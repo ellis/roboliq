@@ -4,6 +4,7 @@ var expect = require('./expect.js');
 var jmespath = require('jmespath');
 var math = require('mathjs');
 var misc = require('./misc.js');
+import wellsParser from './parsers/wellsParser.js';
 
 /**
  * Try to get a value from data.objects with the given name.
@@ -76,6 +77,15 @@ function getNameAndVolume(params, data, paramName, defaultValue) {
 	return x;
 }
 
+function getNameAndWells(params, data, paramName, defaultValue) {
+	var x = getNameAndValue(params, data, paramName, defaultValue);
+	if (_.isString(x.value)) {
+		x.value = wellsParser.parse(x.value, data.objects);
+	}
+	expect.truthy({paramName: paramName}, _.isArray(x.value), "expected a list of wells: "+JSON.stringify(x));
+	return x;
+}
+
 function getNameAndTime(params, data, paramName, defaultValue) {
 	var x0 = getNameAndValue(params, data, paramName, defaultValue);
 	var x = _.clone(x0);
@@ -131,6 +141,7 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 		case "Object": return getNameAndObject(params, data, name, defaultValue);
 		case "Time": return getNameAndTime(params, data, name, defaultValue);
 		case "Volume": return getNameAndVolume(params, data, name, defaultValue);
+		case "Wells": return getNameAndWells(params, data, name, defaultValue);
 		case "File":
 			var filename = params[name];
 			var filedata = data.files[filename];

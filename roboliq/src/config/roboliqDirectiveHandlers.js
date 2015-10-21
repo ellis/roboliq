@@ -7,6 +7,7 @@ var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
 var random = require('random-js');
+import commandHelper from '../commandHelper.js';
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser = require('../parsers/wellsParser.js');
@@ -19,6 +20,18 @@ var wellsParser = require('../parsers/wellsParser.js');
 
 function handleDirective(spec, data) {
 	return misc.handleDirective(spec, data);
+}
+
+function directive_createWellAssignments(spec, data) {
+	return expect.try("#createWellAssignments", () => {
+		const parsed = commandHelper.parseParams(spec, data, {
+			list: 'Object',
+			wells: 'Wells'
+		});
+		console.log(parsed);
+		throw new Error();
+		return _.take(parsed.wells.value, parsed.list.value.length);
+	});
 }
 
 function directive_destinationWells(spec, data) {
@@ -272,20 +285,24 @@ function directive_pipetteMixtures(spec, data) {
 	const volumePerMixture = (spec.volume)
 		? math.eval(spec.volume) : undefined;
 	//console.log({volumePerMixture})
+	//console.log({combined})
 	combined.forEach(l => {
 		let volumeTotal = math.unit(0, 'l');
 		let missingVolumeIndex = -1;
+		//console.log({l})
 		// Find total volume of components and whether any components are missing the volume parameter
 		_.forEach(l, (x, i) => {
 			//console.log({x, i, and: x.hasOwnProperty('volume')})
-			if (!x.hasOwnProperty('volume')) {
-				assert(volumePerMixture, "missing volume parameter: "+JSON.stringify(x));
-				assert(missingVolumeIndex < 0, "only one mixture element may omit the volume parameter: "+JSON.stringify(l));
-				missingVolumeIndex = i;
-				//console.log({missingVolumeIndex})
-			}
-			else {
-				volumeTotal = math.add(volumeTotal, math.eval(x.volume));
+			if (x) {
+				if (!x.hasOwnProperty('volume')) {
+					assert(volumePerMixture, "missing volume parameter: "+JSON.stringify(x));
+					assert(missingVolumeIndex < 0, "only one mixture element may omit the volume parameter: "+JSON.stringify(l));
+					missingVolumeIndex = i;
+					//console.log({missingVolumeIndex})
+				}
+				else {
+					volumeTotal = math.add(volumeTotal, math.eval(x.volume));
+				}
 			}
 		});
 		// If one of the components needs to have its volume set:
@@ -458,6 +475,7 @@ function directive_zipMerge(spec, data) {
 
 module.exports = {
 	"#createPipetteMixtureList": directive_pipetteMixtures,
+	"#createWellAssignments": directive_createWellAssignments,
 	"#destinationWells": directive_destinationWells,
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,

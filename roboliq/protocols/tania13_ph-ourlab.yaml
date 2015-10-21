@@ -56,8 +56,8 @@ objects:
       "#createPipetteMixtureList":
         replicates: 3
         items:
-        -
-        -
+        - {}
+        - {}
         - program: Roboliq_Water_Wet_1000_mix3x50ul
 
 steps:

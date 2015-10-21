@@ -318,6 +318,7 @@ function postProcessProtocol(protocol) {
 }
 
 function postProcessProtocol_variables(protocol) {
+	const data = _.clone(protocol);
 	// Recursively expand all directives
 	function expandDirectives(x) {
 		if (_.isPlainObject(x)) {
@@ -331,17 +332,19 @@ function postProcessProtocol_variables(protocol) {
 				}
 			}
 		}
-		var x2 = misc.handleDirective(x, protocol);
-		return x2;
+		data.accesses = [];
+		return misc.handleDirective(x, data);
 	}
 
 	_.forEach(protocol.objects, (obj, key) => {
-		// If this is a variable with a 'calculate' property
-		if (obj.type === 'Variable' && obj.calculate) {
-			const calculate = _.cloneDeep(obj.calculate);
-			const value = expandDirectives(calculate);
-			obj.value = value;
-		}
+		expect.try({path: key, paramName: "calculate"}, () => {
+			// If this is a variable with a 'calculate' property
+			if (obj.type === 'Variable' && obj.calculate) {
+				const calculate = _.cloneDeep(obj.calculate);
+				const value = expandDirectives(calculate);
+				obj.value = value;
+			}
+		});
 	});
 }
 
@@ -360,13 +363,9 @@ function run(argv, userProtocol) {
 		console.log(e.message);
 		console.log(e.stack);
 		if (e.hasOwnProperty("errors")) {
-			result = {
-				output: {
-					errors: {
-						'': e.errors
-					}
-				}
-			};
+			const path = e.path || "''";
+			result = {}
+			_.set(result, `output.errors[${path}]`, e.errors);
 		}
 		else {
 			console.log(JSON.stringify(e));

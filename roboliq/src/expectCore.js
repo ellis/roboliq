@@ -6,26 +6,31 @@ function getContextPrefix(context) {
 	else if (_.isString(context.paramName)) return "parameter `"+context.paramName+"`: ";
 	else if (_.isArray(context.paramName)) return "parameters `"+context.paramName.join('`, `')+"`: ";
 	else if (_.isString(context.valueName)) return "value `"+context.valueName+"`: ";
+	else if (_.isString(context.objectName)) return "object `"+context.objectName+"`: ";
 	else return "";
 }
 
 function handleError(context, e) {
 	var prefix = getContextPrefix(context);
+
 	if (!e.trace) {
 		console.log(e.stack);
 		e.trace = e.stack;
 	}
+
 	if (e.errors) {
-		e.errors = _.map(e.errors, function(message) {
-			return prefix+message;
-		});
-		throw e;
+		e.errors = _.map(e.errors, message => prefix+message);
 	}
 	else {
 		e.name = "ProcessingError";
-		e.errors = [prefix+e.toString()];
-		throw e;
+		e.errors = _.compact([prefix+e.message]);
 	}
+
+	//console.log({epath: e.path, cpath: context.path})
+	if (!e.path && context.path)
+		e.path = context.path;
+
+	throw e;
 }
 
 function truthy(context, result, message) {
