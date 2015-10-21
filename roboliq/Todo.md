@@ -31,6 +31,7 @@
 	- [x] tania13_ph: make combined protocol, at first lab-specific
 	- [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
 	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
+	- [ ] npm install json-patch and tani13_ph-ourlab-diff and <http://bruth.github.io/jsonpatch-js/>
 	- [ ] tania12_denaturation
 	- [ ] tania15_renaturation
 - [ ] augment protocol design:
