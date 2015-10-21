@@ -54,7 +54,6 @@ objects:
     type: Variable
     calculate:
       "#createPipetteMixtureList":
-        replicates: 3
         items:
         - {}
         - {}

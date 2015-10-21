@@ -25,11 +25,9 @@ function handleDirective(spec, data) {
 function directive_createWellAssignments(spec, data) {
 	return expect.try("#createWellAssignments", () => {
 		const parsed = commandHelper.parseParams(spec, data, {
-			list: 'Object',
+			list: 'Any',
 			wells: 'Wells'
 		});
-		console.log(parsed);
-		throw new Error();
 		return _.take(parsed.wells.value, parsed.list.value.length);
 	});
 }

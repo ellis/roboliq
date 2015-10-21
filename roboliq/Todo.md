@@ -29,8 +29,8 @@
 	- [x] directives in command parameters are processed before being passed to the command handler
 - [ ] split `tania*` protocols into portable vs lab data
 	- [x] tania13_ph: make combined protocol, at first lab-specific
-	- [ ] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
-	- [ ] tania13_ph: split combined protocol into portable and lab-specific parts
+	- [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
+	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
 	- [ ] tania12_denaturation
 	- [ ] tania15_renaturation
 - [ ] augment protocol design:
