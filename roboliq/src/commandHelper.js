@@ -2,7 +2,7 @@ var _ = require('lodash');
 var assert = require('assert');
 var expect = require('./expect.js');
 var jmespath = require('jmespath');
-var math = require('mathjs');
+import math from 'mathjs';
 var misc = require('./misc.js');
 import wellsParser from './parsers/wellsParser.js';
 
@@ -12,12 +12,44 @@ import wellsParser from './parsers/wellsParser.js';
  * @param  {String} name Name of the object value to lookup
  * @return {Any} The value at the given path, if any
  */
-function g(data, name) {
+function g(data, name, dflt) {
 	data.accesses.push(name);
-	return _.get(data.objects, name);
+	return _.get(data.objects, name, dflt);
 }
 
-function getNameAndValue(params, data, paramName, defaultValue) {
+function lookupValue(params, data, paramName, defaultValue) {
+	// Get value from params
+	const value0 = _.get(params, paramName, defaultValue);
+	const result = {};
+
+	if (_.isUndefined(value0)) {
+		// do nothing
+	}
+	else if (!_.isString(value0) || _.startsWith(value0, '"')) {
+		result.value = value0;
+	}
+	else {
+		result.value = value0;
+		let value = value0;
+		let path = value;
+		while (!_.isUndefined(value) && _.has(data.objects, path)) {
+			value = g(data, path, defaultValue);
+			if (value && value.type === 'Variable')
+				value = value.value;
+
+			result.valueName = path;
+			result.value = value;
+
+			path = path + "." + result.value;
+		}
+	}
+
+	return (result.value || result.valueName)
+		? _.merge({}, result)
+		: undefined;
+}
+
+function lookupString(params, data, paramName, defaultValue) {
 	// Get value from params
 	var value1 = params[paramName];
 	// If parameter is missing, use the default value:
@@ -43,11 +75,11 @@ function getNameAndValue(params, data, paramName, defaultValue) {
 
 	return (_.isUndefined(value1))
 		? undefined
-		: _.merge({}, {valueName: valueName, value: value1});
+		: _.merge({}, {valueName: valueName, value: value1.toString()});
 }
 
-function getNameAndObject(params, data, paramName, defaultValue) {
-	var x = getNameAndValue(params, data, paramName, defaultValue);
+function lookupObject(params, data, paramName, defaultValue) {
+	var x = lookupValue(params, data, paramName, defaultValue);
 	if (x) {
 		var value = x.value;
 		if (_.isString(value) && !_.isEmpty(value) && !_.startsWith(value, '"')) {
@@ -59,14 +91,14 @@ function getNameAndObject(params, data, paramName, defaultValue) {
 	return x;
 }
 
-function getNameAndNumber(params, data, paramName, defaultValue) {
-	var x = getNameAndValue(params, data, paramName, defaultValue);
+function lookupNumber(params, data, paramName, defaultValue) {
+	var x = lookupValue(params, data, paramName, defaultValue);
 	expect.truthy({paramName: paramName}, _.isNumber(x.value), "expected a number, received: "+JSON.stringify(x.value));
 	return x;
 }
 
-function getNameAndVolume(params, data, paramName, defaultValue) {
-	var x = getNameAndValue(params, data, paramName, defaultValue);
+function lookupVolume(params, data, paramName, defaultValue) {
+	var x = lookupValue(params, data, paramName, defaultValue);
 	if (_.isNumber(x.value)) {
 		x.value = math.unit(x.value, 'l');
 	}
@@ -77,8 +109,8 @@ function getNameAndVolume(params, data, paramName, defaultValue) {
 	return x;
 }
 
-function getNameAndWells(params, data, paramName, defaultValue) {
-	var x = getNameAndValue(params, data, paramName, defaultValue);
+function lookupWells(params, data, paramName, defaultValue) {
+	var x = lookupValue(params, data, paramName, defaultValue);
 	if (_.isString(x.value)) {
 		x.value = wellsParser.parse(x.value, data.objects);
 	}
@@ -86,8 +118,8 @@ function getNameAndWells(params, data, paramName, defaultValue) {
 	return x;
 }
 
-function getNameAndTime(params, data, paramName, defaultValue) {
-	var x0 = getNameAndValue(params, data, paramName, defaultValue);
+function lookupDuration(params, data, paramName, defaultValue) {
+	var x0 = lookupValue(params, data, paramName, defaultValue);
 	var x = _.clone(x0);
 	if (_.isNumber(x.value)) {
 		x.value = math.unit(x.value, 's');
@@ -95,6 +127,7 @@ function getNameAndTime(params, data, paramName, defaultValue) {
 	else if (_.isString(x.value)) {
 		x.value = math.eval(x.value);
 	}
+	//console.log({a: math.unit('s'), value: x.value, x0})
 	expect.truthy({paramName: paramName}, math.unit('s').equalBase(x.value), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
 	return x;
 }
@@ -136,12 +169,13 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 			if (_.isUndefined(value))
 				value = defaultValue;
 			return (_.isUndefined(value)) ? undefined : {valueName: value};
-		case "Any": return getNameAndValue(params, data, name, defaultValue);
-		case "Number": return getNameAndNumber(params, data, name, defaultValue);
-		case "Object": return getNameAndObject(params, data, name, defaultValue);
-		case "Time": return getNameAndTime(params, data, name, defaultValue);
-		case "Volume": return getNameAndVolume(params, data, name, defaultValue);
-		case "Wells": return getNameAndWells(params, data, name, defaultValue);
+		case "Any": return lookupValue(params, data, name, defaultValue);
+		case "Number": return lookupNumber(params, data, name, defaultValue);
+		case "Object": return lookupObject(params, data, name, defaultValue);
+		case "String":  return lookupString(params, data, name, defaultValue);
+		case "Duration": return lookupDuration(params, data, name, defaultValue);
+		case "Volume": return lookupVolume(params, data, name, defaultValue);
+		case "Wells": return lookupWells(params, data, name, defaultValue);
 		case "File":
 			var filename = params[name];
 			var filedata = data.files[filename];
@@ -278,5 +312,6 @@ module.exports = {
 	getNumberParameter: getNumberParameter,
 	getParsedValue: getParsedValue,
 	parseParams: parseParams,
-	queryLogic: queryLogic
+	queryLogic: queryLogic,
+	_lookupValue: lookupValue
 }

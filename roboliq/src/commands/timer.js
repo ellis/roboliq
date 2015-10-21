@@ -170,7 +170,7 @@ var commandHandlers = {
 	 */
 	"timer.doAndWait": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
-			duration: "Time",
+			duration: "Duration",
 			steps: "Object"
 		});
 
@@ -213,7 +213,7 @@ var commandHandlers = {
 	 */
 	"timer.sleep": function(params, data) {
 		var parsed = commandHelper.parseParams(params, data, {
-			duration: "Time"
+			duration: "Duration"
 		});
 
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);

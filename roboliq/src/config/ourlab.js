@@ -599,9 +599,9 @@ module.exports = {
 			});
 			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
 				rpm: {type: "Number", default: 3000},
-				duration: {type: "Time", default: math.unit(30, 's')},
-				spinUpTime: {type: "Time", default: math.unit(9, 's')},
-				spinDownTime: {type: "Time", default: math.unit(9, 's')},
+				duration: {type: "Duration", default: math.unit(30, 's')},
+				spinUpTime: {type: "Duration", default: math.unit(9, 's')},
+				spinDownTime: {type: "Duration", default: math.unit(9, 's')},
 				temperature: {type: "Number", default: 25}
 			});
 			//console.log(parsedProgram);
