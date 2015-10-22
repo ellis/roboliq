@@ -33,8 +33,13 @@
 	- [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
 	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
 	- [x] tani13_ph-ourlab-diff
-	- [ ] tania12_denaturation
+	- [x] tania12_denaturation
 	- [ ] tania15_renaturation
+- [ ] improvements to specification/realization splitting
+	- [ ] look at tania12 split, there are some things that seem less than idea
+	- [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
+	- [ ] tania12: should have `balanceWater` liquid used by first pipette command, and which can be overridden by an `type: Alias` or `type: Variable` with `value: ourlab.mario.systemLiquid`
+	- [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
 - [ ] augment protocol design:
  	- [ ] specify factors
 	- [ ] choose combinations of factor levels (e.g. full-factorial)
