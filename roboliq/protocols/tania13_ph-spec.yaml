@@ -50,7 +50,6 @@ objects:
           volume: "5ul"
           clean: thorough
           cleanBetweenSameSource: flush
-          program: Roboliq_Water_Wet_1000_mix3x50ul
 
   mixtureWells:
     type: Variable
@@ -86,10 +85,14 @@ steps:
     cleanEnd: thorough
 
   5:
+    command: sealer.sealPlate
+    object: mixPlate
+
+  6:
     command: centrifuge.insertPlates2
     object1: mixPlate
 
-  6:
+  7:
     description: Measurement loop; Each cycle of the loop lasts 4 hours
     command: system.repeat
     count: 2

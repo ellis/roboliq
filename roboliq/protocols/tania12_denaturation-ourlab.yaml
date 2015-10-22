@@ -1,0 +1,58 @@
+roboliq: v1
+
+objects:
+  balancePlate:
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P2
+
+  bufferSource:
+    type: Plate
+    description: labware for buffer
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+  denaturantSource:
+    description: labware for denaturant
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+  gfpSource:
+    type: Plate
+    description: GFP eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  mixPlate:
+    type: Plate
+    description: labware for denatured GFP experiments
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P3
+
+  buffer:
+    wells: bufferSource(C01 down to F01)
+  denaturant:
+    wells: denaturantSource(C01 down to F01)
+
+  sfGFP: {wells: gfpSource(A01)}
+  Q204H_N149Y: {wells: gfpSource(A02)}
+  tdGFP: {wells: gfpSource(A03)}
+  N149Y: {wells: gfpSource(A04)}
+  Q204H: {wells: gfpSource(A05)}
+
+  mixtures:
+    calculate:
+      "#createPipetteMixtureList":
+        items:
+        - {}
+        - {}
+        - program: Roboliq_Water_Wet_1000_mix3x50ul
+
+steps:
+  1:
+    1:
+      program: Roboliq_Water_Air_1000
+      sources: ourlab.mario.systemLiquid
+      cleanBetween: none
+
+  3:
+    steps:
+        steps:
+          2:
+            outputFile: C:\Users\localadmin\Desktop\Ellis\tania12_denaturation--<YYYYMMDD_HHmmss>.xml
