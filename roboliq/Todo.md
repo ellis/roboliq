@@ -27,11 +27,12 @@
 	- [x] directives can have an 'override' property, whose value gets merged into the result of the directive
 	- [x] directives in steps are processed as they are encountered
 	- [x] directives in command parameters are processed before being passed to the command handler
+- [x] handle JSON Patch files (as opposed to merge-able files)
 - [ ] split `tania*` protocols into portable vs lab data
 	- [x] tania13_ph: make combined protocol, at first lab-specific
 	- [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
 	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
-	- [ ] npm install json-patch and tani13_ph-ourlab-diff and <http://bruth.github.io/jsonpatch-js/>
+	- [x] tani13_ph-ourlab-diff
 	- [ ] tania12_denaturation
 	- [ ] tania15_renaturation
 - [ ] augment protocol design:

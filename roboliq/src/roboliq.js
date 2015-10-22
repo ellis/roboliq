@@ -50,6 +50,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var fs = require('fs');
+var jiff = require('jiff');
 var jsonfile = require('jsonfile');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
@@ -165,11 +166,11 @@ function loadUrlContent(url, filecache) {
 }
 
 /**
- * Pre-process a protocol: handle imports, directives, and file nodes
- * @param  {Object} a   Previously loaded protocol data
- * @param  {Object} b   The protocol to pre-process
- * @param  {String} url (optional) The url of the protocol
- * @return {Object}
+ * Finishing loading/processing an unprocessed protocol: handle imports, directives, and file nodes
+ * @param  {Object} a - Previously loaded protocol data
+ * @param  {Object} b - The protocol to pre-process
+ * @param  {String} [url] - The url of the protocol
+ * @return {Object} protocol with
  */
 function loadProtocol(a, b, url, filecache) {
 	// Require 'roboliq' property
@@ -215,7 +216,7 @@ function loadProtocol(a, b, url, filecache) {
 		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
 	};
 
-	// Handle directives for other predicates
+	// Handle directives for predicates
 	var l = [
 		'predicates',
 	];
@@ -460,11 +461,14 @@ function _run(opts, userProtocol) {
 	// Load
 	var protocol = _.reduce(
 		urlToProtocol_l,
-		function(protocol, pair) {
-			var url = pair[0];
-			var raw = pair[1];
-			var b = loadProtocol(protocol, raw, url, filecache);
-			return mergeProtocols(protocol, b);
+		(protocol, [url, raw]) => {
+			if (_.isArray(raw)) {
+				return jiff.patch(raw, protocol);
+			}
+			else {
+				var b = loadProtocol(protocol, raw, url, filecache);
+				return mergeProtocols(protocol, b);
+			}
 		},
 		protocolEmpty
 	);

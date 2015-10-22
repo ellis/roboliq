@@ -1,73 +1,45 @@
-- op: set
-roboliq: v1
-
-objects:
-  balancePlate:
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P4
-  mixPlate:
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P3
-
-  tubes1:
+- {op: add, path: /objects/balancePlate/model, value: ourlab.model.plateModel_384_square}
+- {op: add, path: /objects/balancePlate/location, value: ourlab.mario.site.P4}
+- {op: add, path: /objects/mixPlate/model, value: ourlab.model.plateModel_384_square}
+- {op: add, path: /objects/mixPlate/location, value: ourlab.mario.site.P3}
+- op: add
+  path: /objects/tubes1
+  value:
     type: Plate
     description: GFP eppendorf tubes
     model: ourlab.model.tubeHolderModel_1500ul
     location: ourlab.mario.site.T3
-  trough1:
+- op: add
+  path: /objects/trough1
+  value:
     type: Plate
     description: trough for water/glycerol/salt mix
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, saltwater]
-  sourcePlate1:
+- op: add
+  path: /objects/sourcePlate1
+  value:
     type: Plate
     description: buffer plate
     model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P2
-# Reagents used in this protocol
-  saltwater:
-    wells: trough1(C01 down to F01)
-  hepes_850:
-    wells: sourcePlate1(A01 down to D01)
-  hepes_650:
-    wells: sourcePlate1(A02 down to D02)
-  pipes_775:
-    wells: sourcePlate1(A03 down to D03)
-  pipes_575:
-    wells: sourcePlate1(A04 down to D04)
-  mes_710:
-    wells: sourcePlate1(A05 down to D05)
-  mes_510:
-    wells: sourcePlate1(A06 down to D06)
-  acetate_575:
-    wells: sourcePlate1(A07 down to D07)
-  acetate_375:
-    wells: sourcePlate1(A08 down to D08)
-  # GFPs
-  sfGFP: {wells: tubes1(A01)}
-  Q204H_N149Y: {wells: tubes1(A02)}
-  tdGFP: {wells: tubes1(A03)}
-  N149Y: {wells: tubes1(A04)}
-  Q204H: {wells: tubes1(A05)}
-
-  mixtures:
-    type: Variable
-    calculate:
-      "#createPipetteMixtureList":
-        items:
-        - {}
-        - {}
-        - program: Roboliq_Water_Wet_1000_mix3x50ul
-
-steps:
-  1:
-    program: Roboliq_Water_Air_1000
-    sources: ourlab.mario.systemLiquid
-    cleanBetween: none
-
-  6:
-    steps:
-        steps:
-          2:
-            outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+- {op: add, path: /objects/saltwater/wells, value: trough1(C01 down to F01)}
+- {op: add, path: /objects/hepes_850/wells, value: sourcePlate1(A01 down to D01)}
+- {op: add, path: /objects/hepes_650/wells, value: sourcePlate1(A02 down to D02)}
+- {op: add, path: /objects/pipes_775/wells, value: sourcePlate1(A03 down to D03)}
+- {op: add, path: /objects/pipes_575/wells, value: sourcePlate1(A04 down to D04)}
+- {op: add, path: /objects/mes_710/wells, value: sourcePlate1(A05 down to D05)}
+- {op: add, path: /objects/mes_510/wells, value: sourcePlate1(A06 down to D06)}
+- {op: add, path: /objects/acetate_575/wells, value: sourcePlate1(A07 down to D07)}
+- {op: add, path: /objects/acetate_375/wells, value: sourcePlate1(A08 down to D08)}
+- {op: add, path: /objects/sfGFP/wells, value: tubes1(A01)}
+- {op: add, path: /objects/Q204H_N149Y/wells, value: tubes1(A02)}
+- {op: add, path: /objects/tdGFP/wells, value: tubes1(A03)}
+- {op: add, path: /objects/N149Y/wells, value: tubes1(A04)}
+- {op: add, path: /objects/Q204H/wells, value: tubes1(A05)}
+- {op: add, path: "/objects/mixtures/calculate/#createPipetteMixtureList/items/2/program", value: Roboliq_Water_Wet_1000_mix3x50ul}
+- {op: add, path: /steps/1/program, value: Roboliq_Water_Air_1000}
+- {op: add, path: /steps/1/sources, value: ourlab.mario.systemLiquid}
+- {op: add, path: /steps/1/cleanBetween, value: none}
+- {op: add, path: /steps/6/steps/steps/2/outputFile, value: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml}
