@@ -36,10 +36,24 @@
 	- [x] tania12_denaturation
 	- [ ] tania15_renaturation
 - [ ] improvements to specification/realization splitting
-	- [ ] look at tania12 split, there are some things that seem less than idea
+	- [ ] look at tania12 split, there are some things that seem less than ideal
+		- [ ] the split between two files is inconvenient
+		- [ ] the specification of override values is sometimes awkward
+		- [ ] the source liquid for the balance plate isn't named in the specification
 	- [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
 	- [ ] tania12: should have `balanceWater` liquid used by first pipette command, and which can be overridden by an `type: Alias` or `type: Variable` with `value: ourlab.mario.systemLiquid`
 	- [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
+	- [ ] consider allowing the protocol specification to have '???' values, indicating a required field
+	- [ ] consider allowing the protocol specification to have ?-prefixed properties:
+		- [ ] these indicate fields that need to be filled in
+		- [ ] they can have descriptions
+		- [ ] they can have lab-specific values that get automatically transfered to the relevant property, allowing a protocol author to write both the protocol specification and realization in the same file
+		- [ ] maybe `valueFor` map with keys for different robots/labs, or perhaps just a '!value' for the current lab
+	- [ ] consider allowing the protocol specification to have !-prefixed properties:
+		- [ ] they allow for including properties which are only for the realization
+		      and don't belong in the specification at all.
+		- [ ] if the desired value is given as the value of the property, we can't switch based on lab/robot.
+		- [ ] if we use a switch map, it's less convenient to specify the value!
 - [ ] augment protocol design:
  	- [ ] specify factors
 	- [ ] choose combinations of factor levels (e.g. full-factorial)
