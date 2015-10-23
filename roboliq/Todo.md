@@ -22,6 +22,7 @@
     - [x] node protocols/tania15_renaturation.js, use `__dirname`
 	- [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
 	- [x] merge protocols together rather than appending them!
+- [x] for object of type `Variable`, process a `calculate` property as an alternative to setting the value to a directive.
 - [x] change directive handling to accommodate merging of lab-specific protocol
 	- [x] object variables should have directives parsed before parsing steps, not immediately after loading
 	- [x] directives can have an 'override' property, whose value gets merged into the result of the directive
@@ -67,8 +68,7 @@
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
-- [ ] for object of type `Variable`, process a `calculate` property as an alternative to setting the value to a directive.
-- [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need
+- [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need (definitely consider JSON schema)
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
@@ -77,9 +77,9 @@
 - [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect
 - [ ] add program version info to the protocol output
 - [ ] add commandline arguments to the protocol output
+- [ ] add a command line command to split a protocol into its specification/realization parts for when a protocol needs to be shared
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly tricky will be object merging and gathering all required step parameters into a single parameters map
-- [ ] figure out how to pass commands without handlers onto the biologist
-- [ ] JSON schema
+- [ ] figure out how to pass commands without handlers onto the biologist for execution
 - [ ] documentation for the available commands and their parameters
 - [ ] code documentation
 - [ ] upload to a public repository

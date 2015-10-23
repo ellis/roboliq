@@ -18,7 +18,7 @@ function locationRowColToText(row, col) {
 }
 
 function parse(text, objects) {
-	assert(_.isString(text), "wellsParser.parseOne() expected a string, received: "+text)
+	assert(_.isString(text), "wellsParser.parse() expected a string, received: "+text)
 	var result;
 	try {
 		result = wellsParser0.parse(text);

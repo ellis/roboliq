@@ -21,6 +21,7 @@ var pipetterUtils = require('./pipetter/pipetterUtils.js');
 var sourceMethods = require('./pipetter/sourceMethods.js');
 var sourceParser = require('../parsers/sourceParser.js');
 var wellsParser = require('../parsers/wellsParser.js');
+import * as WellContents from '../WellContents.js';
 
 var intensityToValue = {
 	"none": 0,
@@ -279,37 +280,25 @@ function pipette(params, data) {
 	// Try to find a pipettingClass for the given items
 	var findPipettingClass = function(items) {
 		// Pick liquid properties by inspecting source contents
-		var pipettingClasses = _(items).map('source').map(function(source) {
-			var pipettingClass = "Water";
-			var i = source.indexOf('(');
-			var well = null;
-			// If the source is a source name
-			if (i < 0) {
-				var wells = misc.findObjectsValue(source+".wells", data.objects);
-				if (!_.isEmpty(wells))
-					well = wells[0];
-			}
-			// Else
-			else {
-				well = source;
-			}
+		var pipettingClasses = _(items).map(({source}) => {
+			let pipettingClass = "Water";
 
-			if (well) {
-				var labware = source.substr(0, i);
-				var wellId = source.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-				var contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
-				var liquids = extractLiquidNamesFromContents(contents);
-				var pipettingClasses = _(liquids).map(function(name) {
-					return misc.findObjectsValue(name+".pipettingClass", data.objects, null, "Water");
-				}).uniq().value();
-				// FIXME: should pick "Water" if water-like liquids have high enough concentration
-				// Use "Water" if present
-				if (!pipettingClasses.indexOf("Water") >= 0) {
-					if (pipettingClasses.length === 1) {
-						pipettingClass = pipettingClasses[0];
-					}
-					else if (pipettingClasses.length > 1) {
-						pipettingClass = null;
+			if (source.length > 0) {
+				const contents = WellContents.getWellContents(source[0], data);
+				if (contents) {
+					var liquids = extractLiquidNamesFromContents(contents);
+					var pipettingClasses = _(liquids).map(function(name) {
+						return misc.findObjectsValue(name+".pipettingClass", data.objects, null, "Water");
+					}).uniq().value();
+					// FIXME: should pick "Water" if water-like liquids have high enough concentration
+					// Use "Water" if present
+					if (!pipettingClasses.indexOf("Water") >= 0) {
+						if (pipettingClasses.length === 1) {
+							pipettingClass = pipettingClasses[0];
+						}
+						else if (pipettingClasses.length > 1) {
+							pipettingClass = null;
+						}
 					}
 				}
 			}
