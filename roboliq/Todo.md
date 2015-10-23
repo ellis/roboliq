@@ -36,6 +36,7 @@
 	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
 	- [x] tani13_ph-ourlab-diff
 	- [x] tania12_denaturation
+- [ ] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > xdiff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed

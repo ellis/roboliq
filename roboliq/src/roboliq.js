@@ -254,8 +254,8 @@ function loadProtocol(a, b, url, filecache) {
 	// Merge in the imports
 	var d = mergeProtocols(imported, c);
 	//if (url.indexOf("roboliq") > 0)
-	if (c.objects && !c.predicates)
-	console.log(JSON.stringify(c, null, '\t'));
+	//if (c.objects && !c.predicates)
+	//	console.log(JSON.stringify(c, null, '\t'));
 
 	return d;
 }
@@ -304,18 +304,19 @@ function preProcessQuestionMarks(protocol, obj, path) {
  * @param  {array} path
  */
 function preProcessExclamationMarks(protocol, obj, path) {
+	//console.log(JSON.stringify(obj));
 	if (_.isPlainObject(obj)) {
 		const keys = _.keys(obj);
-		let reorder = false;
+		//let reorder = false;
 		for (const name of keys) {
 			const value = obj[name];
 			if (_.endsWith(name, "!")) {
 				delete obj[name];
 				const name1 = name.slice(0, -1);
-				//console.log({name, name1});
+				//console.log({name, name1, path});
 				obj[name1] = value;
 				//console.log({obj, name1})
-				reorder = true;
+				//reorder = true;
 			}
 			else {
 				preProcessExclamationMarks(protocol, value, path.concat(name));

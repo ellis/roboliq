@@ -76,7 +76,7 @@ objects:
           volume: 5ul
           clean: thorough
           cleanBetweenSameSource: flush
-          !program: Roboliq_Water_Wet_1000_mix3x50ul
+          program!: Roboliq_Water_Wet_1000_mix3x50ul
         transformations:
         - name: shuffle
           seed: 1234
@@ -97,7 +97,7 @@ steps:
 
     1:
       command: pipetter.pipette
-      !program: Roboliq_Water_Air_1000
+      program!: Roboliq_Water_Air_1000
       sources: balanceWater
       destinations:
         "#replaceLabware":
