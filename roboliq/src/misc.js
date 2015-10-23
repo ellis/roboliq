@@ -32,6 +32,7 @@ function findObjectsValue(key, objects, effects, defaultValue, prefix) {
 
 // NOTE: This is basically a copy of expect.objectsValue
 function getObjectsValue(key, objects, effects, prefix) {
+	assert(_.isString(key), "getObjectsValue expected a string key, received: "+JSON.stringify(key));
 	if (effects) {
 		var id = (prefix) ? prefix+"."+key : key;
 		if (effects.hasOwnProperty(id))

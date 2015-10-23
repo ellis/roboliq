@@ -356,7 +356,7 @@ function directive_replaceLabware(spec, data) {
 	expect.paramsRequired(spec, ['list', 'new']);
 	var list = misc.getVariableValue(spec.list, data.objects);
 	//if (!_.isArray(list)) console.log("list:", list)
-	assert(_.isArray(list));
+	assert(_.isArray(list), "expected a list, received: "+JSON.stringify(list));
 	assert(_.isString(spec.new));
 	var l1 = _.flatten(_.map(list, function(s) {
 		var l2 = wellsParser.parse(s);

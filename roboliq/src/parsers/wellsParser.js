@@ -39,6 +39,7 @@ function processParserResult(result, objects, text) {
 		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
 		if (clause.labware) {
 			var modelName = misc.getObjectsValue(clause.labware+".model", objects);
+			assert(modelName, "`"+clause.labware+".model` missing");
 			var model = misc.getObjectsValue(modelName, objects);
 			assert(model.rows, "`"+modelName+".rows` missing");
 			assert(model.columns, "`"+modelName+".columns` missing");

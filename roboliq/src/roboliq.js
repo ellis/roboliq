@@ -139,8 +139,9 @@ var protocolEmpty = {
 	commandHandlers: {},
 	planHandlers: {},
 	files: {},
+	fillIns: {},
 	errors: {},
-	warnings: {}
+	warnings: {},
 };
 
 // REFACTOR: If nodejs version >= 0.12, then use path.isAbsolute instead
@@ -211,11 +212,18 @@ function loadProtocol(a, b, url, filecache) {
 		'errors',
 		'warnings'
 	));
+
+	if (!c.fillIns)
+		c.fillIns = {};
+	preProcessQuestionMarks(c, c.objects, ['objects']);
+	preProcessQuestionMarks(c, c.steps, ['steps']);
+	preProcessExclamationMarks(c, c.objects, ['objects']);
+	preProcessExclamationMarks(c, c.steps, ['steps']);
+
 	var data = {
 		objects: _.merge({}, a.objects, imported.objects, c.objects),
 		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
 	};
-
 	// Handle directives for predicates
 	var l = [
 		'predicates',
@@ -246,9 +254,79 @@ function loadProtocol(a, b, url, filecache) {
 	// Merge in the imports
 	var d = mergeProtocols(imported, c);
 	//if (url.indexOf("roboliq") > 0)
-	//	console.log(JSON.stringify(b))
+	if (c.objects && !c.predicates)
+	console.log(JSON.stringify(c, null, '\t'));
 
 	return d;
+}
+
+/**
+ * Remove properties with '?'-prefix.  If the propery value has a '!value' property,
+ * add a new property to the object without the '?' prefix and with the given value.
+ * Mutates the object.
+ * Also add the path to the property to the protocol's `fillIns`
+ * @param  {Protocol} protocol
+ * @param  {any} obj
+ * @param  {array} path
+ */
+function preProcessQuestionMarks(protocol, obj, path) {
+	if (_.isPlainObject(obj)) {
+		_.forEach(obj, (value, name) => {
+			if (_.endsWith(name, "?")) {
+				delete obj[name];
+				const name1 = name.slice(0, -1);
+				if (value.hasOwnProperty('value!')) {
+					obj[name1] = value['value!'];
+				}
+				else {
+					protocol.fillIns[path.concat(name1).join('.')] = value || {};
+				}
+			}
+			else {
+				preProcessQuestionMarks(protocol, value, path.concat(name));
+			}
+		});
+	}
+	else if (_.isArray(obj)) {
+		_.forEach(obj, (value, index) => {
+			preProcessQuestionMarks(protocol, value, path.concat(index));
+		});
+	}
+}
+
+/**
+ * Remove properties with '?'-prefix.  If the propery value has a '!value' property,
+ * add a new property to the object without the '?' prefix and with the given value.
+ * Mutates the object.
+ * Also add the path to the property to the protocol's `fillIns`
+ * @param  {Protocol} protocol
+ * @param  {any} obj
+ * @param  {array} path
+ */
+function preProcessExclamationMarks(protocol, obj, path) {
+	if (_.isPlainObject(obj)) {
+		const keys = _.keys(obj);
+		let reorder = false;
+		for (const name of keys) {
+			const value = obj[name];
+			if (_.endsWith(name, "!")) {
+				delete obj[name];
+				const name1 = name.slice(0, -1);
+				//console.log({name, name1});
+				obj[name1] = value;
+				//console.log({obj, name1})
+				reorder = true;
+			}
+			else {
+				preProcessExclamationMarks(protocol, value, path.concat(name));
+			}
+		}
+	}
+	else if (_.isArray(obj)) {
+		_.forEach(obj, (value, index) => {
+			preProcessExclamationMarks(protocol, value, path.concat(index));
+		});
+	}
 }
 
 /**
@@ -671,7 +749,8 @@ function _run(opts, userProtocol) {
 	}
 
 	if (!_.isEmpty(protocol.errors)) {
-		return {protocol: protocol, output: _.pick(protocol, 'errors', 'warnings')};
+		//return {protocol: protocol, output: _.pick(protocol, 'errors', 'warnings')};
+		return {protocol: protocol, output: protocol};
 	}
 	else {
 		//var instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);

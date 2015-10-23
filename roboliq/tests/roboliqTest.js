@@ -116,5 +116,66 @@ describe('roboliq', function() {
 				model: "plateModel1"
 			});
 		});
+
+		it("it should handle ?-properties in objects and steps", () => {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: 'Plate',
+						'model?': {
+							description: "please provide a model"
+						},
+						'location?': {
+							description: "please provide a location",
+							'value!': "here"
+						}
+					},
+				},
+				steps: {
+					1: {
+						command: "timer.sleep",
+						'duration?': {
+							description: "please provide a duration"
+						}
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			should.deepEqual(result.output.fillIns, {
+				'objects.plate1.model': {description: "please provide a model"},
+				'steps.1.duration': {description: "please provide a duration"},
+			});
+			should.deepEqual(result.output.warnings, {});
+			should.deepEqual(result.output.objects.plate1.location, "here");
+		});
+
+		it("it should handle !-properties in objects and steps", () => {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					'plate1!': {
+						type: 'Plate',
+						location: "here"
+					},
+					'plate2': {
+						type: 'Plate',
+						'location!': "there"
+					},
+				},
+				steps: {
+					1: {
+						command: "timer.sleep",
+						'duration!': 3
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			should.deepEqual(result.output.objects.plate1.location, "here");
+			should.deepEqual(result.output.objects.plate2.location, "there");
+			should.deepEqual(result.output.steps['1'].duration, 3);
+		});
 	});
 });

@@ -29,40 +29,13 @@
 	- [x] directives in steps are processed as they are encountered
 	- [x] directives in command parameters are processed before being passed to the command handler
 - [x] handle JSON Patch files (as opposed to merge-able files)
-- [ ] split `tania*` protocols into portable vs lab data
+- [x] handle '?'-suffix and '!'-suffix properties in objects and steps
+- [x] split `tania*` protocols into portable vs lab data
 	- [x] tania13_ph: make combined protocol, at first lab-specific
 	- [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
 	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
 	- [x] tani13_ph-ourlab-diff
 	- [x] tania12_denaturation
-	- [ ] tania15_renaturation
-- [ ] improvements to specification/realization splitting
-	- [ ] look at tania12 split, there are some things that seem less than ideal
-		- [ ] the split between two files is inconvenient
-		- [ ] the specification of override values is sometimes awkward
-		- [ ] the source liquid for the balance plate isn't named in the specification
-	- [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
-	- [ ] tania12: should have `balanceWater` liquid used by first pipette command, and which can be overridden by an `type: Alias` or `type: Variable` with `value: ourlab.mario.systemLiquid`
-	- [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
-	- [ ] consider allowing the protocol specification to have '???' values, indicating a required field
-	- [ ] consider allowing the protocol specification to have ?-prefixed properties:
-		- [ ] these indicate fields that need to be filled in
-		- [ ] they can have descriptions
-		- [ ] they can have lab-specific values that get automatically transfered to the relevant property, allowing a protocol author to write both the protocol specification and realization in the same file
-		- [ ] maybe `valueFor` map with keys for different robots/labs, or perhaps just a '!value' for the current lab
-	- [ ] consider allowing the protocol specification to have !-prefixed properties:
-		- [ ] they allow for including properties which are only for the realization
-		      and don't belong in the specification at all.
-		- [ ] if the desired value is given as the value of the property, we can't switch based on lab/robot.
-		- [ ] if we use a switch map, it's less convenient to specify the value!
-- [ ] augment protocol design:
- 	- [ ] specify factors
-	- [ ] choose combinations of factor levels (e.g. full-factorial)
-	- [ ] possibly partition blocks of the combinations
-	- [ ] construct mixtures, if relevant
-	- [ ] assign mixtures to wells (probably with randomization)
-	- [ ] specify pipetting details, such as order of sources, and parameters by source
-	- [ ] allow factor values to alter program flow (i.e., heating vs not heating)
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
@@ -78,6 +51,7 @@
 - [ ] add program version info to the protocol output
 - [ ] add commandline arguments to the protocol output
 - [ ] add a command line command to split a protocol into its specification/realization parts for when a protocol needs to be shared
+- [ ] preProcess_Marks: preserve property order
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly tricky will be object merging and gathering all required step parameters into a single parameters map
 - [ ] figure out how to pass commands without handlers onto the biologist for execution
 - [ ] documentation for the available commands and their parameters
@@ -85,6 +59,17 @@
 - [ ] upload to a public repository
 - [ ] change imports to require a version number?
 - [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
+- [ ] improvements to specification/realization splitting
+	- [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
+	- [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
+- [ ] augment protocol design:
+ 	- [ ] specify factors
+	- [ ] choose combinations of factor levels (e.g. full-factorial)
+	- [ ] possibly partition blocks of the combinations
+	- [ ] construct mixtures, if relevant
+	- [ ] assign mixtures to wells (probably with randomization)
+	- [ ] specify pipetting details, such as order of sources, and parameters by source
+	- [ ] allow factor values to alter program flow (i.e., heating vs not heating)
 
 ## After submission
 
@@ -148,6 +133,13 @@ When loading JSON/JavaScript files, we expect the following structure:
     * pre-process directives and urls
     * merge into previous protocol
 
+# Separation of protocol specification and realization
+
+The protocol specification and realization can be combined in a single for for convenience while developing the protocol.  In this case, properties can be suffixed with a '?' or '!' to allow for automatically separating the realization aspects from the specification later.
+
+A '!'-suffixed property indicates that the value is lab-specific and is not portable.  When compiled, such properties will automatically have the '!' removed from their name.  When Roboliq is told to split the file into specification+realization, it will remove such properties from the specification and add them to the realization file.
+
+A '?'-suffixed property indicates that the value need to be supplied by the realization.  Such a property should be a map.  It may contain a `description` field and a `value!` field.  If the `value!` field is present, a property without the '?'-suffix will be added to the containing object with the given value.
 
 # Variable references
 
