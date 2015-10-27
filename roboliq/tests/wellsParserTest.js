@@ -24,6 +24,22 @@ describe('wellsParser', function() {
 			type: "PlateModel",
 			rows: 16,
 			columns: 24
+		},
+		vp: {
+			type: "Variable",
+			value: "p"
+		},
+		vq: {
+			type: "Variable",
+			value: "q"
+		},
+		vw: {
+			type: "Variable",
+			value: "p(A01)"
+		},
+		vw2: {
+			type: "Variable",
+			value: "vw"
 		}
 	}
 	describe('parse()', function() {
@@ -238,6 +254,30 @@ describe('wellsParser', function() {
 			test1("r(all row-jump(1) take 2)",
 				['r(A01)', 'r(C01)']
 			)
+		});
+		it('should parse variable pointing to source', function() {
+			test2("vq",
+				[{source: 'vq'}],
+				[["p(A12)", "p(B12)"]]
+			);
+		});
+		it('should parse variable pointing to plate', function() {
+			test2("vp(A1)",
+				[{labware: 'vp', subject: 'A01', phrases: []}],
+				["p(A01)"]
+			);
+		});
+		it('should parse variable representing individual wells', function() {
+			test2("vw",
+				[{source: 'vw'}],
+				["p(A01)"]
+			);
+		});
+		it('should parse variable that indirectly represents individual wells', function() {
+			test2("vw2",
+				[{source: 'vw2'}],
+				["p(A01)"]
+			);
 		});
 	})
 })

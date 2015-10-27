@@ -36,7 +36,11 @@
 	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
 	- [x] tani13_ph-ourlab-diff
 	- [x] tania12_denaturation
-- [ ] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > xdiff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
+- [x] if an object has both ! and non ! properties, the ! property should take precedence
+- [ ] `npm test`: fix problem with variable that references a source
+	- [ ] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
+	- [ ] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
+- [ ] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
@@ -74,6 +78,7 @@
 
 ## After submission
 
+- [ ] refactor misc.js, expect.js, and commandHelper.js to remove duplication
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line
 - [ ] for unit tests, create a simplified variant of ourlab.js that won't need to be changed when there are changes on our robot

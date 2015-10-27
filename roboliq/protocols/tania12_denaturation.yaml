@@ -40,6 +40,10 @@ objects:
     model: ourlab.model.plateModel_384_square
     location: ourlab.mario.site.P3
 
+  balanceWater:
+    type: Variable
+    description: water used to fill the balance plate
+    value: ourlab.mario.systemLiquid
   buffer:
     type: Liquid
     description: water/glycerol/salt mix
@@ -81,10 +85,10 @@ objects:
 
   mixtureWells:
     type: Variable
-    value:
-      "#take":
-        list: "#destinationWells#mixPlate(all row-jump(1))"
-        count: "#length#mixtures"
+    calculate:
+      "#createWellAssignments":
+        list: mixtures
+        wells: mixPlate(all row-jump(1))
 
 steps:
   1:
@@ -93,11 +97,11 @@ steps:
     1:
       command: pipetter.pipette
       program: Roboliq_Water_Air_1000
-      sources: ourlab.mario.systemLiquid
+      sources: balanceWater
       destinations:
-        "#take":
-          list: "#destinationWells#balancePlate(all row-jump(1))"
-          count: "#length#mixtures"
+        "#replaceLabware":
+          list: mixtureWells
+          new: "balancePlate"
       volumes: 75ul
       cleanBetween: none
 

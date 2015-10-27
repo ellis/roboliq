@@ -4,6 +4,7 @@ var random = require('random-js');
 var expect = require('../expectCore.js');
 var misc = require('../misc.js');
 var wellsParser0 = require('./wellsParser0.js');
+import commandHelper from '../commandHelper.js';
 
 function locationTextToRowCol(location) {
 	var row = location.charCodeAt(0) - "A".charCodeAt(0) + 1;
@@ -36,8 +37,14 @@ function processParserResult(result, objects, text) {
 	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
 	var ll = _.map(result, function(clause) {
+		CONTINUE: use commandHelper to de-reference variables
 		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
-		if (clause.labware) {
+		if (clause.source) {
+			var wells = misc.findObjectsValue(clause.source+".wells", objects);
+			if (wells) return [wells];
+			else return clause.source;
+		}
+		else if (clause.labware) {
 			var modelName = misc.getObjectsValue(clause.labware+".model", objects);
 			assert(modelName, "`"+clause.labware+".model` missing");
 			var model = misc.getObjectsValue(modelName, objects);
@@ -242,11 +249,6 @@ function processParserResult(result, objects, text) {
 				var location = locationRowColToText(rc[0], rc[1]);
 				return clause.labware+'('+location+')';
 			});
-		}
-		else if (clause.source) {
-			var wells = misc.findObjectsValue(clause.source+".wells", objects);
-			if (wells) return [wells];
-			else return clause.source;
 		}
 		else {
 			assert(false);

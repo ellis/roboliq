@@ -320,6 +320,7 @@ describe('pipetter', function() {
 
 
 
+
 		it('should pipette from a multi-well source', function () {
 			var protocol = {
 				roboliq: "v1",
@@ -457,6 +458,60 @@ describe('pipetter', function() {
 					{"well": "plate1(B02)", "source1": "10 ul", "source2": "20 ul"}
 				]
 			)
+		});
+	});
+
+
+
+
+	it('should pipette from a variable that refers to the system liquid source', function () {
+		var protocol = {
+			roboliq: "v1",
+			objects: {
+				plate1: {
+					type: "Plate",
+					model: "ourlab.model.plateModel_96_square_transparent_nunc",
+					location: "ourlab.mario.site.P2"
+				},
+				liquid1: {
+					type: "Variable",
+					value: "ourlab.mario.systemLiquid"
+				}
+			},
+			steps: {
+				"1": {
+					command: "pipetter.pipette",
+					sources: "liquid1",
+					destinations: "plate1(A01)",
+					volumes: "10ul",
+					clean: "none"
+				}
+			}
+		};
+		var result = roboliq.run(["-o", ""], protocol);
+		should.deepEqual(result.output.effects, {
+			"1.1": {
+				"ourlab.mario.systemLiquidLabware.contents": [
+					"Infinity l",
+					"systemLiquid"
+				],
+				"plate1.contents.A01": [
+					"10 ul",
+					"systemLiquid"
+				],
+				"__WELLS__.ourlab.mario.systemLiquidLabware.contents": {
+					"isSource": true,
+					"volumeMin": "Infinity l",
+					"volumeMax": "Infinity l",
+					"volumeRemoved": "10 ul"
+				},
+				"__WELLS__.plate1.contents.A01": {
+					"isSource": false,
+					"volumeMin": "0 l",
+					"volumeMax": "10 ul",
+					"volumeAdded": "10 ul"
+				},
+			}
 		});
 	});
 });

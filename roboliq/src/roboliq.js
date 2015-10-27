@@ -271,21 +271,32 @@ function loadProtocol(a, b, url, filecache) {
  */
 function preProcessQuestionMarks(protocol, obj, path) {
 	if (_.isPlainObject(obj)) {
-		_.forEach(obj, (value, name) => {
+		const pairs0 = _.pairs(obj);
+		let changed = false;
+		const pairs1 = pairs0.map(pair => {
+			const [name, value] = pair;
 			if (_.endsWith(name, "?")) {
-				delete obj[name];
+				changed = true;
 				const name1 = name.slice(0, -1);
 				if (value.hasOwnProperty('value!')) {
-					obj[name1] = value['value!'];
+					return [name1, value['value!']];
 				}
 				else {
 					protocol.fillIns[path.concat(name1).join('.')] = value || {};
+					return null;
 				}
 			}
 			else {
 				preProcessQuestionMarks(protocol, value, path.concat(name));
+				return [name, obj[name]];
 			}
 		});
+		if (changed) {
+			// Remove all properties
+			pairs0.forEach(pair => delete obj[pair[0]]);
+			// Add them all back in again, with new names/values
+			_.compact(pairs1).forEach(pair => obj[pair[0]] = pair[1]);
+		}
 	}
 	else if (_.isArray(obj)) {
 		_.forEach(obj, (value, index) => {
@@ -306,21 +317,28 @@ function preProcessQuestionMarks(protocol, obj, path) {
 function preProcessExclamationMarks(protocol, obj, path) {
 	//console.log(JSON.stringify(obj));
 	if (_.isPlainObject(obj)) {
-		const keys = _.keys(obj);
-		//let reorder = false;
-		for (const name of keys) {
-			const value = obj[name];
+		const pairs0 = _.pairs(obj);
+		let changed = false;
+		const obj1 = [];
+		for (var i = 0; i < pairs0.length; i++) {
+			const [name, value] = pairs0[i];
 			if (_.endsWith(name, "!")) {
-				delete obj[name];
+				changed = true;
 				const name1 = name.slice(0, -1);
-				//console.log({name, name1, path});
-				obj[name1] = value;
-				//console.log({obj, name1})
-				//reorder = true;
+				obj1[name1] = value;
 			}
-			else {
+			// if an object has both ! and non ! properties, the ! property should take precedence
+			else if (!obj1.hasOwnProperty(name)) {
 				preProcessExclamationMarks(protocol, value, path.concat(name));
+				obj1[name] = obj[name];
 			}
+		}
+		if (changed) {
+			// Remove all properties
+			pairs0.forEach(pair => delete obj[pair[0]]);
+			// Add them all back in again, with new names/values
+			const pairs1 = _.pairs(obj1);
+			pairs1.forEach(pair => obj[pair[0]] = pair[1]);
 		}
 	}
 	else if (_.isArray(obj)) {
