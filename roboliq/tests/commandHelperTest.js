@@ -4,6 +4,77 @@ import math from 'mathjs';
 var commandHelper = require('../src/commandHelper.js')
 
 describe('commandHelper', function() {
+	describe('_dereferenceVariable', function () {
+		const objects = {
+			number1: {type: "Variable", value: 1},
+			number2: {type: "Variable", value: 'number1'},
+			number3: {type: "Variable", value: 'number2'},
+		};
+		it('should handle 1-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._dereferenceVariable(data, 'number1'),
+				{objectName: 'number1', value: 1}
+			);
+		});
+		it('should handle 2-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._dereferenceVariable(data, 'number2'),
+				{objectName: 'number1', value: 1}
+			);
+		});
+		it('should handle 3-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._dereferenceVariable(data, 'number3'),
+				{objectName: 'number1', value: 1}
+			);
+		});
+	});
+
+	describe('_lookupValue with various levels of de-referencing', function () {
+		const objects = {
+			number1: {type: "Variable", value: 1},
+			number2: {type: "Variable", value: 'number1'},
+			number3: {type: "Variable", value: 'number2'},
+		};
+		const params = {
+			n0: 1,
+			n1: 'number1',
+			n2: 'number2',
+			n3: 'number3'
+		};
+		it('should handle 0-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._lookupValue(params, data, 'n0'),
+				{value: 1}
+			);
+		});
+		it('should handle 1-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._lookupValue(params, data, 'n1'),
+				{objectName: 'number1', value: 1}
+			);
+		});
+		it('should handle 2-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._lookupValue(params, data, 'n2'),
+				{objectName: 'number1', value: 1}
+			);
+		});
+		it('should handle 3-depth', () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._lookupValue(params, data, 'n3'),
+				{objectName: 'number1', value: 1}
+			);
+		});
+	});
+
 	describe('_lookupValue on inline values', function() {
 		const params = {
 			name: "plate1",
@@ -85,35 +156,35 @@ describe('commandHelper', function() {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._lookupValue(params, data, 'name'),
-				{valueName: 'plate1', value: {type: "Plate", location: "P1"}}
+				{objectName: 'plate1', value: {type: "Plate", location: "P1"}}
 			);
 		});
 		it("should handle objects", () => {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._lookupValue(params, data, 'object'),
-				{valueName: 'plate1', value: {type: "Plate", location: "P1"}}
+				{objectName: 'plate1', value: {type: "Plate", location: "P1"}}
 			);
 		});
 		it("should handle numbers", () => {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._lookupValue(params, data, 'number'),
-				{valueName: 'number1', value: 1}
+				{objectName: 'number1', value: 1}
 			);
 		});
 		/*it("should handle strings", () => {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._lookupValue(params, data, 'string'),
-				{valueName: 'string1', value: "hello"}
+				{objectName: 'string1', value: "hello"}
 			);
 		});*/
 		it("should handle durations", () => {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._lookupValue(params, data, 'duration'),
-				{valueName: 'duration1', value: "23 minutes"}
+				{objectName: 'duration1', value: "23 minutes"}
 			);
 		});
 	});
@@ -150,7 +221,7 @@ describe('commandHelper', function() {
 			};
 			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
-				name: {valueName: "plate1"},
+				name: {objectName: "plate1"},
 				object1: {value: {a: 1, b: 2}},
 				number: {value: 42},
 				string1: {value: "hello"},
@@ -189,11 +260,11 @@ describe('commandHelper', function() {
 			};
 			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
-				objectName: {valueName: "plate1"},
-				object: {valueName: "plate1", value: {type: "Plate", location: "P1"}},
-				count: {valueName: "number1", value: 1},
+				objectName: {objectName: "plate1"},
+				object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
+				count: {objectName: "number1", value: 1},
 				any2: {},
-				text: {valueName: "string1", value: "hello"}
+				text: {objectName: "string1", value: "hello"}
 			});
 			should.deepEqual(data.accesses, ["plate1", "number1", "string1.type", "string1.value"]);
 		});
@@ -243,7 +314,7 @@ describe('commandHelper', function() {
 				agent: {},
 				equipment: {},
 				program: {},
-				object: {valueName: "plate1"},
+				object: {objectName: "plate1"},
 				site: {},
 				destinationAfter: {}
 			});
@@ -260,9 +331,9 @@ describe('commandHelper', function() {
 				accesses: []
 			};
 			var parsed = {
-				objectName: {valueName: "plate1"},
-				object: {valueName: "plate1", value: {type: "Plate", location: "P1"}},
-				count: {valueName: "number1", value: 1}
+				objectName: {objectName: "plate1"},
+				object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
+				count: {objectName: "number1", value: 1}
 			};
 			should.deepEqual(commandHelper.getParsedValue(parsed, data, "objectName", "location"), "P1");
 			should.deepEqual(commandHelper.getParsedValue(parsed, data, "object", "location"), "P1");

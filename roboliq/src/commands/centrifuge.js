@@ -246,11 +246,11 @@ var commandHandlers = {
 		};
 		var query = _.merge({}, query0,
 			{"centrifuge.canAgentEquipmentModelSite1Site2": {
-				"agent": parsed.agent.valueName,
-				"equipment": parsed.equipment.valueName,
+				"agent": parsed.agent.objectName,
+				"equipment": parsed.equipment.objectName,
 				"model": model,
-				"site1": parsed.site1.valueName,
-				"site2": parsed.site2.valueName
+				"site1": parsed.site1.objectName,
+				"site2": parsed.site2.objectName
 			}}
 		);
 		var resultList = llpl.query(query);

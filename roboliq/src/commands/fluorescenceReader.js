@@ -49,14 +49,14 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
-		var destinationAfter = (_.isUndefined(parsed.destinationAfter.valueName)) ? location0 : parsed.destinationAfter.valueName;
+		var destinationAfter = (_.isUndefined(parsed.destinationAfter.objectName)) ? location0 : parsed.destinationAfter.objectName;
 
 		var predicates = [
 			{"fluorescenceReader.canAgentEquipmentModelSite": {
-				"agent": parsed.agent.valueName,
-				"equipment": parsed.equipment.valueName,
+				"agent": parsed.agent.objectName,
+				"equipment": parsed.equipment.objectName,
 				"model": model,
-				"site": parsed.site.valueName
+				"site": parsed.site.objectName
 			}}
 		];
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."fluorescenceReader.canAgentEquipmentModelSite"');
@@ -67,7 +67,7 @@ var commandHandlers = {
 		var expansion = [
 			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
-				object: parsed.object.valueName,
+				object: parsed.object.objectName,
 				destination: params2.site
 			},
 			{
@@ -75,11 +75,11 @@ var commandHandlers = {
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: parsed.program.value,
-				outputFile: parsed.outputFile.valueName
+				outputFile: parsed.outputFile.objectName
 			},
 			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",
-				object: parsed.object.valueName,
+				object: parsed.object.objectName,
 				destination: destinationAfter
 			}
 		];

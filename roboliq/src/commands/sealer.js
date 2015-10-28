@@ -34,15 +34,15 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
-		var destinationAfter = (_.isUndefined(parsed.destinationAfter.valueName)) ? location0 : parsed.destinationAfter.valueName;
+		var destinationAfter = (_.isUndefined(parsed.destinationAfter.objectName)) ? location0 : parsed.destinationAfter.objectName;
 
 		var predicates = [
 			{"sealer.canAgentEquipmentProgramModelSite": {
-				"agent": parsed.agent.valueName,
-				"equipment": parsed.equipment.valueName,
-				"program": parsed.program.valueName,
+				"agent": parsed.agent.objectName,
+				"equipment": parsed.equipment.objectName,
+				"program": parsed.program.objectName,
 				"model": model,
-				"site": parsed.site.valueName
+				"site": parsed.site.objectName
 			}}
 		];
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
@@ -52,7 +52,7 @@ var commandHandlers = {
 		var expansion = [
 			(params2.site === location0) ? null : {
 				"command": "transporter.movePlate",
-				"object": parsed.object.valueName,
+				"object": parsed.object.objectName,
 				"destination": params2.site
 			},
 			{
@@ -60,11 +60,11 @@ var commandHandlers = {
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params2.program,
-				object: parsed.object.valueName
+				object: parsed.object.objectName
 			},
 			(destinationAfter === null) ? null : {
 				"command": "transporter.movePlate",
-				"object": parsed.object.valueName,
+				"object": parsed.object.objectName,
 				"destination": location0
 			},
 		];

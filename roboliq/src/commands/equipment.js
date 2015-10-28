@@ -69,9 +69,9 @@ var commandHandlers = {
 		});
 
 		var expansion = [{
-			command: "equipment.open|"+parsed.agent.valueName+"|"+parsed.equipment.valueName,
-			agent: parsed.agent.valueName,
-			equipment: parsed.equipment.valueName
+			command: "equipment.open|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
+			agent: parsed.agent.objectName,
+			equipment: parsed.equipment.objectName
 		}];
 
 		return {
@@ -107,15 +107,15 @@ var commandHandlers = {
 		expect.truthy({paramName: "site"}, sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+sitesInternal);
 
 		var expansion = [{
-			command: "equipment.openSite|"+parsed.agent.valueName+"|"+parsed.equipment.valueName,
-			agent: parsed.agent.valueName,
-			equipment: parsed.equipment.valueName,
-			site: parsed.site.valueName
+			command: "equipment.openSite|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
+			agent: parsed.agent.objectName,
+			equipment: parsed.equipment.objectName,
+			site: parsed.site.objectName
 		}];
 
 		var effects = {};
 		// Open equipment
-		effects[parsed.equipment.valueName+".open"] = true;
+		effects[parsed.equipment.objectName+".open"] = true;
 		// Indicate that the given site is open and the other internal sites are closed
 		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
 
@@ -148,14 +148,14 @@ var commandHandlers = {
 		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 
 		var expansion = [{
-			command: "equipment.close|"+parsed.agent.valueName+"|"+parsed.equipment.valueName,
-			agent: parsed.agent.valueName,
-			equipment: parsed.equipment.valueName
+			command: "equipment.close|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
+			agent: parsed.agent.objectName,
+			equipment: parsed.equipment.objectName
 		}];
 
 		var effects = {};
 		// Close equipment
-		effects[parsed.equipment.valueName+".open"] = false;
+		effects[parsed.equipment.objectName+".open"] = false;
 		// Indicate that the internal sites are closed
 		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = true; });
 

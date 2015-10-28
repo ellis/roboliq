@@ -5,7 +5,7 @@ function getContextPrefix(context) {
 	if (_.isEmpty(context)) return "";
 	else if (_.isString(context.paramName)) return "parameter `"+context.paramName+"`: ";
 	else if (_.isArray(context.paramName)) return "parameters `"+context.paramName.join('`, `')+"`: ";
-	else if (_.isString(context.valueName)) return "value `"+context.valueName+"`: ";
+	else if (_.isString(context.objectName)) return "value `"+context.objectName+"`: ";
 	else if (_.isString(context.objectName)) return "object `"+context.objectName+"`: ";
 	else return "";
 }

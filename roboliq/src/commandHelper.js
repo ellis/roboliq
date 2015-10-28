@@ -8,13 +8,38 @@ import wellsParser from './parsers/wellsParser.js';
 
 /**
  * Try to get a value from data.objects with the given name.
- * @param  {Object} data Data object with 'objects' property
- * @param  {String} name Name of the object value to lookup
+ * @param  {object} data Data object with 'objects' property
+ * @param  {array|string} name Name of the object value to lookup
  * @return {Any} The value at the given path, if any
  */
 function g(data, name, dflt) {
-	data.accesses.push(name);
+	if (_.isArray(name))
+		name = name.join('.');
+
+	if (_.isArray(data.accesses))
+		data.accesses.push(name);
+	else
+		data.accesses = [name];
+
 	return _.get(data.objects, name, dflt);
+}
+
+function dereferenceVariable(data, name) {
+	const result = {};
+	while (_.has(data.objects, name)) {
+		const value = g(data, name);
+		result.objectName = name;
+		//console.log({name, value})
+		if (value.type === 'Variable') {
+			result.value = value.value;
+			name = value.value;
+		}
+		else {
+			result.value = value;
+			break;
+		}
+	}
+	return (_.isEmpty(result)) ? undefined : result;
 }
 
 function lookupValue(params, data, paramName, defaultValue) {
@@ -30,21 +55,14 @@ function lookupValue(params, data, paramName, defaultValue) {
 	}
 	else {
 		result.value = value0;
-		let value = value0;
-		let path = value;
-		while (!_.isUndefined(value) && _.has(data.objects, path)) {
-			value = g(data, path, defaultValue);
-			if (value && value.type === 'Variable')
-				value = value.value;
-
-			result.valueName = path;
-			result.value = value;
-
-			path = path + "." + result.value;
+		const deref = dereferenceVariable(data, value0);
+		if (deref) {
+			result.value = deref.value;
+			result.objectName = deref.objectName;
 		}
 	}
 
-	return (result.value || result.valueName)
+	return (result.value || result.objectName)
 		? _.merge({}, result)
 		: undefined;
 }
@@ -58,24 +76,24 @@ function lookupString(params, data, paramName, defaultValue) {
 
 	// Follow de-references:
 	var references = [];
-	var valueName = undefined;
+	var objectName = undefined;
 	while (_.isString(value1) && _.startsWith(value1, "${") && references.indexOf(value1) < 0) {
 		references.push(value1);
-		valueName = value1.substring(2, value1.length - 1);
-		if (_.has(data.objects, valueName)) {
-			var type2 = g(data, valueName+".type");
+		objectName = value1.substring(2, value1.length - 1);
+		if (_.has(data.objects, objectName)) {
+			var type2 = g(data, objectName+".type");
 			if (type2 === "Variable") {
-				value1 = g(data, valueName+".value");
+				value1 = g(data, objectName+".value");
 			}
 			else {
-				value1 = g(data, valueName);
+				value1 = g(data, objectName);
 			}
 		}
 	}
 
 	return (_.isUndefined(value1))
 		? undefined
-		: _.merge({}, {valueName: valueName, value: value1.toString()});
+		: _.merge({}, {objectName: objectName, value: value1.toString()});
 }
 
 function lookupObject(params, data, paramName, defaultValue) {
@@ -83,8 +101,8 @@ function lookupObject(params, data, paramName, defaultValue) {
 	if (x) {
 		var value = x.value;
 		if (_.isString(value) && !_.isEmpty(value) && !_.startsWith(value, '"')) {
-			x.valueName = value;
-			x.value = g(data, x.valueName);
+			x.objectName = value;
+			x.value = g(data, x.objectName);
 		}
 		expect.truthy({paramName: paramName}, _.isPlainObject(x.value), "expected an object, received: "+JSON.stringify(x.value));
 	}
@@ -144,7 +162,7 @@ function get(params, data, name, defaultValue) {
 		value1 = defaultValue;
 
 	var value2 = misc.getVariableValue(value1, data.objects, data.effects);
-	expect.truthy({valueName: value1}, !_.isUndefined(value2), "not found");
+	expect.truthy({objectName: value1}, !_.isUndefined(value2), "not found");
 	return value2;
 }
 
@@ -168,7 +186,7 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 			var value = params[name];
 			if (_.isUndefined(value))
 				value = defaultValue;
-			return (_.isUndefined(value)) ? undefined : {valueName: value};
+			return (_.isUndefined(value)) ? undefined : {objectName: value};
 		case "Any": return lookupValue(params, data, name, defaultValue);
 		case "Number": return lookupNumber(params, data, name, defaultValue);
 		case "Object": return lookupObject(params, data, name, defaultValue);
@@ -183,8 +201,8 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
 				filedata = defaultValue;
 			if (_.isUndefined(filedata) && _.isUndefined(filename))
 				return undefined;
-			expect.truthy({paramName: name, valueName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
-			return {valueName: filename, value: filedata};
+			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
+			return {objectName: filename, value: filedata};
 	}
 	return undefined;
 }
@@ -196,7 +214,7 @@ function getTypedNameAndValue(type, params, data, name, defaultValue) {
  * @param  {object} data - protocol data
  * @param  {object} specs - description of the expected parameters
  * @return {object} and objects whose keys are the expected parameters and whose
- *  values are `{valueName: ..., value: ...}` objects, or `undefined` if the paramter
+ *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
  *  is optional and not presents in `params`..
  */
 function parseParams(params, data, specs) {
@@ -241,16 +259,16 @@ function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 
 	if (x.hasOwnProperty('value')) {
 		var value = _.get(x.value, propertyName, defaultValue);
-		var valueName = (x.valueName) ? x.valueName+"."+propertyName : paramName+"/"+propertyName;
-		expect.truthy({valueName: valueName}, !_.isUndefined(value), "missing value");
+		var objectName = (x.objectName) ? x.objectName+"."+propertyName : paramName+"/"+propertyName;
+		expect.truthy({objectName: objectName}, !_.isUndefined(value), "missing value");
 		return value;
 	}
 	else {
-		var valueName = x.valueName+"."+propertyName;
-		var value = g(data, valueName);
+		var objectName = x.objectName+"."+propertyName;
+		var value = g(data, objectName);
 		if (_.isUndefined(value))
 			value = defaultValue;
-		expect.truthy({valueName: valueName}, !_.isUndefined(value), "missing value");
+		expect.truthy({objectName: objectName}, !_.isUndefined(value), "missing value");
 		return value;
 	}
 }
@@ -307,6 +325,7 @@ function queryLogic(data, predicates, queryExtract) {
 }
 
 module.exports = {
+	_dereferenceVariable: dereferenceVariable,
 	getParameter: get,
 	getObjectParameter: getObjectParameter,
 	getNumberParameter: getNumberParameter,

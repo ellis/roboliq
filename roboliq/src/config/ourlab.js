@@ -11,7 +11,7 @@ function makeEvowareFacts(params, data, variable, value) {
 	var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	var result2 = {
 		command: "evoware._facts",
-		agent: parsed.agent.valueName,
+		agent: parsed.agent.objectName,
 		factsEquipment: carrier,
 		factsVariable: carrier+"_"+variable
 	};
@@ -573,20 +573,20 @@ module.exports = {
 			});
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
+			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
 			return {
 				expansion: [
 					{
 						command: "evoware._facts",
-						agent: parsed.agent.valueName,
+						agent: parsed.agent.objectName,
 						factsEquipment: carrier,
 						factsVariable: carrier+"_MoveToPos",
 						factsValue: (siteIndex+1).toString()
 					},
 					{
 						command: "evoware._facts",
-						agent: parsed.agent.valueName,
+						agent: parsed.agent.objectName,
 						factsEquipment: carrier,
 						factsVariable: carrier+"_Open"
 					},
@@ -630,7 +630,7 @@ module.exports = {
 			});
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.site.valueName);
+			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
 
 			return {expansion: [makeEvowareFacts(params, data, "Open")]};
@@ -670,7 +670,7 @@ module.exports = {
 				replace(/~/, "&tilde;").
 				replace(/>[ \t]+</g, "><");
 			// Token
-			var value = parsed.outputFile.valueName + "|" + programData;
+			var value = parsed.outputFile.objectName + "|" + programData;
 			return {expansion: [makeEvowareFacts(params, data, "Measure", value)]};
 		},
 		// Sealer
@@ -684,10 +684,10 @@ module.exports = {
 			return {
 				expansion: [{
 					command: "evoware._facts",
-					agent: parsed.agent.valueName,
+					agent: parsed.agent.objectName,
 					factsEquipment: carrier,
 					factsVariable: carrier+"_Seal",
-					factsValue: parsed.program.valueName
+					factsValue: parsed.program.objectName
 				}],
 				//effects: _.zipObject([[params.object + ".sealed", true]])
 			};

@@ -37,7 +37,14 @@ function processParserResult(result, objects, text) {
 	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
 	var ll = _.map(result, function(clause) {
-		CONTINUE: use commandHelper to de-reference variables
+		// CONTINUE: use commandHelper to de-reference variables
+		if (clause.source) {
+			const data = {objects};
+			console.log({source: commandHelper._lookupValue(clause, data, 'source')});
+			console.log({plate: commandHelper._lookupValue(clause, data, 'plate')});
+			console.log({subject: commandHelper._lookupValue(clause, data, 'subject')});
+		}
+
 		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
 		if (clause.source) {
 			var wells = misc.findObjectsValue(clause.source+".wells", objects);
