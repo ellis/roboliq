@@ -52,11 +52,10 @@ function processParserResult(result, objects, text) {
 				return parse(parsed.source.value, objects);
 		}
 		else if (parsed.labware.value) {
-			//const labware = parsed.labware.value;
-			if (parsed.labware.value.type === 'Plate' && parsed.labware.objectName)
-				clause.labware = parsed.labware.objectName;
-			var modelName = misc.getObjectsValue(clause.labware+".model", objects);
-			assert(modelName, "`"+clause.labware+".model` missing");
+			const labware = parsed.labware.value;
+			const labwareName = parsed.labware.objectName;
+			var modelName = labware.model;
+			assert(modelName, "`"+labwareName+".model` missing");
 			var model = misc.getObjectsValue(modelName, objects);
 			assert(model.rows, "`"+modelName+".rows` missing");
 			assert(model.columns, "`"+modelName+".columns` missing");
@@ -87,7 +86,7 @@ function processParserResult(result, objects, text) {
 									row = 1;
 									col++;
 									if (col > model.columns) {
-										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
 								l.push([row, col])
@@ -107,7 +106,7 @@ function processParserResult(result, objects, text) {
 									row = 1;
 									col++;
 									if (col > model.columns) {
-										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
 								l.push([row, col])
@@ -143,7 +142,7 @@ function processParserResult(result, objects, text) {
 									row++;
 									col = 1;
 									if (row > model.rows) {
-										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
 								l.push([row, col])
@@ -163,7 +162,7 @@ function processParserResult(result, objects, text) {
 									col = 1;
 									row++;
 									if (row > model.rows) {
-										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+clause.labware+"`"};
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
 								l.push([row, col])
@@ -257,7 +256,7 @@ function processParserResult(result, objects, text) {
 			// Convert the list of row/col back to text
 			return _.map(l, function(rc) {
 				var location = locationRowColToText(rc[0], rc[1]);
-				return clause.labware+'('+location+')';
+				return labwareName+'('+location+')';
 			});
 		}
 		else {
