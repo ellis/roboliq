@@ -37,21 +37,24 @@ function processParserResult(result, objects, text) {
 	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
 	var ll = _.map(result, function(clause) {
-		// CONTINUE: use commandHelper to de-reference variables
-		if (clause.source) {
-			const data = {objects};
-			console.log({source: commandHelper._lookupValue(clause, data, 'source')});
-			console.log({plate: commandHelper._lookupValue(clause, data, 'plate')});
-			console.log({subject: commandHelper._lookupValue(clause, data, 'subject')});
+		const data = {objects};
+		// Get source or labware objects
+		const parsed = commandHelper.parseParams(clause, data, {
+			source: 'Any?',
+			labware: 'Any?',
+			//subject: 'Any?'
+		});
+		//console.log(parsed);
+		if (parsed.source.value) {
+			if (parsed.source.value.type === 'Source')
+				return [parsed.source.value.wells];
+			else if (_.isString(parsed.source.value) && parsed.source.value !== clause.source)
+				return parse(parsed.source.value, objects);
 		}
-
-		//console.log("clause:\n"+JSON.stringify(clause, null, '  '));
-		if (clause.source) {
-			var wells = misc.findObjectsValue(clause.source+".wells", objects);
-			if (wells) return [wells];
-			else return clause.source;
-		}
-		else if (clause.labware) {
+		else if (parsed.labware.value) {
+			//const labware = parsed.labware.value;
+			if (parsed.labware.value.type === 'Plate' && parsed.labware.objectName)
+				clause.labware = parsed.labware.objectName;
 			var modelName = misc.getObjectsValue(clause.labware+".model", objects);
 			assert(modelName, "`"+clause.labware+".model` missing");
 			var model = misc.getObjectsValue(modelName, objects);
