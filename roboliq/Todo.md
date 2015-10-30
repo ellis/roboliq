@@ -38,7 +38,7 @@
 	- [x] tania12_denaturation
 - [x] if an object has both ! and non ! properties, the ! property should take precedence
 - [ ] `npm test`: fix problem with variable that references a source
-	- [ ] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
+	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
 	- [ ] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
 - [ ] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [ ] evoware:

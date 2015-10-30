@@ -4,7 +4,7 @@ var random = require('random-js');
 var expect = require('../expectCore.js');
 var misc = require('../misc.js');
 var wellsParser0 = require('./wellsParser0.js');
-import commandHelper from '../commandHelper.js';
+//import commandHelper from '../commandHelper.js';
 
 function locationTextToRowCol(location) {
 	var row = location.charCodeAt(0) - "A".charCodeAt(0) + 1;
@@ -33,12 +33,14 @@ function parse(text, objects) {
 }
 
 function processParserResult(result, objects, text) {
+	var commandHelper = require('../commandHelper.js');
 	//console.log("text", text)
 	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));
 	var ll = _.map(result, function(clause) {
 		const data = {objects};
 		// Get source or labware objects
+		//console.log({commandHelper})
 		const parsed = commandHelper.parseParams(clause, data, {
 			source: 'Any?',
 			labware: 'Any?',

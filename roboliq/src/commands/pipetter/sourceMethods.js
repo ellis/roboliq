@@ -32,7 +32,7 @@ function sourceMethod1(group, data) {
 }
 
 // Rotate through source wells in order
-function sourceMethod2(group, data) {
+/*function sourceMethod2(group, data) {
 	var sourceToWellIndex = {};
 	_.forEach(group, function (item) {
 		var source = item.source;
@@ -48,7 +48,7 @@ function sourceMethod2(group, data) {
 			item.sourceWell = source;
 		}
 	});
-}
+}*/
 
 /**
  * Rotate through source wells in order of max volume.
@@ -106,6 +106,6 @@ function sourceMethod3(group, data, effects) {
 
 module.exports = {
 	sourceMethod1: sourceMethod1,
-	sourceMethod2: sourceMethod2,
+	//sourceMethod2: sourceMethod2,
 	sourceMethod3: sourceMethod3
 }

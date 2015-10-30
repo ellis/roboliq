@@ -2,7 +2,7 @@ var _ = require('lodash');
 var should = require('should');
 var roboliq = require('../src/roboliq.js')
 
-describe('pipetter', function() {
+describe('pipetter', function() {/*
 	describe('pipetter.pipette', function () {
 
 		it('should pipette between two wells on plate1 without specifying well contents', function () {
@@ -463,7 +463,7 @@ describe('pipetter', function() {
 
 
 
-
+*/
 	it('should pipette from a variable that refers to the system liquid source', function () {
 		var protocol = {
 			roboliq: "v1",
@@ -482,6 +482,7 @@ describe('pipetter', function() {
 				"1": {
 					command: "pipetter.pipette",
 					sources: "liquid1",
+					//sources: "ourlab.mario.systemLiquid",
 					destinations: "plate1(A01)",
 					volumes: "10ul",
 					clean: "none"

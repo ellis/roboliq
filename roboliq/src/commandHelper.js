@@ -3,8 +3,116 @@ var assert = require('assert');
 var expect = require('./expect.js');
 var jmespath = require('jmespath');
 import math from 'mathjs';
-var misc = require('./misc.js');
+import tv4 from 'tv4';
+import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
+
+/**
+ * Parse command parameters.
+ *
+ * @param  {object} params - the parameters passed to the command
+ * @param  {object} data - protocol data
+ * @param  {object} specs - description of the expected parameters
+ * @return {object} and objects whose keys are the expected parameters and whose
+ *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
+ *  is optional and not presents in `params`..
+ */
+function parseParams(params, data, specs) {
+	return _(specs).map(function(spec, paramName) {
+		var type = undefined;
+		var optional = false;
+		var defaultValue = undefined;
+
+		if (_.isString(spec)) {
+			type = spec;
+		}
+		else {
+			assert(_.isPlainObject(spec));
+			assert(spec.type);
+			type = spec.type;
+			defaultValue = spec.default;
+		}
+
+		var optional = _.endsWith(type, "?");
+		type = (optional) ? type.substr(0, type.length - 1) : type;
+		optional |= !_.isUndefined(defaultValue);
+
+		let info;
+		if (type === 'name') {
+			info = {objectName: _.get(params, paramName, defaultValue)};
+			// If not optional, require the variable's presence:
+			if (!optional) {
+				expect.truthy({paramName}, !_.isUndefined(info.objectName), "missing required value");
+			}
+		}
+		else {
+			info = lookupValue(params, data, paramName, defaultValue);
+			if (info.value) {
+				info.value = processValueType(info.value, type, data, paramName);
+			}
+			// If not optional, require the variable's presence:
+			if (!optional) {
+				expect.truthy({paramName}, !_.isUndefined(info.value), "missing required value");
+			}
+		}
+
+		return [paramName, _.merge({}, info)];
+	}).compact().zipObject().value();
+}
+
+function processValueType(value0, type, data, name) {
+	if (_.endsWith(type, '[]')) {
+		const type1 = type.slice(0, -2);
+
+		// Try to process the whole thing as a single object rather than an array,
+		// because a single object will be then made into an array with that one object.
+		try {
+			const value1 = processValueType(value0, type1, data, name);
+			return [value1];
+		} catch (e) {}
+
+		if (_.isArray(value0)) {
+			const list1 = _.map(value0, (x, index) => expect.try({paramName: `$name[$index]`}, () => {
+				return processValueTypeSingle(x, type1, data, name);
+			}));
+			return list1;
+		}
+
+		assert(false, "unable to process typed value "+type+": "+JSON.stringify(value0));
+	}
+	else {
+		return processValueTypeSingle(value0, type, data, name);
+	}
+}
+
+function processValueTypeSingle(value0, type, data, name) {
+	switch (type) {
+		case "Any": return value0;
+		case "Duration": return processDuration(value0, data, name);
+		case "Source": return processSource(value0, data, name);
+		case "Source": return processSources(value0, data, name);
+		case "String": return processString(value0, data, name);
+		case "Volume": return processVolume(value0, data, name);
+		case "Wells": return processWells(value0, data, name);
+		case "File":
+			var filename = value0;
+			var filedata = data.files[filename];
+			if (_.isUndefined(filedata))
+				filedata = defaultValue;
+			if (_.isUndefined(filedata) && _.isUndefined(filename))
+				return undefined;
+			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
+			return filedata;
+		default: {
+			const schema = roboliqSchemas[type];
+			expect.truthy({paramName: name}, schema, "unknown type: "+type);
+			const isValid = tv4.validate(value0, schema);
+			expect.truthy({paramName: name}, isValid, tv4.toString());
+			return value0;
+		}
+	}
+	return undefined;
+}
 
 /**
  * Try to get a value from data.objects with the given name.
@@ -22,24 +130,6 @@ function g(data, name, dflt) {
 		data.accesses = [name];
 
 	return _.get(data.objects, name, dflt);
-}
-
-function dereferenceVariable(data, name) {
-	const result = {};
-	while (_.has(data.objects, name)) {
-		const value = g(data, name);
-		result.objectName = name;
-		//console.log({name, value})
-		if (value.type === 'Variable') {
-			result.value = value.value;
-			name = value.value;
-		}
-		else {
-			result.value = value;
-			break;
-		}
-	}
-	return (_.isEmpty(result)) ? undefined : result;
 }
 
 function lookupValue(params, data, paramName, defaultValue) {
@@ -62,21 +152,32 @@ function lookupValue(params, data, paramName, defaultValue) {
 		}
 	}
 
-	return (result.value || result.objectName)
-		? _.merge({}, result)
-		: undefined;
+	return _.merge({}, result);
 }
 
-function lookupString(params, data, paramName, defaultValue) {
-	// Get value from params
-	var value1 = params[paramName];
-	// If parameter is missing, use the default value:
-	if (_.isUndefined(value1))
-		value1 = defaultValue;
+function dereferenceVariable(data, name) {
+	const result = {};
+	while (_.has(data.objects, name)) {
+		const value = g(data, name);
+		result.objectName = name;
+		//console.log({name, value})
+		if (value.type === 'Variable') {
+			result.value = value.value;
+			name = value.value;
+		}
+		else {
+			result.value = value;
+			break;
+		}
+	}
+	return (_.isEmpty(result)) ? undefined : result;
+}
 
+function processString(value0, data, paramName) {
 	// Follow de-references:
 	var references = [];
 	var objectName = undefined;
+	let value1 = value0;
 	while (_.isString(value1) && _.startsWith(value1, "${") && references.indexOf(value1) < 0) {
 		references.push(value1);
 		objectName = value1.substring(2, value1.length - 1);
@@ -91,163 +192,63 @@ function lookupString(params, data, paramName, defaultValue) {
 		}
 	}
 
-	return (_.isUndefined(value1))
-		? undefined
-		: _.merge({}, {objectName: objectName, value: value1.toString()});
+	return value1.toString();
 }
 
-function lookupObject(params, data, paramName, defaultValue) {
-	var x = lookupValue(params, data, paramName, defaultValue);
-	if (x) {
-		var value = x.value;
-		if (_.isString(value) && !_.isEmpty(value) && !_.startsWith(value, '"')) {
-			x.objectName = value;
-			x.value = g(data, x.objectName);
-		}
-		expect.truthy({paramName: paramName}, _.isPlainObject(x.value), "expected an object, received: "+JSON.stringify(x.value));
+function lookupSource(x, data, paramName) {
+	if (_.isString(x)) {
+		x = wellsParser.parse(x, data.objects);
+		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
 	}
 	return x;
 }
 
-function lookupNumber(params, data, paramName, defaultValue) {
-	var x = lookupValue(params, data, paramName, defaultValue);
-	expect.truthy({paramName: paramName}, _.isNumber(x.value), "expected a number, received: "+JSON.stringify(x.value));
+function processSources(x, data, paramName) {
+	if (_.isString(x)) {
+		x = wellsParser.parse(x, data.objects);
+		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
+	}
+	else if (_.isArray(x)) {
+		x = x.map(x2 => {
+			const paramName2 = `$paramName[$index]`;
+			return expect.try({paramName: paramName2}, () => {
+				return processSource(x2, data, paramName2);
+			});
+		});
+	}
 	return x;
 }
 
-function lookupVolume(params, data, paramName, defaultValue) {
-	var x = lookupValue(params, data, paramName, defaultValue);
-	if (_.isNumber(x.value)) {
-		x.value = math.unit(x.value, 'l');
+function processVolume(x, data, paramName) {
+	if (_.isNumber(x)) {
+		x = math.unit(x, 'l');
 	}
-	else if (_.isString(x.value)) {
-		x.value = math.eval(x.value);
+	else if (_.isString(x)) {
+		x = math.eval(x);
 	}
-	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x.value), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
+	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
 	return x;
 }
 
-function lookupWells(params, data, paramName, defaultValue) {
-	var x = lookupValue(params, data, paramName, defaultValue);
-	if (_.isString(x.value)) {
-		x.value = wellsParser.parse(x.value, data.objects);
+function processWells(x, data, paramName) {
+	if (_.isString(x)) {
+		x = wellsParser.parse(x, data.objects);
 	}
-	expect.truthy({paramName: paramName}, _.isArray(x.value), "expected a list of wells: "+JSON.stringify(x));
+	expect.truthy({paramName: paramName}, _.isArray(x), "expected a list of wells: "+JSON.stringify(x));
 	return x;
 }
 
-function lookupDuration(params, data, paramName, defaultValue) {
-	var x0 = lookupValue(params, data, paramName, defaultValue);
-	var x = _.clone(x0);
-	if (_.isNumber(x.value)) {
-		x.value = math.unit(x.value, 's');
+function processDuration(x0, data, paramName) {
+	let x = x0;
+	if (_.isNumber(x)) {
+		x = math.unit(x, 's');
 	}
-	else if (_.isString(x.value)) {
-		x.value = math.eval(x.value);
+	else if (_.isString(x)) {
+		x = math.eval(x);
 	}
-	//console.log({a: math.unit('s'), value: x.value, x0})
-	expect.truthy({paramName: paramName}, math.unit('s').equalBase(x.value), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
+	//console.log({a: math.unit('s'), value: x, x0})
+	expect.truthy({paramName: paramName}, math.unit('s').equalBase(x), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
 	return x;
-}
-
-// REFACTOR: remove
-function get(params, data, name, defaultValue) {
-	// If there's no default value, require the variable's presence
-	if (_.isUndefined(defaultValue))
-		expect.paramsRequired(params, [name]);
-
-	// If parameter is missing, use the default value
-	var value1 = params[name];
-	if (_.isUndefined(value1))
-		value1 = defaultValue;
-
-	var value2 = misc.getVariableValue(value1, data.objects, data.effects);
-	expect.truthy({objectName: value1}, !_.isUndefined(value2), "not found");
-	return value2;
-}
-
-// REFACTOR: remove
-function getObjectParameter(params, data, name, defaultValue) {
-	var value = get(params, data, name, defaultValue);
-	expect.truthy({paramName: name}, _.isPlainObject(value), "expected an object, received: "+JSON.stringify(value));
-	return value;
-}
-
-// REFACTOR: remove
-function getNumberParameter(params, data, name, defaultValue) {
-	var value = get(params, data, name, defaultValue);
-	expect.truthy({paramName: name}, _.isNumber(value), "expected a number, received: "+JSON.stringify(value));
-	return value;
-}
-
-function getTypedNameAndValue(type, params, data, name, defaultValue) {
-	switch (type) {
-		case "name":
-			var value = params[name];
-			if (_.isUndefined(value))
-				value = defaultValue;
-			return (_.isUndefined(value)) ? undefined : {objectName: value};
-		case "Any": return lookupValue(params, data, name, defaultValue);
-		case "Number": return lookupNumber(params, data, name, defaultValue);
-		case "Object": return lookupObject(params, data, name, defaultValue);
-		case "String":  return lookupString(params, data, name, defaultValue);
-		case "Duration": return lookupDuration(params, data, name, defaultValue);
-		case "Volume": return lookupVolume(params, data, name, defaultValue);
-		case "Wells": return lookupWells(params, data, name, defaultValue);
-		case "File":
-			var filename = params[name];
-			var filedata = data.files[filename];
-			if (_.isUndefined(filedata))
-				filedata = defaultValue;
-			if (_.isUndefined(filedata) && _.isUndefined(filename))
-				return undefined;
-			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
-			return {objectName: filename, value: filedata};
-	}
-	return undefined;
-}
-
-/**
- * Parse command parameters.
- *
- * @param  {object} params - the parameters passed to the command
- * @param  {object} data - protocol data
- * @param  {object} specs - description of the expected parameters
- * @return {object} and objects whose keys are the expected parameters and whose
- *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
- *  is optional and not presents in `params`..
- */
-function parseParams(params, data, specs) {
-	return _.zipObject(_.compact(_.map(specs, function(info, paramName) {
-		var type = undefined;
-		var optional = false;
-		var defaultValue = undefined;
-
-		if (_.isString(info)) {
-			type = info;
-		}
-		else {
-			assert(_.isPlainObject(info));
-			assert(info.type);
-			type = info.type;
-			defaultValue = info.default;
-		}
-
-		var optional = _.endsWith(type, "?");
-		type = (optional) ? type.substr(0, type.length - 1) : type;
-		optional |= !_.isUndefined(defaultValue);
-
-		// If not optional, require the variable's presence:
-		if (!optional)
-			expect.paramsRequired(params, [paramName]);
-
-		var x = getTypedNameAndValue(type, params, data, paramName, defaultValue);
-		if (_.isUndefined(x)) {
-			expect.truthy({paramName: paramName}, optional, "missing value for required parameter");
-			x = {};
-		}
-		return [paramName, x];
-	})));
 }
 
 function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
@@ -326,9 +327,6 @@ function queryLogic(data, predicates, queryExtract) {
 
 module.exports = {
 	_dereferenceVariable: dereferenceVariable,
-	getParameter: get,
-	getObjectParameter: getObjectParameter,
-	getNumberParameter: getNumberParameter,
 	getParsedValue: getParsedValue,
 	parseParams: parseParams,
 	queryLogic: queryLogic,

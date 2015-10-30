@@ -19,7 +19,10 @@ var commandHandlers = {
 		}
 	},
 	"system.repeat": function(params, data) {
-		var count = commandHelper.getNumberParameter(params, data, 'count');
+		const parsed = commandHelper.parseParams(params, data, {
+			count: 'Number'
+		});
+		var count = parsed.count.value;
 
 		expect.paramsRequired(params, ['steps']);
 		var steps = params.steps;

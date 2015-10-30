@@ -54,7 +54,7 @@ export function checkContents(contents) {
  */
 export function getWellContents(wellName, data, effects) {
 	var wellInfo = wellsParser.parseOne(wellName);
-	assert(wellInfo.wellId);
+	assert(wellInfo.wellId, "missing `wellId`: "+JSON.stringify(wellInfo));
 	var labwareContentsName = wellInfo.labware+".contents";
 	var wellContentsName = wellInfo.labware+".contents."+wellInfo.wellId;
 	// Check for well or labware contents in effects object

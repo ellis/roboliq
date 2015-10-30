@@ -69,8 +69,13 @@ var commandHandlers = {
 		var agent = params.agent || "?agent";
 		var equipment = params.equipment || "?equipment";
 
-		var object1 = commandHelper.getObjectParameter(params, data, 'object1');
-		var object2 = commandHelper.getObjectParameter(params, data, 'object2');
+		const parsed = commandHelper.parseParams(params, data, {
+			object1: "Object",
+			object2: "Object"
+		});
+
+		var object1 = parsed.object1.value;
+		var object2 = parsed.object2.value;
 		if (object1.model != object2.model)
 			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
 
@@ -211,7 +216,7 @@ var commandHandlers = {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
-		var parsed = commandHelper.parseParams(params, data, {
+		const parsed = commandHelper.parseParams(params, data, {
 			agent: "name?",
 			equipment: "name?",
 			object1: "Object?",
@@ -219,6 +224,7 @@ var commandHandlers = {
 			site1: "name?",
 			site2: "name?"
 		});
+		//console.log(parsed);
 
 		if (!parsed.object1 && !parsed.object2) {
 			// do nothing

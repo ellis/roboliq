@@ -14,6 +14,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 var groupingMethods = require('./pipetter/groupingMethods.js');
@@ -64,36 +65,46 @@ var createEffects_pipette = pipetterUtils.getEffects_pipette;
  * @property {string} command - "pipetter.pipette"
  * @property {string} [agent] - Agent identifier
  * @property {string} [equipment] - Equipment identifier
- * @property {Object} [program] - Program identifier
+ * @property {object} [program] - Program identifier
  * @property {_PipetteItem[]} items - Data about what should be pipetted where
+ * @property {string|array} [sources] - a value for the source(s) to aspirate from
  */
 function pipette(params, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
+	const parsed = commandHelper.parseParams(params, data, {
+		agent: "name?",
+		equipment: "name?",
+		program: "Any?",
+		sources: "Sources",
+		destinations: "Wells",
+		volumes: "Any?",
+	});
 	var items = (params.items) ? _.cloneDeep(params.items) : [];
-	var agent = params.agent || "?agent";
-	var equipment = params.equipment || "?equipment";
+	var agent = parsed.agent.objectName || "?agent";
+	var equipment = parsed.equipment.objectName || "?equipment";
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
 	var sourcesTop = [];
-	if (params.sources) {
+	if (parsed.sources.value) {
 		expect.try({paramName: 'sources'}, function () {
-			if (_.isString(params.sources))
-				sourcesTop = wellsParser.parse(params.sources, data.objects);
+			if (_.isString(parsed.sources.value))
+				sourcesTop = wellsParser.parse(parsed.sources.value.wells, data.objects);
 			else
-				sourcesTop = params.sources;
+				sourcesTop = parsed.sources.value.wells;
 		});
 	}
+	console.log({sourcesTop})
 
 	var destinationsTop = [];
-	if (params.destinations) {
+	if (parsed.destinations.value) {
 		expect.try({paramName: 'destinations'}, function () {
-			if (_.isString(params.destinations))
-				destinationsTop = wellsParser.parse(params.destinations, data.objects);
+			if (_.isString(parsed.destinations.value))
+				destinationsTop = wellsParser.parse(parsed.destinations.value, data.objects);
 			else
-				destinationsTop = params.destinations;
+				destinationsTop = parsed.destinations.value;
 		});
 		//console.log("destinationsTop:", destinationsTop)
 		//console.log(destinationsTop.length)
@@ -280,9 +291,17 @@ function pipette(params, data) {
 	// Try to find a pipettingClass for the given items
 	var findPipettingClass = function(items) {
 		// Pick liquid properties by inspecting source contents
-		var pipettingClasses = _(items).map(({source}) => {
+		var pipettingClasses = _(items).map(item => {
+			const {source} = item;
 			let pipettingClass = "Water";
 
+			// FIXME: for debug only
+			if (!source) {
+				console.log({item});
+			}
+			// ENDIFX
+
+			console.log({source})
 			if (source.length > 0) {
 				const contents = WellContents.getWellContents(source[0], data);
 				if (contents) {

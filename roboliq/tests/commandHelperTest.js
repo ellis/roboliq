@@ -91,7 +91,7 @@ describe('commandHelper', function() {
 			const data = {objects: {}, accesses: []};
 			should.deepEqual(
 				commandHelper._lookupValue(params, data, 'xxx'),
-				undefined
+				{}
 			);
 		});
 		it("should handle names", () => {
@@ -192,7 +192,21 @@ describe('commandHelper', function() {
 	describe('commandHelper.parseParams', function() {
 		it("should work with values specified in-line", () => {
 			var data = {
-				objects: {},
+				objects: {
+					p: {
+						type: "Plate",
+						model: "m96"
+					},
+					q: {
+						type: "Source",
+						wells: ["p(A01)", "p(A02)"]
+					},
+					m96: {
+						type: "PlateModel",
+						rows: 8,
+						columns: 12
+					},
+				},
 				accesses: []
 			};
 			var params = {
@@ -205,7 +219,7 @@ describe('commandHelper', function() {
 				time2: "23 minutes",
 				volume1: 10,
 				volume2: "10 ul",
-				//wells
+				wells1: "p(A01)"
 				//file
 			};
 			var specs = {
@@ -218,6 +232,7 @@ describe('commandHelper', function() {
 				time2: 'Duration',
 				volume1: 'Volume',
 				volume2: 'Volume',
+				wells1: 'Wells',
 			};
 			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
@@ -230,6 +245,7 @@ describe('commandHelper', function() {
 				time2: {value: math.unit(23, 'minutes')},
 				volume1: {value: math.unit(10, 'l')},
 				volume2: {value: math.unit(10, 'ul')},
+				wells1: {value: ["p(A01)"]}
 			});
 			should.deepEqual(data.accesses, []);
 		});
@@ -264,7 +280,7 @@ describe('commandHelper', function() {
 				object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
 				count: {objectName: "number1", value: 1},
 				any2: {},
-				text: {objectName: "string1", value: "hello"}
+				text: {value: "hello"}
 			});
 			should.deepEqual(data.accesses, ["plate1", "number1", "string1.type", "string1.value"]);
 		});
