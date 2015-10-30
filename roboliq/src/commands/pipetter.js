@@ -87,28 +87,9 @@ function pipette(params, data) {
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
-	var sourcesTop = [];
-	if (parsed.sources.value) {
-		expect.try({paramName: 'sources'}, function () {
-			if (_.isString(parsed.sources.value))
-				sourcesTop = wellsParser.parse(parsed.sources.value.wells, data.objects);
-			else
-				sourcesTop = parsed.sources.value.wells;
-		});
-	}
-	console.log({sourcesTop})
-
-	var destinationsTop = [];
-	if (parsed.destinations.value) {
-		expect.try({paramName: 'destinations'}, function () {
-			if (_.isString(parsed.destinations.value))
-				destinationsTop = wellsParser.parse(parsed.destinations.value, data.objects);
-			else
-				destinationsTop = parsed.destinations.value;
-		});
-		//console.log("destinationsTop:", destinationsTop)
-		//console.log(destinationsTop.length)
-	}
+	const sourcesTop = parsed.sources.value || [];
+	//console.log({sourcesTop})
+	const destinationsTop = parsed.destinations.value || [];
 
 	var volumesTop = [];
 	if (params.volumes) {
@@ -301,7 +282,7 @@ function pipette(params, data) {
 			}
 			// ENDIFX
 
-			console.log({source})
+			//console.log({source})
 			if (source.length > 0) {
 				const contents = WellContents.getWellContents(source[0], data);
 				if (contents) {

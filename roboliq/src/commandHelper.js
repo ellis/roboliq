@@ -90,7 +90,7 @@ function processValueTypeSingle(value0, type, data, name) {
 		case "Any": return value0;
 		case "Duration": return processDuration(value0, data, name);
 		case "Source": return processSource(value0, data, name);
-		case "Source": return processSources(value0, data, name);
+		case "Sources": return processSources(value0, data, name);
 		case "String": return processString(value0, data, name);
 		case "Volume": return processVolume(value0, data, name);
 		case "Wells": return processWells(value0, data, name);
@@ -200,13 +200,21 @@ function lookupSource(x, data, paramName) {
 		x = wellsParser.parse(x, data.objects);
 		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
 	}
+	else if (_.isPlainObject(x) && x.type === 'Liquid') {
+		x = [x.wells];
+	}
 	return x;
 }
 
 function processSources(x, data, paramName) {
+	//console.log({before: x, paramName})
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
 		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
+		//x = [x];
+	}
+	else if (_.isPlainObject(x) && x.type === 'Liquid') {
+		x = [x.wells];
 	}
 	else if (_.isArray(x)) {
 		x = x.map(x2 => {
@@ -216,6 +224,7 @@ function processSources(x, data, paramName) {
 			});
 		});
 	}
+	//console.log({after: x})
 	return x;
 }
 
