@@ -243,6 +243,8 @@ function loadProtocol(a, b, url, filecache) {
 				var filedata = fs.readFileSync(filename);
 				filecache[filename] = filedata;
 				//console.log("filename: "+filename);
+				//console.log(filedata);
+				//console.log(filedata.toString('utf8'))
 			}
 			return filename;
 		}

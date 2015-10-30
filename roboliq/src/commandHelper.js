@@ -49,6 +49,9 @@ function parseParams(params, data, specs) {
 			info = lookupValue(params, data, paramName, defaultValue);
 			if (info.value) {
 				info.value = processValueType(info.value, type, data, paramName);
+				//console.log({paramName, type, info})
+				//console.log({value: info.value})
+				//console.trace();
 			}
 			// If not optional, require the variable's presence:
 			if (!optional) {
@@ -56,7 +59,7 @@ function parseParams(params, data, specs) {
 			}
 		}
 
-		return [paramName, _.merge({}, info)];
+		return [paramName, _.omit(info, _.isUndefined)];
 	}).compact().zipObject().value();
 }
 
@@ -102,6 +105,7 @@ function processValueTypeSingle(value0, type, data, name) {
 			if (_.isUndefined(filedata) && _.isUndefined(filename))
 				return undefined;
 			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
+			//console.log({filedata})
 			return filedata;
 		default: {
 			const schema = roboliqSchemas[type];
