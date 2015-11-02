@@ -37,10 +37,10 @@
 	- [x] tani13_ph-ourlab-diff
 	- [x] tania12_denaturation
 - [x] if an object has both ! and non ! properties, the ! property should take precedence
-- [ ] `npm test`: fix problem with variable that references a source
+- [x] `npm test`: fix problem with variable that references a source
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
-	- [ ] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
-- [ ] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
+	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
+- [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
