@@ -33,6 +33,35 @@ var objectToPredicateConverters = {
 	},
 };
 
+const commandSpecs = {
+	"centrifuge.centrifuge2": {
+		description: "Centrifuge using two plate",
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+			object1: {description: "Plate identifier 1", type: "string"},
+			object2: {description: "Plate identifier 2", type: "string"},
+			site1: {description: "Location identifier for the centrifugation site of object1", type: "string"},
+			site2: {description: "Location identifier for the centrifugation site of object2", type: "string"},
+			destinationAfter1: {description: "Location identifier for where object1 should be placed after centrifugation", "type": "string"},
+			destinationAfter2: {description: "Location identifier for where object2 should be placed after centrifugation", "type": "string"},
+		},
+		required: ["object1", "object2"],
+	},
+	"centrifuge.insertPlates2": {
+		description: "Insert up to two plates into the centrifuge.",
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+			object1: {description: "Plate identifier 1", type: "string"},
+			object2: {description: "Plate identifier 2", type: "string"},
+			site1: {description: "Location identifier for the centrifugation site of object1", type: "string"},
+			site2: {description: "Location identifier for the centrifugation site of object2", type: "string"},
+		},
+		required: [],
+	},
+};
+
 function closeAll(params, data, effects) {
 	expect.paramsRequired(params, ["equipment"]);
 	var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
@@ -316,6 +345,7 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	objectToPredicateConverters: objectToPredicateConverters,
-	commandHandlers: commandHandlers
+	objectToPredicateConverters,
+	commandSpecs,
+	commandHandlers
 };

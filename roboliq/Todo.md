@@ -41,12 +41,18 @@
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
+- [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need (definitely consider JSON schema)
+- [ ] documentation for the available commands and their parameters
+- [ ] code documentation
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
-- [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need (definitely consider JSON schema)
+- [ ] upload to a public repository
+
+## After submission
+- [ ] rewrite evoware compiler in javascript
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
@@ -59,9 +65,6 @@
 - [ ] preProcess_Marks: preserve property order
 - [ ] test the usage of a separate protocol as part of a new protocol (test re-use); particularly tricky will be object merging and gathering all required step parameters into a single parameters map
 - [ ] figure out how to pass commands without handlers onto the biologist for execution
-- [ ] documentation for the available commands and their parameters
-- [ ] code documentation
-- [ ] upload to a public repository
 - [ ] change imports to require a version number?
 - [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
 - [ ] improvements to specification/realization splitting
@@ -75,9 +78,6 @@
 	- [ ] assign mixtures to wells (probably with randomization)
 	- [ ] specify pipetting details, such as order of sources, and parameters by source
 	- [ ] allow factor values to alter program flow (i.e., heating vs not heating)
-
-## After submission
-
 - [ ] refactor misc.js, expect.js, and commandHelper.js to remove duplication
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line

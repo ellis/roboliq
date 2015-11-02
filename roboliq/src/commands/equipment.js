@@ -17,6 +17,59 @@ var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
+const commandSpecs = {
+	"equipment._run": {
+		description: "Run the given equipment.\n\nThis is a generic command, and any addition parameters may be passed that are required by the target equipment.",
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+		},
+		required: ["agent", "equipment"],
+	},
+	"equipment.open": {
+		description: "Open the given equipment.\n\nThis is a generic command that expands to a sub-command named `equipment.open|${agent}|${equipment}`. That command should be defined in your configuration for your lab.\n\nThe handler should return effects indicating that the equipment is open.",
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+		},
+		required: ["agent", "equipment"],
+	},
+	"equipment.openSite": {
+		description:
+`Open an equipment site.
+This command assumes that only one equipment site can be open at a time.
+
+This is a generic command that expands to a sub-command named
+\`equipment.openSite|\${agent}|\${equipment}\`.
+That command should be defined in your configuration for your lab.
+
+The handler should return effects indicating that the equipment is open,
+the given site is open, and all other equipment sites are closed.`,
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+			site: {description: "Site identifier", type: "string"},
+		},
+		required: ["agent", "equipment", "site"],
+	},
+	"equipment.close": {
+		description:
+`Close the given equipment.
+
+This is a generic command that expands to a sub-command named
+\`equipment.close|\${agent}|\${equipment}\`.
+That command should be defined in your lab configuration.
+
+The handler should return effects indicating the the equipment is closed
+and all of its sites are closed.`,
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+		},
+		required: ["agent", "equipment"],
+	}
+};
+
 function closeAll(params, data, effects) {
 	expect.paramsRequired(params, ["equipment"]);
 	var equipmentData = expect.objectsValue({}, params.equipment, data.objects);
@@ -191,6 +244,7 @@ var planHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	commandHandlers: commandHandlers,
-	planHandlers: planHandlers
+	commandSpecs,
+	commandHandlers,
+	planHandlers
 };
