@@ -17,6 +17,22 @@ var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
+const commandSpecs = {
+	"fluorescenceReader.measurePlate": {
+		description: "Measure the fluorescence of a plate.",
+		properties: {
+			agent: {description: "Agent identifier", type: "string"},
+			equipment: {description: "Equipment identifier", type: "string"},
+			program: {description: "Program specification for measurement", type: "object"},
+			outputFile: {description: "Filename for output", type: "string"},
+			object: {description: "Plate identifier", type: "string"},
+			site: {description: "Site identifier in reader", type: "string"},
+			destinationAfter: {description: "Site to move the plate to after measurement", "type": "string"},
+		},
+		required: ["program", "outputFile", "object"],
+	},
+};
+
 /**
  * Handlers for {@link fluorescenceReader} commands.
  * @static
@@ -91,5 +107,6 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	commandHandlers: commandHandlers
+	commandSpecs,
+	commandHandlers
 };

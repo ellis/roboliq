@@ -42,7 +42,9 @@
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need (definitely consider JSON schema)
+	- continue with pipetter, timer, transporter
 - [ ] documentation for the available commands and their parameters
+- [ ] user documentation
 - [ ] code documentation
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps

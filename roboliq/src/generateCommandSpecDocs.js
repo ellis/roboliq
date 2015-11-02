@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import centrifuge from './commands/centrifuge.js';
-import equipment from './commands/equipment.js';
 
 function toMarkdown(o, name) {
 	return _.flattenDeep([
@@ -19,8 +17,14 @@ function toMarkdown(o, name) {
 	]).join('\n');
 }
 
-const l0 = [centrifuge, equipment];
-const l1 = _.compact(_.map(l0, x => x.commandSpecs));
+const l0 = [
+	'./commands/centrifuge.js',
+	'./commands/equipment.js',
+	'./commands/fluorescenceReader.js',
+	'./commands/sealer.js',
+	'./commands/system.js',
+]
+const l1 = _.compact(_.map(l0, filename => require(filename).commandSpecs));
 const commandSpecs = _.merge.apply(_, [{}].concat(l1));
 const s = _.map(commandSpecs, toMarkdown).join('\n\n')
 console.log(s)
