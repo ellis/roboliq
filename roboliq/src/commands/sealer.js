@@ -1,22 +1,8 @@
 var _ = require('lodash');
+import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
-
-const commandSpecs = {
-	"sealer.sealPlate": {
-		description: "Seal a plate.",
-		properties: {
-			agent: {description: "Agent identifier", type: "string"},
-			equipment: {description: "Equipment identifier", type: "string"},
-			program: {description: "Program identifier for sealing", type: "string"},
-			object: {description: "Plate identifier", type: "string"},
-			site: {description: "Site identifier in reader", type: "string"},
-			destinationAfter: {description: "Site to move the plate to after measurement", "type": "string"},
-		},
-		required: ["object"]
-	}
-};
 
 var objectToPredicateConverters = {
 	"Sealer": function(name, object) {
@@ -99,6 +85,6 @@ var commandHandlers = {
 module.exports = {
 	roboliq: "v1",
 	objectToPredicateConverters,
-	commandSpecs,
+	commandSpecs: yaml.load(__dirname+"/../commandSpecs/sealer.yaml"),
 	commandHandlers
 };

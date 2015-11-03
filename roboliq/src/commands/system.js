@@ -1,26 +1,9 @@
 var _ = require('lodash');
+import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
-const commandSpecs = {
-	"system.call": {
-		description: "Call a template function.\n\nThe template function should be an object of type `Template` with a property `template` holding either a Mustache template string or an object whose properties may be Mustache template strings. The template will be expanded using the values passed in the `params` property.",
-		properties: {
-			name: {description: "Name of the template function.", type: "string"},
-			params: {description: "Parameters to pass to the template function.", type: "object"},
-		},
-		required: ["name"]
-	},
-	"system.repeat": {
-		description: "Repeat the given command a given number of times.",
-		properties: {
-			count: {description: "The number of times to repeat.", type: "integer"},
-			steps: {description: "The sequence of commands to repeat.", type: "object"}
-		},
-		required: ["count"]
-	}
-};
 
 var commandHandlers = {
 	"system.call": function(params, data) {
@@ -58,6 +41,6 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	commandSpecs,
+	commandSpecs: yaml.load(__dirname+"/../commandSpecs/system.yaml"),
 	commandHandlers
 };
