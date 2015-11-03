@@ -1,0 +1,86 @@
+pipetter.PipetteItem:
+  description: Parameters for pipette items.
+  properties:
+    syringe: {description: Syring identifier, type: [string, integer]}
+    source: {description: Source specifier, type: string}
+    destination: {description: Destination specifier, type: string}
+    volume: {description: Volume, type: string}
+
+pipetter._PipetteItem:
+  description: Parameters for low-level pipette items.
+  properties:
+    syringe: {description: Syring identifier, type: [string, integer]}
+    source: {description: Source specifier, type: string}
+    destination: {description: Destination specifier, type: string}
+    volume: {description: Volume, type: string}
+  required: [syringe, source, destination, volume]
+
+pipetter._aspirate:
+  description: Aspirate liquids from sources into syringes.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Data about what should be aspirated from where", "type": "array"}
+  required: [agent, equipment, program]
+
+pipetter._cleanTips:
+  description: Clean the pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Data about which tips to clean and with what intensity", "type": "array"}
+  required: [agent, equipment, program]
+
+pipetter._dispense:
+  description: Dispense liquids from sryinges into destinations.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Data about what should be dispensed where", "type": "array"}
+  required: [agent, equipment, program]
+
+pipetter._pipette:
+  description: Pipette liquids from sources to destinations.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Data about what should be pipetted where", "type": "array"}
+  required: [agent, equipment, program]
+
+pipetter.cleanTips:
+  description: Clean the pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    syringes: {}
+    intensity: {}
+  required: [equipment, intensity]
+
+pipetter.pipette:
+  description: Pipette liquids from sources to destinations.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Data about what should be pipetted where", "type": "array"}
+    sources: {description: "Specifier for source(s) to aspirate from, if missing from items"}
+    destinations: {description: "Specifier for destination(s) to despense to, if missing from items"}
+    volumes: {description: "Volume(s) to pipette, if missing from items"}
+  required: []
+
+
+pipetter.pipetteMixtures:
+  description: Pipette the given mixtures into the given destinations.
+  properties:
+    agent: {description: "Agent identifier", type: "string"}
+    equipment: {description: "Equipment identifier", type: "string"}
+    program: {description: "Program identifier", type: "string"}
+    mixtures: {description: "Array of arrays, where each sub-array is a list of components to be mixed into a destination well", "type": "array"}
+    destinations: {description: "Destination specifier", type: string}
+    order: {description: "Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.", type: string}
+  required: [mixtures, destinations]

@@ -41,9 +41,17 @@
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
-- [ ] put documentation of protocol commands into JSON structures; generate documentation from them; improve command processing by using them (check types, improve error messages); send to UI so that it knows which parameters commands need (definitely consider JSON schema)
-	- continue with pipetter, timer, transporter
-- [ ] documentation for the available commands and their parameters
+- [ ] command documentation:
+	- [x] create commandSpecs for all commands (JSON/YAML structured documentation)
+	- [ ] move all commandSpecs to YAML files
+	- [ ] generate PDF/HTML documentation from commandSpecs
+		- [x] write code to do the generation
+		- [ ] create an npm command for generating docs
+		- [ ] install git version of jsdoc and try to get it to work with our ES6 code
+		- [ ] put the command docs somewhere where jsdoc will pick it up
+	- [ ] change all commandSpecs to use roboliq types, rather than just JSON Schema types
+	- [ ] use commandSpecs to parse the params before passing them to the commandHandler
+	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
 - [ ] user documentation
 - [ ] code documentation
 - [ ] evoware:
@@ -51,10 +59,10 @@
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
+- [ ] rewrite evoware compiler in javascript
 - [ ] upload to a public repository
 
 ## After submission
-- [ ] rewrite evoware compiler in javascript
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol

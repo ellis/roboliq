@@ -12,6 +12,7 @@
 
 var _ = require('lodash');
 var jmespath = require('jmespath');
+var yaml = require('yamljs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
@@ -319,6 +320,7 @@ var commandHandlers = {
  */
 module.exports = {
 	roboliq: "v1",
-	objectToPredicateConverters: objectToPredicateConverters,
-	commandHandlers: commandHandlers
+	objectToPredicateConverters,
+	commandSpecs: yaml.load(__dirname+'/../commandSpecs/timer.yaml'),
+	commandHandlers
 };

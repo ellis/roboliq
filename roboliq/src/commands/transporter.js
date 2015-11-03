@@ -12,6 +12,7 @@
  */
 
 var _ = require('lodash');
+import yaml from 'yamljs';
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 
@@ -192,6 +193,7 @@ var planHandlers = {
 module.exports = {
 	roboliq: "v1",
 	objectToPredicateConverters: objectToPredicateConverters,
+	commandSpecs: yaml.load(__dirname+'/../commandSpecs/transporter.yaml'),
 	commandHandlers: commandHandlers,
 	planHandlers: planHandlers
 };

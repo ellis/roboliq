@@ -14,6 +14,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
@@ -780,5 +781,6 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
+	commandSpecs: yaml.load(__dirname+'/../commandSpecs/pipetter.yaml'),
 	commandHandlers: commandHandlers
 };

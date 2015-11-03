@@ -21,8 +21,11 @@ const l0 = [
 	'./commands/centrifuge.js',
 	'./commands/equipment.js',
 	'./commands/fluorescenceReader.js',
+	'./commands/pipetter.js',
 	'./commands/sealer.js',
 	'./commands/system.js',
+	'./commands/timer.js',
+	'./commands/transporter.js',
 ]
 const l1 = _.compact(_.map(l0, filename => require(filename).commandSpecs));
 const commandSpecs = _.merge.apply(_, [{}].concat(l1));
