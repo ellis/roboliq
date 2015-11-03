@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import fs from 'fs';
+import path from 'path';
+import yaml from 'yamljs';
 
 function toMarkdown(o, name) {
 	return _.flattenDeep([
@@ -17,17 +20,8 @@ function toMarkdown(o, name) {
 	]).join('\n');
 }
 
-const l0 = [
-	'./commands/centrifuge.js',
-	'./commands/equipment.js',
-	'./commands/fluorescenceReader.js',
-	'./commands/pipetter.js',
-	'./commands/sealer.js',
-	'./commands/system.js',
-	'./commands/timer.js',
-	'./commands/transporter.js',
-]
-const l1 = _.compact(_.map(l0, filename => require(filename).commandSpecs));
-const commandSpecs = _.merge.apply(_, [{}].concat(l1));
+const filename_l = _.filter(fs.readdirSync(__dirname+"/commandSpecs/"), s => path.extname(s) === ".yaml");
+const commandSpecs_l = _.map(filename_l, filename => yaml.load(__dirname+"/commandSpecs/"+filename));
+const commandSpecs = _.merge.apply(_, [{}].concat(commandSpecs_l));
 const s = _.map(commandSpecs, toMarkdown).join('\n\n')
 console.log(s)

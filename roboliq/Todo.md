@@ -49,6 +49,7 @@
 		- [x] create an npm command for generating docs
 		- [x] install git version of jsdoc and try to get it to work with our ES6 code
 		- [x] put the command docs somewhere where jsdoc will pick it up
+	- [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
 	- [ ] change all commandSpecs to use roboliq types, rather than just JSON Schema types
 	- [ ] use commandSpecs to parse the params before passing them to the commandHandler
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
