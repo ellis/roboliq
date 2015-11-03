@@ -5,3 +5,5 @@ output.json
 out
 protocols/*.prot
 npm-debug.log
+commandSpecs.html
+commandSpecs.pdf

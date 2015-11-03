@@ -43,10 +43,10 @@
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [ ] command documentation:
 	- [x] create commandSpecs for all commands (JSON/YAML structured documentation)
-	- [ ] move all commandSpecs to YAML files
+	- [x] move all commandSpecs to YAML files
 	- [ ] generate PDF/HTML documentation from commandSpecs
 		- [x] write code to do the generation
-		- [ ] create an npm command for generating docs
+		- [x] create an npm command for generating docs
 		- [ ] install git version of jsdoc and try to get it to work with our ES6 code
 		- [ ] put the command docs somewhere where jsdoc will pick it up
 	- [ ] change all commandSpecs to use roboliq types, rather than just JSON Schema types
