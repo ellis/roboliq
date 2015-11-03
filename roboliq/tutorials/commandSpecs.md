@@ -4,14 +4,14 @@ Centrifuge using two plate
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
-* `object1: string` -- Plate identifier 1
-* `object2: string` -- Plate identifier 2
-* `[site1]: string` -- Location identifier for the centrifugation site of object1
-* `[site2]: string` -- Location identifier for the centrifugation site of object2
-* `[destinationAfter1]: string` -- Location identifier for where object1 should be placed after centrifugation
-* `[destinationAfter2]: string` -- Location identifier for where object2 should be placed after centrifugation
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
+* `object1: Plate` -- Plate identifier 1
+* `object2: Plate` -- Plate identifier 2
+* `[site1]: Site` -- Location identifier for the centrifugation site of object1
+* `[site2]: Site` -- Location identifier for the centrifugation site of object2
+* `[destinationAfter1]: Site` -- Location identifier for where object1 should be placed after centrifugation
+* `[destinationAfter2]: Site` -- Location identifier for where object2 should be placed after centrifugation
 
 ## centrifuge.insertPlates2
 
@@ -19,12 +19,12 @@ Insert up to two plates into the centrifuge.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
-* `[object1]: string` -- Plate identifier 1
-* `[object2]: string` -- Plate identifier 2
-* `[site1]: string` -- Location identifier for the centrifugation site of object1
-* `[site2]: string` -- Location identifier for the centrifugation site of object2
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
+* `[object1]: Plate` -- Plate identifier 1
+* `[object2]: Plate` -- Plate identifier 2
+* `[site1]: Site` -- Location identifier for the centrifugation site of object1
+* `[site2]: Site` -- Location identifier for the centrifugation site of object2
 
 ## equipment._run
 
@@ -35,8 +35,8 @@ This is a generic command, and any addition parameters may be passed that are re
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 
 ## equipment.open
 
@@ -49,8 +49,8 @@ The handler should return effects indicating that the equipment is open.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 
 ## equipment.openSite
 
@@ -67,9 +67,9 @@ the given site is open, and all other equipment sites are closed.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
-* `site: string` -- Site identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
+* `site: Site` -- Site identifier
 
 ## equipment.close
 
@@ -85,8 +85,8 @@ and all of its sites are closed.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 
 ## fluorescenceReader.measurePlate
 
@@ -94,13 +94,13 @@ Measure the fluorescence of a plate.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 * `program: object` -- Program specification for measurement
 * `outputFile: string` -- Filename for output
-* `object: string` -- Plate identifier
-* `[site]: string` -- Site identifier in reader
-* `[destinationAfter]: string` -- Site to move the plate to after measurement
+* `object: Plate` -- Plate identifier
+* `[site]: Site` -- Site identifier in reader
+* `[destinationAfter]: Site` -- Site to move the plate to after measurement
 
 ## pipetter.PipetteItem
 
@@ -109,9 +109,9 @@ Parameters for pipette items.
 Properties:
 
 * `[syringe]: string,integer` -- Syring identifier
-* `[source]: string` -- Source specifier
-* `[destination]: string` -- Destination specifier
-* `[volume]: string` -- Volume
+* `[source]: Source` -- Source specifier
+* `[destination]: Site` -- Destination specifier
+* `[volume]: Volume` -- Volume
 
 ## pipetter._PipetteItem
 
@@ -120,9 +120,9 @@ Parameters for low-level pipette items.
 Properties:
 
 * `syringe: string,integer` -- Syring identifier
-* `source: string` -- Source specifier
-* `destination: string` -- Destination specifier
-* `volume: string` -- Volume
+* `source: Source` -- Source specifier
+* `destination: Well` -- Destination specifier
+* `volume: Volume` -- Volume
 
 ## pipetter._aspirate
 
@@ -130,8 +130,8 @@ Aspirate liquids from sources into syringes.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about what should be aspirated from where
 
@@ -141,8 +141,8 @@ Clean the pipetter tips.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about which tips to clean and with what intensity
 
@@ -152,8 +152,8 @@ Dispense liquids from sryinges into destinations.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about what should be dispensed where
 
@@ -163,8 +163,8 @@ Pipette liquids from sources to destinations.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about what should be pipetted where
 
@@ -174,8 +174,8 @@ Clean the pipetter tips.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 * `[program]: string` -- Program identifier
 * `[syringes]` -- 
 * `intensity` -- 
@@ -186,13 +186,13 @@ Pipette liquids from sources to destinations.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 * `[program]: string` -- Program identifier
 * `[items]: array` -- Data about what should be pipetted where
-* `[sources]` -- Specifier for source(s) to aspirate from, if missing from items
-* `[destinations]` -- Specifier for destination(s) to despense to, if missing from items
-* `[volumes]` -- Volume(s) to pipette, if missing from items
+* `[sources]: Sources` -- Specifier for source(s) to aspirate from, if missing from items
+* `[destinations]: Wells` -- Specifier for destination(s) to despense to, if missing from items
+* `[volumes]: Volumes` -- Volume(s) to pipette, if missing from items
 
 ## pipetter.pipetteMixtures
 
@@ -200,11 +200,11 @@ Pipette the given mixtures into the given destinations.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 * `[program]: string` -- Program identifier
 * `mixtures: array` -- Array of arrays, where each sub-array is a list of components to be mixed into a destination well
-* `destinations: string` -- Destination specifier
+* `destinations: Wells` -- Destination specifier
 * `[order]: string` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
 
 ## sealer.sealPlate

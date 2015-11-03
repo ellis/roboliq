@@ -4,8 +4,8 @@ equipment._run:
 
     This is a generic command, and any addition parameters may be passed that are required by the target equipment.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: ["agent", "equipment"]
 
 equipment.open:
@@ -16,8 +16,8 @@ equipment.open:
 
     The handler should return effects indicating that the equipment is open.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: ["agent", "equipment"]
 
 equipment.openSite:
@@ -32,9 +32,9 @@ equipment.openSite:
     The handler should return effects indicating that the equipment is open,
     the given site is open, and all other equipment sites are closed.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
-    site: {description: "Site identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    site: {description: "Site identifier", type: "Site"}
   required: ["agent", "equipment", "site"]
 
 equipment.close:
@@ -48,6 +48,6 @@ equipment.close:
     The handler should return effects indicating the the equipment is closed
     and all of its sites are closed.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: ["agent", "equipment"]

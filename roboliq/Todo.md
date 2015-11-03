@@ -50,9 +50,13 @@
 		- [x] install git version of jsdoc and try to get it to work with our ES6 code
 		- [x] put the command docs somewhere where jsdoc will pick it up
 	- [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
-	- [ ] change all commandSpecs to use roboliq types, rather than just JSON Schema types
+	- [ ] change all commandSpecs to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
 	- [ ] use commandSpecs to parse the params before passing them to the commandHandler
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
+- [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
+- [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
+- [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
+- [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation
 - [ ] evoware:
@@ -61,6 +65,7 @@
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
 - [ ] rewrite evoware compiler in javascript
+- [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
 - [ ] upload to a public repository
 
 ## After submission
