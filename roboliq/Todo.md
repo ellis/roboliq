@@ -44,15 +44,15 @@
 - [ ] command documentation:
 	- [x] create commandSpecs for all commands (JSON/YAML structured documentation)
 	- [x] move all commandSpecs to YAML files
-	- [ ] generate PDF/HTML documentation from commandSpecs
+	- [x] generate documentation from commandSpecs
 		- [x] write code to do the generation
 		- [x] create an npm command for generating docs
-		- [ ] install git version of jsdoc and try to get it to work with our ES6 code
-		- [ ] put the command docs somewhere where jsdoc will pick it up
+		- [x] install git version of jsdoc and try to get it to work with our ES6 code
+		- [x] put the command docs somewhere where jsdoc will pick it up
 	- [ ] change all commandSpecs to use roboliq types, rather than just JSON Schema types
 	- [ ] use commandSpecs to parse the params before passing them to the commandHandler
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
-- [ ] user documentation
+- [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
