@@ -50,10 +50,9 @@ var commandHandlers = {
 	 * @property {string} object - Plate identifier
 	 * @property {string} destination - Location identifier
 	 */
-	"transporter._movePlate": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "object", "destination"]);
+	"transporter._movePlate": function(params, parsed, data) {
 		var effects = {};
-		effects[params.object + ".location"] = params.destination;
+		effects[`${parsed.object.objectName}.location`] = parsed.destination.objectName;
 		return {
 			effects: effects
 		};
@@ -68,24 +67,23 @@ var commandHandlers = {
 	 * @property {string} object - Plate identifier
 	 * @property {string} destination - Location identifier
 	 */
-	"transporter.movePlate": function(params, data) {
-		expect.paramsRequired(params, ["object", "destination"]);
+	"transporter.movePlate": function(params, parsed, data) {
 		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		var transporterLogic = require('./transporterLogic.json');
 		var taskList = [];
-		if (params.hasOwnProperty("agent")) {
+		if (parsed.agent.objectName) {
 			taskList.push({
 				"movePlate-a": {
-					"agent": params.agent,
-					"labware": params['object'],
-					"destination": params.destination
+					"agent": parsed.agent.objectName,
+					"labware": parsed.object.objectName,
+					"destination": parsed.destination.objectName
 				}
 			});
 		} else {
 			taskList.push({
 				"movePlate": {
-					"labware": params['object'],
-					"destination": params.destination
+					"labware": parsed.object.objectName,
+					"destination": parsed.destination.objectName
 				}
 			});
 		}
@@ -140,7 +138,7 @@ var commandHandlers = {
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		if (_.isEmpty(plan)) {
-			return {errors: ["unable to find a transportation path for `"+params.object+"` from `"+misc.findObjectsValue(params.object+".location", data.objects)+"` to `"+params.destination+"`"]}
+			return {errors: ["unable to find a transportation path for `"+parsed.object.objectName+"` from `"+misc.findObjectsValue(parsed.object.objectName+".location", data.objects)+"` to `"+parsed.destination.objectName+"`"]}
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")
@@ -163,7 +161,7 @@ var commandHandlers = {
 
 		// Create the effets object
 		var effects = {};
-		effects[params.object + ".location"] = params.destination;
+		effects[`${parsed.object.objectName}.location`] = parsed.destination.objectName;
 
 		return {
 			expansion: expansion,

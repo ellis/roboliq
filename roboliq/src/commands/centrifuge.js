@@ -213,19 +213,9 @@ var commandHandlers = {
 	 * @property {string} [site1] - Location identifier for the centrifugation site of object1
 	 * @property {string} [site2] - Location identifier for the centrifugation site of object2
 	 */
-	"centrifuge.insertPlates2": function(params, data) {
+	"centrifuge.insertPlates2": function(params, parsed, data) {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
-
-		const parsed = commandHelper.parseParams(params, data, {
-			agent: "name?",
-			equipment: "name?",
-			object1: "Object?",
-			object2: "Object?",
-			site1: "name?",
-			site2: "name?"
-		});
-		//console.log(parsed);
 
 		if (!parsed.object1 && !parsed.object2) {
 			// do nothing
@@ -289,7 +279,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": params.object1,
+					"object": parsed.object1.objectName,
 					"destination": params2.site1
 				}
 			],
@@ -302,7 +292,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": params.object2,
+					"object": parsed.object2.objectName,
 					"destination": params2.site2
 				}
 			],

@@ -45,8 +45,7 @@ var commandHandlers = {
 	 * @property {string} agent - Agent identifier
 	 * @property {string} equipment - Equipment identifier
 	 */
-	"equipment._run": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment"]);
+	"equipment._run": function(params, parsed, data) {
 		return {};
 	},
 	/**
@@ -64,12 +63,7 @@ var commandHandlers = {
 	 * @property {string} agent - Agent identifier
 	 * @property {string} equipment - Equipment identifier
 	 */
-	"equipment.open": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			agent: "name",
-			equipment: "name"
-		});
-
+	"equipment.open": function(params, parsed, data) {
 		var expansion = [{
 			command: "equipment.open|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
 			agent: parsed.agent.objectName,
@@ -78,7 +72,7 @@ var commandHandlers = {
 
 		return {
 			expansion: expansion,
-			effects: _.zipObject([[params.equipment+".open", true]])
+			effects: _.zipObject([[parsed.equipment.objectName+".open", true]])
 		};
 	},
 	/**
@@ -99,14 +93,9 @@ var commandHandlers = {
 	 * @property {string} equipment - Equipment identifier
 	 * @property {string} site - Site identifier
 	 */
-	"equipment.openSite": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			agent: "name",
-			equipment: "name",
-			site: "name"
-		});
+	"equipment.openSite": function(params, parsed, data) {
 		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-		expect.truthy({paramName: "site"}, sitesInternal.indexOf(params.site) >= 0, "site must be in `"+params.equipment+".sitesInternal`; `"+params.equipment+".sitesInternal` = "+sitesInternal);
+		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.site.objectName) >= 0, `site ${parsed.site.objectName} must be in \`${parsed.equipment.objectName}.sitesInternal\; \`${parsed.equipment.objectName}.sitesInternal\` = ${sitesInternal}`);
 
 		var expansion = [{
 			command: "equipment.openSite|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
@@ -119,7 +108,7 @@ var commandHandlers = {
 		// Open equipment
 		effects[parsed.equipment.objectName+".open"] = true;
 		// Indicate that the given site is open and the other internal sites are closed
-		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != params.site); });
+		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != parsed.site.objectName); });
 
 		return {
 			expansion: expansion,
@@ -142,11 +131,7 @@ var commandHandlers = {
 	 * @property {string} agent - Agent identifier
 	 * @property {string} equipment - Equipment identifier
 	 */
-	"equipment.close": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			agent: "name",
-			equipment: "name"
-		});
+	"equipment.close": function(params, parsed, data) {
 		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 
 		var expansion = [{

@@ -557,20 +557,25 @@ module.exports = {
 
 	]),
 
+	commandSpecs: {
+		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				site: {description: "Site identifier", type: "Site"}
+			},
+			required: ["agent", "equipment", "site"]
+		}
+	},
+
 	commandHandlers: {
-		// Centrifuge
-		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			return {expansion: [makeEvowareFacts(params, data, "Close")]};
 		},
-		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
-		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				agent: "name",
-				equipment: "name",
-				site: "name"
-			});
+		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
@@ -635,7 +640,7 @@ module.exports = {
 
 			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsedNull, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				program: "Object",
 				outputFile: "name"

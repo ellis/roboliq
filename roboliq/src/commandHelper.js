@@ -12,6 +12,49 @@ import wellsParser from './parsers/wellsParser.js';
  *
  * @param  {object} params - the parameters passed to the command
  * @param  {object} data - protocol data
+ * @param  {CommandSpec} specs - description of the expected parameters
+ * @return {object} and objects whose keys are the expected parameters and whose
+ *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
+ *  is optional and not presents in `params`..
+ */
+function parseParams2(params, data, specs) {
+	const required_l = specs.required || [];
+	return _(specs.properties).map(function(p, paramName) {
+		const type = p.type;
+		const required = required_l.includes(paramName);
+		const defaultValue = p.default;
+
+		let info;
+		if (type === 'name') {
+			info = {objectName: _.get(params, paramName, defaultValue)};
+			// If not optional, require the variable's presence:
+			if (required) {
+				expect.truthy({paramName}, !_.isUndefined(info.objectName), "missing required value");
+			}
+		}
+		else {
+			info = lookupValue(params, data, paramName, defaultValue);
+			if (info.value) {
+				info.value = processValueType(info.value, type, data, paramName, p);
+				//console.log({paramName, type, info})
+				//console.log({value: info.value})
+				//console.trace();
+			}
+			// If not optional, require the variable's presence:
+			if (required) {
+				expect.truthy({paramName}, !_.isUndefined(info.value), "missing required value");
+			}
+		}
+
+		return [paramName, _.omit(info, _.isUndefined)];
+	}).compact().zipObject().value();
+}
+
+/**
+ * Parse command parameters.
+ *
+ * @param  {object} params - the parameters passed to the command
+ * @param  {object} data - protocol data
  * @param  {object} specs - description of the expected parameters
  * @return {object} and objects whose keys are the expected parameters and whose
  *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
@@ -63,35 +106,88 @@ function parseParams(params, data, specs) {
 	}).compact().zipObject().value();
 }
 
-function processValueType(value0, type, data, name) {
-	if (_.endsWith(type, '[]')) {
-		const type1 = type.slice(0, -2);
+/**
+ * Try to convert value0 to the type given by type, possibly considering p.
+ *
+ * This function also handles arrays, which it's helper function
+ * (processValueTypeSingle) does not.
+ *
+ * @param  {any} value0 - initial value
+ * @param  {string} type - type to convert to
+ * @param  {object} data
+ * @param  {string} name - parameter name used to lookup value0
+ * @param  {[type]} schema - property schema information (e.g. for arrays)
+ * @return {any} converted value
+ */
+function processValueType(value0, type, data, name, schema) {
+	if (_.isUndefined(type))
+		return value0;
 
-		// Try to process the whole thing as a single object rather than an array,
-		// because a single object will be then made into an array with that one object.
+	const types = _.flatten([type]);
+	let es = [];
+	for (const t of types) {
+		let result;
 		try {
-			const value1 = processValueType(value0, type1, data, name);
-			return [value1];
-		} catch (e) {}
-
-		if (_.isArray(value0)) {
-			const list1 = _.map(value0, (x, index) => expect.try({paramName: `$name[$index]`}, () => {
-				return processValueTypeSingle(x, type1, data, name);
-			}));
-			return list1;
+			if (t === 'array') {
+				expect.truthy({paramName: name}, _.isArray(), "expected an array: "+value0);
+				const name2 = `$name[$index]`;
+				const t2 = _.get(schema, 'items.type');
+				const list1 = _.map(value0, (x, index) => expect.try({paramName: name2}, () => {
+					return processValueTypeSingle(x, t2, data, name2);
+				}));
+				return list1;
+			}
+			else {
+				result = processValueTypeSingle(value0, type, data, name);
+			}
 		}
+		catch (e) {
+			es.push(e);
+		}
+		if (!_.isUndefined(result))
+			return result;
+	}
 
-		assert(false, "unable to process typed value "+type+": "+JSON.stringify(value0));
-	}
-	else {
-		return processValueTypeSingle(value0, type, data, name);
-	}
+	if (!_.isEmpty(es))
+		throw es[0];
+
+	return undefined;
 }
 
 function processValueTypeSingle(value0, type, data, name) {
+	if (_.isUndefined(type))
+		return value0;
+
 	switch (type) {
+		case "string": return processString(value0, data, name);
+		case "integer":
+			expect.truthy({paramName: name}, _.isNumber(value0) && value0 === (value0 % 1), "expected integer: "+value0);
+			return value0;
+		case "number":
+			expect.truthy({paramName: name}, _.isNumber(value0), "expected number: "+value0);
+			return value0;
+		case "object":
+			expect.truthy({paramName: name}, _.isPlainObject(value0), "expected object: "+value0);
+			return value0;
+		//case "array":
+		case "boolean":
+			expect.truthy({paramName: name}, _.isBoolean(value0), "expected boolean: "+value0);
+			return value0;
+		case "null":
+			expect.truthy({paramName: name}, _.isNull(value0), "expected null: "+value0);
+			return value0;
+		case "Agent":
+			// TODO: need to check a list of which types are Agent types
+			expect.truthy({paramName: name}, _.isPlainObject(value0), "expected object: "+value0);
+			return value0;
 		case "Any": return value0;
 		case "Duration": return processDuration(value0, data, name);
+		case "Equipment":
+			// TODO: need to check a list of which types are Equipment types
+			expect.truthy({paramName: name}, _.isPlainObject(value0), "expected object: "+value0);
+			return value0;
+		case "Plate": return processObjectOfType(value0, data, name, type);
+		case "Site": return processObjectOfType(value0, data, name, type);
 		case "Source": return processSource(value0, data, name);
 		case "Sources": return processSources(value0, data, name);
 		case "String": return processString(value0, data, name);
@@ -199,6 +295,12 @@ function processString(value0, data, paramName) {
 	return value1.toString();
 }
 
+function processObjectOfType(x, data, paramName, type) {
+	expect.truthy({paramName}, _.isPlainObject(x), "expected an object: "+JSON.stringify(x));
+	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(x));
+	return x;
+}
+
 function lookupSource(x, data, paramName) {
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
@@ -265,6 +367,7 @@ function processDuration(x0, data, paramName) {
 }
 
 function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
+	//console.log({parsed, x: parsed[paramName], paramName, propertyName})
 	if (!parsed.hasOwnProperty(paramName)) {
 		expect.truthy({paramName: paramName}, !_.isUndefined(defaultValue), "missing parameter value");
 		return defaultValue;
@@ -342,6 +445,7 @@ module.exports = {
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue: getParsedValue,
 	parseParams: parseParams,
+	parseParams2,
 	queryLogic: queryLogic,
 	_lookupValue: lookupValue
 }

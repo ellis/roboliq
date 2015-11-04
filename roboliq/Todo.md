@@ -53,6 +53,7 @@
 	- [x] change all commandSpecs to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
 	- [ ] use commandSpecs to parse the params before passing them to the commandHandler
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
+- [ ] pipetterTest: re-enable all the tests
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem

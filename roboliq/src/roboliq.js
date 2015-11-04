@@ -55,6 +55,7 @@ var jsonfile = require('jsonfile');
 var naturalSort = require('javascript-natural-sort');
 var path = require('path');
 var yaml = require('yamljs');
+import commandHelper from './commandHelper.js';
 var expect = require('./expect.js');
 var misc = require('./misc.js');
 import * as WellContents from './WellContents.js';
@@ -136,6 +137,7 @@ var protocolEmpty = {
 	predicates: [],
 	directiveHandlers: {},
 	objectToPredicateConverters: {},
+	commandSpecs: {},
 	commandHandlers: {},
 	planHandlers: {},
 	files: {},
@@ -206,6 +208,7 @@ function loadProtocol(a, b, url, filecache) {
 		'predicates',
 		'directiveHandlers',
 		'objectToPredicateConverters',
+		'commandSpecs',
 		'commandHandlers',
 		'planHandlers',
 		'files',
@@ -649,14 +652,18 @@ function _run(opts, userProtocol) {
 					var predicates = protocol.predicates.concat(createStateItems(objects));
 					var result = {};
 					try {
-						var data = {
+						const data = {
 							objects: objects,
 							predicates: predicates,
 							planHandlers: protocol.planHandlers,
 							accesses: [],
 							files: filecache
 						};
-						result = handler(params, data) || {};
+						const commandSpec = protocol.commandSpecs[commandName];
+						const parsed = (commandSpec)
+							? commandHelper.parseParams2(params, data, commandSpec)
+							: undefined;
+						result = handler(params, parsed, data) || {};
 					} catch (e) {
 						if (e.hasOwnProperty("errors")) {
 							result = {errors: e.errors};

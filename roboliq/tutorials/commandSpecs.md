@@ -213,12 +213,12 @@ Seal a plate.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 * `[program]: string` -- Program identifier for sealing
-* `object: string` -- Plate identifier
-* `[site]: string` -- Site identifier in reader
-* `[destinationAfter]: string` -- Site to move the plate to after measurement
+* `object: Plate` -- Plate identifier
+* `[site]: Site` -- Site identifier in reader
+* `[destinationAfter]: Site` -- Site to move the plate to after measurement
 
 ## system.call
 
@@ -249,8 +249,8 @@ Handler should return `effects` that the timer is not running.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 * `duration: number` -- Number of seconds to sleep
 
 ## timer._start
@@ -262,8 +262,8 @@ Handler should return `effects` that the timer is running.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 
 ## timer._stop
 
@@ -274,8 +274,8 @@ Handler should return `effects` that the timer is not running.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
 
 ## timer._wait
 
@@ -289,9 +289,9 @@ Handler should:
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
-* `till: number` -- Number of seconds to wait till from the time the timer was started
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
+* `till: Duration` -- Number of seconds to wait till from the time the timer was started
 * `stop: boolean` -- Whether to stop the timer after waiting, or let it continue
 
 ## timer.doAndWait
@@ -302,9 +302,9 @@ until a certain amount of time has elapsed since the beginning of this command.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
-* `duration: number` -- Number of seconds this command should last
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
+* `duration: Duration` -- Number of seconds this command should last
 * `steps: object,array` -- Sub-steps to perform
 
 ## timer.sleep
@@ -313,8 +313,8 @@ Sleep for a given duration.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 * `duration: string,number` -- Duration to sleep (default units is in seconds)
 
 ## timer.start
@@ -326,8 +326,8 @@ If no parameters are supplied, a timer will be automatically chosen.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 
 ## timer.stop
 
@@ -339,8 +339,8 @@ Otherwise, the equipment identifier must be supplied.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `[equipment]: string` -- Equipment identifier
+* `[agent]: Agent` -- Agent identifier
+* `[equipment]: Equipment` -- Equipment identifier
 
 ## transporter._movePlate
 
@@ -351,10 +351,10 @@ Handler should return `effects` with the plate's new location.
 
 Properties:
 
-* `agent: string` -- Agent identifier
-* `equipment: string` -- Equipment identifier
-* `object: string` -- Plate identifier
-* `destination: string` -- Site to move the plate to
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
+* `object: Plate` -- Plate identifier
+* `destination: Site` -- Site to move the plate to
 
 ## transporter.movePlate
 
@@ -363,6 +363,6 @@ Transport a plate to a destination.
 
 Properties:
 
-* `[agent]: string` -- Agent identifier
-* `object: string` -- Plate identifier
-* `destination: string` -- Site to move the plate to
+* `[agent]: Agent` -- Agent identifier
+* `object: Plate` -- Plate identifier
+* `destination: Site` -- Site to move the plate to

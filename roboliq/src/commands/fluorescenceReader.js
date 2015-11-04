@@ -38,16 +38,8 @@ var commandHandlers = {
 	 * @property {string} [site] - Site identifier in reader
 	 * @property {string} [destinationAfter] - Site to move the plate to after measurement
 	 */
-	"fluorescenceReader.measurePlate": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			agent: "name?",
-			equipment: "name?",
-			program: "Object",
-			outputFile: "name",
-			object: "name",
-			site: "name?",
-			destinationAfter: "name?"
-		});
+	"fluorescenceReader.measurePlate": function(params, parsed, data) {
+		console.log(JSON.stringify(parsed));
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
@@ -77,7 +69,7 @@ var commandHandlers = {
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: parsed.program.value,
-				outputFile: parsed.outputFile.objectName
+				outputFile: parsed.outputFile.value
 			},
 			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",

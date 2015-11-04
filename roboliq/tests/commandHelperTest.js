@@ -189,7 +189,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('commandHelper.parseParams', function() {
+	describe('commandHelper.parseParams2', function() {
 		it("should work with values specified in-line", () => {
 			var data = {
 				objects: {
@@ -223,18 +223,21 @@ describe('commandHelper', function() {
 				//file
 			};
 			var specs = {
-				name: 'name',
-				object1: 'Object',
-				number: 'Number',
-				string1: 'String',
-				string2: 'String',
-				time1: 'Duration',
-				time2: 'Duration',
-				volume1: 'Volume',
-				volume2: 'Volume',
-				wells1: 'Wells',
+				properties: {
+					name: {type: 'name'},
+					object1: {type: 'object'},
+					number: {type: 'number'},
+					string1: {type: 'string'},
+					string2: {type: 'string'},
+					time1: {type: 'Duration'},
+					time2: {type: 'Duration'},
+					volume1: {type: 'Volume'},
+					volume2: {type: 'Volume'},
+					wells1: {type: 'Wells'},
+				},
+				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'wells1']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			var parsed = commandHelper.parseParams2(params, data, specs);
 			should.deepEqual(parsed, {
 				name: {objectName: "plate1"},
 				object1: {value: {a: 1, b: 2}},
@@ -255,7 +258,10 @@ describe('commandHelper', function() {
 		it('should work with error-free input', function() {
 			const data = {
 				objects: {
+					agent1: {type: "MyAgent"},
+					equipment1: {type: "MyEquipment", config: "special"},
 					plate1: {type: "Plate", location: "P1"},
+					site1: {type: "Site", extraData: 0},
 					number1: {type: "Variable", value: 1},
 					string1: {type: "Variable", value: "hello"}
 				},
@@ -263,26 +269,38 @@ describe('commandHelper', function() {
 			};
 			var params = {
 				objectName: "plate1",
-				object: "plate1",
+				agent: "agent1",
+				equipment: "equipment1",
+				plate: "plate1",
+				site: "site1",
 				count: "number1",
 				text: "${string1}"
 			};
 			var specs = {
-				objectName: "name",
-				object: "Object",
-				count: "Number",
-				text: "String",
-				any2: "Any?"
+				properties: {
+					objectName: {type: "name"},
+					agent: {type: "Agent"},
+					equipment: {type: "Equipment"},
+					plate: {type: "Plate"},
+					site: {type: "Site"},
+					count: {type: "number"},
+					text: {type: "string"},
+					any2: {}
+				},
+				required: ['objectName', 'agent', 'equipment', 'plate', 'site', 'count', 'text']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			var parsed = commandHelper.parseParams2(params, data, specs);
 			should.deepEqual(parsed, {
 				objectName: {objectName: "plate1"},
-				object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
+				agent: {objectName: "agent1", value: {type: "MyAgent"}},
+				equipment: {objectName: "equipment1", value: {type: "MyEquipment", config: "special"}},
+				plate: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
+				site: {objectName: "site1", value: {type: "Site", extraData: 0}},
 				count: {objectName: "number1", value: 1},
 				any2: {},
 				text: {value: "hello"}
 			});
-			should.deepEqual(data.accesses, ["plate1", "number1", "string1.type", "string1.value"]);
+			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'site1', "number1", "string1.type", "string1.value"]);
 		});
 
 		it('should work with defaults', function() {
@@ -294,10 +312,13 @@ describe('commandHelper', function() {
 				number1: 1
 			};
 			var specs = {
-				number1: {type: "Number", default: -1},
-				number2: {type: "Number", default: 2}
+				properties: {
+					number1: {type: "number", default: -1},
+					number2: {type: "number", default: 2}
+				},
+				required: ['number1', 'number2']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			var parsed = commandHelper.parseParams2(params, data, specs);
 			should.deepEqual(parsed, {
 				number1: {value: 1},
 				number2: {value: 2}
@@ -318,14 +339,17 @@ describe('commandHelper', function() {
 				"object": "plate1"
 			};
 			var specs = {
-				agent: "name?",
-				equipment: "name?",
-				program: "name?",
-				object: "name",
-				site: "name?",
-				destinationAfter: "name?"
+				properties: {
+					agent: {type: "name"},
+					equipment: {type: "name"},
+					program: {type: "name"},
+					object: {type: "name"},
+					site: {type: "name"},
+					destinationAfter: {type: "name"}
+				},
+				required: ['object']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			var parsed = commandHelper.parseParams2(params, data, specs);
 			should.deepEqual(parsed, {
 				agent: {},
 				equipment: {},
