@@ -70,19 +70,11 @@ var createEffects_pipette = pipetterUtils.getEffects_pipette;
  * @property {_PipetteItem[]} items - Data about what should be pipetted where
  * @property {string|array} [sources] - a value for the source(s) to aspirate from
  */
-function pipette(params, data) {
+function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	const parsed = commandHelper.parseParams(params, data, {
-		agent: "name?",
-		equipment: "name?",
-		program: "Any?",
-		sources: "Sources",
-		destinations: "Wells",
-		volumes: "Any?",
-	});
-	var items = (params.items) ? _.cloneDeep(params.items) : [];
+	var items = (parsed.items.value) ? _.cloneDeep(parsed.items.value) : [];
 	var agent = parsed.agent.objectName || "?agent";
 	var equipment = parsed.equipment.objectName || "?equipment";
 	//var tipModels = params.tipModels;
@@ -91,14 +83,7 @@ function pipette(params, data) {
 	const sourcesTop = parsed.sources.value || [];
 	//console.log({sourcesTop})
 	const destinationsTop = parsed.destinations.value || [];
-
-	var volumesTop = [];
-	if (params.volumes) {
-		if (_.isString(params.volumes))
-			volumesTop = [params.volumes];
-		else
-			volumesTop = params.volumes;
-	}
+	const volumesTop = parsed.volumes.value || [];
 
 	// Figure out number of items
 	var itemCount = 0;
@@ -337,10 +322,10 @@ function pipette(params, data) {
 	}
 
 	// Assign programs to items
-	if (params.program) {
+	if (parsed.program.value) {
 		_.forEach(items, function(item) {
 			if (!item.program)
-				item.program = params.program;
+				item.program = parsed.program.value;
 		});
 	}
 	else {
@@ -465,11 +450,6 @@ function pipette(params, data) {
 	Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 	*/
 
-	//var cleanBefore = params.cleanBefore || params.clean || "thorough";
-	//var cleanBetween = params.cleanBetween || params.clean || "thorough";
-	//var cleanBetweenSameSource = params.cleanBetweenSameSource || cleanBetween;
-	//var cleanAfter = params.cleanAfter || params.clean || "thorough";
-
 	// Find the cleaning intensity required before the first aspiration
 	var syringeToCleanBeginValue = {};
 	_.forEach(groups, function(group) {
@@ -477,7 +457,7 @@ function pipette(params, data) {
 			var syringe = item.syringe;
 			if (!syringeToCleanBeginValue.hasOwnProperty(syringe)) {
 				// TODO: handle source's cleanBefore
-				var intensity = item.cleanBefore || params.cleanBegin || params.clean || "thorough";
+				var intensity = item.cleanBefore || parsed.cleanBegin.value || parsed.clean.value || "thorough";
 				var intensityValue = intensityToValue[intensity];
 				syringeToCleanBeginValue[syringe] = intensityValue;
 			}
@@ -502,8 +482,8 @@ function pipette(params, data) {
 			// FIXME: ignore isSameSource if tip has been contaminated by 'Wet' pipetting position
 			// FIXME: also take the source's and destination's "cleanBefore" into account
 			var intensity = (!isSameSource)
-				? item.cleanBefore || params.cleanBetween || params.clean || "thorough"
-				: item.cleanBefore || params.cleanBetweenSameSource || params.cleanBetween || params.clean || "thorough";
+				? item.cleanBefore || parsed.cleanBetween.value || parsed.clean.value || "thorough"
+				: item.cleanBefore || parsed.cleanBetweenSameSource.value || parsed.cleanBetween.value || parsed.clean.value || "thorough";
 			assert(intensityToValue.hasOwnProperty(intensity));
 			var intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
@@ -553,7 +533,7 @@ function pipette(params, data) {
 	// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 	var syringeToCleanEndValue = {};
 	_.forEach(syringeToCleanValue, function (value, syringe) {
-		var intensity = params.cleanEnd || params.clean || "thorough";
+		var intensity = parsed.cleanEnd.value || parsed.clean.value || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));
 		var intensityValue = intensityToValue[intensity];
 		if (syringeToCleanAfterValue.hasOwnProperty(syringe))
@@ -594,8 +574,7 @@ var commandHandlers = {
 	 * @property {Object} program - Program identifier
 	 * @property {Object[]} items - Data about what should be pipetted where
 	 */
-	"pipetter._aspirate": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "program"]);
+	"pipetter._aspirate": function(params, parsed, data) {
 		var effects = {};
 		return {
 			effects: effects
@@ -612,15 +591,13 @@ var commandHandlers = {
 	 * @property {Object} program - Program identifier
 	 * @property {Object[]} items - Data about which tips to clean and with what intensity
 	 */
-	"pipetter._cleanTips": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "program"]);
+	"pipetter._cleanTips": function(params, parsed, data) {
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
-	"pipetter._dispense": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "program"]);
+	"pipetter._dispense": function(params, parsed, data) {
 		var effects = {};
 		return {
 			effects: effects
@@ -647,8 +624,7 @@ var commandHandlers = {
 	 * @property {Object} program - Program identifier
 	 * @property {_PipetteItem[]} items - Data about what should be pipetted where
 	 */
-	"pipetter._pipette": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "program"]);
+	"pipetter._pipette": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
 		//console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
 		return {
@@ -656,24 +632,20 @@ var commandHandlers = {
 		};
 	},
 
-	"pipetter.cleanTips": function(params, data) {
-		if (_.isEmpty(params.syringes))
+	"pipetter.cleanTips": function(params, parsed, data) {
+		if (_.isEmpty(parsed.syringes.value))
 			return {};
-		if (!params.equipment)
-			return {errors: ["`equipment` parameter required"]};
-		if (!params.intensity)
-			return {errors: ["`intensity` parameter required"]};
 
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
-		var agent = params.agent || "?agent";
-		var equipment = params.equipment;
-		var program = params.program || "?program";
-		var intensity = params.intensity
+		var agent = parsed.agent.objectName || "?agent";
+		var equipment = parsed.equipment.objectName;
+		var program = parsed.program.objectName || parsed.program.value || "?program";
+		var intensity = parsed.intensity.value
 
 		// Check whether labwares are on sites that can be pipetted
-		var syringeToProgram_l = _.map(params.syringes, function(syringe) {
+		var syringeToProgram_l = _.map(parsed.syringes.value, function(syringe) {
 			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
 			var tipModel = expect.objectsValue({}, tipModelRef, data.objects);
 			var query = {
@@ -725,15 +697,14 @@ var commandHandlers = {
 		};
 	},
 	"pipetter.pipette": pipette,
-	"pipetter.pipetteMixtures": function(params, data) {
-		expect.paramsRequired(params, ["mixtures", "destinations"]);
-		var mixtures = misc.getVariableValue(params.mixtures, data.objects);
+	"pipetter.pipetteMixtures": function(params, parsed, data) {
+		const mixtures = parsed.mixtures.value;
 		//console.log("params:", params);
 		//console.log("data.objects.mixtures:", data.objects.mixtures);
 		//console.log("mixtures:", mixtures);
-		expect.truthy({paramName: 'mixtures'}, _.isArray(mixtures), "array required");
 		//console.log("A:", misc.getVariableValue(params.destinations, data.objects))
 		//console.log("data.objects.mixtureWells:", data.objects.mixtureWells);
+		CONTINUE
 		var destinations = expect.destinationWells({paramName: 'destinations'}, misc.getVariableValue(params.destinations, data.objects), data);
 		//console.log("destinations:", destinations);
 		expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");

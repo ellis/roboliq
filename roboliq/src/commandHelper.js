@@ -192,6 +192,7 @@ function processValueTypeSingle(value0, type, data, name) {
 		case "Sources": return processSources(value0, data, name);
 		case "String": return processString(value0, data, name);
 		case "Volume": return processVolume(value0, data, name);
+		case "Volumes": return processOneOrArray(value0, data, name, (x) => processVolume(x, data, name));
 		case "Wells": return processWells(value0, data, name);
 		case "File":
 			var filename = value0;
@@ -271,6 +272,15 @@ function dereferenceVariable(data, name) {
 		}
 	}
 	return (_.isEmpty(result)) ? undefined : result;
+}
+
+function processOneOrArray(value0, data, name, fn) {
+	try {
+		return [fn(value0)];
+	} catch (e) {}
+
+	expect.truthy({paramName: name}, _.isArray(value0), "expected an array: "+JSON.stringify(value0));
+	return value0.map(x => fn(x));
 }
 
 function processString(value0, data, paramName) {

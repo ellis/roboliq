@@ -58,6 +58,8 @@
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
+- [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
+- [ ] rename commandSpec to commandSchema everywhere
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation
 - [ ] evoware:

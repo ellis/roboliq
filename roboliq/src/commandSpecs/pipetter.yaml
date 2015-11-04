@@ -57,8 +57,8 @@ pipetter.cleanTips:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
-    syringes: {}
-    intensity: {}
+    syringes: {description: "List of syringes to clean", type: "array", items: {type: [integer, string]}}
+    intensity: {description: "Intensity of the cleaning", type: string}
   required: [equipment, intensity]
 
 pipetter.pipette:
@@ -71,6 +71,11 @@ pipetter.pipette:
     sources: {description: "Specifier for source(s) to aspirate from, if missing from items", type: Sources}
     destinations: {description: "Specifier for destination(s) to despense to, if missing from items", type: Wells}
     volumes: {description: "Volume(s) to pipette, if missing from items", type: Volumes}
+    clean: {description: "Intensity of cleaning", type: string}
+    cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
+    cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
+    cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
+    cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
   required: []
 
 
