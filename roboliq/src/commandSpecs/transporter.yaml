@@ -4,17 +4,17 @@ transporter._movePlate:
 
     Handler should return `effects` with the plate's new location.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
-    object: {description: "Plate identifier", type: "string"}
-    destination: {description: "Site to move the plate to", "type": "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    object: {description: "Plate identifier", type: "Plate"}
+    destination: {description: "Site to move the plate to", "type": "Site"}
   required: [agent, equipment, object, destination]
 
 transporter.movePlate:
   description: |
     Transport a plate to a destination.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    object: {description: "Plate identifier", type: "string"}
-    destination: {description: "Site to move the plate to", "type": "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    object: {description: "Plate identifier", type: "Plate"}
+    destination: {description: "Site to move the plate to", "type": "Site"}
   required: [object, destination]

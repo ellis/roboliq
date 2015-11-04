@@ -4,8 +4,8 @@ timer._sleep:
 
     Handler should return `effects` that the timer is not running.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
     duration: {description: "Number of seconds to sleep", type: "number"}
   required: [agent, equipment, duration]
 
@@ -15,8 +15,8 @@ timer._start:
 
     Handler should return `effects` that the timer is running.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: [agent, equipment]
 
 timer._stop:
@@ -25,8 +25,8 @@ timer._stop:
 
     Handler should return `effects` that the timer is not running.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: [agent, equipment]
 
 timer._wait:
@@ -38,9 +38,9 @@ timer._wait:
     - expect that the timer (identified by the `equipment` parameter) is running
     - return `effects` that the timer is not running
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
-    till: {description: "Number of seconds to wait till from the time the timer was started", type: number}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    till: {description: "Number of seconds to wait till from the time the timer was started", type: Duration}
     stop: {description: "Whether to stop the timer after waiting, or let it continue", type: boolean}
   required: [agent, equipment, till, stop]
 
@@ -49,17 +49,17 @@ timer.doAndWait:
     A control construct to perform the given sub-steps and then wait
     until a certain amount of time has elapsed since the beginning of this command.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
-    duration: {description: "Number of seconds this command should last", type: number}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    duration: {description: "Number of seconds this command should last", type: Duration}
     steps: {description: "Sub-steps to perform", type: [object, array]}
   required: [duration, steps]
 
 timer.sleep:
   description: Sleep for a given duration.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
     duration: {description: "Duration to sleep (default units is in seconds)", type: [string, number]}
   required: [duration]
 
@@ -69,8 +69,8 @@ timer.start:
 
     If no parameters are supplied, a timer will be automatically chosen.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: []
 
 timer.stop:
@@ -80,6 +80,6 @@ timer.stop:
     If only one timer is running, this command can be called without any parameters.
     Otherwise, the equipment identifier must be supplied.
   properties:
-    agent: {description: "Agent identifier", type: "string"}
-    equipment: {description: "Equipment identifier", type: "string"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
   required: []
