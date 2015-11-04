@@ -565,7 +565,14 @@ module.exports = {
 				site: {description: "Site identifier", type: "Site"}
 			},
 			required: ["agent", "equipment", "site"]
-		}
+		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				program: {description: "Program identifier for sealing", type: "string"}
+			}
+		},
 	},
 
 	commandHandlers: {
@@ -598,7 +605,7 @@ module.exports = {
 				]
 			};
 		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, data) {
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				program: "Object"
 			});
@@ -621,13 +628,13 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(params, data, "Execute1", value)]};
 		},
 		// Reader
-		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
 			return {expansion: [makeEvowareFacts(params, data, "Close")]};
 		},
-		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
 			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
-		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, data) {
+		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				agent: "name",
 				equipment: "name",
@@ -673,7 +680,7 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(params, data, "Measure", value)]};
 		},
 		// Sealer
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, data) {
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, parsed, data) {
 			var parsed = commandHelper.parseParams(params, data, {
 				agent: "name",
 				equipment: "name",

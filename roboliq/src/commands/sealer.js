@@ -21,17 +21,7 @@ var commandHandlers = {
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
-	"sealer.sealPlate": function(params, data) {
-		//console.log("params:\n"+JSON.stringify(params, null, '  '))
-		var parsed = commandHelper.parseParams(params, data, {
-			agent: "name?",
-			equipment: "name?",
-			program: "name?",
-			object: "name",
-			site: "name?",
-			destinationAfter: "name?"
-		});
-		//console.log("parsed:\n"+JSON.stringify(parsed, null, '  '))
+	"sealer.sealPlate": function(params, parsed, data) {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
@@ -72,7 +62,7 @@ var commandHandlers = {
 
 		// Create the effects object
 		var effects = {};
-		effects[params.object + ".sealed"] = true;
+		effects[parsed.object.objectName + ".sealed"] = true;
 
 		return {
 			expansion: expansion,
