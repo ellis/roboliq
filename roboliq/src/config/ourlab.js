@@ -569,7 +569,7 @@ module.exports = {
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
 			program: {description: "Program for centrifuging"},
 			required: ["program"]
-		}
+		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
