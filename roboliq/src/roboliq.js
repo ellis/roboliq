@@ -656,6 +656,7 @@ function _run(opts, userProtocol) {
 							objects: objects,
 							predicates: predicates,
 							planHandlers: protocol.planHandlers,
+							commandSpecs: protocol.commandSpecs,
 							accesses: [],
 							files: filecache
 						};

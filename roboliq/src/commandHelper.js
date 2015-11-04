@@ -57,7 +57,7 @@ function parseParams2(params, data, specs) {
  * @param  {object} data - protocol data
  * @param  {object} specs - description of the expected parameters
  * @return {object} and objects whose keys are the expected parameters and whose
- *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
+ *  values are `{objectName: ..., value: ...}` objects, or `{}` if the paramter
  *  is optional and not presents in `params`..
  */
 function parseParams(params, data, specs) {
@@ -129,12 +129,11 @@ function processValueType(value0, type, data, name, schema) {
 		let result;
 		try {
 			if (t === 'array') {
-				expect.truthy({paramName: name}, _.isArray(), "expected an array: "+value0);
-				const name2 = `$name[$index]`;
+				expect.truthy({paramName: name}, _.isArray(value0), "expected an array: "+value0);
 				const t2 = _.get(schema, 'items.type');
-				const list1 = _.map(value0, (x, index) => expect.try({paramName: name2}, () => {
-					return processValueTypeSingle(x, t2, data, name2);
-				}));
+				const list1 = _.map(value0, (x, index) => {
+					return processValueTypeSingle(x, t2, data, `${name}[${index}]`);
+				});
 				return list1;
 			}
 			else {
@@ -193,6 +192,7 @@ function processValueTypeSingle(value0, type, data, name) {
 		case "String": return processString(value0, data, name);
 		case "Volume": return processVolume(value0, data, name);
 		case "Volumes": return processOneOrArray(value0, data, name, (x) => processVolume(x, data, name));
+		case "Well": return processWell(value0, data, name);
 		case "Wells": return processWells(value0, data, name);
 		case "File":
 			var filename = value0;
@@ -205,11 +205,18 @@ function processValueTypeSingle(value0, type, data, name) {
 			//console.log({filedata})
 			return filedata;
 		default: {
-			const schema = roboliqSchemas[type];
-			expect.truthy({paramName: name}, schema, "unknown type: "+type);
-			const isValid = tv4.validate(value0, schema);
-			expect.truthy({paramName: name}, isValid, tv4.toString());
-			return value0;
+			if (data.commandSpecs.hasOwnProperty(type)) {
+				const spec = data.commandSpecs[type];
+				const parsed = parseParams(value0, data, spec.properties);
+				return parsed.value;
+			}
+			else {
+				const schema = roboliqSchemas[type];
+				expect.truthy({paramName: name}, schema, "unknown type: "+type);
+				const isValid = tv4.validate(value0, schema);
+				expect.truthy({paramName: name}, isValid, tv4.toString());
+				return value0;
+			}
 		}
 	}
 	return undefined;
@@ -275,6 +282,7 @@ function dereferenceVariable(data, name) {
 }
 
 function processOneOrArray(value0, data, name, fn) {
+	//console.log({value0, name})
 	try {
 		return [fn(value0)];
 	} catch (e) {}
@@ -311,7 +319,7 @@ function processObjectOfType(x, data, paramName, type) {
 	return x;
 }
 
-function lookupSource(x, data, paramName) {
+function processSource(x, data, paramName) {
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
 		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
@@ -353,6 +361,14 @@ function processVolume(x, data, paramName) {
 	}
 	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
 	return x;
+}
+
+function processWell(x, data, paramName) {
+	if (_.isString(x)) {
+		x = wellsParser.parse(x, data.objects);
+	}
+	expect.truthy({paramName: paramName}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(x));
+	return x[0];
 }
 
 function processWells(x, data, paramName) {

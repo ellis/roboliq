@@ -17,7 +17,7 @@ import * as WellContents from '../../WellContents.js';
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {object} The effects caused by the pipetting command.
  */
-export function getEffects_pipette(params, data, effects) {
+export function getEffects_pipette(parsed, data, effects) {
 	var effects2 = (effects) ? _.cloneDeep(effects) : {};
 	var effectsNew = {}
 
@@ -32,7 +32,7 @@ export function getEffects_pipette(params, data, effects) {
 				water: -60ul
 				*/
 	//console.log(JSON.stringify(params));
-	_.forEach(params.items, function(item) {
+	_.forEach(parsed.items.value, function(item) {
 		//console.log(JSON.stringify(item));
 
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);

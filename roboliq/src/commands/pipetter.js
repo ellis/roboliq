@@ -74,6 +74,8 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
+	//console.log({parsed})
+
 	var items = (parsed.items.value) ? _.cloneDeep(parsed.items.value) : [];
 	var agent = parsed.agent.objectName || "?agent";
 	var equipment = parsed.equipment.objectName || "?equipment";
@@ -211,7 +213,7 @@ function pipette(params, parsed, data) {
 		var pos = "wet";
 		_.forEach(items, function(item) {
 			//console.log("item:", item)
-			var volume = math.eval(item.volume);
+			var volume = item.volume;
 			assert.equal(volume.unit.name, 'l', "expected units to be in liters");
 			if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
 				canUse0050 = false;
@@ -238,7 +240,8 @@ function pipette(params, parsed, data) {
 	var sourceToItems = _.groupBy(items, 'source');
 
 	const itemsAll = items;
-	items = _.filter(items, item => math.eval(item.volume).toNumber('l') > 0);
+	//console.log({itemVolumes: items.map(x => x.volume)})
+	items = _.filter(items, item => item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items
 	if (!findTipModel(items)) {
@@ -516,7 +519,7 @@ function pipette(params, parsed, data) {
 				syringe: item.syringe,
 				source: item.source,
 				destination: item.destination,
-				volume: item.volume
+				volume: item.volume.format({precision: 14})
 			};
 		});
 		// Pipette
@@ -698,26 +701,25 @@ var commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
-		const mixtures = parsed.mixtures.value;
+		const mixtures0 = parsed.mixtures.value;
+		const destinations = parsed.destinations.value;
 		//console.log("params:", params);
 		//console.log("data.objects.mixtures:", data.objects.mixtures);
 		//console.log("mixtures:", mixtures);
 		//console.log("A:", misc.getVariableValue(params.destinations, data.objects))
 		//console.log("data.objects.mixtureWells:", data.objects.mixtureWells);
-		CONTINUE
-		var destinations = expect.destinationWells({paramName: 'destinations'}, misc.getVariableValue(params.destinations, data.objects), data);
 		//console.log("destinations:", destinations);
 		expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
 
 		var params2 = _.omit(params, ['mixtures', 'destinations', 'order']);
 		// Put 'index' on all non-null mixture subitems
-		_.forEach(mixtures, function(mixture) {
+		_.forEach(mixtures0, function(mixture) {
 			_.forEach(mixture, function(subitem, index) {
 				if (!_.isEmpty(subitem))
 					subitem.index = index;
 			});
 		});
-		mixtures = _.compact(mixtures);
+		const mixtures = _.compact(mixtures0);
 		//console.log("mixtures:", mixtures);
 
 		params2.items = [];
@@ -727,9 +729,9 @@ var commandHandlers = {
 				params2.items.push(_.merge({index: index}, subitem, {destination: pair[1]}));
 			});
 		});
-		var order = params.order || ["index"];
+		let order = parsed.order.value || ["index"];
 		if (!_.isArray(order)) order = [order];
-		var ordering = _.map(order, function(what) {
+		const ordering = _.map(order, function(what) {
 			switch (what) {
 				case 'index': return 'index';
 				case 'destination': return function(item) { destinations.indexOf(item.destination); };

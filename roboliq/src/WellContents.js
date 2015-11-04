@@ -183,10 +183,11 @@ export function flattenContents(contents) {
  */
 export function transferContents(srcContents, dstContents, volume) {
 	assert(_.isArray(srcContents));
-	assert(_.isString(volume));
 	checkContents(srcContents);
 
-	volume = math.eval(volume);
+	if (_.isString(volume))
+		volume = math.eval(volume);
+
 	const volumeText = volume.format({precision: 14});
 
 	//console.log({dstContents})
