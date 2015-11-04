@@ -169,7 +169,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": params.object1,
+					"object": parsed.object1.objectName,
 					"destination": destination1
 				}
 			],
@@ -183,7 +183,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": params.object2,
+					"object": parsed.object2.objectName,
 					"destination": destination2
 				}
 			],

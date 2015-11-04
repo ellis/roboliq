@@ -138,7 +138,7 @@ function processValueType(value0, type, data, name, schema) {
 				return list1;
 			}
 			else {
-				result = processValueTypeSingle(value0, type, data, name);
+				result = processValueTypeSingle(value0, t, data, name);
 			}
 		}
 		catch (e) {

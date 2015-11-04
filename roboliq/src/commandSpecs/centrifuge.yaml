@@ -3,6 +3,7 @@ centrifuge.centrifuge2:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program for centrifuging"}
     object1: {description: "Plate identifier 1", type: "Plate"}
     object2: {description: "Plate identifier 2", type: "Plate"}
     site1: {description: "Location identifier for the centrifugation site of object1", type: "Site"}

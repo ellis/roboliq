@@ -566,12 +566,17 @@ module.exports = {
 			},
 			required: ["agent", "equipment", "site"]
 		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+			program: {description: "Program for centrifuging"},
+			required: ["program"]
+		}
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
 				program: {description: "Program identifier for sealing", type: "string"}
-			}
+			},
+			required: ["agent", "equipment", "program"]
 		},
 	},
 
@@ -606,9 +611,6 @@ module.exports = {
 			};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				program: "Object"
-			});
 			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
 				rpm: {type: "Number", default: 3000},
 				duration: {type: "Duration", default: math.unit(30, 's')},

@@ -7,6 +7,7 @@ timer._sleep:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     duration: {description: "Number of seconds to sleep", type: "number"}
+    stop: {description: "Whether to stop the timer after waiting, or let it continue", type: boolean}
   required: [agent, equipment, duration]
 
 timer._start:
@@ -60,7 +61,7 @@ timer.sleep:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    duration: {description: "Duration to sleep (default units is in seconds)", type: [string, number]}
+    duration: {description: "Duration to sleep (default units is in seconds)", type: Duration}
   required: [duration]
 
 timer.start:

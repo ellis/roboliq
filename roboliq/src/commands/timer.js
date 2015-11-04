@@ -85,11 +85,10 @@ var commandHandlers = {
 	 * @property {string} equipment - Equipment identifier
 	 * @property {number} duration - Number of seconds to sleep
 	 */
-	"timer._sleep": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "duration"]);
+	"timer._sleep": function(params, parsed, data) {
 		var effects = {};
-		if (params.stop)
-			effects[params.equipment + ".running"] = false;
+		if (parsed.stop.value)
+			effects[parsed.equipment.objectName + ".running"] = false;
 		return {
 			effects: effects
 		};
@@ -105,10 +104,9 @@ var commandHandlers = {
 	 * @property {string} agent - Agent identifier
 	 * @property {string} equipment - Equipment identifier
 	 */
-	"timer._start": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment"]);
+	"timer._start": function(params, parsed, data) {
 		var effects = {};
-		effects[params.equipment + ".running"] = true;
+		effects[parsed.equipment.objectName + ".running"] = true;
 		return {
 			effects: effects
 		};
@@ -124,10 +122,9 @@ var commandHandlers = {
 	 * @property {string} agent - Agent identifier
 	 * @property {string} equipment - Equipment identifier
 	 */
-	"timer._stop": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment"]);
+	"timer._stop": function(params, parsed, data) {
 		var effects = {};
-		effects[params.equipment + ".running"] = false;
+		effects[parsed.equipment.objectName + ".running"] = false;
 		return {
 			effects: effects
 		};
@@ -147,12 +144,11 @@ var commandHandlers = {
 	 * @property {number} till - Number of seconds to wait till from the time the timer was started
 	 * @property {boolean} stop - Whether to stop the timer after waiting, or let it continue
 	 */
-	"timer._wait": function(params, data) {
-		expect.paramsRequired(params, ["agent", "equipment", "till", "stop"]);
+	"timer._wait": function(params, parsed, data) {
 		// TODO: assert that timer is running
 		var effects = {};
-		if (params.stop)
-			effects[params.equipment + ".running"] = false;
+		if (parsed.stop.value)
+			effects[parsed.equipment.objectName + ".running"] = false;
 		return {
 			effects: effects
 		};
@@ -169,12 +165,7 @@ var commandHandlers = {
 	 * @property {number} duration - Number of seconds this command should last
 	 * @property {Array|Object} steps - Sub-steps to perform
 	 */
-	"timer.doAndWait": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			duration: "Duration",
-			steps: "Object"
-		});
-
+	"timer.doAndWait": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
 		if (alternatives.errors) return altenatives;
 
@@ -212,11 +203,7 @@ var commandHandlers = {
 	 * @property {string} [equipment] - Equipment identifier
 	 * @property {number} duration - Number of seconds to sleep
 	 */
-	"timer.sleep": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			duration: "Duration"
-		});
-
+	"timer.sleep": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
 		if (alternatives.errors) return altenatives;
 
@@ -251,7 +238,7 @@ var commandHandlers = {
 	 * @property {string} [agent] - Agent identifier
 	 * @property {string} [equipment] - Equipment identifier
 	 */
-	"timer.start": function(params, data) {
+	"timer.start": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
 		if (alternatives.errors) return altenatives;
 
@@ -285,7 +272,7 @@ var commandHandlers = {
 	 * @property {string} [agent] - Agent identifier
 	 * @property {string} [equipment] - Equipment identifier
 	 */
-	"timer.stop": function(params, data) {
+	"timer.stop": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, true);
 		if (alternatives.errors) return alternatives;
 		if (alternatives.length > 1) {
