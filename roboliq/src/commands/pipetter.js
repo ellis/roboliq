@@ -74,7 +74,7 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	//console.log({parsed})
+	console.log({parsed})
 
 	var items = (parsed.items.value) ? _.cloneDeep(parsed.items.value) : [];
 	var agent = parsed.agent.objectName || "?agent";
