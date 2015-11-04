@@ -6,10 +6,7 @@ var misc = require('../misc.js');
 
 
 var commandHandlers = {
-	"system.call": function(params, data) {
-		var parsed = commandHelper.parseParams(params, data, {
-			name: "Object"
-		});
+	"system.call": function(params, parsed, data) {
 		switch (parsed.name.value.type) {
 			case "Template":
 				var expansion = misc.renderTemplate(parsed.name.value.template, params.params, data);
@@ -20,22 +17,16 @@ var commandHandlers = {
 				return {};
 		}
 	},
-	"system.repeat": function(params, data) {
-		const parsed = commandHelper.parseParams(params, data, {
-			count: 'Number'
-		});
-		var count = parsed.count.value;
-
-		expect.paramsRequired(params, ['steps']);
-		var steps = params.steps;
-
+	"system.repeat": function(params, parsed, data) {
 		var expansion = {};
-		for (var i = 1; i <= count; i++) {
-			expansion[i] = _.cloneDeep(steps);
+		if (parsed.steps) {
+			const count = parsed.count.value;
+			for (let i = 1; i <= count; i++) {
+				expansion[i] = _.cloneDeep(parsed.steps.value);
+			}
 		}
-		return {
-			expansion: expansion
-		};
+
+		return {expansion};
 	},
 };
 

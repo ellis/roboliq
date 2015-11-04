@@ -161,7 +161,7 @@ function processValueTypeSingle(value0, type, data, name) {
 	switch (type) {
 		case "string": return processString(value0, data, name);
 		case "integer":
-			expect.truthy({paramName: name}, _.isNumber(value0) && value0 === (value0 % 1), "expected integer: "+value0);
+			expect.truthy({paramName: name}, _.isNumber(value0) && (value0 % 1) === 0, "expected integer: "+value0);
 			return value0;
 		case "number":
 			expect.truthy({paramName: name}, _.isNumber(value0), "expected number: "+value0);
