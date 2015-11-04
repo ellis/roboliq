@@ -567,7 +567,9 @@ module.exports = {
 			required: ["agent", "equipment", "site"]
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
-			program: {description: "Program for centrifuging"},
+			properties: {
+				program: {description: "Program for centrifuging"}
+			},
 			required: ["program"]
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
@@ -611,6 +613,7 @@ module.exports = {
 			};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+			//console.log({parsed, params})
 			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
 				rpm: {type: "Number", default: 3000},
 				duration: {type: "Duration", default: math.unit(30, 's')},

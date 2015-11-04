@@ -10,7 +10,7 @@ centrifuge.centrifuge2:
     site2: {description: "Location identifier for the centrifugation site of object2", type: "Site"}
     destinationAfter1: {description: "Location identifier for where object1 should be placed after centrifugation", "type": "Site"}
     destinationAfter2: {description: "Location identifier for where object2 should be placed after centrifugation", "type": "Site"}
-  required: ["object1", "object2"]
+  required: ["program", "object1", "object2"]
 
 centrifuge.insertPlates2:
   description: "Insert up to two plates into the centrifuge."
