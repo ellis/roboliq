@@ -631,7 +631,7 @@ var commandHandlers = {
 		//console.log("params", JSON.stringify(params, null, '  '))
 		//console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
 		return {
-			effects: createEffects_pipette(params, data)
+			effects: createEffects_pipette(parsed, data)
 		};
 	},
 

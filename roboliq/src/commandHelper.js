@@ -209,7 +209,7 @@ function processValueTypeSingle(value0, type, data, name) {
 				const spec = data.commandSpecs[type];
 				const parsed = parseParams(value0, data, spec.properties);
 				console.log({type, parsed})
-				return parsed.value;
+				return parsed;
 			}
 			else {
 				const schema = roboliqSchemas[type];
