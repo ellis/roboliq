@@ -35,15 +35,15 @@ export function getEffects_pipette(parsed, data, effects) {
 	_.forEach(parsed.items.value, function(item) {
 		//console.log(JSON.stringify(item));
 
-		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
+		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source.value, data, effects2);
 		if (_.isEmpty(srcContents0))
-			srcContents0 = ["Infinity l", item.source];
+			srcContents0 = ["Infinity l", item.source.value];
 		//console.log("srcContents0", srcContents0, srcContentsName);
 
-		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
+		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination.value, data, effects2);
 		//console.log("dst contents", dstContents0, dstContentsName);
 
-		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume);
+		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume.value);
 		//console.log({srcContents1, dstContents1});
 
 		// Update content effects
@@ -53,7 +53,7 @@ export function getEffects_pipette(parsed, data, effects) {
 		effectsNew[dstContentsName] = dstContents1;
 		//console.log()
 
-		const volume = math.eval(item.volume);
+		const volume = item.volume.value;
 
 		// Update __WELLS__ effects for source
 		if (true) {

@@ -52,7 +52,6 @@
 	- [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
 	- [x] change all commandSpecs to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
 	- [x] use commandSpecs to parse the params before passing them to the commandHandler
-	- [ ] commandHelper: Source type should return a list of lists of wells rather than the Source object
 	- [ ] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
 - [ ] pipetterTest: re-enable all the tests
