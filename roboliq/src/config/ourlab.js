@@ -634,11 +634,13 @@ module.exports = {
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			//console.log({parsed, params})
 			var parsedProgram = commandHelper.parseParams2(parsed.program.value, data, {
-				rpm: {type: "number", default: 3000},
-				duration: {type: "Duration", default: math.unit(30, 's')},
-				spinUpTime: {type: "Duration", default: math.unit(9, 's')},
-				spinDownTime: {type: "Duration", default: math.unit(9, 's')},
-				temperature: {type: "number", default: 25}
+				properties: {
+					rpm: {type: "number", default: 3000},
+					duration: {type: "Duration", default: math.unit(30, 's')},
+					spinUpTime: {type: "Duration", default: math.unit(9, 's')},
+					spinDownTime: {type: "Duration", default: math.unit(9, 's')},
+					temperature: {type: "number", default: 25}
+				}
 			});
 			//console.log(parsedProgram);
 			var list = [
