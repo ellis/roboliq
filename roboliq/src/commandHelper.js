@@ -141,6 +141,7 @@ function processValueBySchema(value0, schema, data, name) {
 				result = processValueAsArray(value0, schema.items, data, name);
 			}
 			else if (t === 'object' && !_.isEmpty(schema.properties)) {
+				//console.log(JSON.stringify({t, value0, schema}, null, '\t'))
 				result = parseParams2(value0, data, schema);
 			}
 			else {

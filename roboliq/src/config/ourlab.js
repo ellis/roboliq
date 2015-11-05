@@ -568,7 +568,17 @@ module.exports = {
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
 			properties: {
-				program: {description: "Program for centrifuging"}
+				program: {
+					description: "Program for centrifuging",
+					type: "object",
+					properties: {
+						rpm: {type: "number", default: 3000},
+						duration: {type: "Duration", default: "30 s"},
+						spinUpTime: {type: "Duration", default: "9 s"},
+						spinDownTime: {type: "Duration", default: "9 s"},
+						temperature: {type: "number", default: 25}
+					}
+				}
 			},
 			required: ["program"]
 		},
@@ -633,16 +643,8 @@ module.exports = {
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			//console.log({parsed, params})
-			var parsedProgram = commandHelper.parseParams2(parsed.program.value, data, {
-				properties: {
-					rpm: {type: "number", default: 3000},
-					duration: {type: "Duration", default: math.unit(30, 's')},
-					spinUpTime: {type: "Duration", default: math.unit(9, 's')},
-					spinDownTime: {type: "Duration", default: math.unit(9, 's')},
-					temperature: {type: "number", default: 25}
-				}
-			});
-			//console.log(parsedProgram);
+			const parsedProgram = parsed.program.value;
+			//console.log({parsedProgram});
 			var list = [
 				math.round(parsedProgram.rpm.value),
 				math.round(parsedProgram.duration.value.toNumber('s')),
