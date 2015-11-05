@@ -2,7 +2,7 @@ var _ = require('lodash');
 var should = require('should');
 var roboliq = require('../src/roboliq.js')
 
-describe('pipetter', function() {/*
+describe('pipetter', function() {
 	describe('pipetter.pipette', function () {
 
 		it('should pipette between two wells on plate1 without specifying well contents', function () {
@@ -26,7 +26,7 @@ describe('pipetter', function() {/*
 					}
 				}
 			};
-			var result = roboliq.run(["-o", ""], protocol);
+			var result = roboliq.run(["-o", "", "-p"], protocol);
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.steps[1][1][1], {
@@ -156,25 +156,25 @@ describe('pipetter', function() {/*
 						"syringe": 1,
 						"source": "ourlab.mario.systemLiquidLabware(A01)",
 						"destination": "plate1(A01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					},
 					{
 						"syringe": 2,
 						"source": "ourlab.mario.systemLiquidLabware(B01)",
 						"destination": "plate1(B01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					},
 					{
 						"syringe": 3,
 						"source": "ourlab.mario.systemLiquidLabware(C01)",
 						"destination": "plate1(C01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					},
 					{
 						"syringe": 4,
 						"source": "ourlab.mario.systemLiquidLabware(D01)",
 						"destination": "plate1(D01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					}
 				]
 			});
@@ -188,25 +188,25 @@ describe('pipetter', function() {/*
 						"syringe": 1,
 						"source": "ourlab.mario.systemLiquidLabware(A01)",
 						"destination": "plate1(E01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					},
 					{
 						"syringe": 2,
 						"source": "ourlab.mario.systemLiquidLabware(B01)",
 						"destination": "plate1(F01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					},
 					{
 						"syringe": 3,
 						"source": "ourlab.mario.systemLiquidLabware(C01)",
 						"destination": "plate1(G01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					},
 					{
 						"syringe": 4,
 						"source": "ourlab.mario.systemLiquidLabware(D01)",
 						"destination": "plate1(H01)",
-						"volume": "10ul"
+						"volume": "10 ul"
 					}
 				]
 			});
@@ -362,29 +362,83 @@ describe('pipetter', function() {/*
 						"syringe": 1,
 						"source": "trough1(A01)",
 						"destination": "plate1(A02)",
-						"volume": "20ul"
+						"volume": "20 ul"
 					},
 					{
 						"syringe": 2,
 						"source": "trough1(B01)",
 						"destination": "plate1(B02)",
-						"volume": "20ul"
+						"volume": "20 ul"
 					},
 					{
 						"syringe": 3,
 						"source": "trough1(C01)",
 						"destination": "plate1(C02)",
-						"volume": "20ul"
+						"volume": "20 ul"
 					},
 					{
 						"syringe": 4,
 						"source": "trough1(D01)",
 						"destination": "plate1(D02)",
-						"volume": "20ul"
+						"volume": "20 ul"
 					},
 				]
 			});
 		})
+
+
+
+		it('should pipette from a variable that refers to the system liquid source', function () {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2"
+					},
+					liquid1: {
+						type: "Variable",
+						value: "ourlab.mario.systemLiquid"
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipette",
+						sources: "liquid1",
+						//sources: "ourlab.mario.systemLiquid",
+						destinations: "plate1(A01)",
+						volumes: "10ul",
+						clean: "none"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			should.deepEqual(result.output.effects, {
+				"1.1": {
+					"ourlab.mario.systemLiquidLabware.contents": [
+						"Infinity l",
+						"systemLiquid"
+					],
+					"plate1.contents.A01": [
+						"10 ul",
+						"systemLiquid"
+					],
+					"__WELLS__.ourlab.mario.systemLiquidLabware.contents": {
+						"isSource": true,
+						"volumeMin": "Infinity l",
+						"volumeMax": "Infinity l",
+						"volumeRemoved": "10 ul"
+					},
+					"__WELLS__.plate1.contents.A01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
+				}
+			});
+		});
 	});
 
 
@@ -450,7 +504,7 @@ describe('pipetter', function() {/*
 				]
 			});
 			//console.log(JSON.stringify(result.output.tables.wellContentsFinal, null, '\t'));
-			should.deepEqual(result.output.tables.wellContentsFinal,
+			should.deepEqual(_.get(result, "output.tables.wellContentsFinal"),
 				[
 					{"well": "plate1(A01)", "source1": "80 ul"},
 					{"well": "plate1(B01)", "source2": "70 ul"},
@@ -463,56 +517,4 @@ describe('pipetter', function() {/*
 
 
 
-*/
-	it('should pipette from a variable that refers to the system liquid source', function () {
-		var protocol = {
-			roboliq: "v1",
-			objects: {
-				plate1: {
-					type: "Plate",
-					model: "ourlab.model.plateModel_96_square_transparent_nunc",
-					location: "ourlab.mario.site.P2"
-				},
-				liquid1: {
-					type: "Variable",
-					value: "ourlab.mario.systemLiquid"
-				}
-			},
-			steps: {
-				"1": {
-					command: "pipetter.pipette",
-					sources: "liquid1",
-					//sources: "ourlab.mario.systemLiquid",
-					destinations: "plate1(A01)",
-					volumes: "10ul",
-					clean: "none"
-				}
-			}
-		};
-		var result = roboliq.run(["-o", ""], protocol);
-		should.deepEqual(result.output.effects, {
-			"1.1": {
-				"ourlab.mario.systemLiquidLabware.contents": [
-					"Infinity l",
-					"systemLiquid"
-				],
-				"plate1.contents.A01": [
-					"10 ul",
-					"systemLiquid"
-				],
-				"__WELLS__.ourlab.mario.systemLiquidLabware.contents": {
-					"isSource": true,
-					"volumeMin": "Infinity l",
-					"volumeMax": "Infinity l",
-					"volumeRemoved": "10 ul"
-				},
-				"__WELLS__.plate1.contents.A01": {
-					"isSource": false,
-					"volumeMin": "0 l",
-					"volumeMax": "10 ul",
-					"volumeAdded": "10 ul"
-				},
-			}
-		});
-	});
 });

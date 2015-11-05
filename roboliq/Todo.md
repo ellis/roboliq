@@ -52,7 +52,8 @@
 	- [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
 	- [x] change all commandSpecs to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
 	- [x] use commandSpecs to parse the params before passing them to the commandHandler
-	- [ ] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
+	- [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
+	- [ ] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
 - [ ] pipetterTest: re-enable all the tests
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
@@ -60,7 +61,7 @@
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
-- [ ] rename commandSpec to commandSchema everywhere
+- [ ] rename commandSpec to schema everywhere
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation
 - [ ] evoware:
