@@ -115,8 +115,7 @@ steps:
           2:
             command: fluorescenceReader.measurePlate
             object: mixPlate
-            program:
-              programFile: ./tania12_denaturation.mdfx
+            programFile: ./tania12_denaturation.mdfx
           3:
             description: Incubate at 25C
             comment: For our centrifuge to work as an incubator, we need to set a spin duration greater than 0.

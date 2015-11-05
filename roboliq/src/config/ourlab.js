@@ -580,6 +580,25 @@ module.exports = {
 			},
 			required: ["agent", "equipment", "program"]
 		},
+		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				site: {description: "Site identifier", type: "Site"}
+			},
+			required: ["agent", "equipment", "site"]
+		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": {
+			description: "Run our Infinit M200 reader using either programFile or programData",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				programFile: {description: "Program filename", type: "File"},
+				programData: {description: "Program data"},
+				outputFile: {description: "Filename for measured output", type: "string"}
+			},
+			required: ["outputFile"]
+		},
 	},
 
 	commandHandlers: {
@@ -640,11 +659,6 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				agent: "name",
-				equipment: "name",
-				site: "name"
-			});
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
@@ -652,24 +666,15 @@ module.exports = {
 
 			return {expansion: [makeEvowareFacts(params, data, "Open")]};
 		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsedNull, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				program: "Object",
-				outputFile: "name"
-			});
-			var parsedProgram = commandHelper.parseParams(parsed.program.value, data, {
-				programFile: "File?",
-				programData: "Any?",
-				//program: "Any?"
-			});
-			var hasProgramFile = (parsedProgram.programFile.value) ? 1 : 0;
-			var hasProgramData = (parsedProgram.programData.value) ? 1 : 0;
-			//console.log(parsedProgram);
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
+			var hasProgramFile = (parsed.programFile.value) ? 1 : 0;
+			var hasProgramData = (parsed.programData.value) ? 1 : 0;
+			//console.log(parsed);
 			expect.truthy({}, hasProgramFile + hasProgramData >= 1, "either `programFile` or `programData` must be specified.");
 			expect.truthy({}, hasProgramFile + hasProgramData <= 1, "only one of `programFile` or `programData` may be specified.");
 			const content = (hasProgramData)
-				? parsedProgram.programData.value.toString('utf8')
-				: parsedProgram.programFile.value.toString('utf8');
+				? parsed.programData.value.toString('utf8')
+				: parsed.programFile.value.toString('utf8');
 			var start_i = content.indexOf("<TecanFile");
 			if (start_i < 0)
 				start_i = 0;
@@ -681,7 +686,7 @@ module.exports = {
 				replace(/~/, "&tilde;").
 				replace(/>[ \t]+</g, "><");
 			// Token
-			var value = parsed.outputFile.objectName + "|" + programData;
+			var value = parsed.outputFile.value + "|" + programData;
 			return {expansion: [makeEvowareFacts(params, data, "Measure", value)]};
 		},
 		// Sealer

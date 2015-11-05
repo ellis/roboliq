@@ -3,9 +3,11 @@ fluorescenceReader.measurePlate:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program specification for measurement", type: "object"}
+    programFile: {description: "Program filename", type: "string"}
+    programData: {description: "Program data"}
+#    program: {description: "Program specification for measurement", type: "object"}
     outputFile: {description: "Filename for output", type: "string"}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after measurement", "type": "Site"}
-  required: ["program", "outputFile", "object"]
+  required: ["outputFile", "object"]

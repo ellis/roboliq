@@ -21,9 +21,7 @@ describe('commands/fluorescenceReader', function() {
 					1: {
 						command: "fluorescenceReader.measurePlate",
 						object: "plate1",
-						program: {
-							programFile: "./protocols/tania13_ph-temp.mdfx"
-						},
+						programFile: "./protocols/tania13_ph-temp.mdfx",
 						outputFile: "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					}
 				}
@@ -101,9 +99,7 @@ describe('commands/fluorescenceReader', function() {
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.reader",
-						"program": {
-							"programFile": "./protocols/tania13_ph-temp.mdfx"
-						},
+						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {
@@ -163,9 +159,7 @@ describe('commands/fluorescenceReader', function() {
 					},
 					"command": "fluorescenceReader.measurePlate",
 					"object": "plate1",
-					"program": {
-						"programFile": "./protocols/tania13_ph-temp.mdfx"
-					},
+					"programFile": "./protocols/tania13_ph-temp.mdfx",
 					"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 				}
 			);

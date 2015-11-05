@@ -154,8 +154,7 @@ steps:
           2:
             command: fluorescenceReader.measurePlate
             object: mixPlate
-            program:
-              programFile: ./tania12_denaturation.mdfx
+            programFile: ./tania12_denaturation.mdfx
             outputFile!: C:\Users\localadmin\Desktop\Ellis\tania12_denaturation--<YYYYMMDD_HHmmss>.xml
           3:
             description: Incubate at 25C

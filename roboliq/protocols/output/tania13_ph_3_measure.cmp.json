@@ -533,9 +533,7 @@
 							"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.reader",
-							"program": {
-								"programFile": "./protocols/tania13_ph-temp.mdfx"
-							},
+							"programFile": "./protocols/tania13_ph-temp.mdfx",
 							"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 						},
 						"3": {
@@ -636,9 +634,7 @@
 						},
 						"command": "fluorescenceReader.measurePlate",
 						"object": "mixPlate",
-						"program": {
-							"programFile": "./protocols/tania13_ph-temp.mdfx"
-						},
+						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {
@@ -696,9 +692,7 @@
 					"2": {
 						"command": "fluorescenceReader.measurePlate",
 						"object": "mixPlate",
-						"program": {
-							"programFile": "./protocols/tania13_ph-temp.mdfx"
-						},
+						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {
@@ -859,9 +853,7 @@
 							"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.reader",
-							"program": {
-								"programFile": "./protocols/tania13_ph-temp.mdfx"
-							},
+							"programFile": "./protocols/tania13_ph-temp.mdfx",
 							"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 						},
 						"3": {
@@ -962,9 +954,7 @@
 						},
 						"command": "fluorescenceReader.measurePlate",
 						"object": "mixPlate",
-						"program": {
-							"programFile": "./protocols/tania13_ph-temp.mdfx"
-						},
+						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {
@@ -1022,9 +1012,7 @@
 					"2": {
 						"command": "fluorescenceReader.measurePlate",
 						"object": "mixPlate",
-						"program": {
-							"programFile": "./protocols/tania13_ph-temp.mdfx"
-						},
+						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {
@@ -1063,9 +1051,7 @@
 					"2": {
 						"command": "fluorescenceReader.measurePlate",
 						"object": "mixPlate",
-						"program": {
-							"programFile": "./protocols/tania13_ph-temp.mdfx"
-						},
+						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {

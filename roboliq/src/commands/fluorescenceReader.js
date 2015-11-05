@@ -39,7 +39,7 @@ var commandHandlers = {
 	 * @property {string} [destinationAfter] - Site to move the plate to after measurement
 	 */
 	"fluorescenceReader.measurePlate": function(params, parsed, data) {
-		console.log(JSON.stringify(parsed));
+		//console.log(JSON.stringify(parsed));
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
@@ -64,13 +64,14 @@ var commandHandlers = {
 				object: parsed.object.objectName,
 				destination: params2.site
 			},
-			{
+			_.merge({}, {
 				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,
-				program: parsed.program.value,
+				programFile: parsed.programFile.value,
+				programData: parsed.programData.value,
 				outputFile: parsed.outputFile.value
-			},
+			}),
 			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",
 				object: parsed.object.objectName,
