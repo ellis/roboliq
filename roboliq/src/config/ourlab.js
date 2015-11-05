@@ -609,6 +609,13 @@ module.exports = {
 			},
 			required: ["outputFile"]
 		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				program: {description: "Program identifier for shaking", type: "string"}
+			}
+		},
 	},
 
 	commandHandlers: {
@@ -695,19 +702,14 @@ module.exports = {
 		},
 		// Sealer
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, parsed, data) {
-			var parsed = commandHelper.parseParams(params, data, {
-				agent: "name",
-				equipment: "name",
-				program: "name"
-			});
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+			const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			return {
 				expansion: [{
 					command: "evoware._facts",
 					agent: parsed.agent.objectName,
 					factsEquipment: carrier,
 					factsVariable: carrier+"_Seal",
-					factsValue: parsed.program.objectName
+					factsValue: parsed.program.value
 				}],
 				//effects: _.zipObject([[params.object + ".sealed", true]])
 			};
