@@ -208,7 +208,7 @@ function processValueTypeSingle(value0, type, data, name) {
 			if (data.commandSpecs.hasOwnProperty(type)) {
 				const spec = data.commandSpecs[type];
 				const parsed = parseParams(value0, data, spec.properties);
-				//console.log({type, parsed})
+				console.log({type, parsed})
 				return parsed;
 			}
 			else {
