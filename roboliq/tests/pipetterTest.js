@@ -120,7 +120,6 @@ describe('pipetter', function() {
 				},
 			]);
 		})
-/*
 
 
 
@@ -320,7 +319,6 @@ describe('pipetter', function() {
 
 
 
-
 		it('should pipette from a multi-well source', function () {
 			var protocol = {
 				roboliq: "v1",
@@ -513,7 +511,7 @@ describe('pipetter', function() {
 				]
 			)
 		});
-*/	});
+	});
 
 
 
