@@ -53,6 +53,7 @@ export function checkContents(contents) {
  * @return {WellContents} the contents array if found, otherwise null
  */
 export function getWellContents(wellName, data, effects) {
+	//console.log({wellName})
 	var wellInfo = wellsParser.parseOne(wellName);
 	assert(wellInfo.wellId, "missing `wellId`: "+JSON.stringify(wellInfo));
 	var labwareContentsName = wellInfo.labware+".contents";

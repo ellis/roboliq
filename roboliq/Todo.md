@@ -55,6 +55,7 @@
 	- [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
 	- [ ] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
 	- [ ] refactor all commands to accept parsed parameters, using the commandSpecs
+	- [ ] remove all uses of commandHelper.parseParams()
 - [ ] pipetterTest: re-enable all the tests
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)

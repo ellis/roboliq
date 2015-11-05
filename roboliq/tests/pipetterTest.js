@@ -26,7 +26,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["-o", "", "-p"], protocol);
+			var result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.steps[1][1][1], {
@@ -51,7 +51,7 @@ describe('pipetter', function() {
 						"syringe": 1,
 						"source": "plate1(A01)",
 						"destination": "plate1(A02)",
-						"volume": "20ul"
+						"volume": "20 ul"
 					}
 				]
 			});
@@ -120,7 +120,7 @@ describe('pipetter', function() {
 				},
 			]);
 		})
-
+/*
 
 
 
@@ -513,7 +513,7 @@ describe('pipetter', function() {
 				]
 			)
 		});
-	});
+*/	});
 
 
 

@@ -49,6 +49,7 @@ function _try(context, fn) {
 }
 
 function _throw(context, errors) {
+	console.trace();
 	errors = _.isArray(errors) ? errors : [errors];
 	var o = _.merge({}, context, {
 		name: "ProcessingError",

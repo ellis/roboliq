@@ -74,11 +74,16 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	//console.log({parsed})
+	//console.log("pipette: "+JSON.stringify(parsed))
 
-	var items = (parsed.items.value) ? _.cloneDeep(parsed.items.value) : [];
-	var agent = parsed.agent.objectName || "?agent";
-	var equipment = parsed.equipment.objectName || "?equipment";
+	let items = (_.isUndefined(parsed.items.value))
+		? []
+		: parsed.items.value.map(parsedItem =>
+				_(parsedItem).map((value, name) => [name, value.value]).filter(l => !_.isUndefined(l[1])).zipObject().value()
+			);
+	//console.log("items: "+JSON.stringify(items));
+	let agent = parsed.agent.objectName || "?agent";
+	let equipment = parsed.equipment.objectName || "?equipment";
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
@@ -113,32 +118,21 @@ function pipette(params, parsed, data) {
 		}
 		for (var i = 0; i < itemCount; i++) {
 			//console.log("i:", i)
-			if (items[i].source) {
-				items[i].source = wellsParser.parse(items[i].source, data.objects);
-				if (_.isArray(items[i].source))
-					items[i].source = _.flatten(items[i].source);
-				//console.log("items["+i+"].source:", items[i].source)
-			}
-			else {
+			if (_.isUndefined(items[i].source)) {
 				if (sourcesTop.length == 1)
 					items[i].source = sourcesTop[0];
 				else if (sourcesTop.length > 1)
 					items[i].source = sourcesTop[i];
 			}
 
-			if (items[i].destination) {
-				expect.try({paramName: "items["+i+"].destination"}, function() {
-					wellsParser.parseOne(items[i].destination);
-				});
-			}
-			else {
+			if (_.isUndefined(items[i].destination)) {
 				//console.log("step", items[i], destinationsTop, i, destinationsTop[i])
 				if (destinationsTop.length == 1)
 					items[i].destination = destinationsTop[0];
 				else if (destinationsTop.length > 1)
 					items[i].destination = destinationsTop[i];
 			}
-			if (!items[i].volume) {
+			if (_.isUndefined(items[i].volume)) {
 				if (volumesTop.length == 1)
 					items[i].volume = volumesTop[0];
 				else if (volumesTop.length > 1)
@@ -261,18 +255,19 @@ function pipette(params, parsed, data) {
 	// Try to find a pipettingClass for the given items
 	var findPipettingClass = function(items) {
 		// Pick liquid properties by inspecting source contents
-		var pipettingClasses = _(items).map(item => {
-			const {source} = item;
+		const pipettingClasses0 = items.map(item => {
+			const source = _.isArray(item.source) ? item.source : [item.source];
 			let pipettingClass = "Water";
 
 			// FIXME: for debug only
-			if (!source) {
+			if (!source || _.isEmpty(source)) {
 				console.log({item});
 			}
 			// ENDIFX
 
 			//console.log({source})
 			if (source.length > 0) {
+				//console.log({source})
 				const contents = WellContents.getWellContents(source[0], data);
 				if (contents) {
 					var liquids = extractLiquidNamesFromContents(contents);
@@ -293,7 +288,8 @@ function pipette(params, parsed, data) {
 			}
 
 			return pipettingClass;
-		}).uniq().value();
+		});
+		const pipettingClasses = _.uniq(pipettingClasses0);
 
 		if (pipettingClasses.length === 1) {
 			return pipettingClasses[0];

@@ -661,6 +661,7 @@ function _run(opts, userProtocol) {
 							files: filecache
 						};
 						const commandSpec = protocol.commandSpecs[commandName];
+						//console.log("params: "+JSON.stringify(params))
 						const parsed = (commandSpec)
 							? commandHelper.parseParams2(params, data, commandSpec)
 							: undefined;
@@ -716,9 +717,9 @@ function _run(opts, userProtocol) {
 			return (c >= '0' && c <= '9');
 		});
 		keys.sort(naturalSort);
-		_.forEach(keys, function(key) {
+		for (const key of keys) {
 			expandStep(protocol, prefix.concat(key), step[key], objects);
-		});
+		}
 	}
 
 	/**

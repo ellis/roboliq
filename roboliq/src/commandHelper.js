@@ -18,6 +18,7 @@ import wellsParser from './parsers/wellsParser.js';
  *  is optional and not presents in `params`..
  */
 function parseParams2(params, data, specs) {
+	//console.log(`parseParams2: ${JSON.stringify(params)} ${JSON.stringify(specs)}`)
 	const required_l = specs.required || [];
 	return _(specs.properties).map(function(p, paramName) {
 		const type = p.type;
@@ -29,6 +30,7 @@ function parseParams2(params, data, specs) {
 			info = {objectName: _.get(params, paramName, defaultValue)};
 			// If not optional, require the variable's presence:
 			if (required) {
+				//console.log({paramName, type, info, params})
 				expect.truthy({paramName}, !_.isUndefined(info.objectName), "missing required value");
 			}
 		}
@@ -42,6 +44,7 @@ function parseParams2(params, data, specs) {
 			}
 			// If not optional, require the variable's presence:
 			if (required) {
+				//console.log({paramName, type, info, params})
 				expect.truthy({paramName}, !_.isUndefined(info.value), "missing required value");
 			}
 		}
@@ -83,6 +86,7 @@ function parseParams(params, data, specs) {
 		let info;
 		if (type === 'name') {
 			info = {objectName: _.get(params, paramName, defaultValue)};
+			//console.log({paramName, type, info})
 			// If not optional, require the variable's presence:
 			if (!optional) {
 				expect.truthy({paramName}, !_.isUndefined(info.objectName), "missing required value");
@@ -116,7 +120,7 @@ function parseParams(params, data, specs) {
  * @param  {string} type - type to convert to
  * @param  {object} data
  * @param  {string} name - parameter name used to lookup value0
- * @param  {[type]} schema - property schema information (e.g. for arrays)
+ * @param  {object} schema - property schema information (e.g. for arrays)
  * @return {any} converted value
  */
 function processValueType(value0, type, data, name, schema) {
@@ -125,15 +129,21 @@ function processValueType(value0, type, data, name, schema) {
 
 	const types = _.flatten([type]);
 	let es = [];
+	// Try each type alternative:
 	for (const t of types) {
 		let result;
 		try {
 			if (t === 'array') {
 				expect.truthy({paramName: name}, _.isArray(value0), "expected an array: "+value0);
 				const t2 = _.get(schema, 'items.type');
+				//console.log({t2})
 				const list1 = _.map(value0, (x, index) => {
-					return processValueTypeSingle(x, t2, data, `${name}[${index}]`);
+					//return processValueTypeSingle(x, t2, data, `${name}[${index}]`);
+					const x2 = processValueType(x, t2, data, `${name}[${index}]`, undefined);
+					//console.log({x, t2, x2})
+					return x2;
 				});
+				//console.log({list1})
 				return list1;
 			}
 			else {
@@ -154,6 +164,7 @@ function processValueType(value0, type, data, name, schema) {
 }
 
 function processValueTypeSingle(value0, type, data, name) {
+	//console.log({type, value0})
 	if (_.isUndefined(type))
 		return value0;
 
@@ -207,8 +218,9 @@ function processValueTypeSingle(value0, type, data, name) {
 		default: {
 			if (data.commandSpecs.hasOwnProperty(type)) {
 				const spec = data.commandSpecs[type];
-				const parsed = parseParams(value0, data, spec.properties);
-				console.log({type, parsed})
+				//console.log({type, spec})
+				const parsed = parseParams2(value0, data, spec);
+				//console.log({type, parsed})
 				return parsed;
 			}
 			else {
