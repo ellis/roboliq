@@ -489,7 +489,7 @@ describe('pipetter', function() {/*
 				}
 			}
 		};
-		var result = roboliq.run(["-o", "", "-p"], protocol);
+		var result = roboliq.run(["-o", ""], protocol);
 		should.deepEqual(result.output.effects, {
 			"1.1": {
 				"ourlab.mario.systemLiquidLabware.contents": [
