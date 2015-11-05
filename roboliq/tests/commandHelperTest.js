@@ -198,7 +198,7 @@ describe('commandHelper', function() {
 						model: "m96"
 					},
 					q: {
-						type: "Source",
+						type: "Liquid",
 						wells: ["p(A01)", "p(A02)"]
 					},
 					m96: {
@@ -219,7 +219,11 @@ describe('commandHelper', function() {
 				time2: "23 minutes",
 				volume1: 10,
 				volume2: "10 ul",
-				wells1: "p(A01)"
+				well1: "p(A01)",
+				wells1: "p(A01)",
+				source1: "p(A01)",
+				sources1: "p(A01 down to B01)",
+				sources2: "q"
 				//file
 			};
 			var specs = {
@@ -233,9 +237,13 @@ describe('commandHelper', function() {
 					time2: {type: 'Duration'},
 					volume1: {type: 'Volume'},
 					volume2: {type: 'Volume'},
+					well1: {type: 'Well'},
 					wells1: {type: 'Wells'},
+					source1: {type: 'Source'},
+					sources1: {type: 'Sources'},
+					sources2: {type: 'Sources'},
 				},
-				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'wells1']
+				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'well1', 'wells1', 'source1', 'sources1']
 			};
 			var parsed = commandHelper.parseParams2(params, data, specs);
 			should.deepEqual(parsed, {
@@ -248,9 +256,13 @@ describe('commandHelper', function() {
 				time2: {value: math.unit(23, 'minutes')},
 				volume1: {value: math.unit(10, 'l')},
 				volume2: {value: math.unit(10, 'ul')},
-				wells1: {value: ["p(A01)"]}
+				well1: {value: "p(A01)"},
+				wells1: {value: ["p(A01)"]},
+				source1: {value: "p(A01)"},
+				sources1: {value: ["p(A01)", "p(B01)"]},
+				sources2: {objectName: "q", value: [["p(A01)", "p(A02)"]]},
 			});
-			should.deepEqual(data.accesses, []);
+			should.deepEqual(data.accesses, ["q"]);
 		});
 
 		//it("should work with values supplied via variables", () => {
@@ -263,7 +275,8 @@ describe('commandHelper', function() {
 					plate1: {type: "Plate", location: "P1"},
 					site1: {type: "Site", extraData: 0},
 					number1: {type: "Variable", value: 1},
-					string1: {type: "Variable", value: "hello"}
+					string1: {type: "Variable", value: "hello"},
+					liquid1: {type: "Liquid", wells: ["plate1(A01)", "plate2(A02)"]},
 				},
 				accesses: []
 			};

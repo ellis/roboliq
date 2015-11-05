@@ -321,14 +321,9 @@ function processObjectOfType(x, data, paramName, type) {
 }
 
 function processSource(x, data, paramName) {
-	if (_.isString(x)) {
-		x = wellsParser.parse(x, data.objects);
-		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
-	}
-	else if (_.isPlainObject(x) && x.type === 'Liquid') {
-		x = [x.wells];
-	}
-	return x;
+	const l = processSources(x, data, paramName);
+	expect.truthy({paramName: paramName}, _.isArray(l) && l.length === 1, "expected a single liquid source: "+JSON.stringify(x));
+	return l[0];
 }
 
 function processSources(x, data, paramName) {
