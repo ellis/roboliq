@@ -65,12 +65,12 @@ function sourceMethod3(group, data, effects) {
 	// Consider each source in the group separately
 	var sourceToItems = _.groupBy(group, 'source');
 	//console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
-	_.forEach(sourceToItems, function (items) {
+	for (const items of _.values(sourceToItems)) {
 		//console.log("sourceMethod3", items)
 		assert(items[0].source);
 		var wells = _.clone(items[0].source);
 		assert(!_.isEmpty(wells));
-		_.forEach(items, function(item) {
+		for (const item of items) {
 			//console.log("wells: ", wells);
 			if (_.isArray(wells)) {
 				if (wells.length === 1) {
@@ -100,8 +100,8 @@ function sourceMethod3(group, data, effects) {
 			else {
 				//item.source = item.source;
 			}
-		});
-	});
+		}
+	}
 }
 
 module.exports = {

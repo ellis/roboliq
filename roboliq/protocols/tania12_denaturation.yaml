@@ -16,48 +16,49 @@ objects:
   balancePlate:
     type: Plate
     description: balance plate for centrifuge
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P2
+    model?: {"value!": ourlab.model.plateModel_384_square}
+    location?: {"value!": ourlab.mario.site.P2}
 
-  bufferSource:
+  bufferSource!:
     type: Plate
     description: labware for buffer
-    model: ourlab.model.troughModel_100ml
-    location: ourlab.mario.site.R6
-  denaturantSource:
+    model?: {value!: ourlab.model.troughModel_100ml}
+    location?: {"value!": ourlab.mario.site.R6}
+  denaturantSource!:
     type: Plate
     description: labware for denaturant
-    model: ourlab.model.troughModel_100ml
-    location: ourlab.mario.site.R5
-  gfpSource:
+    model?: {value!: ourlab.model.troughModel_100ml}
+    location?: {value!: ourlab.mario.site.R5}
+  gfpSource!:
     type: Plate
     description: GFP eppendorf tubes
-    model: ourlab.model.tubeHolderModel_1500ul
-    location: ourlab.mario.site.T3
-  mixPlate:
+    model?: {value!: ourlab.model.tubeHolderModel_1500ul}
+    location?: {value!: ourlab.mario.site.T3}
+  mixPlate!:
     type: Plate
     description: labware for denatured GFP experiments
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P3
+    model?: {value!: ourlab.model.plateModel_384_square}
+    location?: {value!: ourlab.mario.site.P3}
 
   balanceWater:
-    type: Variable
+    type: Liquid
     description: water used to fill the balance plate
-    value: ourlab.mario.systemLiquid
+    type!: Variable
+    value!: ourlab.mario.systemLiquid
   buffer:
     type: Liquid
     description: water/glycerol/salt mix
-    wells: bufferSource(C01 down to F01)
+    wells!: bufferSource(C01 down to F01)
   denaturant:
     type: Liquid
     description: denaturant (Guanidine hydrochloride)
-    wells: denaturantSource(C01 down to F01)
+    wells!: denaturantSource(C01 down to F01)
 
-  sfGFP: {type: Liquid, description: wild type, wells: gfpSource(A01)}
-  Q204H_N149Y: {type: Liquid, description: double mutant, wells: gfpSource(A02)}
-  tdGFP: {type: Liquid, description: fusion of double mutant, wells: gfpSource(A03)}
-  N149Y: {type: Liquid, description: single mutant, wells: gfpSource(A04)}
-  Q204H: {type: Liquid, description: single mutant, wells: gfpSource(A05)}
+  sfGFP: {type: Liquid, description: wild type, wells!: gfpSource(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells!: gfpSource(A02)}
+  tdGFP: {type: Liquid, description: fusion of double mutant, wells!: gfpSource(A03)}
+  N149Y: {type: Liquid, description: single mutant, wells!: gfpSource(A04)}
+  Q204H: {type: Liquid, description: single mutant, wells!: gfpSource(A05)}
 
   mixtures:
     type: Variable
@@ -75,7 +76,7 @@ objects:
           volume: 5ul
           clean: thorough
           cleanBetweenSameSource: flush
-          program: Roboliq_Water_Wet_1000_mix3x50ul
+          program!: Roboliq_Water_Wet_1000_mix3x50ul
         transformations:
         - name: shuffle
           seed: 1234
@@ -96,7 +97,7 @@ steps:
 
     1:
       command: pipetter.pipette
-      program: Roboliq_Water_Air_1000
+      program!: Roboliq_Water_Air_1000
       sources: balanceWater
       destinations:
         "#replaceLabware":
@@ -154,7 +155,7 @@ steps:
             command: fluorescenceReader.measurePlate
             object: mixPlate
             programFile: ./tania12_denaturation.mdfx
-            outputFile: C:\Users\localadmin\Desktop\Ellis\tania12_denaturation--<YYYYMMDD_HHmmss>.xml
+            outputFile!: C:\Users\localadmin\Desktop\Ellis\tania12_denaturation--<YYYYMMDD_HHmmss>.xml
           3:
             description: Incubate at 25C
             comment: For our centrifuge to work as an incubator, we need to set a spin duration greater than 0.

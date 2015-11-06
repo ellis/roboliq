@@ -33,6 +33,11 @@ objects:
     model: ourlab.model.plateModel_384_square
     location: ourlab.mario.site.P3
 # Reagents used in this protocol
+  balanceWater:
+    type: Liquid
+    description: water used to fill the balance plate
+    type!: Variable
+    value!: ourlab.mario.systemLiquid
   saltwater:
     type: Liquid
     wells: trough1(C01 down to F01)
@@ -69,8 +74,8 @@ objects:
 
   mixtures:
     type: Variable
-    value:
-      "#factorialMixtures":
+    calculate:
+      "#createPipetteMixtureList":
         replicates: 3
         items:
         - source: saltwater
@@ -87,52 +92,63 @@ objects:
           volume: "5ul"
           clean: thorough
           cleanBetweenSameSource: flush
-          program: Roboliq_Water_Wet_1000_mix3x50ul
+          program!: Roboliq_Water_Wet_1000_mix3x50ul
+
   mixtureWells:
     type: Variable
-    value:
-      "#take":
-        list: "#destinationWells#mixPlate(all row-jump(1))"
-        count: "#length#mixtures"
+    calculate:
+      "#createWellAssignments":
+        list: mixtures
+        wells: mixPlate(all row-jump(1))
+
 steps:
   1:
-    command: pipetter.pipette
-    program: Roboliq_Water_Air_1000
-    sources: ourlab.mario.systemLiquid
-    destinations: balancePlate(all row-jump(1) take 2)
-    volumes: 75ul
-    cleanBetween: none
+    description: Fill balance plate with 75ul in 375 wells, store it in the centrifuge
+
+    1:
+      command: pipetter.pipette
+      program!: Roboliq_Water_Air_1000
+      sources: balanceWater
+      destinations:
+        "#replaceLabware":
+          list: mixtureWells
+          new: "balancePlate"
+      volumes: 75ul
+      cleanBetween: none
+
+    2:
+      command: sealer.sealPlate
+      object: balancePlate
+
+    3:
+      command: centrifuge.insertPlates2
+      object2: balancePlate
 
   2:
-    command: sealer.sealPlate
-    object: balancePlate
+    description: Prepare the mixture plate with a range of pH levels
+    1:
+      command: pipetter.pipetteMixtures
+      mixtures: mixtures
+      destinations: mixtureWells
+      clean: flush
+      cleanBegin: thorough
+      cleanBetweenSameSource: none
+      cleanEnd: thorough
+    2:
+      command: sealer.sealPlate
+      object: mixPlate
 
   3:
-    command: transporter.movePlate
-    object: balancePlate
-    destination: ourlab.mario.site.CENTRIFUGE_4
+    command: centrifuge.insertPlates2
+    object1: mixPlate
 
   4:
-    command: pipetter.pipetteMixtures
-    mixtures: mixtures
-    destinations: mixtureWells
-    clean: flush
-    cleanBegin: thorough
-    cleanBetweenSameSource: none
-    cleanEnd: thorough
-
-  5:
-    command: transporter.movePlate
-    object: mixPlate
-    destination: ourlab.mario.site.CENTRIFUGE_2
-
-  6:
     description: Measurement loop; Each cycle of the loop lasts 4 hours
     command: system.repeat
     count: 2
     steps:
         command: timer.doAndWait
-        duration: 14400 # 4hr
+        duration: 4 hours
         steps:
           1:
             description: Remove condensation from seal
@@ -141,13 +157,13 @@ steps:
             object2: balancePlate
             program:
               rpm: 3000
-              duration: 120 # 2min
+              duration: 2 minutes
               temperature: 25
           2:
             command: fluorescenceReader.measurePlate
             object: mixPlate
             programFile: ./tania13_ph-temp.mdfx
-            outputFile: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+            outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
           3:
             description: Incubate at 25C
             command: centrifuge.centrifuge2

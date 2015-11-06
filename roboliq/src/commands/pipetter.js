@@ -359,9 +359,16 @@ function pipette(params, parsed, data) {
 
 	// Pick source well for items, if the source has multiple wells
 	// Rotate through source wells in order of max volume
-	_.forEach(groups, function(group) {
+	for (const group of groups) {
+		// FIXME: for debug only
+		for (const x of group) {
+			if (!x.source) {
+				console.log({x})
+			}
+		}
+		// ENDFIX
 		sourceMethods.sourceMethod3(group, data, effects);
-	});
+	}
 
 	// Calculate when tips need to be washed
 	// Create pipetting commands
@@ -633,7 +640,7 @@ var commandHandlers = {
 		const destinations = parsed.destinations.value;
 		//console.log("params:", params);
 		//console.log("data.objects.mixtures:", data.objects.mixtures);
-		//console.log("mixtures:", mixtures);
+		//console.log("mixtures:\n"+JSON.stringify(mixtures0));
 		//console.log("A:", misc.getVariableValue(params.destinations, data.objects))
 		//console.log("data.objects.mixtureWells:", data.objects.mixtureWells);
 		//console.log("destinations:", destinations);
