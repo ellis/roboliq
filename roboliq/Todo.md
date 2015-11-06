@@ -60,8 +60,8 @@
 	- [x] rename commandHelper.parseParams2()
 - [x] commandSpec: pipetter.cleanTips: define intensity (intensity is a predefined enum)
 - [x] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
-- [ ] move around protocols/tania* files so that ./runall.sh works
-- [ ] create commandHelper.parseParams test for misspelled `sources` specifier
+- [x] move around protocols/tania* files so that ./runall.sh works
+- [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
