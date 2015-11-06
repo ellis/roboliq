@@ -189,7 +189,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('commandHelper.parseParams2', function() {
+	describe('commandHelper.parseParams', function() {
 		it("should work with values specified in-line", () => {
 			var data = {
 				objects: {
@@ -245,7 +245,7 @@ describe('commandHelper', function() {
 				},
 				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'well1', 'wells1', 'source1', 'sources1']
 			};
-			var parsed = commandHelper.parseParams2(params, data, specs);
+			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
 				name: {objectName: "plate1"},
 				object1: {value: {a: 1, b: 2}},
@@ -302,7 +302,7 @@ describe('commandHelper', function() {
 				},
 				required: ['objectName', 'agent', 'equipment', 'plate', 'site', 'count', 'text']
 			};
-			var parsed = commandHelper.parseParams2(params, data, specs);
+			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
 				objectName: {objectName: "plate1"},
 				agent: {objectName: "agent1", value: {type: "MyAgent"}},
@@ -331,7 +331,7 @@ describe('commandHelper', function() {
 				},
 				required: ['number1', 'number2']
 			};
-			var parsed = commandHelper.parseParams2(params, data, specs);
+			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
 				number1: {value: 1},
 				number2: {value: 2}
@@ -362,7 +362,7 @@ describe('commandHelper', function() {
 				},
 				required: ['object']
 			};
-			var parsed = commandHelper.parseParams2(params, data, specs);
+			var parsed = commandHelper.parseParams(params, data, specs);
 			should.deepEqual(parsed, {
 				agent: {},
 				equipment: {},

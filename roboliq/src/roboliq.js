@@ -663,7 +663,7 @@ function _run(opts, userProtocol) {
 						const commandSpec = protocol.commandSpecs[commandName];
 						//console.log("params: "+JSON.stringify(params))
 						const parsed = (commandSpec)
-							? commandHelper.parseParams2(params, data, commandSpec)
+							? commandHelper.parseParams(params, data, commandSpec)
 							: undefined;
 						result = handler(params, parsed, data) || {};
 					} catch (e) {

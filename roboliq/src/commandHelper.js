@@ -17,8 +17,8 @@ import wellsParser from './parsers/wellsParser.js';
  *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
  *  is optional and not presents in `params`..
  */
-function parseParams2(params, data, specs) {
-	//console.log(`parseParams2: ${JSON.stringify(params)} ${JSON.stringify(specs)}`)
+function parseParams(params, data, specs) {
+	//console.log(`parseParams: ${JSON.stringify(params)} ${JSON.stringify(specs)}`)
 	const required_l = specs.required || [];
 	const l0 = _.pairs(specs.properties);
 	const l1 = l0.map(([propertyName, p]) => {
@@ -144,7 +144,7 @@ function processValueBySchema(value0, schema, data, name) {
 			}
 			else if (t === 'object' && !_.isEmpty(schema.properties)) {
 				//console.log(JSON.stringify({t, value0, schema}, null, '\t'))
-				result = parseParams2(value0, data, schema);
+				result = parseParams(value0, data, schema);
 			}
 			else {
 				result = processValueBySchemaSingle(value0, t, data, name);
@@ -232,7 +232,7 @@ function processValueBySchemaSingle(value0, type, data, name) {
 			if (data.commandSpecs.hasOwnProperty(type)) {
 				const spec = data.commandSpecs[type];
 				//console.log({type, spec})
-				const parsed = parseParams2(value0, data, spec);
+				const parsed = parseParams(value0, data, spec);
 				//console.log({type, parsed})
 				return parsed;
 			}
@@ -491,7 +491,7 @@ function queryLogic(data, predicates, queryExtract) {
 module.exports = {
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
-	parseParams2,
+	parseParams,
 	queryLogic,
 	_lookupValue: lookupValue
 }

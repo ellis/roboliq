@@ -24,7 +24,7 @@ function handleDirective(spec, data) {
 
 function directive_createWellAssignments(spec, data) {
 	return expect.try("#createWellAssignments", () => {
-		const parsed = commandHelper.parseParams2(spec, data, {
+		const parsed = commandHelper.parseParams(spec, data, {
 			properties: {
 				list: {type: "array"},
 				wells: {type: "Wells"}

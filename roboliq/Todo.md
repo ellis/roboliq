@@ -57,6 +57,7 @@
 	- [x] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
 	- [x] refactor all commands to accept parsed parameters, using the commandSpecs
 	- [x] remove all uses of commandHelper.parseParams()
+	- [x] rename commandHelper.parseParams2()
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum

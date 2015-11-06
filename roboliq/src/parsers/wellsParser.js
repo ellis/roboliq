@@ -41,7 +41,7 @@ function processParserResult(result, objects, text) {
 		const data = {objects};
 		// Get source or labware objects
 		//console.log({commandHelper})
-		const parsed = commandHelper.parseParams2(clause, data, {
+		const parsed = commandHelper.parseParams(clause, data, {
 			properties: {
 				source: {},
 				labware: {},
