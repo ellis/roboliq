@@ -67,6 +67,7 @@ function parseParams2(params, data, specs) {
  *  values are `{objectName: ..., value: ...}` objects, or `{}` if the paramter
  *  is optional and not presents in `params`..
  */
+/*
 function parseParams(params, data, specs) {
 	return _(specs).map(function(spec, paramName) {
 		var type = undefined;
@@ -113,6 +114,7 @@ function parseParams(params, data, specs) {
 		return [paramName, _.omit(info, _.isUndefined)];
 	}).compact().zipObject().value();
 }
+*/
 
 /**
  * Try to convert value0 to the type given by type, possibly considering p.
@@ -488,9 +490,8 @@ function queryLogic(data, predicates, queryExtract) {
 
 module.exports = {
 	_dereferenceVariable: dereferenceVariable,
-	getParsedValue: getParsedValue,
-	parseParams: parseParams,
+	getParsedValue,
 	parseParams2,
-	queryLogic: queryLogic,
+	queryLogic,
 	_lookupValue: lookupValue
 }

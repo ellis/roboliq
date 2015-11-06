@@ -41,10 +41,12 @@ function processParserResult(result, objects, text) {
 		const data = {objects};
 		// Get source or labware objects
 		//console.log({commandHelper})
-		const parsed = commandHelper.parseParams(clause, data, {
-			source: 'Any?',
-			labware: 'Any?',
-			//subject: 'Any?'
+		const parsed = commandHelper.parseParams2(clause, data, {
+			properties: {
+				source: {},
+				labware: {},
+				//subject: 'Any?'
+			}
 		});
 		//console.log(parsed);
 		if (parsed.source.value) {

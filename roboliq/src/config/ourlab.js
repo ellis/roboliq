@@ -3,21 +3,17 @@ var math = require('mathjs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 
-function makeEvowareFacts(params, data, variable, value) {
-	var parsed = commandHelper.parseParams(params, data, {
-		agent: "name",
-		equipment: "name"
-	});
-	var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-	var result2 = {
+function makeEvowareFacts(parsed, data, variable, value) {
+	const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+	const result2 = {
 		command: "evoware._facts",
 		agent: parsed.agent.objectName,
 		factsEquipment: carrier,
 		factsVariable: carrier+"_"+variable
 	};
-	var value2 = value;
-	if (_.isFunction(value))
-		value2 = value(parsed, data);
+	const value2 = (_.isFunction(value))
+		? value(parsed, data)
+		: value;
 	return _.merge(result2, {factsValue: value2});
 }
 
@@ -558,6 +554,20 @@ module.exports = {
 	]),
 
 	commandSpecs: {
+		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+			},
+			required: ["agent", "equipment"]
+		},
+		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+			},
+			required: ["agent", "equipment"]
+		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
@@ -568,6 +578,8 @@ module.exports = {
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
 			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
 				program: {
 					description: "Program for centrifuging",
 					type: "object",
@@ -589,6 +601,20 @@ module.exports = {
 				program: {description: "Program identifier for sealing", type: "string"}
 			},
 			required: ["agent", "equipment", "program"]
+		},
+		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+			},
+			required: ["agent", "equipment"]
+		},
+		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+			},
+			required: ["agent", "equipment"]
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": {
 			properties: {
@@ -620,10 +646,10 @@ module.exports = {
 
 	commandHandlers: {
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(params, data, "Close")]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
 		},
 		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(params, data, "Open")]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
@@ -660,14 +686,14 @@ module.exports = {
 				math.round(parsedProgram.temperature.value)
 			];
 			var value = list.join(",");
-			return {expansion: [makeEvowareFacts(params, data, "Execute1", value)]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
 		},
 		// Reader
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(params, data, "Close")]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
 		},
 		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(params, data, "Open")]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
@@ -675,7 +701,7 @@ module.exports = {
 			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
 
-			return {expansion: [makeEvowareFacts(params, data, "Open")]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
 			var hasProgramFile = (parsed.programFile.value) ? 1 : 0;
@@ -698,7 +724,7 @@ module.exports = {
 				replace(/>[ \t]+</g, "><");
 			// Token
 			var value = parsed.outputFile.value + "|" + programData;
-			return {expansion: [makeEvowareFacts(params, data, "Measure", value)]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value)]};
 		},
 		// Sealer
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, parsed, data) {

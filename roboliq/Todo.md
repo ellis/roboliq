@@ -42,7 +42,7 @@
 	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [x] pipetterTest: re-enable all the tests
-- [ ] command documentation:
+- [x] command documentation:
 	- [x] create commandSpecs for all commands (JSON/YAML structured documentation)
 	- [x] move all commandSpecs to YAML files
 	- [x] generate documentation from commandSpecs
@@ -56,8 +56,7 @@
 	- [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
 	- [x] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
 	- [x] refactor all commands to accept parsed parameters, using the commandSpecs
-	- [ ] remove all uses of commandHelper.parseParams()
-- [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
+	- [x] remove all uses of commandHelper.parseParams()
 - [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
