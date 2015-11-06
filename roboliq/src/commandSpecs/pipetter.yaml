@@ -2,7 +2,7 @@ pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:
     syringe: {description: Syring identifier, type: [string, integer]}
-    source: {description: Source specifier, type: Well}
+    well: {description: Source specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, source, volume]
 
@@ -10,9 +10,13 @@ pipetter._DispenseItem:
   description: Parameters for pipette items.
   properties:
     syringe: {description: Syring identifier, type: [string, integer]}
-    destination: {description: Destination specifier, type: Well}
+    well: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, destination, volume]
+
+pipetter.CleaningIntensity:
+  description: Intensity of cleaning.
+  enum: ["none", "flush", "light", "thorough", "decontaminate"]
 
 pipetter.PipetteItem:
   description: Parameters for pipette items.
@@ -74,7 +78,7 @@ pipetter.cleanTips:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
     syringes: {description: "List of syringes to clean", type: "array", items: {type: [integer, string]}}
-    intensity: {description: "Intensity of the cleaning", type: string}
+    intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
   required: [equipment, intensity]
 
 pipetter.pipette:

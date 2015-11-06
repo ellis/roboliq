@@ -45,31 +45,6 @@ function extractLiquidNamesFromContents(contents) {
 	}
 }
 
-// REFACTOR: remove this variable
-var createEffects_pipette = pipetterUtils.getEffects_pipette;
-
-/**
- * Parameters for pipette items.
- *
- * @typedef PipetteItem
- * @memberof pipetter
- * @property {string|integer} [syringe] - Syringe identifier
- * @property {string} [source] - Source specifier
- * @property {string} [destination] - Destination specifier
- * @property {string} [volume] - Volume specifier
- */
-/**
- * Pipette liquids from sources to destinations.
- *
- * @typedef pipette
- * @memberof pipetter
- * @property {string} command - "pipetter.pipette"
- * @property {string} [agent] - Agent identifier
- * @property {string} [equipment] - Equipment identifier
- * @property {object} [program] - Program identifier
- * @property {_PipetteItem[]} items - Data about what should be pipetted where
- * @property {string|array} [sources] - a value for the source(s) to aspirate from
- */
 function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
@@ -562,34 +537,12 @@ function pipette(params, parsed, data) {
  * @static
  */
 var commandHandlers = {
-	/**
-	 * Aspirate liquids from sources.
-	 *
-	 * @typedef _aspirate
-	 * @memberof pipetter
-	 * @property {string} command - "pipetter._aspirate"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 * @property {Object} program - Program identifier
-	 * @property {Object[]} items - Data about what should be pipetted where
-	 */
 	"pipetter._aspirate": function(params, parsed, data) {
 		var effects = {};
 		return {
 			effects: effects
 		};
 	},
-	/**
-	 * Clean the pipetter tips.
-	 *
-	 * @typedef _cleanTips
-	 * @memberof pipetter
-	 * @property {string} command - "pipetter._cleanTips"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 * @property {Object} program - Program identifier
-	 * @property {Object[]} items - Data about which tips to clean and with what intensity
-	 */
 	"pipetter._cleanTips": function(params, parsed, data) {
 		var effects = {};
 		return {
@@ -602,35 +555,13 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	/**
-	 * Parameters for low-level pipette items.
-	 *
-	 * @typedef _PipetteItem
-	 * @memberof pipetter
-	 * @property {string|integer} syringe - Syringe identifier
-	 * @property {string} source - Source specifier
-	 * @property {string} destination - Destination specifier
-	 * @property {string} volume - Volume specifier
-	 */
-	/**
-	 * Pipette liquids from sources to destinations.
-	 *
-	 * @typedef _pipette
-	 * @memberof pipetter
-	 * @property {string} command - "pipetter._pipette"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 * @property {Object} program - Program identifier
-	 * @property {_PipetteItem[]} items - Data about what should be pipetted where
-	 */
 	"pipetter._pipette": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
-		//console.log("effects:", JSON.stringify(createEffects_pipette(params, data), null, '  '))
+		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
 		return {
-			effects: createEffects_pipette(parsed, data)
+			effects: pipetterUtils.getEffects_pipette(parsed, data)
 		};
 	},
-
 	"pipetter.cleanTips": function(params, parsed, data) {
 		if (_.isEmpty(parsed.syringes.value))
 			return {};
@@ -641,7 +572,8 @@ var commandHandlers = {
 		var agent = parsed.agent.objectName || "?agent";
 		var equipment = parsed.equipment.objectName;
 		var program = parsed.program.objectName || parsed.program.value || "?program";
-		var intensity = parsed.intensity.value
+		var intensity = parsed.intensity.value;
+		//console.log({intensity: parsed.intensity})
 
 		// Check whether labwares are on sites that can be pipetted
 		var syringeToProgram_l = _.map(parsed.syringes.value, function(syringe) {

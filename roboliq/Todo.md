@@ -58,9 +58,11 @@
 	- [x] refactor all commands to accept parsed parameters, using the commandSpecs
 	- [x] remove all uses of commandHelper.parseParams()
 	- [x] rename commandHelper.parseParams2()
-- [ ] commandSpec: pipetter.cleanTips: define syringes and intensity (intensity is a predefined enum)
+- [ ] commandSpec: pipetter.cleanTips: define intensity (intensity is a predefined enum)
+- [ ] move around protocols/tania* files so that ./runall.sh works
 - [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
+- [ ] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 - [ ] rename commandSpec to schema everywhere
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
@@ -73,8 +75,11 @@
 - [ ] rewrite evoware compiler in javascript
 - [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
 - [ ] upload to a public repository
+- [ ] test all pipetter commands
+- [ ] testing scripts on second Tecan robot
 
 ## After submission
+- [ ] write back-end for Hamilton
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol

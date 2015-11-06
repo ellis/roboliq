@@ -8,6 +8,62 @@ import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
 
 /**
+ * Try to convert value0 to the type given by type, possibly considering p.
+ *
+ * This function also handles arrays, which it's helper function
+ * (processValueBySchemaSingle) does not.
+ *
+ * @param  {any} value0 - initial value
+ * @param  {string} type - type to convert to
+ * @param  {object} data
+ * @param  {string} name - parameter name used to lookup value0
+ * @param  {object} schema - property schema information (e.g. for arrays)
+ * @return {any} converted value
+ */
+function processValueBySchema(value0, schema, data, name) {
+	if (_.isUndefined(schema))
+		return value0;
+
+	if (schema.hasOwnProperty('enum')) {
+		expect.truthy({paramName: name}, schema.enum.includes(value0), "expected one of "+schema.enum+": "+JSON.stringify(value0));
+		return value0;
+	}
+
+	if (_.isEmpty(schema.type) && _.isEmpty(schema.properties))
+		return value0;
+
+	// Try each type alternative:
+	const types = _.flatten([schema.type]);
+	let es = [];
+	for (const t of types) {
+		let result;
+		try {
+			if (t === 'array') {
+				result = processValueAsArray(value0, schema.items, data, name);
+			}
+			else if (t === 'object' || !_.isEmpty(schema.properties)) {
+				//console.log(JSON.stringify({t, value0, schema}, null, '\t'))
+				result = processValueAsObject(value0, data, schema);
+			}
+			else {
+				result = processValueBySchemaSingle(value0, t, data, name);
+			}
+		}
+		catch (e) {
+			es.push(e);
+		}
+		if (!_.isUndefined(result))
+			return result;
+	}
+
+	if (!_.isEmpty(es))
+		throw es[0];
+
+	return undefined;
+}
+
+
+/**
  * Parse command parameters.
  *
  * @param  {object} params - the parameters passed to the command
@@ -17,10 +73,15 @@ import wellsParser from './parsers/wellsParser.js';
  *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
  *  is optional and not presents in `params`..
  */
-function parseParams(params, data, specs) {
-	//console.log(`parseParams: ${JSON.stringify(params)} ${JSON.stringify(specs)}`)
+function processValueAsObject(params, data, specs) {
+	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(specs)}`)
 	const required_l = specs.required || [];
 	const l0 = _.pairs(specs.properties);
+	// If no properties are specified, return the original parameters
+	if (l0.length === 0) {
+		return params;
+	}
+	// Otherwise, convert the parameters
 	const l1 = l0.map(([propertyName, p]) => {
 		const type = p.type;
 		const required = required_l.includes(propertyName);
@@ -55,112 +116,6 @@ function parseParams(params, data, specs) {
 
 	const o = _.zipObject(_.compact(l1));
 	return o;
-}
-
-/**
- * Parse command parameters.
- *
- * @param  {object} params - the parameters passed to the command
- * @param  {object} data - protocol data
- * @param  {object} specs - description of the expected parameters
- * @return {object} and objects whose keys are the expected parameters and whose
- *  values are `{objectName: ..., value: ...}` objects, or `{}` if the paramter
- *  is optional and not presents in `params`..
- */
-/*
-function parseParams(params, data, specs) {
-	return _(specs).map(function(spec, paramName) {
-		var type = undefined;
-		var optional = false;
-		var defaultValue = undefined;
-
-		if (_.isString(spec)) {
-			type = spec;
-		}
-		else {
-			assert(_.isPlainObject(spec));
-			assert(spec.type);
-			type = spec.type;
-			defaultValue = spec.default;
-		}
-
-		var optional = _.endsWith(type, "?");
-		type = (optional) ? type.substr(0, type.length - 1) : type;
-		optional |= !_.isUndefined(defaultValue);
-
-		let info;
-		if (type === 'name') {
-			info = {objectName: _.get(params, paramName, defaultValue)};
-			//console.log({paramName, type, info})
-			// If not optional, require the variable's presence:
-			if (!optional) {
-				expect.truthy({paramName}, !_.isUndefined(info.objectName), "missing required value");
-			}
-		}
-		else {
-			info = lookupValue(params, data, paramName, defaultValue);
-			if (info.value) {
-				info.value = processValueBySchema(info.value, {type}, data, paramName);
-				//console.log({paramName, type, info})
-				//console.log({value: info.value})
-				//console.trace();
-			}
-			// If not optional, require the variable's presence:
-			if (!optional) {
-				expect.truthy({paramName}, !_.isUndefined(info.value), "missing required value");
-			}
-		}
-
-		return [paramName, _.omit(info, _.isUndefined)];
-	}).compact().zipObject().value();
-}
-*/
-
-/**
- * Try to convert value0 to the type given by type, possibly considering p.
- *
- * This function also handles arrays, which it's helper function
- * (processValueBySchemaSingle) does not.
- *
- * @param  {any} value0 - initial value
- * @param  {string} type - type to convert to
- * @param  {object} data
- * @param  {string} name - parameter name used to lookup value0
- * @param  {object} schema - property schema information (e.g. for arrays)
- * @return {any} converted value
- */
-function processValueBySchema(value0, schema, data, name) {
-	if (_.isUndefined(schema) || _.isEmpty(schema.type))
-		return value0;
-
-	// Try each type alternative:
-	const types = _.flatten([schema.type]);
-	let es = [];
-	for (const t of types) {
-		let result;
-		try {
-			if (t === 'array') {
-				result = processValueAsArray(value0, schema.items, data, name);
-			}
-			else if (t === 'object' && !_.isEmpty(schema.properties)) {
-				//console.log(JSON.stringify({t, value0, schema}, null, '\t'))
-				result = parseParams(value0, data, schema);
-			}
-			else {
-				result = processValueBySchemaSingle(value0, t, data, name);
-			}
-		}
-		catch (e) {
-			es.push(e);
-		}
-		if (!_.isUndefined(result))
-			return result;
-	}
-
-	if (!_.isEmpty(es))
-		throw es[0];
-
-	return undefined;
 }
 
 function processValueAsArray(list0, schema, data, name) {
@@ -232,7 +187,7 @@ function processValueBySchemaSingle(value0, type, data, name) {
 			if (data.commandSpecs.hasOwnProperty(type)) {
 				const spec = data.commandSpecs[type];
 				//console.log({type, spec})
-				const parsed = parseParams(value0, data, spec);
+				const parsed = processValueBySchema(value0, spec, data, name);
 				//console.log({type, parsed})
 				return parsed;
 			}
@@ -491,7 +446,7 @@ function queryLogic(data, predicates, queryExtract) {
 module.exports = {
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
-	parseParams,
+	parseParams: processValueAsObject,
 	queryLogic,
 	_lookupValue: lookupValue
 }
