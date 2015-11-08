@@ -62,7 +62,7 @@
 - [x] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
 - [x] move around protocols/tania* files so that ./runall.sh works
 - [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
-- [ ] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
+- [x] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 - [ ] rename commandSpec to schema everywhere
@@ -80,7 +80,9 @@
 - [ ] testing scripts on second Tecan robot
 
 ## After submission
+
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
+- [ ] refactor roboliq.js: `_run`: move as many of the functions as possible out of the `_run` function
 - [ ] write back-end for Hamilton
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
@@ -136,6 +138,7 @@
 - [ ] add a default storage site for plates?  How to handle when plates are shared between robots?
 - [ ] commands/pipetter.js: handle case of dispensing then later aspirating from a single well in a single pipetting command
 - [ ] consider allowing for scopes to commands, rather than just globals objects and command params; may need to make data.objects an array.
+- [ ] Use Immutablejs to protocol structure: should speed up handling of large protocols by avoiding the `_.cloneDeep` calls and unnecessary recalculations of logic for each step.
 
 # Notes
 

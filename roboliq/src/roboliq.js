@@ -61,9 +61,9 @@ var misc = require('./misc.js');
 import * as WellContents from './WellContents.js';
 var wellsParser = require('./parsers/wellsParser.js');
 
-var version = "v1";
+const version = "v1";
 
-var nomnom = require('nomnom').options({
+const nomnom = require('nomnom').options({
 	infiles: {
 		position: 0,
 		help: 'input files, .json or .js',
@@ -130,7 +130,7 @@ var nomnom = require('nomnom').options({
 	},
 });
 
-var protocolEmpty = {
+const protocolEmpty = {
 	objects: {},
 	steps: {},
 	effects: {},
@@ -151,6 +151,14 @@ function isAbsolute(p) {
 	return path.normalize(p + '/') === path.normalize(path.resolve(p) + '/');
 }
 
+/**
+ * Loads the raw content at the given URL.
+ * Supported formats are: JSON, YAML, JavaScript, and pre-cached file data.
+ *
+ * @param  {string} url - URL to load.
+ * @param  {object} filecache - map of cached file data, map from URL to data.
+ * @return content at URL.
+ */
 function loadUrlContent(url, filecache) {
 	url = path.join(url);
 	//if (!path.isAbsolute(url))
@@ -201,6 +209,7 @@ function loadProtocol(a, b, url, filecache) {
 		_.merge(filecache, b.files)
 	}
 
+	// Create a clone keeping only valid protocol properties.
 	var c = _.cloneDeep(_.pick(b,
 		'objects',
 		'steps',
@@ -216,6 +225,7 @@ function loadProtocol(a, b, url, filecache) {
 		'warnings'
 	));
 
+	// Pre-process properties with ?-suffixes and !-suffixes.
 	if (!c.fillIns)
 		c.fillIns = {};
 	preProcessQuestionMarks(c, c.objects, ['objects']);
@@ -370,6 +380,12 @@ function mergeProtocols(a, b) {
 	return c;
 }
 
+/**
+ * Merge a list of protocols.
+ *
+ * @param  {array} protocols - list of protocols.
+ * @return {Protocol} merged protocol.
+ */
 function mergeProtocolList(protocols) {
 	var protocol = _.cloneDeep(protocolEmpty);
 	_.forEach(protocols, function(b) {
@@ -420,6 +436,14 @@ function postProcessProtocol(protocol) {
 	});
 }
 
+/**
+ * For all variables that have a `calculate` property, handle the calculation and put the
+ * result in the `value` property.
+ *
+ * Mutates protocol.
+ *
+ * @param  {Protocol} protocol - The protocol to inspect.
+ */
 function postProcessProtocol_variables(protocol) {
 	const data = _.clone(protocol);
 	// Recursively expand all directives
@@ -451,17 +475,29 @@ function postProcessProtocol_variables(protocol) {
 	});
 }
 
+/**
+ * Process a roboliq protocol.
+ *
+ * @param  {array} argv - command line options.
+ * @param  {Protocol} [userProtocol] - an optional protocol that can be directly passed into the function rather than supplied via argv; currently this is only for testing purposes.
+ * @return {object} Processing results with properties `output` (the final processed protocol) and `protocol` (the result of merging all input protocols).
+ */
 function run(argv, userProtocol) {
+	// Validate the command line arguments
 	var opts = nomnom.parse(argv);
 	if (_.isEmpty(opts.infiles) && !userProtocol) {
 		console.log(nomnom.getUsage());
 		process.exit(0);
 	}
 
+	// Try to process the protocol
 	var result = undefined;
 	try {
 		result = _run(opts, userProtocol);
 	} catch (e) {
+		// If _run throws an exception, we don't get any results,
+		// so try to set `error` in the result or at least print
+		// messages to the console.
 		console.log(JSON.stringify(e));
 		console.log(e.message);
 		console.log(e.stack);
@@ -475,7 +511,9 @@ function run(argv, userProtocol) {
 		}
 	}
 
+	// If processing finished without exceptions:
 	if (result && result.output) {
+		// Print errors, if any:
 		if (!_.isEmpty(result.output.errors)) {
 			console.log();
 			console.log("Errors:");
@@ -487,6 +525,7 @@ function run(argv, userProtocol) {
 			});
 		}
 
+		// Print warnings, if any:
 		if (!_.isEmpty(result.output.warnings)) {
 			console.log();
 			console.log("Warnings:");
@@ -506,6 +545,7 @@ function run(argv, userProtocol) {
 		if (opts.debug || opts.print)
 			console.log(outputText);
 
+		// If an output is not suppressed, write the protocol to an output file.
 		if (opts.output !== '') {
 			var inpath = _.last(opts.infiles);
 			var dir = opts.outputDir || path.dirname(inpath);
@@ -518,13 +558,23 @@ function run(argv, userProtocol) {
 	return result;
 }
 
+/**
+ * Process the protocol(s) given by the command line options and an optional
+ * userProtocol passed in separately to the API (currently this is just for testing).
+ *
+ * @param  {object} opts - command line arguments as processed by nomnom.
+ * @param  {Protocol} [userProtocol] - an optional protocol that can be directly passed into the function rather than supplied via argv; currently this is only for testing purposes.
+ * @return {object} Processing results with properties `output` (the final processed protocol) and `protocol` (the result of merging all input protocols).
+ */
 function _run(opts, userProtocol) {
 
 	if (opts.debug) {
 		console.log("opts:", opts);
 	}
 
-	var filecache = {};
+	const filecache = {};
+
+	// Handle fileData and fileJson options, where file data is passed on the command line.
 	function splitInlineFile(s) {
 		var i = s.indexOf(':');
 		assert(i > 0);
@@ -544,7 +594,9 @@ function _run(opts, userProtocol) {
 		filecache[pair[0]] = data;
 	});
 
-	var urls = _.uniq(_.compact(
+	// Add ourlab.js config to URLs by default (it also include config/roboliq.js),
+	// but if --no-ourlab is specified, make sure that config/roboliq.js gets loaded.
+	const urls = _.uniq(_.compact(
 		_.compact([
 			(opts.ourlab) ? 'config/ourlab.js' : 'config/roboliq.js'
 		]).concat(opts.infiles)
@@ -557,10 +609,13 @@ function _run(opts, userProtocol) {
 	var urlToProtocol_l = _.map(urls, function(url) {
 		return [url, loadUrlContent(url, filecache)];
 	});
+	// Append the optional user protocol to the list
+	// (this lets unit tests pass in JSON protocols rather than loading them from files).
 	if (userProtocol)
 		urlToProtocol_l.push([undefined, userProtocol]);
 
-	// Load
+	// Reduce the list of URLs by merging or patching them together, starting
+	// with the empty protocol.
 	var protocol = _.reduce(
 		urlToProtocol_l,
 		(protocol, [url, raw]) => {
@@ -582,6 +637,17 @@ function _run(opts, userProtocol) {
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
 
+	/**
+	 * This function recurively iterates through all objects, and for each
+	 * object whose type has an entry in protocol.objectToPredicateConverters,
+	 * it generates the logical predicates and appends them to stateList.
+	 *
+	 * Mutates stateList.
+	 *
+	 * @param  {string} name - name of current object
+	 * @param  {object} o - current object
+	 * @param  {array} stateList - array of logical predicates
+	 */
 	function fillStateItems(name, o, stateList) {
 		//console.log("name: "+name);
 		if (o.hasOwnProperty("type")) {
@@ -590,9 +656,7 @@ function _run(opts, userProtocol) {
 			if (objectToPredicateConverters.hasOwnProperty(type)) {
 				var result = objectToPredicateConverters[type](name, o);
 				if (result.value) {
-					_.forEach(result.value, function(value) {
-						stateList.push(value);
-					});
+					stateList.push.apply(stateList, result.value);
 				}
 			}
 		}
