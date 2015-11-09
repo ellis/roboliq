@@ -12,6 +12,11 @@ var wellsParser = require('./parsers/wellsParser.js');
 export const emptyVolume = math.unit(0, 'ul');
 export const unknownVolume = math.eval('Infinity l');
 
+/**
+ * Validate well contents.  Throws an error if they aren't valid.
+ *
+ * @param  {array} contents - The well contents.
+ */
 export function checkContents(contents) {
 	if (_.isUndefined(contents)) {
 		// ok

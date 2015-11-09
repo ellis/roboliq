@@ -68,6 +68,15 @@
 - [ ] rename commandSpec to schema everywhere
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation
+	- [x] roboliq.js
+	- [x] WellContents.js
+	- [ ] commandHelper.js
+	- [ ] expect.js
+	- [ ] expectCore.js
+	- [ ] generateCommandSpecDocs.js
+	- [ ] main.js
+	- [ ] misc.js
+	- [ ] commands...
 - [ ] evoware:
 	- [ ] add run-option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
