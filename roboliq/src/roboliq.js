@@ -724,8 +724,12 @@ function _run(opts, userProtocol) {
 			}
 			// Otherwise, the command has a handler:
 			else {
-				var predicates = protocol.predicates.concat(createStateItems(objects));
-				var result = {};
+				// Take the initial predicates and append predicates for the current state
+				// REFACTOR: this might be a time-consuming process, which could perhaps be
+				// sped up by using Immutablejs and checking which objects have changed
+				// rather than regenerating predicates for all objects.
+				const predicates = protocol.predicates.concat(createStateItems(objects));
+				let result = {};
 				try {
 					const data = {
 						objects: objects,
@@ -735,11 +739,13 @@ function _run(opts, userProtocol) {
 						accesses: [],
 						files: filecache
 					};
+					// If a schema is given for the command, parse its parameters
 					const commandSpec = protocol.commandSpecs[commandName];
 					//console.log("params: "+JSON.stringify(params))
 					const parsed = (commandSpec)
 						? commandHelper.parseParams(params, data, commandSpec)
 						: undefined;
+					// Try to run the command handler
 					result = handler(params, parsed, data) || {};
 				} catch (e) {
 					if (e.hasOwnProperty("errors")) {
@@ -754,7 +760,10 @@ function _run(opts, userProtocol) {
 						throw e;
 					}
 				}
-				protocol.cache[id] = result;
+				// If debugging, store the result verbatim
+				if (opts.debug)
+					protocol.cache[id] = result;
+
 				// If there were errors:
 				if (!_.isEmpty(result.errors)) {
 					protocol.errors[id] = result.errors;
