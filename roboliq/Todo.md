@@ -61,8 +61,11 @@
 - [x] commandSpec: pipetter.cleanTips: define intensity (intensity is a predefined enum)
 - [x] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
 - [x] move around protocols/tania* files so that ./runall.sh works
-- [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
+- [ ] schemas/objects.yaml: add schemas for object types
+- [ ] validate `protocol.objects` using object schemas
+- [ ] generate documentation for object schemas
+- [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 - [ ] rename commandSpec to schema everywhere
