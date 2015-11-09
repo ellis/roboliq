@@ -564,7 +564,7 @@ function run(argv, userProtocol) {
  *
  * @param  {object} opts - command line arguments as processed by nomnom.
  * @param  {Protocol} [userProtocol] - an optional protocol that can be directly passed into the function rather than supplied via argv; currently this is only for testing purposes.
- * @return {object} Processing results with properties `output` (the final processed protocol) and `protocol` (the result of merging all input protocols).
+ * @return {object} Processing results with properties `output` (the final processed protocol) and `protocol` (same as output, but without tables).
  */
 function _run(opts, userProtocol) {
 
@@ -774,7 +774,9 @@ function _run(opts, userProtocol) {
 				if (!_.isEmpty(result.warnings)) {
 					protocol.warnings[id] = result.warnings;
 				}
+				// If the command was expanded, merge the expansion into the protocol as substeps:
 				if (result.hasOwnProperty("expansion")) {
+					// If an array was returned rather than an object, put it in the proper form
 					if (_.isArray(result.expansion)) {
 						//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
 						var l = _.compact(_.flattenDeep(result.expansion));
@@ -783,9 +785,10 @@ function _run(opts, userProtocol) {
 					}
 					_.merge(step, result.expansion);
 				}
-				if (result.hasOwnProperty("effects") && !_.isEmpty(result.effects)) {
+				// If the command has effects
+				if (!_.isEmpty(result.effects)) {
 					//console.log(result.effects);
-					// Add effects to protocol
+					// Add effects to protocol's record of effects
 					protocol.effects[id] = result.effects;
 					//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
 					// Update object states
@@ -795,59 +798,25 @@ function _run(opts, userProtocol) {
 			}
 		}
 
+		// Find all sub-steps (properties that start with a digit)
 		var keys = _.filter(_.keys(step), function(key) {
 			var c = key[0];
 			return (c >= '0' && c <= '9');
 		});
+		// Sort them in natural order
 		keys.sort(naturalSort);
+		// Try to expand the substeps
 		for (const key of keys) {
 			expandStep(protocol, prefix.concat(key), step[key], objects);
 		}
 	}
 
-	/**
-	 * Once the protocol is fully processed, call this to generate a list of instructions to pass to the robot compilers.
-	 */
-	function gatherInstructions(prefix, steps, objects, effects) {
-		var instructions = [];
-		var keys = _(steps).keys(steps).filter(function(key) {
-			var c = key[0];
-			return (c >= '0' && c <= '9');
-		}).value();
-		keys.sort(naturalSort);
-		//console.log(keys);
-		_.forEach(keys, function(key) {
-			var step = steps[key];
-			if (step.hasOwnProperty("command")) {
-				if (step.command.indexOf("._") >= 0) {
-					instructions.push(step);
-				}
-				var prefix2 = prefix.concat([key]);
-				var id = prefix2.join('.');
+	// If initial processing didn't result in any errors,
+	//  expand steps and get final objects.
+	const objectsFinal = (_.isEmpty(protocol.errors))
+		? expandProtocol(protocol)
+		: protocol.objects;
 
-				var instructions2 = gatherInstructions(prefix2, step, objects, effects);
-				instructions = instructions.concat(instructions2);
-
-				if (effects.hasOwnProperty(id)) {
-					var item = {
-						"let": effects[id]
-					};
-					if (_.isEmpty(instructions) || !_.isEqual(_.last(instructions), item))
-						instructions.push(item);
-				}
-			} else if (step.hasOwnProperty("let")) {
-				instructions.push({
-					"let": step["let"]
-				});
-			}
-		});
-		return instructions;
-	}
-
-	var objectsFinal = protocol.objects;
-	if (_.isEmpty(protocol.errors)) {
-		objectsFinal = expandProtocol(protocol);
-	}
 	if (opts.debug || opts.printProtocol) {
 		console.log();
 		console.log("Protocol:");
@@ -861,13 +830,14 @@ function _run(opts, userProtocol) {
 		*/
 	}
 
+	// If there were errors,
 	if (!_.isEmpty(protocol.errors)) {
 		//return {protocol: protocol, output: _.pick(protocol, 'errors', 'warnings')};
 		return {protocol: protocol, output: protocol};
 	}
+	// Otherwise create tables
 	else {
-		//var instructions = gatherInstructions([], protocol.steps, protocol.objects, protocol.effects);
-		var output = _.merge(
+		const output = _.merge(
 			{},
 			{
 				roboliq: version,
@@ -879,13 +849,13 @@ function _run(opts, userProtocol) {
 			}
 		);
 
-		var tables = {
+		const tables = {
 			labware: [],
 			sourceWells: [],
 			wellContentsFinal: []
 		};
 		// Construct labware table
-		var labwares = misc.getObjectsOfType(objectsFinal, ['Plate', 'Tube']);
+		const labwares = misc.getObjectsOfType(objectsFinal, ['Plate', 'Tube']);
 		_.forEach(labwares, function(labware, name) {
 			tables.labware.push(_.merge({}, {
 				labware: name,
@@ -917,6 +887,7 @@ function _run(opts, userProtocol) {
 				tables.sourceWells.push({source: source, well: wellName, volumeInitial: volumeInitial, volumeFinal: volumeFinal, volumeRemoved: o.volumeRemoved || "0"});
 			}
 		};
+		// For each well in object.__WELLS__, add to the appropriate table
 		var tabulateWELLS = function(objects, prefix) {
 			//console.log("tabulateWELLS", prefix)
 			_.forEach(objects, function(x, field) {
@@ -950,8 +921,7 @@ function _run(opts, userProtocol) {
 			}
 		});
 
-		//
-		_.merge(output, {tables: tables});
+		output.tables = tables;
 
 		return {protocol: protocol, output: output};
 	}
