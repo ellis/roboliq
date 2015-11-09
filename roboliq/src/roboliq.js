@@ -648,7 +648,7 @@ function _run(opts, userProtocol) {
 	 * @param  {object} o - current object
 	 * @param  {array} stateList - array of logical predicates
 	 */
-	function fillStateItems(name, o, stateList) {
+	function createStateItems(o, name = "", stateList = []) {
 		//console.log("name: "+name);
 		if (o.hasOwnProperty("type")) {
 			//console.log("type: "+o.type);
@@ -665,28 +665,23 @@ function _run(opts, userProtocol) {
 		_.forEach(o, function(value, name2) {
 			//console.log(name2, value);
 			if (_.isPlainObject(value)) {
-				fillStateItems(prefix + name2, value, stateList);
+				createStateItems(value, prefix + name2, stateList);
 			}
 		});
-	}
 
-	/** Create state items for SHOP planning from the protocol's objects. */
-	function createStateItems(objects) {
-		var stateList = [];
-		fillStateItems("", objects, stateList);
-		//console.log(JSON.stringify(stateList, null, '\t'));
 		return stateList;
 	}
 
-	function createSimpleObject(nameList, value) {
-		if (_.isEmpty(nameList)) return null;
-		else {
-			var o = {};
-			o[nameList[0]] = (nameList.length == 1) ? value : createSimpleObject(_.rest(nameList), value);
-			return o;
-		}
-	}
-
+	/**
+	 * Expand the protocol's steps.
+	 * This means that commands are passed to command handlers to possibly
+	 * be expanded to lower-level sub-commands.
+	 *
+	 * Mutates protocol.
+	 *
+	 * @param  {Protocol} The protocol.
+	 * @return {object} The final state of objects.
+	 */
 	function expandProtocol(protocol) {
 		var objects0 = _.cloneDeep(protocol.objects);
 		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
@@ -694,6 +689,20 @@ function _run(opts, userProtocol) {
 		return objects0;
 	}
 
+	/**
+	 * Expand the given step by passing a command to its command handler
+	 * and recursively expanding sub-steps.
+	 *
+	 * Mutates protocol.  However, since protocol.objects should still hold the
+	 * *initial* objects after processing, rather than mutating protocol.objects
+	 * during processing, a separate `objects` variable is mutated, which
+	 * starts out as a deep copy of protocol.objects.
+	 *
+	 * @param  {Protocol} protocol - the protocol
+	 * @param  {array} prefix - array of string representing the current step ID (initially []).
+	 * @param  {object} step - the current step (initially protocol.steps).
+	 * @param  {object} objects - a mutable copy of the protocol's objects.
+	 */
 	function expandStep(protocol, prefix, step, objects) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
@@ -702,76 +711,77 @@ function _run(opts, userProtocol) {
 			console.log("step "+id);
 		}
 
+		// Process any directives in this step
 		const params = misc.handleDirectiveDeep(step, protocol);
 		//console.log({step, params})
+
+		// If this step is a command:
 		const commandName = params.command;
 		if (commandName) {
 			const handler = commandHandlers[commandName];
 			if (!handler) {
 				protocol.warnings[id] = ["unknown command: "+params.command];
 			}
+			// Otherwise, the command has a handler:
 			else {
-				var expand = true
-				if (expand) {
-					var predicates = protocol.predicates.concat(createStateItems(objects));
-					var result = {};
-					try {
-						const data = {
-							objects: objects,
-							predicates: predicates,
-							planHandlers: protocol.planHandlers,
-							commandSpecs: protocol.commandSpecs,
-							accesses: [],
-							files: filecache
-						};
-						const commandSpec = protocol.commandSpecs[commandName];
-						//console.log("params: "+JSON.stringify(params))
-						const parsed = (commandSpec)
-							? commandHelper.parseParams(params, data, commandSpec)
-							: undefined;
-						result = handler(params, parsed, data) || {};
-					} catch (e) {
-						if (e.hasOwnProperty("errors")) {
-							result = {errors: e.errors};
-						}
-						else {
-							result = {errors: _.compact([e.toString(), e.stack])};
-						}
-						if (opts.throw) {
-							if (_.isPlainObject(e))
-								console.log("e:\n"+JSON.stringify(e));
-							throw e;
-						}
+				var predicates = protocol.predicates.concat(createStateItems(objects));
+				var result = {};
+				try {
+					const data = {
+						objects: objects,
+						predicates: predicates,
+						planHandlers: protocol.planHandlers,
+						commandSpecs: protocol.commandSpecs,
+						accesses: [],
+						files: filecache
+					};
+					const commandSpec = protocol.commandSpecs[commandName];
+					//console.log("params: "+JSON.stringify(params))
+					const parsed = (commandSpec)
+						? commandHelper.parseParams(params, data, commandSpec)
+						: undefined;
+					result = handler(params, parsed, data) || {};
+				} catch (e) {
+					if (e.hasOwnProperty("errors")) {
+						result = {errors: e.errors};
 					}
-					protocol.cache[id] = result;
-					// If there were errors:
-					if (!_.isEmpty(result.errors)) {
-						protocol.errors[id] = result.errors;
-						// Abort expansion of protocol
-						return false;
+					else {
+						result = {errors: _.compact([e.toString(), e.stack])};
 					}
-					// If there were warnings
-					if (!_.isEmpty(result.warnings)) {
-						protocol.warnings[id] = result.warnings;
+					if (opts.throw) {
+						if (_.isPlainObject(e))
+							console.log("e:\n"+JSON.stringify(e));
+						throw e;
 					}
-					if (result.hasOwnProperty("expansion")) {
-						if (_.isArray(result.expansion)) {
-							//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
-							var l = _.compact(_.flattenDeep(result.expansion));
-							result.expansion = _.zipObject(_.range(1, l.length + 1), l);
-							//console.log("expansion:\n"+JSON.stringify(result.expansion, null, '  '))
-						}
-						_.merge(step, result.expansion);
+				}
+				protocol.cache[id] = result;
+				// If there were errors:
+				if (!_.isEmpty(result.errors)) {
+					protocol.errors[id] = result.errors;
+					// Abort expansion of protocol
+					return false;
+				}
+				// If there were warnings
+				if (!_.isEmpty(result.warnings)) {
+					protocol.warnings[id] = result.warnings;
+				}
+				if (result.hasOwnProperty("expansion")) {
+					if (_.isArray(result.expansion)) {
+						//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
+						var l = _.compact(_.flattenDeep(result.expansion));
+						result.expansion = _.zipObject(_.range(1, l.length + 1), l);
+						//console.log("expansion:\n"+JSON.stringify(result.expansion, null, '  '))
 					}
-					if (result.hasOwnProperty("effects") && !_.isEmpty(result.effects)) {
-						//console.log(result.effects);
-						// Add effects to protocol
-						protocol.effects[id] = result.effects;
-						//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
-						// Update object states
-						_.forEach(result.effects, (value, key) => _.set(objects, key, value));
-						//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
-					}
+					_.merge(step, result.expansion);
+				}
+				if (result.hasOwnProperty("effects") && !_.isEmpty(result.effects)) {
+					//console.log(result.effects);
+					// Add effects to protocol
+					protocol.effects[id] = result.effects;
+					//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
+					// Update object states
+					_.forEach(result.effects, (value, key) => _.set(objects, key, value));
+					//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
 				}
 			}
 		}
