@@ -93,7 +93,7 @@
 
 ## After submission
 
-- [ ] enforce all objects in protocol.objects to have a type (see `roboliq.js:validateProtocol1()`)
+- [ ] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
 - [ ] refactor roboliq.js: `_run`: move as many of the functions as possible out of the `_run` function
 - [ ] refactor roboliq.js: `_run`: rather than return `{protocol, output}`, add tables to protocol and return protocol
