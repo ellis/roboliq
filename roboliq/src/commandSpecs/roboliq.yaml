@@ -1,0 +1,31 @@
+Liquid:
+  description: Liquid substance.
+  properties:
+    type: {enum: [Liquid]}
+    description: {type: string}
+    wells: {type: array}
+  required: [type]
+
+Plate:
+  description: Plate labware.
+  properties:
+    type: {enum: [Plate]}
+    description: {type: string}
+    model: {type: Model}
+    location: {type: Site}
+  required: [type]
+
+Site:
+  description: Represents a bench site where labware can placed.
+  properties:
+    type: {enum: [Site]}
+    description: {type: string}
+  required: [type]
+
+Variable:
+  description: User-defined variable.
+  properties:
+    type: {enum: [Variable]}
+    description: {type: string}
+    value: {}
+  required: [type]

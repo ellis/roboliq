@@ -476,6 +476,28 @@ function postProcessProtocol_variables(protocol) {
 }
 
 /**
+ * Perorms a schema check, makes sure that all objects are valid.
+ *
+ * Throws an error if the protocol isn't valid.
+ *
+ * @param  {Protocol} protocol - The protocol to validate.
+ */
+function validateProtocol1(protocol, o, path) {
+	if (_.isUndefined(o)) {
+		o = protocol.objects;
+		path = [];
+	}
+	for (const [name, value] of _.pairs(o)) {
+		if (value.type) {
+			const schema = protocol.commandSpecs[value.type];
+			if (schema) {
+				commandHelper.parseParams(value, protocol, schema);
+			}
+		}
+	}
+}
+
+/**
  * Process a roboliq protocol.
  *
  * @param  {array} argv - command line options.
@@ -634,6 +656,7 @@ function _run(opts, userProtocol) {
 	}*/
 
 	postProcessProtocol(protocol);
+	validateProtocol1(protocol);
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
 
