@@ -1,3 +1,14 @@
+## Centrifuge
+
+Centrifuge equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `sitesInternal: array` -- 
+
 ## centrifuge.centrifuge2
 
 Centrifuge using two plate
@@ -6,6 +17,7 @@ Properties:
 
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
+* `program` -- Program for centrifuging
 * `object1: Plate` -- Plate identifier 1
 * `object2: Plate` -- Plate identifier 2
 * `[site1]: Site` -- Location identifier for the centrifugation site of object1
@@ -88,6 +100,16 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
+## Reader
+
+Reader equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
 ## fluorescenceReader.measurePlate
 
 Measure the fluorescence of a plate.
@@ -96,11 +118,49 @@ Properties:
 
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
-* `program: object` -- Program specification for measurement
+* `[programFile]: string` -- Program filename
+* `[programData]` -- Program data
 * `outputFile: string` -- Filename for output
 * `object: Plate` -- Plate identifier
 * `[site]: Site` -- Site identifier in reader
 * `[destinationAfter]: Site` -- Site to move the plate to after measurement
+
+## Pipetter
+
+Pipetting equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
+## pipetter._AspirateItem
+
+Parameters for pipette items.
+
+Properties:
+
+* `syringe: string,integer` -- Syring identifier
+* `[well]: Well` -- Source specifier
+* `volume: Volume` -- Volume
+
+## pipetter._DispenseItem
+
+Parameters for pipette items.
+
+Properties:
+
+* `syringe: string,integer` -- Syring identifier
+* `[well]: Well` -- Destination specifier
+* `volume: Volume` -- Volume
+
+## pipetter.CleaningIntensity
+
+Intensity of cleaning.
+
+Properties:
+
 
 ## pipetter.PipetteItem
 
@@ -110,7 +170,7 @@ Properties:
 
 * `[syringe]: string,integer` -- Syring identifier
 * `[source]: Source` -- Source specifier
-* `[destination]: Site` -- Destination specifier
+* `[destination]: Well` -- Destination specifier
 * `[volume]: Volume` -- Volume
 
 ## pipetter._PipetteItem
@@ -120,7 +180,7 @@ Parameters for low-level pipette items.
 Properties:
 
 * `syringe: string,integer` -- Syring identifier
-* `source: Source` -- Source specifier
+* `source: Well` -- Source specifier
 * `destination: Well` -- Destination specifier
 * `volume: Volume` -- Volume
 
@@ -177,8 +237,8 @@ Properties:
 * `[agent]: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 * `[program]: string` -- Program identifier
-* `[syringes]` -- 
-* `intensity` -- 
+* `[syringes]: array` -- List of syringes to clean
+* `intensity: pipetter.CleaningIntensity` -- Intensity of the cleaning
 
 ## pipetter.pipette
 
@@ -193,6 +253,11 @@ Properties:
 * `[sources]: Sources` -- Specifier for source(s) to aspirate from, if missing from items
 * `[destinations]: Wells` -- Specifier for destination(s) to despense to, if missing from items
 * `[volumes]: Volumes` -- Volume(s) to pipette, if missing from items
+* `[clean]: string` -- Intensity of cleaning
+* `[cleanBegin]: string` -- intensity of first cleaning at beginning of pipetting, before first aspiration.
+* `[cleanBetween]: string` -- Intensity of cleaning between different liquids.
+* `[cleanBetweenSameSource]: string` -- Intensity of cleaning between transfers of the same liquid.
+* `[cleanEnd]: string` -- Intensity of cleaning after the last dispense.
 
 ## pipetter.pipetteMixtures
 
@@ -206,6 +271,94 @@ Properties:
 * `mixtures: array` -- Array of arrays, where each sub-array is a list of components to be mixed into a destination well
 * `destinations: Wells` -- Destination specifier
 * `[order]: string` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
+
+## Agent
+
+An agent that can execute commands.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
+## Liquid
+
+Liquid substance.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `[wells]: array` -- 
+
+## Plate
+
+Plate labware.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `[model]: PlateModel` -- 
+* `[location]: Site` -- 
+* `[contents]: object,array` -- 
+
+## PlateModel
+
+Model for plate labware.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `rows: integer` -- 
+* `columns: integer` -- 
+
+## Site
+
+Represents a bench site where labware can placed.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
+## Template
+
+A template object, used by the `system.call` command.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `[template]` -- 
+
+## Variable
+
+User-defined variable.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `[value]` -- 
+
+## Sealer
+
+Sealing equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
 
 ## sealer.sealPlate
 
@@ -228,7 +381,7 @@ The template function should be an object of type `Template` with a property `te
 
 Properties:
 
-* `name: string` -- Name of the template function.
+* `name: Object` -- Name of the template function.
 * `[params]: object` -- Parameters to pass to the template function.
 
 ## system.repeat
@@ -239,6 +392,16 @@ Properties:
 
 * `count: integer` -- The number of times to repeat.
 * `[steps]: object` -- The sequence of commands to repeat.
+
+## Timer
+
+Timer equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
 
 ## timer._sleep
 
@@ -252,6 +415,7 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 * `duration: number` -- Number of seconds to sleep
+* `[stop]: boolean` -- Whether to stop the timer after waiting, or let it continue
 
 ## timer._start
 
@@ -315,7 +479,7 @@ Properties:
 
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
-* `duration: string,number` -- Duration to sleep (default units is in seconds)
+* `duration: Duration` -- Duration to sleep (default units is in seconds)
 
 ## timer.start
 
@@ -341,6 +505,16 @@ Properties:
 
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
+
+## Transporter
+
+Labware transporter equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
 
 ## transporter._movePlate
 

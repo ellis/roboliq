@@ -66,8 +66,6 @@
 - [x] validate `protocol.objects` using object schemas
 - [x] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
 - [x] commandHelperTest.js: test array of variables of integers
-- [ ] refactor commandHelper parseValue functions to return `{values, objects, inputs}`
-- [ ] refactor: rename commandHelper type `name` to `Symbol`
 - [ ] generate documentation for object schemas
 - [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
@@ -94,10 +92,13 @@
 - [ ] upload to a public repository
 - [ ] test all pipetter commands
 - [ ] testing scripts on second Tecan robot
+- [ ] start working on "Cookbook" tutorial, explaining how to solve specific problems
 
 ## After submission
 
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
+- [ ] refactor commandHelper parseValue functions to return `{values, objects, inputs}`
+- [ ] refactor: rename commandHelper type `name` to `Symbol`
 - [ ] refactor roboliq.js: `_run`: move as many of the functions as possible out of the `_run` function
 - [ ] refactor roboliq.js: `_run`: rather than return `{protocol, output}`, add tables to protocol and return protocol
 - [ ] write back-end for Hamilton
