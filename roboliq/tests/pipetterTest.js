@@ -93,6 +93,13 @@ describe('pipetter', function() {
 			});
 			should.deepEqual(result.output.tables.labware, [
 				{
+					labware: 'ourlab.mario.systemLiquidLabware',
+					locationFinal: 'ourlab.mario.site.SYSTEM',
+					locationInitial: 'ourlab.mario.site.SYSTEM',
+					model: 'ourlab.mario.systemLiquidLabwareModel',
+					type: 'Plate'
+				},
+				{
 					labware: 'plate1',
 					locationFinal: 'ourlab.mario.site.P2',
 					locationInitial: 'ourlab.mario.site.P2',
@@ -110,6 +117,10 @@ describe('pipetter', function() {
 				}
 			]);
 			should.deepEqual(result.output.tables.wellContentsFinal, [
+				{
+					systemLiquid: 'Infinity l',
+					well: 'ourlab.mario.systemLiquidLabware'
+				},
 				{
 					well: 'plate1(A01)',
 					'plate1(A01)': 'Infinity l'
@@ -504,6 +515,7 @@ describe('pipetter', function() {
 			//console.log(JSON.stringify(result.output.tables.wellContentsFinal, null, '\t'));
 			should.deepEqual(_.get(result, "output.tables.wellContentsFinal"),
 				[
+					{well: 'ourlab.mario.systemLiquidLabware', systemLiquid: 'Infinity l'},
 					{"well": "plate1(A01)", "source1": "80 ul"},
 					{"well": "plate1(B01)", "source2": "70 ul"},
 					{"well": "plate1(A02)", "source1": "10 ul", "source2": "10 ul"},
