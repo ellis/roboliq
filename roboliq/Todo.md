@@ -66,6 +66,8 @@
 - [x] validate `protocol.objects` using object schemas
 - [x] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
 - [ ] commandHelperTest.js: test array of variables of integers
+- [ ] refactor commandHelper parseValue functions to return `{values, objects, inputs}`
+- [ ] refactor: rename commandHelper type `name` to `Symbol`
 - [ ] generate documentation for object schemas
 - [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum

@@ -1,3 +1,11 @@
+Sealer:
+  description: Sealing equipment.
+  properties:
+    type: {enum: [Sealer]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 sealer.sealPlate:
   description: "Seal a plate."
   properties:

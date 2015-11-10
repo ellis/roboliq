@@ -11,13 +11,6 @@ import wellsParser from './parsers/wellsParser.js';
  * processValueBySchema():
  * Input: value and a schema.
  *
- * If schema is undefined, return value.
- *
- * If schema.type is undefined but there are schema.properties, assume schema.type = "object".
- *
- * If type is undefined or empty, return value.
- *
- * If type is an array, try processing for each element of the array
  *
  * ---
  *
@@ -29,10 +22,17 @@ import wellsParser from './parsers/wellsParser.js';
  */
 
 /**
- * Try to convert value0 to the type given by type, possibly considering p.
+ * Try to convert value0 (a "raw" value, no yet looked up) to the type given by type, possibly considering p.
  *
- * This function also handles arrays, which it's helper function
- * (processValueByType) does not.
+ * - If schema is undefined, return value.
+ *
+ * - If schema.enum: return processValue0AsEnum()
+ *
+ * - If schema.type is undefined but there are schema.properties, assume schema.type = "object".
+ *
+ * - If type is undefined or empty, return value.
+ *
+ * - If type is an array, try processing for each element of the array
  *
  * @param  {any} value0 - initial value
  * @param  {string} type - type to convert to
@@ -41,50 +41,131 @@ import wellsParser from './parsers/wellsParser.js';
  * @param  {object} schema - property schema information (e.g. for arrays)
  * @return {any} converted value
  */
-function processValueBySchema(value0, schema, data, name) {
-	if (value0 === "ourlab.mario.site.CENTRIFUGE_1")
-		console.log({value0, schema, name})
-	if (_.isUndefined(schema))
+function processValue0BySchema(value0, schema, data, name) {
+	if (_.isUndefined(schema)) {
 		return value0;
+	}
 
 	if (schema.hasOwnProperty('enum')) {
-		expect.truthy({paramName: name}, schema.enum.includes(value0), "expected one of "+schema.enum+": "+JSON.stringify(value0));
-		return value0;
+		return processValue0AsEnum(value0, schema, data, name);
 	}
 
-	if (_.isEmpty(schema.type) && _.isEmpty(schema.properties))
+	const type = (_.isUndefined(schema.type) && !_.isEmpty(schema.properties))
+		? "object"
+		: schema.type;
+
+	if (_.isEmpty(type))
 		return value0;
 
-	// Try each type alternative:
-	const types = _.flatten([schema.type]);
-	let es = [];
-	for (const t of types) {
-		let result;
-		try {
-			if (t === 'array') {
-				result = processValueAsArray(value0, schema.items, data, name);
-			}
-			else if (t === 'object' || !_.isEmpty(schema.properties)) {
-				//console.log(JSON.stringify({t, value0, schema}, null, '\t'))
-				result = processValueAsObject(value0, data, schema);
-			}
-			else {
-				result = processValueByType(value0, t, data, name);
-			}
-		}
-		catch (e) {
-			es.push(e);
-		}
-		if (!_.isUndefined(result))
-			return result;
+	if (_.isString(type)) {
+		return processValue0BySchemaType(value0, schema, type, data, name);
 	}
+	else {
+		// Try each type alternative:
+		const types = _.flatten([schema.type]);
+		let es = [];
+		for (const t of types) {
+			try {
+				return processValue0BySchemaType(value0, schema, t, data, name);
+			}
+			catch (e) {
+				es.push(e);
+			}
+		}
 
-	if (!_.isEmpty(es))
-		throw es[0];
+		if (!_.isEmpty(es))
+			throw es[0];
+	}
 
 	return undefined;
 }
 
+function processValue0AsEnum(value0, schema, data, name) {
+	const value1 = lookupValue0(value0, data);
+	expect.truthy({paramName: name}, schema.enum.includes(value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
+	return value1;
+}
+
+function processValue0BySchemaType(value0, schema, type, data, name) {
+	if (type === 'name')
+		return value0;
+
+	const value = lookupValue0(value0, data);
+	switch (type) {
+		case "array": return processValueAsArray(value, schema.items, data, name);
+		case "boolean":
+			expect.truthy({paramName: name}, _.isBoolean(value), "expected boolean: "+value);
+			return value;
+		case "integer":
+			expect.truthy({paramName: name}, _.isNumber(value) && (value % 1) === 0, "expected integer: "+value);
+			return value;
+		case "number":
+			expect.truthy({paramName: name}, _.isNumber(value), "expected number: "+value);
+			return value;
+		case "null":
+			expect.truthy({paramName: name}, _.isNull(value), "expected null: "+value);
+			return value;
+		case "string": return processString(value, data, name);
+		case "object": return processValueAsObject(value, data, schema);
+		case "Agent":
+			// TODO: need to check a list of which types are Agent types
+			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
+			return value;
+		case "Any": return value;
+		case "Duration": return processDuration(value, data, name);
+		case "Equipment":
+			// TODO: need to check a list of which types are Equipment types
+			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
+			return value;
+		case "Plate": return processObjectOfType(value, data, name, type);
+		case "Site": return processObjectOfType(value, data, name, type);
+		case "Source": return processSource(value, data, name);
+		case "Sources": return processSources(value, data, name);
+		case "String": return processString(value, data, name);
+		case "Volume": return processVolume(value, data, name);
+		case "Volumes": return processOneOrArray(value, data, name, (x) => processVolume(x, data, name));
+		case "Well": return processWell(value, data, name);
+		case "Wells": return processWells(value, data, name);
+		case "File":
+			var filename = value;
+			var filedata = data.files[filename];
+			if (_.isUndefined(filedata))
+				filedata = defaultValue;
+			if (_.isUndefined(filedata) && _.isUndefined(filename))
+				return undefined;
+			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
+			//console.log({filedata})
+			return filedata;
+		default: {
+			if (data.commandSpecs.hasOwnProperty(type)) {
+				const spec = data.commandSpecs[type];
+				//console.log({type, spec})
+				const parsed = processValue0BySchema(value, spec, data, name);
+				//console.log({type, parsed})
+				return parsed;
+			}
+			else {
+				const schema = roboliqSchemas[type];
+				expect.truthy({paramName: name}, schema, "unknown type: "+type);
+				const isValid = tv4.validate(value, schema);
+				expect.truthy({paramName: name}, isValid, tv4.toString());
+				return value;
+			}
+		}
+	}
+	return undefined;
+	if (t === 'array') {
+		result = processValueAsArray(value, schema.items, data, name);
+	}
+	else if (t === 'object' || !_.isEmpty(schema.properties)) {
+		//console.log(JSON.stringify({t, value, schema}, null, '\t'))
+		result = processValueAsObject(value, data, schema);
+	}
+	else {
+		result = processValueByType(value, t, data, name);
+	}
+
+}
 
 /**
  * Parse command parameters.
@@ -122,7 +203,7 @@ function processValueAsObject(params, data, specs) {
 		else {
 			info = lookupValue(params, data, propertyName, defaultValue);
 			if (info.value) {
-				info.value = processValueBySchema(info.value, p, data, propertyName);
+				info.value = processValue0BySchema(info.value, p, data, propertyName);
 				//console.log({propertyName, type, info})
 				//console.log({value: info.value})
 				//console.trace();
@@ -146,84 +227,12 @@ function processValueAsArray(list0, schema, data, name) {
 	//console.log({t2})
 	const list1 = list0.map((x, index) => {
 		//return processValueByType(x, t2, data, `${name}[${index}]`);
-		const x2 = processValueBySchema(x, schema, data, `${name}[${index}]`);
+		const x2 = processValue0BySchema(x, schema, data, `${name}[${index}]`);
 		//console.log({x, t2, x2})
 		return x2;
 	});
 	//console.log({list1})
 	return list1;
-}
-
-function processValueByType(value0, type, data, name) {
-	//console.log({type, value0})
-	if (_.isUndefined(type))
-		return value0;
-
-	switch (type) {
-		case "string": return processString(value0, data, name);
-		case "integer":
-			expect.truthy({paramName: name}, _.isNumber(value0) && (value0 % 1) === 0, "expected integer: "+value0);
-			return value0;
-		case "number":
-			expect.truthy({paramName: name}, _.isNumber(value0), "expected number: "+value0);
-			return value0;
-		case "object":
-			expect.truthy({paramName: name}, _.isPlainObject(value0), "expected object: "+value0);
-			return value0;
-		//case "array":
-		case "boolean":
-			expect.truthy({paramName: name}, _.isBoolean(value0), "expected boolean: "+value0);
-			return value0;
-		case "null":
-			expect.truthy({paramName: name}, _.isNull(value0), "expected null: "+value0);
-			return value0;
-		case "Agent":
-			// TODO: need to check a list of which types are Agent types
-			expect.truthy({paramName: name}, _.isPlainObject(value0), "expected object: "+value0);
-			return value0;
-		case "Any": return value0;
-		case "Duration": return processDuration(value0, data, name);
-		case "Equipment":
-			// TODO: need to check a list of which types are Equipment types
-			expect.truthy({paramName: name}, _.isPlainObject(value0), "expected object: "+value0);
-			return value0;
-		case "Plate": return processObjectOfType(value0, data, name, type);
-		case "Site": return processObjectOfType(value0, data, name, type);
-		case "Source": return processSource(value0, data, name);
-		case "Sources": return processSources(value0, data, name);
-		case "String": return processString(value0, data, name);
-		case "Volume": return processVolume(value0, data, name);
-		case "Volumes": return processOneOrArray(value0, data, name, (x) => processVolume(x, data, name));
-		case "Well": return processWell(value0, data, name);
-		case "Wells": return processWells(value0, data, name);
-		case "File":
-			var filename = value0;
-			var filedata = data.files[filename];
-			if (_.isUndefined(filedata))
-				filedata = defaultValue;
-			if (_.isUndefined(filedata) && _.isUndefined(filename))
-				return undefined;
-			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
-			//console.log({filedata})
-			return filedata;
-		default: {
-			if (data.commandSpecs.hasOwnProperty(type)) {
-				const spec = data.commandSpecs[type];
-				//console.log({type, spec})
-				const parsed = processValueBySchema(value0, spec, data, name);
-				//console.log({type, parsed})
-				return parsed;
-			}
-			else {
-				const schema = roboliqSchemas[type];
-				expect.truthy({paramName: name}, schema, "unknown type: "+type);
-				const isValid = tv4.validate(value0, schema);
-				expect.truthy({paramName: name}, isValid, tv4.toString());
-				return value0;
-			}
-		}
-	}
-	return undefined;
 }
 
 /**
@@ -242,6 +251,26 @@ function g(data, name, dflt) {
 		data.accesses = [name];
 
 	return _.get(data.objects, name, dflt);
+}
+
+/**
+ * Try to lookup value0 in objects set.
+ * This function is recursive, insofar as if the value refers to a variable,
+ * the variables value will also be dereferenced.
+ *
+ * @param  {any} value0 - The value from the user.
+ * @param  {object} data - The data object.
+ * @return {any} A new value, if value0 referred to something in data.objects.
+ */
+function lookupValue0(value0, data) {
+	if (_.isString(value0) && !_.startsWith(value0, '"')) {
+		const deref = dereferenceVariable(data, value0);
+		if (deref) {
+			return deref.value;
+		}
+	}
+
+	return value0;
 }
 
 function lookupValue(params, data, paramName, defaultValue) {

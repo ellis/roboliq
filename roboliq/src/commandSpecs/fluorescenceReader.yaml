@@ -1,3 +1,11 @@
+Reader:
+  description: Reader equipment.
+  properties:
+    type: {enum: [Reader]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 fluorescenceReader.measurePlate:
   description: "Measure the fluorescence of a plate."
   properties:

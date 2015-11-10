@@ -1,3 +1,11 @@
+Pipetter:
+  description: Pipetting equipment.
+  properties:
+    type: {enum: [Pipetter]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:

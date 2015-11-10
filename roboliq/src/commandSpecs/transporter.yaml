@@ -1,3 +1,11 @@
+Transporter:
+  description: Labware transporter equipment.
+  properties:
+    type: {enum: [Transporter]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 transporter._movePlate:
   description: |
     Transport a plate to a destination.

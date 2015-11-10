@@ -565,6 +565,18 @@ module.exports = {
 	]),
 
 	commandSpecs: {
+		"EvowareRobot": {
+			properties: {
+				type: {enum: ["EvowareRobot"]}
+			},
+			required: ["type"]
+		},
+		"EvowareWashProgram": {
+			properties: {
+				type: {enum: ["EvowareWashProgram"]}
+			},
+			required: ["type"]
+		},
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
