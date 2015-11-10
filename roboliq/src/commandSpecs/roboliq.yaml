@@ -1,8 +1,20 @@
+Labware:
+  description: Plate labware.
+  properties:
+    type: {enum: [Labware]}
+    description: {type: string}
+    label: {type: string}
+    model: {type: Model}
+    location: {type: Site}
+    contents: {type: [object, array]}
+  required: [type]
+
 Liquid:
   description: Liquid substance.
   properties:
     type: {enum: [Liquid]}
     description: {type: string}
+    label: {type: string}
     wells: {type: array}
   required: [type]
 
@@ -11,8 +23,10 @@ Plate:
   properties:
     type: {enum: [Plate]}
     description: {type: string}
+    label: {type: string}
     model: {type: Model}
     location: {type: Site}
+    contents: {type: [object, array]}
   required: [type]
 
 Site:
@@ -20,6 +34,7 @@ Site:
   properties:
     type: {enum: [Site]}
     description: {type: string}
+    label: {type: string}
   required: [type]
 
 Variable:
@@ -27,5 +42,6 @@ Variable:
   properties:
     type: {enum: [Variable]}
     description: {type: string}
+    label: {type: string}
     value: {}
   required: [type]

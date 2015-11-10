@@ -488,10 +488,19 @@ function validateProtocol1(protocol, o, path) {
 		path = [];
 	}
 	for (const [name, value] of _.pairs(o)) {
-		if (value.type) {
-			const schema = protocol.commandSpecs[value.type];
-			if (schema) {
-				commandHelper.parseParams(value, protocol, schema);
+		const fullName = path.concat(name).join(".");
+		//console.log({name, value})
+		if (name !== 'type') {
+			expect.truthy({objectName: fullName}, !_.isEmpty(value.type), "Missing `type` property.")
+			if (value.type === "Namespace") {
+				validateProtocol1(protocol, value, path.concat(name));
+			}
+			else {
+				const schema = protocol.commandSpecs[value.type];
+				//expect.truthy({objectName: fullName}, schema, "Unknown type: "+value.type);
+				if (schema) {
+					commandHelper.parseParams(value, protocol, schema);
+				}
 			}
 		}
 	}

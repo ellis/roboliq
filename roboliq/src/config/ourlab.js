@@ -126,6 +126,7 @@ module.exports = {
 					T3: { type: "Site", evowareCarrier: "Block 20Pos", evowareGrid: 16, evowareSite: 1 },
 				},
 				"systemLiquidLabwareModel": {
+					"type": "PlateModel",
 					"description": "dummy labware model representing the system liquid source",
 					"rows": 8,
 					"columns": 1,
@@ -141,6 +142,7 @@ module.exports = {
 					]
 				},
 				"systemLiquidLabware": {
+					"type": "Plate",
 					"description": "dummy labware representing the system liquid source",
 					"model": "ourlab.mario.systemLiquidLabwareModel",
 					"location": "ourlab.mario.site.SYSTEM",
@@ -210,54 +212,63 @@ module.exports = {
 			"model": {
 				"type": "Namespace",
 				"plateModel_96_pcr": {
+					"type": "PlateModel",
 					"label": "96 well PCR plate",
 					"rows": 8,
 					"columns": 12,
 					"evowareName": "D-BSSE 96 Well PCR Plate"
 				},
 				"plateModel_96_dwp": {
+					"type": "PlateModel",
 					"label": "96 well deep-well plate",
 					"rows": 8,
 					"columns": 12,
 					"evowareName": "D-BSSE 96 Well DWP"
 				},
 				"plateModel_384_round": {
+					"type": "PlateModel",
 					"label": "384 round-well plate",
 					"rows": 16,
 					"columns": 24,
 					"evowareName": "D-BSSE 384 Well Plate White"
 				},
 				"plateModel_384_square": {
+					"type": "PlateModel",
 					"label": "384 square-flat-well white plate",
 					"rows": 16,
 					"columns": 24,
 					"evowareName": "D-BSSE 384 Well Plate White"
 				},
 				"plateModel_384_square_transparent_greiner": {
+					"type": "PlateModel",
 					"label": "384 square-flat-well transparent Greiner",
 					"rows": 16,
 					"columns": 24,
 					"evowareName": "384 Sqr Flat Trans Greiner"
 				},
 				"plateModel_96_square_transparent_nunc": {
+					"type": "PlateModel",
 					"label": "96 square-well transparent Nunc plate",
 					"rows": 8,
 					"columns": 12,
 					"evowareName": "Ellis Nunc F96 MicroWell"
 				},
 				"troughModel_100ml": {
+					"type": "PlateModel",
 					"label": "Trough 100ml",
 					"rows": 8,
 					"columns": 1,
 					"evowareName": "Trough 100ml"
 				},
 				"troughModel_100ml_lowvol_tips": {
+					"type": "PlateModel",
 					"label": "Trough 100ml LowVol Tips",
 					"rows": 8,
 					"columns": 1,
 					"evowareName": "Trough 100ml LowVol Tips"
 				},
 				"tubeHolderModel_1500ul": {
+					"type": "PlateModel",
 					"label": "20 tube block 1.5ml",
 					"rows": 4,
 					"columns": 5,
