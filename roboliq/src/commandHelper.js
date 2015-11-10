@@ -8,10 +8,31 @@ import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
 
 /**
+ * processValueBySchema():
+ * Input: value and a schema.
+ *
+ * If schema is undefined, return value.
+ *
+ * If schema.type is undefined but there are schema.properties, assume schema.type = "object".
+ *
+ * If type is undefined or empty, return value.
+ *
+ * If type is an array, try processing for each element of the array
+ *
+ * ---
+ *
+ * processValueBySchemaAndType():
+ * If type === "name", return value.
+ * If _.isString(value), try to lookup object.
+ *
+ * If type === "array"
+ */
+
+/**
  * Try to convert value0 to the type given by type, possibly considering p.
  *
  * This function also handles arrays, which it's helper function
- * (processValueBySchemaSingle) does not.
+ * (processValueByType) does not.
  *
  * @param  {any} value0 - initial value
  * @param  {string} type - type to convert to
@@ -21,6 +42,8 @@ import wellsParser from './parsers/wellsParser.js';
  * @return {any} converted value
  */
 function processValueBySchema(value0, schema, data, name) {
+	if (value0 === "ourlab.mario.site.CENTRIFUGE_1")
+		console.log({value0, schema, name})
 	if (_.isUndefined(schema))
 		return value0;
 
@@ -46,7 +69,7 @@ function processValueBySchema(value0, schema, data, name) {
 				result = processValueAsObject(value0, data, schema);
 			}
 			else {
-				result = processValueBySchemaSingle(value0, t, data, name);
+				result = processValueByType(value0, t, data, name);
 			}
 		}
 		catch (e) {
@@ -122,7 +145,7 @@ function processValueAsArray(list0, schema, data, name) {
 	expect.truthy({paramName: name}, _.isArray(list0), "expected an array: "+list0);
 	//console.log({t2})
 	const list1 = list0.map((x, index) => {
-		//return processValueBySchemaSingle(x, t2, data, `${name}[${index}]`);
+		//return processValueByType(x, t2, data, `${name}[${index}]`);
 		const x2 = processValueBySchema(x, schema, data, `${name}[${index}]`);
 		//console.log({x, t2, x2})
 		return x2;
@@ -131,7 +154,7 @@ function processValueAsArray(list0, schema, data, name) {
 	return list1;
 }
 
-function processValueBySchemaSingle(value0, type, data, name) {
+function processValueByType(value0, type, data, name) {
 	//console.log({type, value0})
 	if (_.isUndefined(type))
 		return value0;
@@ -295,7 +318,7 @@ function processString(value0, data, paramName) {
 }
 
 function processObjectOfType(x, data, paramName, type) {
-	expect.truthy({paramName}, _.isPlainObject(x), "expected an object: "+JSON.stringify(x));
+	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(x));
 	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(x));
 	return x;
 }

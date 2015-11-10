@@ -339,6 +339,30 @@ describe('commandHelper', function() {
 			should.deepEqual(data.accesses, []);
 		});
 
+		it('should work with arrays of variables', () => {
+			const data = {
+				objects: {
+					n1: {type: "Variable", value: 1},
+					n2: {type: "Variable", value: 2},
+				},
+				accesses: []
+			};
+			var params = {
+				ns: ["n1", "n2"]
+			};
+			var specs = {
+				properties: {
+					ns: {type: "array", items: {type: "integer"}},
+				},
+				required: ["ns"]
+			};
+			var parsed = commandHelper.parseParams(params, data, specs);
+			should.deepEqual(parsed, {
+				ns: {value: [1, 2]}
+			});
+			should.deepEqual(data.accesses, ["n1", "n2"]);
+		});
+
 		it('should work for a previous bug', function() {
 			var data = {
 				objects: {

@@ -62,8 +62,10 @@
 - [x] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
 - [x] move around protocols/tania* files so that ./runall.sh works
 - [x] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
-- [ ] schemas/objects.yaml: add schemas for object types
-- [ ] validate `protocol.objects` using object schemas
+- [x] schemas/objects.yaml: add schemas for object types
+- [x] validate `protocol.objects` using object schemas
+- [x] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
+- [ ] commandHelperTest.js: test array of variables of integers
 - [ ] generate documentation for object schemas
 - [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
@@ -93,7 +95,6 @@
 
 ## After submission
 
-- [ ] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
 - [ ] refactor roboliq.js: `_run`: move as many of the functions as possible out of the `_run` function
 - [ ] refactor roboliq.js: `_run`: rather than return `{protocol, output}`, add tables to protocol and return protocol
@@ -101,6 +102,7 @@
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
+- [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect

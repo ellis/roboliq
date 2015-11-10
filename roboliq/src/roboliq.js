@@ -497,7 +497,7 @@ function validateProtocol1(protocol, o, path) {
 			}
 			else {
 				const schema = protocol.commandSpecs[value.type];
-				//expect.truthy({objectName: fullName}, schema, "Unknown type: "+value.type);
+				expect.truthy({objectName: fullName}, schema, "Unknown type: "+value.type);
 				if (schema) {
 					commandHelper.parseParams(value, protocol, schema);
 				}
