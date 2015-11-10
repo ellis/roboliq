@@ -36,6 +36,15 @@ Site:
     label: {type: string}
   required: [type]
 
+Template:
+  description: A template object, used by the `system.call` command.
+  properties:
+    type: {enum: [Template]}
+    description: {type: string}
+    label: {type: string}
+    template: {}
+  required: [type]
+
 Variable:
   description: User-defined variable.
   properties:
