@@ -1,14 +1,3 @@
-Labware:
-  description: Plate labware.
-  properties:
-    type: {enum: [Labware]}
-    description: {type: string}
-    label: {type: string}
-    model: {type: Model}
-    location: {type: Site}
-    contents: {type: [object, array]}
-  required: [type]
-
 Liquid:
   description: Liquid substance.
   properties:
@@ -24,10 +13,20 @@ Plate:
     type: {enum: [Plate]}
     description: {type: string}
     label: {type: string}
-    model: {type: Model}
+    model: {type: PlateModel}
     location: {type: Site}
     contents: {type: [object, array]}
   required: [type]
+
+PlateModel:
+  description: Model for plate labware.
+  properties:
+    type: {enum: [PlateModel]}
+    description: {type: string}
+    label: {type: string}
+    rows: {type: integer}
+    columns: {type: integer}
+  required: [type, rows, columns]
 
 Site:
   description: Represents a bench site where labware can placed.

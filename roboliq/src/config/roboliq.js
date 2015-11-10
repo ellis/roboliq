@@ -4,6 +4,7 @@
  */
 
 var _ = require('lodash');
+import yaml from 'yamljs';
 
 var predicates = [
 	//
@@ -142,6 +143,7 @@ module.exports = {
 	],
 	predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
+	commandSpecs: yaml.load(__dirname+'/../commandSpecs/roboliq.yaml'),
 	planHandlers: planHandlers,
 	directiveHandlers: require('./roboliqDirectiveHandlers.js'),
 };

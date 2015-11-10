@@ -121,6 +121,9 @@ describe('roboliq', function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
+					here: {
+						type: 'Site',
+					},
 					plate1: {
 						type: 'Plate',
 						'model?': {
@@ -155,6 +158,12 @@ describe('roboliq', function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
+					here: {
+						type: 'Site',
+					},
+					there: {
+						type: 'Site',
+					},
 					'plate1!': {
 						type: 'Plate',
 						location: "here"
