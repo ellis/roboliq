@@ -1,3 +1,11 @@
+Agent:
+  description: An agent that can execute commands.
+  properties:
+    type: {enum: [Agent]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 Liquid:
   description: Liquid substance.
   properties:
