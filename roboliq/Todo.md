@@ -72,6 +72,19 @@
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
+- [ ] rewrite evoware compiler in javascript
+- [ ] evoware:
+	- [ ] add command-line option to only process certain steps
+	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
+	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
+	- [ ] try loading the `tania*` protocols in Tecan Evoware
+- [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
+- [ ] upload to a public repository
+- [ ] test all pipetter commands
+- [ ] testing scripts on second Tecan robot
+
+## On-going todos with lots of sub-steps
+
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 	- [ ] Commands.md: Add general documentation to each command namespace
 	- [ ] Developing_Roboliq.md
@@ -90,16 +103,79 @@
 	- [ ] main.js
 	- [ ] misc.js
 	- [ ] commands...
-- [ ] evoware:
-	- [ ] add command-line option to only process certain steps
-	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
-	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
-	- [ ] try loading the `tania*` protocols in Tecan Evoware
-- [ ] rewrite evoware compiler in javascript
-- [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
-- [ ] upload to a public repository
-- [ ] test all pipetter commands
-- [ ] testing scripts on second Tecan robot
+- [ ] implement equivalents for BioCoder commands
+	- [ ] optional_step
+	- [ ] parallel_step
+	- [ ] to_do
+	- [ ] store_until
+	- [ ] use_or_store
+	- [ ] time_constraint
+	- [?] set_value
+	- [?] assign
+	- [ ] add
+	- [ ] divide
+	- [ ] subtract
+	- [ ] multiply
+	- [ ] discard
+	- [ ] drain
+	- [ ] new_solid
+	- [ ] new_container
+	- [ ] new_slide
+	- [ ] new_column
+	- [ ] measure_solid
+	- [ ] measure_prop
+	- [ ] add_to_column
+	- [ ] add_to_slide
+	- [ ] collect_tissue
+	- [ ] plate_out
+	- [ ] transfer
+	- [ ] combine
+	- [ ] combine_and_mix
+	- [ ] dissolve
+	- [ ] invert
+	- [ ] pipet
+	- [ ] resuspend
+	- [ ] tap
+	- [ ] vortex
+	- [ ] vortex_column
+	- [ ] incubate_and_mix
+	- [ ] mixing_table
+	- [ ] mixing_table_pcr
+	- [ ] immerse_slide
+	- [ ] remove_slide
+	- [ ] wash_slide
+	- [ ] homogenize_tissue
+	- [ ] wash_tissue
+	- [ ] incubate
+	- [ ] store_for
+	- [ ] set_temp
+	- [ ] store_plate
+	- [ ] thermocycler
+	- [ ] thermocycler_anneal
+	- [ ] pcr_init_denat
+	- [ ] pcr_final_ext
+	- [ ] inoculation
+	- [ ] incubate_plate
+	- [ ] invert_dry
+	- [ ] dry_pellet
+	- [ ] dry_slide
+	- [ ] centrifuge
+	- [ ] centrifuge_pellet
+	- [ ] centrifuge_phases_top
+	- [ ] centrifuge_phases_bottom
+	- [ ] centrifuge_column
+	- [ ] centrifuge_flow_through()
+	- [ ] ce_detect
+	- [ ] electrophoresis
+	- [ ] facs
+	- [ ] measure_fluorescence
+	- [ ] mount_observe_slide
+	- [ ] sequencing
+	- [ ] electroporate
+	- [ ] weigh
+	- [ ] cell_culture
+	- [ ] transfection
+- [ ] implement equivalents for PR-PR commands
 
 ## After submission
 
