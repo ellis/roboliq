@@ -772,10 +772,10 @@ function _run(opts, userProtocol) {
 						files: filecache
 					};
 					// If a schema is given for the command, parse its parameters
-					const commandSpec = protocol.schemas[commandName];
+					const schema = protocol.schemas[commandName];
 					//console.log("params: "+JSON.stringify(params))
-					const parsed = (commandSpec)
-						? commandHelper.parseParams(params, data, commandSpec)
+					const parsed = (schema)
+						? commandHelper.parseParams(params, data, schema)
 						: undefined;
 					// Try to run the command handler
 					result = handler(params, parsed, data) || {};

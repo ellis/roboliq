@@ -138,9 +138,9 @@ function processValue0BySchemaType(value0, schema, type, data, name) {
 			return filedata;
 		default: {
 			if (data.schemas.hasOwnProperty(type)) {
-				const spec = data.schemas[type];
-				//console.log({type, spec})
-				const parsed = processValue0BySchema(value, spec, data, name);
+				const schema = data.schemas[type];
+				//console.log({type, schema})
+				const parsed = processValue0BySchema(value, schema, data, name);
 				//console.log({type, parsed})
 				return parsed;
 			}
@@ -172,16 +172,16 @@ function processValue0BySchemaType(value0, schema, type, data, name) {
  *
  * @param  {object} params - the parameters passed to the command
  * @param  {object} data - protocol data
- * @param  {CommandSpec} specs - description of the expected parameters
+ * @param  {object} schemas - JSON Schema description, with roboliq extensions
  * @return {object} and objects whose keys are the expected parameters and whose
  *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
  *  is optional and not presents in `params`..
  */
-function processValueAsObject(params, data, specs) {
-	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(specs)}`)
-	const required_l = specs.required || [];
-	const l0 = _.pairs(specs.properties);
-	// If no properties are specified, return the original parameters
+function processValueAsObject(params, data, schemas) {
+	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(schemas)}`)
+	const required_l = schemas.required || [];
+	const l0 = _.pairs(schemas.properties);
+	// If no properties are schemaified, return the original parameters
 	if (l0.length === 0) {
 		return params;
 	}

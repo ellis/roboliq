@@ -43,19 +43,19 @@
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [x] pipetterTest: re-enable all the tests
 - [x] command documentation:
-	- [x] create commandSpecs for all commands (JSON/YAML structured documentation)
-	- [x] move all commandSpecs to YAML files
-	- [x] generate documentation from commandSpecs
+	- [x] create schemas for all commands (JSON/YAML structured documentation)
+	- [x] move all schemas to YAML files
+	- [x] generate documentation from schemas
 		- [x] write code to do the generation
 		- [x] create an npm command for generating docs
 		- [x] install git version of jsdoc and try to get it to work with our ES6 code
 		- [x] put the command docs somewhere where jsdoc will pick it up
 	- [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
-	- [x] change all commandSpecs to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
-	- [x] use commandSpecs to parse the params before passing them to the commandHandler
+	- [x] change all schemas to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
+	- [x] use schemas to parse the params before passing them to the commandHandler
 	- [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
 	- [x] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
-	- [x] refactor all commands to accept parsed parameters, using the commandSpecs
+	- [x] refactor all commands to accept parsed parameters, using the schemas
 	- [x] remove all uses of commandHelper.parseParams()
 	- [x] rename commandHelper.parseParams2()
 - [x] commandSpec: pipetter.cleanTips: define intensity (intensity is a predefined enum)
@@ -67,10 +67,10 @@
 - [x] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
 - [x] commandHelperTest.js: test array of variables of integers
 - [x] generate documentation for object schemas
+- [x] rename commandSpec to schema everywhere
 - [ ] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
-- [ ] rename commandSpec to schema everywhere
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation
 	- [x] roboliq.js
