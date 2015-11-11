@@ -83,7 +83,7 @@
 	- [ ] misc.js
 	- [ ] commands...
 - [ ] evoware:
-	- [ ] add run-option to only process certain steps
+	- [ ] add command-line option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
