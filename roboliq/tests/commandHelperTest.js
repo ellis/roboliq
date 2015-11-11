@@ -1,7 +1,7 @@
-var _ = require('lodash');
-var should = require('should');
+const _ = require('lodash');
+const should = require('should');
 import math from 'mathjs';
-var commandHelper = require('../src/commandHelper.js')
+const commandHelper = require('../src/commandHelper.js')
 
 describe('commandHelper', function() {
 	describe('_dereferenceVariable', function () {
@@ -191,7 +191,7 @@ describe('commandHelper', function() {
 
 	describe('commandHelper.parseParams', function() {
 		it("should work with values specified in-line", () => {
-			var data = {
+			const data = {
 				objects: {
 					p: {
 						type: "Plate",
@@ -209,7 +209,7 @@ describe('commandHelper', function() {
 				},
 				accesses: []
 			};
-			var params = {
+			const params = {
 				name: "plate1",
 				object1: {a: 1, b: 2},
 				number: 42,
@@ -226,7 +226,7 @@ describe('commandHelper', function() {
 				sources2: "q"
 				//file
 			};
-			var specs = {
+			const schema = {
 				properties: {
 					name: {type: 'name'},
 					object1: {type: 'object'},
@@ -245,7 +245,7 @@ describe('commandHelper', function() {
 				},
 				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'well1', 'wells1', 'source1', 'sources1']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				name: {objectName: "plate1"},
 				object1: {value: {a: 1, b: 2}},
@@ -280,7 +280,7 @@ describe('commandHelper', function() {
 				},
 				accesses: []
 			};
-			var params = {
+			const params = {
 				objectName: "plate1",
 				agent: "agent1",
 				equipment: "equipment1",
@@ -289,7 +289,7 @@ describe('commandHelper', function() {
 				count: "number1",
 				text: "${string1}"
 			};
-			var specs = {
+			const schema = {
 				properties: {
 					objectName: {type: "name"},
 					agent: {type: "Agent"},
@@ -302,7 +302,7 @@ describe('commandHelper', function() {
 				},
 				required: ['objectName', 'agent', 'equipment', 'plate', 'site', 'count', 'text']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				objectName: {objectName: "plate1"},
 				agent: {objectName: "agent1", value: {type: "MyAgent"}},
@@ -317,21 +317,21 @@ describe('commandHelper', function() {
 		});
 
 		it('should work with defaults', function() {
-			var data = {
+			const data = {
 				objects: {},
 				accesses: []
 			};
-			var params = {
+			const params = {
 				number1: 1
 			};
-			var specs = {
+			const schema = {
 				properties: {
 					number1: {type: "number", default: -1},
 					number2: {type: "number", default: 2}
 				},
 				required: ['number1', 'number2']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				number1: {value: 1},
 				number2: {value: 2}
@@ -347,16 +347,16 @@ describe('commandHelper', function() {
 				},
 				accesses: []
 			};
-			var params = {
+			const params = {
 				ns: ["n1", "n2"]
 			};
-			var specs = {
+			const schema = {
 				properties: {
 					ns: {type: "array", items: {type: "integer"}},
 				},
 				required: ["ns"]
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				ns: {value: [1, 2]}
 			});
@@ -364,18 +364,18 @@ describe('commandHelper', function() {
 		});
 
 		it('should work for a previous bug', function() {
-			var data = {
+			const data = {
 				objects: {
 					plate1: {type: "Plate", location: "P1"},
 					number1: {type: "Variable", value: 1}
 				},
 				accesses: []
 			};
-			var params = {
+			const params = {
 				"command": "sealer.sealPlate",
 				"object": "plate1"
 			};
-			var specs = {
+			const schema = {
 				properties: {
 					agent: {type: "name"},
 					equipment: {type: "name"},
@@ -386,7 +386,7 @@ describe('commandHelper', function() {
 				},
 				required: ['object']
 			};
-			var parsed = commandHelper.parseParams(params, data, specs);
+			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				agent: {},
 				equipment: {},
@@ -396,18 +396,35 @@ describe('commandHelper', function() {
 				destinationAfter: {}
 			});
 		});
+
+		it('should catch missing sources', () => {
+			const data = {
+				objects: {},
+				accesses: []
+			};
+			const params = {
+				sources: ["missing"]
+			};
+			const schema = {
+				properties: {
+					sources: {type: "Sources"},
+				},
+				required: ["sources"]
+			};
+			should.throws(() => commandHelper.parseParams(params, data, schema), "something");
+		});
 	});
 
 	describe('commandHelper.getParsedValue', function() {
 		it('should work with error-free input', function() {
-			var data = {
+			const data = {
 				objects: {
 					plate1: {type: "Plate", location: "P1"},
 					number1: {type: "Variable", value: 1}
 				},
 				accesses: []
 			};
-			var parsed = {
+			const parsed = {
 				objectName: {objectName: "plate1"},
 				object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
 				count: {objectName: "number1", value: 1}

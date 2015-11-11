@@ -48,12 +48,18 @@ function processParserResult(result, objects, text) {
 				//subject: 'Any?'
 			}
 		});
-		//console.log(parsed);
+		//console.log({clause, parsed});
 		if (parsed.source.value) {
+			// If this was a source, return its wells
 			if (parsed.source.value.type === 'Source')
 				return [parsed.source.value.wells];
+			// Handle the case of when a variable is used and here we can substitute in its value
 			else if (_.isString(parsed.source.value) && parsed.source.value !== clause.source)
 				return parse(parsed.source.value, objects);
+			// Else
+			else {
+				expect.throw({}, "unrecognized source specifier: "+parsed.source.value);
+			}
 		}
 		else if (parsed.labware.value) {
 			const labware = parsed.labware.value;

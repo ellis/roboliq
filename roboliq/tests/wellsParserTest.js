@@ -1,8 +1,8 @@
-var should = require('should');
-var wellsParser = require('../src/parsers/wellsParser.js');
+const should = require('should');
+const wellsParser = require('../src/parsers/wellsParser.js');
 
 describe('wellsParser', function() {
-	var objects = {
+	const objects = {
 		p: {
 			type: "Plate",
 			model: "m96"
@@ -43,10 +43,10 @@ describe('wellsParser', function() {
 		}
 	}
 	describe('parse()', function() {
-		var test1 = function(text, wells) {
+		const test1 = function(text, wells) {
 			should.deepEqual(wellsParser.parse(text, objects), wells);
 		}
-		var test2 = function(text, result, wells) {
+		const test2 = function(text, result, wells) {
 			should.deepEqual(wellsParser.parse(text), result);
 			should.deepEqual(wellsParser.parse(text, objects), wells);
 		}
@@ -99,7 +99,7 @@ describe('wellsParser', function() {
 			)
 		})
 		it('should parse "p(A01)+q"', function() {
-			var text = "p(A01,A02)+q";
+			const text = "p(A01,A02)+q";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: []},
 				{labware: 'p', subject: 'A02', phrases: []},
@@ -110,7 +110,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 down 1)"', function() {
-			var text = "p(A01 down 1)";
+			const text = "p(A01 down 1)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['down', 1]]}
 			]);
@@ -119,7 +119,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 right 1)"', function() {
-			var text = "p(A01 right 1)";
+			const text = "p(A01 right 1)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['right', 1]]}
 			]);
@@ -128,7 +128,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 down 4)"', function() {
-			var text = "p(A01 down 4)";
+			const text = "p(A01 down 4)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['down', 4]]}
 			]);
@@ -137,7 +137,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 down take 4)"', function() {
-			var text = "p(A01 down take 4)";
+			const text = "p(A01 down take 4)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['down', 4]]}
 			]);
@@ -146,7 +146,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 right 4)"', function() {
-			var text = "p(A01 right 4)";
+			const text = "p(A01 right 4)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['right', 4]]}
 			]);
@@ -155,7 +155,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 right take 4)"', function() {
-			var text = "p(A01 right take 4)";
+			const text = "p(A01 right take 4)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['right', 4]]}
 			]);
@@ -164,19 +164,19 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 down 9)"', function() {
-			var text = "p(A01 down 9)";
+			const text = "p(A01 down 9)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(B01)", "p(C01)", "p(D01)", "p(E01)", "p(F01)", "p(G01)", "p(H01)", "p(A02)"
 			]);
 		})
 		it('should parse "p(A01 right 13)"', function() {
-			var text = "p(A01 right 13)";
+			const text = "p(A01 right 13)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(A02)", "p(A03)", "p(A04)", "p(A05)", "p(A06)", "p(A07)", "p(A08)", "p(A09)", "p(A10)", "p(A11)", "p(A12)", "p(B01)"
 			]);
 		})
 		it('should parse "p(A01 down C01)"', function() {
-			var text = "p(A01 down C01)";
+			const text = "p(A01 down C01)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['down-to', "C01"]]}
 			]);
@@ -185,13 +185,13 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 down to C01)"', function() {
-			var text = "p(A01 down to C01)";
+			const text = "p(A01 down to C01)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(B01)", "p(C01)"
 			]);
 		})
 		it('should parse "p(A01 right A03)"', function() {
-			var text = "p(A01 right A03)";
+			const text = "p(A01 right A03)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['right-to', "A03"]]}
 			]);
@@ -200,7 +200,7 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 right to A03)"', function() {
-			var text = "p(A01 right to A03)";
+			const text = "p(A01 right to A03)";
 			should.deepEqual(wellsParser.parse(text), [
 				{labware: 'p', subject: 'A01', phrases: [['right-to', "A03"]]}
 			]);
@@ -209,25 +209,25 @@ describe('wellsParser', function() {
 			]);
 		})
 		it('should parse "p(A01 down A02)"', function() {
-			var text = "p(A01 down A02)";
+			const text = "p(A01 down A02)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(B01)", "p(C01)", "p(D01)", "p(E01)", "p(F01)", "p(G01)", "p(H01)", "p(A02)"
 			]);
 		})
 		it('should parse "p(A01 right B01)"', function() {
-			var text = "p(A01 right B01)";
+			const text = "p(A01 right B01)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(A02)", "p(A03)", "p(A04)", "p(A05)", "p(A06)", "p(A07)", "p(A08)", "p(A09)", "p(A10)", "p(A11)", "p(A12)", "p(B01)"
 			]);
 		})
 		it('should parse "p(A01 down block C02)"', function() {
-			var text = "p(A01 down block C02)";
+			const text = "p(A01 down block C02)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(B01)", "p(C01)", "p(A02)", "p(B02)", "p(C02)"
 			]);
 		})
 		it('should parse "p(A01 right block C02)"', function() {
-			var text = "p(A01 right block C02)";
+			const text = "p(A01 right block C02)";
 			should.deepEqual(wellsParser.parse(text, objects), [
 				"p(A01)", "p(A02)", "p(B01)", "p(B02)", "p(C01)", "p(C02)"
 			]);
@@ -279,5 +279,8 @@ describe('wellsParser', function() {
 				["p(A01)"]
 			);
 		});
-	})
-})
+		it('should catch error when missing source', function() {
+			should.throws(() => wellsParser.parse("missing", objects), "Something");
+		});
+	});
+});

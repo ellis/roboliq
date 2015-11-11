@@ -362,6 +362,7 @@ function processSources(x, data, paramName) {
 	//console.log({before: x, paramName})
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
+		//console.log({x})
 		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
 		//x = [x];
 	}
