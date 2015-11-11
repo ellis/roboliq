@@ -73,6 +73,13 @@
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
+	- [ ] Commands.md: Add general documentation to each command namespace
+	- [ ] Developing_Roboliq.md
+	- [ ] Object_Types.md: Add general documentation to top of page
+	- [ ] Using_Roboliq.md
+		- [ ] add reference to WritingAProtocol.md
+	- [ ] WritingAProtocol.md
+	- [ ] Cookbook.md: explaining how to solve specific problems
 - [ ] code documentation
 	- [x] roboliq.js
 	- [x] WellContents.js
@@ -93,7 +100,6 @@
 - [ ] upload to a public repository
 - [ ] test all pipetter commands
 - [ ] testing scripts on second Tecan robot
-- [ ] start working on "Cookbook" tutorial, explaining how to solve specific problems
 
 ## After submission
 
