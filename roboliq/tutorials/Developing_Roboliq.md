@@ -9,14 +9,6 @@ to the project's root (where the `package.json` file is) and running:
 
 ``npm install``
 
-## Running Roboliq
-
-
-
-```{sh}
-npm run roboliq -- [options] ${PROTOCOL}
-```
-
 ## Development
 
 The most commonly used commands are:
@@ -36,44 +28,31 @@ Less commonly used commands include:
 Here is a directory listing with the most important files and directories.
 
 ```
-├── README.md
-├── Todo.md
-├── beautify.sh
-├── jsdoc.json
-├── out/
-├── package.json
-├── protocols/
-├── runall.sh
-├── src
-│   ├── commands
-│   │   ├── pipetter
-│   │   │   ├── groupingMethods.js
-│   │   │   ├── pipetterUtils.js
-│   │   │   └── sourceMethods.js
-│   │   ├── centrifuge.js
-│   │   ├── equipment.js
-│   │   ├── fluorescenceReader.js
-│   │   ├── pipetter.js
-│   │   ├── sealer.js
-│   │   ├── system.js
-│   │   ├── timer.js
-│   │   ├── transporter.js
-│   │   └── transporterLogic.json
+├── README.md -- project description
+├── Todo.md -- todo list
+├── beautify.sh -- script for reformatting JavaScript code
+├── jsdoc.json -- configuration file for JSDoc documentation
+├── out/ -- output directory for JSDoc documentation
+├── package.json -- configuration file for npm
+├── protocols/ -- sample protocol files
+├── runall.sh -- compile all sample protocol files
+├── src -- source code
+│   ├── commands/ -- command handlers
 │   ├── config
 │   │   ├── ourlab.js
 │   │   ├── roboliq.js
 │   │   └── roboliqDirectiveHandlers.js
-│   ├── HTN
+│   ├── HTN -- logic planning
 │   │   ├── llpl.js
 │   │   ├── shop.js
 │   │   └── utils.js
 │   ├── parsers
-│   │   ├── sourceParser.js
-│   │   ├── sourceParser0.js
-│   │   ├── sourceParser0.pegjs
-│   │   ├── wellsParser.js
-│   │   ├── wellsParser0.js
-│   │   └── wellsParser0.pegjs
+│   │   ├── sourceParser.js -- parse specifier for sources, wraps sourceParser0
+│   │   ├── sourceParser0.js -- generated parser
+│   │   ├── sourceParser0.pegjs -- PEGJS description of source parser
+│   │   ├── wellsParser.js -- parser for well specifier, wraps wellParser0
+│   │   ├── wellsParser0.js -- generated parser
+│   │   └── wellsParser0.pegjs -- PEGJS description of well parser
 │   ├── schemas
 │   │   ├── centrifuge.yaml
 │   │   ├── equipment.yaml

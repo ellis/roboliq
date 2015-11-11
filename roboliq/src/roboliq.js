@@ -92,7 +92,7 @@ const nomnom = require('nomnom').options({
 	},
 	output: {
 		abbr: 'o',
-		help: 'specify output filename or "" for standard output, otherwise default is used',
+		help: 'specify output filename or "" for none; otherwise the default filename is used',
 		metavar: 'FILE'
 	},
 	outputDir: {
@@ -576,7 +576,7 @@ function run(argv, userProtocol) {
 		if (opts.debug || opts.print)
 			console.log(outputText);
 
-		// If an output is not suppressed, write the protocol to an output file.
+		// If the output is not suppressed, write the protocol to an output file.
 		if (opts.output !== '') {
 			var inpath = _.last(opts.infiles);
 			var dir = opts.outputDir || path.dirname(inpath);
