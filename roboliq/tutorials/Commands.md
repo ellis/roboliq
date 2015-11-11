@@ -1,14 +1,3 @@
-## Centrifuge
-
-Centrifuge equipment.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `sitesInternal: array` -- 
-
 ## centrifuge.centrifuge2
 
 Centrifuge using two plate
@@ -100,16 +89,6 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
-## Reader
-
-Reader equipment.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-
 ## fluorescenceReader.measurePlate
 
 Measure the fluorescence of a plate.
@@ -124,16 +103,6 @@ Properties:
 * `object: Plate` -- Plate identifier
 * `[site]: Site` -- Site identifier in reader
 * `[destinationAfter]: Site` -- Site to move the plate to after measurement
-
-## Pipetter
-
-Pipetting equipment.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
 
 ## pipetter._AspirateItem
 
@@ -272,94 +241,6 @@ Properties:
 * `destinations: Wells` -- Destination specifier
 * `[order]: string` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
 
-## Agent
-
-An agent that can execute commands.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-
-## Liquid
-
-Liquid substance.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[wells]: array` -- 
-
-## Plate
-
-Plate labware.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[model]: PlateModel` -- 
-* `[location]: Site` -- 
-* `[contents]: object,array` -- 
-
-## PlateModel
-
-Model for plate labware.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `rows: integer` -- 
-* `columns: integer` -- 
-
-## Site
-
-Represents a bench site where labware can placed.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-
-## Template
-
-A template object, used by the `system.call` command.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[template]` -- 
-
-## Variable
-
-User-defined variable.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[value]` -- 
-
-## Sealer
-
-Sealing equipment.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-
 ## sealer.sealPlate
 
 Seal a plate.
@@ -392,16 +273,6 @@ Properties:
 
 * `count: integer` -- The number of times to repeat.
 * `[steps]: object` -- The sequence of commands to repeat.
-
-## Timer
-
-Timer equipment.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
 
 ## timer._sleep
 
@@ -505,16 +376,6 @@ Properties:
 
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
-
-## Transporter
-
-Labware transporter equipment.
-
-Properties:
-
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
 
 ## transporter._movePlate
 

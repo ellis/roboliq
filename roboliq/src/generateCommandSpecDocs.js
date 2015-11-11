@@ -3,7 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'yamljs';
 
-function toMarkdown(o, name) {
+function toMarkdown(pair) {
+	const [name, o] = pair;
 	return _.flattenDeep([
 		`## ${name}`,
 		"",
@@ -22,6 +23,11 @@ function toMarkdown(o, name) {
 
 const filename_l = _.filter(fs.readdirSync(__dirname+"/commandSpecs/"), s => path.extname(s) === ".yaml");
 const commandSpecs_l = _.map(filename_l, filename => yaml.load(__dirname+"/commandSpecs/"+filename));
-const commandSpecs = _.merge.apply(_, [{}].concat(commandSpecs_l));
-const s = _.map(commandSpecs, toMarkdown).join('\n\n')
-console.log(s)
+const schemas = _.merge.apply(_, [{}].concat(commandSpecs_l));
+const [objectSchemas, commandSchemas] = _.partition(_.pairs(schemas), ([name, schema]) => name[0] === name[0].toUpperCase());
+
+const objectSchemasText = _.map(objectSchemas, toMarkdown).join('\n\n')
+fs.writeFileSync(__dirname+"/../tutorials/Object_Types.md", objectSchemasText);
+
+const commandSchemasText = _.map(commandSchemas, toMarkdown).join('\n\n')
+fs.writeFileSync(__dirname+"/../tutorials/Commands.md", commandSchemasText);

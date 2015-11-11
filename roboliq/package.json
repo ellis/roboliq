@@ -29,7 +29,7 @@
     "test": "mocha --compilers js:babel/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc.json --readme README.md --tutorials tutorials",
-    "generateCommandSpecDocs": "babel-node src/generateCommandSpecDocs.js > tutorials/commandSpecs.md"
+    "generateCommandSpecDocs": "babel-node src/generateCommandSpecDocs.js"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"
