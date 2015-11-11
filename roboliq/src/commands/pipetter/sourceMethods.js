@@ -3,7 +3,6 @@ var assert = require('assert');
 var math = require('mathjs');
 var expect = require('../../expect.js');
 var pipetterUtils = require('./pipetterUtils.js');
-var wellsParser = require('../../parsers/sourceParser.js');
 var WellContents = require('../../WellContents.js');
 
 /*

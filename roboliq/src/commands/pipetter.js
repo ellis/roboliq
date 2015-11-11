@@ -21,7 +21,6 @@ var misc = require('../misc.js');
 var groupingMethods = require('./pipetter/groupingMethods.js');
 var pipetterUtils = require('./pipetter/pipetterUtils.js');
 var sourceMethods = require('./pipetter/sourceMethods.js');
-var sourceParser = require('../parsers/sourceParser.js');
 var wellsParser = require('../parsers/wellsParser.js');
 import * as WellContents from '../WellContents.js';
 

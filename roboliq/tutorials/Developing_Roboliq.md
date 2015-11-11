@@ -27,7 +27,7 @@ Less commonly used commands include:
 
 Here is a directory listing with the most important files and directories.
 
-```
+<pre>
 ├── README.md -- project description
 ├── Todo.md -- todo list
 ├── beautify.sh -- script for reformatting JavaScript code
@@ -47,22 +47,10 @@ Here is a directory listing with the most important files and directories.
 │   │   ├── shop.js
 │   │   └── utils.js
 │   ├── parsers
-│   │   ├── sourceParser.js -- parse specifier for sources, wraps sourceParser0
-│   │   ├── sourceParser0.js -- generated parser
-│   │   ├── sourceParser0.pegjs -- PEGJS description of source parser
 │   │   ├── wellsParser.js -- parser for well specifier, wraps wellParser0
 │   │   ├── wellsParser0.js -- generated parser
 │   │   └── wellsParser0.pegjs -- PEGJS description of well parser
-│   ├── schemas
-│   │   ├── centrifuge.yaml
-│   │   ├── equipment.yaml
-│   │   ├── fluorescenceReader.yaml
-│   │   ├── pipetter.yaml
-│   │   ├── roboliq.yaml
-│   │   ├── sealer.yaml
-│   │   ├── system.yaml
-│   │   ├── timer.yaml
-│   │   └── transporter.yaml
+│   ├── schemas/ -- schemas for Roboliq's commands and objects
 │   ├── commandHelper.js
 │   ├── expect.js
 │   ├── expectCore.js
@@ -72,6 +60,6 @@ Here is a directory listing with the most important files and directories.
 │   ├── roboliq.js
 │   ├── roboliqSchemas.js
 │   └── WellContents.js
-├── tests/
-└── tutorials/
-```
+├── tests/ -- unit tests
+└── tutorials/ -- Markdown files that are included as tutorials in the JSDoc documentation
+<pre>
