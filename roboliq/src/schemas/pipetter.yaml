@@ -115,5 +115,9 @@ pipetter.pipetteMixtures:
     program: {description: "Program identifier", type: "string"}
     mixtures: {description: "Array of arrays, where each sub-array is a list of components to be mixed into a destination well", "type": "array"}
     destinations: {description: "Destination specifier", type: Wells}
-    order: {description: "Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.", type: string}
+    order:
+      description: "Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array."
+      type: array
+      items:
+        enum: ["index", "destination"]
   required: [mixtures, destinations]

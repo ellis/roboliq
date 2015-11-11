@@ -500,7 +500,7 @@ describe('pipetter', function() {
 				]
 			});
 
-			protocol.steps["1"].order = "destination";
+			protocol.steps["1"].order = ["destination"];
 			result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",

@@ -70,7 +70,7 @@
 - [x] rename commandSpec to schema everywhere
 - [x] refactor: can I remove parsers/sourceParser?
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
-- [ ] commandSpec: pipetter.pipetteMixtures.order: should be an enum
+- [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 - [ ] code documentation

@@ -835,7 +835,7 @@ function _run(opts, userProtocol) {
 			var c = key[0];
 			return (c >= '0' && c <= '9');
 		});
-		// Sort them in natural order
+		// Sort them in "natural" order
 		keys.sort(naturalSort);
 		// Try to expand the substeps
 		for (const key of keys) {
