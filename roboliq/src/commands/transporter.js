@@ -191,7 +191,7 @@ var planHandlers = {
 module.exports = {
 	roboliq: "v1",
 	objectToPredicateConverters: objectToPredicateConverters,
-	commandSpecs: yaml.load(__dirname+'/../commandSpecs/transporter.yaml'),
+	schemas: yaml.load(__dirname+'/../schemas/transporter.yaml'),
 	commandHandlers: commandHandlers,
 	planHandlers: planHandlers
 };

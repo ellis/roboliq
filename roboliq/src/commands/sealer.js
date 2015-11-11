@@ -75,6 +75,6 @@ var commandHandlers = {
 module.exports = {
 	roboliq: "v1",
 	objectToPredicateConverters,
-	commandSpecs: yaml.load(__dirname+"/../commandSpecs/sealer.yaml"),
+	schemas: yaml.load(__dirname+"/../schemas/sealer.yaml"),
 	commandHandlers
 };

@@ -564,7 +564,7 @@ module.exports = {
 
 	]),
 
-	commandSpecs: {
+	schemas: {
 		"EvowareRobot": {
 			properties: {
 				type: {enum: ["EvowareRobot"]}

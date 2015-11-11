@@ -86,6 +86,6 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	commandSpecs: yaml.load(__dirname+"/../commandSpecs/fluorescenceReader.yaml"),
+	schemas: yaml.load(__dirname+"/../schemas/fluorescenceReader.yaml"),
 	commandHandlers
 };

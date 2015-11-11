@@ -308,6 +308,6 @@ var commandHandlers = {
 module.exports = {
 	roboliq: "v1",
 	objectToPredicateConverters,
-	commandSpecs: yaml.load(__dirname+'/../commandSpecs/timer.yaml'),
+	schemas: yaml.load(__dirname+'/../schemas/timer.yaml'),
 	commandHandlers
 };

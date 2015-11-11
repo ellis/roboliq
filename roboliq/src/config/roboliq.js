@@ -143,7 +143,7 @@ module.exports = {
 	],
 	predicates: predicates,
 	objectToPredicateConverters: objectToPredicateConverters,
-	commandSpecs: yaml.load(__dirname+'/../commandSpecs/roboliq.yaml'),
+	schemas: yaml.load(__dirname+'/../schemas/roboliq.yaml'),
 	planHandlers: planHandlers,
 	directiveHandlers: require('./roboliqDirectiveHandlers.js'),
 };

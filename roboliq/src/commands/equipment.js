@@ -178,7 +178,7 @@ var planHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	commandSpecs: yaml.load(__dirname+"/../commandSpecs/equipment.yaml"),
+	schemas: yaml.load(__dirname+"/../schemas/equipment.yaml"),
 	commandHandlers,
 	planHandlers
 };

@@ -137,8 +137,8 @@ function processValue0BySchemaType(value0, schema, type, data, name) {
 			//console.log({filedata})
 			return filedata;
 		default: {
-			if (data.commandSpecs.hasOwnProperty(type)) {
-				const spec = data.commandSpecs[type];
+			if (data.schemas.hasOwnProperty(type)) {
+				const spec = data.schemas[type];
 				//console.log({type, spec})
 				const parsed = processValue0BySchema(value, spec, data, name);
 				//console.log({type, parsed})

@@ -21,9 +21,9 @@ function toMarkdown(pair) {
 	]).join('\n');
 }
 
-const filename_l = _.filter(fs.readdirSync(__dirname+"/commandSpecs/"), s => path.extname(s) === ".yaml");
-const commandSpecs_l = _.map(filename_l, filename => yaml.load(__dirname+"/commandSpecs/"+filename));
-const schemas = _.merge.apply(_, [{}].concat(commandSpecs_l));
+const filename_l = _.filter(fs.readdirSync(__dirname+"/schemas/"), s => path.extname(s) === ".yaml");
+const schemas_l = _.map(filename_l, filename => yaml.load(__dirname+"/schemas/"+filename));
+const schemas = _.merge.apply(_, [{}].concat(schemas_l));
 const [objectSchemas, commandSchemas] = _.partition(_.pairs(schemas), ([name, schema]) => name[0] === name[0].toUpperCase());
 
 const objectSchemasText = _.map(objectSchemas, toMarkdown).join('\n\n')

@@ -689,6 +689,6 @@ var commandHandlers = {
 
 module.exports = {
 	roboliq: "v1",
-	commandSpecs: yaml.load(__dirname+'/../commandSpecs/pipetter.yaml'),
+	schemas: yaml.load(__dirname+'/../schemas/pipetter.yaml'),
 	commandHandlers: commandHandlers
 };

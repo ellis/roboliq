@@ -137,7 +137,7 @@ const protocolEmpty = {
 	predicates: [],
 	directiveHandlers: {},
 	objectToPredicateConverters: {},
-	commandSpecs: {},
+	schemas: {},
 	commandHandlers: {},
 	planHandlers: {},
 	files: {},
@@ -217,7 +217,7 @@ function loadProtocol(a, b, url, filecache) {
 		'predicates',
 		'directiveHandlers',
 		'objectToPredicateConverters',
-		'commandSpecs',
+		'schemas',
 		'commandHandlers',
 		'planHandlers',
 		'files',
@@ -496,7 +496,7 @@ function validateProtocol1(protocol, o, path) {
 				validateProtocol1(protocol, value, path.concat(name));
 			}
 			else {
-				const schema = protocol.commandSpecs[value.type];
+				const schema = protocol.schemas[value.type];
 				expect.truthy({objectName: fullName}, schema, "Unknown type: "+value.type);
 				if (schema) {
 					commandHelper.parseParams(value, protocol, schema);
@@ -767,12 +767,12 @@ function _run(opts, userProtocol) {
 						objects: objects,
 						predicates: predicates,
 						planHandlers: protocol.planHandlers,
-						commandSpecs: protocol.commandSpecs,
+						schemas: protocol.schemas,
 						accesses: [],
 						files: filecache
 					};
 					// If a schema is given for the command, parse its parameters
-					const commandSpec = protocol.commandSpecs[commandName];
+					const commandSpec = protocol.schemas[commandName];
 					//console.log("params: "+JSON.stringify(params))
 					const parsed = (commandSpec)
 						? commandHelper.parseParams(params, data, commandSpec)
