@@ -79,6 +79,7 @@
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
 - [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
+- [ ] review FIXMEs
 - [ ] upload to a public repository
 - [ ] test all pipetter commands
 - [ ] testing scripts on second Tecan robot
