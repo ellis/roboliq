@@ -559,7 +559,7 @@ const commandHandlers = {
 			effects: effects
 		};
 	},
-	"pipetter._cleanTips": function(params, parsed, data) {
+	"pipetter._washTips": function(params, parsed, data) {
 		var effects = {};
 		return {
 			effects: effects
@@ -591,7 +591,7 @@ const commandHandlers = {
 		var intensity = parsed.intensity.value;
 		//console.log({intensity: parsed.intensity})
 
-		// Check whether labwares are on sites that can be pipetted
+		// Check whether there's a program to wash the tip models at the given intensity
 		var syringeToProgram_l = _.map(parsed.syringes.value, function(syringe) {
 			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
 			var tipModel = expect.objectsValue({}, tipModelRef, data.objects);
@@ -622,7 +622,7 @@ const commandHandlers = {
 			var l = _.remove(syringeToProgram_l, function(x) { return x.program === program; });
 			var syringe_l = _.map(l, 'syringe');
 			expansion_l.push({
-				command: "pipetter._cleanTips",
+				command: `pipetter.cleanTips|${agent}|${equipment}`,
 				agent: agent,
 				equipment: equipment,
 				program: program,

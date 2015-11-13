@@ -446,6 +446,12 @@ module.exports = {
 			"site": "ourlab.mario.site.ROBOSEAL"
 		}
 	},
+	{
+		"pipetter.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.liha"
+		}
+	},
 	{"#for": {
 		factors: {site: ["P2", "P3", "P4", "P5", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
 		output: {
@@ -457,18 +463,6 @@ module.exports = {
 		}
 	}},
 	{
-		"pipetter.canAgentEquipmentSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha",
-			"site": "ourlab.mario.site.P3"
-		}
-	}, {
-		"pipetter.canAgentEquipmentSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha",
-			"site": "ourlab.mario.site.SYSTEM"
-		}
-	}, {
 		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",

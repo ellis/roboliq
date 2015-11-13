@@ -55,15 +55,6 @@ pipetter._aspirate:
     items: {description: "Data about what should be aspirated from where", "type": "array", items: {type: pipetter._AspirateItem}}
   required: [agent, equipment, program]
 
-pipetter._cleanTips:
-  description: Clean the pipetter tips.
-  properties:
-    agent: {description: "Agent identifier", type: "Agent"}
-    equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "string"}
-    items: {description: "Data about which tips to clean and with what intensity", "type": "array", items: {type: pipetter._CleanTipsItem}}
-  required: [agent, equipment, program]
-
 pipetter._dispense:
   description: Dispense liquids from sryinges into destinations.
   properties:
@@ -80,6 +71,16 @@ pipetter._pipette:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter._PipetteItem}}
+  required: [agent, equipment, program]
+
+pipetter._washTips:
+  description: Clean the pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
+    syringes: {description: "List of syringe identifiers", type: array, items: {type: string}}
+    intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
   required: [agent, equipment, program]
 
 pipetter.cleanTips:

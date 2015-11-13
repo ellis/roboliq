@@ -72,12 +72,16 @@
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
-	- [ ] change pipetter.cleanTips to pipetter.washTips
-	- [ ] `pipetter._washTips` should update syringe state
+	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
+	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
+	- [ ] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
+	- [ ] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
+	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] rewrite evoware compiler in javascript
 - [ ] evoware:
+	- [ ] rename `_cleanTips` instruction to `_washTips`
 	- [ ] add command-line option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
@@ -98,6 +102,8 @@
 		- [ ] add reference to WritingAProtocol.md
 	- [ ] WritingAProtocol.md
 	- [ ] Cookbook.md: explaining how to solve specific problems
+	- [ ] Configuring a lab (e.g. `config/ourlab.js`)
+	- [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
 - [ ] code documentation
 	- [x] roboliq.js
 	- [x] WellContents.js
