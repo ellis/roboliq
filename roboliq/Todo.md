@@ -72,6 +72,10 @@
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
+	- [ ] change pipetter.cleanTips to pipetter.washTips
+	- [ ] `pipetter._washTips` should update syringe state
+	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
+- [ ] add pipetter commands for dropping tips and getting tips
 - [ ] rewrite evoware compiler in javascript
 - [ ] evoware:
 	- [ ] add command-line option to only process certain steps

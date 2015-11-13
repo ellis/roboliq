@@ -177,10 +177,10 @@ function processValue0BySchemaType(value0, schema, type, data, name) {
  *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
  *  is optional and not presents in `params`..
  */
-function processValueAsObject(params, data, schemas) {
-	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(schemas)}`)
-	const required_l = schemas.required || [];
-	const l0 = _.pairs(schemas.properties);
+function processValueAsObject(params, data, schema) {
+	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
+	const required_l = schema.required || [];
+	const l0 = _.pairs(schema.properties);
 	// If no properties are schemaified, return the original parameters
 	if (l0.length === 0) {
 		return params;

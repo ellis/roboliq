@@ -57,7 +57,7 @@ function pipette(params, parsed, data) {
 			);
 	//console.log("items: "+JSON.stringify(items));
 	let agent = parsed.agent.objectName || "?agent";
-	let equipment = parsed.equipment.objectName || "?equipment";
+	let equipmentName = parsed.equipment.objectName || "?equipment";
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
@@ -142,7 +142,7 @@ function pipette(params, parsed, data) {
 		var query = {
 			"pipetter.canAgentEquipmentSite": {
 				"agent": agent,
-				"equipment": equipment,
+				"equipment": equipmentName,
 				"site": labware.location
 			}
 		};
@@ -168,9 +168,18 @@ function pipette(params, parsed, data) {
 		else {
 			var x = queryResults2[0]["and"][0]["pipetter.canAgentEquipmentSite"];
 			agent = x.agent;
-			equipment = x.equipment;
+			equipmentName = x.equipment;
 		}
 	}
+
+	const parsed2 = commandHelper.parseParams({equipment: equipmentName}, data, {
+		properties: {
+			equipment: {type: "Equipment"}
+		},
+		required: ["equipment"]
+	});
+	//console.log({equipment: parsed2.equipment.value})
+	const equipment = parsed2.equipment.value;
 
 	// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
@@ -335,12 +344,8 @@ function pipette(params, parsed, data) {
 	}
 
 	// Limit syringe choices based on params
-	// TODO: get syringe information from data.objects
-	var syringesAvailable = params.syringes || [1, 2, 3, 4, 5, 6, 7, 8];
-	var tipModelToSyringes = {
-		"ourlab.mario.tipModel1000": [1, 2, 3, 4],
-		"ourlab.mario.tipModel0050": [5, 6, 7, 8]
-	};
+	var syringesAvailable = params.syringes || _.map(_.keys(equipment.syringes), s => `${equipmentName}.syringes.${s}`) || [];
+	var tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
 	var groups = groupingMethods.groupingMethod2(items, syringesAvailable, tipModelToSyringes);
 	//console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
@@ -374,13 +379,13 @@ function pipette(params, parsed, data) {
 
 	var syringeToSource = {};
 	// How clean is the syringe/tip currently?
-	var syringeToCleanValue = {"1": 5, "2": 5, "3": 5, "4": 5, "6": 5, "7": 5, "8": 5};
+	var syringeToCleanValue = _.zipObject(_.map(syringesAvailable, s => [s, 5]));
 	var expansionList = [];
 
 	// Create clean commands before pipetting this group
 	var createCleanActions = function(syringeToCleanValue) {
 		var expansionList = [];
-
+		CONTINUE
 		if (_.isEmpty(syringeToCleanValue)) return [];
 		var l1000 = _.compact([
 			syringeToCleanValue[1],
@@ -401,7 +406,7 @@ function pipette(params, parsed, data) {
 				expansionList.push({
 					command: "pipetter.cleanTips",
 					agent: agent,
-					equipment: equipment,
+					equipment: equipmentName,
 					intensity: intensity,
 					syringes: syringes
 				});
@@ -452,6 +457,7 @@ function pipette(params, parsed, data) {
 		assert(group.length > 0);
 		// What cleaning intensity is required for the tip before aspirating?
 		var syringeToCleanBeforeValue = _.clone(syringeToCleanAfterValue);
+		console.log({syringeToCleanBeforeValue, syringeToCleanAfterValue})
 		_.forEach(group, function(item) {
 			var source = item.source;
 			var syringe = item.syringe;
@@ -468,6 +474,7 @@ function pipette(params, parsed, data) {
 			var intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 				intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);
+			console.log({source, syringe, isSameSource, intensityValue})
 
 			// Update cleaning value required before current aspirate
 			if (!syringeToCleanBeforeValue.hasOwnProperty(syringe) || intensityValue > syringeToCleanBeforeValue[syringe]) {
@@ -482,6 +489,7 @@ function pipette(params, parsed, data) {
 				syringeToCleanAfterValue[syringe] = item.cleanAfter;
 			else
 				delete syringeToCleanAfterValue[syringe];
+			console.log({syringeToCleanAfterValue, syringe})
 			// TODO: if wet contact, indicate tip contamination
 		});
 
@@ -503,7 +511,7 @@ function pipette(params, parsed, data) {
 		expansionList.push({
 			"command": "pipetter._pipette",
 			"agent": agent,
-			"equipment": equipment,
+			"equipment": equipmentName,
 			"program": group[0].program,
 			"items": items2
 		});
@@ -512,6 +520,7 @@ function pipette(params, parsed, data) {
 	// cleanEnd
 	// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 	var syringeToCleanEndValue = {};
+	console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
 		var intensity = parsed.cleanEnd.value || parsed.clean.value || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));
@@ -521,6 +530,7 @@ function pipette(params, parsed, data) {
 		if (value < intensityValue)
 			syringeToCleanEndValue[syringe] = intensityValue;
 	});
+	console.log({syringeToCleanEndValue})
 	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanEndValue));
 
 	var expansion = {};
@@ -542,7 +552,7 @@ function pipette(params, parsed, data) {
  * Handlers for {@link pipetter} commands.
  * @static
  */
-var commandHandlers = {
+const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
 		var effects = {};
 		return {

@@ -29,16 +29,17 @@ describe('pipetter', function() {
 			var result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
+			console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1][1][1], {
 				"command": "pipetter._cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",
 				"syringes": [
-					1,
-					2,
-					3,
-					4
+					"ourlab.mario.liha.syringes.1",
+					"ourlab.mario.liha.syringes.2",
+					"ourlab.mario.liha.syringes.3",
+					"ourlab.mario.liha.syringes.4"
 				]
 			});
 			should.deepEqual(result.output.steps[1][2], {
@@ -48,7 +49,7 @@ describe('pipetter', function() {
 				"program": "\"Roboliq_Water_Dry_1000\"",
 				"items": [
 					{
-						"syringe": 1,
+						"syringe": "ourlab.mario.liha.syringes.1",
 						"source": "plate1(A01)",
 						"destination": "plate1(A02)",
 						"volume": "20 ul"
@@ -61,10 +62,10 @@ describe('pipetter', function() {
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",
 				"syringes": [
-					1,
-					2,
-					3,
-					4
+					"ourlab.mario.liha.syringes.1",
+					"ourlab.mario.liha.syringes.2",
+					"ourlab.mario.liha.syringes.3",
+					"ourlab.mario.liha.syringes.4"
 				]
 			});
 			should.deepEqual(result.output.effects, {
@@ -163,25 +164,25 @@ describe('pipetter', function() {
 				"program": "\"Roboliq_Water_Dry_1000\"",
 				"items": [
 					{
-						"syringe": 1,
+						"syringe": "ourlab.mario.liha.syringes.1",
 						"source": "ourlab.mario.systemLiquidLabware(A01)",
 						"destination": "plate1(A01)",
 						"volume": "10 ul"
 					},
 					{
-						"syringe": 2,
+						"syringe": "ourlab.mario.liha.syringes.2",
 						"source": "ourlab.mario.systemLiquidLabware(B01)",
 						"destination": "plate1(B01)",
 						"volume": "10 ul"
 					},
 					{
-						"syringe": 3,
+						"syringe": "ourlab.mario.liha.syringes.3",
 						"source": "ourlab.mario.systemLiquidLabware(C01)",
 						"destination": "plate1(C01)",
 						"volume": "10 ul"
 					},
 					{
-						"syringe": 4,
+						"syringe": "ourlab.mario.liha.syringes.4",
 						"source": "ourlab.mario.systemLiquidLabware(D01)",
 						"destination": "plate1(D01)",
 						"volume": "10 ul"
@@ -195,25 +196,25 @@ describe('pipetter', function() {
 				"program": "\"Roboliq_Water_Dry_1000\"",
 				"items": [
 					{
-						"syringe": 1,
+						"syringe": "ourlab.mario.liha.syringes.1",
 						"source": "ourlab.mario.systemLiquidLabware(A01)",
 						"destination": "plate1(E01)",
 						"volume": "10 ul"
 					},
 					{
-						"syringe": 2,
+						"syringe": "ourlab.mario.liha.syringes.2",
 						"source": "ourlab.mario.systemLiquidLabware(B01)",
 						"destination": "plate1(F01)",
 						"volume": "10 ul"
 					},
 					{
-						"syringe": 3,
+						"syringe": "ourlab.mario.liha.syringes.3",
 						"source": "ourlab.mario.systemLiquidLabware(C01)",
 						"destination": "plate1(G01)",
 						"volume": "10 ul"
 					},
 					{
-						"syringe": 4,
+						"syringe": "ourlab.mario.liha.syringes.4",
 						"source": "ourlab.mario.systemLiquidLabware(D01)",
 						"destination": "plate1(H01)",
 						"volume": "10 ul"
@@ -368,25 +369,25 @@ describe('pipetter', function() {
 				"program": "\"Roboliq_Water_Dry_1000\"",
 				"items": [
 					{
-						"syringe": 1,
+						"syringe": "ourlab.mario.liha.syringes.1",
 						"source": "trough1(A01)",
 						"destination": "plate1(A02)",
 						"volume": "20 ul"
 					},
 					{
-						"syringe": 2,
+						"syringe": "ourlab.mario.liha.syringes.2",
 						"source": "trough1(B01)",
 						"destination": "plate1(B02)",
 						"volume": "20 ul"
 					},
 					{
-						"syringe": 3,
+						"syringe": "ourlab.mario.liha.syringes.3",
 						"source": "trough1(C01)",
 						"destination": "plate1(C02)",
 						"volume": "20 ul"
 					},
 					{
-						"syringe": 4,
+						"syringe": "ourlab.mario.liha.syringes.4",
 						"source": "trough1(D01)",
 						"destination": "plate1(D02)",
 						"volume": "20 ul"

@@ -51,24 +51,28 @@ module.exports = {
 					"syringes": {
 						"1": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"2": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"3": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"4": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						}
+					},
+					"tipModelToSyringes": {
+						"ourlab.mario.tipModel1000": ["ourlab.mario.liha.syringes.1", "ourlab.mario.liha.syringes.2", "ourlab.mario.liha.syringes.3", "ourlab.mario.liha.syringes.4"],
+						"ourlab.mario.tipModel0050": ["ourlab.mario.liha.syringes.5", "ourlab.mario.liha.syringes.6", "ourlab.mario.liha.syringes.7", "ourlab.mario.liha.syringes.8"]
 					}
 				},
 				"sealer": {
@@ -469,7 +473,7 @@ module.exports = {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"program": "ourlab.mario.washProgram.flush_1000",
-			"model": "tipModel1000",
+			"model": "ourlab.mario.tipModel1000",
 			"intensity": "flush"
 		}
 	}, {
@@ -477,7 +481,7 @@ module.exports = {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"program": "ourlab.mario.washProgram.light_1000",
-			"model": "tipModel1000",
+			"model": "ourlab.mario.tipModel1000",
 			"intensity": "light"
 		}
 	}, {
@@ -485,7 +489,7 @@ module.exports = {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha",
 			"program": "ourlab.mario.washProgram.thorough_1000",
-			"model": "tipModel1000",
+			"model": "ourlab.mario.tipModel1000",
 			"intensity": "thorough"
 		}
 	},
@@ -665,6 +669,27 @@ module.exports = {
 				program: {description: "Program identifier for shaking", type: "string"}
 			}
 		},
+		"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": {
+			description: "Clean the pipetter tips.",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				program: {description: "Program identifier", type: "string"},
+				items: {
+					description: "List of which syringes to clean at which intensity",
+					type: "array",
+					items: {
+						type: "object",
+						properties: {
+							syringe: {description: "Syringe identifier", type: "string"},
+							intensity: {description: "Intensity of the cleaning", type: "pipetter.CleaningIntensity"}
+						},
+						required: ["syringe", "intensity"]
+					}
+				}
+			},
+			required: ["agent", "equipment", "items"]
+		}
 	},
 
 	commandHandlers: {
@@ -763,7 +788,38 @@ module.exports = {
 				//effects: _.zipObject([[params.object + ".sealed", true]])
 			};
 		},
-		"evoware._facts": function() {}
+		"evoware._facts": function(params, parsed, data) {},
+		// Clean tips
+		"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
+			console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
+			console.log(JSON.stringify(parsed, null, '  '))
+
+			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
+
+			const expansionList = [];
+			const sub = function(syringeNames) {
+				const items = _.filter(parsed.items.value, item =>
+					syringeNames.includes(item.syringe.value)
+				);
+				if (!_.isEmpty(items)) {
+					const value = _.max(_.map(items, item => cleaningIntensities.indexOf(item.intensity.value)));
+					if (value >= 0) {
+						const intensity = cleaningIntensities[value];
+						const syringes = _.map(items, item => item.syring.value);
+						expansionList.push({
+							command: "pipetter.washTips",
+							agent: agent,
+							equipment: equipmentName,
+							intensity: intensity,
+							syringes: syringes
+						});
+					}
+				}
+			}
+			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringes.${n}`);
+			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringes.${n}`);
+			return {expansion: expansionList};
+		}
 	},
 
 	planHandlers: {

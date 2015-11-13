@@ -23,7 +23,10 @@ pipetter._DispenseItem:
   required: [syringe, destination, volume]
 
 pipetter.CleaningIntensity:
-  description: Intensity of cleaning.
+  description: |
+    Intensity of cleaning.
+
+    The enum lists the intensities in increase order.
   enum: ["none", "flush", "light", "thorough", "decontaminate"]
 
 pipetter.PipetteItem:
@@ -85,9 +88,16 @@ pipetter.cleanTips:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
-    syringes: {description: "List of syringes to clean", type: "array", items: {type: [integer, string]}}
-    intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
-  required: [equipment, intensity]
+    items:
+      description: "List of which syringes to clean at which intensity"
+      type: array
+      items:
+        type: object
+        properties:
+          syringe: {description: "Syringe identifier", type: string}
+          intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
+        required: [syringe, intensity]
+  required: [equipment, items]
 
 pipetter.pipette:
   description: Pipette liquids from sources to destinations.
