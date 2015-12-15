@@ -74,6 +74,7 @@
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
+	- [ ] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
 	- [ ] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
 	- [ ] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state

@@ -98,7 +98,7 @@ pipetter.cleanTips:
           syringe: {description: "Syringe identifier", type: string}
           intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
         required: [syringe, intensity]
-  required: [equipment, items]
+  required: [items]
 
 pipetter.pipette:
   description: Pipette liquids from sources to destinations.

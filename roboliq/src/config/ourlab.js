@@ -71,8 +71,8 @@ module.exports = {
 						}
 					},
 					"tipModelToSyringes": {
-						"ourlab.mario.tipModel1000": ["ourlab.mario.liha.syringes.1", "ourlab.mario.liha.syringes.2", "ourlab.mario.liha.syringes.3", "ourlab.mario.liha.syringes.4"],
-						"ourlab.mario.tipModel0050": ["ourlab.mario.liha.syringes.5", "ourlab.mario.liha.syringes.6", "ourlab.mario.liha.syringes.7", "ourlab.mario.liha.syringes.8"]
+						"ourlab.mario.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"],
+						"ourlab.mario.tipModel0050": ["ourlab.mario.liha.syringe.5", "ourlab.mario.liha.syringe.6", "ourlab.mario.liha.syringe.7", "ourlab.mario.liha.syringe.8"]
 					}
 				},
 				"sealer": {
@@ -462,6 +462,16 @@ module.exports = {
 			}
 		}
 	}},
+	{"#for": {
+		factors: {i: [1, 2, 3, 4, 5, 6, 7, 8]},
+		output: {
+			"pipetter.canAgentEquipmentSyringe": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"site": "ourlab.mario.liha.syringe.{{i}}"
+			}
+		}
+	}},
 	{
 		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
 			"agent": "ourlab.mario.evoware",
@@ -656,7 +666,7 @@ module.exports = {
 			},
 			required: ["outputFile"]
 		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
@@ -801,7 +811,7 @@ module.exports = {
 						const intensity = cleaningIntensities[value];
 						const syringes = _.map(items, item => item.syring.value);
 						expansionList.push({
-							command: "pipetter.washTips",
+							command: "pipetter._washTips",
 							agent: agent,
 							equipment: equipmentName,
 							intensity: intensity,
@@ -810,8 +820,8 @@ module.exports = {
 					}
 				}
 			}
-			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringes.${n}`);
-			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringes.${n}`);
+			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`));
+			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`));
 			return {expansion: expansionList};
 		}
 	},

@@ -554,22 +554,13 @@ function pipette(params, parsed, data) {
  */
 const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
-		var effects = {};
-		return {
-			effects: effects
-		};
+		return {};
 	},
 	"pipetter._washTips": function(params, parsed, data) {
-		var effects = {};
-		return {
-			effects: effects
-		};
+		return {};
 	},
 	"pipetter._dispense": function(params, parsed, data) {
-		var effects = {};
-		return {
-			effects: effects
-		};
+		return {};
 	},
 	"pipetter._pipette": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
@@ -579,6 +570,32 @@ const commandHandlers = {
 		};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
+		console.log("pipetter.cleanTips:")
+		console.log(JSON.stringify(params, null, '\t'));
+		
+		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.site.objectName) >= 0, `site ${parsed.site.objectName} must be in \`${parsed.equipment.objectName}.sitesInternal\; \`${parsed.equipment.objectName}.sitesInternal\` = ${sitesInternal}`);
+
+		var expansion = [{
+			command: "pipetter.cleanTips|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
+			agent: parsed.agent.objectName,
+			equipment: parsed.equipment.objectName,
+			site: parsed.site.objectName
+		}];
+
+		var effects = {};
+		// Open equipment
+		effects[parsed.equipment.objectName+".open"] = true;
+		// Indicate that the given site is open and the other internal sites are closed
+		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != parsed.site.objectName); });
+
+		return {
+			expansion: expansion,
+			effects: effects
+		};
+
+	},
+	/*"pipetter.cleanTips": function(params, parsed, data) {
 		if (_.isEmpty(parsed.syringes.value))
 			return {};
 
@@ -642,7 +659,7 @@ const commandHandlers = {
 			expansion: expansion,
 			effects: effects
 		};
-	},
+	},*/
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
 		const mixtures0 = parsed.mixtures.value;
