@@ -26,7 +26,7 @@ describe('pipetter', function() {
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.liha",
 							"intensity": "light",
-							"syringes": [
+							"syringe": [
 								"ourlab.mario.liha.syringe.1"
 							]
 						},
@@ -84,7 +84,7 @@ describe('pipetter', function() {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",
-				"syringes": [
+				"syringe": [
 					"ourlab.mario.liha.syringe.1",
 					"ourlab.mario.liha.syringe.2",
 					"ourlab.mario.liha.syringe.3",
@@ -110,7 +110,7 @@ describe('pipetter', function() {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
 				"program": "ourlab.mario.washProgram.thorough_1000",
-				"syringes": [
+				"syringe": [
 					"ourlab.mario.liha.syringe.1",
 					"ourlab.mario.liha.syringe.2",
 					"ourlab.mario.liha.syringe.3",
@@ -181,7 +181,7 @@ describe('pipetter', function() {
 				},
 			]);
 		})
-
+/*
 
 
 		it('should pipette from system liquid source', function () {
@@ -573,6 +573,7 @@ describe('pipetter', function() {
 				]
 			)
 		});
+		*/
 	});
 
 

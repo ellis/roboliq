@@ -32,12 +32,13 @@ function groupingMethod1(items) {
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
 function groupingMethod2(items, syringes, tipModelToSyringes) {
-	var groups = [];
+	//console.log({items, syringes, tipModelToSyringes})
+	const groups = [];
 	while (!_.isEmpty(items)) {
-		var program = items[0].program;
-		var syringesAvailable = _.clone(syringes);
-		var group = _.takeWhile(items, function (item) {
-			//console.log("A");
+		const program = items[0].program;
+		let syringesAvailable = _.clone(syringes);
+		const group = _.takeWhile(items, function (item) {
+			//console.log("A "+JSON.stringify(item));
 			// Make sure we still have syringes available
 			if (syringesAvailable.length == 0) return false;
 			// Make sure all items in the group use the same program
@@ -51,6 +52,7 @@ function groupingMethod2(items, syringes, tipModelToSyringes) {
 				//console.log("C");
 				assert(tipModelToSyringes.hasOwnProperty(item.tipModel));
 				var syringesPossible = tipModelToSyringes[item.tipModel];
+				//console.log({syringesPossible, syringesAvailable})
 				assert(!_.isEmpty(syringesPossible));
 				// Try to find a possible syringe that's still available
 				var l = _.intersection(syringesPossible, syringesAvailable);

@@ -48,7 +48,7 @@ module.exports = {
 				},
 				"liha": {
 					"type": "Pipetter",
-					"syringes": {
+					"syringe": {
 						"1": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",

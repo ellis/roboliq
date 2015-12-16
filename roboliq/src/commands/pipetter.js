@@ -344,7 +344,7 @@ function pipette(params, parsed, data) {
 	}
 
 	// Limit syringe choices based on params
-	var syringesAvailable = params.syringes || _.map(_.keys(equipment.syringes), s => `${equipmentName}.syringes.${s}`) || [];
+	var syringesAvailable = params.syringes || _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
 	var tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
 	var groups = groupingMethods.groupingMethod2(items, syringesAvailable, tipModelToSyringes);
@@ -641,7 +641,7 @@ const commandHandlers = {
 
 		// Check whether there's a program to wash the tip models at the given intensity
 		var syringeToProgram_l = _.map(parsed.syringes.value, function(syringe) {
-			var tipModelRef = equipment+".syringes."+syringe+".tipModel";
+			var tipModelRef = equipment+".syringe."+syringe+".tipModel";
 			var tipModel = expect.objectsValue({}, tipModelRef, data.objects);
 			var query = {
 				"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
