@@ -809,11 +809,11 @@ module.exports = {
 					const value = _.max(_.map(items, item => cleaningIntensities.indexOf(item.intensity.value)));
 					if (value >= 0) {
 						const intensity = cleaningIntensities[value];
-						const syringes = _.map(items, item => item.syring.value);
+						const syringes = _.map(items, item => item.syringe.value);
 						expansionList.push({
 							command: "pipetter._washTips",
-							agent: agent,
-							equipment: equipmentName,
+							agent: parsed.agent.objectName,
+							equipment: parsed.equipment.objectName,
 							intensity: intensity,
 							syringes: syringes
 						});

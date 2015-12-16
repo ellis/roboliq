@@ -573,8 +573,8 @@ const commandHandlers = {
 		console.log("pipetter.cleanTips:")
 		console.log(JSON.stringify(parsed, null, '\t'));
 
-		//console.log(JSON.stringify(data, null, '\t'))
-		for (const item of parsed.items.value) {
+		// Get list of valid agent/equipment/syringe combinations for all syringes
+		const nodes = _.flatten(parsed.items.value.map(item => {
 			const predicates = [
 				{"pipetter.canAgentEquipmentSyringe": {
 					"agent": parsed.agent.objectName,
@@ -582,34 +582,49 @@ const commandHandlers = {
 					"syringe": item.syringe.value // FIXME: `syringe` should reference and object instead of just be a name
 				}}
 			];
-			console.log(predicates)
+			//console.log(predicates)
 			const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."pipetter.canAgentEquipmentSyringe"');
-			console.log(alternatives)
-			const params2 = alternatives[0];
+			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe.value}`);
+			return alternatives;
+		}));
+		console.log(nodes);
+		// Group by agent+equipment
+		const equipToNodes = _.groupBy(nodes, x => `${x.agent}|${x.equipment}`);
+		console.log(equipToNodes);
+		// Group by syringe
+		const syringeToNodes = _.groupBy(nodes, x => x.syringe);
+		console.log(syringeToNodes);
+
+		// Desired intensity for each syringe
+		const syringeToItem = _.groupBy(params.items, item => item.syringe);
+		// Sub-command list
+		let expansion = [];
+		// Get list of syringes
+		let syringesRemaining = _.uniq(parsed.items.value.map(item => item.syringe.value));
+		// Generate sub-commands until all syringes have been taken care of
+		while (!_.isEmpty(syringesRemaining)) {
+			const syringe = syringesRemaining[0];
+			const nodes = syringeToNodes[syringe];
+			// Arbitrarily pick the first possible agent/equipment combination
+			const {agent, equipment} = nodes[0];
+			const equipNodes = equipToNodes[`${agent}|${equipment}`];
+			const syringes = _.intersection(syringesRemaining, equipNodes.map(x => x.syringe));
+			// Create cleanTips items
+			const items = _.flatten(syringes.map(syringe => syringeToItem[syringe]));
+			console.log({syringes, syringeToItem, items})
+			// Add the sub-command
+			expansion.push({
+				command: `pipetter.cleanTips|${agent}|${equipment}`,
+				agent,
+				equipment,
+				items
+			});
+			// Remove those syringes from the remaining list
+			syringesRemaining = _.difference(syringesRemaining, syringes);
 		}
+		console.log(expansion);
 
-
-		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.site.objectName) >= 0, `site ${parsed.site.objectName} must be in \`${parsed.equipment.objectName}.sitesInternal\; \`${parsed.equipment.objectName}.sitesInternal\` = ${sitesInternal}`);
-
-		var expansion = [{
-			command: "pipetter.cleanTips|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
-			agent: parsed.agent.objectName,
-			equipment: parsed.equipment.objectName,
-			site: parsed.site.objectName
-		}];
-
-		var effects = {};
-		// Open equipment
-		effects[parsed.equipment.objectName+".open"] = true;
-		// Indicate that the given site is open and the other internal sites are closed
-		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != parsed.site.objectName); });
-
-		return {
-			expansion: expansion,
-			effects: effects
-		};
-
+		return {expansion};
 	},
 	/*"pipetter.cleanTips": function(params, parsed, data) {
 		if (_.isEmpty(parsed.syringes.value))
