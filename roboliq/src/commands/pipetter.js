@@ -571,8 +571,24 @@ const commandHandlers = {
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
 		console.log("pipetter.cleanTips:")
-		console.log(JSON.stringify(params, null, '\t'));
-		
+		console.log(JSON.stringify(parsed, null, '\t'));
+
+		//console.log(JSON.stringify(data, null, '\t'))
+		for (const item of parsed.items.value) {
+			const predicates = [
+				{"pipetter.canAgentEquipmentSyringe": {
+					"agent": parsed.agent.objectName,
+					"equipment": parsed.equipment.objectName,
+					"syringe": item.syringe.value // FIXME: `syringe` should reference and object instead of just be a name
+				}}
+			];
+			console.log(predicates)
+			const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."pipetter.canAgentEquipmentSyringe"');
+			console.log(alternatives)
+			const params2 = alternatives[0];
+		}
+
+
 		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.site.objectName) >= 0, `site ${parsed.site.objectName} must be in \`${parsed.equipment.objectName}.sitesInternal\; \`${parsed.equipment.objectName}.sitesInternal\` = ${sitesInternal}`);
 

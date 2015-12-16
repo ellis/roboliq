@@ -468,7 +468,7 @@ module.exports = {
 			"pipetter.canAgentEquipmentSyringe": {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"site": "ourlab.mario.liha.syringe.{{i}}"
+				"syringe": "ourlab.mario.liha.syringe.{{i}}"
 			}
 		}
 	}},
