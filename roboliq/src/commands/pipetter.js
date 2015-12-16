@@ -570,8 +570,8 @@ const commandHandlers = {
 		};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
-		console.log("pipetter.cleanTips:")
-		console.log(JSON.stringify(parsed, null, '\t'));
+		//console.log("pipetter.cleanTips:")
+		//console.log(JSON.stringify(parsed, null, '\t'));
 
 		// Get list of valid agent/equipment/syringe combinations for all syringes
 		const nodes = _.flatten(parsed.items.value.map(item => {
@@ -587,13 +587,13 @@ const commandHandlers = {
 			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe.value}`);
 			return alternatives;
 		}));
-		console.log(nodes);
+		//console.log(nodes);
 		// Group by agent+equipment
 		const equipToNodes = _.groupBy(nodes, x => `${x.agent}|${x.equipment}`);
-		console.log(equipToNodes);
+		//console.log(equipToNodes);
 		// Group by syringe
 		const syringeToNodes = _.groupBy(nodes, x => x.syringe);
-		console.log(syringeToNodes);
+		//console.log(syringeToNodes);
 
 		// Desired intensity for each syringe
 		const syringeToItem = _.groupBy(params.items, item => item.syringe);
@@ -611,7 +611,7 @@ const commandHandlers = {
 			const syringes = _.intersection(syringesRemaining, equipNodes.map(x => x.syringe));
 			// Create cleanTips items
 			const items = _.flatten(syringes.map(syringe => syringeToItem[syringe]));
-			console.log({syringes, syringeToItem, items})
+			//console.log({syringes, syringeToItem, items})
 			// Add the sub-command
 			expansion.push({
 				command: `pipetter.cleanTips|${agent}|${equipment}`,
@@ -622,7 +622,7 @@ const commandHandlers = {
 			// Remove those syringes from the remaining list
 			syringesRemaining = _.difference(syringesRemaining, syringes);
 		}
-		console.log(expansion);
+		//console.log(expansion);
 
 		return {expansion};
 	},

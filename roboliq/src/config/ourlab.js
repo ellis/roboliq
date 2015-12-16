@@ -795,8 +795,8 @@ module.exports = {
 		"evoware._facts": function(params, parsed, data) {},
 		// Clean tips
 		"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
-			console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
-			console.log(JSON.stringify(parsed, null, '  '))
+			//console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
+			//console.log(JSON.stringify(parsed, null, '  '))
 
 			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
 

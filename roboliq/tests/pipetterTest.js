@@ -17,11 +17,41 @@ describe('pipetter', function() {
 				}
 			};
 			const result = roboliq.run(["-o", ""], protocol);
-			console.log(JSON.stringify(result.output.steps, null, '\t'));
+			//console.log(JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"1": {
+							"command": "pipetter._washTips",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"intensity": "light",
+							"syringes": [
+								"ourlab.mario.liha.syringe.1"
+							]
+						},
+						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "light"
+							}
+						]
+					},
+					"command": "pipetter.cleanTips",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"intensity": "light"
+						}
+					]
+				}
+			});
 		});
 	});
 
-	/*
 	describe('pipetter.pipette', function () {
 
 		it('should pipette between two wells on plate1 without specifying well contents', function () {
@@ -546,5 +576,4 @@ describe('pipetter', function() {
 	});
 
 
-*/
 });
