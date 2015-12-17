@@ -9,7 +9,7 @@ to the project's root (where the `package.json` file is) and running:
 
 ``npm install``
 
-## Development
+## Command-line commands
 
 The most commonly used commands are:
 
@@ -38,28 +38,37 @@ Here is a directory listing with the most important files and directories.
 ├── runall.sh -- compile all sample protocol files
 ├── src -- source code
 │   ├── commands/ -- command handlers
-│   ├── config
+│   ├── config/ -- Roboliq and robot configuration files
 │   │   ├── ourlab.js
 │   │   ├── roboliq.js
 │   │   └── roboliqDirectiveHandlers.js
-│   ├── HTN -- logic planning
+│   ├── HTN/ -- logic planning
 │   │   ├── llpl.js
 │   │   ├── shop.js
 │   │   └── utils.js
-│   ├── parsers
+│   ├── parsers/ -- Roboliq parsers
 │   │   ├── wellsParser.js -- parser for well specifier, wraps wellParser0
 │   │   ├── wellsParser0.js -- generated parser
 │   │   └── wellsParser0.pegjs -- PEGJS description of well parser
 │   ├── schemas/ -- schemas for Roboliq's commands and objects
-│   ├── commandHelper.js
-│   ├── expect.js
-│   ├── expectCore.js
-│   ├── generateSchemaDocs.js
-│   ├── main.js
-│   ├── misc.js
-│   ├── roboliq.js
-│   ├── roboliqSchemas.js
-│   └── WellContents.js
+│   ├── commandHelper.js -- helper functions for command handlers
+│   ├── expect.js -- functions for catching errors
+│   ├── expectCore.js -- functions for catching errors
+│   ├── generateSchemaDocs.js -- program to generate tutorials from schemas
+│   ├── main.js -- main program
+│   ├── misc.js -- some miscellaneous helper functions
+│   ├── roboliq.js -- the core Roboliq library
+│   ├── roboliqSchemas.js -- a few schemas for Roboliq types
+│   └── WellContents.js -- class to handle well contents
 ├── tests/ -- unit tests
 └── tutorials/ -- Markdown files that are included as tutorials in the JSDoc documentation
 <pre>
+
+The three most important files/directories for developers are:
+
+* `src/roboliq.js`: if you want to change how Roboliq works,
+    this is probably where you'll start.
+
+* `src/commands/`: CONTINUE
+
+* `src/config/`: CONTINUE
