@@ -548,18 +548,27 @@ const commandHandlers = {
 		//console.log(JSON.stringify(params, null, '\t'));
 		//console.log(JSON.stringify(parsed, null, '\t'));
 
+		const n = _.max([commandHelper.asArray(params.syringes).length, commandHelper.asArray(params.syringes).length])
+		const items = _.merge(
+			(params.intensity) ? _.fill(Array(n), {intensity: params.intensity}) : [],
+			_.map(_.compact([params.intensity]), intensity => { return {intensity} }),
+			_.map(commandHelper.asArray(params.syringes), syringe => { return {syringe} }),
+			params.items
+		);
+		console.log("items: "+JSON.stringify(items))
+
 		// Get list of valid agent/equipment/syringe combinations for all syringes
-		const nodes = _.flatten(parsed.items.value.map(item => {
+		const nodes = _.flatten(items(item => {
 			const predicates = [
 				{"pipetter.canAgentEquipmentSyringe": {
 					"agent": parsed.agent.objectName,
 					"equipment": parsed.equipment.objectName,
-					"syringe": item.syringe.objectName
+					"syringe": item.syringe
 				}}
 			];
 			//console.log(predicates)
 			const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."pipetter.canAgentEquipmentSyringe"');
-			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe.objectName}`);
+			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe}`);
 			return alternatives;
 		}));
 		//console.log(nodes);

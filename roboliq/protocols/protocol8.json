@@ -4,19 +4,22 @@
 		"1": {
 			"command": "pipetter.cleanTips",
 			"equipment": "ourlab.mario.liha",
-			"syringes": [1,2,3,4],
-			"intensity": "flush"
+			"items": [
+				{"syringe": "ourlab.mario.liha.syringe.1", "intensity": "flush"},
+				{"syringe": "ourlab.mario.liha.syringe.2", "intensity": "flush"},
+				{"syringe": "ourlab.mario.liha.syringe.3", "intensity": "flush"},
+				{"syringe": "ourlab.mario.liha.syringe.4", "intensity": "flush"}
+			]
 		},
 		"2": {
 			"command": "pipetter.cleanTips",
 			"equipment": "ourlab.mario.liha",
-			"syringes": [1,2,3,4],
+			"syringes": ["ourlab.mario.liha.syringe.1","ourlab.mario.liha.syringe.2","ourlab.mario.liha.syringe.3","ourlab.mario.liha.syringe.4"],
 			"intensity": "light"
 		},
 		"3": {
 			"command": "pipetter.cleanTips",
 			"equipment": "ourlab.mario.liha",
-			"syringes": [1,2,3,4],
 			"intensity": "thorough"
 		}
 	}

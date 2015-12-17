@@ -8,6 +8,21 @@ import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
 
 /**
+ * Ensure that the value is an array.
+ * If the value is already an array, return it directly.
+ * If the value is undefined, return an empty array.
+ * Otherwise, return the value wrapped in an array.
+ *
+ * @param  {any} x - value
+ * @return {array} an array
+ */
+function asArray(x) {
+	if (_.isArray(x)) return x;
+	else if (_.isUndefined(x)) return [];
+	else return [x];
+}
+
+/**
  * processValueBySchema():
  * Input: value and a schema.
  *
@@ -497,6 +512,7 @@ function queryLogic(data, predicates, queryExtract) {
 }
 
 module.exports = {
+	asArray,
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
 	parseParams: processValueAsObject,
