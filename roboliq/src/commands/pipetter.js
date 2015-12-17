@@ -384,8 +384,8 @@ function pipette(params, parsed, data) {
 
 	// Create clean commands before pipetting this group
 	const createCleanActions = function(syringeToCleanValue) {
-		if (_.isEmpty(syringeToCleanValue)) return [];
-		const items = _.map(syringeToCleanValue, (n, syringe) => { return {syringe, intensity: valueToIntensity[n]}; });
+		const items = _(syringeToCleanValue).pairs().filter(([x, n]) => n > 0).map(([syringe, n]) => { return {syringe, intensity: valueToIntensity[n]} }).value();
+		if (_.isEmpty(items)) return [];
 		return [{
 			command: "pipetter.cleanTips",
 			agent: agent,
