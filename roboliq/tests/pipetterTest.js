@@ -473,7 +473,7 @@ describe('pipetter', function() {
 		})
 
 
-/*
+
 		it('should pipette from a variable that refers to the system liquid source', function () {
 			var protocol = {
 				roboliq: "v1",
@@ -525,11 +525,10 @@ describe('pipetter', function() {
 				}
 			});
 		});
-		*/
 	});
 
 
-	/*
+
 
 	describe('pipetter.pipetteMixtures', function () {
 		it("should pipette mixtures to destination wells", function() {
@@ -602,7 +601,6 @@ describe('pipetter', function() {
 			)
 		});
 	});
-	*/
 
 
 });
