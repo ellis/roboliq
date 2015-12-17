@@ -209,7 +209,6 @@ describe('pipetter', function() {
 				},
 			]);
 		})
-/*
 
 
 		it('should pipette from system liquid source', function () {
@@ -407,7 +406,7 @@ describe('pipetter', function() {
 		})
 
 
-
+/*
 		it('should pipette from a multi-well source', function () {
 			var protocol = {
 				roboliq: "v1",
@@ -526,10 +525,11 @@ describe('pipetter', function() {
 				}
 			});
 		});
+		*/
 	});
 
 
-
+	/*
 
 	describe('pipetter.pipetteMixtures', function () {
 		it("should pipette mixtures to destination wells", function() {
@@ -601,8 +601,8 @@ describe('pipetter', function() {
 				]
 			)
 		});
-		*/
 	});
+	*/
 
 
 });

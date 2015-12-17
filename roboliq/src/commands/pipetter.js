@@ -422,8 +422,8 @@ function pipette(params, parsed, data) {
 	});
 	// Add cleanBegin commands
 	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeginValue));
-	console.log("expansionList:")
-	console.log(JSON.stringify(expansionList, null, '  '));
+	//console.log("expansionList:")
+	//console.log(JSON.stringify(expansionList, null, '  '));
 
 	var syringeToCleanAfterValue = {};
 	var doCleanBefore = false
@@ -431,7 +431,7 @@ function pipette(params, parsed, data) {
 		assert(group.length > 0);
 		// What cleaning intensity is required for the tip before aspirating?
 		var syringeToCleanBeforeValue = _.clone(syringeToCleanAfterValue);
-		console.log({syringeToCleanBeforeValue, syringeToCleanAfterValue})
+		//console.log({syringeToCleanBeforeValue, syringeToCleanAfterValue})
 		_.forEach(group, function(item) {
 			var source = item.source;
 			var syringe = item.syringe;
@@ -448,7 +448,7 @@ function pipette(params, parsed, data) {
 			var intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 				intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);
-			console.log({source, syringe, isSameSource, intensityValue})
+			//console.log({source, syringe, isSameSource, intensityValue})
 
 			// Update cleaning value required before current aspirate
 			if (!syringeToCleanBeforeValue.hasOwnProperty(syringe) || intensityValue > syringeToCleanBeforeValue[syringe]) {
@@ -463,7 +463,7 @@ function pipette(params, parsed, data) {
 				syringeToCleanAfterValue[syringe] = item.cleanAfter;
 			else
 				delete syringeToCleanAfterValue[syringe];
-			console.log({syringeToCleanAfterValue, syringe})
+			//console.log({syringeToCleanAfterValue, syringe})
 			// TODO: if wet contact, indicate tip contamination
 		});
 
@@ -494,7 +494,7 @@ function pipette(params, parsed, data) {
 	// cleanEnd
 	// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 	var syringeToCleanEndValue = {};
-	console.log({syringeToCleanValue})
+	//console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
 		var intensity = parsed.cleanEnd.value || parsed.clean.value || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));
@@ -504,7 +504,7 @@ function pipette(params, parsed, data) {
 		if (value < intensityValue)
 			syringeToCleanEndValue[syringe] = intensityValue;
 	});
-	console.log({syringeToCleanEndValue})
+	//console.log({syringeToCleanEndValue})
 	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanEndValue));
 
 	var expansion = {};
