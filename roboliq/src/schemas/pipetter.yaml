@@ -6,6 +6,16 @@ Pipetter:
     label: {type: string}
   required: [type]
 
+Syringe:
+  description: Pipetting syringe.
+  properties:
+    type: {enum: [Syringe]}
+    description: {type: string}
+    label: {type: string}
+    tipModel: {type: string}
+    tipModelPermanent: {type: string}
+  required: [type]
+
 pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:
@@ -95,7 +105,7 @@ pipetter.cleanTips:
       items:
         type: object
         properties:
-          syringe: {description: "Syringe identifier", type: string}
+          syringe: {description: "Syringe identifier", type: Syringe}
           intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
         required: [syringe, intensity]
   required: [items]

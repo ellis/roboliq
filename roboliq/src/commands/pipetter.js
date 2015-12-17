@@ -544,9 +544,9 @@ const commandHandlers = {
 		};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
-		console.log("pipetter.cleanTips:")
-		console.log(JSON.stringify(params, null, '\t'));
-		console.log(JSON.stringify(parsed, null, '\t'));
+		//console.log("pipetter.cleanTips:")
+		//console.log(JSON.stringify(params, null, '\t'));
+		//console.log(JSON.stringify(parsed, null, '\t'));
 
 		// Get list of valid agent/equipment/syringe combinations for all syringes
 		const nodes = _.flatten(parsed.items.value.map(item => {
@@ -554,12 +554,12 @@ const commandHandlers = {
 				{"pipetter.canAgentEquipmentSyringe": {
 					"agent": parsed.agent.objectName,
 					"equipment": parsed.equipment.objectName,
-					"syringe": item.syringe.value // FIXME: `syringe` should reference and object instead of just be a name
+					"syringe": item.syringe.objectName
 				}}
 			];
 			//console.log(predicates)
 			const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."pipetter.canAgentEquipmentSyringe"');
-			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe.value}`);
+			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe.objectName}`);
 			return alternatives;
 		}));
 		//console.log(nodes);
@@ -575,7 +575,7 @@ const commandHandlers = {
 		// Sub-command list
 		let expansion = [];
 		// Get list of syringes
-		let syringesRemaining = _.uniq(parsed.items.value.map(item => item.syringe.value));
+		let syringesRemaining = _.uniq(parsed.items.value.map(item => item.syringe.objectName));
 		// Generate sub-commands until all syringes have been taken care of
 		while (!_.isEmpty(syringesRemaining)) {
 			const syringe = syringesRemaining[0];

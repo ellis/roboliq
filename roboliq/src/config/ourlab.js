@@ -685,7 +685,7 @@ module.exports = {
 					items: {
 						type: "object",
 						properties: {
-							syringe: {description: "Syringe identifier", type: "string"},
+							syringe: {description: "Syringe identifier", type: "Syringe"},
 							intensity: {description: "Intensity of the cleaning", type: "pipetter.CleaningIntensity"}
 						},
 						required: ["syringe", "intensity"]
@@ -801,27 +801,28 @@ module.exports = {
 			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
 
 			const expansionList = [];
-			const sub = function(syringeNames) {
+			const sub = function(syringeNames, volume) {
 				const items = _.filter(parsed.items.value, item =>
-					syringeNames.includes(item.syringe.value)
+					syringeNames.includes(item.syringe.objectName)
 				);
 				if (!_.isEmpty(items)) {
 					const value = _.max(_.map(items, item => cleaningIntensities.indexOf(item.intensity.value)));
 					if (value >= 0) {
 						const intensity = cleaningIntensities[value];
-						const syringes = _.map(items, item => item.syringe.value);
+						const syringes = _.map(items, item => item.syringe.objectName);
 						expansionList.push({
 							command: "pipetter._washTips",
 							agent: parsed.agent.objectName,
 							equipment: parsed.equipment.objectName,
+							program: `ourlab.mario.washProgram.${intensity}_${volume}`,
 							intensity: intensity,
-							syringes: syringes
+							syringes: syringeNames
 						});
 					}
 				}
 			}
-			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`));
-			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`));
+			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`), "1000");
+			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
 			return {expansion: expansionList};
 		}
 	},

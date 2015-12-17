@@ -25,9 +25,13 @@ describe('pipetter', function() {
 							"command": "pipetter._washTips",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.liha",
+							"program": "ourlab.mario.washProgram.light_1000",
 							"intensity": "light",
-							"syringe": [
-								"ourlab.mario.liha.syringe.1"
+							"syringes": [
+								"ourlab.mario.liha.syringe.1",
+								"ourlab.mario.liha.syringe.2",
+								"ourlab.mario.liha.syringe.3",
+								"ourlab.mario.liha.syringe.4"
 							]
 						},
 						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
@@ -78,17 +82,29 @@ describe('pipetter', function() {
 			var result = roboliq.run(["-o", ""], protocol);
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
-			console.log(JSON.stringify(result.output.steps, null, '\t'))
+			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1][1][1], {
-				"command": "pipetter._cleanTips",
+				"1": {
+					"command": "pipetter._washTips",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "ourlab.mario.washProgram.thorough_1000",
+					"intensity": "thorough",
+					"syringes": [
+						"ourlab.mario.liha.syringe.1",
+						"ourlab.mario.liha.syringe.2",
+						"ourlab.mario.liha.syringe.3",
+						"ourlab.mario.liha.syringe.4"
+					]
+				},
+				"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"program": "ourlab.mario.washProgram.thorough_1000",
-				"syringe": [
-					"ourlab.mario.liha.syringe.1",
-					"ourlab.mario.liha.syringe.2",
-					"ourlab.mario.liha.syringe.3",
-					"ourlab.mario.liha.syringe.4"
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"intensity": "thorough"
+					}
 				]
 			});
 			should.deepEqual(result.output.steps[1][2], {
@@ -106,15 +122,27 @@ describe('pipetter', function() {
 				]
 			});
 			should.deepEqual(result.output.steps[1][3][1], {
-				"command": "pipetter._cleanTips",
+				"1": {
+					"command": "pipetter._washTips",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "ourlab.mario.washProgram.thorough_1000",
+					"intensity": "thorough",
+					"syringes": [
+						"ourlab.mario.liha.syringe.1",
+						"ourlab.mario.liha.syringe.2",
+						"ourlab.mario.liha.syringe.3",
+						"ourlab.mario.liha.syringe.4"
+					]
+				},
+				"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"program": "ourlab.mario.washProgram.thorough_1000",
-				"syringe": [
-					"ourlab.mario.liha.syringe.1",
-					"ourlab.mario.liha.syringe.2",
-					"ourlab.mario.liha.syringe.3",
-					"ourlab.mario.liha.syringe.4"
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"intensity": "thorough"
+					}
 				]
 			});
 			should.deepEqual(result.output.effects, {
