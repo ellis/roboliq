@@ -232,7 +232,7 @@ describe('pipetter', function() {
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
-			//console.log(JSON.stringify(result, null, '\t'));
+			console.log(JSON.stringify(result, null, '\t'));
 			should.deepEqual(result.output.steps[1][1], {
 				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
