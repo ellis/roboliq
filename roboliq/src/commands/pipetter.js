@@ -383,43 +383,15 @@ function pipette(params, parsed, data) {
 	var expansionList = [];
 
 	// Create clean commands before pipetting this group
-	var createCleanActions = function(syringeToCleanValue) {
-		var expansionList = [];
-		CONTINUE
+	const createCleanActions = function(syringeToCleanValue) {
 		if (_.isEmpty(syringeToCleanValue)) return [];
-		var l1000 = _.compact([
-			syringeToCleanValue[1],
-			syringeToCleanValue[2],
-			syringeToCleanValue[3],
-			syringeToCleanValue[4]
-		]);
-		var l0050 = _.compact([
-			syringeToCleanValue[5],
-			syringeToCleanValue[6],
-			syringeToCleanValue[7],
-			syringeToCleanValue[8]
-		]);
-
-		var sub = function(value, syringes) {
-			if (value > 0) {
-				var intensity = valueToIntensity[value];
-				expansionList.push({
-					command: "pipetter.cleanTips",
-					agent: agent,
-					equipment: equipmentName,
-					intensity: intensity,
-					syringes: syringes
-				});
-				_.forEach(syringes, function(syringe) { syringeToCleanValue[syringe] = value; });
-			}
-		}
-		if (!_.isEmpty(l1000)) {
-			sub(_.max(l1000), [1, 2, 3, 4]);
-		}
-		if (!_.isEmpty(l0050)) {
-			sub(_.max(l0050), [5, 6, 7, 8]);
-		}
-		return expansionList;
+		const items = _.map(syringeToCleanValue, (n, syringe) => { return {syringe, intensity: valueToIntensity[n]}; });
+		return [{
+			command: "pipetter.cleanTips",
+			agent: agent,
+			equipment: equipmentName,
+			items
+		}];
 	}
 
 	/*
@@ -450,6 +422,8 @@ function pipette(params, parsed, data) {
 	});
 	// Add cleanBegin commands
 	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeginValue));
+	console.log("expansionList:")
+	console.log(JSON.stringify(expansionList, null, '  '));
 
 	var syringeToCleanAfterValue = {};
 	var doCleanBefore = false
@@ -570,8 +544,9 @@ const commandHandlers = {
 		};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
-		//console.log("pipetter.cleanTips:")
-		//console.log(JSON.stringify(parsed, null, '\t'));
+		console.log("pipetter.cleanTips:")
+		console.log(JSON.stringify(params, null, '\t'));
+		console.log(JSON.stringify(parsed, null, '\t'));
 
 		// Get list of valid agent/equipment/syringe combinations for all syringes
 		const nodes = _.flatten(parsed.items.value.map(item => {
