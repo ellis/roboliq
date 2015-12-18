@@ -76,8 +76,8 @@
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
 	- [x] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
 	- [x] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
-	- [ ] test for clean all tips
-	- [ ] delete protocol8.json, because the tests are in pipetterTest.js
+	- [x] test for clean all tips
+	- [x] delete protocol8.json, because the tests are in pipetterTest.js
 	- [ ] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [ ] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
