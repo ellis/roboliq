@@ -472,31 +472,6 @@ module.exports = {
 			}
 		}
 	}},
-	{
-		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha",
-			"program": "ourlab.mario.washProgram.flush_1000",
-			"model": "ourlab.mario.tipModel1000",
-			"intensity": "flush"
-		}
-	}, {
-		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha",
-			"program": "ourlab.mario.washProgram.light_1000",
-			"model": "ourlab.mario.tipModel1000",
-			"intensity": "light"
-		}
-	}, {
-		"pipetter.cleanTips.canAgentEquipmentProgramModelIntensity": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha",
-			"program": "ourlab.mario.washProgram.thorough_1000",
-			"model": "ourlab.mario.tipModel1000",
-			"intensity": "thorough"
-		}
-	},
 	{"timer.canAgentEquipment": {
 		"agent": "ourlab.mario.evoware",
 		"equipment": "ourlab.mario.timer1",
