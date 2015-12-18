@@ -77,8 +77,11 @@
 	- [x] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
 	- [x] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
 	- [ ] test for clean all tips
+	- [ ] delete protocol8.json, because the tests are in pipetterTest.js
 	- [ ] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
+	- [ ] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
+	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] rewrite evoware compiler in javascript
@@ -106,6 +109,7 @@
 	- [ ] Cookbook.md: explaining how to solve specific problems
 	- [ ] Configuring a lab (e.g. `config/ourlab.js`)
 	- [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
+	- [ ] convention for syringes being in 'syringe' property of pipetter
 - [ ] code documentation
 	- [x] roboliq.js
 	- [x] WellContents.js

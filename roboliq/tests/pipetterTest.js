@@ -190,7 +190,6 @@ describe('pipetter', function() {
 		});
 
 
-/*
 		it("should clean all tips", () => {
 			const protocol = {
 				"roboliq": "v1",
@@ -211,8 +210,8 @@ describe('pipetter', function() {
 							"command": "pipetter._washTips",
 							"agent": "ourlab.mario.evoware",
 							"equipment": "ourlab.mario.liha",
-							"program": "ourlab.mario.washProgram.light_1000",
-							"intensity": "light",
+							"program": "ourlab.mario.washProgram.thorough_1000",
+							"intensity": "thorough",
 							"syringes": [
 								"ourlab.mario.liha.syringe.1",
 								"ourlab.mario.liha.syringe.2",
@@ -226,20 +225,28 @@ describe('pipetter', function() {
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "light"
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.3",
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.4",
+								"intensity": "thorough"
 							}
 						]
 					},
 					"command": "pipetter.cleanTips",
-					"items": [
-						{
-							"syringe": "ourlab.mario.liha.syringe.1",
-							"intensity": "light"
-						}
-					]
+					"equipment": "ourlab.mario.liha",
+					"intensity": "thorough"
 				}
 			});
-		});*/
+		});
 	});
 
 	describe('pipetter.pipette', function () {

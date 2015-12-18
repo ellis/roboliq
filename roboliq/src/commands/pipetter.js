@@ -548,15 +548,20 @@ const commandHandlers = {
 		//console.log(JSON.stringify(params, null, '\t'));
 		//console.log(JSON.stringify(parsed, null, '\t'));
 
-		const n = _.max([commandHelper.asArray(params.syringes).length, commandHelper.asArray(params.syringes).length])
+		const syringes0 = (params.syringes)
+			? commandHelper.asArray(params.syringes)
+			: (parsed.equipment.value && parsed.equipment.value.syringe)
+				? _.keys(parsed.equipment.value.syringe).map(s => parsed.equipment.objectName + ".syringe." + s)
+				: [];
+		const n = _.max([syringes0.length, commandHelper.asArray(params.items).length])
 		const itemsToMerge = [
-			commandHelper.asArray(params.syringes).map(syringe => { return {syringe} }),
+			syringes0.map(syringe => { return {syringe} }),
 			(params.intensity) ? _.times(n, () => ({intensity: params.intensity})) : []
 		];
 		const items = _.merge([], itemsToMerge[0], itemsToMerge[1], params.items);
 		//console.log("items: "+JSON.stringify(params.items))
 		//console.log(JSON.stringify(itemsToMerge, null, '\t'));
-		console.log("items: "+JSON.stringify(items))
+		//console.log("items: "+JSON.stringify(items))
 
 		// Get list of valid agent/equipment/syringe combinations for all syringes
 		const nodes = _.flatten(items.map(item => {
@@ -586,12 +591,12 @@ const commandHandlers = {
 		let expansion = [];
 		// Get list of syringes
 		let syringesRemaining = _.uniq(items.map(item => item.syringe));
-		console.log({nodes, syringeToNodes, syringeToItem})
+		//console.log({nodes, syringeToNodes, syringeToItem})
 		// Generate sub-commands until all syringes have been taken care of
 		while (!_.isEmpty(syringesRemaining)) {
 			const syringe = syringesRemaining[0];
 			const nodes = syringeToNodes[syringe];
-			console.log({syringe, nodes})
+			//console.log({syringe, nodes})
 			// Arbitrarily pick the first possible agent/equipment combination
 			const {agent, equipment} = nodes[0];
 			const equipNodes = equipToNodes[`${agent}|${equipment}`];
