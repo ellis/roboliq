@@ -110,6 +110,7 @@
 	- [ ] Configuring a lab (e.g. `config/ourlab.js`)
 	- [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
 	- [ ] convention for syringes being in 'syringe' property of pipetter
+	- [ ] pipetter.cleanTips: document the various allowed parameter combinations of equipment, items, syringes, intensity
 - [ ] code documentation
 	- [x] roboliq.js
 	- [x] WellContents.js

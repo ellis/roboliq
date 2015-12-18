@@ -550,7 +550,7 @@ const commandHandlers = {
 
 		const syringes0 = (params.syringes)
 			? commandHelper.asArray(params.syringes)
-			: (parsed.equipment.value && parsed.equipment.value.syringe)
+			: (!params.items && parsed.equipment.value && parsed.equipment.value.syringe)
 				? _.keys(parsed.equipment.value.syringe).map(s => parsed.equipment.objectName + ".syringe." + s)
 				: [];
 		const n = _.max([syringes0.length, commandHelper.asArray(params.items).length])

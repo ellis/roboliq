@@ -273,9 +273,9 @@ describe('pipetter', function() {
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
+			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
-			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1][1][1], {
 				"1": {
 					"command": "pipetter._washTips",
