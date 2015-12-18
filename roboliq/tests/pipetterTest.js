@@ -54,6 +54,192 @@ describe('pipetter', function() {
 				}
 			});
 		});
+
+
+		it("should clean tips 1 thru 4", () => {
+			const protocol = {
+				"roboliq": "v1",
+				"steps": {
+					"1": {
+						"command": "pipetter.cleanTips",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{"syringe": "ourlab.mario.liha.syringe.1", "intensity": "flush"},
+							{"syringe": "ourlab.mario.liha.syringe.2", "intensity": "flush"},
+							{"syringe": "ourlab.mario.liha.syringe.3", "intensity": "flush"},
+							{"syringe": "ourlab.mario.liha.syringe.4", "intensity": "flush"}
+						]
+					},
+					"2": {
+						"command": "pipetter.cleanTips",
+						"equipment": "ourlab.mario.liha",
+						"syringes": ["ourlab.mario.liha.syringe.1","ourlab.mario.liha.syringe.2","ourlab.mario.liha.syringe.3","ourlab.mario.liha.syringe.4"],
+						"intensity": "light"
+					}
+				}
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			//console.log(JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"1": {
+							"command": "pipetter._washTips",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"program": "ourlab.mario.washProgram.flush_1000",
+							"intensity": "flush",
+							"syringes": [
+								"ourlab.mario.liha.syringe.1",
+								"ourlab.mario.liha.syringe.2",
+								"ourlab.mario.liha.syringe.3",
+								"ourlab.mario.liha.syringe.4"
+							]
+						},
+						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "flush"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"intensity": "flush"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.3",
+								"intensity": "flush"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.4",
+								"intensity": "flush"
+							}
+						]
+					},
+					"command": "pipetter.cleanTips",
+					"equipment": "ourlab.mario.liha",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"intensity": "flush"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"intensity": "flush"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.3",
+							"intensity": "flush"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.4",
+							"intensity": "flush"
+						}
+					]
+				},
+				"2": {
+					"1": {
+						"1": {
+							"command": "pipetter._washTips",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"program": "ourlab.mario.washProgram.light_1000",
+							"intensity": "light",
+							"syringes": [
+								"ourlab.mario.liha.syringe.1",
+								"ourlab.mario.liha.syringe.2",
+								"ourlab.mario.liha.syringe.3",
+								"ourlab.mario.liha.syringe.4"
+							]
+						},
+						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.3",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.4",
+								"intensity": "light"
+							}
+						]
+					},
+					"command": "pipetter.cleanTips",
+					"equipment": "ourlab.mario.liha",
+					"syringes": [
+						"ourlab.mario.liha.syringe.1",
+						"ourlab.mario.liha.syringe.2",
+						"ourlab.mario.liha.syringe.3",
+						"ourlab.mario.liha.syringe.4"
+					],
+					"intensity": "light"
+				}
+			});
+		});
+
+
+/*
+		it("should clean all tips", () => {
+			const protocol = {
+				"roboliq": "v1",
+				"steps": {
+					"1": {
+						"command": "pipetter.cleanTips",
+						"equipment": "ourlab.mario.liha",
+						"intensity": "thorough"
+					}
+				}
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			//console.log(JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"1": {
+							"command": "pipetter._washTips",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"program": "ourlab.mario.washProgram.light_1000",
+							"intensity": "light",
+							"syringes": [
+								"ourlab.mario.liha.syringe.1",
+								"ourlab.mario.liha.syringe.2",
+								"ourlab.mario.liha.syringe.3",
+								"ourlab.mario.liha.syringe.4"
+							]
+						},
+						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "light"
+							}
+						]
+					},
+					"command": "pipetter.cleanTips",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"intensity": "light"
+						}
+					]
+				}
+			});
+		});*/
 	});
 
 	describe('pipetter.pipette', function () {

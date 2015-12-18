@@ -549,16 +549,17 @@ const commandHandlers = {
 		//console.log(JSON.stringify(parsed, null, '\t'));
 
 		const n = _.max([commandHelper.asArray(params.syringes).length, commandHelper.asArray(params.syringes).length])
-		const items = _.merge(
-			(params.intensity) ? _.fill(Array(n), {intensity: params.intensity}) : [],
-			_.map(_.compact([params.intensity]), intensity => { return {intensity} }),
-			_.map(commandHelper.asArray(params.syringes), syringe => { return {syringe} }),
-			params.items
-		);
+		const itemsToMerge = [
+			commandHelper.asArray(params.syringes).map(syringe => { return {syringe} }),
+			(params.intensity) ? _.times(n, () => ({intensity: params.intensity})) : []
+		];
+		const items = _.merge([], itemsToMerge[0], itemsToMerge[1], params.items);
+		//console.log("items: "+JSON.stringify(params.items))
+		//console.log(JSON.stringify(itemsToMerge, null, '\t'));
 		console.log("items: "+JSON.stringify(items))
 
 		// Get list of valid agent/equipment/syringe combinations for all syringes
-		const nodes = _.flatten(items(item => {
+		const nodes = _.flatten(items.map(item => {
 			const predicates = [
 				{"pipetter.canAgentEquipmentSyringe": {
 					"agent": parsed.agent.objectName,
@@ -580,15 +581,17 @@ const commandHandlers = {
 		//console.log(syringeToNodes);
 
 		// Desired intensity for each syringe
-		const syringeToItem = _.groupBy(params.items, item => item.syringe);
+		const syringeToItem = _.groupBy(items, item => item.syringe);
 		// Sub-command list
 		let expansion = [];
 		// Get list of syringes
-		let syringesRemaining = _.uniq(parsed.items.value.map(item => item.syringe.objectName));
+		let syringesRemaining = _.uniq(items.map(item => item.syringe));
+		console.log({nodes, syringeToNodes, syringeToItem})
 		// Generate sub-commands until all syringes have been taken care of
 		while (!_.isEmpty(syringesRemaining)) {
 			const syringe = syringesRemaining[0];
 			const nodes = syringeToNodes[syringe];
+			console.log({syringe, nodes})
 			// Arbitrarily pick the first possible agent/equipment combination
 			const {agent, equipment} = nodes[0];
 			const equipNodes = equipToNodes[`${agent}|${equipment}`];

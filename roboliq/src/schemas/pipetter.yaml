@@ -107,7 +107,7 @@ pipetter.cleanTips:
         properties:
           syringe: {description: "Syringe identifier", type: Syringe}
           intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
-        required: [syringe, intensity]
+        required: [syringe]
     syringes: {description: "Optional list of syringes to serve as default for missing syringes in items list", type: array, items: {type: Syringe}}
     intensity: {description: "Optional intensity to serve as default intensity for missing intensities in items list", type: pipetter.CleaningIntensity}
 
