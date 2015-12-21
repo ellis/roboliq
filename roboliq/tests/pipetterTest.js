@@ -219,6 +219,19 @@ describe('pipetter', function() {
 								"ourlab.mario.liha.syringe.4"
 							]
 						},
+						"2": {
+							"command": "pipetter._washTips",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"program": "ourlab.mario.washProgram.thorough_0050",
+							"intensity": "thorough",
+							"syringes": [
+								"ourlab.mario.liha.syringe.5",
+								"ourlab.mario.liha.syringe.6",
+								"ourlab.mario.liha.syringe.7",
+								"ourlab.mario.liha.syringe.8"
+							]
+						},
 						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
@@ -237,6 +250,22 @@ describe('pipetter', function() {
 							},
 							{
 								"syringe": "ourlab.mario.liha.syringe.4",
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.5",
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.6",
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.7",
+								"intensity": "thorough"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.8",
 								"intensity": "thorough"
 							}
 						]

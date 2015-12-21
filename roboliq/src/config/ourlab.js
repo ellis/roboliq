@@ -68,6 +68,26 @@ module.exports = {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",
 							"tipModelPermanent": "ourlab.mario.tipModel1000"
+						},
+						"5": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"6": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"7": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"8": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
 						}
 					},
 					"tipModelToSyringes": {
