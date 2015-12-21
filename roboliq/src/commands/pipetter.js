@@ -528,6 +528,7 @@ function pipette(params, parsed, data) {
  */
 const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
+		CONTINUE
 		return {};
 	},
 	"pipetter._washTips": function(params, parsed, data) {

@@ -81,8 +81,9 @@
 	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [x] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
-	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
-	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
+		- [ ] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
+		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
+		- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] rewrite evoware compiler in javascript
 - [ ] evoware:
@@ -260,6 +261,8 @@
 - [ ] commands/pipetter.js: handle case of dispensing then later aspirating from a single well in a single pipetting command
 - [ ] consider allowing for scopes to commands, rather than just globals objects and command params; may need to make data.objects an array.
 - [ ] Use Immutablejs to protocol structure: should speed up handling of large protocols by avoiding the `_.cloneDeep` calls and unnecessary recalculations of logic for each step.
+- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands to return -- but if there are any errors, then return the sub-command instead.
+- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 
 # Notes
 
