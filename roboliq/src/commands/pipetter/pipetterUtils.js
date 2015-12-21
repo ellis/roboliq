@@ -21,11 +21,11 @@ export function getEffects_aspirate(parsed, data, effects) {
 	var effects2 = (effects) ? _.cloneDeep(effects) : {};
 	var effectsNew = {}
 
-	//console.log(JSON.stringify(params));
+	console.log(JSON.stringify(parsed));
 	for (const item of parsed.items.value) {
-		//console.log(JSON.stringify(item));
+		console.log(JSON.stringify(item));
 
-		CONTINUE
+		/*CONTINUE
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source.value, data, effects2);
 		if (_.isEmpty(srcContents0))
 			srcContents0 = ["Infinity l", item.source.value];
@@ -90,7 +90,8 @@ export function getEffects_aspirate(parsed, data, effects) {
 			effects2[nameWELL] = well1;
 			effectsNew[nameWELL] = well1;
 		}
-	});
+		*/
+	}
 
 	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
 
@@ -105,8 +106,8 @@ export function getEffects_aspirate(parsed, data, effects) {
  * @return {object} The effects caused by the pipetting command.
  */
 export function getEffects_pipette(parsed, data, effects) {
-	var effects2 = (effects) ? _.cloneDeep(effects) : {};
-	var effectsNew = {}
+	const effects2 = (effects) ? _.cloneDeep(effects) : {};
+	const effectsNew = {};
 
 	/*__WELLS__:
 		plate1.contents.A01:
@@ -119,19 +120,33 @@ export function getEffects_pipette(parsed, data, effects) {
 				water: -60ul
 				*/
 	//console.log(JSON.stringify(params));
-	for (const item of parsed.items.value) {
-		//console.log(JSON.stringify(item));
+	_.forEach(parsed.items.value, item => {
+		console.log(JSON.stringify(item));
 
+		// Get initial contents of the source well
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source.value, data, effects2);
 		if (_.isEmpty(srcContents0))
 			srcContents0 = ["Infinity l", item.source.value];
 		//console.log("srcContents0", srcContents0, srcContentsName);
 
+		// Get initial contents of the syringe
+		const syringeContents0 = item.syringe.value.contents || [];
+		// Get initial contents of the destination well
 		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination.value, data, effects2);
 		//console.log("dst contents", dstContents0, dstContentsName);
 
+		// Final contents of source and destination wells
 		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume.value);
 		//console.log({srcContents1, dstContents1});
+
+		// Contaminate the syringe with source contents
+		// FIXME: Contaminate the syringe with destination contents if there is wet contact, i.e., use dstContents1 instead of srcContents0 for flattenContents()
+		const contaminantsName = `${item.syringe.objectName}.contaminants`;
+		const contaminants0 = item.syringe.value.contaminants || [];
+		const contaminants1 = _.keys(WellContents.flattenContents(srcContents0));
+		const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
+		effects2[contaminantsName] = contaminants2;
+		effectsNew[contaminantsName] = contaminants2;
 
 		// Update content effects
 		effects2[srcContentsName] = srcContents1;

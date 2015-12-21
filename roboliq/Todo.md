@@ -81,6 +81,7 @@
 	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [x] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
+		- [x] `_pipette`: append contaminants from source well to syringe
 		- [ ] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
 		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 		- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`

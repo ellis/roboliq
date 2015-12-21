@@ -94,6 +94,7 @@ describe('pipetter', function() {
 			});
 			should.deepEqual(result.output.effects, {
 				"1.2": {
+					"ourlab.mario.liha.syringe.1.contaminants": ["plate1(A01)"],
 					"plate1.contents.A01": [
 						"Infinity l",
 						"plate1(A01)"
@@ -250,6 +251,10 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.2.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.3.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.4.contaminants": ["systemLiquid"],
 					"plate1.contents.A01": [
 						"10 ul",
 						"systemLiquid"
@@ -302,6 +307,10 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.2.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.3.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.4.contaminants": ["systemLiquid"],
 					"plate1.contents.E01": [
 						"10 ul",
 						"systemLiquid"
@@ -453,6 +462,7 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
 					"plate1.contents.A01": [
 						"10 ul",
 						"systemLiquid"

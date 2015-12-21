@@ -528,10 +528,19 @@ function pipette(params, parsed, data) {
  */
 const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
-		CONTINUE
-		return {};
+		return {effects: pipetterUtils.getEffects_aspirate(parsed, data)};
 	},
 	"pipetter._washTips": function(params, parsed, data) {
+		console.log("washTips:");
+		console.log(JSON.stringify(parsed, null, '\t'))
+		for (const item of parsed.syringes.value) {
+			console.log(JSON.stringify(item))
+			/*const contaminantsName = `${items.syringe.objectName}.contaminants`;
+			const contaminants0 = misc.findObjectsValue(contaminantsName, data.objects, effects2) || [];
+			const contaminants1 = _.keys(WellContents.flattenContents(srcContents0));
+			const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
+			effects2[contaminantsName] = contaminants2;*/
+		}
 		return {};
 	},
 	"pipetter._dispense": function(params, parsed, data) {
