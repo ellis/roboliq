@@ -276,8 +276,8 @@ function loadProtocol(a, b, url, filecache) {
 }
 
 /**
- * Remove properties with '?'-prefix.  If the propery value has a '!value' property,
- * add a new property to the object without the '?' prefix and with the given value.
+ * Remove properties with '?'-suffix.  If the propery value has a 'value!' property,
+ * add a new property to the object without the '?'-suffix and with the given value.
  * Mutates the object.
  * Also add the path to the property to the protocol's `fillIns`
  * @param  {Protocol} protocol
@@ -321,10 +321,9 @@ function preProcessQuestionMarks(protocol, obj, path) {
 }
 
 /**
- * Remove properties with '?'-prefix.  If the propery value has a '!value' property,
- * add a new property to the object without the '?' prefix and with the given value.
+ * Any properties that have a "!" suffix are renamed to not have that suffix,
+ * overwritting an already existing property if necessary.
  * Mutates the object.
- * Also add the path to the property to the protocol's `fillIns`
  * @param  {Protocol} protocol
  * @param  {any} obj
  * @param  {array} path
