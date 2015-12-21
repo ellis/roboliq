@@ -1,8 +1,15 @@
 objects:
-Comment("Changes in this version: Adapted to the new layout of deck and shaker hight, improved pipetting, inactivation and wash");
-Group("Init");
-Command("O2SSO5,0",1,1,,,2,2,0);
-Variable(SamplingNumber,"24",1,"How many times should be sampled? (4 repetitions per sampling, max 24 samplings per 96-DWB, max 2 x 96-DWB)",1,1.000000,48.000000,0,2,1,0);
+  SamplingNumber:
+    type: Variable
+    subtype: Integer
+    description: "How many times should be sampled? (4 repetitions per sampling, max 24 samplings per 96-DWB, max 2 x 96-DWB)"
+    min: 1
+    max: 48
+  WellNumber:
+    type: Variable
+    subtype: Integer
+    description: 
+    calculate: "SamplingNumber*4"
 Variable(WellNumber,"SamplingNumber*4",0,"How many times should be sampled? (4 repetitions per sampling, max 24 samplings per 96-DWB, max 2 x 96-DWB)",0,1.000000,48.000000,0,2,0,0);
 Variable(SamplingTime,"30",1,"How frequent should be sampled? (Every 15 to 240 min)",1,15.000000,240.000000,0,2,1,0);
 Variable(Blank,"3",1,"Do you want BLANK measurements? (1 = None, 2 = All, 3 = First, 4 = Last, 5 = First and Last)",1,1.000000,5.000000,0,2,1,0);
