@@ -99,6 +99,9 @@
 
 ## On-going todos with lots of sub-steps
 
+- [ ] complex protocol
+	- [ ] write script based on DM_Growthcurves
+	- [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 	- [ ] Commands.md: Add general documentation to each command namespace
 	- [ ] Developing_Roboliq.md
@@ -207,6 +210,7 @@
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
+- [ ] consider adding constraints to properties using 'property@' properties, e.g. `model@: {rows:8, columns:16}`
 - [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
