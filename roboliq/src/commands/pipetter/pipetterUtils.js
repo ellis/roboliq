@@ -109,6 +109,11 @@ export function getEffects_pipette(parsed, data, effects) {
 	const effects2 = (effects) ? _.cloneDeep(effects) : {};
 	const effectsNew = {};
 
+	function addEffect(name, obj) {
+		effects2[name] = obj;
+		effectsNew[name] = obj;
+	}
+
 	/*__WELLS__:
 		plate1.contents.A01:
 			isSource: true
@@ -141,18 +146,17 @@ export function getEffects_pipette(parsed, data, effects) {
 
 		// Contaminate the syringe with source contents
 		// FIXME: Contaminate the syringe with destination contents if there is wet contact, i.e., use dstContents1 instead of srcContents0 for flattenContents()
-		const contaminantsName = `${item.syringe.objectName}.contaminants`;
 		const contaminants0 = item.syringe.value.contaminants || [];
 		const contaminants1 = _.keys(WellContents.flattenContents(srcContents0));
 		const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
-		effects2[contaminantsName] = contaminants2;
-		effectsNew[contaminantsName] = contaminants2;
+		addEffect(`${item.syringe.objectName}.contaminants`, contaminants2);
+		// FIXME: need to check the syringe contents more carefully, such as if there was something already in there previously
+		CONTINUE
+		addEffect(`${item.syringe.objectName}.contents`, undefined);
 
 		// Update content effects
-		effects2[srcContentsName] = srcContents1;
-		effects2[dstContentsName] = dstContents1;
-		effectsNew[srcContentsName] = srcContents1;
-		effectsNew[dstContentsName] = dstContents1;
+		addEffect(srcContentsName, srcContents1);
+		addEffect(dstContentsName, dstContents1);
 		//console.log()
 
 		const volume = item.volume.value;
@@ -176,8 +180,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			});
 			//console.log({well0, well1});
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
-			effects2[nameWELL] = well1;
-			effectsNew[nameWELL] = well1;
+			addEffect(nameWELL, well1);
 		}
 
 		// Update __WELLS__ effects for destination
@@ -198,8 +201,7 @@ export function getEffects_pipette(parsed, data, effects) {
 					: volume.format({precision: 14})
 			});
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
-			effects2[nameWELL] = well1;
-			effectsNew[nameWELL] = well1;
+			addEffect(nameWELL, well1);
 		}
 	});
 

@@ -82,6 +82,8 @@
 	- [x] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
 		- [x] `_pipette`: append contaminants from source well to syringe
+		- [ ] `_pipette`: clear contents of syringe
+		- [ ] `_pipette`: clear syringe.cleaned
 		- [ ] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
 		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 		- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`
