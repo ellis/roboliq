@@ -83,13 +83,15 @@
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
 	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
+- [ ] create incubator command for tania13_ph
+- [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] rewrite evoware compiler in javascript
 - [ ] evoware:
 	- [ ] rename `_cleanTips` instruction to `_washTips`
 	- [ ] add command-line option to only process certain steps
 	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
-	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware.
+	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
 - [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
 - [ ] review FIXMEs
@@ -149,12 +151,12 @@
 	- [ ] add_to_slide
 	- [ ] collect_tissue
 	- [ ] plate_out
-	- [ ] transfer
+	- [?] transfer
 	- [ ] combine
 	- [ ] combine_and_mix
 	- [ ] dissolve
 	- [ ] invert
-	- [ ] pipet
+	- [?] pipet
 	- [ ] resuspend
 	- [ ] tap
 	- [ ] vortex
@@ -180,7 +182,7 @@
 	- [ ] invert_dry
 	- [ ] dry_pellet
 	- [ ] dry_slide
-	- [ ] centrifuge
+	- [x] centrifuge
 	- [ ] centrifuge_pellet
 	- [ ] centrifuge_phases_top
 	- [ ] centrifuge_phases_bottom

@@ -143,16 +143,14 @@ steps:
         2:
           command: fluorescenceReader.measurePlate
           object: mixPlate
+          program:
+            excitation: 488nm
+            emission: 510nm
           programFile: ./tania13_ph-temp.mdfx
           outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
         3:
           description: Incubate at 25C
-          command: centrifuge.centrifuge2
-          object1: mixPlate
-          object2: balancePlate
-          destinationAfter1: null
-          destinationAfter2: null
+          command: incubator.start
+          object: mixPlate
           program:
-            rpm: 3000
-            duration: 1 # must set a duration of at least 1s
             temperature: 25
