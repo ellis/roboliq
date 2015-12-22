@@ -123,14 +123,16 @@ steps:
     command: centrifuge.insertPlates2
     object1: mixPlate
 
+"WE DON'T NEED THIS LOOP!  Just do it once, because there was no appreciable change over time."
+"OR IF WE DO KEEP IT, THEN DON'T WAIT AFTER LAST ITERATION"
+"AND THEN MAYBE ADD system.repeatWithTimer and set property waitAfter=false"
   4:
     description: Measurement loop; Each cycle of the loop lasts 4 hours
-    command: system.repeat
+    command: system.repeatWithStepDuration
     count: 2
+    stepDuration: 4 hours
+    waitAfter: false
     steps:
-      command: timer.doAndWait
-      duration: 4 hours
-      steps:
         1:
           description: Remove condensation from seal
           command: centrifuge.centrifuge2
@@ -150,7 +152,8 @@ steps:
           outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
         3:
           description: Incubate at 25C
-          command: incubator.start
-          object: mixPlate
+          command: centrifuge.incubate2
+          object1: mixPlate
+          object2: balancePlate
           program:
             temperature: 25

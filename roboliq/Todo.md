@@ -86,6 +86,8 @@
 - [ ] create incubator command for tania13_ph
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] add pipetter commands for dropping tips and getting tips
+- [ ] consider having the fluorescenceReader command generate a report with the current plate contents
+- [ ] how can we automatically analyse the results of the fluorescence readout?
 - [ ] rewrite evoware compiler in javascript
 - [ ] evoware:
 	- [ ] rename `_cleanTips` instruction to `_washTips`
