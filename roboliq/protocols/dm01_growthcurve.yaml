@@ -1,25 +1,71 @@
+roboliq: v1
+
 objects:
   SamplingNumber:
     type: Variable
     subtype: Integer
     description: "How many times should be sampled? (4 repetitions per sampling, max 24 samplings per 96-DWB, max 2 x 96-DWB)"
+    default: 24
     min: 1
     max: 48
   WellNumber:
     type: Variable
-    subtype: Integer
-    description: 
     calculate: "SamplingNumber*4"
-Variable(WellNumber,"SamplingNumber*4",0,"How many times should be sampled? (4 repetitions per sampling, max 24 samplings per 96-DWB, max 2 x 96-DWB)",0,1.000000,48.000000,0,2,0,0);
-Variable(SamplingTime,"30",1,"How frequent should be sampled? (Every 15 to 240 min)",1,15.000000,240.000000,0,2,1,0);
-Variable(Blank,"3",1,"Do you want BLANK measurements? (1 = None, 2 = All, 3 = First, 4 = Last, 5 = First and Last)",1,1.000000,5.000000,0,2,1,0);
-Variable(SealNumber,"2",1,"By how many seal layers should the DWB be closed? (0 to 2)",1,0.000000,2.000000,0,2,1,0);
-Variable(ContiShake,"No",1,"Do you want to continue shaking of 2nd DWB while sample withdraw on 1st DWB? (Yes or No)",0,1.000000,5.000000,1,2,1,0);
-Variable(ContiCult,"No",1,"Do you want to continue cultivation after the last sampling? (Yes or No)",0,1.000000,5.000000,1,2,1,0);
-Variable(FillDWB,"Yes",1,"Do you want to fill the DWB with inoculated medium in the beginning? (Yes or No)",0,0.000000,2.000000,1,2,1,0);
+  SamplingTime:
+    type: Variable
+    subtype: Integer
+    description: "How frequent should be sampled? (Every 15 to 240 min)"
+    min: 15
+    max: 240
+  Blank:
+    type: Variable
+    description: "Do you want BLANK measurements?"
+    schema:
+      enum: [None, All, First, Last, First and Last]
+    default: First
+  SealNumber:
+    type: Variable
+    default: 2
+    description: "By how many seal layers should the DWB be closed? (0 to 2)"
+    min: 0
+    max: 2
+  SealNumber:
+    type: Variable
+    default: "2"
+    description: "By how many seal layers should the DWB be closed? (0 to 2)"
+    min: 0.000000
+    max: 2.000000
+  ContiShake:
+    type: Variable
+    default: "No"
+    description: "Do you want to continue shaking of 2nd DWB while sample withdraw on 1st DWB? (Yes or No)"
+    min: 1.000000
+    max: 5.000000
+  ContiCult:
+    type: Variable
+    default: "No"
+    description: "Do you want to continue cultivation after the last sampling? (Yes or No)"
+    min: 1.000000
+    max: 5.000000
+  FillDWB:
+    type: Variable
+    default: "Yes"
+    description: "Do you want to fill the DWB with inoculated medium in the beginning? (Yes or No)"
+    min: 0.000000
+    max: 2.000000
 IfThen("FillDWB",0,"Yes");
-Variable(DilutionFactor,"100",1,"What is the desired dilution factor of the inoculum in medium? (X-fold, where X is between 20 and 1000)",0,0.000000,2.000000,0,2,1,0);
-Variable(CultivationVolume,"1000",1,"What is the desired cultivation volume per well in ul? (500 to 1000)",1,500.000000,1000.000000,0,2,1,0);
+  DilutionFactor:
+    type: Variable
+    default: "100"
+    description: "What is the desired dilution factor of the inoculum in medium? (X-fold, where X is between 20 and 1000)"
+    min: 0.000000
+    max: 2.000000
+  CultivationVolume:
+    default: 1000
+    description: "What is the desired cultivation volume per well in ul? (500 to 1000)"
+    min: 500
+    max: 1000
+
 Variable(PreDispenseFactor,"5",0,"By how many seal layers should the DWB be closed? (0 to 2)",0,0.000000,2.000000,0,2,0,0);
 Variable(InoculationVolumeML,"48/(DilutionFactor/PreDispenseFactor-1)",0,"By how many seal layers should the DWB be closed? (0 to 2)",0,0.000000,2.000000,0,2,0,0);
 UserPrompt("Please provide for Filling of the DWB:- At least ~InoculationVolumeML~ ml (+ 5 ml) of Inoculum in sterile 100-ml-Trough on Pos 3. Add sterile and empty 100-ml-trough on Pos 1 for preparation of inoculated medium.",0,-1);
