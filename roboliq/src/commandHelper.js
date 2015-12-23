@@ -468,6 +468,9 @@ function processDuration(result, path, x0, data, paramName) {
 	_.set(result.value, path, x);
 }
 
+/**
+ * Get property value from an object in the parsed parameters.
+ */
 function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 	const value = _.get(parsed.value[paramName], propertyName, defaultValue);
 	const objectName = parsed.objectName[paramName];

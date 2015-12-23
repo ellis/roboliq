@@ -56,7 +56,7 @@ var commandHandlers = {
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."fluorescenceReader.canAgentEquipmentModelSite"');
 		var params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
-		//console.log("parsed.outputFile: "+JSON.stringify(parsed.outputFile));
+		//console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
 
 		var expansion = [
 			(params2.site === location0) ? null : {

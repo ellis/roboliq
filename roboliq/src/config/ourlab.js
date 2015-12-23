@@ -794,17 +794,20 @@ module.exports = {
 			//console.log(JSON.stringify(parsed, null, '  '))
 
 			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
+			const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
+			//console.log(syringeNameToItems);
 
 			const expansionList = [];
 			const sub = function(syringeNames, volume) {
-				const items = _.filter(parsed.value.items, item =>
-					syringeNames.includes(item.syringe.objectName)
+				const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
+					syringeNames.includes(syringeName)
 				);
-				if (!_.isEmpty(items)) {
-					const value = _.max(_.map(items, item => cleaningIntensities.indexOf(item.intensity.value)));
+				//console.log({syringeNameToItems2})
+				if (!_.isEmpty(syringeNameToItems2)) {
+					const value = _.max(_.map(syringeNameToItems2, ([, item]) => cleaningIntensities.indexOf(item.intensity)));
 					if (value >= 0) {
 						const intensity = cleaningIntensities[value];
-						const syringes = _.map(items, item => item.syringe.objectName);
+						const syringes = _.map(syringeNameToItems2, ([syringeName, ]) => syringeName);
 						expansionList.push({
 							command: "pipetter._washTips",
 							agent: parsed.objectName.agent,

@@ -187,13 +187,13 @@ var commandHandlers = {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
-		if (!parsed.object1 && !parsed.object2) {
+		if (!parsed.value.object1 && !parsed.value.object2) {
 			// do nothing
 			return {};
 		}
 
-		var agent = parsed.agent.name || "?agent";
-		var equipment = parsed.equipment.name || "?equipment";
+		var agent = parsed.objectName.agent || "?agent";
+		var equipment = parsed.objectName.equipment || "?equipment";
 		var object1 = parsed.value.object1;
 		var object2 = parsed.value.object2;
 

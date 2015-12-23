@@ -72,6 +72,7 @@
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] change `parseParams` function to return a {objectNames, values}
+- [ ] refactor usage of commandHelper.getParsedValue
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
