@@ -358,7 +358,11 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
-				ns: {value: [1, 2]}
+				objectName: {
+				},
+				value: {
+					ns: [1, 2]
+				}
 			});
 			should.deepEqual(data.accesses, ["n1", "n2"]);
 		});
@@ -388,12 +392,10 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
-				agent: {},
-				equipment: {},
-				program: {},
-				object: {objectName: "plate1"},
-				site: {},
-				destinationAfter: {}
+				objectName: {},
+				value: {
+					object: "plate1"
+				}
 			});
 		});
 
