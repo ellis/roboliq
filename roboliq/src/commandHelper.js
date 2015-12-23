@@ -399,7 +399,7 @@ function processSource(result, path, x, data, paramName) {
  * @returns list of sources
  */
 function processSources(result, path, x, data, paramName) {
-	console.log({before: x, paramName})
+	//console.log({before: x, paramName})
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
 		//console.log({x})
@@ -436,8 +436,8 @@ function processVolume(result, path, x, data, paramName) {
 
 function processWell(result, path, x, data, paramName) {
 	if (_.isString(x)) {
-		console.log("processWell:")
-		console.log({result, path, x, paramName})
+		//console.log("processWell:")
+		//console.log({result, path, x, paramName})
 		x = wellsParser.parse(x, data.objects);
 	}
 	expect.truthy({paramName: paramName}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(x));
