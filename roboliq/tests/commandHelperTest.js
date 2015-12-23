@@ -309,14 +309,22 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
-				objectName: {objectName: "plate1"},
-				agent: {objectName: "agent1", value: {type: "MyAgent"}},
-				equipment: {objectName: "equipment1", value: {type: "MyEquipment", config: "special"}},
-				plate: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
-				site: {objectName: "site1", value: {type: "Site", extraData: 0}},
-				count: {objectName: "number1", value: 1},
-				any2: {},
-				text: {value: "hello"}
+				value: {
+					objectName: "plate1",
+					agent: {type: "MyAgent"},
+					equipment: {type: "MyEquipment", config: "special"},
+					plate: {type: "Plate", location: "P1"},
+					site: {type: "Site", extraData: 0},
+					count: 1,
+					text: "hello"
+				},
+				objectName: {
+					agent: "agent1",
+					equipment: "equipment1",
+					plate: "plate1",
+					site: "site1",
+					count: "number1",
+				}
 			});
 			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'site1', "number1", "string1.type", "string1.value"]);
 		});
