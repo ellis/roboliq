@@ -14,7 +14,8 @@ function handleError(context, e) {
 	var prefix = getContextPrefix(context);
 
 	if (!e.trace) {
-		console.log(e.stack);
+		if (e.stack)
+			console.log(e.stack);
 		e.trace = e.stack;
 	}
 

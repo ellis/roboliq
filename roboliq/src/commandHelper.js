@@ -71,6 +71,7 @@ function parseParams(params, data, schema) {
  * @return nothing of interest
  */
 function processValue0BySchema(result, path, value0, schema, data, name) {
+	//console.log(`processValue0BySchema(${path.join('.')}, ${value0})`)
 	if (_.isUndefined(schema)) {
 		return _.set(result.value, path, value0);
 	}
@@ -115,6 +116,7 @@ function processValue0AsEnum(result, path, value0, schema, data, name) {
 }
 
 function processValue0BySchemaType(result, path, value0, schema, type, data, name) {
+	//console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
 	if (type === 'name') {
 		return 	_.set(result.value, path, value0);
 	}
@@ -252,6 +254,7 @@ function processValueAsObject(result, path, params, data, schema) {
 }
 
 function processValueAsArray(result, path, list0, schema, data, name) {
+	//console.log(`processValueAsArray(${path}, ${list0})`)
 	expect.truthy({paramName: name}, _.isArray(list0), "expected an array: "+list0);
 	//console.log({t2})
 	list0.forEach((x, index) => {
@@ -296,7 +299,7 @@ function lookupValue0(result, path, value0, data) {
 	if (_.isString(value0) && !_.startsWith(value0, '"')) {
 		const deref = dereferenceVariable(data, value0);
 		if (deref) {
-			//result.objectName[path.join('.')] = deref.objectName;
+			result.objectName[path.join('.')] = deref.objectName;
 			return deref.value;
 		}
 	}
