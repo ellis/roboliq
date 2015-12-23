@@ -109,17 +109,17 @@ function processValue0BySchema(result, path, value0, schema, data, name) {
 }
 
 function processValue0AsEnum(result, path, value0, schema, data, name) {
-	const value1 = lookupValue0(value0, data);
+	const value1 = lookupValue0(result, path, value0, data);
 	expect.truthy({paramName: name}, schema.enum.includes(value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
 	_.set(result.value, path, value1);
 }
 
 function processValue0BySchemaType(result, path, value0, schema, type, data, name) {
 	if (type === 'name') {
-		return 	_.set(result.objectName, path, value0);
+		return 	_.set(result.value, path, value0);
 	}
 
-	const value = lookupValue0(value0, data);
+	const value = lookupValue0(result, path, value0, data);
 	// By default, set result.value@path = value
 	_.set(result.value, path, value);
 
@@ -167,7 +167,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data, nam
 				return;
 			expect.truthy({paramName: name, objectName: filename}, !_.isUndefined(filedata), "file not loaded: "+filename);
 			//console.log({filedata})
-			_.set(result.objectName, path, filename);
+			result.objectName[path.join('.')] = filename;
 			_.set(result.value, path, filedata);
 			return;
 		default: {
@@ -237,7 +237,7 @@ function processValueAsObject(result, path, params, data, schema) {
 				//console.trace();
 				//_.set(result.value, path1, info.value);
 				if (info.objectName) {
-					_.set(result.objectName, path1.concat('name'), info.objectName);
+					result.objectName[path1.join('.')] = info.objectName;
 				}
 			}
 			// If not optional, require the variable's presence:
@@ -286,15 +286,17 @@ function g(data, name, dflt) {
  * Try to lookup value0 in objects set.
  * This function is recursive, insofar as if the value refers to a variable,
  * the variables value will also be dereferenced.
+ * When a variable is looked up, its also added to result.objectName[path].
  *
  * @param  {any} value0 - The value from the user.
  * @param  {object} data - The data object.
  * @return {any} A new value, if value0 referred to something in data.objects.
  */
-function lookupValue0(value0, data) {
+function lookupValue0(result, path, value0, data) {
 	if (_.isString(value0) && !_.startsWith(value0, '"')) {
 		const deref = dereferenceVariable(data, value0);
 		if (deref) {
+			//result.objectName[path.join('.')] = deref.objectName;
 			return deref.value;
 		}
 	}
@@ -393,6 +395,9 @@ function processSource(result, path, x, data, paramName) {
 	_.set(result.value, path, l[0]);
 }
 
+/**
+ * @returns list of sources
+ */
 function processSources(result, path, x, data, paramName) {
 	console.log({before: x, paramName})
 	if (_.isString(x)) {
@@ -415,6 +420,7 @@ function processSources(result, path, x, data, paramName) {
 		});
 	}
 	_.set(result.value, path, x);
+	return x;
 }
 
 function processVolume(result, path, x, data, paramName) {
@@ -430,6 +436,8 @@ function processVolume(result, path, x, data, paramName) {
 
 function processWell(result, path, x, data, paramName) {
 	if (_.isString(x)) {
+		console.log("processWell:")
+		console.log({result, path, x, paramName})
 		x = wellsParser.parse(x, data.objects);
 	}
 	expect.truthy({paramName: paramName}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(x));

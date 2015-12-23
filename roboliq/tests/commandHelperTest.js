@@ -247,20 +247,25 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
-				name: {objectName: "plate1"},
-				object1: {value: {a: 1, b: 2}},
-				number: {value: 42},
-				string1: {value: "hello"},
-				string2: {value: '"hello"'},
-				time1: {value: math.unit(23, 's')},
-				time2: {value: math.unit(23, 'minutes')},
-				volume1: {value: math.unit(10, 'l')},
-				volume2: {value: math.unit(10, 'ul')},
-				well1: {value: "p(A01)"},
-				wells1: {value: ["p(A01)"]},
-				source1: {value: "p(A01)"},
-				sources1: {value: ["p(A01)", "p(B01)"]},
-				sources2: {objectName: "q", value: [["p(A01)", "p(A02)"]]},
+				value: {
+					name: "plate1",
+					object1: {a: 1, b: 2},
+					number: 42,
+					string1: "hello",
+					string2: '"hello"',
+					time1: math.unit(23, 's'),
+					time2: math.unit(23, 'minutes'),
+					volume1: math.unit(10, 'l'),
+					volume2: math.unit(10, 'ul'),
+					well1: "p(A01)",
+					wells1: ["p(A01)"],
+					source1: "p(A01)",
+					sources1: ["p(A01)", "p(B01)"],
+					sources2: [["p(A01)", "p(A02)"]]
+				},
+				objectName: {
+					sources2: "q"
+				}
 			});
 			should.deepEqual(data.accesses, ["q"]);
 		});
@@ -333,8 +338,11 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
-				number1: {value: 1},
-				number2: {value: 2}
+				value: {
+					number1: 1,
+					number2: 2
+				},
+				objectName: {}
 			});
 			should.deepEqual(data.accesses, []);
 		});
@@ -359,6 +367,8 @@ describe('commandHelper', function() {
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				objectName: {
+					"ns.0": "n1",
+					"ns.1": "n2"
 				},
 				value: {
 					ns: [1, 2]

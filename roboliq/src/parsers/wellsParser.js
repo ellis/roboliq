@@ -49,21 +49,21 @@ function processParserResult(result, objects, text) {
 			}
 		});
 		//console.log({clause, parsed});
-		if (parsed.source.value) {
+		if (parsed.value.source) {
 			// If this was a source, return its wells
-			if (parsed.source.value.type === 'Source')
-				return [parsed.source.value.wells];
+			if (parsed.value.source.type === 'Source')
+				return [parsed.value.source.wells];
 			// Handle the case of when a variable is used and here we can substitute in its value
-			else if (_.isString(parsed.source.value) && parsed.source.value !== clause.source)
-				return parse(parsed.source.value, objects);
+			else if (_.isString(parsed.value.source) && parsed.value.source !== clause.source)
+				return parse(parsed.value.source, objects);
 			// Else
 			else {
-				expect.throw({}, "unrecognized source specifier: "+parsed.source.value);
+				expect.throw({}, "unrecognized source specifier: "+parsed.value.source);
 			}
 		}
-		else if (parsed.labware.value) {
-			const labware = parsed.labware.value;
-			const labwareName = parsed.labware.objectName;
+		else if (parsed.value.labware) {
+			const labware = parsed.value.labware;
+			const labwareName = parsed.objectName.labware;
 			var modelName = labware.model;
 			assert(modelName, "`"+labwareName+".model` missing");
 			var model = misc.getObjectsValue(modelName, objects);
