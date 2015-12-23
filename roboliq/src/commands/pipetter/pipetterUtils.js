@@ -124,46 +124,47 @@ export function getEffects_pipette(parsed, data, effects) {
 			contentsFinal:
 				water: -60ul
 				*/
-	//console.log(JSON.stringify(params));
-	_.forEach(parsed.value.items, item => {
+	//console.log(JSON.stringify(parsed, null, '\t'));
+	_.forEach(parsed.value.items, (item, index) => {
 		//console.log(JSON.stringify(item));
 
 		// Get initial contents of the source well
-		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source.value, data, effects2);
+		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
 		if (_.isEmpty(srcContents0))
-			srcContents0 = ["Infinity l", item.source.value];
+			srcContents0 = ["Infinity l", item.source];
 		//console.log("srcContents0", srcContents0, srcContentsName);
 
 		// Get initial contents of the syringe
-		const syringeContents0 = item.syringe.value.contents || [];
+		const syringeContents0 = item.syringe.contents || [];
 		// Get initial contents of the destination well
-		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination.value, data, effects2);
+		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
 		//console.log("dst contents", dstContents0, dstContentsName);
 
 		// Final contents of source and destination wells
-		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume.value);
+		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume);
 		//console.log({srcContents1, dstContents1});
 
 		// Contaminate the syringe with source contents
 		// FIXME: Contaminate the syringe with destination contents if there is wet contact, i.e., use dstContents1 instead of srcContents0 for flattenContents()
-		const contaminants0 = item.syringe.value.contaminants || [];
+		const contaminants0 = item.syringe.contaminants || [];
 		const contaminants1 = _.keys(WellContents.flattenContents(srcContents0));
 		const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
-		addEffect(`${item.syringe.objectName}.contaminants`, contaminants2);
+		const syringeName = parsed.objectName[`items.${index}.syringe`];
+		addEffect(`${syringeName}.contaminants`, contaminants2);
 		// Remove contents property
 		// FIXME: this isn't quite right -- should handle the case of multi-aspriating
-		if (!_.isUndefined(item.syringe.value.contents))
-			addEffect(`${item.syringe.objectName}.contents`, null);
+		if (!_.isUndefined(item.syringe.contents))
+			addEffect(`${syringeName}.contents`, null);
 		// Remove cleaned property
-		if (!_.isUndefined(item.syringe.value.cleaned))
-			addEffect(`${item.syringe.objectName}.cleaned`, null);
+		if (!_.isUndefined(item.syringe.cleaned))
+			addEffect(`${syringeName}.cleaned`, null);
 
 		// Update content effects
 		addEffect(srcContentsName, srcContents1);
 		addEffect(dstContentsName, dstContents1);
 		//console.log()
 
-		const volume = item.volume.value;
+		const volume = item.volume;
 
 		// Update __WELLS__ effects for source
 		if (true) {

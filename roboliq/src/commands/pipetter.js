@@ -53,9 +53,9 @@ function pipette(params, parsed, data) {
 	let items = (_.isUndefined(parsed.value.items))
 		? []
 		: parsed.value.items.map(parsedItem =>
-				_(parsedItem).map((value, name) => [name, value.value]).filter(l => !_.isUndefined(l[1])).zipObject().value()
+				_(parsedItem).map((value, name) => [name, value]).filter(l => !_.isUndefined(l[1])).zipObject().value()
 			);
-	//console.log("items: "+JSON.stringify(items));
+	console.log("items: "+JSON.stringify(items));
 	let agent = parsed.objectName.agent || "?agent";
 	let equipmentName = parsed.objectName.equipment || "?equipment";
 	//var tipModels = params.tipModels;
@@ -179,7 +179,7 @@ function pipette(params, parsed, data) {
 		required: ["equipment"]
 	});
 	//console.log({equipment: parsed2.equipment.value})
-	const equipment = parsed2.equipment.value;
+	const equipment = parsed2.value.equipment;
 
 	// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
