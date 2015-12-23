@@ -212,6 +212,7 @@
 - [ ] UI to interactively customize protocol
 - [ ] UI to create protocol
 - [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
+- [ ] handle multi-aspirate, and prevent use of `pipetter._pipette` if there are already contents in a syringe
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect

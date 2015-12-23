@@ -150,9 +150,12 @@ export function getEffects_pipette(parsed, data, effects) {
 		const contaminants1 = _.keys(WellContents.flattenContents(srcContents0));
 		const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
 		addEffect(`${item.syringe.objectName}.contaminants`, contaminants2);
-		// FIXME: need to check the syringe contents more carefully, such as if there was something already in there previously
-		CONTINUE
-		addEffect(`${item.syringe.objectName}.contents`, undefined);
+		// Remove contents property
+		if (!_.isUndefined(item.syringe.value.contents))
+			addEffect(`${item.syringe.objectName}.contents`, undefined);
+		// Remove cleaned property
+		if (!_.isUndefined(item.syringe.value.cleaned))
+			addEffect(`${item.syringe.objectName}.cleaned`, undefined);
 
 		// Update content effects
 		addEffect(srcContentsName, srcContents1);
