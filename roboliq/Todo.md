@@ -82,11 +82,12 @@
 	- [x] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
 		- [x] `_pipette`: append contaminants from source well to syringe
-		- [ ] `_pipette`: clear contents of syringe
-		- [ ] `_pipette`: clear syringe.cleaned
+		- [?] `_pipette`: clear contents of syringe
+		- [?] `_pipette`: clear syringe.cleaned
+		- [?] `_washTips`: remove contents, remove contaminants, set `cleaned`
+		- [ ] `_washTips`: used 'parsed' instead of 'params' for the syringe names
 		- [ ] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
 		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
-		- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] rewrite evoware compiler in javascript
 - [ ] evoware:

@@ -531,17 +531,20 @@ const commandHandlers = {
 		return {effects: pipetterUtils.getEffects_aspirate(parsed, data)};
 	},
 	"pipetter._washTips": function(params, parsed, data) {
-		console.log("washTips:");
-		console.log(JSON.stringify(parsed, null, '\t'))
-		for (const item of parsed.syringes.value) {
-			console.log(JSON.stringify(item))
-			/*const contaminantsName = `${items.syringe.objectName}.contaminants`;
-			const contaminants0 = misc.findObjectsValue(contaminantsName, data.objects, effects2) || [];
-			const contaminants1 = _.keys(WellContents.flattenContents(srcContents0));
-			const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
-			effects2[contaminantsName] = contaminants2;*/
+		//console.log("washTips:");
+		//console.log(JSON.stringify(parsed, null, '\t'))
+		const effects = {};
+		for (const [syringeName, syringe] of _.zip(params.syringes, parsed.syringes.value)) {
+			//console.log(JSON.stringify(item))
+			if (!_.isUndefined(syringe.contaminants))
+				effects[`${syringeName}.contaminants`] = null;
+			// Remove contents property
+			if (!_.isUndefined(syringe.contents))
+				effects[`${syringeName}.contents`] = null;
+			// Set cleaned property
+			effects[`${syringeName}.cleaned`] = parsed.intensity.value;
 		}
-		return {};
+		return effects;
 	},
 	"pipetter._dispense": function(params, parsed, data) {
 		return {};

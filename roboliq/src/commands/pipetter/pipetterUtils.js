@@ -126,7 +126,7 @@ export function getEffects_pipette(parsed, data, effects) {
 				*/
 	//console.log(JSON.stringify(params));
 	_.forEach(parsed.items.value, item => {
-		console.log(JSON.stringify(item));
+		//console.log(JSON.stringify(item));
 
 		// Get initial contents of the source well
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source.value, data, effects2);
@@ -151,11 +151,12 @@ export function getEffects_pipette(parsed, data, effects) {
 		const contaminants2 = _.uniq(contaminants0.concat(contaminants1));
 		addEffect(`${item.syringe.objectName}.contaminants`, contaminants2);
 		// Remove contents property
+		// FIXME: this isn't quite right -- should handle the case of multi-aspriating
 		if (!_.isUndefined(item.syringe.value.contents))
-			addEffect(`${item.syringe.objectName}.contents`, undefined);
+			addEffect(`${item.syringe.objectName}.contents`, null);
 		// Remove cleaned property
 		if (!_.isUndefined(item.syringe.value.cleaned))
-			addEffect(`${item.syringe.objectName}.cleaned`, undefined);
+			addEffect(`${item.syringe.objectName}.cleaned`, null);
 
 		// Update content effects
 		addEffect(srcContentsName, srcContents1);
