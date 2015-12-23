@@ -50,21 +50,21 @@ function pipette(params, parsed, data) {
 
 	//console.log("pipette: "+JSON.stringify(parsed))
 
-	let items = (_.isUndefined(parsed.items.value))
+	let items = (_.isUndefined(parsed.value.items))
 		? []
-		: parsed.items.value.map(parsedItem =>
+		: parsed.value.items.map(parsedItem =>
 				_(parsedItem).map((value, name) => [name, value.value]).filter(l => !_.isUndefined(l[1])).zipObject().value()
 			);
 	//console.log("items: "+JSON.stringify(items));
-	let agent = parsed.agent.objectName || "?agent";
-	let equipmentName = parsed.equipment.objectName || "?equipment";
+	let agent = parsed.objectName.agent || "?agent";
+	let equipmentName = parsed.objectName.equipment || "?equipment";
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
-	const sourcesTop = parsed.sources.value || [];
+	const sourcesTop = parsed.value.sources || [];
 	//console.log({sourcesTop})
-	const destinationsTop = parsed.destinations.value || [];
-	const volumesTop = parsed.volumes.value || [];
+	const destinationsTop = parsed.value.destinations || [];
+	const volumesTop = parsed.value.volumes || [];
 
 	// Figure out number of items
 	var itemCount = 0;
@@ -304,10 +304,10 @@ function pipette(params, parsed, data) {
 	}
 
 	// Assign programs to items
-	if (parsed.program.value) {
+	if (parsed.value.program) {
 		_.forEach(items, function(item) {
 			if (!item.program)
-				item.program = parsed.program.value;
+				item.program = parsed.value.program;
 		});
 	}
 	else {
@@ -414,7 +414,7 @@ function pipette(params, parsed, data) {
 			var syringe = item.syringe;
 			if (!syringeToCleanBeginValue.hasOwnProperty(syringe)) {
 				// TODO: handle source's cleanBefore
-				var intensity = item.cleanBefore || parsed.cleanBegin.value || parsed.clean.value || "thorough";
+				var intensity = item.cleanBefore || parsed.value.cleanBegin || parsed.value.clean || "thorough";
 				var intensityValue = intensityToValue[intensity];
 				syringeToCleanBeginValue[syringe] = intensityValue;
 			}
@@ -442,8 +442,8 @@ function pipette(params, parsed, data) {
 			// FIXME: ignore isSameSource if tip has been contaminated by 'Wet' pipetting position
 			// FIXME: also take the source's and destination's "cleanBefore" into account
 			var intensity = (!isSameSource)
-				? item.cleanBefore || parsed.cleanBetween.value || parsed.clean.value || "thorough"
-				: item.cleanBefore || parsed.cleanBetweenSameSource.value || parsed.cleanBetween.value || parsed.clean.value || "thorough";
+				? item.cleanBefore || parsed.value.cleanBetween || parsed.value.clean || "thorough"
+				: item.cleanBefore || parsed.value.cleanBetweenSameSource || parsed.value.cleanBetween || parsed.value.clean || "thorough";
 			assert(intensityToValue.hasOwnProperty(intensity));
 			var intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
@@ -496,7 +496,7 @@ function pipette(params, parsed, data) {
 	var syringeToCleanEndValue = {};
 	//console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
-		var intensity = parsed.cleanEnd.value || parsed.clean.value || "thorough";
+		var intensity = parsed.value.cleanEnd || parsed.value.clean || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));
 		var intensityValue = intensityToValue[intensity];
 		if (syringeToCleanAfterValue.hasOwnProperty(syringe))
@@ -534,7 +534,7 @@ const commandHandlers = {
 		//console.log("washTips:");
 		//console.log(JSON.stringify(parsed, null, '\t'))
 		const effects = {};
-		for (const [syringeName, syringe] of _.zip(params.syringes, parsed.syringes.value)) {
+		for (const [syringeName, syringe] of _.zip(params.syringes, parsed.value.syringes)) {
 			//console.log(JSON.stringify(item))
 			if (!_.isUndefined(syringe.contaminants))
 				effects[`${syringeName}.contaminants`] = null;
@@ -542,7 +542,7 @@ const commandHandlers = {
 			if (!_.isUndefined(syringe.contents))
 				effects[`${syringeName}.contents`] = null;
 			// Set cleaned property
-			effects[`${syringeName}.cleaned`] = parsed.intensity.value;
+			effects[`${syringeName}.cleaned`] = parsed.value.intensity;
 		}
 		return effects;
 	},
@@ -563,8 +563,8 @@ const commandHandlers = {
 
 		const syringes0 = (params.syringes)
 			? commandHelper.asArray(params.syringes)
-			: (!params.items && parsed.equipment.value && parsed.equipment.value.syringe)
-				? _.keys(parsed.equipment.value.syringe).map(s => parsed.equipment.objectName + ".syringe." + s)
+			: (!params.items && parsed.value.equipment && parsed.value.equipment.syringe)
+				? _.keys(parsed.value.equipment.syringe).map(s => parsed.objectName.equipment + ".syringe." + s)
 				: [];
 		const n = _.max([syringes0.length, commandHelper.asArray(params.items).length])
 		const itemsToMerge = [
@@ -580,8 +580,8 @@ const commandHandlers = {
 		const nodes = _.flatten(items.map(item => {
 			const predicates = [
 				{"pipetter.canAgentEquipmentSyringe": {
-					"agent": parsed.agent.objectName,
-					"equipment": parsed.equipment.objectName,
+					"agent": parsed.objectName.agent,
+					"equipment": parsed.objectName.equipment,
 					"syringe": item.syringe
 				}}
 			];
@@ -633,8 +633,8 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
-		const mixtures0 = parsed.mixtures.value;
-		const destinations = parsed.destinations.value;
+		const mixtures0 = parsed.value.mixtures;
+		const destinations = parsed.value.destinations;
 		//console.log("params:", params);
 		//console.log("data.objects.mixtures:", data.objects.mixtures);
 		//console.log("mixtures:\n"+JSON.stringify(mixtures0));
@@ -661,7 +661,7 @@ const commandHandlers = {
 				params2.items.push(_.merge({index: index}, subitem, {destination: pair[1]}));
 			});
 		});
-		let order = parsed.order.value || ["index"];
+		let order = parsed.value.order || ["index"];
 		if (!_.isArray(order)) order = [order];
 		const ordering = _.map(order, function(what) {
 			switch (what) {

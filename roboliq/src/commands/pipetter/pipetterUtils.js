@@ -22,7 +22,7 @@ export function getEffects_aspirate(parsed, data, effects) {
 	var effectsNew = {}
 
 	console.log(JSON.stringify(parsed));
-	for (const item of parsed.items.value) {
+	for (const item of parsed.value.items) {
 		console.log(JSON.stringify(item));
 
 		/*CONTINUE
@@ -125,7 +125,7 @@ export function getEffects_pipette(parsed, data, effects) {
 				water: -60ul
 				*/
 	//console.log(JSON.stringify(params));
-	_.forEach(parsed.items.value, item => {
+	_.forEach(parsed.value.items, item => {
 		//console.log(JSON.stringify(item));
 
 		// Get initial contents of the source well

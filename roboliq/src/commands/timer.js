@@ -87,8 +87,8 @@ var commandHandlers = {
 	 */
 	"timer._sleep": function(params, parsed, data) {
 		var effects = {};
-		if (parsed.stop.value)
-			effects[parsed.equipment.objectName + ".running"] = false;
+		if (parsed.value.stop)
+			effects[parsed.objectName.equipment + ".running"] = false;
 		return {
 			effects: effects
 		};
@@ -106,7 +106,7 @@ var commandHandlers = {
 	 */
 	"timer._start": function(params, parsed, data) {
 		var effects = {};
-		effects[parsed.equipment.objectName + ".running"] = true;
+		effects[parsed.objectName.equipment + ".running"] = true;
 		return {
 			effects: effects
 		};
@@ -124,7 +124,7 @@ var commandHandlers = {
 	 */
 	"timer._stop": function(params, parsed, data) {
 		var effects = {};
-		effects[parsed.equipment.objectName + ".running"] = false;
+		effects[parsed.objectName.equipment + ".running"] = false;
 		return {
 			effects: effects
 		};
@@ -147,8 +147,8 @@ var commandHandlers = {
 	"timer._wait": function(params, parsed, data) {
 		// TODO: assert that timer is running
 		var effects = {};
-		if (parsed.stop.value)
-			effects[parsed.equipment.objectName + ".running"] = false;
+		if (parsed.value.stop)
+			effects[parsed.objectName.equipment + ".running"] = false;
 		return {
 			effects: effects
 		};
@@ -178,12 +178,12 @@ var commandHandlers = {
 				agent: agent,
 				equipment: equipment
 			},
-			2: parsed.steps.value,
+			2: parsed.value.steps,
 			3: {
 				command: "timer._wait",
 				agent: agent,
 				equipment: equipment,
-				till: parsed.duration.value.toNumber('s'),
+				till: parsed.value.duration.toNumber('s'),
 				stop: true
 			},
 		};
@@ -210,7 +210,7 @@ var commandHandlers = {
 		var params2 = _.merge(
 			{
 				command: "timer._sleep",
-				duration: parsed.duration.value.toNumber('s')
+				duration: parsed.value.duration.toNumber('s')
 			},
 			alternatives[0]
 		);

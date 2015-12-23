@@ -773,12 +773,13 @@ function _run(opts, userProtocol) {
 					};
 					// If a schema is given for the command, parse its parameters
 					const schema = protocol.schemas[commandName];
-					//console.log("params: "+JSON.stringify(params))
+					console.log("params: "+JSON.stringify(params))
 					const parsed = (schema)
 						? commandHelper.parseParams(params, data, schema)
 						: undefined;
 					// Try to run the command handler
 					result = handler(params, parsed, data) || {};
+					console.log("result: "+JSON.stringify(result))
 				} catch (e) {
 					if (e.hasOwnProperty("errors")) {
 						result = {errors: e.errors};

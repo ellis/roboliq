@@ -25,15 +25,15 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
-		var destinationAfter = (_.isUndefined(parsed.destinationAfter.objectName)) ? location0 : parsed.destinationAfter.objectName;
+		var destinationAfter = (_.isUndefined(parsed.objectName.destinationAfter)) ? location0 : parsed.objectName.destinationAfter;
 
 		var predicates = [
 			{"sealer.canAgentEquipmentProgramModelSite": {
-				"agent": parsed.agent.objectName,
-				"equipment": parsed.equipment.objectName,
-				"program": parsed.program.objectName,
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment,
+				"program": parsed.objectName.program,
 				"model": model,
-				"site": parsed.site.objectName
+				"site": parsed.objectName.site
 			}}
 		];
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
@@ -43,7 +43,7 @@ var commandHandlers = {
 		var expansion = [
 			(params2.site === location0) ? null : {
 				"command": "transporter.movePlate",
-				"object": parsed.object.objectName,
+				"object": parsed.objectName.object,
 				"destination": params2.site
 			},
 			{
@@ -51,18 +51,18 @@ var commandHandlers = {
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params2.program,
-				object: parsed.object.objectName
+				object: parsed.objectName.object
 			},
 			(destinationAfter === null) ? null : {
 				"command": "transporter.movePlate",
-				"object": parsed.object.objectName,
+				"object": parsed.objectName.object,
 				"destination": location0
 			},
 		];
 
 		// Create the effects object
 		var effects = {};
-		effects[parsed.object.objectName + ".sealed"] = true;
+		effects[parsed.objectName.object + ".sealed"] = true;
 
 		return {
 			expansion: expansion,

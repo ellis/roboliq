@@ -52,7 +52,7 @@ var commandHandlers = {
 	 */
 	"transporter._movePlate": function(params, parsed, data) {
 		var effects = {};
-		effects[`${parsed.object.objectName}.location`] = parsed.destination.objectName;
+		effects[`${parsed.objectName.object}.location`] = parsed.objectName.destination;
 		return {
 			effects: effects
 		};
@@ -71,19 +71,19 @@ var commandHandlers = {
 		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		var transporterLogic = require('./transporterLogic.json');
 		var taskList = [];
-		if (parsed.agent.objectName) {
+		if (parsed.objectName.agent) {
 			taskList.push({
 				"movePlate-a": {
-					"agent": parsed.agent.objectName,
-					"labware": parsed.object.objectName,
-					"destination": parsed.destination.objectName
+					"agent": parsed.objectName.agent,
+					"labware": parsed.objectName.object,
+					"destination": parsed.objectName.destination
 				}
 			});
 		} else {
 			taskList.push({
 				"movePlate": {
-					"labware": parsed.object.objectName,
-					"destination": parsed.destination.objectName
+					"labware": parsed.objectName.object,
+					"destination": parsed.objectName.destination
 				}
 			});
 		}
@@ -138,7 +138,7 @@ var commandHandlers = {
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		if (_.isEmpty(plan)) {
-			return {errors: ["unable to find a transportation path for `"+parsed.object.objectName+"` from `"+misc.findObjectsValue(parsed.object.objectName+".location", data.objects)+"` to `"+parsed.destination.objectName+"`"]}
+			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`"]}
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")
@@ -161,7 +161,7 @@ var commandHandlers = {
 
 		// Create the effets object
 		var effects = {};
-		effects[`${parsed.object.objectName}.location`] = parsed.destination.objectName;
+		effects[`${parsed.objectName.object}.location`] = parsed.objectName.destination;
 
 		return {
 			expansion: expansion,

@@ -469,26 +469,25 @@ function processDuration(result, path, x0, data, paramName) {
 }
 
 function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
+	const value = _.get(parsed.value[paramName], propertyName, defaultValue);
+	const objectName = parsed.objectName[paramName];
 	//console.log({parsed, x: parsed[paramName], paramName, propertyName})
-	if (!parsed.hasOwnProperty(paramName)) {
-		expect.truthy({paramName: paramName}, !_.isUndefined(defaultValue), "missing parameter value");
-		return defaultValue;
-	}
-	var x = parsed[paramName];
-
-	if (x.hasOwnProperty('value')) {
-		var value = _.get(x.value, propertyName, defaultValue);
-		var objectName = (x.objectName) ? x.objectName+"."+propertyName : paramName+"/"+propertyName;
-		expect.truthy({objectName: objectName}, !_.isUndefined(value), "missing value");
+	if (!_.isUndefined(value)) {
+		const objectName1 = (objectName) ? objectName+"."+propertyName : paramName+"/"+propertyName;
+		expect.truthy({objectName1}, !_.isUndefined(value), "missing value");
 		return value;
 	}
-	else {
-		var objectName = x.objectName+"."+propertyName;
+	/*else if (!_.isUndefined(objectName)) {
+		const objectName1 = objectName+"."+propertyName;
 		var value = g(data, objectName);
 		if (_.isUndefined(value))
 			value = defaultValue;
 		expect.truthy({objectName: objectName}, !_.isUndefined(value), "missing value");
 		return value;
+	}*/
+	else {
+		expect.truthy({paramName: paramName}, !_.isUndefined(defaultValue), "missing parameter value");
+		return defaultValue;
 	}
 }
 
