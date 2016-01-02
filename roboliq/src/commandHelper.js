@@ -387,7 +387,7 @@ function processOneOrArray(result, path, value0, fn) {
 	value0.forEach((x, i) => fn(result, path.concat(i), x));
 }
 
-function processString(result, path, value0, data, paramName) {
+function processString(result, path, value0, data) {
 	// Follow de-references:
 	var references = [];
 	var objectName = undefined;
@@ -423,7 +423,7 @@ function processString(result, path, value0, data, paramName) {
  */
 function processObjectOfType(result, path, x, data, type) {
 	//console.log("processObjectOfType:")
-	//console.log({result, path, x, paramName, type})
+	//console.log({result, path, x, type})
 	const paramName = path.join(".");
 	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(x));
 	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(x));
@@ -438,32 +438,32 @@ function processObjectOfType(result, path, x, data, type) {
  * @param  {[type]} paramName [description]
  * @return {[type]}           [description]
  */
-function processSource(result, path, x, data, paramName) {
-	const l = processSources(result, path, x, data, paramName);
-	expect.truthy({paramName: paramName}, _.isArray(l) && l.length === 1, "expected a single liquid source: "+JSON.stringify(x));
+function processSource(result, path, x, data) {
+	const l = processSources(result, path, x, data);
+	expect.truthy({paramName: path.join('.')}, _.isArray(l) && l.length === 1, "expected a single liquid source: "+JSON.stringify(x));
 	_.set(result.value, path, l[0]);
 }
 
 /**
  * @returns list of sources
  */
-function processSources(result, path, x, data, paramName) {
+function processSources(result, path, x, data) {
 	//console.log({before: x, paramName})
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
 		//console.log({x})
-		expect.truthy({paramName: paramName}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
+		expect.truthy({paramName: path.join('.')}, _.isArray(x), "expected a liquid source: "+JSON.stringify(x));
 		//x = [x];
 	}
 	else if (_.isPlainObject(x) && x.type === 'Liquid') {
 		x = [x.wells];
 	}
 	else if (_.isArray(x)) {
-		x = x.map(x2 => {
-			const paramName2 = `$paramName[$index]`;
-			return expect.try({paramName: paramName2}, () => {
+		x = x.map((x2, index) => {
+			const path2 = path.concat(index)
+			return expect.try({paramName: path2.join('.')}, () => {
 				const result2 = {value: {}, objectName: {}};
-				processSource(result2, ['x'], x2, data, paramName2);
+				processSource(result2, path2, x2, data);
 				return result2.value.x;
 			});
 		});
@@ -472,7 +472,7 @@ function processSources(result, path, x, data, paramName) {
 	return x;
 }
 
-function processVolume(result, path, x, data, paramName) {
+function processVolume(result, path, x, data) {
 	if (_.isNumber(x)) {
 		x = math.unit(x, 'l');
 	}
@@ -480,30 +480,30 @@ function processVolume(result, path, x, data, paramName) {
 		x = math.eval(x);
 	}
 	//console.log({function: "processVolume", path, x})
-	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
 	_.set(result.value, path, x);
 	//console.log("set in result.value")
 }
 
-function processWell(result, path, x, data, paramName) {
+function processWell(result, path, x, data) {
 	if (_.isString(x)) {
 		//console.log("processWell:")
-		//console.log({result, path, x, paramName})
+		//console.log({result, path, x})
 		x = wellsParser.parse(x, data.objects);
 	}
-	expect.truthy({paramName: paramName}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(x));
 	_.set(result.value, path, x[0]);
 }
 
-function processWells(result, path, x, data, paramName) {
+function processWells(result, path, x, data) {
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
 	}
-	expect.truthy({paramName: paramName}, _.isArray(x), "expected a list of wells: "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, _.isArray(x), "expected a list of wells: "+JSON.stringify(x));
 	_.set(result.value, path, x);
 }
 
-function processDuration(result, path, x0, data, paramName) {
+function processDuration(result, path, x0, data) {
 	let x = x0;
 	if (_.isNumber(x)) {
 		x = math.unit(x, 's');
@@ -512,7 +512,7 @@ function processDuration(result, path, x0, data, paramName) {
 		x = math.eval(x);
 	}
 	//console.log({a: math.unit('s'), value: x, x0})
-	expect.truthy({paramName: paramName}, math.unit('s').equalBase(x), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
+	expect.truthy({paramName: path.join('.')}, math.unit('s').equalBase(x), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
 	_.set(result.value, path, x);
 }
 
