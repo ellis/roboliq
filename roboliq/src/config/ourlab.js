@@ -722,15 +722,16 @@ module.exports = {
 			};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge:")
 			//console.log({parsed, params})
 			const parsedProgram = parsed.value.program;
 			//console.log({parsedProgram});
 			var list = [
-				math.round(parsedProgram.rpm.value),
-				math.round(parsedProgram.duration.value.toNumber('s')),
-				math.round(parsedProgram.spinUpTime.value.toNumber('s')),
-				math.round(parsedProgram.spinDownTime.value.toNumber('s')),
-				math.round(parsedProgram.temperature.value)
+				math.round(parsedProgram.rpm),
+				math.round(parsedProgram.duration.toNumber('s')),
+				math.round(parsedProgram.spinUpTime.toNumber('s')),
+				math.round(parsedProgram.spinDownTime.toNumber('s')),
+				math.round(parsedProgram.temperature)
 			];
 			var value = list.join(",");
 			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};

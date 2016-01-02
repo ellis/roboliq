@@ -71,11 +71,10 @@
 - [x] refactor: can I remove parsers/sourceParser?
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
-- [ ] change `parseParams` function to return a {objectNames, values}
+- [x] change `parseParams` function to return a {objectNames, values}
 	- [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
-	- [ ] pipetterPipetteTest.js
-		- problem appears to be related to get getEffects_pipette()
-	- [ ] centrifugeTest.js
+	- [x] pipetterPipetteTest.js
+	- [x] centrifugeTest.js
 - [ ] refactor usage of commandHelper.getParsedValue
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler

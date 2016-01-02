@@ -52,7 +52,7 @@ var commandHandlers = {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
-		console.log(JSON.stringify(parsed, null, '\t'))
+		//console.log(JSON.stringify(parsed, null, '\t'))
 
 		var agent = parsed.objectName.agent || "?agent";
 		var equipment = parsed.objectName.equipment || "?equipment";
@@ -97,7 +97,7 @@ var commandHandlers = {
 
 		// Find any parameters which can only take one specific value
 		var params2 = alternatives[0];
-		console.log("alternatives[0]:\n"+JSON.stringify(params2))
+		//console.log("alternatives[0]:\n"+JSON.stringify(params2))
 
 		var destination1 =
 			_.isUndefined(parsed.objectName.destinationAfter1) ? object1.location
@@ -177,7 +177,8 @@ var commandHandlers = {
 			},
 		];
 
-		console.log(JSON.stringify(expansion, null, '\t'))
+		//console.log("centrifuge2 expansion:")
+		//console.log(JSON.stringify(expansion, null, '\t'))
 		return {
 			expansion: expansion,
 			alternatives: alternatives
