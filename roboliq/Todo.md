@@ -72,7 +72,7 @@
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] change `parseParams` function to return a {objectNames, values}
-	- [ ] figure out problem with processOneOrArray as currently testing in commandHelperTest
+	- [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
 	- [ ] centrifugeTest.js
 	- [ ] pipetterPipetteTest.js
 - [ ] refactor usage of commandHelper.getParsedValue

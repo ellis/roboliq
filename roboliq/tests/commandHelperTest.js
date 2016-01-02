@@ -219,6 +219,8 @@ describe('commandHelper', function() {
 				time2: "23 minutes",
 				volume1: 10,
 				volume2: "10 ul",
+				volumes1: "10 ul",
+				volumes2: ["10 ul", "20 ul"],
 				well1: "p(A01)",
 				wells1: "p(A01)",
 				source1: "p(A01)",
@@ -237,13 +239,15 @@ describe('commandHelper', function() {
 					time2: {type: 'Duration'},
 					volume1: {type: 'Volume'},
 					volume2: {type: 'Volume'},
+					volumes1: {type: 'Volumes'},
+					volumes2: {type: 'Volumes'},
 					well1: {type: 'Well'},
 					wells1: {type: 'Wells'},
 					source1: {type: 'Source'},
 					sources1: {type: 'Sources'},
 					sources2: {type: 'Sources'},
 				},
-				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'well1', 'wells1', 'source1', 'sources1']
+				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'volumes1', 'volumes2', 'well1', 'wells1', 'source1', 'sources1']
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
@@ -257,6 +261,8 @@ describe('commandHelper', function() {
 					time2: math.unit(23, 'minutes'),
 					volume1: math.unit(10, 'l'),
 					volume2: math.unit(10, 'ul'),
+					volumes1: [math.unit(10, 'ul')],
+					volumes2: [math.unit(10, 'ul'), math.unit(20, 'ul')],
 					well1: "p(A01)",
 					wells1: ["p(A01)"],
 					source1: "p(A01)",
