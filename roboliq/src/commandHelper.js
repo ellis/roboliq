@@ -157,7 +157,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data, nam
 		case "Sources": return processSources(result, path, value, data, name);
 		case "String": return processString(result, path, value, data, name);
 		case "Volume": return processVolume(result, path, value, data, name);
-		case "Volumes": return processOneOrArray(path, value, (x, i) => processVolume(result, path.concat(i), x, data, name));
+		case "Volumes": return processOneOrArray(result, path, value, (result, path, x) => processVolume(result, path, x, data, name));
 		case "Well": return processWell(result, path, value, data, name);
 		case "Wells": return processWells(result, path, value, data, name);
 		case "File":
@@ -354,15 +354,26 @@ function dereferenceVariable(data, name) {
 /**
  * Try to call fn on value0.  If that works, return the value is be made into
  * a singleton array.  Otherwise try to process value0 as an array.
+ * fn should accept parameters (result, path, value0) and set the value in
+ * result.value at the given path.
  */
-function processOneOrArray(path, value0, fn) {
-	//console.log({value0, name})
+function processOneOrArray(result, path, value0, fn) {
+	//console.log("processOneOrArray:")
+	//console.log({path, value0})
+	// Try to process value0 as a single value, then turn it into an array
 	try {
-		fn(value0, 0);
-	} catch (e) {}
+		fn(result, path.concat(0), value0);
+		//console.log({result})
+		const x = [_.get(result.value, path)];
+		_.set(result.value, path, x);
+		//console.log({result})
+		return;
+	} catch (e) {
+		//console.log(e)
+	}
 
 	expect.truthy({paramName: path.join('.')}, _.isArray(value0), "expected an array: "+JSON.stringify(value0));
-	value0.forEach((x, i) => fn(x, i));
+	value0.forEach((x, i) => fn(result, path.concat(i), x));
 }
 
 function processString(result, path, value0, data, paramName) {
@@ -433,6 +444,7 @@ function processVolume(result, path, x, data, paramName) {
 	else if (_.isString(x)) {
 		x = math.eval(x);
 	}
+	//console.log({function: "processVolume", x})
 	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
 	_.set(result.value, path, x);
 }
