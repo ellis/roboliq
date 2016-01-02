@@ -358,15 +358,19 @@ function dereferenceVariable(data, name) {
  * result.value at the given path.
  */
 function processOneOrArray(result, path, value0, fn) {
-	//console.log("processOneOrArray:")
-	//console.log({path, value0})
+	console.log("processOneOrArray:")
+	console.log({path, value0})
 	// Try to process value0 as a single value, then turn it into an array
 	try {
-		fn(result, path.concat(0), value0);
-		//console.log({result})
-		const x = [_.get(result.value, path)];
-		_.set(result.value, path, x);
-		//console.log({result})
+		_.set(result.value, path, undefined);
+		const path2 = path.concat(0);
+		fn(result, path2, value0);
+		console.log(JSON.stringify(result));
+		console.log(JSON.stringify(_.get(result.value, path)));
+		const x = _.get(result.value, path2);
+		console.log({path2, x: JSON.stringify(x)})
+		_.set(result.value, path2, x);
+		console.log({result})
 		return;
 	} catch (e) {
 		//console.log(e)
@@ -444,9 +448,10 @@ function processVolume(result, path, x, data, paramName) {
 	else if (_.isString(x)) {
 		x = math.eval(x);
 	}
-	//console.log({function: "processVolume", x})
+	console.log({function: "processVolume", path, x})
 	expect.truthy({paramName: paramName}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
 	_.set(result.value, path, x);
+	console.log("set in result.value")
 }
 
 function processWell(result, path, x, data, paramName) {
