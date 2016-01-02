@@ -1,3 +1,7 @@
+/**
+ * @file A collection of helper functions for command handlers.
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var expect = require('./expect.js');
@@ -35,20 +39,6 @@ function asArray(x) {
 function parseParams(params, data, schema) {
 	return processValueAsObject({value: {}, objectName: {}}, [], params, data, schema);
 }
-
-/**
- * processValueBySchema():
- * Input: value and a schema.
- *
- *
- * ---
- *
- * processValueBySchemaAndType():
- * If type === "name", return value.
- * If _.isString(value), try to lookup object.
- *
- * If type === "array"
- */
 
 /**
  * Try to convert value0 (a "raw" value, no yet looked up) to the given type.
@@ -109,6 +99,15 @@ function processValue0BySchema(result, path, value0, schema, data, name) {
 	}
 }
 
+/**
+ * Try to handle an enum
+ * @param  {object} result - result structure for values and objectNames
+ * @param  {array} path - path in params
+ * @param  {any} value0 [description]
+ * @param  {object} schema - schema
+ * @param  {object} data - protocol data
+ * @param  {string} name   [description]
+ */
 function processValue0AsEnum(result, path, value0, schema, data, name) {
 	const value1 = lookupValue0(result, path, value0, data);
 	expect.truthy({paramName: name}, schema.enum.includes(value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
