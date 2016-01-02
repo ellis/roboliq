@@ -2,22 +2,23 @@ var _ = require('lodash');
 var should = require('should');
 var roboliq = require('../src/roboliq.js')
 
-describe('commands/centrifgue', function() {
-	var protocol0 = {
-		roboliq: "v1",
-		objects: {
-			plate1: {
-				type: "Plate",
-				model: "ourlab.model.plateModel_384_square",
-				location: "ourlab.mario.site.P2"
-			},
-			plate2: {
-				type: "Plate",
-				model: "ourlab.model.plateModel_384_square",
-				location: "ourlab.mario.site.P3"
-			}
+const protocol0 = {
+	roboliq: "v1",
+	objects: {
+		plate1: {
+			type: "Plate",
+			model: "ourlab.model.plateModel_384_square",
+			location: "ourlab.mario.site.P2"
+		},
+		plate2: {
+			type: "Plate",
+			model: "ourlab.model.plateModel_384_square",
+			location: "ourlab.mario.site.P3"
 		}
-	};
+	}
+};
+
+describe('commands/centrifgue', function() {
 
 	describe('centrifuge.centrifuge2', function () {
 		it('should put two plates in the centrifuge, run, then move the plates back', function () {
@@ -26,6 +27,7 @@ describe('commands/centrifgue', function() {
 				steps: {
 					1: {
 						command: "centrifuge.centrifuge2",
+						//command: "centrifuge.insertPlates2",
 						object1: "plate1",
 						object2: "plate2",
 						program: {
@@ -38,6 +40,7 @@ describe('commands/centrifgue', function() {
 			});
 			var result = roboliq.run(["-o", "", "-T"], protocol);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+
 			should.deepEqual(result.output.steps[1],
 				{
 					"1": {

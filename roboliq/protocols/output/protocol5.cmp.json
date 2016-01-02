@@ -35,27 +35,61 @@
 				},
 				"liha": {
 					"type": "Pipetter",
-					"syringes": {
+					"syringe": {
 						"1": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"2": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"3": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"4": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
+						},
+						"5": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"6": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"7": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"8": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
 						}
+					},
+					"tipModelToSyringes": {
+						"ourlab.mario.tipModel1000": [
+							"ourlab.mario.liha.syringe.1",
+							"ourlab.mario.liha.syringe.2",
+							"ourlab.mario.liha.syringe.3",
+							"ourlab.mario.liha.syringe.4"
+						],
+						"ourlab.mario.tipModel0050": [
+							"ourlab.mario.liha.syringe.5",
+							"ourlab.mario.liha.syringe.6",
+							"ourlab.mario.liha.syringe.7",
+							"ourlab.mario.liha.syringe.8"
+						]
 					}
 				},
 				"sealer": {
@@ -380,6 +414,9 @@
 	},
 	"effects": {
 		"1": {
+			"undefined.contaminants": [
+				"plate1(A01)"
+			],
 			"plate1.contents.A01": [
 				"Infinity l",
 				"plate1(A01)"

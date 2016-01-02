@@ -71,6 +71,11 @@
 - [x] refactor: can I remove parsers/sourceParser?
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
+- [x] change `parseParams` function to return a {objectNames, values}
+	- [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
+	- [x] pipetterPipetteTest.js
+	- [x] centrifugeTest.js
+- [ ] refactor usage of commandHelper.getParsedValue
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
@@ -79,8 +84,15 @@
 	- [x] test for clean all tips
 	- [x] delete protocol8.json, because the tests are in pipetterTest.js
 	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
-	- [ ] add tips 5-8 to ourlab.js
+	- [x] add tips 5-8 to ourlab.js
 	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
+		- [x] `_pipette`: append contaminants from source well to syringe
+		- [?] `_pipette`: clear contents of syringe
+		- [?] `_pipette`: clear syringe.cleaned
+		- [?] `_washTips`: remove contents, remove contaminants, set `cleaned`
+		- [ ] `_washTips`: used 'parsed' instead of 'params' for the syringe names
+		- [ ] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
+		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] create incubator command for tania13_ph
@@ -216,6 +228,7 @@
 - [ ] UI to create protocol
 - [ ] consider adding constraints to properties using 'property@' properties, e.g. `model@: {rows:8, columns:16}`
 - [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
+- [ ] handle multi-aspirate, and prevent use of `pipetter._pipette` if there are already contents in a syringe
 - [ ] use a generic incubate command in tania13_ph_3_measure, instead of centrifuge.run
 - [ ] write program to generate part of ourlab.mario from the evoware config files ('siteModel', 'stackable')
 - [ ] support creation of well groups by commands, so that the same wells can be used by later commands; pass in a well group name to the generating command, and have it populate that well group as an effect
@@ -268,6 +281,8 @@
 - [ ] commands/pipetter.js: handle case of dispensing then later aspirating from a single well in a single pipetting command
 - [ ] consider allowing for scopes to commands, rather than just globals objects and command params; may need to make data.objects an array.
 - [ ] Use Immutablejs to protocol structure: should speed up handling of large protocols by avoiding the `_.cloneDeep` calls and unnecessary recalculations of logic for each step.
+- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands to return -- but if there are any errors, then return the sub-command instead.
+- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 
 # Notes
 

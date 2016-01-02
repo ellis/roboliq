@@ -37,9 +37,9 @@ var objectToPredicateConverters = {
 /*
 function closeAll(parsed, data, effects) {
 	// Close equipment
-	effects[parsed.equipment.objectName+".open"] = false;
+	effects[parsed.objectName.equipment+".open"] = false;
 	// Indicate that all internal sites are closed
-	_.forEach(parsed.equipment.value.sitesInternal, function(site) { effects[site+".closed"] = true; });
+	_.forEach(parsed.value.equipment.sitesInternal, function(site) { effects[site+".closed"] = true; });
 }
 */
 
@@ -48,30 +48,17 @@ function closeAll(parsed, data, effects) {
  * @static
  */
 var commandHandlers = {
-	/**
-	 * Centrifuge using two plates.
-	 *
-	 * @typedef centrifuge2
-	 * @memberof centrifuge
-	 * @property {string} command - "centrifuge.centrifuge2"
-	 * @property {string} [agent] - Agent identifier
-	 * @property {string} [equipment] - Equipment identifier
-	 * @property {string} object1 - Plate identifier
-	 * @property {string} object2 - Plate identifier
-	 * @property {string} [site1] - Location identifier for the centrifugation site of object1
-	 * @property {string} [site2] - Location identifier for the centrifugation site of object2
-	 * @property {string} [destinationAfter1] - Location identifier for where object1 should be placed after centrifugation
-	 * @property {string} [destinationAfter2] - Location identifier for where object2 should be placed after centrifugation
-	 */
 	"centrifuge.centrifuge2": function(params, parsed, data) {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
-		var agent = parsed.agent.objectName || "?agent";
-		var equipment = parsed.equipment.objectName || "?equipment";
+		//console.log(JSON.stringify(parsed, null, '\t'))
 
-		var object1 = parsed.object1.value;
-		var object2 = parsed.object2.value;
+		var agent = parsed.objectName.agent || "?agent";
+		var equipment = parsed.objectName.equipment || "?equipment";
+
+		var object1 = parsed.value.object1;
+		var object2 = parsed.value.object2;
 		if (object1.model != object2.model)
 			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
 
@@ -86,11 +73,11 @@ var commandHandlers = {
 		};
 		var query = _.merge({}, query0,
 			{"centrifuge.canAgentEquipmentModelSite1Site2": {
-				"agent": parsed.agent.objectName,
-				"equipment": parsed.equipment.objectName,
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment,
 				"model": object1.model,
-				"site1": parsed.site1.objectName,
-				"site2": parsed.site2.objectName
+				"site1": parsed.objectName.site1,
+				"site2": parsed.objectName.site2
 			}}
 		);
 		var resultList = llpl.query(query);
@@ -113,13 +100,13 @@ var commandHandlers = {
 		//console.log("alternatives[0]:\n"+JSON.stringify(params2))
 
 		var destination1 =
-			_.isUndefined(parsed.destinationAfter1.objectName) ? object1.location
-			: (parsed.destinationAfter1.objectName === null) ? params2.site1
-			: parsed.destinationAfter1.objectName;
+			_.isUndefined(parsed.objectName.destinationAfter1) ? object1.location
+			: (parsed.objectName.destinationAfter1 === null) ? params2.site1
+			: parsed.objectName.destinationAfter1;
 		var destination2 =
-			_.isUndefined(parsed.destinationAfter2.objectName) ? object2.location
-			: (parsed.destinationAfter2.objectName === null) ? params2.site2
-			: parsed.destinationAfter2.objectName;
+			_.isUndefined(parsed.objectName.destinationAfter2) ? object2.location
+			: (parsed.objectName.destinationAfter2 === null) ? params2.site2
+			: parsed.objectName.destinationAfter2;
 
 		var expansion = [
 			(object1.location === params2.site1) ? null : [
@@ -131,7 +118,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": parsed.object1.objectName,
+					"object": parsed.objectName.object1,
 					"destination": params2.site1
 				}
 			],
@@ -144,7 +131,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": parsed.object2.objectName,
+					"object": parsed.objectName.object2,
 					"destination": params2.site2
 				}
 			],
@@ -152,7 +139,7 @@ var commandHandlers = {
 				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,
-				program: parsed.program.objectName || parsed.program.value
+				program: parsed.objectName.program || parsed.value.program
 			},
 			// Move object1 back
 			(destination1 === params2.site1) ? null : [
@@ -164,7 +151,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": parsed.object1.objectName,
+					"object": parsed.objectName.object1,
 					"destination": destination1
 				}
 			],
@@ -178,7 +165,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": parsed.object2.objectName,
+					"object": parsed.objectName.object2,
 					"destination": destination2
 				}
 			],
@@ -190,37 +177,26 @@ var commandHandlers = {
 			},
 		];
 
+		//console.log("centrifuge2 expansion:")
+		//console.log(JSON.stringify(expansion, null, '\t'))
 		return {
 			expansion: expansion,
 			alternatives: alternatives
 		};
 	},
-	/**
-	 * Insert up to two plates into the centrifuge.
-	 *
-	 * @typedef insertPlates2
-	 * @memberof centrifuge
-	 * @property {string} command - "centrifuge.insertPlates2"
-	 * @property {string} [agent] - Agent identifier
-	 * @property {string} [equipment] - Equipment identifier
-	 * @property {string} [object1] - Plate identifier
-	 * @property {string} [object2] - Plate identifier
-	 * @property {string} [site1] - Location identifier for the centrifugation site of object1
-	 * @property {string} [site2] - Location identifier for the centrifugation site of object2
-	 */
 	"centrifuge.insertPlates2": function(params, parsed, data) {
 		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
-		if (!parsed.object1 && !parsed.object2) {
+		if (!parsed.value.object1 && !parsed.value.object2) {
 			// do nothing
 			return {};
 		}
 
-		var agent = parsed.agent.name || "?agent";
-		var equipment = parsed.equipment.name || "?equipment";
-		var object1 = parsed.object1.value;
-		var object2 = parsed.object2.value;
+		var agent = parsed.objectName.agent || "?agent";
+		var equipment = parsed.objectName.equipment || "?equipment";
+		var object1 = parsed.value.object1;
+		var object2 = parsed.value.object2;
 
 		if (object1 && object2 && object1.model !== object2.model)
 			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
@@ -238,11 +214,11 @@ var commandHandlers = {
 		};
 		var query = _.merge({}, query0,
 			{"centrifuge.canAgentEquipmentModelSite1Site2": {
-				"agent": parsed.agent.objectName,
-				"equipment": parsed.equipment.objectName,
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment,
 				"model": model,
-				"site1": parsed.site1.objectName,
-				"site2": parsed.site2.objectName
+				"site1": parsed.objectName.site1,
+				"site2": parsed.objectName.site2
 			}}
 		);
 		var resultList = llpl.query(query);
@@ -274,7 +250,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": parsed.object1.objectName,
+					"object": parsed.objectName.object1,
 					"destination": params2.site1
 				}
 			],
@@ -287,7 +263,7 @@ var commandHandlers = {
 				},
 				{
 					"command": "transporter.movePlate",
-					"object": parsed.object2.objectName,
+					"object": parsed.objectName.object2,
 					"destination": params2.site2
 				}
 			],

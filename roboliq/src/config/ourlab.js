@@ -7,7 +7,7 @@ function makeEvowareFacts(parsed, data, variable, value) {
 	const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	const result2 = {
 		command: "evoware._facts",
-		agent: parsed.agent.objectName,
+		agent: parsed.objectName.agent,
 		factsEquipment: carrier,
 		factsVariable: carrier+"_"+variable
 	};
@@ -68,6 +68,26 @@ module.exports = {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",
 							"tipModelPermanent": "ourlab.mario.tipModel1000"
+						},
+						"5": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"6": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"7": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"8": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
 						}
 					},
 					"tipModelToSyringes": {
@@ -681,20 +701,20 @@ module.exports = {
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
+			var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
 			return {
 				expansion: [
 					{
 						command: "evoware._facts",
-						agent: parsed.agent.objectName,
+						agent: parsed.objectName.agent,
 						factsEquipment: carrier,
 						factsVariable: carrier+"_MoveToPos",
 						factsValue: (siteIndex+1).toString()
 					},
 					{
 						command: "evoware._facts",
-						agent: parsed.agent.objectName,
+						agent: parsed.objectName.agent,
 						factsEquipment: carrier,
 						factsVariable: carrier+"_Open"
 					},
@@ -702,15 +722,16 @@ module.exports = {
 			};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge:")
 			//console.log({parsed, params})
-			const parsedProgram = parsed.program.value;
+			const parsedProgram = parsed.value.program;
 			//console.log({parsedProgram});
 			var list = [
-				math.round(parsedProgram.rpm.value),
-				math.round(parsedProgram.duration.value.toNumber('s')),
-				math.round(parsedProgram.spinUpTime.value.toNumber('s')),
-				math.round(parsedProgram.spinDownTime.value.toNumber('s')),
-				math.round(parsedProgram.temperature.value)
+				math.round(parsedProgram.rpm),
+				math.round(parsedProgram.duration.toNumber('s')),
+				math.round(parsedProgram.spinUpTime.toNumber('s')),
+				math.round(parsedProgram.spinDownTime.toNumber('s')),
+				math.round(parsedProgram.temperature)
 			];
 			var value = list.join(",");
 			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
@@ -725,20 +746,20 @@ module.exports = {
 		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
 			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.site.objectName);
+			var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
 			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
 
 			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			var hasProgramFile = (parsed.programFile.value) ? 1 : 0;
-			var hasProgramData = (parsed.programData.value) ? 1 : 0;
+			var hasProgramFile = (parsed.value.programFile) ? 1 : 0;
+			var hasProgramData = (parsed.value.programData) ? 1 : 0;
 			//console.log(parsed);
 			expect.truthy({}, hasProgramFile + hasProgramData >= 1, "either `programFile` or `programData` must be specified.");
 			expect.truthy({}, hasProgramFile + hasProgramData <= 1, "only one of `programFile` or `programData` may be specified.");
 			const content = (hasProgramData)
-				? parsed.programData.value.toString('utf8')
-				: parsed.programFile.value.toString('utf8');
+				? parsed.value.programData.toString('utf8')
+				: parsed.value.programFile.toString('utf8');
 			var start_i = content.indexOf("<TecanFile");
 			if (start_i < 0)
 				start_i = 0;
@@ -750,7 +771,7 @@ module.exports = {
 				replace(/~/, "&tilde;").
 				replace(/>[ \t]+</g, "><");
 			// Token
-			var value = parsed.outputFile.value + "|" + programData;
+			var value = parsed.value.outputFile + "|" + programData;
 			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value)]};
 		},
 		// Sealer
@@ -759,10 +780,10 @@ module.exports = {
 			return {
 				expansion: [{
 					command: "evoware._facts",
-					agent: parsed.agent.objectName,
+					agent: parsed.objectName.agent,
 					factsEquipment: carrier,
 					factsVariable: carrier+"_Seal",
-					factsValue: parsed.program.value
+					factsValue: parsed.value.program
 				}],
 				//effects: _.zipObject([[params.object + ".sealed", true]])
 			};
@@ -774,21 +795,24 @@ module.exports = {
 			//console.log(JSON.stringify(parsed, null, '  '))
 
 			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
+			const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
+			//console.log(syringeNameToItems);
 
 			const expansionList = [];
 			const sub = function(syringeNames, volume) {
-				const items = _.filter(parsed.items.value, item =>
-					syringeNames.includes(item.syringe.objectName)
+				const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
+					syringeNames.includes(syringeName)
 				);
-				if (!_.isEmpty(items)) {
-					const value = _.max(_.map(items, item => cleaningIntensities.indexOf(item.intensity.value)));
+				//console.log({syringeNameToItems2})
+				if (!_.isEmpty(syringeNameToItems2)) {
+					const value = _.max(_.map(syringeNameToItems2, ([, item]) => cleaningIntensities.indexOf(item.intensity)));
 					if (value >= 0) {
 						const intensity = cleaningIntensities[value];
-						const syringes = _.map(items, item => item.syringe.objectName);
+						const syringes = _.map(syringeNameToItems2, ([syringeName, ]) => syringeName);
 						expansionList.push({
 							command: "pipetter._washTips",
-							agent: parsed.agent.objectName,
-							equipment: parsed.equipment.objectName,
+							agent: parsed.objectName.agent,
+							equipment: parsed.objectName.equipment,
 							program: `ourlab.mario.washProgram.${intensity}_${volume}`,
 							intensity: intensity,
 							syringes: syringeNames

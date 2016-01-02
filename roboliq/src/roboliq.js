@@ -777,7 +777,11 @@ function _run(opts, userProtocol) {
 						? commandHelper.parseParams(params, data, schema)
 						: undefined;
 					// Try to run the command handler
+					//console.log("A")
+					//console.log(handler)
 					result = handler(params, parsed, data) || {};
+					//console.log("B")
+					//console.log("result: "+JSON.stringify(result))
 				} catch (e) {
 					if (e.hasOwnProperty("errors")) {
 						result = {errors: e.errors};

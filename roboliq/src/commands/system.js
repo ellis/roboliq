@@ -7,9 +7,9 @@ var misc = require('../misc.js');
 
 var commandHandlers = {
 	"system.call": function(params, parsed, data) {
-		switch (parsed.name.value.type) {
+		switch (parsed.value.name.type) {
 			case "Template":
-				var expansion = misc.renderTemplate(parsed.name.value.template, params.params, data);
+				var expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);
 				return {expansion: expansion};
 				break;
 			default:
@@ -19,10 +19,10 @@ var commandHandlers = {
 	},
 	"system.repeat": function(params, parsed, data) {
 		var expansion = {};
-		if (parsed.steps) {
-			const count = parsed.count.value;
+		if (parsed.value.steps) {
+			const count = parsed.value.count;
 			for (let i = 1; i <= count; i++) {
-				expansion[i] = _.cloneDeep(parsed.steps.value);
+				expansion[i] = _.cloneDeep(parsed.value.steps);
 			}
 		}
 

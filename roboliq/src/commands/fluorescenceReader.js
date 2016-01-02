@@ -43,38 +43,38 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
-		var destinationAfter = (_.isUndefined(parsed.destinationAfter.objectName)) ? location0 : parsed.destinationAfter.objectName;
+		var destinationAfter = (_.isUndefined(parsed.objectName.destinationAfter)) ? location0 : parsed.objectName.destinationAfter;
 
 		var predicates = [
 			{"fluorescenceReader.canAgentEquipmentModelSite": {
-				"agent": parsed.agent.objectName,
-				"equipment": parsed.equipment.objectName,
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment,
 				"model": model,
-				"site": parsed.site.objectName
+				"site": parsed.objectName.site
 			}}
 		];
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."fluorescenceReader.canAgentEquipmentModelSite"');
 		var params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
-		//console.log("parsed.outputFile: "+JSON.stringify(parsed.outputFile));
+		//console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
 
 		var expansion = [
 			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
-				object: parsed.object.objectName,
+				object: parsed.objectName.object,
 				destination: params2.site
 			},
 			_.merge({}, {
 				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,
-				programFile: parsed.programFile.value,
-				programData: parsed.programData.value,
-				outputFile: parsed.outputFile.value
+				programFile: parsed.value.programFile,
+				programData: parsed.value.programData,
+				outputFile: parsed.value.outputFile
 			}),
 			(destinationAfter === null) ? null : {
 				command: "transporter.movePlate",
-				object: parsed.object.objectName,
+				object: parsed.objectName.object,
 				destination: destinationAfter
 			}
 		];

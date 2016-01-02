@@ -65,14 +65,14 @@ var commandHandlers = {
 	 */
 	"equipment.open": function(params, parsed, data) {
 		var expansion = [{
-			command: "equipment.open|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
-			agent: parsed.agent.objectName,
-			equipment: parsed.equipment.objectName
+			command: "equipment.open|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
+			agent: parsed.objectName.agent,
+			equipment: parsed.objectName.equipment
 		}];
 
 		return {
 			expansion: expansion,
-			effects: _.zipObject([[parsed.equipment.objectName+".open", true]])
+			effects: _.zipObject([[parsed.objectName.equipment+".open", true]])
 		};
 	},
 	/**
@@ -94,22 +94,26 @@ var commandHandlers = {
 	 * @property {string} site - Site identifier
 	 */
 	"equipment.openSite": function(params, parsed, data) {
-		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.site.objectName) >= 0, `site ${parsed.site.objectName} must be in \`${parsed.equipment.objectName}.sitesInternal\; \`${parsed.equipment.objectName}.sitesInternal\` = ${sitesInternal}`);
+		//console.log("equipment.openSite:")
+		//console.log(JSON.stringify(parsed, null, '\t'))
+		var sitesInternal = parsed.value.equipment.sitesInternal;
+		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.objectName.site) >= 0, `site ${parsed.objectName.site} must be in \`${parsed.objectName.equipment}.sitesInternal\; \`${parsed.objectName.equipment}.sitesInternal\` = ${sitesInternal}`);
 
 		var expansion = [{
-			command: "equipment.openSite|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
-			agent: parsed.agent.objectName,
-			equipment: parsed.equipment.objectName,
-			site: parsed.site.objectName
+			command: "equipment.openSite|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
+			agent: parsed.objectName.agent,
+			equipment: parsed.objectName.equipment,
+			site: parsed.objectName.site
 		}];
+		//console.log(JSON.stringify(expansion, null, '\t'))
 
 		var effects = {};
 		// Open equipment
-		effects[parsed.equipment.objectName+".open"] = true;
+		effects[parsed.objectName.equipment+".open"] = true;
 		// Indicate that the given site is open and the other internal sites are closed
-		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != parsed.site.objectName); });
+		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != parsed.objectName.site); });
 
+		//console.log(JSON.stringify(effects, null, '\t'))
 		return {
 			expansion: expansion,
 			effects: effects
@@ -135,14 +139,14 @@ var commandHandlers = {
 		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
 
 		var expansion = [{
-			command: "equipment.close|"+parsed.agent.objectName+"|"+parsed.equipment.objectName,
-			agent: parsed.agent.objectName,
-			equipment: parsed.equipment.objectName
+			command: "equipment.close|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
+			agent: parsed.objectName.agent,
+			equipment: parsed.objectName.equipment
 		}];
 
 		var effects = {};
 		// Close equipment
-		effects[parsed.equipment.objectName+".open"] = false;
+		effects[parsed.objectName.equipment+".open"] = false;
 		// Indicate that the internal sites are closed
 		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = true; });
 

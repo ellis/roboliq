@@ -3,252 +3,6 @@ var should = require('should');
 var roboliq = require('../src/roboliq.js')
 
 describe('pipetter', function() {
-	describe("pipetter.cleanTips", function() {
-		it("should clean tip 1", function() {
-			const protocol = {
-				roboliq: "v1",
-				steps: {
-					"1": {
-						command: "pipetter.cleanTips",
-						items: [
-							{syringe: "ourlab.mario.liha.syringe.1", intensity: "light"}
-						]
-					}
-				}
-			};
-			const result = roboliq.run(["-o", ""], protocol);
-			//console.log(JSON.stringify(result.output.steps, null, '\t'));
-			should.deepEqual(result.output.steps, {
-				"1": {
-					"1": {
-						"1": {
-							"command": "pipetter._washTips",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"program": "ourlab.mario.washProgram.light_1000",
-							"intensity": "light",
-							"syringes": [
-								"ourlab.mario.liha.syringe.1",
-								"ourlab.mario.liha.syringe.2",
-								"ourlab.mario.liha.syringe.3",
-								"ourlab.mario.liha.syringe.4"
-							]
-						},
-						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "light"
-							}
-						]
-					},
-					"command": "pipetter.cleanTips",
-					"items": [
-						{
-							"syringe": "ourlab.mario.liha.syringe.1",
-							"intensity": "light"
-						}
-					]
-				}
-			});
-		});
-
-
-		it("should clean tips 1 thru 4", () => {
-			const protocol = {
-				"roboliq": "v1",
-				"steps": {
-					"1": {
-						"command": "pipetter.cleanTips",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{"syringe": "ourlab.mario.liha.syringe.1", "intensity": "flush"},
-							{"syringe": "ourlab.mario.liha.syringe.2", "intensity": "flush"},
-							{"syringe": "ourlab.mario.liha.syringe.3", "intensity": "flush"},
-							{"syringe": "ourlab.mario.liha.syringe.4", "intensity": "flush"}
-						]
-					},
-					"2": {
-						"command": "pipetter.cleanTips",
-						"equipment": "ourlab.mario.liha",
-						"syringes": ["ourlab.mario.liha.syringe.1","ourlab.mario.liha.syringe.2","ourlab.mario.liha.syringe.3","ourlab.mario.liha.syringe.4"],
-						"intensity": "light"
-					}
-				}
-			};
-			const result = roboliq.run(["-o", ""], protocol);
-			//console.log(JSON.stringify(result.output.steps, null, '\t'));
-			should.deepEqual(result.output.steps, {
-				"1": {
-					"1": {
-						"1": {
-							"command": "pipetter._washTips",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"program": "ourlab.mario.washProgram.flush_1000",
-							"intensity": "flush",
-							"syringes": [
-								"ourlab.mario.liha.syringe.1",
-								"ourlab.mario.liha.syringe.2",
-								"ourlab.mario.liha.syringe.3",
-								"ourlab.mario.liha.syringe.4"
-							]
-						},
-						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "flush"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"intensity": "flush"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.3",
-								"intensity": "flush"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.4",
-								"intensity": "flush"
-							}
-						]
-					},
-					"command": "pipetter.cleanTips",
-					"equipment": "ourlab.mario.liha",
-					"items": [
-						{
-							"syringe": "ourlab.mario.liha.syringe.1",
-							"intensity": "flush"
-						},
-						{
-							"syringe": "ourlab.mario.liha.syringe.2",
-							"intensity": "flush"
-						},
-						{
-							"syringe": "ourlab.mario.liha.syringe.3",
-							"intensity": "flush"
-						},
-						{
-							"syringe": "ourlab.mario.liha.syringe.4",
-							"intensity": "flush"
-						}
-					]
-				},
-				"2": {
-					"1": {
-						"1": {
-							"command": "pipetter._washTips",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"program": "ourlab.mario.washProgram.light_1000",
-							"intensity": "light",
-							"syringes": [
-								"ourlab.mario.liha.syringe.1",
-								"ourlab.mario.liha.syringe.2",
-								"ourlab.mario.liha.syringe.3",
-								"ourlab.mario.liha.syringe.4"
-							]
-						},
-						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.3",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.4",
-								"intensity": "light"
-							}
-						]
-					},
-					"command": "pipetter.cleanTips",
-					"equipment": "ourlab.mario.liha",
-					"syringes": [
-						"ourlab.mario.liha.syringe.1",
-						"ourlab.mario.liha.syringe.2",
-						"ourlab.mario.liha.syringe.3",
-						"ourlab.mario.liha.syringe.4"
-					],
-					"intensity": "light"
-				}
-			});
-		});
-
-
-		it("should clean all tips", () => {
-			const protocol = {
-				"roboliq": "v1",
-				"steps": {
-					"1": {
-						"command": "pipetter.cleanTips",
-						"equipment": "ourlab.mario.liha",
-						"intensity": "thorough"
-					}
-				}
-			};
-			const result = roboliq.run(["-o", ""], protocol);
-			//console.log(JSON.stringify(result.output.steps, null, '\t'));
-			should.deepEqual(result.output.steps, {
-				"1": {
-					"1": {
-						"1": {
-							"command": "pipetter._washTips",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"program": "ourlab.mario.washProgram.thorough_1000",
-							"intensity": "thorough",
-							"syringes": [
-								"ourlab.mario.liha.syringe.1",
-								"ourlab.mario.liha.syringe.2",
-								"ourlab.mario.liha.syringe.3",
-								"ourlab.mario.liha.syringe.4"
-							]
-						},
-						"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "thorough"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"intensity": "thorough"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.3",
-								"intensity": "thorough"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.4",
-								"intensity": "thorough"
-							}
-						]
-					},
-					"command": "pipetter.cleanTips",
-					"equipment": "ourlab.mario.liha",
-					"intensity": "thorough"
-				}
-			});
-		});
-	});
-
 	describe('pipetter.pipette', function () {
 
 		it('should pipette between two wells on plate1 without specifying well contents', function () {
@@ -340,6 +94,7 @@ describe('pipetter', function() {
 			});
 			should.deepEqual(result.output.effects, {
 				"1.2": {
+					"ourlab.mario.liha.syringe.1.contaminants": ["plate1(A01)"],
 					"plate1.contents.A01": [
 						"Infinity l",
 						"plate1(A01)"
@@ -496,6 +251,10 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.2.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.3.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.4.contaminants": ["systemLiquid"],
 					"plate1.contents.A01": [
 						"10 ul",
 						"systemLiquid"
@@ -548,6 +307,10 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.2.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.3.contaminants": ["systemLiquid"],
+					"ourlab.mario.liha.syringe.4.contaminants": ["systemLiquid"],
 					"plate1.contents.E01": [
 						"10 ul",
 						"systemLiquid"
@@ -699,6 +462,7 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
 					"plate1.contents.A01": [
 						"10 ul",
 						"systemLiquid"
@@ -794,6 +558,4 @@ describe('pipetter', function() {
 			)
 		});
 	});
-
-
 });

@@ -35,27 +35,61 @@
 				},
 				"liha": {
 					"type": "Pipetter",
-					"syringes": {
+					"syringe": {
 						"1": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"2": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"3": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
 						},
 						"4": {
 							"type": "Syringe",
-							"tipModel": "tipModel1000",
-							"tipModelPermanent": "tipModel1000"
+							"tipModel": "ourlab.mario.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.tipModel1000"
+						},
+						"5": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"6": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"7": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
+						},
+						"8": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.tipModel0050"
 						}
+					},
+					"tipModelToSyringes": {
+						"ourlab.mario.tipModel1000": [
+							"ourlab.mario.liha.syringe.1",
+							"ourlab.mario.liha.syringe.2",
+							"ourlab.mario.liha.syringe.3",
+							"ourlab.mario.liha.syringe.4"
+						],
+						"ourlab.mario.tipModel0050": [
+							"ourlab.mario.liha.syringe.5",
+							"ourlab.mario.liha.syringe.6",
+							"ourlab.mario.liha.syringe.7",
+							"ourlab.mario.liha.syringe.8"
+						]
 					}
 				},
 				"sealer": {
@@ -388,26 +422,45 @@
 		"1": {
 			"1": {
 				"1": {
-					"command": "pipetter._cleanTips",
+					"1": {
+						"command": "pipetter._washTips",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "ourlab.mario.washProgram.thorough_1000",
+						"intensity": "thorough",
+						"syringes": [
+							"ourlab.mario.liha.syringe.1",
+							"ourlab.mario.liha.syringe.2",
+							"ourlab.mario.liha.syringe.3",
+							"ourlab.mario.liha.syringe.4"
+						]
+					},
+					"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.liha",
-					"program": "ourlab.mario.washProgram.thorough_1000",
-					"syringes": [
-						1,
-						2,
-						3,
-						4
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"intensity": "thorough"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"intensity": "thorough"
+						}
 					]
 				},
 				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"intensity": "thorough",
-				"syringes": [
-					1,
-					2,
-					3,
-					4
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"intensity": "thorough"
+					},
+					{
+						"syringe": "ourlab.mario.liha.syringe.2",
+						"intensity": "thorough"
+					}
 				]
 			},
 			"2": {
@@ -417,13 +470,13 @@
 				"program": "\"Roboliq_Water_Dry_1000\"",
 				"items": [
 					{
-						"syringe": 1,
+						"syringe": "ourlab.mario.liha.syringe.1",
 						"source": "plate1(A01)",
 						"destination": "plate2(A01)",
 						"volume": "20 ul"
 					},
 					{
-						"syringe": 2,
+						"syringe": "ourlab.mario.liha.syringe.2",
 						"source": "plate1(A02)",
 						"destination": "plate2(A02)",
 						"volume": "20 ul"
@@ -432,26 +485,45 @@
 			},
 			"3": {
 				"1": {
-					"command": "pipetter._cleanTips",
+					"1": {
+						"command": "pipetter._washTips",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "ourlab.mario.washProgram.thorough_1000",
+						"intensity": "thorough",
+						"syringes": [
+							"ourlab.mario.liha.syringe.1",
+							"ourlab.mario.liha.syringe.2",
+							"ourlab.mario.liha.syringe.3",
+							"ourlab.mario.liha.syringe.4"
+						]
+					},
+					"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.liha",
-					"program": "ourlab.mario.washProgram.thorough_1000",
-					"syringes": [
-						1,
-						2,
-						3,
-						4
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"intensity": "thorough"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"intensity": "thorough"
+						}
 					]
 				},
 				"command": "pipetter.cleanTips",
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha",
-				"intensity": "thorough",
-				"syringes": [
-					1,
-					2,
-					3,
-					4
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"intensity": "thorough"
+					},
+					{
+						"syringe": "ourlab.mario.liha.syringe.2",
+						"intensity": "thorough"
+					}
 				]
 			},
 			"command": "pipetter.pipette",
@@ -471,6 +543,9 @@
 	},
 	"effects": {
 		"1.2": {
+			"ourlab.mario.liha.syringe.1.contaminants": [
+				"water"
+			],
 			"plate1.contents.A01": [
 				"30 ul",
 				"water"
@@ -491,6 +566,9 @@
 				"volumeMax": "20 ul",
 				"volumeAdded": "20 ul"
 			},
+			"ourlab.mario.liha.syringe.2.contaminants": [
+				"water"
+			],
 			"plate1.contents.A02": [
 				"30 ul",
 				"water"

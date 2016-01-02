@@ -31,7 +31,7 @@ function directive_createWellAssignments(spec, data) {
 			},
 			required: ["list", "wells"]
 		});
-		return _.take(parsed.wells.value, parsed.list.value.length);
+		return _.take(parsed.value.wells, parsed.value.list.length);
 	});
 }
 

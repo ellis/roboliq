@@ -50,6 +50,28 @@ export function checkContents(contents) {
 }
 
 /**
+ * Tries to find the contents array for the given syringe.
+ *
+ * @param {string} syringeName name of the syringe
+ * @param {object} data the data object passed to command handlers
+ * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
+ * @return {WellContents} the contents array if found, otherwise null
+ *//*
+export function getSyringeContents(syringeName, data, effects) {
+	//console.log({syringeName})
+	const contentsName = `${syringeName}.contents`;
+	// Check for well or labware contents in effects object
+	if (!_.isEmpty(effects)) {
+		if (effects.hasOwnProperty(contentsName))
+			return effects[contentsName];
+	}
+
+	let contents = misc.findObjectsValue(contentsName, data.objects, effects);
+	checkContents(contents);
+	return contents;
+}*/
+
+/**
  * Tries to find the contents array for the given well.
  *
  * @param {string} wellName name of the well
