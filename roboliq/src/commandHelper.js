@@ -60,14 +60,14 @@ function parseParams(params, data, schema) {
  * @param  {object} schema - property schema information (e.g. for arrays)
  * @return nothing of interest
  */
-function processValue0BySchema(result, path, value0, schema, data, name) {
+function processValue0BySchema(result, path, value0, schema, data) {
 	//console.log(`processValue0BySchema(${path.join('.')}, ${value0})`)
 	if (_.isUndefined(schema)) {
 		return _.set(result.value, path, value0);
 	}
 
 	if (schema.hasOwnProperty('enum')) {
-		return processValue0AsEnum(result, path, value0, schema, data, name);
+		return processValue0AsEnum(result, path, value0, schema, data);
 	}
 
 	const type = (_.isUndefined(schema.type) && !_.isEmpty(schema.properties))
@@ -79,7 +79,7 @@ function processValue0BySchema(result, path, value0, schema, data, name) {
 	}
 
 	if (_.isString(type)) {
-		return processValue0BySchemaType(result, path, value0, schema, type, data, name);
+		return processValue0BySchemaType(result, path, value0, schema, type, data);
 	}
 	else {
 		// Try each type alternative:
@@ -87,7 +87,7 @@ function processValue0BySchema(result, path, value0, schema, data, name) {
 		let es = [];
 		for (const t of types) {
 			try {
-				return processValue0BySchemaType(result, path, value0, schema, t, data, name);
+				return processValue0BySchemaType(result, path, value0, schema, t, data);
 			}
 			catch (e) {
 				es.push(e);
@@ -107,9 +107,9 @@ function processValue0BySchema(result, path, value0, schema, data, name) {
  * @param  {object} schema - schema
  * @param  {object} data - protocol data
  */
-function processValue0AsEnum(result, path, value0, schema, data, name) {
+function processValue0AsEnum(result, path, value0, schema, data) {
 	const value1 = lookupValue0(result, path, value0, data);
-	expect.truthy({paramName: name}, schema.enum.includes(value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
+	expect.truthy({paramName: path.join(".")}, schema.enum.includes(value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
 	_.set(result.value, path, value1);
 }
 
@@ -121,7 +121,7 @@ function processValue0AsEnum(result, path, value0, schema, data, name) {
  * @param  {object} schema - schema
  * @param  {object} data - protocol data
  */
-function processValue0BySchemaType(result, path, value0, schema, type, data, name) {
+function processValue0BySchemaType(result, path, value0, schema, type, data) {
 	//console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
 	if (type === 'name') {
 		return 	_.set(result.value, path, value0);
@@ -131,8 +131,10 @@ function processValue0BySchemaType(result, path, value0, schema, type, data, nam
 	// By default, set result.value@path = value
 	_.set(result.value, path, value);
 
+	const name = path.join(".");
+
 	switch (type) {
-		case "array": return processValueAsArray(result, path, value, schema.items, data, name);
+		case "array": return processValueAsArray(result, path, value, schema.items, data);
 		case "boolean":
 			expect.truthy({paramName: name}, _.isBoolean(value), "expected boolean: "+value);
 			return;
@@ -145,27 +147,27 @@ function processValue0BySchemaType(result, path, value0, schema, type, data, nam
 		case "null":
 			expect.truthy({paramName: name}, _.isNull(value), "expected null: "+value);
 			return;
-		case "string": return processString(result, path, value, data, name);
+		case "string": return processString(result, path, value, data);
 		case "object": return processValueAsObject(result, path, value, data, schema);
 		case "Agent":
 			// TODO: need to check a list of which types are Agent types
 			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
 			return;
 		case "Any": return;
-		case "Duration": return processDuration(result, path, value, data, name);
+		case "Duration": return processDuration(result, path, value, data);
 		case "Equipment":
 			// TODO: need to check a list of which types are Equipment types
 			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
 			return;
-		case "Plate": return processObjectOfType(result, path, value, data, name, type);
-		case "Site": return processObjectOfType(result, path, value, data, name, type);
-		case "Source": return processSource(result, path, value, data, name);
-		case "Sources": return processSources(result, path, value, data, name);
-		case "String": return processString(result, path, value, data, name);
-		case "Volume": return processVolume(result, path, value, data, name);
-		case "Volumes": return processOneOrArray(result, path, value, (result, path, x) => processVolume(result, path, x, data, name));
-		case "Well": return processWell(result, path, value, data, name);
-		case "Wells": return processWells(result, path, value, data, name);
+		case "Plate": return processObjectOfType(result, path, value, data, type);
+		case "Site": return processObjectOfType(result, path, value, data, type);
+		case "Source": return processSource(result, path, value, data);
+		case "Sources": return processSources(result, path, value, data);
+		case "String": return processString(result, path, value, data);
+		case "Volume": return processVolume(result, path, value, data);
+		case "Volumes": return processOneOrArray(result, path, value, (result, path, x) => processVolume(result, path, x, data));
+		case "Well": return processWell(result, path, value, data);
+		case "Wells": return processWells(result, path, value, data);
 		case "File":
 			var filename = value;
 			var filedata = data.files[filename];
@@ -182,7 +184,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data, nam
 			if (data.schemas.hasOwnProperty(type)) {
 				const schema = data.schemas[type];
 				//console.log({type, schema})
-				processValue0BySchema(result, path, value, schema, data, name);
+				processValue0BySchema(result, path, value, schema, data);
 				//console.log({type, parsed})
 				return;
 			}
@@ -259,13 +261,13 @@ function processValueAsObject(result, path, params, data, schema) {
 	return result;
 }
 
-function processValueAsArray(result, path, list0, schema, data, name) {
+function processValueAsArray(result, path, list0, schema, data) {
 	//console.log(`processValueAsArray(${path}, ${list0})`)
-	expect.truthy({paramName: name}, _.isArray(list0), "expected an array: "+list0);
+	expect.truthy({paramName: path.join(".")}, _.isArray(list0), "expected an array: "+list0);
 	//console.log({t2})
 	list0.forEach((x, index) => {
 		//return processValueByType(x, t2, data, `${name}[${index}]`);
-		processValue0BySchema(result, path.concat(index), x, schema, data, `${name}[${index}]`);
+		processValue0BySchema(result, path.concat(index), x, schema, data);
 		//console.log({x, t2, x2})
 		//return x2;
 	});
@@ -276,12 +278,11 @@ function processValueAsArray(result, path, list0, schema, data, name) {
 /**
  * Try to get a value from data.objects with the given name.
  * @param  {object} data Data object with 'objects' property
- * @param  {array|string} name Name of the object value to lookup
+ * @param  {array|string} path - Name of the object value to lookup
  * @return {Any} The value at the given path, if any
  */
-function g(data, name, dflt) {
-	if (_.isArray(name))
-		name = name.join('.');
+function g(data, path, dflt) {
+	const name = (_.isArray(path)) ? path.join('.') : path;
 
 	if (_.isArray(data.accesses))
 		data.accesses.push(name);
@@ -408,11 +409,35 @@ function processString(result, path, value0, data, paramName) {
 	_.set(result.value, path, value1.toString());
 }
 
-function processObjectOfType(result, path, x, data, paramName, type) {
+/**
+ * Tries to process and object with the given type,
+ * whereby this simply means checking that the value
+ * is a plain object with a property `type` whose value
+ * is the given type.
+ * @param  {[type]} result [description]
+ * @param  {[type]} path   [description]
+ * @param  {[type]} x      [description]
+ * @param  {[type]} data   [description]
+ * @param  {[type]} type   [description]
+ * @return {[type]}        [description]
+ */
+function processObjectOfType(result, path, x, data, type) {
+	//console.log("processObjectOfType:")
+	//console.log({result, path, x, paramName, type})
+	const paramName = path.join(".");
 	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(x));
 	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(x));
 }
 
+/**
+ * Try to process a value as a source reference.
+ * @param  {[type]} result    [description]
+ * @param  {[type]} path      [description]
+ * @param  {[type]} x         [description]
+ * @param  {[type]} data      [description]
+ * @param  {[type]} paramName [description]
+ * @return {[type]}           [description]
+ */
 function processSource(result, path, x, data, paramName) {
 	const l = processSources(result, path, x, data, paramName);
 	expect.truthy({paramName: paramName}, _.isArray(l) && l.length === 1, "expected a single liquid source: "+JSON.stringify(x));

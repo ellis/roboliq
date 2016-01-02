@@ -75,6 +75,7 @@
 	- [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
 	- [x] pipetterPipetteTest.js
 	- [x] centrifugeTest.js
+- [x] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
 - [ ] refactor usage of commandHelper.getParsedValue
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
@@ -95,7 +96,6 @@
 		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
-- [ ] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
 - [ ] fix documentation for commandHelper.processValue0BySchema
 - [ ] create incubator command for tania13_ph
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
