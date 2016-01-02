@@ -124,6 +124,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			contentsFinal:
 				water: -60ul
 				*/
+	//console.log("getEffects_pipette:")
 	//console.log(JSON.stringify(parsed, null, '\t'));
 	_.forEach(parsed.value.items, (item, index) => {
 		//console.log(JSON.stringify(item));

@@ -1,6 +1,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+import commandHelper from '../../commandHelper.js';
 var expect = require('../../expect.js');
 var pipetterUtils = require('./pipetterUtils.js');
 var WellContents = require('../../WellContents.js');
@@ -89,8 +90,23 @@ function sourceMethod3(group, data, effects) {
 					// Move the chosen well to the back of the array
 					_.pull(wells, wellName);
 					wells.push(wellName);
+
+					const params = {items: [item]};
+					const schema = {
+						properties: {
+							items: {
+								description: "Data about what should be pipetted where", "type": "array",
+								items: {type: "pipetter._PipetteItem"}
+							}
+						},
+						required: ["items"]
+					};
+					const parsed = commandHelper.parseParams(params, data, schema);
+					//console.log("parsed:");
+					//console.log(JSON.stringify(parsed, null, '\t'))
+
 					// Get effect of pipetting, so that source volumes are changed appropriately
-					var effects2 = pipetterUtils.getEffects_pipette({items: [item]}, data, effects);
+					var effects2 = pipetterUtils.getEffects_pipette(parsed, data, effects);
 					_.merge(effects, effects2);
 					//console.log("effects2", effects2)
 					//console.log("effects", effects)
@@ -104,7 +120,7 @@ function sourceMethod3(group, data, effects) {
 }
 
 module.exports = {
-	sourceMethod1: sourceMethod1,
+	sourceMethod1,
 	//sourceMethod2: sourceMethod2,
-	sourceMethod3: sourceMethod3
+	sourceMethod3
 }

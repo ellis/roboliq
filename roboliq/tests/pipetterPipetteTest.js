@@ -159,7 +159,7 @@ describe('pipetter', function() {
 		})
 
 
-		it('should pipette from system liquid source', function () {
+		it.only('should pipette from system liquid source', function () {
 			var protocol = {
 				roboliq: "v1",
 				objects: {

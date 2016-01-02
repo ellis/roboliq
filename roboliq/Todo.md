@@ -73,8 +73,9 @@
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [ ] change `parseParams` function to return a {objectNames, values}
 	- [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
-	- [ ] centrifugeTest.js
 	- [ ] pipetterPipetteTest.js
+		- problem appears to be related to get getEffects_pipette()
+	- [ ] centrifugeTest.js
 - [ ] refactor usage of commandHelper.getParsedValue
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
