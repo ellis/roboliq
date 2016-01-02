@@ -94,8 +94,8 @@ var commandHandlers = {
 	 * @property {string} site - Site identifier
 	 */
 	"equipment.openSite": function(params, parsed, data) {
-		console.log("equipment.openSite:")
-		console.log(JSON.stringify(parsed, null, '\t'))
+		//console.log("equipment.openSite:")
+		//console.log(JSON.stringify(parsed, null, '\t'))
 		var sitesInternal = parsed.value.equipment.sitesInternal;
 		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.objectName.site) >= 0, `site ${parsed.objectName.site} must be in \`${parsed.objectName.equipment}.sitesInternal\; \`${parsed.objectName.equipment}.sitesInternal\` = ${sitesInternal}`);
 
@@ -105,7 +105,7 @@ var commandHandlers = {
 			equipment: parsed.objectName.equipment,
 			site: parsed.objectName.site
 		}];
-		console.log(JSON.stringify(expansion, null, '\t'))
+		//console.log(JSON.stringify(expansion, null, '\t'))
 
 		var effects = {};
 		// Open equipment
@@ -113,7 +113,7 @@ var commandHandlers = {
 		// Indicate that the given site is open and the other internal sites are closed
 		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = (site != parsed.objectName.site); });
 
-		console.log(JSON.stringify(effects, null, '\t'))
+		//console.log(JSON.stringify(effects, null, '\t'))
 		return {
 			expansion: expansion,
 			effects: effects
