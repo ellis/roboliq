@@ -96,6 +96,7 @@
 	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
+- [ ] fix documentation for commandHelper.processValue0BySchema
 - [ ] create incubator command for tania13_ph
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] add pipetter commands for dropping tips and getting tips

@@ -100,13 +100,12 @@ function processValue0BySchema(result, path, value0, schema, data, name) {
 }
 
 /**
- * Try to handle an enum
+ * Try to process the value as an enum.
  * @param  {object} result - result structure for values and objectNames
  * @param  {array} path - path in params
- * @param  {any} value0 [description]
+ * @param  {any} value0 - the value to process
  * @param  {object} schema - schema
  * @param  {object} data - protocol data
- * @param  {string} name   [description]
  */
 function processValue0AsEnum(result, path, value0, schema, data, name) {
 	const value1 = lookupValue0(result, path, value0, data);
@@ -114,6 +113,14 @@ function processValue0AsEnum(result, path, value0, schema, data, name) {
 	_.set(result.value, path, value1);
 }
 
+/**
+ * Try to process the value as a given type.
+ * @param  {object} result - result structure for values and objectNames
+ * @param  {array} path - path in params
+ * @param  {any} value0 - the value to process
+ * @param  {object} schema - schema
+ * @param  {object} data - protocol data
+ */
 function processValue0BySchemaType(result, path, value0, schema, type, data, name) {
 	//console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
 	if (type === 'name') {
@@ -197,7 +204,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data, nam
  * @param  {array}  path - path in the original params object
  * @param  {object} params - the part of the original parameters refered to by `path`
  * @param  {object} data - protocol data
- * @param  {object} schemas - JSON Schema description, with roboliq extensions
+ * @param  {object} schema - JSON Schema description, with roboliq extensions
  * @return {object} and objects whose keys are the expected parameters and whose
  *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
  *  is optional and not presents in `params`..
