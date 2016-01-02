@@ -29,12 +29,15 @@ function asArray(x) {
 /**
  * Parse command parameters.
  *
+ * FIXME: descibe the returned object in detail.
+ * an object whose keys are the expected parameters and whose
+ *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
+ *  is optional and not presents in `params`.. (OLD)
+ *
  * @param  {object} params - the parameters passed to the command
  * @param  {object} data - protocol data
  * @param  {object} schemas - JSON Schema description, with roboliq extensions
- * @return {object} and objects whose keys are the expected parameters and whose
- *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
- *  is optional and not presents in `params`..
+ * @return {object} the parsed parameters, if successfully parsed.
  */
 function parseParams(params, data, schema) {
 	return processValueAsObject({value: {}, objectName: {}}, [], params, data, schema);
@@ -200,16 +203,15 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 }
 
 /**
- * Parse command parameters.
+ * Try to process the given params with the given schema.
  *
- * @param  {object} result - the resulting object to return, containing objectName and value representations of params.
- * @param  {array}  path - path in the original params object
- * @param  {object} params - the part of the original parameters refered to by `path`
- * @param  {object} data - protocol data
- * @param  {object} schema - JSON Schema description, with roboliq extensions
- * @return {object} and objects whose keys are the expected parameters and whose
- *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
- *  is optional and not presents in `params`..
+ * FIXME: rename function, maybe to processParamsBySchema?
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} params - the part of the original parameters refered to by `path`
+ * @param {object} data - protocol data
+ * @param {object} schema - JSON Schema description, with roboliq extensions
  */
 function processValueAsObject(result, path, params, data, schema) {
 	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
@@ -298,8 +300,10 @@ function g(data, path, dflt) {
  * the variables value will also be dereferenced.
  * When a variable is looked up, its also added to result.objectName[path].
  *
- * @param  {any} value0 - The value from the user.
- * @param  {object} data - The data object.
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} data - protocol data
+ * @param {any} value0 - The value from the user.
  * @return {any} A new value, if value0 referred to something in data.objects.
  */
 function lookupValue0(result, path, value0, data) {
@@ -363,7 +367,10 @@ function dereferenceVariable(data, name) {
  * a singleton array.  Otherwise try to process value0 as an array.
  * fn should accept parameters (result, path, value0) and set the value in
  * result.value at the given path.
- */
+
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+*/
 function processOneOrArray(result, path, value0, fn) {
 	//console.log("processOneOrArray:")
 	//console.log({path, value0})
@@ -387,6 +394,14 @@ function processOneOrArray(result, path, value0, fn) {
 	value0.forEach((x, i) => fn(result, path.concat(i), x));
 }
 
+/**
+ * Try to process a value as a string.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} params - the part of the original parameters refered to by `path`
+ * @param {object} data - protocol data
+ */
 function processString(result, path, value0, data) {
 	// Follow de-references:
 	var references = [];
@@ -414,12 +429,12 @@ function processString(result, path, value0, data) {
  * whereby this simply means checking that the value
  * is a plain object with a property `type` whose value
  * is the given type.
- * @param  {[type]} result [description]
- * @param  {[type]} path   [description]
- * @param  {[type]} x      [description]
- * @param  {[type]} data   [description]
- * @param  {[type]} type   [description]
- * @return {[type]}        [description]
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ * @param {string} type - type of object expected
  */
 function processObjectOfType(result, path, x, data, type) {
 	//console.log("processObjectOfType:")
@@ -431,12 +446,11 @@ function processObjectOfType(result, path, x, data, type) {
 
 /**
  * Try to process a value as a source reference.
- * @param  {[type]} result    [description]
- * @param  {[type]} path      [description]
- * @param  {[type]} x         [description]
- * @param  {[type]} data      [description]
- * @param  {[type]} paramName [description]
- * @return {[type]}           [description]
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
  */
 function processSource(result, path, x, data) {
 	const l = processSources(result, path, x, data);
@@ -445,7 +459,12 @@ function processSource(result, path, x, data) {
 }
 
 /**
- * @returns list of sources
+ * Try to process a value as an array of source references.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
  */
 function processSources(result, path, x, data) {
 	//console.log({before: x, paramName})
@@ -472,6 +491,14 @@ function processSources(result, path, x, data) {
 	return x;
 }
 
+/**
+ * Try to process a value as a volume.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ */
 function processVolume(result, path, x, data) {
 	if (_.isNumber(x)) {
 		x = math.unit(x, 'l');
@@ -485,6 +512,14 @@ function processVolume(result, path, x, data) {
 	//console.log("set in result.value")
 }
 
+/**
+ * Try to process a value as a well reference.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ */
 function processWell(result, path, x, data) {
 	if (_.isString(x)) {
 		//console.log("processWell:")
@@ -495,6 +530,14 @@ function processWell(result, path, x, data) {
 	_.set(result.value, path, x[0]);
 }
 
+/**
+ * Try to process a value as an array of wells.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ */
 function processWells(result, path, x, data) {
 	if (_.isString(x)) {
 		x = wellsParser.parse(x, data.objects);
@@ -503,6 +546,14 @@ function processWells(result, path, x, data) {
 	_.set(result.value, path, x);
 }
 
+/**
+ * Try to process a value as a time duration.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x0 - the value to process
+ * @param {object} data - protocol data
+ */
 function processDuration(result, path, x0, data) {
 	let x = x0;
 	if (_.isNumber(x)) {
