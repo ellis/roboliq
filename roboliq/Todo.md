@@ -77,6 +77,7 @@
 	- [x] centrifugeTest.js
 - [x] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
 - [ ] refactor usage of commandHelper.getParsedValue
+	- [ ] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`

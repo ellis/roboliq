@@ -189,8 +189,8 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('commandHelper.parseParams', function() {
-		it("should work with values specified in-line", () => {
+	describe.only('commandHelper.parseParams', function() {
+		it.only("should work with values specified in-line", () => {
 			const data = {
 				objects: {
 					p: {
@@ -250,6 +250,7 @@ describe('commandHelper', function() {
 				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'volumes1', 'volumes2', 'well1', 'wells1', 'source1', 'sources1']
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
+			console.log(JSON.stringify(parsed, null, '\t'))
 			should.deepEqual(parsed, {
 				value: {
 					name: "plate1",
@@ -278,7 +279,7 @@ describe('commandHelper', function() {
 
 		//it("should work with values supplied via variables", () => {
 
-		it('should work with error-free input', function() {
+		it.skip('should work with error-free input', function() {
 			const data = {
 				objects: {
 					agent1: {type: "MyAgent"},
