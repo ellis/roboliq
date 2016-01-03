@@ -37,7 +37,10 @@ function asArray(x) {
  * by the actual object (in `data`), quantities are replaced by mathjs objects,
  * well specifications are replaced by an array of well references, etc.
  *
- * The `objectName` map contains any object names that were referenced.
+ * The `objectName` map contains any object names that were referenced;
+ * in contrast to the `value` map (which is a tree of properties like `params`),
+ * `objectName` is a flat map, where the keys are string representations of the
+ * object paths (separated by '.').
  * Any object names that were looked up will also be added to the `data.accesses`
  * list.
  *
@@ -79,16 +82,16 @@ function processParamsBySchema(result, path, params, schema, data) {
 		const required = required_l.includes(propertyName);
 		const defaultValue = p.default;
 		const path1 = path.concat(propertyName);
+		const value0 = _.get(params, propertyName, defaultValue);
 
 		if (type === 'name') {
-			const value1 = _.get(params, propertyName, defaultValue);
-			if (!_.isUndefined(value1)) {
-				_.set(result.value, path1, value1);
+			if (!_.isUndefined(value0)) {
+				_.set(result.value, path1, value0);
 			}
 			// If not optional, require the variable's presence:
 			if (required) {
 				//console.log({propertyName, type, info, params})
-				expect.truthy({propertyName: path1.join('.')}, !_.isUndefined(value1), "missing required value");
+				expect.truthy({propertyName: path1.join('.')}, !_.isUndefined(value0), "missing required value");
 			}
 		}
 		else {
