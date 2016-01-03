@@ -27,20 +27,91 @@ function asArray(x) {
 }
 
 /**
- * Parse command parameters.
+ * Parse command parameters according to a schema.
  *
- * FIXME: descibe the returned object in detail.
- * an object whose keys are the expected parameters and whose
- *  values are `{objectName: ..., value: ...}` objects, or `undefined` if the paramter
- *  is optional and not presents in `params`.. (OLD)
+ * If parsing fails, an exception will be thrown.
+ *
+ * Otherwise, the returned result contains two properties: `value` and `objectName`.
+ * Both properties are maps that reflect the structure of the given schema.
+ * The `value` map contains the parsed values -- object references are replaced
+ * by the actual object (in `data`), quantities are replaced by mathjs objects,
+ * well specifications are replaced by an array of well references, etc.
+ *
+ * The `objectName` map contains any object names that were referenced.
+ * Any object names that were looked up will also be added to the `data.accesses`
+ * list.
  *
  * @param  {object} params - the parameters passed to the command
  * @param  {object} data - protocol data
- * @param  {object} schemas - JSON Schema description, with roboliq extensions
+ * @param  {object} schema - JSON Schema description, with roboliq type extensions
  * @return {object} the parsed parameters, if successfully parsed.
  */
 function parseParams(params, data, schema) {
-	return processValueAsObject({value: {}, objectName: {}}, [], params, data, schema);
+	const result = {value: {}, objectName: {}};
+	processParamsBySchema(result, [], params, schema, data);
+	return result;
+}
+
+/**
+ * Try to process the given params with the given schema.
+ *
+ * Updates the `result` object.
+ * Updates `data.accesses` if object lookups are performed.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} params - the part of the original parameters refered to by `path`
+ * @param {object} schema - JSON Schema description, with roboliq extensions
+ * @param {object} data - protocol data
+ */
+function processParamsBySchema(result, path, params, schema, data) {
+	//console.log(`processParamsBySchema: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
+	const required_l = schema.required || [];
+	const l0 = _.pairs(schema.properties);
+	// If no properties are schemafied, return the original parameters
+	if (l0.length === 0) {
+		_.set(result.value, path, params);
+		return result;
+	}
+	// Otherwise, convert the parameters
+	for (const [propertyName, p] of l0) {
+		const type = p.type;
+		const required = required_l.includes(propertyName);
+		const defaultValue = p.default;
+		const path1 = path.concat(propertyName);
+
+		if (type === 'name') {
+			const value1 = _.get(params, propertyName, defaultValue);
+			if (!_.isUndefined(value1)) {
+				_.set(result.value, path1, value1);
+			}
+			// If not optional, require the variable's presence:
+			if (required) {
+				//console.log({propertyName, type, info, params})
+				expect.truthy({propertyName: path1.join('.')}, !_.isUndefined(value1), "missing required value");
+			}
+		}
+		else {
+			const info = lookupValue(params, data, propertyName, defaultValue);
+			if (info.value) {
+				processValue0BySchema(result, path1, info.value, p, data, propertyName);
+				//console.log({propertyName, type, info})
+				//console.log({value: info.value})
+				//console.trace();
+				//_.set(result.value, path1, info.value);
+				if (info.objectName) {
+					result.objectName[path1.join('.')] = info.objectName;
+				}
+			}
+			// If not optional, require the variable's presence:
+			if (required) {
+				//console.log({propertyName, type, info, params})
+				expect.truthy({propertyName}, !_.isUndefined(info.value), "missing required value");
+			}
+		}
+	}
+
+	return result;
 }
 
 /**
@@ -56,12 +127,11 @@ function parseParams(params, data, schema) {
  *
  * - If type is an array, try processing for each element of the array
  *
- * @param  {any} value0 - initial value
- * @param  {string} type - type to convert to
- * @param  {object} data
- * @param  {string} name - parameter name used to lookup value0
- * @param  {object} schema - property schema information (e.g. for arrays)
- * @return nothing of interest
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {any} value0 - the value to process
+ * @param {object} schema - JSON Schema description, with roboliq extensions
+ * @param {object} data - protocol data
  */
 function processValue0BySchema(result, path, value0, schema, data) {
 	//console.log(`processValue0BySchema(${path.join('.')}, ${value0})`)
@@ -151,7 +221,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			expect.truthy({paramName: name}, _.isNull(value), "expected null: "+value);
 			return;
 		case "string": return processString(result, path, value, data);
-		case "object": return processValueAsObject(result, path, value, data, schema);
+		case "object": return processParamsBySchema(result, path, value, schema, data);
 		case "Agent":
 			// TODO: need to check a list of which types are Agent types
 			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
@@ -200,67 +270,6 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			}
 		}
 	}
-}
-
-/**
- * Try to process the given params with the given schema.
- *
- * FIXME: rename function, maybe to processParamsBySchema?
- *
- * @param {object} result - the resulting object to return, containing objectName and value representations of params.
- * @param {array} path - path in the original params object
- * @param {object} params - the part of the original parameters refered to by `path`
- * @param {object} data - protocol data
- * @param {object} schema - JSON Schema description, with roboliq extensions
- */
-function processValueAsObject(result, path, params, data, schema) {
-	//console.log(`processValueAsObject: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
-	const required_l = schema.required || [];
-	const l0 = _.pairs(schema.properties);
-	// If no properties are schemafied, return the original parameters
-	if (l0.length === 0) {
-		_.set(result.value, path, params);
-		return result;
-	}
-	// Otherwise, convert the parameters
-	for (const [propertyName, p] of l0) {
-		const type = p.type;
-		const required = required_l.includes(propertyName);
-		const defaultValue = p.default;
-		const path1 = path.concat(propertyName);
-
-		if (type === 'name') {
-			const value1 = _.get(params, propertyName, defaultValue);
-			if (!_.isUndefined(value1)) {
-				_.set(result.value, path1, value1);
-			}
-			// If not optional, require the variable's presence:
-			if (required) {
-				//console.log({propertyName, type, info, params})
-				expect.truthy({propertyName: path1.join('.')}, !_.isUndefined(value1), "missing required value");
-			}
-		}
-		else {
-			const info = lookupValue(params, data, propertyName, defaultValue);
-			if (info.value) {
-				processValue0BySchema(result, path1, info.value, p, data, propertyName);
-				//console.log({propertyName, type, info})
-				//console.log({value: info.value})
-				//console.trace();
-				//_.set(result.value, path1, info.value);
-				if (info.objectName) {
-					result.objectName[path1.join('.')] = info.objectName;
-				}
-			}
-			// If not optional, require the variable's presence:
-			if (required) {
-				//console.log({propertyName, type, info, params})
-				expect.truthy({propertyName}, !_.isUndefined(info.value), "missing required value");
-			}
-		}
-	}
-
-	return result;
 }
 
 function processValueAsArray(result, path, list0, schema, data) {
