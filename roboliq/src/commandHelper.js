@@ -187,7 +187,8 @@ function processValue0AsEnum(result, path, value0, schema, data) {
 }
 
 /**
- * Try to process the value as a given type.
+ * A sub-function of processValue0BySchema().
+ * Try to process the value as a named type.
  * @param  {object} result - result structure for values and objectNames
  * @param  {array} path - path in params
  * @param  {any} value0 - the value to process
@@ -272,6 +273,14 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 	}
 }
 
+/**
+ * Try to process a value as an array.
+ * @param  {object} result - result structure for values and objectNames
+ * @param  {array} path - path in params
+ * @param  {any} value0 - the value to process
+ * @param  {object} schema - schema of the array items
+ * @param  {object} data - protocol data
+ */
 function processValueAsArray(result, path, list0, schema, data) {
 	//console.log(`processValueAsArray(${path}, ${list0})`)
 	expect.truthy({paramName: path.join(".")}, _.isArray(list0), "expected an array: "+list0);
