@@ -79,7 +79,7 @@
 - [ ] refactor usage of commandHelper.getParsedValue
 	- [x] figure out why we needed to `_.clone(value1)` -- what is mutating the value?
 	- [x] run `npm test` on branch lookupValue2
-	- [ ] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
+	- [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
 	- [ ] look at `~/src/roboliq/roboliq/protocols/output/diff.sh` or `for file in *.cmp.json; do echo $file; command diff --brief $file $(basename $file .cmp.json).out.json; done`
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler

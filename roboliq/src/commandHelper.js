@@ -342,31 +342,6 @@ function lookupValue0(result, path, value0, data) {
 	return value0;
 }
 
-/*
-function lookupValue(params, data, paramName, defaultValue) {
-	// Get value from params
-	const value0 = _.get(params, paramName, defaultValue);
-	const result = {};
-
-	if (_.isUndefined(value0)) {
-		// do nothing
-	}
-	else if (!_.isString(value0) || _.startsWith(value0, '"')) {
-		result.value = value0;
-	}
-	else {
-		result.value = value0;
-		const deref = dereferenceVariable(data, value0);
-		if (deref) {
-			result.value = deref.value;
-			result.objectName = deref.objectName;
-		}
-	}
-
-	return _.merge({}, result);
-}
-*/
-
 /**
  * Recursively lookup variable by name and return the final value.
  */
