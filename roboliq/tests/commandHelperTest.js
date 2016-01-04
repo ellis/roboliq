@@ -189,8 +189,8 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe.only('commandHelper.parseParams', function() {
-		it.only("should work with values specified in-line", () => {
+	describe('commandHelper.parseParams', function() {
+		it("should work with values specified in-line", () => {
 			const data = {
 				objects: {
 					p: {
@@ -279,7 +279,7 @@ describe('commandHelper', function() {
 
 		//it("should work with values supplied via variables", () => {
 
-		it.skip('should work with error-free input', function() {
+		it('should work with error-free input', function() {
 			const data = {
 				objects: {
 					agent1: {type: "MyAgent"},

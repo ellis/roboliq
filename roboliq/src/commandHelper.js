@@ -95,8 +95,8 @@ function processParamsBySchema(result, path, params, schema, data) {
 			}
 		}
 		else {
-			CONTINUE: replace lookupValue call with the contents of its function body:
-			THEN: try to use lookupValue0?
+			//CONTINUE: replace lookupValue call with the contents of its function body:
+			//THEN: try to use lookupValue0?
 			/*
 			// Get value from params
 			const value0 = _.get(params, paramName, defaultValue);
