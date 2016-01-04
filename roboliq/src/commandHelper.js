@@ -125,9 +125,9 @@ function processParamsBySchema(result, path, params, schema, data) {
 				}
 			}
 			// If not optional, require the variable's presence:
-			if (required) {
+			else if (required) {
 				//console.log({propertyName, type, info, params})
-				expect.truthy({propertyName}, !_.isUndefined(info.value), "missing required value");
+				expect.truthy({propertyName}, false, "missing required value");
 			}
 		}
 	}
