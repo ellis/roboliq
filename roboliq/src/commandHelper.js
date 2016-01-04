@@ -114,7 +114,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 				info = _.merge({}, result);
 			}
 
-			if (info.value) {
+			if (!_.isUndefined(info.value)) {
 				processValue0BySchema(result, path1, info.value, p, data, propertyName);
 				//console.log({propertyName, type, info})
 				//console.log({value: info.value})
