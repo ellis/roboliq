@@ -597,23 +597,9 @@ function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 	}
 }
 
-function fixPredicateUndefines(predicate) {
-	if (_.isArray(predicate)) {
-		_.forEach(predicate, function(p) { fixPredicateUndefines(p); });
-	}
-	else if (_.isPlainObject(predicate)) {
-		_.forEach(predicate, function(value, name) {
-			if (_.isUndefined(value))
-				predicate[name] = "?"+name;
-			else if (_.isPlainObject(value)) {
-				fixPredicateUndefines(value);
-			}
-		})
-	}
-}
-
 /**
- * Query the logic database with the given predicates and return an extracted values from the query result.
+ * Query the logic database with the given predicates and return the values
+ * of interest.
  * @param  {Object} data         Command data
  * @param  {Array} predicates    Array of llpl predicates
  * @param  {String} queryExtract A jmespath query string to extract values of interest from the llpl result list
@@ -645,6 +631,26 @@ function queryLogic(data, predicates, queryExtract) {
 	}
 	else {
 		return resultList;
+	}
+}
+
+/**
+ * Helper function for queryLogic() that replaces undefined property values with
+ * the name of the property prefixed by '?'.
+ * @param  {Array} predicates    Array of llpl predicates
+ */
+function fixPredicateUndefines(predicate) {
+	if (_.isArray(predicate)) {
+		_.forEach(predicate, function(p) { fixPredicateUndefines(p); });
+	}
+	else if (_.isPlainObject(predicate)) {
+		_.forEach(predicate, function(value, name) {
+			if (_.isUndefined(value))
+				predicate[name] = "?"+name;
+			else if (_.isPlainObject(value)) {
+				fixPredicateUndefines(value);
+			}
+		})
 	}
 }
 
