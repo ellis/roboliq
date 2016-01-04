@@ -101,17 +101,17 @@ function processParamsBySchema(result, path, params, schema, data) {
 			let info;
 			{
 				// Get value from params
-				const result = {value: value0};
+				const result1 = {value: value0};
 
 				if (_.isString(value0) && !_.startsWith(value0, '"')) {
 					const deref = dereferenceVariable(data, value0);
 					if (deref) {
-						result.value = deref.value;
-						result.objectName = deref.objectName;
+						result1.value = deref.value;
+						result1.objectName = deref.objectName;
 					}
 				}
 
-				info = _.merge({}, result);
+				info = _.merge({}, result1);
 			}
 
 			if (!_.isUndefined(info.value)) {
