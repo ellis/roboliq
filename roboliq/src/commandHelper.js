@@ -101,7 +101,6 @@ function processParamsBySchema(result, path, params, schema, data) {
 			let info;
 			{
 				// Get value from params
-				const value0 = _.get(params, propertyName, defaultValue);
 				const result = {};
 
 				if (_.isUndefined(value0)) {
