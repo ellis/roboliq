@@ -95,36 +95,9 @@ function processParamsBySchema(result, path, params, schema, data) {
 			}
 		}
 		else {
-			//CONTINUE: replace lookupValue call with the contents of its function body:
-			//THEN: try to use lookupValue0?
-			//const info = lookupValue(params, data, propertyName, defaultValue);
-			let value1 = value0;
-			{
-				// Get value from params
-				const result1 = {value: value0};
-
-				if (_.isString(value0) && !_.startsWith(value0, '"')) {
-					const deref = dereferenceVariable(data, value0);
-					if (deref) {
-						result1.value = deref.value;
-						value1 = deref.value;
-						//result1.objectName = deref.objectName;
-						result.objectName[path1.join('.')] = deref.objectName;
-					}
-				}
-
-				value1 = _.clone(value1);
-			}
-
+			const value1 = _.clone(lookupValue0(result, path1, value0, data));
 			if (!_.isUndefined(value1)) {
-				//const result2 = _.cloneDeep(result);
-				//CONTINUE
-				//processValue0BySchema(result, path1, info.value, p, data, propertyName);
 				processValue0BySchema(result, path1, value1, p, data, propertyName);
-				//console.log({propertyName, type, info})
-				//console.log({value: info.value})
-				//console.trace();
-				//_.set(result.value, path1, info.value);
 			}
 			// If not optional, require the variable's presence:
 			else if (required) {
