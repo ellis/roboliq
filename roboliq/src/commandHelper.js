@@ -98,7 +98,6 @@ function processParamsBySchema(result, path, params, schema, data) {
 			//CONTINUE: replace lookupValue call with the contents of its function body:
 			//THEN: try to use lookupValue0?
 			//const info = lookupValue(params, data, propertyName, defaultValue);
-			let info;
 			let value1 = value0;
 			{
 				// Get value from params
@@ -114,12 +113,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 					}
 				}
 
-				info = _.merge({}, result1);
 				value1 = _.clone(value1);
-			}
-
-			if (!_.isEqual(value1, info.value)) {
-				console.log("DIFF")
 			}
 
 			if (!_.isUndefined(value1)) {
