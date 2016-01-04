@@ -115,6 +115,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 				}
 
 				info = _.merge({}, result1);
+				value1 = _.clone(value1);
 			}
 
 			if (!_.isEqual(value1, info.value)) {
@@ -124,8 +125,8 @@ function processParamsBySchema(result, path, params, schema, data) {
 			if (!_.isUndefined(value1)) {
 				//const result2 = _.cloneDeep(result);
 				//CONTINUE
-				processValue0BySchema(result, path1, info.value, p, data, propertyName);
-				//processValue0BySchema(result, path1, value1, p, data, propertyName);
+				//processValue0BySchema(result, path1, info.value, p, data, propertyName);
+				processValue0BySchema(result, path1, value1, p, data, propertyName);
 				//console.log({propertyName, type, info})
 				//console.log({value: info.value})
 				//console.trace();
