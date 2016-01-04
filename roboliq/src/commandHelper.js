@@ -101,15 +101,9 @@ function processParamsBySchema(result, path, params, schema, data) {
 			let info;
 			{
 				// Get value from params
-				const result = {};
+				const result = {value: value0};
 
-				if (_.isUndefined(value0)) {
-					// do nothing
-				}
-				else if (!_.isString(value0) || _.startsWith(value0, '"')) {
-					result.value = value0;
-				}
-				else {
+				if (_.isString(value0) && !_.startsWith(value0, '"')) {
 					result.value = value0;
 					const deref = dereferenceVariable(data, value0);
 					if (deref) {
