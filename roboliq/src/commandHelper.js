@@ -572,7 +572,16 @@ function processDuration(result, path, x0, data) {
 }
 
 /**
- * Get property value from an object in the parsed parameters.
+ * Get a property value from an object in the parsed parameters.
+ * If no value could be found (and no default was given) then an exception
+ * will be thrown.
+CONTINUE:
+ * @param  {[type]} parsed       [description]
+ * @param {object} data - protocol data
+ * @param  {string} paramName    [description]
+ * @param  {string} propertyName [description]
+ * @param  {any} defaultValue [description]
+ * @return {[type]}              [description]
  */
 function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 	const value = _.get(parsed.value[paramName], propertyName, defaultValue);
@@ -583,14 +592,6 @@ function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 		expect.truthy({objectName1}, !_.isUndefined(value), "missing value");
 		return value;
 	}
-	/*else if (!_.isUndefined(objectName)) {
-		const objectName1 = objectName+"."+propertyName;
-		var value = g(data, objectName);
-		if (_.isUndefined(value))
-			value = defaultValue;
-		expect.truthy({objectName: objectName}, !_.isUndefined(value), "missing value");
-		return value;
-	}*/
 	else {
 		expect.truthy({paramName: paramName}, !_.isUndefined(defaultValue), "missing parameter value");
 		return defaultValue;
