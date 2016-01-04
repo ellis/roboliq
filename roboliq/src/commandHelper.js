@@ -82,7 +82,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 		const required = required_l.includes(propertyName);
 		const defaultValue = p.default;
 		const path1 = path.concat(propertyName);
-		const value0 = _.get(params, propertyName, defaultValue);
+		const value0 = _.cloneDeep(_.get(params, propertyName, defaultValue));
 
 		if (type === 'name') {
 			if (!_.isUndefined(value0)) {
@@ -163,42 +163,51 @@ function processParamsBySchema(result, path, params, schema, data) {
  * @param {object} data - protocol data
  */
 function processValue0BySchema(result, path, value0, schema, data) {
-	console.log(`processValue0BySchema(${path.join('.')}, ${JSON.stringify(value0)})`)
+	//console.log(`processValue0BySchema(${path.join('.')}, ${JSON.stringify(value0)})`)
+	//const valuePre = _.cloneDeep(value0);
 	if (_.isUndefined(schema)) {
-		return _.set(result.value, path, value0);
+		_.set(result.value, path, value0);
 	}
 
-	if (schema.hasOwnProperty('enum')) {
+	else if (schema.hasOwnProperty('enum')) {
 		return processValue0AsEnum(result, path, value0, schema, data);
 	}
 
-	const type = (_.isUndefined(schema.type) && !_.isEmpty(schema.properties))
-		? "object"
-		: schema.type;
-
-	if (_.isEmpty(type)) {
-		return _.set(result.value, path, value0);
-	}
-
-	if (_.isString(type)) {
-		return processValue0BySchemaType(result, path, value0, schema, type, data);
-	}
 	else {
-		// Try each type alternative:
-		const types = _.flatten([schema.type]);
-		let es = [];
-		for (const t of types) {
-			try {
-				return processValue0BySchemaType(result, path, value0, schema, t, data);
-			}
-			catch (e) {
-				es.push(e);
-			}
+		const type = (_.isUndefined(schema.type) && !_.isEmpty(schema.properties))
+			? "object"
+			: schema.type;
+
+		if (_.isEmpty(type)) {
+			_.set(result.value, path, value0);
 		}
 
-		if (!_.isEmpty(es))
-			throw es[0];
+		else if (_.isString(type)) {
+			processValue0BySchemaType(result, path, value0, schema, type, data);
+		}
+
+		// Otherwise, we should have an array of types
+		else {
+			// Try each type alternative:
+			const types = _.flatten([schema.type]);
+			let es = [];
+			for (const t of types) {
+				try {
+					return processValue0BySchemaType(result, path, value0, schema, t, data);
+				}
+				catch (e) {
+					es.push(e);
+				}
+			}
+
+			if (!_.isEmpty(es))
+				throw es[0];
+		}
 	}
+	/*if (!_.isEqual(value0, valuePre)) {
+		console.log("VALUE CHANGED");
+		throw "error";
+	}*/
 }
 
 /**
@@ -230,7 +239,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 		return 	_.set(result.value, path, value0);
 	}
 
-	const value = lookupValue0(result, path, value0, data);
+	const value = _.cloneDeep(lookupValue0(result, path, value0, data));
 	// By default, set result.value@path = value
 	_.set(result.value, path, value);
 
