@@ -97,29 +97,31 @@ function processParamsBySchema(result, path, params, schema, data) {
 		else {
 			//CONTINUE: replace lookupValue call with the contents of its function body:
 			//THEN: try to use lookupValue0?
-			/*
-			// Get value from params
-			const value0 = _.get(params, paramName, defaultValue);
-			const result = {};
+			//const info = lookupValue(params, data, propertyName, defaultValue);
+			let info;
+			{
+				// Get value from params
+				const value0 = _.get(params, propertyName, defaultValue);
+				const result = {};
 
-			if (_.isUndefined(value0)) {
-				// do nothing
-			}
-			else if (!_.isString(value0) || _.startsWith(value0, '"')) {
-				result.value = value0;
-			}
-			else {
-				result.value = value0;
-				const deref = dereferenceVariable(data, value0);
-				if (deref) {
-					result.value = deref.value;
-					result.objectName = deref.objectName;
+				if (_.isUndefined(value0)) {
+					// do nothing
 				}
+				else if (!_.isString(value0) || _.startsWith(value0, '"')) {
+					result.value = value0;
+				}
+				else {
+					result.value = value0;
+					const deref = dereferenceVariable(data, value0);
+					if (deref) {
+						result.value = deref.value;
+						result.objectName = deref.objectName;
+					}
+				}
+
+				info = _.merge({}, result);
 			}
 
-			return _.merge({}, result);
-			*/
-			const info = lookupValue(params, data, propertyName, defaultValue);
 			if (info.value) {
 				processValue0BySchema(result, path1, info.value, p, data, propertyName);
 				//console.log({propertyName, type, info})
