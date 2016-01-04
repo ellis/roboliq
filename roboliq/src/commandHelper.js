@@ -107,7 +107,8 @@ function processParamsBySchema(result, path, params, schema, data) {
 					const deref = dereferenceVariable(data, value0);
 					if (deref) {
 						result1.value = deref.value;
-						result1.objectName = deref.objectName;
+						//result1.objectName = deref.objectName;
+						result.objectName[path1.join('.')] = deref.objectName;
 					}
 				}
 
@@ -120,9 +121,6 @@ function processParamsBySchema(result, path, params, schema, data) {
 				//console.log({value: info.value})
 				//console.trace();
 				//_.set(result.value, path1, info.value);
-				if (info.objectName) {
-					result.objectName[path1.join('.')] = info.objectName;
-				}
 			}
 			// If not optional, require the variable's presence:
 			else if (required) {
