@@ -102,8 +102,8 @@ function sourceMethod3(group, data, effects) {
 						},
 						required: ["items"]
 					};
-					console.log("param of items:")
-					console.log(JSON.stringify(params, null, '\t'))
+					//console.log("param of items:")
+					//console.log(JSON.stringify(params, null, '\t'))
 					const parsed = commandHelper.parseParams(params, data, schema);
 					//console.log("parsed:");
 					//console.log(JSON.stringify(parsed, null, '\t'))

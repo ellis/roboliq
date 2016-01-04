@@ -250,7 +250,7 @@ describe('commandHelper', function() {
 				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'volumes1', 'volumes2', 'well1', 'wells1', 'source1', 'sources1']
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
-			console.log(JSON.stringify(parsed, null, '\t'))
+			//console.log(JSON.stringify(parsed, null, '\t'))
 			should.deepEqual(parsed, {
 				value: {
 					name: "plate1",
