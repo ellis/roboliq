@@ -91,7 +91,8 @@ function sourceMethod3(group, data, effects) {
 					_.pull(wells, wellName);
 					wells.push(wellName);
 
-					const params = {items: [item]};
+					const params = {items: [_.clone(item)]};
+					params.items[0].volume = item.volume.format({precision: 14});
 					const schema = {
 						properties: {
 							items: {
@@ -101,6 +102,8 @@ function sourceMethod3(group, data, effects) {
 						},
 						required: ["items"]
 					};
+					console.log("param of items:")
+					console.log(JSON.stringify(params, null, '\t'))
 					const parsed = commandHelper.parseParams(params, data, schema);
 					//console.log("parsed:");
 					//console.log(JSON.stringify(parsed, null, '\t'))

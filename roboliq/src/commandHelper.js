@@ -562,7 +562,9 @@ function processVolume(result, path, x, data) {
 	else if (_.isString(x)) {
 		x = math.eval(x);
 	}
-	//console.log({function: "processVolume", path, x})
+	console.log({function: "processVolume", path, x})
+	if (!math.unit('l').equalBase(x))
+		console.trace();
 	expect.truthy({paramName: path.join('.')}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
 	_.set(result.value, path, x);
 	//console.log("set in result.value")
