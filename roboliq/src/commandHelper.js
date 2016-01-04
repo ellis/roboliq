@@ -99,6 +99,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 			//THEN: try to use lookupValue0?
 			//const info = lookupValue(params, data, propertyName, defaultValue);
 			let info;
+			let value1 = value0;
 			{
 				// Get value from params
 				const result1 = {value: value0};
@@ -107,6 +108,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 					const deref = dereferenceVariable(data, value0);
 					if (deref) {
 						result1.value = deref.value;
+						value1 = deref.value;
 						//result1.objectName = deref.objectName;
 						result.objectName[path1.join('.')] = deref.objectName;
 					}
@@ -115,8 +117,15 @@ function processParamsBySchema(result, path, params, schema, data) {
 				info = _.merge({}, result1);
 			}
 
-			if (!_.isUndefined(info.value)) {
+			if (!_.isEqual(value1, info.value)) {
+				console.log("DIFF")
+			}
+
+			if (!_.isUndefined(value1)) {
+				//const result2 = _.cloneDeep(result);
+				//CONTINUE
 				processValue0BySchema(result, path1, info.value, p, data, propertyName);
+				//processValue0BySchema(result, path1, value1, p, data, propertyName);
 				//console.log({propertyName, type, info})
 				//console.log({value: info.value})
 				//console.trace();
@@ -153,7 +162,7 @@ function processParamsBySchema(result, path, params, schema, data) {
  * @param {object} data - protocol data
  */
 function processValue0BySchema(result, path, value0, schema, data) {
-	//console.log(`processValue0BySchema(${path.join('.')}, ${value0})`)
+	console.log(`processValue0BySchema(${path.join('.')}, ${JSON.stringify(value0)})`)
 	if (_.isUndefined(schema)) {
 		return _.set(result.value, path, value0);
 	}

@@ -273,8 +273,8 @@ describe('commands/centrifgue', function() {
 		});
 	});
 
-	describe.only('centrifuge.insertPlates2', function () {
-		it('should put plate1 in the centrifuge', function () {
+	describe('centrifuge.insertPlates2', function () {
+		it.only('should put plate1 in the centrifuge', function () {
 			var protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
