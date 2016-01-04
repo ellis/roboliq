@@ -33,6 +33,7 @@ describe('commandHelper', function() {
 		});
 	});
 
+	/*
 	describe('_lookupValue with various levels of de-referencing', function () {
 		const objects = {
 			number1: {type: "Variable", value: 1},
@@ -173,13 +174,6 @@ describe('commandHelper', function() {
 				{objectName: 'number1', value: 1}
 			);
 		});
-		/*it("should handle strings", () => {
-			const data = {objects, accesses: []};
-			should.deepEqual(
-				commandHelper._lookupValue(params, data, 'string'),
-				{objectName: 'string1', value: "hello"}
-			);
-		});*/
 		it("should handle durations", () => {
 			const data = {objects, accesses: []};
 			should.deepEqual(
@@ -188,6 +182,7 @@ describe('commandHelper', function() {
 			);
 		});
 	});
+	*/
 
 	describe('commandHelper.parseParams', function() {
 		it("should work with values specified in-line", () => {

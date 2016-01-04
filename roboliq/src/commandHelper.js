@@ -302,8 +302,9 @@ function processValueAsArray(result, path, list0, schema, data) {
 
 /**
  * Try to get a value from data.objects with the given name.
- * @param  {object} data Data object with 'objects' property
+ * @param  {object} data - Data object with 'objects' property
  * @param  {array|string} path - Name of the object value to lookup
+ * @param  {any} dflt - default value to return
  * @return {Any} The value at the given path, if any
  */
 function g(data, path, dflt) {
@@ -341,6 +342,7 @@ function lookupValue0(result, path, value0, data) {
 	return value0;
 }
 
+/*
 function lookupValue(params, data, paramName, defaultValue) {
 	// Get value from params
 	const value0 = _.get(params, paramName, defaultValue);
@@ -363,6 +365,7 @@ function lookupValue(params, data, paramName, defaultValue) {
 
 	return _.merge({}, result);
 }
+*/
 
 /**
  * Recursively lookup variable by name and return the final value.
@@ -673,5 +676,4 @@ module.exports = {
 	getParsedValue,
 	parseParams,
 	queryLogic,
-	_lookupValue: lookupValue
 }
