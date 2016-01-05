@@ -532,11 +532,12 @@ const commandHandlers = {
 		return {effects: pipetterUtils.getEffects_aspirate(parsed, data)};
 	},
 	"pipetter._washTips": function(params, parsed, data) {
-		//console.log("washTips:");
+		//console.log("_washTips:");
 		//console.log(JSON.stringify(parsed, null, '\t'))
 		const effects = {};
-		for (const [syringeName, syringe] of _.zip(parsed.objectName.syringes, parsed.value.syringes)) {
-			//console.log(JSON.stringify(item))
+		for (const index in parsed.value.syringes) {
+			const syringe = parsed.value.syringes[index];
+			const syringeName = parsed.objectName[`syringes.${index}`];
 			if (!_.isUndefined(syringe.contaminants))
 				effects[`${syringeName}.contaminants`] = null;
 			// Remove contents property

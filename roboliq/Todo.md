@@ -99,7 +99,7 @@
 		- [?] `_pipette`: clear contents of syringe
 		- [?] `_pipette`: clear syringe.cleaned
 		- [?] `_washTips`: remove contents, remove contaminants, set `cleaned`
-		- [ ] `_washTips`: used 'parsed' instead of 'params' for the syringe names
+		- [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
 		- [ ] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
 		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
