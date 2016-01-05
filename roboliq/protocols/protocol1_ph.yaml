@@ -54,10 +54,10 @@ objects:
         - source: saltwater
           volume: 40ul
         - "#gradient":
-          - {source1: acetate_375, source: acetate_575, volume: 30ul, count: 8, decimals: 1}
-          - {source1: mes_510,     source: mes_710,     volume: 30ul, count: 7, decimals: 1}
-          - {source1: pipes_575,   source: pipet_775,   volume: 30ul, count: 5, decimals: 1}
-          - {source1: hepes_650,   source: hepes_850,   volume: 30ul, count: 5, decimals: 1}
+          - {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8, decimals: 1}
+          - {source1: mes_510,     source2: mes_710,     volume: 30ul, count: 7, decimals: 1}
+          - {source1: pipes_575,   source2: pipes_775,   volume: 30ul, count: 5, decimals: 1}
+          - {source1: hepes_650,   source2: hepes_850,   volume: 30ul, count: 5, decimals: 1}
         - source: sfGFP
           volume: 5ul
           clean: thorough

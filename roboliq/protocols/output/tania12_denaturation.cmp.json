@@ -38345,75 +38345,13 @@
 								"temperature": 25
 							}
 						},
-						"4": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_MoveToPos",
-									"factsValue": "2"
-								},
-								"2": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Open"
-								},
-								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge",
-								"site": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "equipment.openSite",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge",
-							"site": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"5": {
-							"1": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.REGRIP"
-							},
-							"2": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.P3"
-							},
-							"command": "transporter.movePlate",
-							"object": "mixPlate",
-							"destination": "ourlab.mario.site.P3"
-						},
-						"6": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Close"
-								},
-								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge"
-							},
-							"command": "equipment.close",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge"
-						},
 						"description": "Incubate at 25C",
 						"comment": "For our centrifuge to work as an incubator, we need to set a spin duration greater than 0.",
 						"command": "centrifuge.centrifuge2",
 						"object1": "mixPlate",
 						"object2": "balancePlate",
-						"destinationAfter1": null,
-						"destinationAfter2": null,
+						"destinationAfter1": "stay",
+						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
@@ -38454,8 +38392,8 @@
 						"command": "centrifuge.centrifuge2",
 						"object1": "mixPlate",
 						"object2": "balancePlate",
-						"destinationAfter1": null,
-						"destinationAfter2": null,
+						"destinationAfter1": "stay",
+						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
@@ -38474,52 +38412,6 @@
 					"1": {
 						"1": {
 							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_MoveToPos",
-									"factsValue": "2"
-								},
-								"2": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Open"
-								},
-								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge",
-								"site": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "equipment.openSite",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge",
-							"site": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"2": {
-							"1": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.REGRIP"
-							},
-							"2": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "transporter.movePlate",
-							"object": "mixPlate",
-							"destination": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"3": {
-							"1": {
 								"command": "evoware._facts",
 								"agent": "ourlab.mario.evoware",
 								"factsEquipment": "Centrifuge",
@@ -38534,68 +38426,6 @@
 								"duration": "2 minutes",
 								"temperature": 25
 							}
-						},
-						"4": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_MoveToPos",
-									"factsValue": "2"
-								},
-								"2": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Open"
-								},
-								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge",
-								"site": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "equipment.openSite",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge",
-							"site": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"5": {
-							"1": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.REGRIP"
-							},
-							"2": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.P3"
-							},
-							"command": "transporter.movePlate",
-							"object": "mixPlate",
-							"destination": "ourlab.mario.site.P3"
-						},
-						"6": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Close"
-								},
-								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge"
-							},
-							"command": "equipment.close",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge"
 						},
 						"description": "Remove condensation from seal",
 						"command": "centrifuge.centrifuge2",
@@ -38726,11 +38556,11 @@
 								"equipment": "ourlab.mario.roma1",
 								"program": "Narrow",
 								"object": "mixPlate",
-								"destination": "ourlab.mario.site.P3"
+								"destination": "ourlab.mario.site.CENTRIFUGE_2"
 							},
 							"command": "transporter.movePlate",
 							"object": "mixPlate",
-							"destination": "ourlab.mario.site.P3"
+							"destination": "ourlab.mario.site.CENTRIFUGE_2"
 						},
 						"command": "fluorescenceReader.measurePlate",
 						"object": "mixPlate",
@@ -38739,52 +38569,6 @@
 					},
 					"3": {
 						"1": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_MoveToPos",
-									"factsValue": "2"
-								},
-								"2": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Open"
-								},
-								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge",
-								"site": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "equipment.openSite",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge",
-							"site": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"2": {
-							"1": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.REGRIP"
-							},
-							"2": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "transporter.movePlate",
-							"object": "mixPlate",
-							"destination": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"3": {
 							"1": {
 								"command": "evoware._facts",
 								"agent": "ourlab.mario.evoware",
@@ -38801,75 +38585,13 @@
 								"temperature": 25
 							}
 						},
-						"4": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_MoveToPos",
-									"factsValue": "2"
-								},
-								"2": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Open"
-								},
-								"command": "equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge",
-								"site": "ourlab.mario.site.CENTRIFUGE_2"
-							},
-							"command": "equipment.openSite",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge",
-							"site": "ourlab.mario.site.CENTRIFUGE_2"
-						},
-						"5": {
-							"1": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.REGRIP"
-							},
-							"2": {
-								"command": "transporter._movePlate",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.roma1",
-								"program": "Narrow",
-								"object": "mixPlate",
-								"destination": "ourlab.mario.site.P3"
-							},
-							"command": "transporter.movePlate",
-							"object": "mixPlate",
-							"destination": "ourlab.mario.site.P3"
-						},
-						"6": {
-							"1": {
-								"1": {
-									"command": "evoware._facts",
-									"agent": "ourlab.mario.evoware",
-									"factsEquipment": "Centrifuge",
-									"factsVariable": "Centrifuge_Close"
-								},
-								"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.centrifuge"
-							},
-							"command": "equipment.close",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.centrifuge"
-						},
 						"description": "Incubate at 25C",
 						"comment": "For our centrifuge to work as an incubator, we need to set a spin duration greater than 0.",
 						"command": "centrifuge.centrifuge2",
 						"object1": "mixPlate",
 						"object2": "balancePlate",
-						"destinationAfter1": null,
-						"destinationAfter2": null,
+						"destinationAfter1": "stay",
+						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
@@ -38910,8 +38632,8 @@
 						"command": "centrifuge.centrifuge2",
 						"object1": "mixPlate",
 						"object2": "balancePlate",
-						"destinationAfter1": null,
-						"destinationAfter2": null,
+						"destinationAfter1": "stay",
+						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
@@ -38950,8 +38672,8 @@
 						"command": "centrifuge.centrifuge2",
 						"object1": "mixPlate",
 						"object2": "balancePlate",
-						"destinationAfter1": null,
-						"destinationAfter2": null,
+						"destinationAfter1": "stay",
+						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
@@ -73929,73 +73651,11 @@
 		"3.1.2.3.2.2": {
 			"mixPlate.location": "ourlab.mario.site.CENTRIFUGE_2"
 		},
-		"3.1.2.3.4": {
-			"ourlab.mario.centrifuge.open": true,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": false,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
-		},
-		"3.1.2.3.5": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.1.2.3.5.1": {
-			"mixPlate.location": "ourlab.mario.site.REGRIP"
-		},
-		"3.1.2.3.5.2": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.1.2.3.6": {
-			"ourlab.mario.centrifuge.open": false,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
-		},
 		"3.1.3": {
 			"ourlab.mario.timer1.running": false
 		},
 		"3.2.1": {
 			"ourlab.mario.timer1.running": true
-		},
-		"3.2.2.1.1": {
-			"ourlab.mario.centrifuge.open": true,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": false,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
-		},
-		"3.2.2.1.2": {
-			"mixPlate.location": "ourlab.mario.site.CENTRIFUGE_2"
-		},
-		"3.2.2.1.2.1": {
-			"mixPlate.location": "ourlab.mario.site.REGRIP"
-		},
-		"3.2.2.1.2.2": {
-			"mixPlate.location": "ourlab.mario.site.CENTRIFUGE_2"
-		},
-		"3.2.2.1.4": {
-			"ourlab.mario.centrifuge.open": true,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": false,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
-		},
-		"3.2.2.1.5": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.2.2.1.5.1": {
-			"mixPlate.location": "ourlab.mario.site.REGRIP"
-		},
-		"3.2.2.1.5.2": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.2.2.1.6": {
-			"ourlab.mario.centrifuge.open": false,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
 		},
 		"3.2.2.2.1": {
 			"mixPlate.location": "ourlab.mario.site.READER"
@@ -74015,7 +73675,7 @@
 			"ourlab.mario.site.READER.closed": true
 		},
 		"3.2.2.2.3": {
-			"mixPlate.location": "ourlab.mario.site.P3"
+			"mixPlate.location": "ourlab.mario.site.CENTRIFUGE_2"
 		},
 		"3.2.2.2.3.1": {
 			"ourlab.mario.reader.open": true,
@@ -74029,46 +73689,7 @@
 			"ourlab.mario.site.READER.closed": true
 		},
 		"3.2.2.2.3.4": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.2.2.3.1": {
-			"ourlab.mario.centrifuge.open": true,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": false,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
-		},
-		"3.2.2.3.2": {
 			"mixPlate.location": "ourlab.mario.site.CENTRIFUGE_2"
-		},
-		"3.2.2.3.2.1": {
-			"mixPlate.location": "ourlab.mario.site.REGRIP"
-		},
-		"3.2.2.3.2.2": {
-			"mixPlate.location": "ourlab.mario.site.CENTRIFUGE_2"
-		},
-		"3.2.2.3.4": {
-			"ourlab.mario.centrifuge.open": true,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": false,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
-		},
-		"3.2.2.3.5": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.2.2.3.5.1": {
-			"mixPlate.location": "ourlab.mario.site.REGRIP"
-		},
-		"3.2.2.3.5.2": {
-			"mixPlate.location": "ourlab.mario.site.P3"
-		},
-		"3.2.2.3.6": {
-			"ourlab.mario.centrifuge.open": false,
-			"ourlab.mario.site.CENTRIFUGE_1.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_2.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_3.closed": true,
-			"ourlab.mario.site.CENTRIFUGE_4.closed": true
 		},
 		"3.2.3": {
 			"ourlab.mario.timer1.running": false
@@ -74118,7 +73739,7 @@
 				"type": "Plate",
 				"model": "ourlab.model.plateModel_384_square",
 				"locationInitial": "ourlab.mario.site.P3",
-				"locationFinal": "ourlab.mario.site.P3"
+				"locationFinal": "ourlab.mario.site.CENTRIFUGE_2"
 			}
 		],
 		"sourceWells": [

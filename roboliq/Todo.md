@@ -81,9 +81,10 @@
 	- [x] run `npm test` on branch lookupValue2
 	- [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
 	- [x] finish documenting commandHelper.getParsedValue
-- [ ] look at `~/src/roboliq/roboliq/protocols/output/diff.sh` or `for file in *.cmp.json; do echo $file; command diff --brief $file $(basename $file .cmp.json).out.json; done`
+- [x] look at `~/src/roboliq/roboliq/protocols/output/diff.sh`
 	- [x] handle `destinationAfter1: null` for `centrifuge.centrifuge2`: make new type of "SiteOrStay"
-	- [ ] fix error in protocols/protocol1_ph.yaml
+	- [x] fix error in protocols/protocol1_ph.yaml
+- [ ] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
@@ -109,6 +110,7 @@
 - [ ] consider having the fluorescenceReader command generate a report with the current plate contents
 - [ ] how can we automatically analyse the results of the fluorescence readout?
 - [ ] rewrite evoware compiler in javascript
+- [ ] use schemas for directives too
 - [ ] evoware:
 	- [ ] rename `_cleanTips` instruction to `_washTips`
 	- [ ] add command-line option to only process certain steps
