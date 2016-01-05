@@ -4,7 +4,7 @@ import fs from 'fs';
 
 /**
  * Tuple for location refered to by carrier+grid+site indexes
- * @typedef {Object} CarrierGridSiteIndex
+ * @typedef {object} CarrierGridSiteIndex
  * @property {integer} carrierId - ID for the carrier
  * @property {integer} gridIndex - 1-based index of grid
  * @property {integer} siteIndex -  0-based index of site
@@ -14,20 +14,21 @@ import fs from 'fs';
 
 /**
  * Tuple for location refered to by carrier+site index
- * @typedef {Object} CarrierSiteIndex
+ * @typedef {object} CarrierSiteIndex
  * @property {integer} carrierId - ID for the carrier
  * @property {integer} siteIndex -  0-based index of site
  */
 
  /**
   * A Carrier object
-  * @typedef {Object} Carrier
+  * @typedef {object} Carrier
   * @property {string} name
   * @property {integer} id
   * @property {integer} siteCount
   * @property {string} [deviceName]
   * @property {string} [partNo]
   */
+
 
 /**
  * @param sites list of (carrier ID, site index) where this labware can be placed.

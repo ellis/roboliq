@@ -1,5 +1,6 @@
 /**
- * @file A collection of helper functions for command handlers.
+ * A collection of helper functions for command handlers.
+ * @module commandHelper
  */
 
 var _ = require('lodash');
@@ -345,7 +346,7 @@ function lookupValue0(result, path, value0, data) {
 /**
  * Recursively lookup variable by name or path and return the final value.
  * @param {object} data - protocol data
- * @param {[type]} name - name or path of object to lookup in `data.objects`
+ * @param {string} name - name or path of object to lookup in `data.objects`
  * @return {any} result of the lookup, if successful; otherwise undefined.
  */
 function dereferenceVariable(data, name) {

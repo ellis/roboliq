@@ -1,3 +1,7 @@
+centrifuge:
+  module: |
+    The `centrifuge` commands specify actions using centrifuge equipment.
+
 Centrifuge:
   description: Centrifuge equipment.
   properties:

@@ -14,20 +14,26 @@ import yaml from 'yamljs';
  */
 function toMarkdown(pair) {
 	const [name, o] = pair;
-	return _.flattenDeep([
-		`## ${name}`,
-		"",
-		o.description ? [o.description, ""] : [],
-		"Properties:",
-		"",
-		_.map(o.properties, (p, pName) => {
-			const isRequired = _.includes(o.required, pName);
-			const nameText = (isRequired) ? pName : `[${pName}]`;
-			const nameTypeText = (p.type) ? `${nameText}: ${p.type}` : nameText;
-			const descriptionText = p.description || "";
-			return `* \`${nameTypeText}\` -- ${descriptionText}`;
-		}),
-	]).join('\n');
+	//console.log({name, o})
+	if (o.module) {
+		return `\n## ${name}\n\n${o.module}`;
+	}
+	else {
+		return _.flattenDeep([
+			`### ${name}`,
+			"",
+			o.description ? [o.description, ""] : [],
+			"Properties:",
+			"",
+			_.map(o.properties, (p, pName) => {
+				const isRequired = _.includes(o.required, pName);
+				const nameText = (isRequired) ? pName : `[${pName}]`;
+				const nameTypeText = (p.type) ? `${nameText}: ${p.type}` : nameText;
+				const descriptionText = p.description || "";
+				return `* \`${nameTypeText}\` -- ${descriptionText}`;
+			}),
+		]).join('\n');
+	}
 }
 
 // All files in the schema/ directory

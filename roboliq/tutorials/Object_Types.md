@@ -1,4 +1,4 @@
-## Centrifuge
+### Centrifuge
 
 Centrifuge equipment.
 
@@ -9,7 +9,7 @@ Properties:
 * `[label]: string` -- 
 * `sitesInternal: array` -- 
 
-## Reader
+### Reader
 
 Reader equipment.
 
@@ -19,7 +19,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-## Pipetter
+### Pipetter
 
 Pipetting equipment.
 
@@ -29,7 +29,19 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-## Agent
+### Syringe
+
+Pipetting syringe.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+* `[tipModel]: string` -- 
+* `[tipModelPermanent]: string` -- 
+
+### Agent
 
 An agent that can execute commands.
 
@@ -39,7 +51,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-## Liquid
+### Liquid
 
 Liquid substance.
 
@@ -50,7 +62,7 @@ Properties:
 * `[label]: string` -- 
 * `[wells]: array` -- 
 
-## Plate
+### Plate
 
 Plate labware.
 
@@ -63,7 +75,7 @@ Properties:
 * `[location]: Site` -- 
 * `[contents]: object,array` -- 
 
-## PlateModel
+### PlateModel
 
 Model for plate labware.
 
@@ -75,7 +87,7 @@ Properties:
 * `rows: integer` -- 
 * `columns: integer` -- 
 
-## Site
+### Site
 
 Represents a bench site where labware can placed.
 
@@ -85,7 +97,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-## Template
+### Template
 
 A template object, used by the `system.call` command.
 
@@ -96,7 +108,7 @@ Properties:
 * `[label]: string` -- 
 * `[template]` -- 
 
-## Variable
+### Variable
 
 User-defined variable.
 
@@ -107,7 +119,7 @@ Properties:
 * `[label]: string` -- 
 * `[value]` -- 
 
-## Sealer
+### Sealer
 
 Sealing equipment.
 
@@ -117,7 +129,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-## Timer
+### Timer
 
 Timer equipment.
 
@@ -127,7 +139,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-## Transporter
+### Transporter
 
 Labware transporter equipment.
 

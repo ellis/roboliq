@@ -127,6 +127,8 @@
 	- [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 	- [ ] Commands.md: Add general documentation to each command namespace
+		- [ ] filter out such entries from the roboliq commands (check for 'module' property)
+		- [ ] generate the documentation
 	- [ ] Developing_Roboliq.md
 	- [ ] Object_Types.md: Add general documentation to top of page
 	- [ ] Using_Roboliq.md
@@ -143,6 +145,8 @@
 	- [x] WellContents.js
 	- [x] generateSchemaDocs.js
 	- [x] commandHelper.js
+	- [ ] check generated jsdoc, and make appropriate improvements (e.g. setting modules and indicating which methods are exported)
+	- [ ] generateSchemaDocs.js shouldn't be listed on the Home page of the jsdocs (probably need to remote `@file`)
 	- [ ] expect.js
 	- [ ] expectCore.js
 	- [ ] main.js
@@ -230,6 +234,7 @@
 - [ ] refactor: rename commandHelper type `name` to `Symbol`
 - [ ] refactor roboliq.js: `_run`: move as many of the functions as possible out of the `_run` function
 - [ ] refactor roboliq.js: `_run`: rather than return `{protocol, output}`, add tables to protocol and return protocol
+- [ ] remove expectCore.paramsRequired
 - [ ] write back-end for Hamilton
 - [ ] write back-end for PR-PR?
 - [ ] UI to display protocol

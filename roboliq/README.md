@@ -26,14 +26,20 @@ To run the tests:
 npm test
 ```
 
-To generate the documentation:
+To update the Markdown tutorials for Commands and Types:
 
 ```{sh}
-npm run jsdoc
+npm run generateSchemaDocs
 ```
 
 To update the parser for well locations:
 
 ```{sh}
 npm run pegjs
+```
+
+To generate the HTML documentation:
+
+```{sh}
+npm run jsdoc
 ```

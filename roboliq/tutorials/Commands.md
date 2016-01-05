@@ -1,4 +1,10 @@
-## centrifuge.centrifuge2
+
+## centrifuge
+
+The `centrifuge` commands specify actions using centrifuge equipment.
+
+
+### centrifuge.centrifuge2
 
 Centrifuge using two plate
 
@@ -14,7 +20,7 @@ Properties:
 * `[destinationAfter1]: Site` -- Location identifier for where object1 should be placed after centrifugation
 * `[destinationAfter2]: Site` -- Location identifier for where object2 should be placed after centrifugation
 
-## centrifuge.insertPlates2
+### centrifuge.insertPlates2
 
 Insert up to two plates into the centrifuge.
 
@@ -27,7 +33,7 @@ Properties:
 * `[site1]: Site` -- Location identifier for the centrifugation site of object1
 * `[site2]: Site` -- Location identifier for the centrifugation site of object2
 
-## equipment._run
+### equipment._run
 
 Run the given equipment.
 
@@ -39,7 +45,7 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
-## equipment.open
+### equipment.open
 
 Open the given equipment.
 
@@ -53,7 +59,7 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
-## equipment.openSite
+### equipment.openSite
 
 Open an equipment site.
 This command assumes that only one equipment site can be open at a time.
@@ -72,7 +78,7 @@ Properties:
 * `equipment: Equipment` -- Equipment identifier
 * `site: Site` -- Site identifier
 
-## equipment.close
+### equipment.close
 
 Close the given equipment.
 
@@ -89,7 +95,7 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
-## fluorescenceReader.measurePlate
+### fluorescenceReader.measurePlate
 
 Measure the fluorescence of a plate.
 
@@ -104,7 +110,7 @@ Properties:
 * `[site]: Site` -- Site identifier in reader
 * `[destinationAfter]: Site` -- Site to move the plate to after measurement
 
-## pipetter._AspirateItem
+### pipetter._AspirateItem
 
 Parameters for pipette items.
 
@@ -114,7 +120,7 @@ Properties:
 * `[well]: Well` -- Source specifier
 * `volume: Volume` -- Volume
 
-## pipetter._DispenseItem
+### pipetter._DispenseItem
 
 Parameters for pipette items.
 
@@ -124,14 +130,17 @@ Properties:
 * `[well]: Well` -- Destination specifier
 * `volume: Volume` -- Volume
 
-## pipetter.CleaningIntensity
+### pipetter.CleaningIntensity
 
 Intensity of cleaning.
+
+The enum lists the intensities in increase order.
+
 
 Properties:
 
 
-## pipetter.PipetteItem
+### pipetter.PipetteItem
 
 Parameters for pipette items.
 
@@ -142,7 +151,7 @@ Properties:
 * `[destination]: Well` -- Destination specifier
 * `[volume]: Volume` -- Volume
 
-## pipetter._PipetteItem
+### pipetter._PipetteItem
 
 Parameters for low-level pipette items.
 
@@ -153,7 +162,7 @@ Properties:
 * `destination: Well` -- Destination specifier
 * `volume: Volume` -- Volume
 
-## pipetter._aspirate
+### pipetter._aspirate
 
 Aspirate liquids from sources into syringes.
 
@@ -164,18 +173,7 @@ Properties:
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about what should be aspirated from where
 
-## pipetter._cleanTips
-
-Clean the pipetter tips.
-
-Properties:
-
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `program: string` -- Program identifier
-* `[items]: array` -- Data about which tips to clean and with what intensity
-
-## pipetter._dispense
+### pipetter._dispense
 
 Dispense liquids from sryinges into destinations.
 
@@ -186,7 +184,7 @@ Properties:
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about what should be dispensed where
 
-## pipetter._pipette
+### pipetter._pipette
 
 Pipette liquids from sources to destinations.
 
@@ -197,19 +195,32 @@ Properties:
 * `program: string` -- Program identifier
 * `[items]: array` -- Data about what should be pipetted where
 
-## pipetter.cleanTips
+### pipetter._washTips
+
+Clean the pipetter tips.
+
+Properties:
+
+* `agent: Agent` -- Agent identifier
+* `equipment: Equipment` -- Equipment identifier
+* `[program]: string` -- Program identifier
+* `syringes: array` -- List of syringe identifiers
+* `intensity: pipetter.CleaningIntensity` -- Intensity of the cleaning
+
+### pipetter.cleanTips
 
 Clean the pipetter tips.
 
 Properties:
 
 * `[agent]: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+* `[equipment]: Equipment` -- Equipment identifier
 * `[program]: string` -- Program identifier
-* `[syringes]: array` -- List of syringes to clean
-* `intensity: pipetter.CleaningIntensity` -- Intensity of the cleaning
+* `[items]: array` -- List of which syringes to clean at which intensity
+* `[syringes]: array` -- Optional list of syringes to serve as default for missing syringes in items list
+* `[intensity]: pipetter.CleaningIntensity` -- Optional intensity to serve as default intensity for missing intensities in items list
 
-## pipetter.pipette
+### pipetter.pipette
 
 Pipette liquids from sources to destinations.
 
@@ -228,7 +239,7 @@ Properties:
 * `[cleanBetweenSameSource]: string` -- Intensity of cleaning between transfers of the same liquid.
 * `[cleanEnd]: string` -- Intensity of cleaning after the last dispense.
 
-## pipetter.pipetteMixtures
+### pipetter.pipetteMixtures
 
 Pipette the given mixtures into the given destinations.
 
@@ -239,9 +250,9 @@ Properties:
 * `[program]: string` -- Program identifier
 * `mixtures: array` -- Array of arrays, where each sub-array is a list of components to be mixed into a destination well
 * `destinations: Wells` -- Destination specifier
-* `[order]: string` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
+* `[order]: array` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
 
-## sealer.sealPlate
+### sealer.sealPlate
 
 Seal a plate.
 
@@ -254,7 +265,7 @@ Properties:
 * `[site]: Site` -- Site identifier in reader
 * `[destinationAfter]: Site` -- Site to move the plate to after measurement
 
-## system.call
+### system.call
 
 Call a template function.
 
@@ -265,7 +276,7 @@ Properties:
 * `name: Object` -- Name of the template function.
 * `[params]: object` -- Parameters to pass to the template function.
 
-## system.repeat
+### system.repeat
 
 Repeat the given command a given number of times.
 
@@ -274,7 +285,7 @@ Properties:
 * `count: integer` -- The number of times to repeat.
 * `[steps]: object` -- The sequence of commands to repeat.
 
-## timer._sleep
+### timer._sleep
 
 Sleep for a given duration using a specific timer.
 
@@ -288,7 +299,7 @@ Properties:
 * `duration: number` -- Number of seconds to sleep
 * `[stop]: boolean` -- Whether to stop the timer after waiting, or let it continue
 
-## timer._start
+### timer._start
 
 Start the given timer.
 
@@ -300,7 +311,7 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
-## timer._stop
+### timer._stop
 
 Stop the given timer.
 
@@ -312,7 +323,7 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
-## timer._wait
+### timer._wait
 
 Wait until the given timer has reacher the given elapsed time.
 
@@ -329,7 +340,7 @@ Properties:
 * `till: Duration` -- Number of seconds to wait till from the time the timer was started
 * `stop: boolean` -- Whether to stop the timer after waiting, or let it continue
 
-## timer.doAndWait
+### timer.doAndWait
 
 A control construct to perform the given sub-steps and then wait
 until a certain amount of time has elapsed since the beginning of this command.
@@ -342,7 +353,7 @@ Properties:
 * `duration: Duration` -- Number of seconds this command should last
 * `steps: object,array` -- Sub-steps to perform
 
-## timer.sleep
+### timer.sleep
 
 Sleep for a given duration.
 
@@ -352,7 +363,7 @@ Properties:
 * `[equipment]: Equipment` -- Equipment identifier
 * `duration: Duration` -- Duration to sleep (default units is in seconds)
 
-## timer.start
+### timer.start
 
 Start a timer.
 
@@ -364,7 +375,7 @@ Properties:
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
 
-## timer.stop
+### timer.stop
 
 Stop a running a timer.
 
@@ -377,7 +388,7 @@ Properties:
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
 
-## transporter._movePlate
+### transporter._movePlate
 
 Transport a plate to a destination.
 
@@ -391,7 +402,7 @@ Properties:
 * `object: Plate` -- Plate identifier
 * `destination: Site` -- Site to move the plate to
 
-## transporter.movePlate
+### transporter.movePlate
 
 Transport a plate to a destination.
 
