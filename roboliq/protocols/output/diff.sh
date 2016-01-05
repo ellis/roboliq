@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-for file in *.cmp.json; do echo $file; diff $file $(basename $file .cmp.json).out.json; done
+for file in *.cmp.json; do diff --brief $file $(basename $file .cmp.json).out.json; done

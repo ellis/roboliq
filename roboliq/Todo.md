@@ -82,6 +82,7 @@
 	- [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
 	- [x] finish documenting commandHelper.getParsedValue
 - [ ] look at `~/src/roboliq/roboliq/protocols/output/diff.sh` or `for file in *.cmp.json; do echo $file; command diff --brief $file $(basename $file .cmp.json).out.json; done`
+	- [ ] handle `destinationAfter1: null` for `centrifuge.centrifuge2`, because `null` might be used to *remove* variables during merging.  We might considering having a property `noDestinateAfter1: true`. We could alternatively specially process `"#undefined"`, and adapt parseParams() to handle nulls.
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
@@ -101,7 +102,6 @@
 		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
-- [ ] create schemas/equipment.yaml based on commands/equipment.js
 - [ ] create incubator command for tania13_ph
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] add pipetter commands for dropping tips and getting tips
