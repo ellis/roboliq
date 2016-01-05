@@ -51,26 +51,39 @@ objects:
     type: Variable
     default: "Yes"
     description: "Do you want to fill the DWB with inoculated medium in the beginning? (Yes or No)"
-    min: 0.000000
-    max: 2.000000
+    enum: [Yes, No]
 IfThen("FillDWB",0,"Yes");
   DilutionFactor:
     type: Variable
     default: "100"
     description: "What is the desired dilution factor of the inoculum in medium? (X-fold, where X is between 20 and 1000)"
-    min: 0.000000
-    max: 2.000000
+    min: 20
+    max: 1000
   CultivationVolume:
+    type: Variable
     default: 1000
     description: "What is the desired cultivation volume per well in ul? (500 to 1000)"
     min: 500
     max: 1000
-
-Variable(PreDispenseFactor,"5",0,"By how many seal layers should the DWB be closed? (0 to 2)",0,0.000000,2.000000,0,2,0,0);
-Variable(InoculationVolumeML,"48/(DilutionFactor/PreDispenseFactor-1)",0,"By how many seal layers should the DWB be closed? (0 to 2)",0,0.000000,2.000000,0,2,0,0);
+  PreDispenseFactor:
+    type: Variable
+    subtype: Integer
+    default: 5
+    description: "By how many seal layers should the DWB be closed? (0 to 2)"
+    min: 0
+    max: 2
+  InoculationVolumeML:
+    type: Variable
+    calculate: "48/(DilutionFactor/PreDispenseFactor-1)"
 UserPrompt("Please provide for Filling of the DWB:- At least ~InoculationVolumeML~ ml (+ 5 ml) of Inoculum in sterile 100-ml-Trough on Pos 3. Add sterile and empty 100-ml-trough on Pos 1 for preparation of inoculated medium.",0,-1);
-Else();
+step:
+  command: if
+  ifs:
+  - condition: FillDWB. CONTINUE
+  command: UserPrompt
+  text: "Please provide for Filling of the DWB:- At least {{InoculationVolumeML}} ml (+ 5 ml) of Inoculum in sterile 100-ml-Trough on Pos 3. Add sterile and empty 100-ml-trough on Pos 1 for preparation of inoculated medium."
 EndIf();
+
 Variable(DilutionPlateNumber,"(SamplingNumber-1)/6-((SamplingNumber-1)%6)/6+1",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
 Variable(DWBnumber,"(SamplingNumber-1)/24-((SamplingNumber-1)%24)/24+1",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
 Variable(RunTime,"SamplingTime*SamplingNumber/60+0.1",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
