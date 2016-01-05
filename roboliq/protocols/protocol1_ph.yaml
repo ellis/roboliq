@@ -33,28 +33,17 @@ objects:
     model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P2
 
-  # Reagents used in this protocol
-  balanceWater:
-    type: Liquid
-    description: water used to fill the balance plate
-    type!: Variable
-    value!: ourlab.mario.systemLiquid
+  saltwater:   {type: Liquid, group: Buffers, wells!: trough1(C01 down to F01)}
+  hepes_850:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A01 down to D01)}
+  hepes_650:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A02 down to D02)}
+  pipes_775:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A03 down to D03)}
+  pipes_575:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A04 down to D04)}
+  mes_710:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A05 down to D05)}
+  mes_510:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A06 down to D06)}
+  acetate_575: {type: Liquid, group: Buffers, wells!: sourcePlate1(A07 down to D07)}
+  acetate_375: {type: Liquid, group: Buffers, wells!: sourcePlate1(A08 down to D08)}
 
-  saltwater:   {type: Liquid, group: Buffers, wells!: trough1(C01 down to F01) }
-  hepes_850:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A01 down to D01) }
-  hepes_650:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A02 down to D02) }
-  pipes_775:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A03 down to D03) }
-  pipes_575:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A04 down to D04) }
-  mes_710:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A05 down to D05) }
-  mes_510:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A06 down to D06) }
-  acetate_575: {type: Liquid, group: Buffers, wells!: sourcePlate1(A07 down to D07) }
-  acetate_375: {type: Liquid, group: Buffers, wells!: sourcePlate1(A08 down to D08) }
-
-  sfGFP:       {type: Liquid, group: GFPs, description: wild type, wells: tubes1(A01)}
-  Q204H_N149Y: {type: Liquid, group: GFPs, description: double mutant, wells: tubes1(A02)}
-  tdGFP:       {type: Liquid, group: GFPs, description: fusion of double mutant, wells: tubes1(A03)}
-  N149Y:       {type: Liquid, group: GFPs, description: single mutant, wells: tubes1(A04)}
-  Q204H:       {type: Liquid, group: GFPs, description: single mutant, wells: tubes1(A05)}
+  sfGFP:       {type: Liquid, group: GFPs, description: wild type, wells!: tubes1(A01)}
 
   mixtures:
     type: Variable
@@ -69,7 +58,7 @@ objects:
           - {source1: mes_510,     source: mes_710,     volume: 30ul, count: 7, decimals: 1}
           - {source1: pipes_575,   source: pipet_775,   volume: 30ul, count: 5, decimals: 1}
           - {source1: hepes_650,   source: hepes_850,   volume: 30ul, count: 5, decimals: 1}
-        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+        - source: sfGFP
           volume: 5ul
           clean: thorough
           cleanBetweenSameSource: flush
@@ -84,28 +73,6 @@ objects:
 
 steps:
   1:
-    description: Fill balance plate with 75ul in 375 wells, store it in the centrifuge
-
-    1:
-      command: pipetter.pipette
-      program!: Roboliq_Water_Air_1000
-      sources: balanceWater
-      destinations:
-        "#replaceLabware":
-          list: mixtureWells
-          new: "balancePlate"
-      volumes: 75ul
-      cleanBetween: none
-
-    2:
-      command: sealer.sealPlate
-      object: balancePlate
-
-    3:
-      command: centrifuge.insertPlates2
-      object2: balancePlate
-
-  2:
     description: Prepare the mixture plate with a range of pH levels
     1:
       command: pipetter.pipetteMixtures
@@ -115,45 +82,16 @@ steps:
       cleanBegin: thorough
       cleanBetweenSameSource: none
       cleanEnd: thorough
+
     2:
       command: sealer.sealPlate
       object: mixPlate
 
-  3:
-    command: centrifuge.insertPlates2
-    object1: mixPlate
-
-"WE DON'T NEED THIS LOOP!  Just do it once, because there was no appreciable change over time."
-"OR IF WE DO KEEP IT, THEN DON'T WAIT AFTER LAST ITERATION"
-"AND THEN MAYBE ADD system.repeatWithTimer and set property waitAfter=false"
-  4:
-    description: Measurement loop; Each cycle of the loop lasts 4 hours
-    command: system.repeatWithStepDuration
-    count: 2
-    stepDuration: 4 hours
-    waitAfter: false
-    steps:
-        1:
-          description: Remove condensation from seal
-          command: centrifuge.centrifuge2
-          object1: mixPlate
-          object2: balancePlate
-          program:
-            rpm: 3000
-            duration: 2 minutes
-            temperature: 25
-        2:
-          command: fluorescenceReader.measurePlate
-          object: mixPlate
-          program:
-            excitation: 488nm
-            emission: 510nm
-          programFile: ./tania13_ph-temp.mdfx
-          outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
-        3:
-          description: Incubate at 25C
-          command: centrifuge.incubate2
-          object1: mixPlate
-          object2: balancePlate
-          program:
-            temperature: 25
+    3:
+      command: fluorescenceReader.measurePlate
+      object: mixPlate
+      program:
+        excitation: 488nm
+        emission: 510nm
+      programFile: ./tania13_ph-temp.mdfx
+      outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
