@@ -99,13 +99,13 @@ var commandHandlers = {
 		var params2 = alternatives[0];
 		//console.log("alternatives[0]:\n"+JSON.stringify(params2))
 
-		var destination1 =
-			_.isUndefined(parsed.objectName.destinationAfter1) ? object1.location
-			: (parsed.objectName.destinationAfter1 === null) ? params2.site1
+		const destination1
+			= (parsed.value.destinationAfter1 === "stay") ? params2.site1
+			: _.isUndefined(parsed.objectName.destinationAfter1) ? object1.location
 			: parsed.objectName.destinationAfter1;
-		var destination2 =
-			_.isUndefined(parsed.objectName.destinationAfter2) ? object2.location
-			: (parsed.objectName.destinationAfter2 === null) ? params2.site2
+		const destination2
+			= (parsed.value.destinationAfter2 === "stay") ? params2.site2
+			: _.isUndefined(parsed.objectName.destinationAfter2) ? object2.location
 			: parsed.objectName.destinationAfter2;
 
 		var expansion = [

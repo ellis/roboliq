@@ -43,8 +43,6 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
-		var destinationAfter = (_.isUndefined(parsed.objectName.destinationAfter)) ? location0 : parsed.objectName.destinationAfter;
-
 		var predicates = [
 			{"fluorescenceReader.canAgentEquipmentModelSite": {
 				"agent": parsed.objectName.agent,
@@ -57,6 +55,11 @@ var commandHandlers = {
 		var params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 		//console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
+
+		const destinationAfter
+			= (parsed.value.destinationAfter === "stay") ? null
+			: _.isUndefined(parsed.objectName.destinationAfter) ? location0
+			: parsed.objectName.destinationAfter;
 
 		var expansion = [
 			(params2.site === location0) ? null : {

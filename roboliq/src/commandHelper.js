@@ -241,6 +241,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			return;
 		case "Plate": return processObjectOfType(result, path, value, data, type);
 		case "Site": return processObjectOfType(result, path, value, data, type);
+		case "SiteOrStay": return processSiteOrStay(result, path, value, data);
 		case "Source": return processSource(result, path, value, data);
 		case "Sources": return processSources(result, path, value, data);
 		case "String": return processString(result, path, value, data);
@@ -447,6 +448,23 @@ function processObjectOfType(result, path, x, data, type) {
 	const paramName = path.join(".");
 	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(x));
 	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(x));
+}
+
+/**
+ * Try to process a value as the keyword "stay" or as a Site reference.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ */
+function processSiteOrStay(result, path, x, data) {
+	if (x === "stay") {
+		// do nothing, leave the value as "stay"
+	}
+	else {
+		processObjectOfType(result, path, x, data, "Site");
+	}
 }
 
 /**

@@ -25,7 +25,10 @@ var commandHandlers = {
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
-		var destinationAfter = (_.isUndefined(parsed.objectName.destinationAfter)) ? location0 : parsed.objectName.destinationAfter;
+		const destinationAfter
+			= (parsed.value.destinationAfter === "stay") ? null
+			: _.isUndefined(parsed.objectName.destinationAfter) ? location0
+			: parsed.objectName.destinationAfter;
 
 		var predicates = [
 			{"sealer.canAgentEquipmentProgramModelSite": {

@@ -82,7 +82,8 @@
 	- [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
 	- [x] finish documenting commandHelper.getParsedValue
 - [ ] look at `~/src/roboliq/roboliq/protocols/output/diff.sh` or `for file in *.cmp.json; do echo $file; command diff --brief $file $(basename $file .cmp.json).out.json; done`
-	- [ ] handle `destinationAfter1: null` for `centrifuge.centrifuge2`, because `null` might be used to *remove* variables during merging.  We might considering having a property `noDestinateAfter1: true`. We could alternatively specially process `"#undefined"`, and adapt parseParams() to handle nulls.
+	- [x] handle `destinationAfter1: null` for `centrifuge.centrifuge2`: make new type of "SiteOrStay"
+	- [ ] fix error in protocols/protocol1_ph.yaml
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`

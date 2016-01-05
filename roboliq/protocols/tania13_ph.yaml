@@ -169,8 +169,8 @@ steps:
           command: centrifuge.centrifuge2
           object1: mixPlate
           object2: balancePlate
-          destinationAfter1: null
-          destinationAfter2: null
+          destinationAfter1: stay
+          destinationAfter2: stay
           program:
             rpm: 3000
             duration: 1 # must set a duration of at least 1s

@@ -21,8 +21,8 @@ centrifuge.centrifuge2:
     object2: {description: "Plate identifier 2", type: "Plate"}
     site1: {description: "Location identifier for the centrifugation site of object1", type: "Site"}
     site2: {description: "Location identifier for the centrifugation site of object2", type: "Site"}
-    destinationAfter1: {description: "Location identifier for where object1 should be placed after centrifugation", "type": "Site"}
-    destinationAfter2: {description: "Location identifier for where object2 should be placed after centrifugation", "type": "Site"}
+    destinationAfter1: {description: "Location identifier for where object1 should be placed after centrifugation", "type": "SiteOrStay"}
+    destinationAfter2: {description: "Location identifier for where object2 should be placed after centrifugation", "type": "SiteOrStay"}
   required: ["program", "object1", "object2"]
 
 centrifuge.insertPlates2:

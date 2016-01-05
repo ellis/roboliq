@@ -492,5 +492,6 @@ module.exports = {
 	"#tableRows": directive_tableRows,
 	"#take": directive_take,
 	//"#wells": genWells,
+	"#undefined": function() { return undefined; },
 	"#zipMerge": directive_zipMerge
 };
