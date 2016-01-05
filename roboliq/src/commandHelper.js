@@ -575,13 +575,13 @@ function processDuration(result, path, x0, data) {
  * Get a property value from an object in the parsed parameters.
  * If no value could be found (and no default was given) then an exception
  * will be thrown.
-CONTINUE:
- * @param  {[type]} parsed       [description]
+ *
+ * @param {object} parsed - the parsed parameters object, as passed into a command handler
  * @param {object} data - protocol data
- * @param  {string} paramName    [description]
- * @param  {string} propertyName [description]
- * @param  {any} defaultValue [description]
- * @return {[type]}              [description]
+ * @param {string} paramName - parameter name (which should reference an object)
+ * @param {string} propertyName - name of the object's property to retrieve
+ * @param {any} defaultValue - default value if property not found
+ * @return {any} the property value
  */
 function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 	const value = _.get(parsed.value[paramName], propertyName, defaultValue);

@@ -76,11 +76,11 @@
 	- [x] pipetterPipetteTest.js
 	- [x] centrifugeTest.js
 - [x] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
-- [ ] refactor usage of commandHelper.getParsedValue
+- [x] refactor usage of commandHelper.getParsedValue
 	- [x] figure out why we needed to `_.clone(value1)` -- what is mutating the value?
 	- [x] run `npm test` on branch lookupValue2
 	- [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
-	- [ ] finish documenting commandHelper.getParsedValue
+	- [x] finish documenting commandHelper.getParsedValue
 - [ ] look at `~/src/roboliq/roboliq/protocols/output/diff.sh` or `for file in *.cmp.json; do echo $file; command diff --brief $file $(basename $file .cmp.json).out.json; done`
 - [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
@@ -137,11 +137,12 @@
 	- [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
 	- [ ] convention for syringes being in 'syringe' property of pipetter
 	- [ ] pipetter.cleanTips: document the various allowed parameter combinations of equipment, items, syringes, intensity
+	- [ ] document the directives, such as "#createPipetteMixtureList"
 - [ ] code documentation
 	- [x] roboliq.js
 	- [x] WellContents.js
 	- [x] generateSchemaDocs.js
-	- [ ] commandHelper.js
+	- [x] commandHelper.js
 	- [ ] expect.js
 	- [ ] expectCore.js
 	- [ ] main.js
