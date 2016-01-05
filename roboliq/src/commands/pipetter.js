@@ -535,7 +535,7 @@ const commandHandlers = {
 		//console.log("washTips:");
 		//console.log(JSON.stringify(parsed, null, '\t'))
 		const effects = {};
-		for (const [syringeName, syringe] of _.zip(params.syringes, parsed.value.syringes)) {
+		for (const [syringeName, syringe] of _.zip(parsed.objectName.syringes, parsed.value.syringes)) {
 			//console.log(JSON.stringify(item))
 			if (!_.isUndefined(syringe.contaminants))
 				effects[`${syringeName}.contaminants`] = null;
