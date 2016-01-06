@@ -27,8 +27,7 @@ export function getEffects_aspirate(parsed, data, effects) {
 	}
 
 	//console.log("getEffects_aspirate:\n"+JSON.stringify(parsed, null, '\t'));
-	for (const index in parsed.value.items) {
-		const item = parsed.value.items[index];
+	parsed.value.items.forEach((item, index) => {
 		//console.log(JSON.stringify(item, null, '\t'));
 
 		// Get initial contents of the source well
@@ -83,7 +82,7 @@ export function getEffects_aspirate(parsed, data, effects) {
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			addEffect(nameWELL, well1);
 		}
-	}
+	});
 
 	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
 
@@ -118,9 +117,8 @@ export function getEffects_pipette(parsed, data, effects) {
 				*/
 	//console.log("getEffects_pipette:")
 	//console.log(JSON.stringify(parsed, null, '\t'));
-	for (const index in parsed.value.items) {
-		const item = parsed.value.items[index];
-		//console.log(JSON.stringify(item));
+	parsed.value.items.forEach((item, index) => {
+		//console.log("item "+index+": "+JSON.stringify(item));
 
 		// Get initial contents of the source well
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
@@ -202,7 +200,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			addEffect(nameWELL, well1);
 		}
-	}
+	});
 
 	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
 
