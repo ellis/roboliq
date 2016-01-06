@@ -529,7 +529,20 @@ function pipette(params, parsed, data) {
  */
 const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
-		return {effects: pipetterUtils.getEffects_aspirate(parsed, data)};
+		//console.log("params", JSON.stringify(params, null, '  '))
+		const effects = pipetterUtils.getEffects_aspirate(parsed, data);
+		//console.log("effects:", JSON.stringify(effects, null, '  '))
+		return {effects};
+	},
+	"pipetter._dispense": function(params, parsed, data) {
+		return {};
+	},
+	"pipetter._pipette": function(params, parsed, data) {
+		//console.log("params", JSON.stringify(params, null, '  '))
+		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
+		return {
+			effects: pipetterUtils.getEffects_pipette(parsed, data)
+		};
 	},
 	"pipetter._washTips": function(params, parsed, data) {
 		//console.log("_washTips:");
@@ -547,16 +560,6 @@ const commandHandlers = {
 			effects[`${syringeName}.cleaned`] = parsed.value.intensity;
 		}
 		return effects;
-	},
-	"pipetter._dispense": function(params, parsed, data) {
-		return {};
-	},
-	"pipetter._pipette": function(params, parsed, data) {
-		//console.log("params", JSON.stringify(params, null, '  '))
-		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
-		return {
-			effects: pipetterUtils.getEffects_pipette(parsed, data)
-		};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
 		//console.log("pipetter.cleanTips:")

@@ -8,6 +8,7 @@ function objectsValue(context, key, objects, effects, prefix) {
 	var value = misc.findObjectsValue(key, objects, effects, undefined, prefix);
 	if (_.isUndefined(value)) {
 		var id = (prefix) ? prefix+"."+key : key;
+		//console.trace();
 		expect.throw(_.defaults({objectName: id}, context), "missing value.");
 	}
 	return value;

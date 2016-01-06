@@ -18,33 +18,46 @@ import * as WellContents from '../../WellContents.js';
  * @return {object} The effects caused by the pipetting command.
  */
 export function getEffects_aspirate(parsed, data, effects) {
-	var effects2 = (effects) ? _.cloneDeep(effects) : {};
-	var effectsNew = {}
+	const effects2 = (effects) ? _.cloneDeep(effects) : {};
+	const effectsNew = {};
 
-	console.log(JSON.stringify(parsed));
-	for (const item of parsed.value.items) {
-		console.log(JSON.stringify(item));
+	function addEffect(name, obj) {
+		effects2[name] = obj;
+		effectsNew[name] = obj;
+	}
 
-		/*CONTINUE
-		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source.value, data, effects2);
+	//console.log(JSON.stringify(parsed, null, '\t'));
+	for (const index in parsed.value.items) {
+		const item = parsed.value.items[index];
+		//console.log(JSON.stringify(item));
+
+		// Get initial contents of the source well
+		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
 		if (_.isEmpty(srcContents0))
-			srcContents0 = ["Infinity l", item.source.value];
+			srcContents0 = ["Infinity l", item.source];
 		//console.log("srcContents0", srcContents0, srcContentsName);
 
-		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination.value, data, effects2);
-		//console.log("dst contents", dstContents0, dstContentsName);
+		// Get initial contents of the syringe
+		const syringeContents0 = item.syringe.contents || [];
 
-		const [srcContents1, dstContents1] = WellContents.transferContents(srcContents0, dstContents0, item.volume.value);
-		//console.log({srcContents1, dstContents1});
+		// Final contents of source well and syringe
+		const [srcContents1, syringeContents1] = WellContents.transferContents(srcContents0, syringeContents0, item.volume);
+		//console.log({srcContents1, syringeContents1});
 
+		// Get list of syringe contaminants
+		const contaminants0 = item.syringe.contaminants || [];
+		const contaminants1 = _.keys(WellContents.flattenContents(syringeContents1));
+		const syringeName = parsed.objectName[`items.${index}.syringe`];
+		if (!_.isEqual(contaminants0, contaminants1))
+			addEffect(`${syringeName}.contaminants`, contaminants1);
 		// Update content effects
-		effects2[srcContentsName] = srcContents1;
-		effects2[dstContentsName] = dstContents1;
-		effectsNew[srcContentsName] = srcContents1;
-		effectsNew[dstContentsName] = dstContents1;
-		//console.log()
+		addEffect(srcContentsName, srcContents1);
+		addEffect(`${syringeName}.contents`, syringeContents1);
+		// Remove cleaned property
+		if (!_.isUndefined(item.syringe.cleaned))
+			addEffect(`${syringeName}.cleaned`, null);
 
-		const volume = item.volume.value;
+		const volume = item.volume;
 
 		// Update __WELLS__ effects for source
 		if (true) {
@@ -65,32 +78,8 @@ export function getEffects_aspirate(parsed, data, effects) {
 			});
 			//console.log({well0, well1});
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
-			effects2[nameWELL] = well1;
-			effectsNew[nameWELL] = well1;
+			addEffect(nameWELL, well1);
 		}
-
-		// Update __WELLS__ effects for destination
-		if (true) {
-			const volume1 = math.eval(dstContents1[0]);
-			const nameWELL = "__WELLS__."+dstContentsName;
-			//console.log("nameWELL:", nameWELL)
-			const well0 = misc.findObjectsValue(nameWELL, data.objects, effects2) || {
-				isSource: false,
-				volumeMin: '0 l',
-				volumeMax: '0 l'
-			};
-			const well1 = _.merge(well0, {
-				volumeMax: math.max(math.eval(well0.volumeMax), volume1).format({precision: 14}),
-				volumeMin: math.min(math.eval(well0.volumeMin), volume1).format({precision: 14}),
-				volumeAdded: (well0.volumeAdded)
-					? math.chain(math.eval(well0.volumeAdded)).add(volume).done().format({precision: 14})
-					: volume.format({precision: 14})
-			});
-			//console.log("x:\n"+JSON.stringify(x, null, '  '));
-			effects2[nameWELL] = well1;
-			effectsNew[nameWELL] = well1;
-		}
-		*/
 	}
 
 	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
@@ -126,7 +115,8 @@ export function getEffects_pipette(parsed, data, effects) {
 				*/
 	//console.log("getEffects_pipette:")
 	//console.log(JSON.stringify(parsed, null, '\t'));
-	_.forEach(parsed.value.items, (item, index) => {
+	for (const index in parsed.value.items) {
+		const item = parsed.value.items[index];
 		//console.log(JSON.stringify(item));
 
 		// Get initial contents of the source well
@@ -209,7 +199,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			addEffect(nameWELL, well1);
 		}
-	});
+	}
 
 	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
 

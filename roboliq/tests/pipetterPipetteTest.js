@@ -483,5 +483,71 @@ describe('pipetter', function() {
 				}
 			});
 		});
+
+		it("should set the syringe state when aspirating", function() {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2"
+					},
+					liquid1: {
+						type: "Variable",
+						value: "ourlab.mario.systemLiquid"
+					},
+					ourlab: {
+						mario: {
+							liha: {
+								syringe: {
+									1: {
+										contaminants: undefined,
+										contents: undefined,
+										cleaned: "thorough"
+									}
+								}
+							}
+						}
+					}.mario.liha.syring
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipette",
+						sources: "liquid1",
+						//sources: "ourlab.mario.systemLiquid",
+						destinations: "plate1(A01)",
+						volumes: "10ul",
+						clean: "none"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			should.deepEqual(result.output.effects, {
+				"1.1": {
+					"ourlab.mario.systemLiquidLabware.contents": [
+						"Infinity l",
+						"systemLiquid"
+					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
+					"plate1.contents.A01": [
+						"10 ul",
+						"systemLiquid"
+					],
+					"__WELLS__.ourlab.mario.systemLiquidLabware.contents": {
+						"isSource": true,
+						"volumeMin": "Infinity l",
+						"volumeMax": "Infinity l",
+						"volumeRemoved": "10 ul"
+					},
+					"__WELLS__.plate1.contents.A01": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
+					},
+				}
+			});
+		});
 	});
 });

@@ -20,7 +20,7 @@ pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:
     syringe: {description: Syring identifier, type: [string, integer]}
-    well: {description: Source specifier, type: Well}
+    source: {description: Source specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, source, volume]
 
@@ -28,7 +28,7 @@ pipetter._DispenseItem:
   description: Parameters for pipette items.
   properties:
     syringe: {description: Syring identifier, type: [string, integer]}
-    well: {description: Destination specifier, type: Well}
+    destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, destination, volume]
 

@@ -608,6 +608,7 @@ function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
 	//console.log({parsed, x: parsed[paramName], paramName, propertyName})
 	if (!_.isUndefined(value)) {
 		const objectName1 = (objectName) ? objectName+"."+propertyName : paramName+"/"+propertyName;
+		//console.trace();
 		expect.truthy({objectName1}, !_.isUndefined(value), "missing value");
 		return value;
 	}
