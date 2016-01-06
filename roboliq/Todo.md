@@ -84,8 +84,7 @@
 - [x] look at `~/src/roboliq/roboliq/protocols/output/diff.sh`
 	- [x] handle `destinationAfter1: null` for `centrifuge.centrifuge2`: make new type of "SiteOrStay"
 	- [x] fix error in protocols/protocol1_ph.yaml
-- [ ] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
-- [ ] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
+- [x] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
 	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
 	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
 	- [x] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
@@ -94,17 +93,19 @@
 	- [x] delete protocol8.json, because the tests are in pipetterTest.js
 	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [x] add tips 5-8 to ourlab.js
-	- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
-		- [x] `_pipette`: append contaminants from source well to syringe
-		- [?] `_pipette`: clear contents of syringe
-		- [?] `_pipette`: clear syringe.cleaned
-		- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`
-			- test this in pipetterCleanTipsTest.js
-		- [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
-		- [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
-		- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
-	- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
-	- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
+- [ ] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
+- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
+	- [x] `_pipette`: append contaminants from source well to syringe
+	- [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
+	- [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
+	- [?] `_pipette`: clear contents of syringe
+	- [?] `_pipette`: clear syringe.cleaned
+	- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`
+		- test this in pipetterCleanTipsTest.js
+		- also make sure that we don't need to specify the equipment for cleanTips, then remove equipment from the command specs in various tests
+	- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
+- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
+- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] create incubator command for tania13_ph
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] add pipetter commands for dropping tips and getting tips

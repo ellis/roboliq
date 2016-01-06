@@ -9,7 +9,7 @@ to the project's root (where the `package.json` file is) and running:
 
 ``npm install``
 
-## Command-line commands
+# Command-line commands
 
 The most commonly used commands are:
 
@@ -23,7 +23,7 @@ Less commonly used commands include:
 
 * ``npm run generateSchemaDocs`` -- Update the schema-related documentation in `tutorias/Commands.md` and `tutorials/Object_Types.md` after modifications to any of the schema files in `schemas/` or the generating function in `src/generateSchemaDocs.js`.
 
-## Directory structure
+# Directory structure
 
 Here is a directory listing with the most important files and directories.
 
@@ -62,13 +62,15 @@ Here is a directory listing with the most important files and directories.
 │   └── WellContents.js -- class to handle well contents
 ├── tests/ -- unit tests
 └── tutorials/ -- Markdown files that are included as tutorials in the JSDoc documentation
-<pre>
+</pre>
 
 The three most important files/directories for developers are:
 
 * `src/roboliq.js`: if you want to change how Roboliq works,
     this is probably where you'll start.
 
-* `src/commands/`: CONTINUE
+* `src/commands/`: here is the code for processing Roboliq commands.
+    The commands are organized in modules, and there is generally one
+    JavaScript file for each module (the pipetter module, however, has multiple files).
 
 * `src/config/`: CONTINUE
