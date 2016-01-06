@@ -276,5 +276,46 @@ describe('pipetter', function() {
 				}
 			});
 		});
+
+
+		it.only("should set the syringe state to cleaned", () => {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					ourlab: {
+						mario: {
+							liha: {
+								syringe: {
+									1: {
+										contaminants: ["A"],
+										contents: undefined,
+										cleaned: "thorough"
+									}
+								}
+							}
+						}
+					}
+				},
+				steps: {
+					"1": {
+						"command": "pipetter.cleanTips",
+						"equipment": "ourlab.mario.liha",
+						"syringes": ["ourlab.mario.liha.syringe.1"],
+						"intensity": "light"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			console.log(JSON.stringify(result.output, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.warnings, {});
+			should.deepEqual(result.output.effects, {
+				"1": {
+					"ourlab.mario.liha.syringe.1.contaminants": null,
+					"ourlab.mario.liha.syringe.1.cleaned": "light",
+					"ourlab.mario.liha.syringe.1.contents": null,
+				}
+			});
+		});
 	});
 });
