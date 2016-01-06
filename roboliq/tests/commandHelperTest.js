@@ -284,6 +284,68 @@ describe('commandHelper', function() {
 			};
 			should.throws(() => commandHelper.parseParams(params, data, schema), "something");
 		});
+
+		it("should handle Syringe objects", () => {
+			const data = {
+				objects: {
+					ourlab: {
+						mario: {
+							liha: {
+								syringe: {
+									1: {
+										"type": "Syringe",
+										"tipModel": "ourlab.mario.tipModel1000",
+										"tipModelPermanent": "ourlab.mario.tipModel1000",
+										contaminants: undefined,
+										contents: undefined,
+										cleaned: "thorough"
+									}
+								}
+							}
+						}
+					}
+				},
+				schemas: {
+					Syringe: {
+						description: "Pipetting syringe.",
+						properties: {
+							type: {enum: ["Syringe"]},
+							description: {type: "string"},
+							label: {type: "string"},
+							tipModel: {type: "string"},
+							tipModelPermanent: {type: "string"}
+						},
+						required: ["type"]
+					}
+				},
+				accesses: []
+			};
+			const params = {
+				"syringe": "ourlab.mario.liha.syringe.1",
+			};
+			const schema = {
+				properties: {
+					syringe: {type: "Syringe"}
+				},
+				required: ['syringe']
+			};
+			const parsed = commandHelper.parseParams(params, data, schema);
+			should.deepEqual(parsed, {
+				objectName: {
+					syringe: "ourlab.mario.liha.syringe.1"
+				},
+				value: {
+					syringe: {
+						"type": "Syringe",
+						"tipModel": "ourlab.mario.tipModel1000",
+						"tipModelPermanent": "ourlab.mario.tipModel1000",
+						contaminants: undefined,
+						contents: undefined,
+						cleaned: "thorough"
+					}
+				}
+			});
+		});
 	});
 
 	/*

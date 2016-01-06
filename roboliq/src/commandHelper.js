@@ -266,12 +266,13 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 				const schema = data.schemas[type];
 				//console.log({type, schema})
 				processValue0BySchema(result, path, value, schema, data);
-				//console.log({type, parsed})
+				//console.log("result: "+JSON.stringify(result, null, '\t'))
 				return;
 			}
 			else {
 				const schema = roboliqSchemas[type];
-				expect.truthy({paramName: name}, schema, "unknown type: "+type);
+				if (!schema) console.log("known types: "+_.keys(data.schemas).concat(_.keys(roboliqSchemas)))
+				expect.truthy({paramName: name}, schema, "unknown type: "+JSON.stringify(type));
 				const isValid = tv4.validate(value, schema);
 				expect.truthy({paramName: name}, isValid, tv4.toString());
 				return;

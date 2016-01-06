@@ -26,10 +26,10 @@ export function getEffects_aspirate(parsed, data, effects) {
 		effectsNew[name] = obj;
 	}
 
-	//console.log(JSON.stringify(parsed, null, '\t'));
+	//console.log("getEffects_aspirate:\n"+JSON.stringify(parsed, null, '\t'));
 	for (const index in parsed.value.items) {
 		const item = parsed.value.items[index];
-		//console.log(JSON.stringify(item));
+		//console.log(JSON.stringify(item, null, '\t'));
 
 		// Get initial contents of the source well
 		let [srcContents0, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
@@ -50,12 +50,15 @@ export function getEffects_aspirate(parsed, data, effects) {
 		const syringeName = parsed.objectName[`items.${index}.syringe`];
 		if (!_.isEqual(contaminants0, contaminants1))
 			addEffect(`${syringeName}.contaminants`, contaminants1);
-		// Update content effects
-		addEffect(srcContentsName, srcContents1);
+		// Update content effect
 		addEffect(`${syringeName}.contents`, syringeContents1);
 		// Remove cleaned property
+		//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))
 		if (!_.isUndefined(item.syringe.cleaned))
 			addEffect(`${syringeName}.cleaned`, null);
+
+		// Update content effect for source
+		addEffect(srcContentsName, srcContents1);
 
 		const volume = item.volume;
 

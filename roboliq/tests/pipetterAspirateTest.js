@@ -4,7 +4,7 @@ var roboliq = require('../src/roboliq.js')
 
 describe('pipetter', function() {
 	describe('pipetter._aspirate', function () {
-		it.only("should update the syringe state", function() {
+		it("should update the syringe state", function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -29,7 +29,7 @@ describe('pipetter', function() {
 								}
 							}
 						}
-					}.mario.liha.syring
+					}
 				},
 				steps: {
 					"1": {
@@ -56,12 +56,13 @@ describe('pipetter', function() {
 					"ourlab.mario.liha.syringe.1.contaminants": [
 						"plate1(A01)"
 					],
-					"plate1.contents.A01": [
-						"Infinity l",
-						"plate1(A01)"
-					],
+					"ourlab.mario.liha.syringe.1.cleaned": null,
 					"ourlab.mario.liha.syringe.1.contents": [
 						"10 ul",
+						"plate1(A01)"
+					],
+					"plate1.contents.A01": [
+						"Infinity l",
 						"plate1(A01)"
 					],
 					"__WELLS__.plate1.contents.A01": {
