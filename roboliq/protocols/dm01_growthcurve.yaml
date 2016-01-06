@@ -29,12 +29,6 @@ objects:
     description: "By how many seal layers should the DWB be closed? (0 to 2)"
     min: 0
     max: 2
-  SealNumber:
-    type: Variable
-    default: "2"
-    description: "By how many seal layers should the DWB be closed? (0 to 2)"
-    min: 0.000000
-    max: 2.000000
   ContiShake:
     type: Variable
     default: "No"
@@ -49,82 +43,97 @@ objects:
     max: 5.000000
   FillDWB:
     type: Variable
-    default: "Yes"
-    description: "Do you want to fill the DWB with inoculated medium in the beginning? (Yes or No)"
-    enum: [Yes, No]
-IfThen("FillDWB",0,"Yes");
-  DilutionFactor:
-    type: Variable
-    default: "100"
-    description: "What is the desired dilution factor of the inoculum in medium? (X-fold, where X is between 20 and 1000)"
-    min: 20
-    max: 1000
-  CultivationVolume:
-    type: Variable
-    default: 1000
-    description: "What is the desired cultivation volume per well in ul? (500 to 1000)"
-    min: 500
-    max: 1000
-  PreDispenseFactor:
-    type: Variable
-    subtype: Integer
-    default: 5
-    description: "By how many seal layers should the DWB be closed? (0 to 2)"
-    min: 0
-    max: 2
-  InoculationVolumeML:
-    type: Variable
-    calculate: "48/(DilutionFactor/PreDispenseFactor-1)"
-UserPrompt("Please provide for Filling of the DWB:- At least ~InoculationVolumeML~ ml (+ 5 ml) of Inoculum in sterile 100-ml-Trough on Pos 3. Add sterile and empty 100-ml-trough on Pos 1 for preparation of inoculated medium.",0,-1);
-step:
-  command: if
-  ifs:
-  - condition: FillDWB. CONTINUE
-  command: UserPrompt
-  text: "Please provide for Filling of the DWB:- At least {{InoculationVolumeML}} ml (+ 5 ml) of Inoculum in sterile 100-ml-Trough on Pos 3. Add sterile and empty 100-ml-trough on Pos 1 for preparation of inoculated medium."
-EndIf();
+    description: "Do you want to fill the DWB with inoculated medium in the beginning?"
+    schema:
+      properties:
+        fill:
+          type: boolean
+          description: "Do you want to fill the DWB with inoculated medium in the beginning? (true or false)"
+        dilutionFactor:
+          type: integer
+          default: 100
+          minimum: 20
+          maximum: 1000
+        cultivationVolume:
+          type: number
+          default: 1000
+          description: "What is the desired cultivation volume per well in ul? (500 to 1000)"
+          minimum: 500
+          maximum: 1000
+        preDispenseFactor:
+          type: integer
+          default: 5
+          description: "By how many seal layers should the DWB be closed? (0 to 2)"
+          minimum: 0
+          maximum: 2
 
-Variable(DilutionPlateNumber,"(SamplingNumber-1)/6-((SamplingNumber-1)%6)/6+1",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
-Variable(DWBnumber,"(SamplingNumber-1)/24-((SamplingNumber-1)%24)/24+1",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
-Variable(RunTime,"SamplingTime*SamplingNumber/60+0.1",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
-Variable(TotalMediumML,"SamplingNumber*12*0.2",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
-IfThen("FillDWB",0,"Yes");
-Variable(RunTime,"RunTime+0.25",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
-Variable(TotalMediumML,"TotalMediumML+48+DWBnumber*96*(1-1/PreDispenseFactor)*CultivationVolume/1000",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
-Else();
-EndIf();
-UserPrompt("Please turn on the heater of the shaking incubator and set the temp. Predefined shaking frequency of 300 rpm.Fill Pos 1 to ~DilutionPlateNumber~ of 3x4Pos Hotel with empty MTPs WITHOUT lid. Add ~DWBnumber~ sterile 96-DWB on Pos1 (and 2) of 3Pos Carrier. Fill sterile steel trough with ~TotalMediumML~ ml (+ 50 ml) of medium. Add a bleach-filled 100-ml-trough on Pos 2.The routine will take about ~RunTime~ hours for completion of sampling.",0,-1);
+
+steps:
+  command: if
+  condition: FillDWB.fill
+  steps:
+    command: system.promptUser
+    text: "Please provide for Filling of the DWB:- At least {{InoculationVolumeML}} ml (+ 5 ml) of Inoculum in sterile 100-ml-Trough on Pos 3. Add sterile and empty 100-ml-trough on Pos 1 for preparation of inoculated medium."
+
+  DilutionPlateNumber:
+    type: Variable
+    calculate: "(SamplingNumber-1)/6-((SamplingNumber-1)%6)/6+1"
+  DWBnumber:
+    type: Variable
+    calculate: "(SamplingNumber-1)/24-((SamplingNumber-1)%24)/24+1"
+  RunTime:
+    type: Variable
+    calculate: "SamplingTime*SamplingNumber/60+0.1"
+  TotalMediumML:
+    type: Variable
+    calculate: "SamplingNumber*12*0.2"
+
+steps:
+  command: if
+  condition: FillDWB.fill
+  steps:
+  - command: set
+    variable: RunTime
+    calculate: "RunTime+0.25"
+  - command: set
+    variable: TotalMediumML
+    calculate: "TotalMediumML+48+DWBnumber*96*(1-1/PreDispenseFactor)*CultivationVolume/1000"
+
+steps:
+  command: system.promptUser
+  text: "Please turn on the heater of the shaking incubator and set the temp. Predefined shaking frequency of 300 rpm.Fill Pos 1 to {{DilutionPlateNumber}} of 3x4Pos Hotel with empty MTPs WITHOUT lid. Add {{DWBnumber}} sterile 96-DWB on Pos1 (and 2) of 3Pos Carrier. Fill sterile steel trough with {{TotalMediumML}} ml (+ 50 ml) of medium. Add a bleach-filled 100-ml-trough on Pos 2.The routine will take about {{RunTime}} hours for completion of sampling."
+
 Variable(PauseNachSchütteln,"5",0,"What is the desired shaking frequency (150 to 300)?",0,150.000000,300.000000,0,2,0,0);
 Variable(InactivationTime,"5",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
 Variable(InactivationVolume,"1200",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
 Variable(MixingTime,"15",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
 GroupEnd();
 Group("Init Pipetting");
-Wash(255,41,1,41,0,"20",500,"15",500,10,70,30,1,0,1000,0);
-Wash(255,41,1,41,0,"15",500,"10",500,10,70,30,0,0,1000,0);
+  Wash(255,41,1,41,0,"20",500,"15",500,10,70,30,1,0,1000,0);
+  Wash(255,41,1,41,0,"15",500,"10",500,10,70,30,0,0,1000,0);
 GroupEnd();
 Group("Inactivation with 2.4 ml");
-Wash(255,42,1,42,2,"6",500,"8",500,10,70,30,1,0,1000,0);
-Aspirate(255,">> DM_Water free dispense <<	877","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
-StartTimer("2");
-WaitTimer("2","InactivationTime");
-Dispense(255,">> DM_Water free dispense <<	878","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
-Wash(255,41,1,41,2,"6",500,"8",500,10,70,30,1,0,1000,0);
+  Wash(255,42,1,42,2,"6",500,"8",500,10,70,30,1,0,1000,0);
+  Aspirate(255,">> DM_Water free dispense <<	877","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
+  StartTimer("2");
+  WaitTimer("2","InactivationTime");
+  Dispense(255,">> DM_Water free dispense <<	878","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
+  Wash(255,41,1,41,2,"6",500,"8",500,10,70,30,1,0,1000,0);
 GroupEnd();
 IfThen("FillDWB",0,"Yes");
-Group("DWB Filling");
-Comment("Medium pre-dispense of 80% of final volume per well (dep on PreDispenseFactor)");
-Variable(PreDispenseVolume,"CultivationVolume*(1-(1/PreDispenseFactor))",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
-Variable(PreDispenseMultipipVolume,"PreDispenseVolume*3",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
-BeginLoop("DWBnumber","DWB");
-BeginLoop("4","Columns");
-Aspirate(255,">> DM_Water free dispense <<	879","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume",0,0,0,0,37,0,1,"0108¯1",0,0);
-BeginLoop("3","Multipipetting");
-Dispense(255,"DM_Water free dispense","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume",0,0,0,0,19,0,1,"0C08¯1000000000000",3,"Multipipetting",0,1,"Columns",0,3,"DWB",3,1,0);
-EndLoop();
-Wash(255,41,1,41,2,"3",500,"4",500,10,70,30,1,0,1000,0);
-EndLoop();
-EndLoop();
-Comment("Preparation of inoculated medium");
-Variable(InoculationVolumeUL,"InoculationVolumeML*1000",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
-Variable(InoculationVolumeUL8Tips,"InoculationVolumeUL/8",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
+  Group("DWB Filling");
+    Comment("Medium pre-dispense of 80% of final volume per well (dep on PreDispenseFactor)");
+    Variable(PreDispenseVolume,"CultivationVolume*(1-(1/PreDispenseFactor))",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
+    Variable(PreDispenseMultipipVolume,"PreDispenseVolume*3",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
+    BeginLoop("DWBnumber","DWB");
+      BeginLoop("4","Columns");
+        Aspirate(255,">> DM_Water free dispense <<	879","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume",0,0,0,0,37,0,1,"0108¯1",0,0);
+        BeginLoop("3","Multipipetting");
+          Dispense(255,"DM_Water free dispense","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume","PreDispenseVolume",0,0,0,0,19,0,1,"0C08¯1000000000000",3,"Multipipetting",0,1,"Columns",0,3,"DWB",3,1,0);
+        EndLoop();
+        Wash(255,41,1,41,2,"3",500,"4",500,10,70,30,1,0,1000,0);
+      EndLoop();
+    EndLoop();
+    Comment("Preparation of inoculated medium");
+    Variable(InoculationVolumeUL,"InoculationVolumeML*1000",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);
+    Variable(InoculationVolumeUL8Tips,"InoculationVolumeUL/8",0,"How many strains do you have?",0,1.000000,3.000000,0,2,0,0);

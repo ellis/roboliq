@@ -1,11 +1,7 @@
 /**
- * Namespace for the ``centrifuge`` commands.
- * @namespace centrifuge
- * @version v1
- */
-
-/**
- * Centrifuge commands module.
+ * Centrifuge commands module (see {@tutorial Commands#centrifuge} or [command specification](tutorial-Commands.html#centrifuge)).
+ *
+ * See {@link roboliq#Protocol}.
  * @module commands/centrifuge
  * @return {Protocol}
  * @version v1

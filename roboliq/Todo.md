@@ -151,6 +151,8 @@
 	- [x] commandHelper.js
 	- [ ] figure out how to reference an anchor from a separate file (e.g. commands/centrifuge.js should reference 'centrifuge' in Commands.md)
 	- [ ] generateSchemaDocs.js: set anchors for command modules, so they can be referenced from the source code
+	- [ ] generateSchemaDocs.js: why aren't descriptions generated for "Object Types" properties?
+	- [ ] for parameter types, can they be links to the Type definition?
 	- [ ] check generated jsdoc, and make appropriate improvements (e.g. setting modules and indicating which methods are exported)
 	- [ ] generateSchemaDocs.js shouldn't be listed on the Home page of the jsdocs (probably need to remote `@file`)
 	- [ ] expectCore.js

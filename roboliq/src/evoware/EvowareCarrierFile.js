@@ -10,8 +10,6 @@ import fs from 'fs';
  * @property {integer} siteIndex -  0-based index of site
  */
 
-//case class CarrierNameGridSiteIndex(carrierName: String, gridIndex: Int, siteIndex: Int)
-
 /**
  * Tuple for location refered to by carrier+site index
  * @typedef {object} CarrierSiteIndex
@@ -19,33 +17,33 @@ import fs from 'fs';
  * @property {integer} siteIndex -  0-based index of site
  */
 
- /**
-  * A Carrier object
-  * @typedef {object} Carrier
-  * @property {string} name
-  * @property {integer} id
-  * @property {integer} siteCount
-  * @property {string} [deviceName]
-  * @property {string} [partNo]
-  */
-
+/**
+ * A Carrier object
+ * @typedef {object} Carrier
+ * @property {string} name
+ * @property {integer} id
+ * @property {integer} siteCount
+ * @property {string} [deviceName]
+ * @property {string} [partNo]
+ */
 
 /**
- * @param sites list of (carrier ID, site index) where this labware can be placed.
+ * An evoware labware model
+ * @typedef {object} EvowareLabwareModel
+ * @property {string} name
+ * @property {integer} rows
+ * @property {integer} cols
+ * @property {number} ul - maximum volume of wells
+ * @property {array} sites - list of CarrierSiteIndexes where this labware can be placed.
  */
-case class EvowareLabwareModel(
-	val sName: String,
-	val nRows: Int,
-	val nCols: Int,
-	val ul: Double,
-	val sites: List[CarrierSiteIndex]
-) extends EvowareModel
 
-case class Vector(
-	val idCarrier: Int,
-	val sClass: String, // Wide, Narrow, or user-defined
-	val iRoma: Int
-) extends EvowareModel
+/**
+ * A tranporter "vector", related to movements that the RoMas can make
+ * @typedef {object} Vector
+ * @property {integer} carrierId - which carrier this vector is for
+ * @property {string} class - Wide, Narrow, or user-defined
+ * @property {integer} romaId - which RoMa this vector is for
+ */
 
 case class CarrierSite(
 	carrier: Carrier,
