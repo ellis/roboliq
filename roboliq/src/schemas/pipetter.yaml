@@ -1,3 +1,7 @@
+pipetter:
+  module: |
+    The `pipetter` commands specify actions using pipetting equipment.
+
 Pipetter:
   description: Pipetting equipment.
   properties:

@@ -17,8 +17,8 @@ Properties:
 * `object2: Plate` -- Plate identifier 2
 * `[site1]: Site` -- Location identifier for the centrifugation site of object1
 * `[site2]: Site` -- Location identifier for the centrifugation site of object2
-* `[destinationAfter1]: Site` -- Location identifier for where object1 should be placed after centrifugation
-* `[destinationAfter2]: Site` -- Location identifier for where object2 should be placed after centrifugation
+* `[destinationAfter1]: SiteOrStay` -- Location identifier for where object1 should be placed after centrifugation
+* `[destinationAfter2]: SiteOrStay` -- Location identifier for where object2 should be placed after centrifugation
 
 ### centrifuge.insertPlates2
 
@@ -32,6 +32,13 @@ Properties:
 * `[object2]: Plate` -- Plate identifier 2
 * `[site1]: Site` -- Location identifier for the centrifugation site of object1
 * `[site2]: Site` -- Location identifier for the centrifugation site of object2
+
+
+## equipment
+
+The `equipment` commands specify generic actions such as 'run' and 'open'
+that may apply to various types of equipment.
+
 
 ### equipment._run
 
@@ -95,6 +102,12 @@ Properties:
 * `agent: Agent` -- Agent identifier
 * `equipment: Equipment` -- Equipment identifier
 
+
+## fluorescenceReader
+
+The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
+
+
 ### fluorescenceReader.measurePlate
 
 Measure the fluorescence of a plate.
@@ -108,7 +121,13 @@ Properties:
 * `outputFile: string` -- Filename for output
 * `object: Plate` -- Plate identifier
 * `[site]: Site` -- Site identifier in reader
-* `[destinationAfter]: Site` -- Site to move the plate to after measurement
+* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after measurement
+
+
+## pipetter
+
+The `pipetter` commands specify actions using pipetting equipment.
+
 
 ### pipetter._AspirateItem
 
@@ -116,8 +135,8 @@ Parameters for pipette items.
 
 Properties:
 
-* `syringe: string,integer` -- Syring identifier
-* `[well]: Well` -- Source specifier
+* `syringe: Syringe` -- Syring identifier
+* `source: Well` -- Source specifier
 * `volume: Volume` -- Volume
 
 ### pipetter._DispenseItem
@@ -126,8 +145,8 @@ Parameters for pipette items.
 
 Properties:
 
-* `syringe: string,integer` -- Syring identifier
-* `[well]: Well` -- Destination specifier
+* `syringe: Syringe` -- Syring identifier
+* `destination: Well` -- Destination specifier
 * `volume: Volume` -- Volume
 
 ### pipetter.CleaningIntensity
@@ -146,7 +165,7 @@ Parameters for pipette items.
 
 Properties:
 
-* `[syringe]: string,integer` -- Syring identifier
+* `[syringe]: Syringe` -- Syring identifier
 * `[source]: Source` -- Source specifier
 * `[destination]: Well` -- Destination specifier
 * `[volume]: Volume` -- Volume
@@ -157,7 +176,7 @@ Parameters for low-level pipette items.
 
 Properties:
 
-* `syringe: string,integer` -- Syring identifier
+* `syringe: Syringe` -- Syring identifier
 * `source: Well` -- Source specifier
 * `destination: Well` -- Destination specifier
 * `volume: Volume` -- Volume
@@ -252,6 +271,12 @@ Properties:
 * `destinations: Wells` -- Destination specifier
 * `[order]: array` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
 
+
+## sealer
+
+The `sealer` commands specify actions using sealing equipment.
+
+
 ### sealer.sealPlate
 
 Seal a plate.
@@ -263,7 +288,14 @@ Properties:
 * `[program]: string` -- Program identifier for sealing
 * `object: Plate` -- Plate identifier
 * `[site]: Site` -- Site identifier in reader
-* `[destinationAfter]: Site` -- Site to move the plate to after measurement
+* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after measurement
+
+
+## system
+
+The `system` commands specify several general, high-level actions that are
+not specific to any particular type of equipment.
+
 
 ### system.call
 
@@ -284,6 +316,12 @@ Properties:
 
 * `count: integer` -- The number of times to repeat.
 * `[steps]: object` -- The sequence of commands to repeat.
+
+
+## timer
+
+The `timer` commands specify actions using timer equipment.
+
 
 ### timer._sleep
 
@@ -387,6 +425,13 @@ Properties:
 
 * `[agent]: Agent` -- Agent identifier
 * `[equipment]: Equipment` -- Equipment identifier
+
+
+## transporter
+
+The `transporter` commands specify actions using equipment to transport
+labware from one location to another.
+
 
 ### transporter._movePlate
 

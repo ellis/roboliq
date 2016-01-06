@@ -1,3 +1,8 @@
+equipment:
+  module: |
+    The `equipment` commands specify generic actions such as 'run' and 'open'
+    that may apply to various types of equipment.
+
 equipment._run:
   description: |
     Run the given equipment.

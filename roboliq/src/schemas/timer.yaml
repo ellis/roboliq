@@ -1,3 +1,7 @@
+timer:
+  module: |
+    The `timer` commands specify actions using timer equipment.
+
 Timer:
   description: Timer equipment.
   properties:

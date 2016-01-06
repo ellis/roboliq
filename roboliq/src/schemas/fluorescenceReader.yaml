@@ -1,3 +1,7 @@
+fluorescenceReader:
+  module: |
+    The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
+
 Reader:
   description: Reader equipment.
   properties:

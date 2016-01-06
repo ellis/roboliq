@@ -1,3 +1,8 @@
+transporter:
+  module: |
+    The `transporter` commands specify actions using equipment to transport
+    labware from one location to another.
+
 Transporter:
   description: Labware transporter equipment.
   properties:

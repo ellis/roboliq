@@ -1,3 +1,7 @@
+sealer:
+  module: |
+    The `sealer` commands specify actions using sealing equipment.
+
 Sealer:
   description: Sealing equipment.
   properties:
