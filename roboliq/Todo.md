@@ -102,10 +102,14 @@
 	- [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
 	- [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
 	- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
+- [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
+- [ ] centrifuge.startIncubation: create
+- [ ] centrifuge: temperature parameters should require unit (e.g. 'degC')
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
-- [ ] add pipetter commands for dropping tips and getting tips
+- [ ] paper1_protocol3_unfolding.yaml: make sure it compiles
 - [ ] consider having the fluorescenceReader command generate a report with the current plate contents
+- [ ] handle mixture randomization well, and use it for the paper1 protocols (pH and unfolding)
 - [ ] how can we automatically analyse the results of the fluorescence readout?
 - [ ] rewrite evoware compiler in javascript
 - [ ] use schemas for directives too
@@ -120,6 +124,7 @@
 - [ ] upload to a public repository
 - [ ] test all pipetter commands
 - [ ] testing scripts on second Tecan robot
+- [ ] add pipetter commands for dropping tips and getting tips
 
 ## On-going todos with lots of sub-steps
 

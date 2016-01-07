@@ -152,6 +152,9 @@ steps:
       2:
         command: fluorescenceReader.measurePlate
         object: mixPlate
+        program:
+          excitation: 488nm
+          emission: 510nm
         programFile: ./tania12_denaturation.mdfx
         outputFile!: C:\Users\localadmin\Desktop\Ellis\tania12_denaturation--<YYYYMMDD_HHmmss>.xml
       3:
