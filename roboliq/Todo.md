@@ -93,7 +93,7 @@
 	- [x] delete protocol8.json, because the tests are in pipetterTest.js
 	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [x] add tips 5-8 to ourlab.js
-- [ ] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
+- [x] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
 - [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
 	- [x] `_pipette`: append contaminants from source well to syringe
 	- [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
@@ -103,8 +103,6 @@
 	- [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
 	- [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
 	- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
-- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
-- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] create incubator command for tania13_ph
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] add pipetter commands for dropping tips and getting tips
@@ -237,7 +235,8 @@
 ## After submission
 
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
-- [ ] refactor commandHelper parseValue functions to return `{values, objects, inputs}`
+- [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
+- [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
 - [ ] refactor: rename commandHelper type `name` to `Symbol`
 - [ ] refactor roboliq.js: `_run`: move as many of the functions as possible out of the `_run` function
 - [ ] refactor roboliq.js: `_run`: rather than return `{protocol, output}`, add tables to protocol and return protocol
