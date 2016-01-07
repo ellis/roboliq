@@ -288,7 +288,7 @@ describe('pipetter', function() {
 								syringe: {
 									1: {
 										contaminants: ["A"],
-										contents: undefined,
+										contents: ["stuff"],
 										cleaned: "thorough"
 									}
 								}
@@ -306,14 +306,17 @@ describe('pipetter', function() {
 				}
 			};
 			var result = roboliq.run(["-o", "", "-T"], protocol);
-			console.log(JSON.stringify(result.output, null, '\t'))
+			//console.log(JSON.stringify(result.output, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.effects, {
-				"1": {
+				"1.1.1": {
 					"ourlab.mario.liha.syringe.1.contaminants": null,
 					"ourlab.mario.liha.syringe.1.cleaned": "light",
 					"ourlab.mario.liha.syringe.1.contents": null,
+					"ourlab.mario.liha.syringe.2.cleaned": "light",
+					"ourlab.mario.liha.syringe.3.cleaned": "light",
+					"ourlab.mario.liha.syringe.4.cleaned": "light",
 				}
 			});
 		});

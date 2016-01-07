@@ -548,8 +548,7 @@ const commandHandlers = {
 		//console.log("_washTips:");
 		//console.log(JSON.stringify(parsed, null, '\t'))
 		const effects = {};
-		for (const index in parsed.value.syringes) {
-			const syringe = parsed.value.syringes[index];
+		parsed.value.syringes.forEach((syringe, index) => {
 			const syringeName = parsed.objectName[`syringes.${index}`];
 			if (!_.isUndefined(syringe.contaminants))
 				effects[`${syringeName}.contaminants`] = null;
@@ -558,8 +557,8 @@ const commandHandlers = {
 				effects[`${syringeName}.contents`] = null;
 			// Set cleaned property
 			effects[`${syringeName}.cleaned`] = parsed.value.intensity;
-		}
-		return effects;
+		});
+		return {effects};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
 		//console.log("pipetter.cleanTips:")

@@ -100,7 +100,7 @@
 	- [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
 	- [?] `_pipette`: clear contents of syringe
 	- [?] `_pipette`: clear syringe.cleaned
-	- [ ] `_washTips`: remove contents, remove contaminants, set `cleaned`
+	- [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
 		- test this in pipetterCleanTipsTest.js
 		- also make sure that we don't need to specify the equipment for cleanTips, then remove equipment from the command specs in various tests
 	- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
