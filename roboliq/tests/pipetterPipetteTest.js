@@ -94,8 +94,17 @@ describe('pipetter', function() {
 				]
 			});
 			should.deepEqual(result.output.effects, {
+				"1.1.1.1": {
+					"ourlab.mario.liha.syringe.1.cleaned": "thorough",
+					"ourlab.mario.liha.syringe.2.cleaned": "thorough",
+					"ourlab.mario.liha.syringe.3.cleaned": "thorough",
+					"ourlab.mario.liha.syringe.4.cleaned": "thorough"
+				},
 				"1.2": {
-					"ourlab.mario.liha.syringe.1.contaminants": ["plate1(A01)"],
+					"ourlab.mario.liha.syringe.1.contaminants": [
+						"plate1(A01)"
+					],
+					"ourlab.mario.liha.syringe.1.cleaned": null,
 					"plate1.contents.A01": [
 						"Infinity l",
 						"plate1(A01)"
@@ -104,18 +113,22 @@ describe('pipetter', function() {
 						"20 ul",
 						"plate1(A01)"
 					],
-					'__WELLS__.plate1.contents.A01': {
-						isSource: true,
-						volumeMax: 'Infinity l',
-						volumeMin: 'Infinity l',
-						volumeRemoved: '20 ul'
+					"__WELLS__.plate1.contents.A01": {
+						"isSource": true,
+						"volumeMin": "Infinity l",
+						"volumeMax": "Infinity l",
+						"volumeRemoved": "20 ul"
 					},
-					'__WELLS__.plate1.contents.A02': {
-						isSource: false,
-						volumeMax: '20 ul',
-						volumeMin: '0 l',
-						volumeAdded: '20 ul'
+					"__WELLS__.plate1.contents.A02": {
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "20 ul",
+						"volumeAdded": "20 ul"
 					}
+				},
+				"1.3.1.1": {
+					"ourlab.mario.liha.syringe.1.contaminants": null,
+					"ourlab.mario.liha.syringe.1.cleaned": "thorough"
 				}
 			});
 			should.deepEqual(result.output.tables.labware, [

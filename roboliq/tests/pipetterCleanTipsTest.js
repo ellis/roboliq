@@ -62,7 +62,7 @@ describe('pipetter', function() {
 				"steps": {
 					"1": {
 						"command": "pipetter.cleanTips",
-						"equipment": "ourlab.mario.liha",
+						//"equipment": "ourlab.mario.liha",
 						"items": [
 							{"syringe": "ourlab.mario.liha.syringe.1", "intensity": "flush"},
 							{"syringe": "ourlab.mario.liha.syringe.2", "intensity": "flush"},
@@ -72,7 +72,7 @@ describe('pipetter', function() {
 					},
 					"2": {
 						"command": "pipetter.cleanTips",
-						"equipment": "ourlab.mario.liha",
+						//"equipment": "ourlab.mario.liha",
 						"syringes": ["ourlab.mario.liha.syringe.1","ourlab.mario.liha.syringe.2","ourlab.mario.liha.syringe.3","ourlab.mario.liha.syringe.4"],
 						"intensity": "light"
 					}
@@ -119,7 +119,7 @@ describe('pipetter', function() {
 						]
 					},
 					"command": "pipetter.cleanTips",
-					"equipment": "ourlab.mario.liha",
+					//"equipment": "ourlab.mario.liha",
 					"items": [
 						{
 							"syringe": "ourlab.mario.liha.syringe.1",
@@ -177,7 +177,7 @@ describe('pipetter', function() {
 						]
 					},
 					"command": "pipetter.cleanTips",
-					"equipment": "ourlab.mario.liha",
+					//"equipment": "ourlab.mario.liha",
 					"syringes": [
 						"ourlab.mario.liha.syringe.1",
 						"ourlab.mario.liha.syringe.2",
@@ -278,7 +278,7 @@ describe('pipetter', function() {
 		});
 
 
-		it.only("should set the syringe state to cleaned", () => {
+		it("should set the syringe state to cleaned", () => {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -299,7 +299,6 @@ describe('pipetter', function() {
 				steps: {
 					"1": {
 						"command": "pipetter.cleanTips",
-						"equipment": "ourlab.mario.liha",
 						"syringes": ["ourlab.mario.liha.syringe.1"],
 						"intensity": "light"
 					}

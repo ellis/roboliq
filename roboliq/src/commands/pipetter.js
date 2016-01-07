@@ -556,7 +556,8 @@ const commandHandlers = {
 			if (!_.isUndefined(syringe.contents))
 				effects[`${syringeName}.contents`] = null;
 			// Set cleaned property
-			effects[`${syringeName}.cleaned`] = parsed.value.intensity;
+			if (syringe.cleaned !== parsed.value.intensity)
+				effects[`${syringeName}.cleaned`] = parsed.value.intensity;
 		});
 		return {effects};
 	},

@@ -101,8 +101,7 @@
 	- [?] `_pipette`: clear contents of syringe
 	- [?] `_pipette`: clear syringe.cleaned
 	- [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
-		- test this in pipetterCleanTipsTest.js
-		- also make sure that we don't need to specify the equipment for cleanTips, then remove equipment from the command specs in various tests
+	- [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
 	- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
 - [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 - [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands
