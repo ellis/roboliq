@@ -15,7 +15,7 @@ import * as WellContents from '../../WellContents.js';
  * @param {object} params The parameters for the pipetter._aspirate command.
  * @param {object} data The data object passed to command handlers.
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
- * @return {object} The effects caused by the pipetting command.
+ * @return {object} The effects caused by the `_aspirate` command.
  */
 export function getEffects_aspirate(parsed, data, effects) {
 	const effects2 = (effects) ? _.cloneDeep(effects) : {};
@@ -50,6 +50,94 @@ export function getEffects_aspirate(parsed, data, effects) {
 		if (!_.isEqual(contaminants0, contaminants1))
 			addEffect(`${syringeName}.contaminants`, contaminants1);
 		// Update content effect
+		addEffect(`${syringeName}.contents`, syringeContents1);
+		// Remove cleaned property
+		//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))
+		if (!_.isUndefined(item.syringe.cleaned))
+			addEffect(`${syringeName}.cleaned`, null);
+
+		// Update content effect for source
+		addEffect(srcContentsName, srcContents1);
+
+		const volume = item.volume;
+
+		// Update __WELLS__ effects for source
+		if (true) {
+			const volume1 = math.eval(srcContents1[0]);
+			const nameWELL = "__WELLS__."+srcContentsName;
+			//console.log("nameWELL:", nameWELL)
+			const well0 = misc.findObjectsValue(nameWELL, data.objects, effects2) || {
+				isSource: true,
+				volumeMin: srcContents0[0],
+				volumeMax: srcContents0[0]
+			};
+			const well1 = _.merge({}, well0, {
+				volumeMax: math.max(math.eval(well0.volumeMax), volume1).format({precision: 14}),
+				volumeMin: math.min(math.eval(well0.volumeMin), volume1).format({precision: 14}),
+				volumeRemoved: (well0.volumeRemoved)
+					? math.chain(math.eval(well0.volumeRemoved)).add(volume).done().format({precision: 14})
+					: volume.format({precision: 14})
+			});
+			//console.log({well0, well1});
+			//console.log("x:\n"+JSON.stringify(x, null, '  '));
+			addEffect(nameWELL, well1);
+		}
+	});
+
+	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));
+
+	return effectsNew;
+}
+
+
+/**
+ * Get an object representing the effects of dispensing.
+ * @param {object} params The parameters for the pipetter._aspirate command.
+ * @param {object} data The data object passed to command handlers.
+ * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
+ * @return {object} The effects caused by the `_dispense` command.
+ */
+export function getEffects_dispense(parsed, data, effects) {
+	const effects2 = (effects) ? _.cloneDeep(effects) : {};
+	const effectsNew = {};
+
+	function addEffect(name, obj) {
+		effects2[name] = obj;
+		effectsNew[name] = obj;
+	}
+
+	//console.log("getEffects_aspirate:\n"+JSON.stringify(parsed, null, '\t'));
+	parsed.value.items.forEach((item, index) => {
+		//console.log(JSON.stringify(item, null, '\t'));
+
+		// Get initial contents of the destination well
+		const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
+		//console.log("dst contents", dstContents0, dstContentsName);
+
+		// Get initial contents of the syringe
+		const syringeContents0 = item.syringe.contents || [];
+
+		// Final contents of source well and syringe
+		const [syringeContents1, dstContents1] = WellContents.transferContents(syringeContents0, dstContents0, item.volume);
+		//console.log({srcContents1, syringeContents1});
+
+		// Check for contact with the destination contents by looking for
+		// the word "wet" in the program name.
+		const isWetContact = /(_wet_|\bwet\b|_wet\b)/.test(parsed.value.program);
+		if (isWetContact) {
+			// Contaminate the syringe with source contents
+			// FIXME: Contaminate the syringe with destination contents if there is wet contact, i.e., use dstContents1 instead of srcContents0 for flattenContents()
+			const contaminantsA = item.syringe.contaminants || [];
+			const contaminantsB = _.keys(WellContents.flattenContents(dstContents0));
+			const contaminants1 = _.uniq(contaminantsA.concat(contaminantsB));
+			const syringeName = parsed.objectName[`items.${index}.syringe`];
+			if (!_.isEqual(contaminantsA, contaminants1))
+				addEffect(`${syringeName}.contaminants`, contaminants1);
+		}
+
+		CONTINEU
+		// Update content effect
+		If content volume 0 zero, set to null
 		addEffect(`${syringeName}.contents`, syringeContents1);
 		// Remove cleaned property
 		//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))

@@ -102,11 +102,24 @@ export function getWellContents(wellName, data, effects) {
 }
 
 /**
+ * Get the volume of the contents array.
+ * @param {array} contents The well contents array
+ * @return {object} the mathjs volume if found, otherwise 0ul
+ */
+export function getContentsVolume(contents) {
+	if (!_.isEmpty(contents)) {
+		var volume = math.eval(contents[0]);
+		if (volume.unit.name === 'l') return volume;
+	}
+	return emptyVolume;
+}
+
+/**
  * Get the volume of the given well.
  * @param {string} wellName name of the well
  * @param {object} data the data object passed to command handlers
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
- * @return {array} the volume if found, otherwise 0ul
+ * @return {object} the mathjs volume if found, otherwise 0ul
  */
 export function getWellVolume(wellName, data, effects) {
 	var contents = getWellContents(wellName, data, effects);

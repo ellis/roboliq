@@ -535,7 +535,10 @@ const commandHandlers = {
 		return {effects};
 	},
 	"pipetter._dispense": function(params, parsed, data) {
-		return {};
+		//console.log("params", JSON.stringify(params, null, '  '))
+		const effects = pipetterUtils.getEffects_dispense(parsed, data);
+		//console.log("effects:", JSON.stringify(effects, null, '  '))
+		return {effects};
 	},
 	"pipetter._pipette": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
