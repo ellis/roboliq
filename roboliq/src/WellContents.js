@@ -106,12 +106,30 @@ export function getWellContents(wellName, data, effects) {
  * @param {array} contents The well contents array
  * @return {object} the mathjs volume if found, otherwise 0ul
  */
-export function getContentsVolume(contents) {
+/*export function getVolume(contents) {
 	if (!_.isEmpty(contents)) {
 		var volume = math.eval(contents[0]);
 		if (volume.unit.name === 'l') return volume;
 	}
 	return emptyVolume;
+}*/
+
+/**
+ * Check whether the contents are empty.
+ * They are empty if the contents are undefined, an empty array,
+ * or the array begins with a number that mathjs considers equal to 0.
+ *
+ * @param {WellContents} contents
+ * @return {Boolean} true if the contents are empty
+ */
+export function isEmpty(contents) {
+	checkContents(contents);
+	if (_.isEmpty(contents)) {
+		return true;
+	}
+	else {
+		return math.equal(contents[0], 0);
+	}
 }
 
 /**

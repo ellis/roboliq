@@ -125,7 +125,7 @@
 - [ ] review FIXMEs
 - [ ] upload to a public repository
 - [ ] test all pipetter commands
-- [ ] testing scripts on second Tecan robot
+- [ ] test scripts on second Tecan robot
 - [ ] add pipetter commands for dropping tips and getting tips
 
 ## On-going todos with lots of sub-steps

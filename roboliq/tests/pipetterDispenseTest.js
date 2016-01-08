@@ -3,8 +3,8 @@ var should = require('should');
 var roboliq = require('../src/roboliq.js')
 
 describe('pipetter', function() {
-	describe('pipetter._aspirate', function () {
-		it("should update the syringe and source state", function() {
+	describe('pipetter._dispense', function () {
+		it("should update the syringe and destination state", function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -22,9 +22,8 @@ describe('pipetter', function() {
 							liha: {
 								syringe: {
 									1: {
-										contaminants: undefined,
-										contents: undefined,
-										cleaned: "thorough"
+										contaminants: ["water"],
+										contents: ["20 ul", "water"]
 									}
 								}
 							}
@@ -33,14 +32,14 @@ describe('pipetter', function() {
 				},
 				steps: {
 					"1": {
-						command: "pipetter._aspirate",
+						command: "pipetter._dispense",
 						agent: "ourlab.mario.evoware",
 						equipment: "ourlab.mario.liha",
 						program: "\"Roboliq_Water_Dry_1000\"",
 						items: [
 							{
 								syringe: "ourlab.mario.liha.syringe.1",
-								source: "plate1(A01)",
+								destination: "plate1(A01)",
 								volume: "10 ul"
 							}
 						]
@@ -53,23 +52,19 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.effects, {
 				"1": {
-					"ourlab.mario.liha.syringe.1.contaminants": [
-						"plate1(A01)"
-					],
-					"ourlab.mario.liha.syringe.1.cleaned": null,
 					"ourlab.mario.liha.syringe.1.contents": [
 						"10 ul",
-						"plate1(A01)"
+						"water"
 					],
 					"plate1.contents.A01": [
-						"Infinity l",
-						"plate1(A01)"
+						"10 ul",
+						"water"
 					],
 					"__WELLS__.plate1.contents.A01": {
-						"isSource": true,
-						"volumeMin": "Infinity l",
-						"volumeMax": "Infinity l",
-						"volumeRemoved": "10 ul"
+						"isSource": false,
+						"volumeMin": "0 l",
+						"volumeMax": "10 ul",
+						"volumeAdded": "10 ul"
 					}
 				}
 			});

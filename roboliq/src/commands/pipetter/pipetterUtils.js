@@ -6,6 +6,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
+import expect from '../../expect.js';
 var misc = require('../../misc.js');
 var wellsParser = require('../../parsers/wellsParser.js');
 import * as WellContents from '../../WellContents.js';
@@ -115,7 +116,9 @@ export function getEffects_dispense(parsed, data, effects) {
 		//console.log("dst contents", dstContents0, dstContentsName);
 
 		// Get initial contents of the syringe
+		const syringeName = parsed.objectName[`items.${index}.syringe`];
 		const syringeContents0 = item.syringe.contents || [];
+		expect.truthy({paramName: `items[${index}].syringe`}, !WellContents.isEmpty(syringeContents0), "syringe contents should not be empty when dispensing");
 
 		// Final contents of source well and syringe
 		const [syringeContents1, dstContents1] = WellContents.transferContents(syringeContents0, dstContents0, item.volume);
@@ -130,43 +133,39 @@ export function getEffects_dispense(parsed, data, effects) {
 			const contaminantsA = item.syringe.contaminants || [];
 			const contaminantsB = _.keys(WellContents.flattenContents(dstContents0));
 			const contaminants1 = _.uniq(contaminantsA.concat(contaminantsB));
-			const syringeName = parsed.objectName[`items.${index}.syringe`];
 			if (!_.isEqual(contaminantsA, contaminants1))
 				addEffect(`${syringeName}.contaminants`, contaminants1);
 		}
 
-		CONTINEU
 		// Update content effect
-		If content volume 0 zero, set to null
-		addEffect(`${syringeName}.contents`, syringeContents1);
-		// Remove cleaned property
-		//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))
-		if (!_.isUndefined(item.syringe.cleaned))
-			addEffect(`${syringeName}.cleaned`, null);
+		// If content volume = zero, set to null
+		const syringeContents2 = (WellContents.isEmpty(syringeContents1))
+			? null : syringeContents1;
+		if (!_.isEqual(syringeContents0, syringeContents2))
+			addEffect(`${syringeName}.contents`, syringeContents2);
 
-		// Update content effect for source
-		addEffect(srcContentsName, srcContents1);
+		// Update content effect for destination
+		addEffect(dstContentsName, dstContents1);
 
 		const volume = item.volume;
 
-		// Update __WELLS__ effects for source
+		// Update __WELLS__ effects for destination
 		if (true) {
-			const volume1 = math.eval(srcContents1[0]);
-			const nameWELL = "__WELLS__."+srcContentsName;
+			const volume1 = math.eval(dstContents1[0]);
+			const nameWELL = "__WELLS__."+dstContentsName;
 			//console.log("nameWELL:", nameWELL)
 			const well0 = misc.findObjectsValue(nameWELL, data.objects, effects2) || {
-				isSource: true,
-				volumeMin: srcContents0[0],
-				volumeMax: srcContents0[0]
+				isSource: false,
+				volumeMin: '0 l',
+				volumeMax: '0 l'
 			};
-			const well1 = _.merge({}, well0, {
+			const well1 = _.merge(well0, {
 				volumeMax: math.max(math.eval(well0.volumeMax), volume1).format({precision: 14}),
 				volumeMin: math.min(math.eval(well0.volumeMin), volume1).format({precision: 14}),
-				volumeRemoved: (well0.volumeRemoved)
-					? math.chain(math.eval(well0.volumeRemoved)).add(volume).done().format({precision: 14})
+				volumeAdded: (well0.volumeAdded)
+					? math.chain(math.eval(well0.volumeAdded)).add(volume).done().format({precision: 14})
 					: volume.format({precision: 14})
 			});
-			//console.log({well0, well1});
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			addEffect(nameWELL, well1);
 		}
