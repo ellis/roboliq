@@ -106,13 +106,14 @@ export function getWellContents(wellName, data, effects) {
  * @param {array} contents The well contents array
  * @return {object} the mathjs volume if found, otherwise 0ul
  */
-/*export function getVolume(contents) {
+export function getVolume(contents) {
+	checkContents(contents);
 	if (!_.isEmpty(contents)) {
-		var volume = math.eval(contents[0]);
+		const volume = math.eval(contents[0]);
 		if (volume.unit.name === 'l') return volume;
 	}
 	return emptyVolume;
-}*/
+}
 
 /**
  * Check whether the contents are empty.
@@ -123,13 +124,8 @@ export function getWellContents(wellName, data, effects) {
  * @return {Boolean} true if the contents are empty
  */
 export function isEmpty(contents) {
-	checkContents(contents);
-	if (_.isEmpty(contents)) {
-		return true;
-	}
-	else {
-		return math.equal(contents[0], 0);
-	}
+	const volume = getVolume(contents);
+	return math.equal(volume.toNumber('l'), 0);
 }
 
 /**
