@@ -117,8 +117,10 @@ export function getEffects_dispense(parsed, data, effects) {
 
 		// Get initial contents of the syringe
 		const syringeName = parsed.objectName[`items.${index}.syringe`];
-		const syringeContents0 = item.syringe.contents || [];
+		const syringeContentsName = `${syringeName}.contents`;
+		const syringeContents0 = effects2[syringeContentsName] || item.syringe.contents || [];
 		expect.truthy({paramName: `items[${index}].syringe`}, !WellContents.isEmpty(syringeContents0), "syringe contents should not be empty when dispensing");
+		console.log({syringeName, syringeContents0});
 
 		// Final contents of source well and syringe
 		const [syringeContents1, dstContents1] = WellContents.transferContents(syringeContents0, dstContents0, item.volume);
@@ -142,7 +144,7 @@ export function getEffects_dispense(parsed, data, effects) {
 		const syringeContents2 = (WellContents.isEmpty(syringeContents1))
 			? null : syringeContents1;
 		if (!_.isEqual(syringeContents0, syringeContents2))
-			addEffect(`${syringeName}.contents`, syringeContents2);
+			addEffect(syringeContentsName, syringeContents2);
 
 		// Update content effect for destination
 		addEffect(dstContentsName, dstContents1);
