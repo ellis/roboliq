@@ -120,7 +120,7 @@ export function getEffects_dispense(parsed, data, effects) {
 		const syringeContentsName = `${syringeName}.contents`;
 		const syringeContents0 = effects2[syringeContentsName] || item.syringe.contents || [];
 		expect.truthy({paramName: `items[${index}].syringe`}, !WellContents.isEmpty(syringeContents0), "syringe contents should not be empty when dispensing");
-		console.log({syringeName, syringeContents0});
+		//console.log({syringeName, syringeContents0});
 
 		// Final contents of source well and syringe
 		const [syringeContents1, dstContents1] = WellContents.transferContents(syringeContents0, dstContents0, item.volume);
@@ -128,7 +128,7 @@ export function getEffects_dispense(parsed, data, effects) {
 
 		// Check for contact with the destination contents by looking for
 		// the word "wet" in the program name.
-		const isWetContact = /(_wet_|\bwet\b|_wet\b)/.test(parsed.value.program);
+		const isWetContact = /(_wet_|\bwet\b|_wet\b)/.test(parsed.value.program.toLowerCase());
 		if (isWetContact) {
 			// Contaminate the syringe with source contents
 			// FIXME: Contaminate the syringe with destination contents if there is wet contact, i.e., use dstContents1 instead of srcContents0 for flattenContents()
@@ -153,14 +153,17 @@ export function getEffects_dispense(parsed, data, effects) {
 
 		// Update __WELLS__ effects for destination
 		if (true) {
-			const volume1 = math.eval(dstContents1[0]);
+			const volume0 = WellContents.getVolume(dstContents0);
+			const volume1 = WellContents.getVolume(dstContents1);
 			const nameWELL = "__WELLS__."+dstContentsName;
+			//console.log({nameWELL, volume0, volume1})
 			//console.log("nameWELL:", nameWELL)
 			const well0 = misc.findObjectsValue(nameWELL, data.objects, effects2) || {
 				isSource: false,
-				volumeMin: '0 l',
-				volumeMax: '0 l'
+				volumeMin: volume0.format({precision: 14}),
+				volumeMax: volume0.format({precision: 14})
 			};
+			//console.log({well0})
 			const well1 = _.merge(well0, {
 				volumeMax: math.max(math.eval(well0.volumeMax), volume1).format({precision: 14}),
 				volumeMin: math.min(math.eval(well0.volumeMin), volume1).format({precision: 14}),

@@ -214,7 +214,7 @@ describe('pipetter', function() {
 		});
 
 
-		it("should update the syringe and destination state when fully dispensing syringe contents", function() {
+		it.only("should update the syringe contaminants when wet despensing", function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -224,7 +224,6 @@ describe('pipetter', function() {
 						location: "ourlab.mario.site.P2",
 						contents: {
 							A01: ["10 ul", "oil"]
-							CONTINUE
 						}
 					},
 					liquid1: {
@@ -249,7 +248,7 @@ describe('pipetter', function() {
 						command: "pipetter._dispense",
 						agent: "ourlab.mario.evoware",
 						equipment: "ourlab.mario.liha",
-						program: "\"Roboliq_Water_Dry_1000\"",
+						program: "\"Roboliq_Water_Wet_1000\"",
 						items: [
 							{
 								syringe: "ourlab.mario.liha.syringe.1",
@@ -267,14 +266,12 @@ describe('pipetter', function() {
 			should.deepEqual(result.output.effects, {
 				"1": {
 					"ourlab.mario.liha.syringe.1.contents": null,
-					"plate1.contents.A01": [
-						"10 ul",
-						"water"
-					],
+					"ourlab.mario.liha.syringe.1.contaminants": ["water", "oil"],
+					"plate1.contents.A01": ["20 ul", ["10 ul", "oil"], ["10 ul", "water"]],
 					"__WELLS__.plate1.contents.A01": {
 						"isSource": false,
-						"volumeMin": "0 l",
-						"volumeMax": "10 ul",
+						"volumeMin": "10 ul",
+						"volumeMax": "20 ul",
 						"volumeAdded": "10 ul"
 					}
 				}

@@ -101,10 +101,10 @@
 	- [x] `_pipette`: clear syringe.cleaned
 	- [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
 	- [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
-	- [ ] `_dispense`: remove contents, append contaminants in dest well if syringe touches, remove `cleaned` if entered dest well
+	- [x] `_dispense`: remove contents, append contaminants in dest well if syringe touches
 		- [x] test contents=null when dispensing all syringe contents
 		- [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
-		- [ ] test contamination upon wet contact
+		- [x] test contamination upon wet contact
 	- [ ] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
