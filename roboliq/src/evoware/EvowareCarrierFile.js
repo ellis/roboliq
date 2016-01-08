@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import fs from 'fs';
+import lineByLine from 'n-readlines';
 import sprintf from 'sprintf';
 
 
@@ -133,24 +134,36 @@ export function loadEvowareCarrierData(filename) {
  * @return {array} an array of EvowareModels (e.g. Carriers, Vectors, EvowareLabwareModels)
  */
 function loadEvowareModels(filename) {
-	CONTINUE
-	val lsLine = scala.io.Source.fromFile(sFilename, "ISO-8859-1").getLines.toList
-	//val lsLine = sInput.split("\r?\n", -1).toList
-	def step(lsLine: List[String], acc: List[EvowareModel]): List[EvowareModel] = {
-		if (lsLine.isEmpty)
-			return acc
-		parseModel(lsLine) match {
-			case (None, lsLine2) => step(lsLine2, acc)
-			case (Some(model), lsLine2) =>
-				//println(sec)
-				step(lsLine2, model::acc)
-		}
+	const models = [];
+
+	CONTINUE: probably need to use a different library, not n-readlines, because it might not handle \r\n
+
+	const liner = new lineByLine(filename);
+	// Drop the first four lines
+	liner.next();
+	liner.next();
+	liner.next();
+	liner.next();
+
+	// Find models in the carrier file
+	CONTINUE: need to pass the liner object to parseModel, because a model may require multiple lines
+	let lineBuffer;
+	while (lineBuffer = liner.next()) {
+		const line = lineBuffer.toString("ISO-8859-1");
+		const model = parseModel(line)
+		if (_.isDefined(model))
+			models.push(model)
 	}
-	step(lsLine.drop(4), Nil)
-	//val ls14 = sLine14.split(";", -1).tail.init.toList
 }
 
-def parseModel(lsLine: List[String]): Tuple2[Option[EvowareModel], List[String]] = {
+/**
+ * Parse the line and return a model if
+ * @param  {[type]} line [description]
+ * @return {[type]}      [description]
+ */
+function parseModel(line) {
+
+}: Tuple2[Option[EvowareModel], List[String]] = {
 	val sLine0 = lsLine.head
 	val (nLineKind, l) = splitSemicolons(sLine0)
 	nLineKind match {
