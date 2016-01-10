@@ -34,11 +34,12 @@ export function getEffects_pipette(parsed, data, effects) {
 		// Get initial contents of the syringe
 		const syringeName = parsed.objectName[`items.${index}.syringe`];
 		const syringeContentsName = `${syringeName}.contents`;
+		const syringeContents00 = effects2[syringeContentsName] || item.syringe.contents || [];
 
 		const volume = item.volume;
 
 		if (!_.isUndefined(item.source)) {
-			const syringeContents0 = effects2[syringeContentsName] || item.syringe.contents || [];
+			const syringeContents0 = syringeContents00;
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the source well
 			const [srcContents00, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
@@ -91,12 +92,12 @@ export function getEffects_pipette(parsed, data, effects) {
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the destination well
 			const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
-			console.log("dst contents", dstContents0, dstContentsName);
+			//console.log("dst contents", dstContents0, dstContentsName);
 
 			expect.truthy({paramName: `items[${index}].syringe`}, !WellContents.isEmpty(syringeContents0), "syringe contents should not be empty when dispensing");
 			// Final contents of source well and syringe
 			const [syringeContents1, dstContents1] = WellContents.transferContents(syringeContents0, dstContents0, item.volume);
-			console.log({syringeContents1, dstContents1})
+			//console.log({syringeContents1, dstContents1})
 
 			//console.log({srcContents1, syringeContents1});
 			// Check for contact with the destination contents by looking for
@@ -145,6 +146,11 @@ export function getEffects_pipette(parsed, data, effects) {
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			addEffect(nameWELL, well1);
 		}
+
+		// Prevent superfluous 'nulling' of syringe contents
+		//console.log({syringeContentsName, syringeContents00, effects2: effects2[syringeContentsName], effectsNew: effectsNew[syringeContentsName]})
+		if (effects2[syringeContentsName] === null && _.isEmpty(syringeContents00))
+			delete effectsNew[syringeContentsName];
 	});
 
 	//console.log("effectsNew:\n"+JSON.stringify(effectsNew));

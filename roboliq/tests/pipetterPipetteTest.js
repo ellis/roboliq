@@ -536,7 +536,7 @@ describe('pipetter', function() {
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
-			console.log(JSON.stringify(result.output.steps, null, '\t'));
+			//console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.effects, {
 				"1.1": {
 					"ourlab.mario.systemLiquidLabware.contents": [
