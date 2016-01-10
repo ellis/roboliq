@@ -214,7 +214,7 @@ describe('pipetter', function() {
 		});
 
 
-		it.only("should update the syringe contaminants when wet despensing", function() {
+		it("should update the syringe contaminants when wet despensing", function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {

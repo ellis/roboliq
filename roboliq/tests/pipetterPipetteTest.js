@@ -497,7 +497,7 @@ describe('pipetter', function() {
 			});
 		});
 
-		it("should set the syringe state when aspirating", function() {
+		it.only("should set the syringe state when aspirating", function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -536,6 +536,7 @@ describe('pipetter', function() {
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
+			console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.effects, {
 				"1.1": {
 					"ourlab.mario.systemLiquidLabware.contents": [

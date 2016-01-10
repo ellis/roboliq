@@ -187,7 +187,7 @@ export function getContentsAndName(wellName, data, effects) {
 		return [contents, contentsName];
 	}
 
-	return [null, wellInfo.labware+".contents."+wellInfo.wellId];
+	return [undefined, wellInfo.labware+".contents."+wellInfo.wellId];
 }
 
 /**
