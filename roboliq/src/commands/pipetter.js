@@ -530,13 +530,13 @@ function pipette(params, parsed, data) {
 const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
-		const effects = pipetterUtils.getEffects_aspirate(parsed, data);
+		const effects = pipetterUtils.getEffects_pipette(parsed, data);
 		//console.log("effects:", JSON.stringify(effects, null, '  '))
 		return {effects};
 	},
 	"pipetter._dispense": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
-		const effects = pipetterUtils.getEffects_dispense(parsed, data);
+		const effects = pipetterUtils.getEffects_pipette(parsed, data);
 		//console.log("effects:", JSON.stringify(effects, null, '  '))
 		return {effects};
 	},

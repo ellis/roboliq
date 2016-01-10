@@ -114,7 +114,7 @@
 - [ ] paper1_protocol3_unfolding.yaml: make sure it compiles
 - [ ] consider having the fluorescenceReader command generate a report with the current plate contents
 - [ ] handle mixture randomization well, and use it for the paper1 protocols (pH and unfolding)
-- [ ] how can we automatically analyse the results of the fluorescence readout?
+- [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] rewrite evoware compiler in javascript
 - [ ] use schemas for directives too
 - [ ] evoware:
@@ -253,6 +253,8 @@
 - [ ] write back-end for PR-PR?
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
+	- see http://arqex.com/991/json-editor-react-immutable-data
+	- see https://github.com/jdorn/json-editor
 - [ ] UI to create protocol
 - [ ] consider adding constraints to properties using 'property@' properties, e.g. `model@: {rows:8, columns:16}`
 - [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
