@@ -35,11 +35,13 @@ export function getEffects_pipette(parsed, data, effects) {
 		const syringeName = parsed.objectName[`items.${index}.syringe`];
 		const syringeContentsName = `${syringeName}.contents`;
 		const syringeContents00 = effects2[syringeContentsName] || item.syringe.contents || [];
+		const syringeContaminantsName = `${syringeName}.contaminants`;
 
 		const volume = item.volume;
 
 		if (!_.isUndefined(item.source)) {
 			const syringeContents0 = syringeContents00;
+			const syringeContaminants0 = effects2[syringeContaminantsName] || item.syringe.contaminants || [];
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the source well
 			const [srcContents00, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
@@ -54,13 +56,13 @@ export function getEffects_pipette(parsed, data, effects) {
 			addEffect(srcContentsName, srcContents1);
 
 			// Get list of syringe contaminants
-			const contaminants0 = item.syringe.contaminants || [];
 			const contaminants1 = _.keys(WellContents.flattenContents(syringeContents1));
+			console.log({syringeContaminantsName, syringeContaminants0, contaminants1});
 
-			if (!_.isEqual(contaminants0, contaminants1))
-				addEffect(`${syringeName}.contaminants`, contaminants1);
+			if (!_.isEqual(syringeContaminants0, contaminants1))
+				addEffect(syringeContaminantsName, contaminants1);
 			// Update content effect
-			addEffect(`${syringeName}.contents`, syringeContents1);
+			addEffect(syringeContentsName, syringeContents1);
 			// Remove cleaned property
 			//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))
 			if (!_.isUndefined(item.syringe.cleaned))
@@ -89,6 +91,7 @@ export function getEffects_pipette(parsed, data, effects) {
 
 		if (!_.isUndefined(item.destination)) {
 			const syringeContents0 = effects2[syringeContentsName] || item.syringe.contents || [];
+			const syringeContaminants0 = effects2[syringeContaminantsName] || item.syringe.contaminants || [];
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the destination well
 			const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
@@ -106,11 +109,10 @@ export function getEffects_pipette(parsed, data, effects) {
 			if (isWetContact) {
 				// Contaminate the syringe with source contents
 				// FIXME: Contaminate the syringe with destination contents if there is wet contact, i.e., use dstContents1 instead of srcContents0 for flattenContents()
-				const contaminantsA = item.syringe.contaminants || [];
 				const contaminantsB = _.keys(WellContents.flattenContents(dstContents0));
-				const contaminants1 = _.uniq(contaminantsA.concat(contaminantsB));
-				if (!_.isEqual(contaminantsA, contaminants1))
-					addEffect(`${syringeName}.contaminants`, contaminants1);
+				const contaminants1 = _.uniq(syringeContaminants0.concat(contaminantsB));
+				if (!_.isEqual(syringeContaminants0, contaminants1))
+					addEffect(syringeContaminantsName, contaminants1);
 			}
 
 			// Update content effect

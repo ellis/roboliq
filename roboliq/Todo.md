@@ -106,6 +106,7 @@
 		- [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
 		- [x] test contamination upon wet contact
 	- [ ] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
+		- debugging systemliquid not contaminanting the syringes
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create
