@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import fs from 'fs';
+import iconv from 'iconv-lite';
 import lineByLine from 'n-readlines';
-import sprintf from 'sprintf';
+import sprintf from 'sprintf-js';
 
 
 /**
@@ -19,6 +20,13 @@ import sprintf from 'sprintf';
  * @property {integer} siteIndex -  0-based index of site
  */
 
+export class CarrierSiteIndex {
+	constructor(carrierId, siteIndex) {
+		this.carrierId = carrierId;
+		this.siteIndex = siteIndex;
+	}
+}
+
 /**
  * A base type for evoware models, one of Carrier, EvowareLabwareModel, or Vector.
  * @typedef {object} EvowareModel
@@ -35,6 +43,16 @@ import sprintf from 'sprintf';
  * @property {string} [deviceName]
  * @property {string} [partNo]
  */
+export class Carrier {
+	constructor(type, name, id, siteCount, deviceName, partNo) {
+		this.type = type;
+		this.name = name;
+		this.id = id;
+		this.siteCount = siteCount;
+		this.deviceName = deviceName;
+		this.partNo = partNo;
+	}
+}
 
 /**
  * An evoware labware model
@@ -52,9 +70,18 @@ import sprintf from 'sprintf';
  * @typedef {EvowareModel} Vector
  * @property {string} type - should be "Vector"
  * @property {integer} carrierId - which carrier this vector is for
- * @property {string} class - Wide, Narrow, or user-defined
+ * @property {string} clazz - Wide, Narrow, or user-defined
  * @property {integer} romaId - which RoMa this vector is for
  */
+
+export class Vector {
+	constructor(type, carrierId, clazz, romaId) {
+		this.type = type;
+		this.carrierId = carrierId;
+		this.clazz = clazz;
+		this.romaId = romaId;
+	}
+}
 
 /**
  * An object representing an evoware carrier file
@@ -115,7 +142,7 @@ function makeEvowareCarrierData(models) {
 		nameToCarrier: _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).zipObject().value(),
 		nameToLabwareModel: _(models).filter(x => x.type === "EvowareLabwareModel").map(x => [x.name, x]).zipObject().value(),
 		carrierIdToVectors: _(models).filter(x => x.type === "Vector").groupBy('carrierId').value()
-	)
+	};
 }
 
 /**
@@ -136,142 +163,143 @@ export function loadEvowareCarrierData(filename) {
 function loadEvowareModels(filename) {
 	const models = [];
 
-	CONTINUE: probably need to use a different library, not n-readlines, because it might not handle \r\n
-
-	const liner = new lineByLine(filename);
-	// Drop the first four lines
-	liner.next();
-	liner.next();
-	liner.next();
-	liner.next();
+	const raw = fs.readFileSync(filename);
+	const filedata = iconv.decode(raw, "ISO-8859-1");
+	const lines = filedata.split("\r\n");
+	let lineIndex = 4; // skip 4 lines
 
 	// Find models in the carrier file
-	CONTINUE: need to pass the liner object to parseModel, because a model may require multiple lines
-	let lineBuffer;
-	while (lineBuffer = liner.next()) {
-		const line = lineBuffer.toString("ISO-8859-1");
-		const model = parseModel(line)
+	while (lineIndex < lines.length) {
+		const [lineIndex2, model] = parseModel(lines, lineIndex)
+		console.log({model})
 		if (_.isDefined(model))
 			models.push(model)
+		assert(lineIndex2 > lineIndex);
+		lineIndex = lineIndex2;
 	}
+
+	return models;
 }
 
 /**
- * Parse the line and return a model if
- * @param  {[type]} line [description]
- * @return {[type]}      [description]
+ * Parse the line and return the next lineIndex and a model, if relevant.
+ * @param {array} lines - array of lines from the Carrier.cfg
+ * @param {number} lineIndex - the current line to inspect
+ * @return {array} a pair [linesUsed, model], where linesUsed is the new lineIndex and model is an optional model.
  */
-function parseModel(line) {
-
-}: Tuple2[Option[EvowareModel], List[String]] = {
-	val sLine0 = lsLine.head
-	val (nLineKind, l) = splitSemicolons(sLine0)
-	nLineKind match {
-		case 13 => parse13(l, lsLine.tail)
-		case 15 => parse15(l, lsLine.tail)
-		case 17 => parse17(l, lsLine.tail)
+function parseModel(lines, lineIndex) {
+	const line = lines[lineIndex++];
+	const [lineKind, l] = splitSemicolons(line);
+	console.log({lineIndex, lineKind, l})
+	switch (lineKind) {
+		case 13: return parse13(l, lines, lineIndex);
+		case 15: return parse15(l, lines, lineIndex);
+		case 17: return parse17(l, lines, lineIndex);
 		// NOTE: There are also 23 and 25 lines, but I don't know what they're for.
-		case _ => (None, lsLine.tail)
+		default: return [lineIndex, undefined];
 	}
 }
 
 /**
  * Parse a carrier object; carrier lines begin with "13"
+ *
+ * @param {array} l - array of string representing the elements of the current line
+ * @param {array} lines - array of lines from the Carrier.cfg
+ * @param {number} lineIndex - the current line to inspect
+ * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a Carrier.
  */
-def parse13(l: List[String], lsLine: List[String]): Tuple2[Option[Carrier], List[String]] = {
-	val sName = l.head
-	val l1 = l(1).split("/")
-	val sId = l1(0)
+function parse13(l, lines, lineIndex) {
+	const sName = l[0];
+	const l1 = l[1].split("/");
+	const sId = l1[0];
 	//val sBarcode = l1(1)
-	val id = sId.toInt
-	val nSites = l(4).toInt
-	val deviceName_? = parse998(lsLine(nSites + 1)) match {
-		case "" :: Nil => None
-		case deviceName :: Nil => Some(deviceName)
-		case _ => None
-	}
-	val partNo_? = parse998(lsLine(nSites + 3)) match {
-		case "" :: Nil => None
-		case x :: Nil => Some(x)
-		case _ => None
-	}
-	/*
-	if (sName == "Infinite M200") {
-		println("parse13:")
-		println(l)
-		lsLine.take(nSites + 6).foreach(println)
-		println(sName, sId, id, nSites, deviceName_?, partNo_?)
-		println()
-		println("lsLine(nSites + 1): " + parse998(lsLine(nSites + 1)))
-		println("lsLine(nSites + 3): " + parse998(lsLine(nSites + 3)))
-		println()
-	}
-	*/
-	(Some(Carrier(sName, id, nSites, deviceName_?, partNo_?)), lsLine.drop(nSites + 6))
+	const id = parseInt(sId);
+	const nSites = parseInt(l[4]);
+	const deviceNameList = parse998(lines[lineIndex + nSites + 1]);
+	const deviceName = (deviceNameList.length != 1) ? undefined : deviceNameList[0];
+	const partNoList = parse998(lines[lineIndex + nSites + 3]);
+	const partNo = (partNoList.length != 1) ? undefined : partNoList[0];
+	return [lineIndex + nSites + 6, new Carrier(sName, id, nSites, deviceName, partNo)];
 }
 
 /**
  * Parse a labware object; labware lines begin with "15"
+ *
+ * @param {array} l - array of string representing the elements of the current line
+ * @param {array} lines - array of lines from the Carrier.cfg
+ * @param {number} lineIndex - the current line to inspect
+ * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a EvowareLabwareModel.
  */
-def parse15(l: List[String], lsLine: List[String]): Tuple2[Option[EvowareLabwareModel], List[String]] = {
-	val sName = l.head
-	val ls2 = l(2).split("/")
-	val nCols = ls2(0).toInt
-	val nRows = ls2(1).toInt
-	//val nCompartments = ls2(2).toInt
-	val ls4 = l(4).split("/")
-	val zBottom = ls4(0).toInt
-	val zDispense = ls4(2).toInt
-	val nArea = l(5).toDouble // mm^2
-	val nDepthOfBottom = l(15).toDouble // mm
-	//val nTipsPerWell = l(6).toDouble
-	//val nDepth = l(15).toDouble // mm
-	val nCarriers = l(20).toInt
+function parse15(l, lines, lineIndex) {
+	const sName = l[0];
+	const ls2 = l[2].split("/");
+	const nCols = parseInt(ls2[0]);
+	const nRows = parseInt(ls2[1]);
+	//const nCompartments = ls2(2).toInt
+	const ls4 = l(4).split("/")
+	const zBottom = parseInt(ls4[0]);
+	const zDispense = parseInt(ls4[2]);
+	const nArea = Number(l[5]); // mm^2
+	const nDepthOfBottom = Number(l[15]); // mm
+	//const nTipsPerWell = l(6).toDouble
+	//const nDepth = l(15).toDouble // mm
+	const nCarriers = parseInt(l[20]);
 	// shape: flat, round, v-shaped (if nDepth == 0, then flat, if > 0 then v-shaped, if < 0 then round
 	// labware can have lid
 
 	// negative values for rounded bottom, positive for cone, 0 for flat
-	val (nDepthOfCone, nDepthOfRound) =
-		if (nDepthOfBottom > 0) (nDepthOfBottom, 0.0)
-		else (0.0, -nDepthOfBottom)
-	val r = math.sqrt(nArea / math.Pi)
+	const [nDepthOfCone, nDepthOfRound] = (nDepthOfBottom > 0)
+	 	? [nDepthOfBottom, 0.0]
+		: [0.0, -nDepthOfBottom];
+	const r = Math.sqrt(nArea / Math.PI);
 	// Calculate the volume in microliters
-	val ul = ((zBottom - zDispense) / 10.0 - nDepthOfCone - nDepthOfRound) * nArea +
+	const ul = ((zBottom - zDispense) / 10.0 - nDepthOfCone - nDepthOfRound) * nArea +
 		// Volume of a cone: (1/3)*area*height
 		(nDepthOfCone * nArea / 3) +
 		// Volume of a half-sphere:
-		((4.0 / 6.0) * math.Pi * r * r *r)
+		((4.0 / 6.0) * Math.PI * r * r * r);
 
-	val lsCarrier = lsLine.take(nCarriers)
-	val sites = lsCarrier.flatMap(s => {
-		val ls = s.split(";").tail // split line, but drop the "998" prefix
-		val idCarrier = ls(0).toInt
-		val sitemask = ls(1)
-		val (_, _, site_li) = Utils.parseEncodedIndexes(sitemask)
-		site_li.map(site_i => CarrierSiteIndex(idCarrier, site_i))
-	})
+	const lsCarrier = lines.slice(lineIndex, lineIndex + nCarriers);
+	const sites = _.flatten(lsCarrier.map(s => {
+		const ls = parse998(s); // split line, but drop the "998" prefix
+		const idCarrier = parseInt(ls[0]);
+		const sitemask = ls[1];
+		const [, , site_li] = Utils.parseEncodedIndexes(sitemask)
+		return site_li.map(site_i => new CarrierSiteIndex(idCarrier, site_i));
+	}));
 
-	(Some(EvowareLabwareModel(sName, nRows, nCols, ul, sites)), lsLine.drop(10 + nCarriers))
+	[lineIndex + 10 + nCarriers, new EvowareLabwareModel(sName, nRows, nCols, ul, sites)];
 }
 
 /**
  * Parse a vector object; vector lines begin with "17"
+ *
+ * @param {array} l - array of string representing the elements of the current line
+ * @param {array} lines - array of lines from the Carrier.cfg
+ * @param {number} lineIndex - the current line to inspect
+ * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a EvowareLabwareModel.
  */
-def parse17(l: List[String], lsLine: List[String]): Tuple2[Option[Vector], List[String]] = {
+function parse17(l, lines, lineIndex) {
 	//println("parse17: "+l.toList)
-	val l0 = l.head.split("_")
+	const l0 = l[0].split("_");
 	if (l0.length < 3)
-		return (None, lsLine)
+		return [lineIndex, undefined];
 
-	val sClass = l0(1)
-	val iRoma = l0(2).toInt - 1
-	val nSteps = l(3).toInt
-	val idCarrier = l(4).toInt
-	((if (nSteps > 2) Some(Vector(idCarrier, sClass, iRoma)) else None), lsLine.drop(nSteps))
+	const sClass = l0[1];
+	const iRoma = parseInt(l0[2]) - 1;
+	const nSteps = parseInt(l[3]);
+	const idCarrier = parseInt(l[4]);
+	const model = (nSteps > 2) ? new Vector(idCarrier, sClass, iRoma) : undefined;
+	return [lineIndex + nSteps, model];
 }
 
-def parse998(s: String): List[String] = {
-	EvowareFormat.splitSemicolons(s) match {
-		case (n, l) => assert(n == 998); l.init
-	}
+/**
+ * Parse a line with the expected lineType=998.  Discards the linetype and just returns a list of strings elements.
+ * @param  {string} s - the line
+ * @return {array} array of line elements
+ */
+function parse998(s) {
+	const [lineType, l] = EvowareFormat.splitSemicolons(s);
+	assert(lineType === 998);
+	return _.initial(l);
 }

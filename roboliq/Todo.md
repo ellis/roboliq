@@ -129,6 +129,7 @@
 - [ ] upload to a public repository
 - [ ] test all pipetter commands
 - [ ] test scripts on second Tecan robot
+- [ ] rename '#createPipetteMixtureList' to '#mixtureList' and '#gradient' to '#gradientLinear', so it matches figure in paper
 - [ ] add pipetter commands for dropping tips and getting tips
 
 ## On-going todos with lots of sub-steps
