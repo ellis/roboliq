@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import assert from 'assert';
 import fs from 'fs';
 import iconv from 'iconv-lite';
 import lineByLine from 'n-readlines';
@@ -165,16 +166,19 @@ function loadEvowareModels(filename) {
 
 	const raw = fs.readFileSync(filename);
 	const filedata = iconv.decode(raw, "ISO-8859-1");
-	const lines = filedata.split("\r\n");
+	const lines = filedata.split("\n");
+	//console.log("lines:\n"+lines)
+	//console.log(lines.length);
 	let lineIndex = 4; // skip 4 lines
 
 	// Find models in the carrier file
 	while (lineIndex < lines.length) {
 		const [lineIndex2, model] = parseModel(lines, lineIndex)
 		console.log({model})
-		if (_.isDefined(model))
+		if (!_.isUndefined(model))
 			models.push(model)
 		assert(lineIndex2 > lineIndex);
+		console.log({lineIndex2})
 		lineIndex = lineIndex2;
 	}
 
@@ -236,7 +240,7 @@ function parse15(l, lines, lineIndex) {
 	const nCols = parseInt(ls2[0]);
 	const nRows = parseInt(ls2[1]);
 	//const nCompartments = ls2(2).toInt
-	const ls4 = l(4).split("/")
+	const ls4 = l[4].split("/")
 	const zBottom = parseInt(ls4[0]);
 	const zDispense = parseInt(ls4[2]);
 	const nArea = Number(l[5]); // mm^2
@@ -299,7 +303,7 @@ function parse17(l, lines, lineIndex) {
  * @return {array} array of line elements
  */
 function parse998(s) {
-	const [lineType, l] = EvowareFormat.splitSemicolons(s);
+	const [lineType, l] = splitSemicolons(s);
 	assert(lineType === 998);
 	return _.initial(l);
 }
