@@ -4,6 +4,7 @@ import fs from 'fs';
 import iconv from 'iconv-lite';
 import lineByLine from 'n-readlines';
 import sprintf from 'sprintf-js';
+import EvowareUtils from './EvowareUtils.js';
 
 
 /**
@@ -29,7 +30,7 @@ export class CarrierSiteIndex {
 }
 
 /**
- * A base type for evoware models, one of Carrier, EvowareLabwareModel, or Vector.
+ * A base type for evoware models, one of Carrier, LabwareModel, or Vector.
  * @typedef {object} EvowareModel
  * @property {string} type - the type of model
  */
@@ -45,8 +46,8 @@ export class CarrierSiteIndex {
  * @property {string} [partNo]
  */
 export class Carrier {
-	constructor(type, name, id, siteCount, deviceName, partNo) {
-		this.type = type;
+	constructor(name, id, siteCount, deviceName, partNo) {
+		this.type = "Carrier";
 		this.name = name;
 		this.id = id;
 		this.siteCount = siteCount;
@@ -57,14 +58,25 @@ export class Carrier {
 
 /**
  * An evoware labware model
- * @typedef {EvowareModel} EvowareLabwareModel
- * @property {string} type - should be "EvowareLabwareModel"
+ * @typedef {EvowareModel} LabwareModel
+ * @property {string} type - should be "LabwareModel"
  * @property {string} name
  * @property {integer} rows
  * @property {integer} cols
  * @property {number} ul - maximum volume of wells
  * @property {array} sites - list of CarrierSiteIndexes where this labware can be placed.
  */
+
+export class LabwareModel {
+	constructor(name, rows, cols, ul, sites) {
+		this.type = "LabwareModel";
+		this.name = name;
+		this.rows = rows;
+		this.cols = cols;
+		this.ul = ul;
+		this.sites = sites;
+	}
+}
 
 /**
  * A tranporter "vector", related to movements that the RoMas can make
@@ -76,8 +88,8 @@ export class Carrier {
  */
 
 export class Vector {
-	constructor(type, carrierId, clazz, romaId) {
-		this.type = type;
+	constructor(carrierId, clazz, romaId) {
+		this.type = "Vector";
 		this.carrierId = carrierId;
 		this.clazz = clazz;
 		this.romaId = romaId;
@@ -91,7 +103,7 @@ export class Vector {
  * @property {array} models - array of the evoware models
  * @property {object} idToCarrier - map of carrier ID to Carrier object
  * @property {object} nameToCarrier - map of carrier name to Carrier object
- * @property {object} nameToLabwareModel - map of name to EvowareLabwareModel
+ * @property {object} nameToLabwareModel - map of name to LabwareModel
  * @property {carrierIdToVectors} - map of carrier ID to list of Vectors
  */
 
@@ -136,12 +148,14 @@ export function printCarriersById(evowareCarrierData) {
  * @return {EvowareCarrierData}
  */
 function makeEvowareCarrierData(models) {
+	console.log({modelsLength: models.length})
 	const idToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.id, x]).zipObject().value();
+	console.log({idToCarrier})
 	return {
 		models,
 		idToCarrier,
 		nameToCarrier: _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).zipObject().value(),
-		nameToLabwareModel: _(models).filter(x => x.type === "EvowareLabwareModel").map(x => [x.name, x]).zipObject().value(),
+		nameToLabwareModel: _(models).filter(x => x.type === "LabwareModel").map(x => [x.name, x]).zipObject().value(),
 		carrierIdToVectors: _(models).filter(x => x.type === "Vector").groupBy('carrierId').value()
 	};
 }
@@ -173,7 +187,9 @@ function loadEvowareModels(filename) {
 
 	// Find models in the carrier file
 	while (lineIndex < lines.length) {
-		const [lineIndex2, model] = parseModel(lines, lineIndex)
+		//const result0 = parseModel(lines, lineIndex);
+		//console.log({result0})
+		const [lineIndex2, model] = parseModel(lines, lineIndex);
 		console.log({model})
 		if (!_.isUndefined(model))
 			models.push(model)
@@ -194,7 +210,7 @@ function loadEvowareModels(filename) {
 function parseModel(lines, lineIndex) {
 	const line = lines[lineIndex++];
 	const [lineKind, l] = splitSemicolons(line);
-	console.log({lineIndex, lineKind, l})
+	//console.log({lineIndex, lineKind, l})
 	switch (lineKind) {
 		case 13: return parse13(l, lines, lineIndex);
 		case 15: return parse15(l, lines, lineIndex);
@@ -232,7 +248,7 @@ function parse13(l, lines, lineIndex) {
  * @param {array} l - array of string representing the elements of the current line
  * @param {array} lines - array of lines from the Carrier.cfg
  * @param {number} lineIndex - the current line to inspect
- * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a EvowareLabwareModel.
+ * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a LabwareModel.
  */
 function parse15(l, lines, lineIndex) {
 	const sName = l[0];
@@ -268,11 +284,11 @@ function parse15(l, lines, lineIndex) {
 		const ls = parse998(s); // split line, but drop the "998" prefix
 		const idCarrier = parseInt(ls[0]);
 		const sitemask = ls[1];
-		const [, , site_li] = Utils.parseEncodedIndexes(sitemask)
+		const [, , site_li] = EvowareUtils.parseEncodedIndexes(sitemask);
 		return site_li.map(site_i => new CarrierSiteIndex(idCarrier, site_i));
 	}));
 
-	[lineIndex + 10 + nCarriers, new EvowareLabwareModel(sName, nRows, nCols, ul, sites)];
+	return [lineIndex + 10 + nCarriers, new LabwareModel(sName, nRows, nCols, ul, sites)];
 }
 
 /**
@@ -281,7 +297,7 @@ function parse15(l, lines, lineIndex) {
  * @param {array} l - array of string representing the elements of the current line
  * @param {array} lines - array of lines from the Carrier.cfg
  * @param {number} lineIndex - the current line to inspect
- * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a EvowareLabwareModel.
+ * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a LabwareModel.
  */
 function parse17(l, lines, lineIndex) {
 	//println("parse17: "+l.toList)
