@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
+import * as EvowareTableFile from './EvowareTableFile.js';
 
 const version = "v1";
 
@@ -46,7 +47,7 @@ export function run(argv) {
 				table.print();
 			}
 			else {
-				
+
 			}
 		}
 	}
