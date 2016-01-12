@@ -3,7 +3,7 @@ import assert from 'assert';
 import fs from 'fs';
 import iconv from 'iconv-lite';
 import lineByLine from 'n-readlines';
-import sprintf from 'sprintf-js';
+import {sprintf} from 'sprintf-js';
 import EvowareUtils from './EvowareUtils.js';
 
 
@@ -104,9 +104,33 @@ export class Vector {
  * @property {object} idToCarrier - map of carrier ID to Carrier object
  * @property {object} nameToCarrier - map of carrier name to Carrier object
  * @property {object} nameToLabwareModel - map of name to LabwareModel
- * @property {carrierIdToVectors} - map of carrier ID to list of Vectors
+ * @property {object} carrierIdToVectors - map of carrier ID to list of Vectors
  */
 
+export class EvowareCarrierData {
+	constructor(models, idToCarrier, nameToCarrier, nameToLabwareModel, carrierIdToVectors) {
+		this.models = models;
+		this.idToCarrier = idToCarrier;
+		this.nameToCarrier = nameToCarrier;
+		this.nameToLabwareModel = nameToLabwareModel;
+		this.carrierIdToVectors = carrierIdToVectors;
+	}
+
+
+	/**
+	 * Print debug output: carrier id, carrier name.
+	 */
+	printCarriersById() {
+		const l0 = _.keys(this.idToCarrier).map(s => parseInt(s));
+		// Sort by carrier ID
+		const ids = _.sortBy(l0, n => n);
+		console.log({ids})
+		ids.forEach(id => {
+			const name = this.idToCarrier[id.toString()].name
+			console.log(sprintf("%03d %s", id, name));
+		});
+	}
+}
 
 /*
 case class CarrierSite(
@@ -132,32 +156,27 @@ function splitSemicolons(line) {
 }
 
 /**
- * Print debug output: carrier id, carrier name.
- * @param {EvowareCarrierData} evowareCarrierData
- */
-export function printCarriersById(evowareCarrierData) {
-	const l0 = _.keys(evowareCarrierData.idToCarrier);
-	// Sort by carrier ID
-	const l1 = _.sortBy(l0, x => parseInt(x[0]));
-	l1.forEach(pair => console.log(sprintf("%03d %s", pair[0], pair[1].name)));
-}
-
-/**
  * Create an EvowareCarrierData object from an array of evoware models.
  * @param  {array} models - array of evoware models
  * @return {EvowareCarrierData}
  */
 function makeEvowareCarrierData(models) {
-	console.log({modelsLength: models.length})
+	//console.log({modelsLength: models.length})
 	const idToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.id, x]).zipObject().value();
-	console.log({idToCarrier})
-	return {
+	//console.log({idToCarrier})
+	const nameToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).zipObject().value();
+	//console.log({nameToCarrier})
+	const nameToLabwareModel = _(models).filter(x => x.type === "LabwareModel").map(x => [x.name, x]).zipObject().value();
+	//console.log({nameToLabwareModel})
+	const carrierIdToVectors = _(models).filter(x => x.type === "Vector").groupBy('carrierId').value();
+	//console.log({carrierIdToVectors})
+	return new EvowareCarrierData(
 		models,
 		idToCarrier,
-		nameToCarrier: _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).zipObject().value(),
-		nameToLabwareModel: _(models).filter(x => x.type === "LabwareModel").map(x => [x.name, x]).zipObject().value(),
-		carrierIdToVectors: _(models).filter(x => x.type === "Vector").groupBy('carrierId').value()
-	};
+		nameToCarrier,
+		nameToLabwareModel,
+		carrierIdToVectors
+	);
 }
 
 /**
@@ -167,7 +186,9 @@ function makeEvowareCarrierData(models) {
  */
 export function loadEvowareCarrierData(filename) {
 	const models = loadEvowareModels(filename);
-	return makeEvowareCarrierData(models);
+	const data = makeEvowareCarrierData(models);
+	//console.log({data});
+	return data;
 }
 
 /**
@@ -190,11 +211,11 @@ function loadEvowareModels(filename) {
 		//const result0 = parseModel(lines, lineIndex);
 		//console.log({result0})
 		const [lineIndex2, model] = parseModel(lines, lineIndex);
-		console.log({model})
+		//console.log({model})
 		if (!_.isUndefined(model))
 			models.push(model)
 		assert(lineIndex2 > lineIndex);
-		console.log({lineIndex2})
+		//console.log({lineIndex2})
 		lineIndex = lineIndex2;
 	}
 
