@@ -103,28 +103,45 @@ steps:
   command: system.promptUser
   text: "Please turn on the heater of the shaking incubator and set the temp. Predefined shaking frequency of 300 rpm.Fill Pos 1 to {{DilutionPlateNumber}} of 3x4Pos Hotel with empty MTPs WITHOUT lid. Add {{DWBnumber}} sterile 96-DWB on Pos1 (and 2) of 3Pos Carrier. Fill sterile steel trough with {{TotalMediumML}} ml (+ 50 ml) of medium. Add a bleach-filled 100-ml-trough on Pos 2.The routine will take about {{RunTime}} hours for completion of sampling."
 
-Variable(PauseNachSchütteln,"5"
-Variable(InactivationTime,"5"
-Variable(InactivationVolume,"1200"
-Variable(MixingTime,"15"
-GroupEnd();
-Group("Init Pipetting");
-  Wash(255,41,1,41,0,"20",500,"15",500,10,70,30,1,0,1000,0);
-  Wash(255,41,1,41,0,"15",500,"10",500,10,70,30,0,0,1000,0);
-GroupEnd();
-Group("Inactivation with 2.4 ml");
-  Wash(255,42,1,42,2,"6",500,"8",500,10,70,30,1,0,1000,0);
-  Aspirate(255,">> DM_Water free dispense <<	877","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
-  StartTimer("2");
-  WaitTimer("2","InactivationTime");
-  Dispense(255,">> DM_Water free dispense <<	878","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
-  Wash(255,41,1,41,2,"6",500,"8",500,10,70,30,1,0,1000,0);
-GroupEnd();
-IfThen("FillDWB",0,"Yes");
-  Group("DWB Filling");
-    Comment("Medium pre-dispense of 80% of final volume per well (dep on PreDispenseFactor)");
-    Variable(PreDispenseVolume,"CultivationVolume*(1-(1/PreDispenseFactor))"
-    Variable(PreDispenseMultipipVolume,"PreDispenseVolume*3"
+objects:
+  PauseNachSchütteln: {type: Variable, value: 5s}
+  InactivationTime: {type: Variable, value: 5s}
+  InactivationVolume: {type: Variable, value: 1200ul}
+  MixingTime: {type: Variable, value: 15s}
+
+steps:
+  1:
+    description: Init Pipetting
+    1:
+      command: pipetter.cleanTips
+      raw: Wash(255,41,1,41,0,"20",500,"15",500,10,70,30,1,0,1000,0);
+    2:
+      command: pipetter.cleanTips
+      raw: Wash(255,41,1,41,0,"15",500,"10",500,10,70,30,0,0,1000,0);
+  2:
+    description: Inactivation with 2.4 ml
+    1: Wash(255,42,1,42,2,"6",500,"8",500,10,70,30,1,0,1000,0);
+    2: Aspirate(255,">> DM_Water free dispense <<	877","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
+    3: {command: timer.sleep, duration: InactivationTime}
+    4: Dispense(255,">> DM_Water free dispense <<	878","2400","2400","2400","2400","2400","2400","2400","2400",0,0,0,0,40,1,1,"0108¯1",0,0);
+    5: Wash(255,41,1,41,2,"6",500,"8",500,10,70,30,1,0,1000,0);
+
+  3:
+    command: if
+    condition: FillDWB.fill
+    1:
+      description: DWB Filling
+      1: {comment: Medium pre-dispense of 80% of final volume per well (dep on PreDispenseFactor)}
+      2: {command: set, variable: PreDispenseVolume, calculate: "CultivationVolume*(1-(1/PreDispenseFactor))"}
+      3: {command: set, variable: PreDispenseMultipipVolume, calculate: "PreDispenseVolume*3"}
+      4:
+        command: pipetter.distributeWithMultidispense
+        program: ">> DM_Water free dispense <<	879" ??? but dispense is just "DM_Water free dispense"
+        source: SOURCE???
+        volumes: PreDispenseVolume
+        destinations: CONTINUE need to name the plate (all)
+        cleanEnd: ???
+        CONTINUE
     BeginLoop("DWBnumber","DWB");
       BeginLoop("4","Columns");
         Aspirate(255,">> DM_Water free dispense <<	879","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume","PreDispenseMultipipVolume",0,0,0,0,37,0,1,"0108¯1",0,0);

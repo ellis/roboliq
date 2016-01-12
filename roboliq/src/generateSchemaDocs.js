@@ -16,7 +16,7 @@ function toMarkdown(pair) {
 	const [name, o] = pair;
 	//console.log({name, o})
 	if (o.module) {
-		return `\n## ${name}\n\n${o.module}`;
+		return `\n## <a name="${name}"></a>${name}\n\n${o.module}`;
 	}
 	else {
 		return _.flattenDeep([
@@ -32,6 +32,13 @@ function toMarkdown(pair) {
 				const descriptionText = p.description || "";
 				return `* \`${nameTypeText}\` -- ${descriptionText}`;
 			}),
+			(_.isEmpty(o.example)) ? [] : [
+				"",
+				"Example:",
+				"",
+				o.example,
+				""
+			]
 		]).join('\n');
 	}
 }

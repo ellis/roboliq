@@ -10,6 +10,13 @@ Centrifuge:
     label: {type: string}
     sitesInternal: {type: array, items: {type: Site}}
   required: [type, sitesInternal]
+  example: |
+    ```
+    "centrifuge": {
+    	"type": "Centrifuge",
+    	"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
+    }
+    ```
 
 centrifuge.centrifuge2:
   description: "Centrifuge using two plate"
@@ -24,6 +31,20 @@ centrifuge.centrifuge2:
     destinationAfter1: {description: "Location identifier for where object1 should be placed after centrifugation", "type": "SiteOrStay"}
     destinationAfter2: {description: "Location identifier for where object2 should be placed after centrifugation", "type": "SiteOrStay"}
   required: ["program", "object1", "object2"]
+  example: |
+    This will centrifuge 2 plates at 3000rpm for 2 minutes at 25°C:
+    ```
+    {
+      "command": "centrifuge.centrifuge2",
+      "object1": "plate1",
+      "object2": "plate2",
+      "program": {
+        "rpm": 3000,
+        "duration": "2 minutes",
+        "temperature": "25 degC"
+      }
+    }
+    ```
 
 centrifuge.insertPlates2:
   description: "Insert up to two plates into the centrifuge."
@@ -35,3 +56,12 @@ centrifuge.insertPlates2:
     site1: {description: "Location identifier for the centrifugation site of object1", type: "Site"}
     site2: {description: "Location identifier for the centrifugation site of object2", type: "Site"}
   required: []
+  example: |
+    This will insert two plates into the centrifuge:
+    ```
+    {
+      "command": "centrifuge.insertPlates2",
+      "object1": "plate1",
+      "object2": "plate2",
+    }
+    ```

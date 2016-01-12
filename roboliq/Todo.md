@@ -140,6 +140,7 @@
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 	- [x] Commands.md: Add general documentation to each command namespace
 	- [ ] Commands.md: add examples for each command
+	- [ ] document the properties of the types (i.e. add 'description' field)
 	- [ ] Developing_Roboliq.md
 	- [ ] Object_Types.md: Add general documentation to top of page
 	- [ ] Using_Roboliq.md

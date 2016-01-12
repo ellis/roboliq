@@ -9,6 +9,17 @@ Properties:
 * `[label]: string` -- 
 * `sitesInternal: array` -- 
 
+Example:
+
+```
+"centrifuge": {
+	"type": "Centrifuge",
+	"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
+}
+```
+
+
+
 ### Reader
 
 Reader equipment.

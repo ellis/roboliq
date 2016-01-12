@@ -20,6 +20,24 @@ Properties:
 * `[destinationAfter1]: SiteOrStay` -- Location identifier for where object1 should be placed after centrifugation
 * `[destinationAfter2]: SiteOrStay` -- Location identifier for where object2 should be placed after centrifugation
 
+Example:
+
+This will centrifuge 2 plates at 3000rpm for 2 minutes at 25°C:
+```
+{
+  "command": "centrifuge.centrifuge2",
+  "object1": "plate1",
+  "object2": "plate2",
+  "program": {
+    "rpm": 3000,
+    "duration": "2 minutes",
+    "temperature": "25 degC"
+  }
+}
+```
+
+
+
 ### centrifuge.insertPlates2
 
 Insert up to two plates into the centrifuge.
@@ -33,8 +51,21 @@ Properties:
 * `[site1]: Site` -- Location identifier for the centrifugation site of object1
 * `[site2]: Site` -- Location identifier for the centrifugation site of object2
 
+Example:
 
-## equipment
+This will insert two plates into the centrifuge:
+```
+{
+  "command": "centrifuge.insertPlates2",
+  "object1": "plate1",
+  "object2": "plate2",
+}
+```
+
+
+
+
+## <a name="equipment"></a>equipment
 
 The `equipment` commands specify generic actions such as 'run' and 'open'
 that may apply to various types of equipment.
@@ -103,7 +134,7 @@ Properties:
 * `equipment: Equipment` -- Equipment identifier
 
 
-## fluorescenceReader
+## <a name="fluorescenceReader"></a>fluorescenceReader
 
 The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
 
@@ -124,7 +155,7 @@ Properties:
 * `[destinationAfter]: SiteOrStay` -- Site to move the plate to after measurement
 
 
-## pipetter
+## <a name="pipetter"></a>pipetter
 
 The `pipetter` commands specify actions using pipetting equipment.
 
@@ -272,7 +303,7 @@ Properties:
 * `[order]: array` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
 
 
-## sealer
+## <a name="sealer"></a>sealer
 
 The `sealer` commands specify actions using sealing equipment.
 
@@ -291,7 +322,7 @@ Properties:
 * `[destinationAfter]: SiteOrStay` -- Site to move the plate to after measurement
 
 
-## system
+## <a name="system"></a>system
 
 The `system` commands specify several general, high-level actions that are
 not specific to any particular type of equipment.
@@ -318,7 +349,7 @@ Properties:
 * `[steps]: object` -- The sequence of commands to repeat.
 
 
-## timer
+## <a name="timer"></a>timer
 
 The `timer` commands specify actions using timer equipment.
 
