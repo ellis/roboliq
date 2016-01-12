@@ -41,7 +41,13 @@ export function run(argv) {
 			data.printCarriersById();
 		}
 		else {
-
+			const table = EvowareTableFile.load(opts.table);
+			if (_.isEmpty(opts.protocol)) {
+				table.print();
+			}
+			else {
+				
+			}
 		}
 	}
 }
