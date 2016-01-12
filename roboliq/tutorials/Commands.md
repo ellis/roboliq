@@ -1,5 +1,5 @@
 
-## centrifuge
+## <a name="centrifuge"></a>centrifuge
 
 The `centrifuge` commands specify actions using centrifuge equipment.
 
@@ -427,7 +427,7 @@ Properties:
 * `[equipment]: Equipment` -- Equipment identifier
 
 
-## transporter
+## <a name="transporter"></a>transporter
 
 The `transporter` commands specify actions using equipment to transport
 labware from one location to another.

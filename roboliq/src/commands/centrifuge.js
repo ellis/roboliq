@@ -1,6 +1,12 @@
 /**
  * Centrifuge commands module (see {@tutorial Commands#centrifuge} or [command specification](tutorial-Commands.html#centrifuge)).
  *
+ * THIS SECTION IS FOR TESTING ONLY:
+ * {@link loadEvowareCarrierData}
+ * {@link module:commandHelper}
+ * {@link module:commands/centrifuge}
+ * END OF SECTION
+ *
  * See {@link roboliq#Protocol}.
  * @module commands/centrifuge
  * @return {Protocol}
