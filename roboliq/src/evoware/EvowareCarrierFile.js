@@ -124,10 +124,10 @@ export class EvowareCarrierData {
 		const l0 = _.keys(this.idToCarrier).map(s => parseInt(s));
 		// Sort by carrier ID
 		const ids = _.sortBy(l0, n => n);
-		console.log({ids})
+		//console.log({ids})
 		ids.forEach(id => {
 			const name = this.idToCarrier[id.toString()].name
-			console.log(sprintf("%03d %s", id, name));
+			console.log(sprintf("%03d\t%s", id, name));
 		});
 	}
 }

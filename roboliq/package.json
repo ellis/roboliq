@@ -31,7 +31,8 @@
     "pegjs": "pegjs --allowed-start-rules start,startOne parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc.json --readme README.md --tutorials tutorials",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
-    "roboliq": "babel-node -- src/main.js"
+    "roboliq": "babel-node -- src/main.js",
+    "evoware": "babel-node -- src/evoware/EvowareMain.js"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"
