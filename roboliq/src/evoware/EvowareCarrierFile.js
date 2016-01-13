@@ -183,24 +183,18 @@ export function loadEvowareCarrierData(filename) {
 function loadEvowareModels(filename) {
 	const models = [];
 
-	const raw = fs.readFileSync(filename);
-	const filedata = iconv.decode(raw, "ISO-8859-1");
-	const lines = filedata.split("\n");
-	//console.log("lines:\n"+lines)
-	//console.log(lines.length);
-	let lineIndex = 4; // skip 4 lines
+	const lines = new EvowareUtils.EvowareSemicolonFile(filename, 4);
 
 	// Find models in the carrier file
-	while (lineIndex < lines.length) {
+	while (lines.hasNext()) {
 		//const result0 = parseModel(lines, lineIndex);
 		//console.log({result0})
-		const [lineIndex2, model] = parseModel(lines, lineIndex);
+		const model = parseModel(lines);
 		//console.log({model})
 		if (!_.isUndefined(model))
 			models.push(model)
-		assert(lineIndex2 > lineIndex);
+		//assert(lineIndex2 > lineIndex);
 		//console.log({lineIndex2})
-		lineIndex = lineIndex2;
 	}
 
 	return models;
@@ -208,20 +202,19 @@ function loadEvowareModels(filename) {
 
 /**
  * Parse the line and return the next lineIndex and a model, if relevant.
- * @param {array} lines - array of lines from the Carrier.cfg
+ * @param {EvowareSemicolonFile} lines - array of lines from the Carrier.cfg
  * @param {number} lineIndex - the current line to inspect
- * @return {array} a pair [linesUsed, model], where linesUsed is the new lineIndex and model is an optional model.
+ * @return {array} an optional model.
  */
-function parseModel(lines, lineIndex) {
-	const line = lines[lineIndex++];
-	const [lineKind, l] = EvowareUtils.splitSemicolons(line);
+function parseModel(lines) {
+	const [lineKind, l] = lines.nextSplit();
 	//console.log({lineIndex, lineKind, l})
 	switch (lineKind) {
-		case 13: return parse13(l, lines, lineIndex);
-		case 15: return parse15(l, lines, lineIndex);
-		case 17: return parse17(l, lines, lineIndex);
+		case 13: return parse13(l, lines);
+		case 15: return parse15(l, lines);
+		case 17: return parse17(l, lines);
 		// NOTE: There are also 23 and 25 lines, but I don't know what they're for.
-		default: return [lineIndex, undefined];
+		default: return undefined;
 	}
 }
 
@@ -231,20 +224,21 @@ function parseModel(lines, lineIndex) {
  * @param {array} l - array of string representing the elements of the current line
  * @param {array} lines - array of lines from the Carrier.cfg
  * @param {number} lineIndex - the current line to inspect
- * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a Carrier.
+ * @return {Carrier} a Carrier.
  */
-function parse13(l, lines, lineIndex) {
+function parse13(l, lines) {
 	const sName = l[0];
 	const l1 = l[1].split("/");
 	const sId = l1[0];
 	//val sBarcode = l1(1)
 	const id = parseInt(sId);
 	const nSites = parseInt(l[4]);
-	const deviceNameList = parse998(lines[lineIndex + nSites + 1]);
+	const deviceNameList = parse998(lines.peekAhead(nSites + 1));
 	const deviceName = (deviceNameList.length != 1) ? undefined : deviceNameList[0];
-	const partNoList = parse998(lines[lineIndex + nSites + 3]);
+	const partNoList = parse998(lines.peekAhead(nSites + 3));
 	const partNo = (partNoList.length != 1) ? undefined : partNoList[0];
-	return [lineIndex + nSites + 6, new Carrier(sName, id, nSites, deviceName, partNo)];
+	lines.skip(nSites + 6);
+	return new Carrier(sName, id, nSites, deviceName, partNo);
 }
 
 /**
@@ -255,7 +249,7 @@ function parse13(l, lines, lineIndex) {
  * @param {number} lineIndex - the current line to inspect
  * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a LabwareModel.
  */
-function parse15(l, lines, lineIndex) {
+function parse15(l, lines) {
 	const sName = l[0];
 	const ls2 = l[2].split("/");
 	const nCols = parseInt(ls2[0]);
@@ -284,7 +278,7 @@ function parse15(l, lines, lineIndex) {
 		// Volume of a half-sphere:
 		((4.0 / 6.0) * Math.PI * r * r * r);
 
-	const lsCarrier = lines.slice(lineIndex, lineIndex + nCarriers);
+	const lsCarrier = lines.take(nCarriers);
 	const sites = _.flatten(lsCarrier.map(s => {
 		const ls = parse998(s); // split line, but drop the "998" prefix
 		const idCarrier = parseInt(ls[0]);
@@ -293,7 +287,8 @@ function parse15(l, lines, lineIndex) {
 		return site_li.map(site_i => new CarrierSiteIndex(idCarrier, site_i));
 	}));
 
-	return [lineIndex + 10 + nCarriers, new LabwareModel(sName, nRows, nCols, ul, sites)];
+	lines.skip(10);
+	return new LabwareModel(sName, nRows, nCols, ul, sites);
 }
 
 /**

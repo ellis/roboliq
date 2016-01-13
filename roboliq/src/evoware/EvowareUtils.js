@@ -62,7 +62,57 @@ function splitSemicolons(line) {
 	return [kind, _.tail(l)];
 }
 
+class EvowareSemicolonFile {
+	constructor(filename, skip) {
+		const raw = fs.readFileSync(filename);
+		const filedata = iconv.decode(raw, "ISO-8859-1");
+		this.lines = filedata.split("\n");
+		//console.log("lines:\n"+lines)
+		//console.log(lines.length);
+		this.lineIndex = skip;
+	}
+
+	next() {
+		if (this.lineIndex >= this.lines.length)
+			return undefined;
+		const line = this.lines[this.lineIndex];
+		this.lineIndex++;
+		return line;
+	}
+
+	nextSplit() {
+		const line = next();
+		if (_.isUndefined(line))
+			return undefined;
+		const result = splitSemicolons(line);
+		return result;
+	}
+
+	hasNext() {
+		return (this.lineIndex < this.lines.length);
+	}
+
+	peekAhead(skip) {
+		const i = this.lineIndex + skip;
+		if (i >= this.lines.length)
+			return undefined;
+		const line = this.lines[i];
+		return line;
+	}
+
+	skip(n) {
+		this.lineIndex += n;
+	}
+
+	take(n) {
+		const l = this.lines.slice(this.lineIndex, this.lineIndex + n);
+		this.lineIndex += n;
+		return l;
+	}
+}
+
 const exports = {
+	EvowareSemicolonFile,
 	decode,
 	encode,
 	hex,

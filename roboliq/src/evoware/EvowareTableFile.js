@@ -140,28 +140,23 @@ function parse14_getCarriers(l) {
 	return l.map(s => parseInt(s));
 }
 
+/**
+ * Get array of labwares on the table.
+ * @param  {EvowareCarrierData} carrierData
+ * @param  {array} lines - lines of table file
+ * @param  {integer} lineIndex - current line index
+ * @return {array}             [description]
+ */
 function parse14_getLabwareObjects(
 	carrierData,
-	mapNameToLabwareModel: Map[String, EvowareLabwareModel],
-	gridIndex: Int,
-	lCarrier_? : List[Option[Carrier]],
-	lsLine: List[String],
-	acc: List[Tuple3[CarrierGridSiteIndex, String, EvowareLabwareModel]]
+	lines,
+	lineIndex
 ): Tuple2[List[Tuple3[CarrierGridSiteIndex, String, EvowareLabwareModel]], List[String]] = {
-	lCarrier_? match {
-		case Nil => (acc, lsLine)
-		case None :: rest => parse14_getLabwareObjects(mapNameToLabwareModel, gridIndex + 1, rest, lsLine.tail, acc)
-		case Some(carrier) :: rest =>
-			const (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
-			const (n1, l1) = EvowareFormat.splitSemicolons(lsLine(1))
-			/*// FIME: for debug only
-			if (l0(0).isEmpty || !(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)) {
-				logger.error("ERROR: parse14_getLabwareObjects:")
-				logger.error(carrier)
-				logger.error(lsLine.head)
-				logger.error((n0, l0, n1, l1, carrier.nSites))
-			}
-			// ENDFIX*/
+	gridToCarrierId.forEach((carrierId, gridIndex) => {
+		if (carrierId > -1) {
+			const carrier = carrierData.idToCarrier[carrierId];
+			const [n0, l0] = EvowareUtils.splitSemicolons(lines[lineIndex+0])
+			const [n1, l1] = EvowareUtils.splitSemicolons(lines[lineIndex+1])
 			assert(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)
 			//println(iGrid+": "+carrier)
 			const l = (for (iSite <- 0 until carrier.nSites) yield {
@@ -171,6 +166,24 @@ function parse14_getLabwareObjects(
 				else Some(CarrierGridSiteIndex(carrier.id, gridIndex, iSite), l1(iSite), mapNameToLabwareModel(sName))
 			}).toList.flatten
 			parse14_getLabwareObjects(mapNameToLabwareModel, gridIndex + 1, rest, lsLine.drop(2), acc ++ l)
+			lineIndex += 2;
+		}
+		else {
+			lineIndex++;
+		}
+	});
+	lCarrier_? match {
+		case Nil => (acc, lsLine)
+		case None :: rest => parse14_getLabwareObjects(mapNameToLabwareModel, gridIndex + 1, rest, lsLine.tail, acc)
+		case Some(carrier) :: rest =>
+			/*// FIME: for debug only
+			if (l0(0).isEmpty || !(n0 == 998 && n1 == 998 && l0(0).toInt == carrier.nSites)) {
+				logger.error("ERROR: parse14_getLabwareObjects:")
+				logger.error(carrier)
+				logger.error(lsLine.head)
+				logger.error((n0, l0, n1, l1, carrier.nSites))
+			}
+			// ENDFIX*/
 	}
 }
 
@@ -185,11 +198,11 @@ function parse14_getHotelObjects(
 	mapIdToCarrier: Map[Int, Carrier],
 	lsLine: List[String]
 ): Tuple2[List[HotelObject], List[String]] = {
-	const (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
+	const (n0, l0) = EvowareUtils.splitSemicolons(lsLine(0))
 	assert(n0 == 998)
 	const nHotels = l0(0).toInt
 	const lHotelObject = lsLine.tail.take(nHotels).map(s => {
-		const (n, l) = EvowareFormat.splitSemicolons(s)
+		const (n, l) = EvowareUtils.splitSemicolons(s)
 		assert(n == 998)
 		const id = l(0).toInt
 		const iGrid = l(1).toInt
@@ -203,11 +216,11 @@ def parse14_getExternalObjects(
 	mapNameToCarrier: Map[String, Carrier],
 	lsLine: List[String]
 ): Tuple2[List[ExternalObject], List[String]] = {
-	const (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
+	const (n0, l0) = EvowareUtils.splitSemicolons(lsLine(0))
 	assert(n0 == 998)
 	const nObjects = l0(0).toInt
 	const lObject = lsLine.tail.take(nObjects).map(s => {
-		const (n, l) = EvowareFormat.splitSemicolons(s)
+		const (n, l) = EvowareUtils.splitSemicolons(s)
 		assert(n == 998)
 		const n1 = l(0).toInt
 		const n2 = l(1).toInt
@@ -225,11 +238,11 @@ def parse14_getExternalLabwares(
 	mapNameToLabwareModel: Map[String, EvowareLabwareModel],
 	lsLine: List[String]
 ): (Map[CarrierSite, EvowareLabwareModel], List[String]) = {
-	const (n0, l0) = EvowareFormat.splitSemicolons(lsLine(0))
+	const (n0, l0) = EvowareUtils.splitSemicolons(lsLine(0))
 	assert(n0 == 998)
 	const nObjects = l0(0).toInt
 	const mapSiteToLabwareModel = lsLine.tail.take(nObjects).map(s => {
-		const (n, l) = EvowareFormat.splitSemicolons(s)
+		const (n, l) = EvowareUtils.splitSemicolons(s)
 		assert(n == 998)
 		const carrierId = l(0).toInt
 		const sName = l(1)
@@ -246,7 +259,7 @@ def parse14_getExternalCarrierGrids(
 ): Tuple2[Map[Carrier, Int], List[String]] = {
 	const map = (lExternalObject zip lsLine).map(pair => {
 		const (external, sLine) = pair
-		const (n, l) = EvowareFormat.splitSemicolons(sLine)
+		const (n, l) = EvowareUtils.splitSemicolons(sLine)
 		assert(n == 998)
 		// We need to force the system liquid to be on grid -1
 		const iGrid = if (external.carrier.id == -1) -1 else l(0).toInt
