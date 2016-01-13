@@ -173,7 +173,7 @@ describe('pipetter', function() {
 		})
 
 
-		it.only('should pipette from system liquid source', function () {
+		it('should pipette from system liquid source', function () {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -321,10 +321,6 @@ describe('pipetter', function() {
 						"Infinity l",
 						"systemLiquid"
 					],
-					"ourlab.mario.liha.syringe.1.contaminants": ["systemLiquid"],
-					"ourlab.mario.liha.syringe.2.contaminants": ["systemLiquid"],
-					"ourlab.mario.liha.syringe.3.contaminants": ["systemLiquid"],
-					"ourlab.mario.liha.syringe.4.contaminants": ["systemLiquid"],
 					"plate1.contents.E01": [
 						"10 ul",
 						"systemLiquid"

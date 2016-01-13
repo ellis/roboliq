@@ -94,7 +94,7 @@
 	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
 	- [x] add tips 5-8 to ourlab.js
 - [x] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
-- [ ] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
+- [x] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
 	- [x] `_pipette`: append contaminants from source well to syringe
 	- [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
 	- [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
@@ -105,8 +105,7 @@
 		- [x] test contents=null when dispensing all syringe contents
 		- [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
 		- [x] test contamination upon wet contact
-	- [ ] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
-		- debugging systemliquid not contaminanting the syringes
+	- [x] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create

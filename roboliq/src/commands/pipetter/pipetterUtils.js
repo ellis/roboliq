@@ -57,8 +57,8 @@ export function getEffects_pipette(parsed, data, effects) {
 
 			// Get list of syringe contaminants
 			const contaminants1 = _.keys(WellContents.flattenContents(syringeContents1));
-			console.log({syringeContaminantsName, syringeContaminants0, contaminants1});
-
+			//console.log({syringeContaminantsName, syringeContaminants0, contaminants1});
+			// Update contaminant effects
 			if (!_.isEqual(syringeContaminants0, contaminants1))
 				addEffect(syringeContaminantsName, contaminants1);
 			// Update content effect
