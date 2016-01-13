@@ -140,22 +140,6 @@ case class CarrierSite(
 */
 
 /**
- * Split an evoware carrier line into its components.
- * The first component is an integer that identifies the type of line.
- * The remaining components are returned as a list of string.
- *
- * @param  {string} line - a text line from Evoware's carrier file
- * @return {array} Returns a pair [kind, items], where kind is an integer
- *   identifying the type of line, and items is a string array of the remaining
- *   components of the line.
- */
-function splitSemicolons(line) {
-	const l = line.split(";");
-	const kind = parseInt(l[0]);
-	return [kind, _.tail(l)];
-}
-
-/**
  * Create an EvowareCarrierData object from an array of evoware models.
  * @param  {array} models - array of evoware models
  * @return {EvowareCarrierData}
@@ -230,7 +214,7 @@ function loadEvowareModels(filename) {
  */
 function parseModel(lines, lineIndex) {
 	const line = lines[lineIndex++];
-	const [lineKind, l] = splitSemicolons(line);
+	const [lineKind, l] = EvowareUtils.splitSemicolons(line);
 	//console.log({lineIndex, lineKind, l})
 	switch (lineKind) {
 		case 13: return parse13(l, lines, lineIndex);
@@ -340,7 +324,7 @@ function parse17(l, lines, lineIndex) {
  * @return {array} array of line elements
  */
 function parse998(s) {
-	const [lineType, l] = splitSemicolons(s);
+	const [lineType, l] = EvowareUtils.splitSemicolons(s);
 	assert(lineType === 998);
 	return _.initial(l);
 }

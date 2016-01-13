@@ -45,11 +45,29 @@ function parseEncodedIndexes(encoded) {
 	return [col_n, row_n, indexes];
 }
 
+
+/**
+ * Split an evoware carrier line into its components.
+ * The first component is an integer that identifies the type of line.
+ * The remaining components are returned as a list of string.
+ *
+ * @param  {string} line - a text line from Evoware's carrier file
+ * @return {array} Returns a pair [kind, items], where kind is an integer
+ *   identifying the type of line, and items is a string array of the remaining
+ *   components of the line.
+ */
+function splitSemicolons(line) {
+	const l = line.split(";");
+	const kind = parseInt(l[0]);
+	return [kind, _.tail(l)];
+}
+
 const exports = {
 	decode,
 	encode,
 	hex,
-	parseEncodedIndexes
+	parseEncodedIndexes,
+	splitSemicolons
 };
 
 export default exports;
