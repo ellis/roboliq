@@ -187,8 +187,6 @@ function loadEvowareModels(filename) {
 
 	// Find models in the carrier file
 	while (lines.hasNext()) {
-		//const result0 = parseModel(lines, lineIndex);
-		//console.log({result0})
 		const model = parseModel(lines);
 		//console.log({model})
 		if (!_.isUndefined(model))
@@ -201,14 +199,13 @@ function loadEvowareModels(filename) {
 }
 
 /**
- * Parse the line and return the next lineIndex and a model, if relevant.
+ * Parse the line and return a model, if relevant.
  * @param {EvowareSemicolonFile} lines - array of lines from the Carrier.cfg
- * @param {number} lineIndex - the current line to inspect
  * @return {array} an optional model.
  */
 function parseModel(lines) {
 	const [lineKind, l] = lines.nextSplit();
-	//console.log({lineIndex, lineKind, l})
+	//console.log({lineKind, l})
 	switch (lineKind) {
 		case 13: return parse13(l, lines);
 		case 15: return parse15(l, lines);
@@ -222,8 +219,7 @@ function parseModel(lines) {
  * Parse a carrier object; carrier lines begin with "13"
  *
  * @param {array} l - array of string representing the elements of the current line
- * @param {array} lines - array of lines from the Carrier.cfg
- * @param {number} lineIndex - the current line to inspect
+ * @param {EvowareSemicolonFile} lines - array of lines from the Carrier.cfg
  * @return {Carrier} a Carrier.
  */
 function parse13(l, lines) {
@@ -245,9 +241,8 @@ function parse13(l, lines) {
  * Parse a labware object; labware lines begin with "15"
  *
  * @param {array} l - array of string representing the elements of the current line
- * @param {array} lines - array of lines from the Carrier.cfg
- * @param {number} lineIndex - the current line to inspect
- * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a LabwareModel.
+ * @param {EvowareSemicolonFile} lines - array of lines from the Carrier.cfg
+ * @return {LabwareModel} a new LabwareModel.
  */
 function parse15(l, lines) {
 	const sName = l[0];
@@ -295,22 +290,22 @@ function parse15(l, lines) {
  * Parse a vector object; vector lines begin with "17"
  *
  * @param {array} l - array of string representing the elements of the current line
- * @param {array} lines - array of lines from the Carrier.cfg
- * @param {number} lineIndex - the current line to inspect
- * @return {array} a pair [lineIndex2, model], where lineIndex2 is the new lineIndex and model is a LabwareModel.
+ * @param {EvowareSemicolonFile} lines - array of lines from the Carrier.cfg
+ * @return {Vector} a new Vector, if any
  */
-function parse17(l, lines, lineIndex) {
+function parse17(l, lines) {
 	//println("parse17: "+l.toList)
 	const l0 = l[0].split("_");
 	if (l0.length < 3)
-		return [lineIndex, undefined];
+		return undefined;
 
 	const sClass = l0[1];
 	const iRoma = parseInt(l0[2]) - 1;
 	const nSteps = parseInt(l[3]);
 	const idCarrier = parseInt(l[4]);
 	const model = (nSteps > 2) ? new Vector(idCarrier, sClass, iRoma) : undefined;
-	return [lineIndex + nSteps, model];
+	lines.skip(nSteps);
+	return model;
 }
 
 /**
