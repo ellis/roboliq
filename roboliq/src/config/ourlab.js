@@ -614,7 +614,7 @@ module.exports = {
 						duration: {type: "Duration", default: "30 s"},
 						spinUpTime: {type: "Duration", default: "9 s"},
 						spinDownTime: {type: "Duration", default: "9 s"},
-						temperature: {type: "number", default: 25}
+						temperature: {type: "Temperature", default: "25 degC"}
 					}
 				}
 			},
@@ -731,7 +731,7 @@ module.exports = {
 				math.round(parsedProgram.duration.toNumber('s')),
 				math.round(parsedProgram.spinUpTime.toNumber('s')),
 				math.round(parsedProgram.spinDownTime.toNumber('s')),
-				math.round(parsedProgram.temperature)
+				math.round(parsedProgram.temperature.toNumber('degC'))
 			];
 			var value = list.join(",");
 			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};

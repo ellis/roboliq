@@ -33,7 +33,7 @@ describe('commands/centrifgue', function() {
 						program: {
 							rpm: 3000,
 							duration: 120,
-							temperature: 25
+							temperature: "25 degC"
 						}
 					}
 				}
@@ -149,7 +149,7 @@ describe('commands/centrifgue', function() {
 						"program": {
 							"rpm": 3000,
 							"duration": 120,
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"6": {
@@ -266,7 +266,7 @@ describe('commands/centrifgue', function() {
 					"program": {
 						"rpm": 3000,
 						"duration": 120,
-						"temperature": 25
+						"temperature": "25 degC"
 					}
 				}
 			);

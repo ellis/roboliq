@@ -245,6 +245,8 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 		case "Source": return processSource(result, path, value, data);
 		case "Sources": return processSources(result, path, value, data);
 		case "String": return processString(result, path, value, data);
+		case "Temperature": return processTemperature(result, path, value, data);
+		case "Temperatures": return processOneOrArray(result, path, value, (result, path, x) => processTemperature(result, path, x, data));
 		case "Volume": return processVolume(result, path, value, data);
 		case "Volumes": return processOneOrArray(result, path, value, (result, path, x) => processVolume(result, path, x, data));
 		case "Well": return processWell(result, path, value, data);
@@ -513,6 +515,24 @@ function processSources(result, path, x, data) {
 	}
 	_.set(result.value, path, x);
 	return x;
+}
+
+/**
+ * Try to process a value as a temperature.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ */
+function processTemperature(result, path, x, data) {
+	if (_.isString(x)) {
+		x = math.eval(x);
+	}
+	//console.log({function: "processVolume", path, x})
+	expect.truthy({paramName: path.join('.')}, math.unit('degC').equalBase(x), "expected a temperature with units degC, degF, or K: "+JSON.stringify(x));
+	_.set(result.value, path, x);
+	//console.log("set in result.value")
 }
 
 /**

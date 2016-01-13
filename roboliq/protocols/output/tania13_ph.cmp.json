@@ -38883,7 +38883,7 @@
 							"program": {
 								"rpm": 3000,
 								"duration": "2 minutes",
-								"temperature": 25
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Remove condensation from seal",
@@ -38893,7 +38893,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -39040,8 +39040,8 @@
 							"equipment": "ourlab.mario.centrifuge",
 							"program": {
 								"rpm": 3000,
-								"duration": 1,
-								"temperature": 25
+								"duration": "1s",
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Incubate at 25C",
@@ -39052,8 +39052,8 @@
 						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
-							"duration": 1,
-							"temperature": 25
+							"duration": "1s",
+							"temperature": "25 degC"
 						}
 					}
 				},
@@ -39075,7 +39075,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -39093,8 +39093,8 @@
 						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
-							"duration": 1,
-							"temperature": 25
+							"duration": "1s",
+							"temperature": "25 degC"
 						}
 					}
 				}
@@ -39121,7 +39121,7 @@
 							"program": {
 								"rpm": 3000,
 								"duration": "2 minutes",
-								"temperature": 25
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Remove condensation from seal",
@@ -39131,7 +39131,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -39278,8 +39278,8 @@
 							"equipment": "ourlab.mario.centrifuge",
 							"program": {
 								"rpm": 3000,
-								"duration": 1,
-								"temperature": 25
+								"duration": "1s",
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Incubate at 25C",
@@ -39290,8 +39290,8 @@
 						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
-							"duration": 1,
-							"temperature": 25
+							"duration": "1s",
+							"temperature": "25 degC"
 						}
 					}
 				},
@@ -39313,7 +39313,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -39331,8 +39331,8 @@
 						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
-							"duration": 1,
-							"temperature": 25
+							"duration": "1s",
+							"temperature": "25 degC"
 						}
 					}
 				}
@@ -39352,7 +39352,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -39370,8 +39370,8 @@
 						"destinationAfter2": "stay",
 						"program": {
 							"rpm": 3000,
-							"duration": 1,
-							"temperature": 25
+							"duration": "1s",
+							"temperature": "25 degC"
 						}
 					}
 				}

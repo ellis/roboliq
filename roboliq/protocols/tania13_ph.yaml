@@ -158,7 +158,7 @@ steps:
           program:
             rpm: 3000
             duration: 2 minutes
-            temperature: 25
+            temperature: 25 degC
         2:
           command: fluorescenceReader.measurePlate
           object: mixPlate
@@ -173,5 +173,5 @@ steps:
           destinationAfter2: stay
           program:
             rpm: 3000
-            duration: 1 # must set a duration of at least 1s
-            temperature: 25
+            duration: 1s # must set a duration of at least 1s
+            temperature: 25 degC

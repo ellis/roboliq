@@ -38076,7 +38076,7 @@
 							"program": {
 								"rpm": 3000,
 								"duration": "2 minutes",
-								"temperature": 25
+								"temperature": "25 degC"
 							}
 						},
 						"4": {
@@ -38148,7 +38148,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -38342,7 +38342,7 @@
 							"program": {
 								"rpm": 3000,
 								"duration": 1,
-								"temperature": 25
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Incubate at 25C",
@@ -38355,7 +38355,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					}
 				},
@@ -38377,7 +38377,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -38397,7 +38397,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					}
 				}
@@ -38424,7 +38424,7 @@
 							"program": {
 								"rpm": 3000,
 								"duration": "2 minutes",
-								"temperature": 25
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Remove condensation from seal",
@@ -38434,7 +38434,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -38582,7 +38582,7 @@
 							"program": {
 								"rpm": 3000,
 								"duration": 1,
-								"temperature": 25
+								"temperature": "25 degC"
 							}
 						},
 						"description": "Incubate at 25C",
@@ -38595,7 +38595,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					}
 				},
@@ -38617,7 +38617,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -38637,7 +38637,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					}
 				}
@@ -38657,7 +38657,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": "2 minutes",
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					},
 					"2": {
@@ -38677,7 +38677,7 @@
 						"program": {
 							"rpm": 3000,
 							"duration": 1,
-							"temperature": 25
+							"temperature": "25 degC"
 						}
 					}
 				}
