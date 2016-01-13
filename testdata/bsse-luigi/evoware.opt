@@ -1,0 +1,212 @@
+FD46B9D3
+20160112_165810 Admin           
+EVOWARE : last used Te-Shake labware stored                                                                                     
+Administrator                                                                                                                   
+PLUNGER_ASP_ACCEL=C1x2r1t1
+PLUNGER_DISP_ACCEL=C1x0r1t4.5C1x1r1t11
+PLUNGER_Drop_Diti=68000
+LAST_OFFSET_CARRIER=TeMO_3x5Pos.
+LAST_OFFSET_RACK=TeMO_DiTi_200ul
+LAST_OFFSET_GRID=16
+LAST_OFFSET_SITE=9
+Y2_MAXSPEED=2000
+DITI_PWM_LIMIT=80
+DITI_CURRENT=3
+TIPBLOCK_PWM=60
+TIPBLOCK_CURRENT=3
+INIT_TOLERANCE_X=5
+INIT_TOLERANCE_Z=15
+INIT_TOLERANCE_Y1=4
+INIT_TOLERANCE_Y2=14
+INIT_TOLERANCE_Y3=4
+RANGE_TOLERANCE_X=2
+RANGE_TOLERANCE_Z=2
+RANGE_TOLERANCE_Y1=2
+RANGE_TOLERANCE_Y2=2
+RANGE_TOLERANCE_Y3=2
+SECOND_DITI_DROP=1
+DELAY_DITI_DROP=200
+RELATIVE_MOVE_DITI_DROP=200
+RETRACT_SPEED_DITI_DROP=200
+
+[CAROUSEL]
+MAXTOWER=9 
+RETRIEVE_POS_TOWER=7
+RETRIEVE_POS_SLOT=3
+RETURN_POS_TOWER=2
+RETURN_POS_SLOT=18
+
+[VIEWS]
+VARIABLE=0
+
+[OBSTACLES]
+NO_TEMO_OBSTACLE=0
+SHOWINSIM=1
+SIMCOORDX0=310
+SIMCOORDY0=570
+HEIGHT=3000
+COLOR1=4,2
+;OBSTACLE1=7000,1500,11000,4000
+COLOR1=1,2
+
+[OPTIONS]
+OPTIMIZE_ZTRAVEL=0
+ALLOW_ABSENT_CARRIER=0
+POOLSAFE_BALANCES=2
+LIHA_ALLOCATION_TIMEOUT=180000
+ROMA_ALLOCATION_TIMEOUT=180000
+MCA_ALLOCATION_TIMEOUT=180000
+PNP_ALLOCATION_TIMEOUT=180000
+POSID_ALLOCATION_TIMEOUT=1800
+LIHA_CHECKFORDEADLOCKS=0
+MCA_CHECKFORDEADLOCKS=0
+MCA384_CHECKFORDEADLOCKS=0
+RUNTIME_PRESERVEBARCODES=0
+LABWARE_OFFSET_ON_SAFEPOS_IN_STD=1
+LIHA_STOP_AT_ZMAX=0
+DISPENSE_EXCESS_INTO_LIQUIDWASTE=0
+DISCARD_DITIS_WITH_LIQUID=0
+REPLACE_EXCESS_BEFORE_ASPIRATE=0 ; activates search for existing excess volume and activates the drop in the Aspirate-command
+NO_SUBCLASS_SEARCH_FOR_CONDITIONING_AND_EXCESS=0 ; deactivates the search for a matching sub-class for the drop of excess and conditioning. 
+LOG_TIP_CONTENT=0 ; activates logging of tip-content
+DROP_TAG_SPEED=80 ; Speed used to drop the TAG (default=80ul/s)
+Delete_Rack_At_Source=1 ; Switches the clearing function on (1) or off (0)
+
+[CFG_RACK]
+TeMO_Tipblock=101
+TeMO_HPTipblock=101
+TeMO_DiTi_100ul=101
+TeMO_DiTi_100ul_Filter=101
+TeMO_DiTi_200ul=101
+TeMO_DiTi_200ul_Filter=101
+TeMO_DiTi_50ul=101
+TeMO_StdTipblock=101
+1536 Well, landscape=101
+Microplate, landscape=101
+AB 96 Well plate on Te-MagS=101
+Wash Station Waste EVO75=101
+Wash Station Cleaner Deep EVO75=103
+Wash Station Cleaner Shallow EVO75=103
+96 Well Microplate=1601
+96 Well DeepWell=5016
+96 Well PCR Plate=501
+Tube Eppendorf 3811 1.5 ml=1502
+Trough 100ml=4001
+DiTi 100ul Filter MCA=101
+DiTi 200ul Filter MCA=101
+DiTi 100ul MCA=101
+DiTi 200ul MCA=101
+DiTi 50ul MCA=101
+Tipblock HP MCA=101
+Tipblock Std MCA=101
+MCA384 Adapter 96 Fixed 125�l=101
+MCA384 Adapter 96 Fixed 50�l=101
+MCA384 Adapter for 96 Tips=101
+MCA384 Adapter 384 Tips Combo=101
+Pos Camera=2902
+Wash Station Cleaner shallow=4101
+Wash Station Cleaner deep=4203
+Wash Station Cleaner LV shallow=101
+PickoloPetriDish=2801
+Omnitray with Lid - OneWell=2901
+96 Well DeepWell Ritterplate=1302
+Balance Mettler SAG285=1901
+Wash Station Waste=4202
+Trough 1500ml Stainless=3701
+DiTi 1000ul LiHa=101
+DM Nunc stronghold=4401
+6 Well Greiner Plate=2901
+Ellis Nunc F96 MicroWell=101
+96 DWB sealed=1301
+ST Heat Plate=101
+Te-PS Sensorplate=1902
+ST 384 Well Greiner Black=101
+four deep well trough=101
+ST 4 Deep Well Trough=101
+ST 384 Well Greiner wo Lid=101
+ST 384-Well Greiner wo Lid=101
+ST 384-Well Greiner=1903
+ST 96-Deep-Well Ritter=101
+ST 96-Deep-Well Ritter GripU=101
+ST 96-Deep-Well Ritter GriUp=1201
+ST 4-Deep-Well Trough=1903
+DM 96-DWB GripUp=101
+DM 96 DWB GripUp sealed=1201
+
+[CFG_VECTOR]
+asd=101
+Home1=101
+Move from A to B=101
+Move from B to A=101
+Just move around=101
+Home2=101
+MP6Pos Flat Grid15to26_Narrow_1=1501
+Infinite 200_Narrow_1=601
+MP6Pos Flat Grid13to24_Narrow_1=1305
+MP1 Pos ReGrip Grid1to4_Narrow_1=601
+Incubator1_Narrow_1=101
+Hotel 3x4Pos Grid25to39_Narrow_1=2509
+Symbol954_Narrow_1=4301
+RoboSeal_Narrow_1=4501
+Te-Shake 2Pos_Narrow_1=4401
+Pickolo-Light-Table_Narrow_1=2901
+MP6Pos Flat Grid13to24_Narrow_2=1306
+Pickolo-Light-Table_Narrow_2=2901
+Symbol954_Narrow_2=4301
+RoboSeal_Narrow_2=4501
+Te-Shake 1Pos Front_Narrow_2=4401
+Kuhner Shaker ES-X  2x4x2Pos_Narrow_2=5016
+MP1 Pos ReGrip Grid1to4_Wide_1=401
+Incubator1_Wide_1=101
+MP1 Pos ReGrip Grid1to4=301
+Incubator1=101
+Te-Shake 1Pos Front_Narrow_1=4401
+Hotel 4Pos Transfer Grid 0_Narrow_1=704
+Incubator2_Narrow_1=201
+Incubator3_Narrow_1=301
+Incubator4_Narrow_1=401
+MP 2Pos Flat with Downholder_Narrow_1=1302
+MP 2Pos Flat with Downholder_Narrow_2=1301
+MP 3Pos Flat Grid19_Narrow_2=1903
+ReGrip below_Narrow_1=901
+ReGrip below_Wide_1=901
+ReGrip above_Narrow_1=801
+Infinite 200_Wide_1=601
+Downholder DWB_Narrow_1=1201
+Hold seald DWB=501
+MP 3Pos Flat Grid19_Narrow_1=1903
+IncubatorAll_Narrow_1=508
+Heat Plate from Pickolo=2901
+From Save to Pickolo=2901
+From Save to Heatblock=2901
+From Save to Pickolo Wide=2902
+Move in front of Scanner=4301
+From Save to IncubatorDoor=501
+
+[MAGS]
+LAST_TYPE_3=1
+
+[MCA]
+SECOND_DITI_DROP=0
+DELAY_DITI_DROP=200
+RELATIVE_MOVE_DITI_DROP=100
+RETRACT_SPEED_DITI_DROP=200
+OptimizeZTravel=1
+DITI_PWM_LIMIT=90
+DITI_PWM_LIMIT1=27
+TIPBLOCK_PWM=50
+SKIP_TIPBLOCK_COMMANDS=0
+DITI_SIDE_STEPS_X=0
+DITI_SIDE_STEPS_Y=0
+DITI_SIDE_STEPS_Z=0
+RIGHT_CUT_OUT=0
+
+[DITI]
+FETCH_MODE=0
+FETCH_MODE2=0
+POSEVAL=1
+[SelfDiagnosticsTest]
+Altitude=-1 ; Altitude in meters
+AltitudeUnit=1 ;1=meter, 2=feet
+[SHAKER]
+LAST_TYPE_8=1
