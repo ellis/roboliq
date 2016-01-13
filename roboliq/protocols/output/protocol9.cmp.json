@@ -542,53 +542,67 @@
 		}
 	},
 	"effects": {
+		"1.1.1.1": {
+			"ourlab.mario.liha.syringe.1.cleaned": "thorough",
+			"ourlab.mario.liha.syringe.2.cleaned": "thorough",
+			"ourlab.mario.liha.syringe.3.cleaned": "thorough",
+			"ourlab.mario.liha.syringe.4.cleaned": "thorough"
+		},
 		"1.2": {
-			"ourlab.mario.liha.syringe.1.contaminants": [
-				"water"
-			],
 			"plate1.contents.A01": [
 				"30 ul",
 				"water"
 			],
-			"plate2.contents.A01": [
-				"20 ul",
+			"ourlab.mario.liha.syringe.1.contaminants": [
 				"water"
 			],
+			"ourlab.mario.liha.syringe.1.cleaned": null,
 			"__WELLS__.plate1.contents.A01": {
 				"isSource": true,
 				"volumeMin": "30 ul",
 				"volumeMax": "50 ul",
 				"volumeRemoved": "20 ul"
 			},
+			"plate2.contents.A01": [
+				"20 ul",
+				"water"
+			],
 			"__WELLS__.plate2.contents.A01": {
 				"isSource": false,
 				"volumeMin": "0 l",
 				"volumeMax": "20 ul",
 				"volumeAdded": "20 ul"
 			},
-			"ourlab.mario.liha.syringe.2.contaminants": [
-				"water"
-			],
 			"plate1.contents.A02": [
 				"30 ul",
 				"water"
 			],
-			"plate2.contents.A02": [
-				"20 ul",
+			"ourlab.mario.liha.syringe.2.contaminants": [
 				"water"
 			],
+			"ourlab.mario.liha.syringe.2.cleaned": null,
 			"__WELLS__.plate1.contents.A02": {
 				"isSource": true,
 				"volumeMin": "30 ul",
 				"volumeMax": "50 ul",
 				"volumeRemoved": "20 ul"
 			},
+			"plate2.contents.A02": [
+				"20 ul",
+				"water"
+			],
 			"__WELLS__.plate2.contents.A02": {
 				"isSource": false,
 				"volumeMin": "0 l",
 				"volumeMax": "20 ul",
 				"volumeAdded": "20 ul"
 			}
+		},
+		"1.3.1.1": {
+			"ourlab.mario.liha.syringe.1.contaminants": null,
+			"ourlab.mario.liha.syringe.1.cleaned": "thorough",
+			"ourlab.mario.liha.syringe.2.contaminants": null,
+			"ourlab.mario.liha.syringe.2.cleaned": "thorough"
 		}
 	},
 	"warnings": {},

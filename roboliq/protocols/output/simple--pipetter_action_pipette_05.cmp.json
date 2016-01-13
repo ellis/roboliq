@@ -477,15 +477,11 @@
 	},
 	"effects": {
 		"1.1": {
-			"ourlab.mario.liha.syringe.1.contaminants": [
-				"reagent1"
-			],
 			"plate1.contents.A01": [
 				"120 ul",
 				"reagent1"
 			],
-			"plate1.contents.A02": [
-				"20 ul",
+			"ourlab.mario.liha.syringe.1.contaminants": [
 				"reagent1"
 			],
 			"__WELLS__.plate1.contents.A01": {
@@ -494,6 +490,10 @@
 				"volumeMax": "200 ul",
 				"volumeRemoved": "80 ul"
 			},
+			"plate1.contents.A02": [
+				"20 ul",
+				"reagent1"
+			],
 			"__WELLS__.plate1.contents.A02": {
 				"isSource": false,
 				"volumeMin": "0 l",
@@ -541,15 +541,8 @@
 			}
 		},
 		"1.2": {
-			"ourlab.mario.liha.syringe.1.contaminants": [
-				"reagent1"
-			],
 			"plate1.contents.A01": [
 				"40 ul",
-				"reagent1"
-			],
-			"plate1.contents.E02": [
-				"20 ul",
 				"reagent1"
 			],
 			"__WELLS__.plate1.contents.A01": {
@@ -558,15 +551,16 @@
 				"volumeMax": "200 ul",
 				"volumeRemoved": "160 ul"
 			},
+			"plate1.contents.E02": [
+				"20 ul",
+				"reagent1"
+			],
 			"__WELLS__.plate1.contents.E02": {
 				"isSource": false,
 				"volumeMin": "0 l",
 				"volumeMax": "20 ul",
 				"volumeAdded": "20 ul"
 			},
-			"ourlab.mario.liha.syringe.2.contaminants": [
-				"reagent1"
-			],
 			"plate1.contents.F02": [
 				"20 ul",
 				"reagent1"
@@ -577,9 +571,6 @@
 				"volumeMax": "20 ul",
 				"volumeAdded": "20 ul"
 			},
-			"ourlab.mario.liha.syringe.3.contaminants": [
-				"reagent1"
-			],
 			"plate1.contents.G02": [
 				"20 ul",
 				"reagent1"
@@ -590,9 +581,6 @@
 				"volumeMax": "20 ul",
 				"volumeAdded": "20 ul"
 			},
-			"ourlab.mario.liha.syringe.4.contaminants": [
-				"reagent1"
-			],
 			"plate1.contents.H02": [
 				"20 ul",
 				"reagent1"

@@ -106,10 +106,10 @@
 		- [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
 		- [x] test contamination upon wet contact
 	- [x] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
+- [ ] centrifuge: temperature parameters should require unit (e.g. 'degC')
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create
-- [ ] centrifuge: temperature parameters should require unit (e.g. 'degC')
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] paper1_protocol3_unfolding.yaml: make sure it compiles
 - [ ] consider having the fluorescenceReader command generate a report with the current plate contents
