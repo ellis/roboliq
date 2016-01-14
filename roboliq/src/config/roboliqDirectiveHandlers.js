@@ -84,8 +84,8 @@ function directive_factorialCols(spec, data) {
     //console.log("genFactorialCols:", spec);
     assert(_.isPlainObject(spec) || _.isArray(spec));
 	var variables = (_.isPlainObject(spec))
-		? _.pairs(spec)
-		: _(spec).map(_.pairs).flatten().value();
+		? _.toPairs(spec)
+		: _(spec).map(_.toPairs).flatten().value();
 
     var lists = _.map(variables, function(pair) {
 		var key = pair[0];

@@ -380,7 +380,7 @@ function pipette(params, parsed, data) {
 
 	var syringeToSource = {};
 	// How clean is the syringe/tip currently?
-	var syringeToCleanValue = _.zipObject(_.map(syringesAvailable, s => [s, 5]));
+	var syringeToCleanValue = _.fromPairs(_.map(syringesAvailable, s => [s, 5]));
 	var expansionList = [];
 
 	// Create clean commands before pipetting this group

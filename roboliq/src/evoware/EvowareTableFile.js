@@ -312,14 +312,13 @@ export function toStringWithLabware(carrierData, table) {
 export function toString_carriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites
 	// [[a, b]]
-	const gridToCarrierId_l = _(table).map((c, carrierName) => {
-		console.log({c, carrierName})
-		const carrier = carrierData.nameToCarrier[carrierName];
+	const gridToCarrierName_l = _(table).map((c, carrierName) => {
+		//console.log({c, carrierName})
 		return _.map(c, (x, gridIndexText) => {
 			if (x.internal) {
 				try {
 					const gridIndex = parseInt(gridIndexText);
-					return [gridIndex, carrier.id];
+					return [gridIndex, carrierName];
 				} catch(e) {
 					// Do nothing
 				}
@@ -327,10 +326,13 @@ export function toString_carriers(carrierData, table) {
 			return undefined;
 		});
 	}).flatten().compact().value();
-	const gridToCarrierId_m = _.zipObject(gridToCarrierId_l);
-	console.log({gridToCarrierId_l, gridToCarrierId_m})
+	const gridToCarrierName_m = _.fromPairs(gridToCarrierName_l);
+	//console.log({gridToCarrierId_l, gridToCarrierId_m})
 
-	const l = _.times(99, gridIndex => _.get(gridToCarrierId_m, gridIndex, -1));
+	const l = _.times(99, gridIndex => {
+		const carrierName = gridToCarrierName_m[gridIndex];
+		return (_.isEmpty(carrierName)) ? -1 : carrierData.getCarrierByName(carrierName).id;
+	});
 
 	return `14;${l.join(";")};`;
 }

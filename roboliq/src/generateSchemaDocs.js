@@ -50,7 +50,7 @@ const schemas_l = _.map(filename_l, filename => yaml.load(__dirname+"/schemas/"+
 // Merge all schemas together
 const schemas = _.merge.apply(_, [{}].concat(schemas_l));
 // Separate object schemas from command schemas
-const [objectSchemas, commandSchemas] = _.partition(_.pairs(schemas), ([name, schema]) => name[0] === name[0].toUpperCase());
+const [objectSchemas, commandSchemas] = _.partition(_.toPairs(schemas), ([name, schema]) => name[0] === name[0].toUpperCase());
 
 // Generate documentation for object types
 const objectSchemasText = _.map(objectSchemas, toMarkdown).join('\n\n')

@@ -71,7 +71,7 @@ function parseParams(params, data, schema) {
 function processParamsBySchema(result, path, params, schema, data) {
 	//console.log(`processParamsBySchema: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
 	const required_l = schema.required || [];
-	const l0 = _.pairs(schema.properties);
+	const l0 = _.toPairs(schema.properties);
 	// If no properties are schemafied, return the original parameters
 	if (l0.length === 0) {
 		_.set(result.value, path, params);
@@ -80,7 +80,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 	// Otherwise, convert the parameters
 	for (const [propertyName, p] of l0) {
 		const type = p.type;
-		const required = required_l.includes(propertyName);
+		const required = _.includes(required_l, propertyName);
 		const defaultValue = p.default;
 		const path1 = path.concat(propertyName);
 		const value0 = _.cloneDeep(_.get(params, propertyName, defaultValue));
@@ -188,7 +188,7 @@ function processValue0BySchema(result, path, value0, schema, data) {
  */
 function processValue0AsEnum(result, path, value0, schema, data) {
 	const value1 = lookupValue0(result, path, value0, data);
-	expect.truthy({paramName: path.join(".")}, schema.enum.includes(value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
+	expect.truthy({paramName: path.join(".")}, _.includes(schema.enum, value1), "expected one of "+schema.enum+": "+JSON.stringify(value0));
 	_.set(result.value, path, value1);
 }
 

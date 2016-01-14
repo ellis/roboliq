@@ -123,6 +123,9 @@ export class EvowareCarrierData {
 		this.carrierIdToVectors = carrierIdToVectors;
 	}
 
+	getCarrierByName(carrierName) {
+		return this.nameToCarrier[carrierName];
+	}
 
 	/**
 	 * Print debug output: carrier id, carrier name.

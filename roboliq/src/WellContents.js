@@ -208,17 +208,24 @@ export function flattenContents(contents) {
 	else if (contents.length == 2) {
 		assert(_.isString(contents[1]), "second element of contents should be a string: "+JSON.stringify(contents));
 		var volume = math.eval(contents[0]).format({precision: 14});
-		return _.zipObject([[contents[1], volume]]);
+		return _.fromPairs([[contents[1], volume]]);
 	}
 	// If the array has more than two elements, each element after the volume has the same
 	// structure as the top array and they represent the mixture originally dispensed in the well.
 	else {
-		var maps = _.map(_.rest(contents), function(contents) { return _.mapValues(flattenContents(contents), function(value) { return math.eval(value); }); });
+		/*const maps = _(contents).tail().map(contents2 => {
+			const flattened = flattenContents(contents2);
+			//console.log({flattened});
+			const x = _.mapValues(flattened, value => math.eval(value))
+			//console.log({x});
+			return x;
+		}).value();*/
+		var maps = _.map(_.tail(contents), contents => _.mapValues(flattenContents(contents), value => math.eval(value)));
 		//console.log("maps: "+JSON.stringify(maps));
 		var merger = function(a, b) { return (_.isUndefined(a)) ? b : math.add(a, b); };
 		var mergeArgs = _.flatten([{}, maps, merger]);
 		//console.log("mergeArgs: "+mergeArgs);
-		var merged = _.merge.apply(_, mergeArgs);
+		var merged = _.mergeWith.apply(_, mergeArgs);
 		//console.log("merged: "+JSON.stringify(merged));
 		var total = math.eval(contents[0]);
 		var subTotal = _.reduce(merged, function(total, n) { return math.add(total, n); }, emptyVolume);
@@ -251,7 +258,7 @@ export function transferContents(srcContents, dstContents, volume) {
 	//console.log({dstContents})
 	checkContents(dstContents);
 
-	const srcContentsToAppend = [volumeText].concat(_.rest(srcContents));
+	const srcContentsToAppend = [volumeText].concat(_.tail(srcContents));
 	let dstContents2;
 	// If the destination is empty:
 	if (dstContents.length <= 1) {
@@ -266,9 +273,9 @@ export function transferContents(srcContents, dstContents, volume) {
 		}
 		// Otherwise add source to destination contents
 		else {
-			const dstSumOfComponents = math.sum(_.map(_.rest(dstContents), l => math.eval(l[0])));
+			const dstSumOfComponents = math.sum(_.map(_.tail(dstContents), l => math.eval(l[0])));
 			if (math.equal(dstVolume, dstSumOfComponents)) {
-				dstContents2 = _.flatten([totalVolumeText, _.rest(dstContents), [srcContentsToAppend]]);
+				dstContents2 = _.flatten([totalVolumeText, _.tail(dstContents), [srcContentsToAppend]]);
 			}
 			else {
 				dstContents2 = _.flatten([totalVolumeText, [dstContents], [srcContentsToAppend]]);
@@ -280,7 +287,7 @@ export function transferContents(srcContents, dstContents, volume) {
 	// Decrease volume of source
 	const srcVolume0 = math.eval(srcContents[0]);
 	const srcVolume1 = math.chain(srcVolume0).subtract(volume).done();
-	const srcContents2 = [srcVolume1.format({precision: 14})].concat(_.rest(srcContents));
+	const srcContents2 = [srcVolume1.format({precision: 14})].concat(_.tail(srcContents));
 
 	checkContents(srcContents2);
 	checkContents(dstContents2);

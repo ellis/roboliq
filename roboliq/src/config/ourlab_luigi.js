@@ -481,12 +481,12 @@ module.exports = {
 		return {"method": {"description": "generic.openSite-CENTRIFUGE_"+n,
 			"task": {"generic.openSite": {"site": "?site"}},
 			"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.luigi.site.CENTRIFUGE_"+n}}],
-			"subtasks": {"ordered": [_.zipObject([["ourlab.luigi.centrifuge.open"+n, {}]])]}
+			"subtasks": {"ordered": [_.fromPairs([["ourlab.luigi.centrifuge.open"+n, {}]])]}
 		}};
 	}),
 	_.map([1,2,3,4], function(n) {
 		return {"action": {"description": "ourlab.luigi.centrifuge.open: open an internal site on the centrifuge",
-			"task": _.zipObject([["ourlab.luigi.centrifuge.open"+n, {}]]),
+			"task": _.fromPairs([["ourlab.luigi.centrifuge.open"+n, {}]]),
 			"preconditions": [],
 			"deletions": [
 				{"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_"+n}}
@@ -744,7 +744,7 @@ module.exports = {
 					factsVariable: carrier+"_Seal",
 					factsValue: parsed.value.program
 				}],
-				//effects: _.zipObject([[params.object + ".sealed", true]])
+				//effects: _.fromPairs([[params.object + ".sealed", true]])
 			};
 		},
 		"evoware._facts": function(params, parsed, data) {},

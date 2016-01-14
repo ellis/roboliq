@@ -286,7 +286,7 @@ function loadProtocol(a, b, url, filecache) {
  */
 function preProcessQuestionMarks(protocol, obj, path) {
 	if (_.isPlainObject(obj)) {
-		const pairs0 = _.pairs(obj);
+		const pairs0 = _.toPairs(obj);
 		let changed = false;
 		const pairs1 = pairs0.map(pair => {
 			const [name, value] = pair;
@@ -331,7 +331,7 @@ function preProcessQuestionMarks(protocol, obj, path) {
 function preProcessExclamationMarks(protocol, obj, path) {
 	//console.log(JSON.stringify(obj));
 	if (_.isPlainObject(obj)) {
-		const pairs0 = _.pairs(obj);
+		const pairs0 = _.toPairs(obj);
 		let changed = false;
 		const obj1 = [];
 		for (var i = 0; i < pairs0.length; i++) {
@@ -351,7 +351,7 @@ function preProcessExclamationMarks(protocol, obj, path) {
 			// Remove all properties
 			pairs0.forEach(pair => delete obj[pair[0]]);
 			// Add them all back in again, with new names/values
-			const pairs1 = _.pairs(obj1);
+			const pairs1 = _.toPairs(obj1);
 			pairs1.forEach(pair => obj[pair[0]] = pair[1]);
 		}
 	}
@@ -419,7 +419,7 @@ function postProcessProtocol(protocol) {
 					var pair = WellContents.getContentsAndName(well, protocol);
 					// If well already has contents:
 					if (pair[0]) {
-						assert(_.isEqual(_.rest(pair[0]), [name]), "well "+well+" already contains different contents: "+JSON.stringify(pair[0]));
+						assert(_.isEqual(_.tail(pair[0]), [name]), "well "+well+" already contains different contents: "+JSON.stringify(pair[0]));
 						// Don't need to set contents, leave as is with the given volume.
 					}
 					else {
@@ -486,7 +486,7 @@ function validateProtocol1(protocol, o, path) {
 		o = protocol.objects;
 		path = [];
 	}
-	for (const [name, value] of _.pairs(o)) {
+	for (const [name, value] of _.toPairs(o)) {
 		const fullName = path.concat(name).join(".");
 		//console.log({name, value})
 		if (name !== 'type') {

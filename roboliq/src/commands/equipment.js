@@ -72,7 +72,7 @@ var commandHandlers = {
 
 		return {
 			expansion: expansion,
-			effects: _.zipObject([[parsed.objectName.equipment+".open", true]])
+			effects: _.fromPairs([[parsed.objectName.equipment+".open", true]])
 		};
 	},
 	/**

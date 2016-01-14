@@ -32,10 +32,10 @@ describe('misc', function() {
 			var fn2 = function(x) {
 				//console.log("fn2:", x)
 				if (_.isPlainObject(x)) {
-					var l = _.pairs(x);
+					var l = _.toPairs(x);
 					//console.log('l:', l)
 					if (l.length === 1 && _.startsWith(l[0][0], "#")) {
-						return _.pairs(l[0][1]);
+						return _.toPairs(l[0][1]);
 					}
 				}
 				//console.log("fn2 ret:", x)
