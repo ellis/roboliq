@@ -111,7 +111,7 @@ function parse14(carrierData, l, lines) {
 		else {
 			const l = _.get(carrierIdToGrids, carrier.id, []);
 			l.push(gridIndex);
-			carrierIdToGrids[carrier.id] = l;
+			carrierIdToGrids[carrier.id] = _.uniq(l);
 		}
 	});
 
