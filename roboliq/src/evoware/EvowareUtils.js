@@ -1,4 +1,6 @@
 import _ from 'lodash';
+import fs from 'fs';
+import iconv from 'iconv-lite';
 
 /**
  * Encode an integer as an ASCII character.
@@ -81,7 +83,7 @@ class EvowareSemicolonFile {
 	}
 
 	nextSplit() {
-		const line = next();
+		const line = this.next();
 		if (_.isUndefined(line))
 			return undefined;
 		const result = splitSemicolons(line);

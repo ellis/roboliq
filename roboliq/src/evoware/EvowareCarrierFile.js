@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
-import fs from 'fs';
-import iconv from 'iconv-lite';
-import lineByLine from 'n-readlines';
+//import fs from 'fs';
+//import iconv from 'iconv-lite';
 import {sprintf} from 'sprintf-js';
 import EvowareUtils from './EvowareUtils.js';
 

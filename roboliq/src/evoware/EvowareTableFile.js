@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
-import fs from 'fs';
-import iconv from 'iconv-lite';
-import lineByLine from 'n-readlines';
+//import fs from 'fs';
+//import iconv from 'iconv-lite';
 import {sprintf} from 'sprintf-js';
 import EvowareUtils from './EvowareUtils.js';
 
@@ -153,13 +152,12 @@ function parse14_getLabwareObjects(carrierData, gridToCarrierId, lines) {
 			const [n1, l1] = lines.nextSplit();
 			assert(n0 == 998 && n1 == 998 && parseInt(l0[0]) === carrier.siteCount);
 			//println(iGrid+": "+carrier)
-			CONTINUE
-			const l = _.compact(_.range(0, ))(for (iSite <- 0 until carrier.siteCount) yield {
+			const l = _.compact(_.range(0, carrier.siteCount).map(siteIndex => {
 				//println("\t"+i+": "+l0(i+1)+", "+l1(i))
-				const sName = l0(iSite+1)
-				if (sName.isEmpty()) None
-				else Some(CarrierGridSiteIndex(carrier.id, gridIndex, iSite), l1(iSite), mapNameToLabwareModel(sName))
-			}).toList.flatten
+				const sName = l0(iSite+1);
+				if (_.isEmpty(sName) return undefined;
+				else return [new CarrierGridSiteIndex(carrierId, gridIndex, siteIndex), l1[siteIndex], carrierData.nameToLabwareModel[sName]];
+			});
 			result.push.apply(result, l);
 		}
 		else {
