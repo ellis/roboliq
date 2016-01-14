@@ -10,18 +10,14 @@ import * as EvowareCarrierFile from './EvowareCarrierFile.js';
  * @param {array} carrierIdsInternal - array of carrier IDs, whereby the index in the array represents the gridIndex, and a value of -1 indicates no carrier at that grid point
  * @param {array} hotelObjects - array of HotelObjects
  * @param {array} externalObjects - array of ExternalObjects
- * @param {object} carrierIdToGrids - map from carrierId to grid indexes where that carrier is used
- * @param {object} siteIdToLabel - map from carrierIndex to gridIndex to siteIndex to name of the site
- * @param {object} siteIdToLabwareModelName - map from carrierIndex to gridIndex to siteIndex to labware model's name at the site
+ * @param {object} layout - map from carrierName to gridIndex to siteIndex to {label, labwareModelName}
  */
 export class EvowareTableData {
-	constructor(carrierIdsInternal, hotelObjects, externalObjects, carrierIdToGrids, siteIdToLabel, siteIdToLabwareModel) {
+	constructor(carrierIdsInternal, hotelObjects, externalObjects, layout) {
 		this.carrierIdsInternal = carrierIdsInternal;
 		this.hotelObjects = hotelObjects;
 		this.externalObjects = externalObjects;
-		this.carrierIdToGrids = carrierIdToGrids;
-		this.siteIdToLabel = siteIdToLabel;
-		this.siteIdToLabwareModel = siteIdToLabwareModel;
+		this.layout = layout;
 	}
 }
 
@@ -116,26 +112,71 @@ function parse14(carrierData, l, lines) {
 		}
 	});
 
-	const siteIdToLabel = {};
-	const siteIdToLabwareModelName = {};
-	internalObjects.forEach(([siteId, label, labwareModelName]) => {
-		if (!_.isEmpty(label)) {
-			const c = _.get(siteIdToLabel, siteId.carrierId, {});
-			const g = _.get(c, siteId.gridIndex, {});
-			_.set(g, siteId.siteIndex, label);
-			_.set(c, siteId.gridIndex, g);
-			_.set(siteIdToLabel, siteId.carrierId, c);
+	function set(carrierName, gridIndex, siteIndex, propertyName, propertyValue) {
+		const c = _.get(layout, carrierName, {});
+		if (_.isUndefined(gridIndex)) {
+			_.set(c, propertyName, propertyValue);
 		}
-		_.set(siteIdToLabwareModelName, [siteId.carrierId.toString(), siteId.gridIndex.toString(), siteId.siteIndex.toString()], labwareModelName);
+		else {
+			const g = _.get(c, gridIndex, {});
+			if (_.isUndefined(siteIndex)) {
+				_.set(g, propertyName, propertyValue);
+			}
+			else {
+				const s = _.get(g, siteIndex, {});
+				_.set(s, propertyName, propertyValue);
+				_.set(g, siteIndex, s);
+			}
+			_.set(c, gridIndex, g);
+		}
+		_.set(layout, carrierName, c);
+	}
+
+	// Get list of all carriers on the table
+	const carrierAndGridList = [];
+	// Internal carriers
+	carrierIdsInternal.forEach((carrierId, gridIndex) => {
+		if (carrierId > -1) {
+			const carrier = carrierData.idToCarrier[carrierId];
+			carrierAndGridList.push([carrier.name, gridIndex, "internal"]);
+		}
+	});
+	// Hotel carriers
+	hotelObjects.forEach(o => {
+		const carrier = carrierData.idToCarrier[o.parentCarrierId];
+		carrierAndGridList.push([carrier.name, o.gridIndex, "hotel"]);
+	});
+	// External objects
+	externalCarrierNameToGridIndexList.forEach(([carrierName, gridIndex]) => {
+		carrierAndGridList.push([carrierName, gridIndex, "external"]);
+	});
+
+	// Sort the list by gridIndex
+	const carrierAndGridList1 = _.sortBy(carrierAndGridList, l => l[1]);
+	//console.log(JSON.stringify(carrierAndGridList1, null, '\t'));
+
+	// Populate the carrier/grid layout information in gridIndex-order
+	const layout = {};
+	carrierAndGridList1.forEach(([carrierName, gridIndex, propertyName]) => {
+		set(carrierName, gridIndex, undefined, propertyName, true);
+	});
+
+	internalObjects.forEach(([carrierName, gridIndex, siteIndex, label, labwareModelName]) => {
+		if (!_.isEmpty(label))
+			set(carrierName, gridIndex, siteIndex, 'label', label);
+		set(carrierName, gridIndex, siteIndex, 'labwareModelName', labwareModelName);
+	});
+
+	hotelObjects.forEach(o => {
+		const carrier = carrierData.idToCarrier[o.parentCarrierId];
+		set(carrier.name, o.gridIndex, undefined, 'hotel', true);
 	});
 
 	return new EvowareTableData(
 		carrierIdsInternal,
 		hotelObjects,
 		externalObjects,
-		carrierIdToGrids,
-		siteIdToLabel,
-		siteIdToLabwareModelName
+		layout
 	);
 /*
 	const mapSiteToLabel = lTableInfo.map(o => o._1 -> o._2).toMap
@@ -189,7 +230,7 @@ function parse14_getCarrierIds(l) {
  * Get array of labwares on the table.
  * @param  {EvowareCarrierData} carrierData
  * @param  {EvowareSemicolonFile} lines - lines of table file
- * @return {array} an array of tuples (CarrierGridSiteIndex, site label, labware model name)
+ * @return {array} an array of tuples (carrier name, gridIndex, siteIndex, site label, labware model name)
  */
 function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 	const result = [];
@@ -204,7 +245,7 @@ function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 			_.times(carrier.siteCount, siteIndex => {
 				const labwareModelName = l0[siteIndex+1];
 				if (!_.isEmpty(labwareModelName)) {
-					const item = [new EvowareCarrierFile.CarrierGridSiteIndex(carrierId, gridIndex, siteIndex), l1[siteIndex], labwareModelName];
+					const item = [carrier.name, gridIndex, siteIndex, l1[siteIndex], labwareModelName];
 					result.push(item);
 				}
 			});
