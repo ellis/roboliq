@@ -81,8 +81,8 @@ function parse14(carrierData, l, lines) {
 	const externalCarrierNameToGridIndexList = parse14_getExternalCarrierGrids(externalObjects, lines);
 
 	// FIXME: for debug only
-	const gridToCarrierIdInternal = _(carrierIdsInternal).map((id, index) => [index.toString(), id]).filter(([, id]) => id > -1).zipObject().value();
-	console.log("gridToCarrierIdInternal: "+JSON.stringify(gridToCarrierIdInternal));
+	//const gridToCarrierIdInternal = _(carrierIdsInternal).map((id, index) => [index.toString(), id]).filter(([, id]) => id > -1).zipObject().value();
+	//console.log("gridToCarrierIdInternal: "+JSON.stringify(gridToCarrierIdInternal));
 	// ENDFIX
 	/*
 	* @param {array} carrierIdsInternal - List with optional CarrierID for each grid on the table
@@ -93,7 +93,7 @@ function parse14(carrierData, l, lines) {
     * @param {object} siteIdToLabwareModel - map from carrierIndex to gridIndex to siteIndex to labware model at the site
     */
 
-	const carrierIdToGrids = {};
+	/*const carrierIdToGrids = {};
 	// Add internal carriers
 	carrierIdsInternal.forEach((carrierId, gridIndex) => {
 		if (carrierId > -1)
@@ -110,7 +110,7 @@ function parse14(carrierData, l, lines) {
 			l.push(gridIndex);
 			carrierIdToGrids[carrier.id] = _.uniq(l);
 		}
-	});
+	});*/
 
 	function set(carrierName, gridIndex, siteIndex, propertyName, propertyValue) {
 		const c = _.get(layout, carrierName, {});
@@ -138,17 +138,18 @@ function parse14(carrierData, l, lines) {
 	carrierIdsInternal.forEach((carrierId, gridIndex) => {
 		if (carrierId > -1) {
 			const carrier = carrierData.idToCarrier[carrierId];
-			carrierAndGridList.push([carrier.name, gridIndex, "internal"]);
+			carrierAndGridList.push([carrier.name, gridIndex, "internal", true]);
 		}
 	});
 	// Hotel carriers
 	hotelObjects.forEach(o => {
 		const carrier = carrierData.idToCarrier[o.parentCarrierId];
-		carrierAndGridList.push([carrier.name, o.gridIndex, "hotel"]);
+		carrierAndGridList.push([carrier.name, o.gridIndex, "hotel", true]);
 	});
 	// External objects
-	externalCarrierNameToGridIndexList.forEach(([carrierName, gridIndex]) => {
-		carrierAndGridList.push([carrierName, gridIndex, "external"]);
+	externalObjects.forEach((external, i) => {
+		const [carrierName, gridIndex] = externalCarrierNameToGridIndexList[i];
+		carrierAndGridList.push([carrierName, gridIndex, "external", _.pick(external, 'n1', 'n2')]);
 	});
 
 	// Sort the list by gridIndex
