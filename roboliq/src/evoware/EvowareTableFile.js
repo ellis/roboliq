@@ -77,7 +77,8 @@ function parse14(carrierData, l, lines) {
 	//import configFile._
 	const carrierIdsInternal = parse14_getCarrierIds(_.initial(l));
 	console.log("carrierIdsInternal: "+JSON.stringify(carrierIdsInternal));
-	const lTableInfo = parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines);
+	const internalObjects = parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines);
+	console.log("internalObjects: "+JSON.stringify(internalObjects));
 	const hotelObjects = parse14_getHotelObjects(lines);
 	const externalObjects = parse14_getExternalObjects(lines);
 	const externalSiteIdToLabwareModelName = parse14_getExternalLabwares(lines);
@@ -117,6 +118,16 @@ function parse14(carrierData, l, lines) {
 
 	const siteIdToLabel = {};
 	const siteIdToLabwareModelName = {};
+	internalObjects.forEach(([siteId, label, labwareModelName]) => {
+		if (!_.isEmpty(label)) {
+			const c = _.get(siteIdToLabel, siteId.carrierId, {});
+			const g = _.get(c, siteId.gridIndex, {});
+			_.set(g, siteId.siteIndex, label);
+			_.set(c, siteId.gridIndex, g);
+			_.set(siteIdToLabel, siteId.carrierId, c);
+		}
+		_.set(siteIdToLabwareModelName, [siteId.carrierId.toString(), siteId.gridIndex.toString(), siteId.siteIndex.toString()], labwareModelName);
+	});
 
 	return new EvowareTableData(
 		carrierIdsInternal,
@@ -178,7 +189,7 @@ function parse14_getCarrierIds(l) {
  * Get array of labwares on the table.
  * @param  {EvowareCarrierData} carrierData
  * @param  {EvowareSemicolonFile} lines - lines of table file
- * @return {array} an array of tuples (CarrierGridSiteIndex, site label, EvowareLabwareModel)
+ * @return {array} an array of tuples (CarrierGridSiteIndex, site label, labware model name)
  */
 function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 	const result = [];
@@ -190,13 +201,13 @@ function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 			//console.log({n0, l0, n1, l1, carrier})
 			assert(n0 === 998 && n1 === 998 && parseInt(l0[0]) === carrier.siteCount);
 			//println(iGrid+": "+carrier)
-			const l = _.compact(_.range(0, carrier.siteCount).map(siteIndex => {
-				//println("\t"+i+": "+l0(i+1)+", "+l1(i))
-				const sName = l0[siteIndex+1];
-				if (_.isEmpty(sName)) return undefined;
-				else return [new EvowareCarrierFile.CarrierGridSiteIndex(carrierId, gridIndex, siteIndex), l1[siteIndex], carrierData.nameToLabwareModel[sName]];
-			}));
-			result.push.apply(result, l);
+			_.times(carrier.siteCount, siteIndex => {
+				const labwareModelName = l0[siteIndex+1];
+				if (!_.isEmpty(labwareModelName)) {
+					const item = [new EvowareCarrierFile.CarrierGridSiteIndex(carrierId, gridIndex, siteIndex), l1[siteIndex], labwareModelName];
+					result.push(item);
+				}
+			});
 		}
 		else {
 			lines.skip(1);

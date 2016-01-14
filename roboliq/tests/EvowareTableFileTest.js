@@ -8,7 +8,7 @@ describe('EvowareTableFile', function() {
 		it('should load table from NewLayout_Feb2015.ewt', function () {
 			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
 			const tableData = EvowareTableFile.load(carrierData, "../testdata/bsse-mario/NewLayout_Feb2015.ewt");
-			console.log(tableData);
+			console.log(JSON.stringify(tableData, null, '\t'));
 			//result.printCarriersById();
 			should.deepEqual(_.isEmpty(result), false);
 		});
