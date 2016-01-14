@@ -67,14 +67,14 @@ export function load(carrierData, filename) {
  * @param {EvowareCarrierData} carrierData
  * @param {array} l - array of string representing the elements of the current line
  * @param {EvowareSemicolonFile} lines - array of lines from the Carrier.cfg
- * @return {EvowareTableData}
+ * @return {object} a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  */
 function parse14(carrierData, l, lines) {
 	//import configFile._
 	const carrierIdsInternal = parse14_getCarrierIds(_.initial(l));
-	console.log("carrierIdsInternal: "+JSON.stringify(carrierIdsInternal));
+	//console.log("carrierIdsInternal: "+JSON.stringify(carrierIdsInternal));
 	const internalObjects = parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines);
-	console.log("internalObjects: "+JSON.stringify(internalObjects));
+	//console.log("internalObjects: "+JSON.stringify(internalObjects));
 	const hotelObjects = parse14_getHotelObjects(lines);
 	const externalObjects = parse14_getExternalObjects(lines);
 	const externalSiteIdToLabwareModelName = parse14_getExternalLabwares(lines);
@@ -84,33 +84,6 @@ function parse14(carrierData, l, lines) {
 	//const gridToCarrierIdInternal = _(carrierIdsInternal).map((id, index) => [index.toString(), id]).filter(([, id]) => id > -1).zipObject().value();
 	//console.log("gridToCarrierIdInternal: "+JSON.stringify(gridToCarrierIdInternal));
 	// ENDFIX
-	/*
-	* @param {array} carrierIdsInternal - List with optional CarrierID for each grid on the table
-    * @param {array} hotelObjects - array of HotelObjects
-    * @param {array} externalObjects - array of ExternalObjects
-    * @param {object} carrierIdToGrids - map from carrierId to grid indexes where that carrier is used
-    * @param {object} siteIdToLabel - map from carrierIndex to gridIndex to siteIndex to name of the site
-    * @param {object} siteIdToLabwareModel - map from carrierIndex to gridIndex to siteIndex to labware model at the site
-    */
-
-	/*const carrierIdToGrids = {};
-	// Add internal carriers
-	carrierIdsInternal.forEach((carrierId, gridIndex) => {
-		if (carrierId > -1)
-			carrierIdToGrids[carrierId] = [gridIndex];
-	});
-	// Add external carriers
-	externalCarrierNameToGridIndexList.forEach(([carrierName, gridIndex]) => {
-		const carrier = carrierData.nameToCarrier[carrierName];
-		if (_.isUndefined(carrier)) {
-			console.log(`unknown carrier ${carrierName} at grid ${gridIndex}`)
-		}
-		else {
-			const l = _.get(carrierIdToGrids, carrier.id, []);
-			l.push(gridIndex);
-			carrierIdToGrids[carrier.id] = _.uniq(l);
-		}
-	});*/
 
 	function set(carrierName, gridIndex, siteIndex, propertyName, propertyValue) {
 		const c = _.get(layout, carrierName, {});
@@ -158,62 +131,26 @@ function parse14(carrierData, l, lines) {
 
 	// Populate the carrier/grid layout information in gridIndex-order
 	const layout = {};
-	carrierAndGridList1.forEach(([carrierName, gridIndex, propertyName]) => {
-		set(carrierName, gridIndex, undefined, propertyName, true);
+	carrierAndGridList1.forEach(([carrierName, gridIndex, propertyName, propertyValue]) => {
+		set(carrierName, gridIndex, undefined, propertyName, propertyValue);
 	});
 
+	// Add to layout the internal site labels and labware
 	internalObjects.forEach(([carrierName, gridIndex, siteIndex, label, labwareModelName]) => {
 		if (!_.isEmpty(label))
 			set(carrierName, gridIndex, siteIndex, 'label', label);
 		set(carrierName, gridIndex, siteIndex, 'labwareModelName', labwareModelName);
 	});
-
-	hotelObjects.forEach(o => {
-		const carrier = carrierData.idToCarrier[o.parentCarrierId];
-		set(carrier.name, o.gridIndex, undefined, 'hotel', true);
+	// Add to layout the external site labware
+	externalSiteIdToLabwareModelName.forEach(([carrierId, labwareModelName]) => {
+		const carrier = carrierData.idToCarrier[carrierId];
+		const result = _.find(externalCarrierNameToGridIndexList, ([carrierName,]) => carrierName === carrier.name);
+		assert(!_.isUndefined(result));
+		const [, gridIndex] = result;
+		set(carrier.name, gridIndex, 0, 'labwareModelName', labwareModelName);
 	});
 
-	return new EvowareTableData(
-		carrierIdsInternal,
-		hotelObjects,
-		externalObjects,
-		layout
-	);
-/*
-	const mapSiteToLabel = lTableInfo.map(o => o._1 -> o._2).toMap
-	const siteIdExternalToLabwareModel_l: List[(CarrierGridSiteIndex, EvowareLabwareModel)] = (
-		mapSiteToExternalLabwareModel.toList.flatMap { case (CarrierSite(carrier, siteIndex), model) =>
-			mapCarrierToGrid2.get(carrier).map(gridIndex => CarrierGridSiteIndex(carrier.id, gridIndex, siteIndex) -> model)
-		}
-	)
-	const siteIdToLabwareModel_m: Map[CarrierGridSiteIndex, EvowareLabwareModel] = (
-		lTableInfo.map(o => o._1 -> o._3) ++
-		siteIdExternalToLabwareModel_l
-	).toMap
-	const mapCarrierToGrid1 = lCarrier_?.zipWithIndex.collect({ case (Some(o), iGrid) => o -> iGrid }).toMap
-	const mapCarrierToGrid = mapCarrierToGrid1 ++ mapCarrierToGrid2
-
-	const carrierIdToGrids_m: Map[Int, List[Int]] = {
-		const l =
-			gridToInternalCarrierId_m.toList.map(_.swap) ++
-			mapCarrierToGrid2.toList.map({ case (carrier, gridIndex) => (carrier.id, gridIndex)})
-		l.groupBy(_._1).mapValues(_.map(_._2))
-	}
-
-	const tableFile = new EvowareTableData(
-		configFile,
-		carrierId_l.toVector,
-		lHotelObject,
-		lExternalObject,
-		carrierIdToGrids_m,
-		//mapCarrierToGrid,
-		mapSiteToLabel,
-		siteIdToLabwareModel_m
-	)
-
-	console.log("tablefile:")
-	console.log(tableFile.toDebugString())
-	return tableFile;*/
+	return layout;
 }
 
 /**
@@ -298,21 +235,19 @@ function parse14_getExternalObjects(lines) {
 /**
  * Parse labware on external sites
  * @param  {[type]} lines       [description]
- * @return {object} map from carrier ID to site ID (which is 0 in this case) to labware model name
+ * @return {object} list of tuples (carrier ID, labware model name)
  */
 function parse14_getExternalLabwares(lines) {
 	const [n0, l0] = lines.nextSplit();
 	assert(n0 === 998);
 	const count = parseInt(l0[0]);
-	const result = {};
-	for (let i = 0; i < count; i++) {
+	return _.times(count, i => {
 		const [n, l] = lines.nextSplit();
 		assert(n == 998);
 		const carrierId = parseInt(l[0]);
 		const labwareModelName = l[1];
-		_.set(result, [carrierId.toString(), "0"], labwareModelName);
-	}
-	return result;
+		return [carrierId, labwareModelName];
+	});
 }
 
 function parse14_getExternalCarrierGrids(externalObjects, lines) {
