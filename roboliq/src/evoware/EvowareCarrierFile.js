@@ -14,6 +14,14 @@ import EvowareUtils from './EvowareUtils.js';
  * @property {integer} siteIndex -  0-based index of site
  */
 
+export class CarrierGridSiteIndex {
+	constructor(carrierId, gridIndex, siteIndex) {
+		this.carrierId = carrierId;
+		this.gridIndex = gridIndex;
+		this.siteIndex = siteIndex;
+	}
+}
+
 /**
  * Tuple for location refered to by carrier+site index
  * @typedef {object} CarrierSiteIndex

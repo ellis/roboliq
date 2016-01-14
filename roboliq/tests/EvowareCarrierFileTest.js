@@ -7,7 +7,7 @@ describe('EvowareCarrierFile', function() {
 		it('should load models from Carrier.cfg', function () {
 			const result = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
 			//console.log({result})
-			//result.printCarriersById();
+			result.printCarriersById();
 			should.deepEqual(_.isEmpty(result), false);
 		});
 	});

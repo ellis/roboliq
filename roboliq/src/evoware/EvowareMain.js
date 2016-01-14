@@ -37,12 +37,12 @@ export function run(argv) {
 		process.exit(0);
 	}
 	else {
-		const data = EvowareCarrierFile.loadEvowareCarrierData(opts.carrier);
+		const carrierData = EvowareCarrierFile.loadEvowareCarrierData(opts.carrier);
 		if (_.isEmpty(opts.table)) {
-			data.printCarriersById();
+			carrierData.printCarriersById();
 		}
 		else {
-			const table = EvowareTableFile.load(opts.table);
+			const table = EvowareTableFile.load(carrierData, opts.table);
 			if (_.isEmpty(opts.protocol)) {
 				table.print();
 			}
