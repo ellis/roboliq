@@ -12,11 +12,10 @@ import * as EvowareCarrierFile from './EvowareCarrierFile.js';
  * @param {array} externalObjects - array of ExternalObjects
  * @param {object} carrierIdToGrids - map from carrierId to grid indexes where that carrier is used
  * @param {object} siteIdToLabel - map from carrierIndex to gridIndex to siteIndex to name of the site
- * @param {object} siteIdToLabwareModel - map from carrierIndex to gridIndex to siteIndex to labware model at the site
+ * @param {object} siteIdToLabwareModelName - map from carrierIndex to gridIndex to siteIndex to labware model's name at the site
  */
 export class EvowareTableData {
-	constructor(carrierData, carrierIdsInternal, hotelObjects, externalObjects, carrierIdToGrids, siteIdToLabel, siteIdToLabwareModel) {
-		this.carrierData = carrierData;
+	constructor(carrierIdsInternal, hotelObjects, externalObjects, carrierIdToGrids, siteIdToLabel, siteIdToLabwareModel) {
 		this.carrierIdsInternal = carrierIdsInternal;
 		this.hotelObjects = hotelObjects;
 		this.externalObjects = externalObjects;
@@ -84,8 +83,10 @@ function parse14(carrierData, l, lines) {
 	const externalSiteIdToLabwareModelName = parse14_getExternalLabwares(lines);
 	const externalCarrierNameToGridIndexList = parse14_getExternalCarrierGrids(externalObjects, lines);
 
+	// FIXME: for debug only
 	const gridToCarrierIdInternal = _(carrierIdsInternal).map((id, index) => [index.toString(), id]).filter(([, id]) => id > -1).zipObject().value();
 	console.log("gridToCarrierIdInternal: "+JSON.stringify(gridToCarrierIdInternal));
+	// ENDFIX
 	/*
 	* @param {array} carrierIdsInternal - List with optional CarrierID for each grid on the table
     * @param {array} hotelObjects - array of HotelObjects
@@ -95,6 +96,36 @@ function parse14(carrierData, l, lines) {
     * @param {object} siteIdToLabwareModel - map from carrierIndex to gridIndex to siteIndex to labware model at the site
     */
 
+	const carrierIdToGrids = {};
+	// Add internal carriers
+	carrierIdsInternal.forEach((carrierId, gridIndex) => {
+		if (carrierId > -1)
+			carrierIdToGrids[carrierId] = [gridIndex];
+	});
+	// Add external carriers
+	externalCarrierNameToGridIndexList.forEach(([carrierName, gridIndex]) => {
+		const carrier = carrierData.nameToCarrier[carrierName];
+		if (_.isUndefined(carrier)) {
+			console.log(`unknown carrier ${carrierName} at grid ${gridIndex}`)
+		}
+		else {
+			const l = _.get(carrierIdToGrids, carrier.id, []);
+			l.push(gridIndex);
+			carrierIdToGrids[carrier.id] = l;
+		}
+	});
+
+	const siteIdToLabel = {};
+	const siteIdToLabwareModelName = {};
+
+	return new EvowareTableData(
+		carrierIdsInternal,
+		hotelObjects,
+		externalObjects,
+		carrierIdToGrids,
+		siteIdToLabel,
+		siteIdToLabwareModelName
+	);
 /*
 	const mapSiteToLabel = lTableInfo.map(o => o._1 -> o._2).toMap
 	const siteIdExternalToLabwareModel_l: List[(CarrierGridSiteIndex, EvowareLabwareModel)] = (
@@ -232,7 +263,7 @@ function parse14_getExternalLabwares(lines) {
 }
 
 function parse14_getExternalCarrierGrids(externalObjects, lines) {
-	externalObjects.forEach(external => {
+	return externalObjects.map(external => {
 		const [n, l] = lines.nextSplit();
 		assert(n === 998);
 		//console.log("carrierName: "+external.carrierName);
