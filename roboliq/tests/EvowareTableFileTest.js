@@ -46,8 +46,9 @@ describe('EvowareTableFile', function() {
 	});
 
 	describe('toString_internalCarriers', function() {
-		it("should stringify a table with system liquid and wash station", function() {
+		it.only("should stringify a table with system liquid and wash station", function() {
 			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+			console.log(JSON.stringify(carrierData, null, '\t'));
 			/*const carrierData = {
 				nameToCarrier
 			}*/

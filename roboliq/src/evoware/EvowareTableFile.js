@@ -359,7 +359,6 @@ export function toStrings_internalLabware(carrierData, table) {
 		else {
 			const carrier = carrierData.getCarrierByName(item.carrierName);
 			console.log({item, carrier})
-			console.log(JSON.stringify(carrierData, null, '\t'));
 			//val sSiteCount = if (carrier.nSites > 0) carrier.nSites.toString else ""
 			const namesAndLabels = _.times(carrier.siteCount, siteIndex => {
 				const labwareModelName = _.get(item.g, [siteIndex, 'labwareModelName'], "");
