@@ -56,13 +56,13 @@ describe('EvowareTableFile', function() {
 		});
 	});
 
-	describe('toString_hotels', function () {
+	describe('toStrings_hotels', function () {
 		it("should stringify a table with two hotels", function() {
 			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
 			/*const carrierData = {
 				nameToCarrier
 			}*/
-			const s = EvowareTableFile.toString_hotels(carrierData, table1);
+			const s = EvowareTableFile.toStrings_hotels(carrierData, table1);
 			should.deepEqual(s, [
 				'998;2;', '998;315;11;', '998;322;69;'
 			]);
@@ -81,6 +81,9 @@ describe('EvowareTableFile', function() {
 				'998;4;0;System;',
 				'998;0;1;Shelf 32Pos Microplate;',
 				'998;0;7;Hotel 4Pos Transfer Grid 69;',
+				'998;2;',
+				'998;315;DM Nunc stronghold;',
+				'998;322;DM Nunc stronghold;',
 				'998;1;',
 				'998;11;',
 				'998;69;'

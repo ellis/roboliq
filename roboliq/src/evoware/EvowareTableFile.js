@@ -367,7 +367,7 @@ private def toString_tableLabware(
 }
 */
 
-export function toString_hotels(carrierData, table) {
+export function toStrings_hotels(carrierData, table) {
 	const hotelItems0 = [];
 	_.forEach(table, (c, carrierName) => {
 		_.forEach(c, (g, gridIndexText) => {
@@ -403,58 +403,13 @@ export function toStrings_externals(carrierData, table) {
 		items.map(({carrierName, g}) => `998;${g.external.n1};${g.external.n2};${carrierName};`)
 	]);
 	// Generate list of labware models
-	//const l2 = items.map(([, carrierId, grid]))
+	const itemsWithLabware = items.filter(item => _.has(item, "g.0.labwareModelName"));
+	const l2 = _.flatten([
+		`998;${itemsWithLabware.length};`,
+		itemsWithLabware.map(({carrierId, g}) => `998;${carrierId};${_.get(g, "0.labwareModelName")};`)
+	]);
 	// Generate grid list
 	const l3 = items.map(({gridIndex}) => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
 
-	return _.concat(l1, l3);
-}
-
-export function toString_externalsX(carrierData, table) {
-	const items0 = [];
-	_.forEach(table, (c, carrierName) => {
-		_.forEach(c, (g, gridIndexText) => {
-			if (g.external) {
-				items0.push([carrierName, parseInt(gridIndexText), g.external.n1, g.external.n2]);
-			}
-		});
-	});
-	//console.log({hotelItems0});
-	const items = _.sortBy(items0, x => x[1]);
-	return _.flatten([
-		`998;${items.length};`,
-		items.map(([carrierName, , n1, n2]) => `998;${n1};${n2};${carrierName};`)
-	]);
-}
-
-/*
-private def toString_externalLabware(
-	siteIdToLabwareModel_m2: Map[CarrierGridSiteIndex, EvowareLabwareModel]
-): List[String] = {
-	// List of external carriers
-	val carrierId_l: Set[Int] = externalObject_l.map(_.carrier.id).toSet
-	val siteIdToLabwareModel_m3 = siteIdToLabwareModel_m2.filterKeys(siteId => carrierId_l.contains(siteId.carrierId))
-	// Map of external carrier to labware model
-	val carrierIdToLabwareModel_m: Map[Int, EvowareLabwareModel]
-		= siteIdToLabwareModel_m3.toList.groupBy(_._1.carrierId).mapValues(l => l.head._2)
-	// List of external carriers with labware on them
-	val lCarrierToLabware = carrierIdToLabwareModel_m.toList.map { case (carrierId, labwareModelE) =>
-		s"998;${carrierId};${labwareModelE.sName};"
-	}
-	("998;"+carrierIdToLabwareModel_m.size+";") :: lCarrierToLabware
-}
-*/
-
-export function toString_externalGrids(carrierData, table) {
-	const items0 = [];
-	_.forEach(table, (c, carrierName) => {
-		_.forEach(c, (g, gridIndexText) => {
-			if (g.external) {
-				items0.push(parseInt(gridIndexText));
-			}
-		});
-	});
-	//console.log({items0});
-	const items = _.sortBy(items0, x => x);
-	return items.map(gridIndex => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
+	return _.concat(l1, l2, l3);
 }
