@@ -33,8 +33,8 @@ export class HotelObject {
 }
 
 /**
- * @param {integer} n1 - Value of unknown significance
- * @param {integer} n2 - Value of unknown significance
+ * @param {integer} n1 - Value of unknown significance (4 for System, 0 for others?)
+ * @param {integer} n2 - I think this is the on-screen display index
  * @param {string} carrierName - carrier name for the carrier holding this hotel/object
  */
 export class ExternalObject {
@@ -385,7 +385,31 @@ export function toString_hotels(carrierData, table) {
 	]);
 }
 
-export function toString_externals(carrierData, table) {
+export function toStrings_externals(carrierData, table) {
+	const items0 = [];
+	_.forEach(table, (c, carrierName) => {
+		_.forEach(c, (g, gridIndexText) => {
+			if (g.external) {
+				const carrierId = _.get(carrierData.getCarrierByName(carrierName), 'id', -1);
+				items0.push([carrierName, carrierId, parseInt(gridIndexText), g]);
+			}
+		});
+	});
+	// Sort by carrierId
+	const items = _.sortBy(items0, x => x[1]);
+	// Generate list of external objects and their carriers
+	const l1 = _.flatten([
+		`998;${items.length};`,
+		items.map(([carrierName, , , {external}]) => `998;${external.n1};${external.n2};${carrierName};`)
+	]);
+	// Generate list of labware models
+	// Generate grid list
+	const l3 = items.map(([,,gridIndex,]) => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
+
+	return _.concat(l1, l3);
+}
+
+export function toString_externalsX(carrierData, table) {
 	const items0 = [];
 	_.forEach(table, (c, carrierName) => {
 		_.forEach(c, (g, gridIndexText) => {
@@ -418,8 +442,18 @@ private def toString_externalLabware(
 	}
 	("998;"+carrierIdToLabwareModel_m.size+";") :: lCarrierToLabware
 }
-
-private def toString_externalGrids(): List[String] = {
-	externalObject_l.map(o => "998;"+carrierIdToGrids_m(o.carrier.id).head+";")
-}
 */
+
+export function toString_externalGrids(carrierData, table) {
+	const items0 = [];
+	_.forEach(table, (c, carrierName) => {
+		_.forEach(c, (g, gridIndexText) => {
+			if (g.external) {
+				items0.push(parseInt(gridIndexText));
+			}
+		});
+	});
+	//console.log({items0});
+	const items = _.sortBy(items0, x => x);
+	return items.map(gridIndex => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
+}
