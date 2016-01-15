@@ -27,7 +27,7 @@
     "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "mocha": "^2.3.4",
     "pegjs": "~0.8.0",
-    "should": "~7.0.1"
+    "should": "^8.1.1"
   },
   "scripts": {
     "test": "mocha --compilers js:babel-core/register --recursive tests/",

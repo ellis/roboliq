@@ -209,7 +209,7 @@ function mutateDeep(x, fn) {
 		}
 	}
 	else if (_.isArray(x)) {
-		for (var i in x) {
+		for (let i = 0; i < x.length; i++) {
 			x[i] = mutateDeep(x[i], fn);
 		}
 	}
