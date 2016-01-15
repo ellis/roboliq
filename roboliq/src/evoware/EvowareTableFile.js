@@ -309,7 +309,7 @@ export function toStringWithLabware(carrierData, table) {
 }
 */
 
-export function toString_carriers(carrierData, table) {
+export function toString_internalCarriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites
 	// [[a, b]]
 	const gridToCarrierName_l = _(table).map((c, carrierName) => {
@@ -337,35 +337,42 @@ export function toString_carriers(carrierData, table) {
 	return `14;${l.join(";")};`;
 }
 
-/*
-private def toString_tableLabware(
-	siteIdToLabel_m2: Map[CarrierGridSiteIndex, String],
-	siteIdToLabwareModel_m2: Map[CarrierGridSiteIndex, EvowareLabwareModel]
-): List[String] = {
-	carrierIdInternal_l.toList.zipWithIndex.flatMap {
-		case (None, _) => List("998;0;")
-		case (Some(carrierId), gridIndex) =>
-			val carrier = configFile.mapIdToCarrier(carrierId)
+export function toStrings_internalLabware(carrierData, table) {
+	const items0 = [];
+	_.forEach(table, (c, carrierName) => {
+		_.forEach(c, (g, gridIndexText) => {
+			if (g.internal === true) {
+				const carrierId = _.get(carrierData.getCarrierByName(carrierName), 'id', -1);
+				items0.push({carrierName, carrierId, gridIndex: parseInt(gridIndexText), g});
+			}
+		});
+	});
+	// Sort by gridIndex
+	const items = _.sortBy(items0, 'gridIndex');
+	const gridIndexToItem = _.groupBy(items, 'gridIndex');
+
+	return _.flatten(_.times(99, gridIndex => {
+		const item = gridIndexToItem[gridIndex];
+		if (_.isUndefined(item)) {
+			return "998;0;";
+		}
+		else {
+			const carrier = carrierData.getCarrierByName(item.carrierName);
+			console.log({item, carrier})
+			console.log(JSON.stringify(carrierData, null, '\t'));
 			//val sSiteCount = if (carrier.nSites > 0) carrier.nSites.toString else ""
-			List(
-				"998;"+carrier.nSites+";"+((0 until carrier.nSites).map(siteIndex => {
-					val siteId = CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
-					siteIdToLabwareModel_m2.get(siteId) match {
-						case None => ""
-						case Some(labwareModel) => labwareModel.sName
-					}
-				}).mkString(";"))+";",
-				"998;"+((0 until carrier.nSites).map(siteIndex => {
-					val siteId = CarrierGridSiteIndex(carrierId, gridIndex, siteIndex)
-					siteIdToLabel_m2.get(siteId) match {
-						case None => ""
-						case Some(sLabel) => sLabel
-					}
-				}).mkString(";"))+";"
-			)
-	}
+			const namesAndLabels = _.times(carrier.siteCount, siteIndex => {
+				const labwareModelName = _.get(item.g, [siteIndex, 'labwareModelName'], "");
+				const label = _.get(item.g, [siteIndex, 'label'], "");
+				return {labwareModelName, label};
+			})
+			return [
+				`998;${carrier.siteCount};${_.pick(namesAndLabels, 'labwareModelName').join(';')};`,
+				`998;${_.pick(namesAndLabels, 'label').join(';')};`,
+			]
+		}
+	}));
 }
-*/
 
 export function toStrings_hotels(carrierData, table) {
 	const hotelItems0 = [];

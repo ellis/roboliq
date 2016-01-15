@@ -45,14 +45,25 @@ describe('EvowareTableFile', function() {
 		});
 	});
 
-	describe('toString_carriers', function() {
+	describe('toString_internalCarriers', function() {
 		it("should stringify a table with system liquid and wash station", function() {
 			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
 			/*const carrierData = {
 				nameToCarrier
 			}*/
-			const s = EvowareTableFile.toString_carriers(carrierData, table1);
+			const s = EvowareTableFile.toString_internalCarriers(carrierData, table1);
 			should.deepEqual(s, "14;-1;239;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;");
+		});
+	});
+
+	describe('toStrings_internalLabware', function() {
+		it("should stringify table1", function() {
+			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+			/*const carrierData = {
+				nameToCarrier
+			}*/
+			const l = EvowareTableFile.toStrings_internalLabware(carrierData, table1);
+			console.log(JSON.stringify(l, null, '\t'))
 		});
 	});
 
