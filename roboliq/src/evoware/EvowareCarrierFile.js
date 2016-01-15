@@ -156,11 +156,11 @@ case class CarrierSite(
  */
 function makeEvowareCarrierData(models) {
 	//console.log({modelsLength: models.length})
-	const idToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.id, x]).zipObject().value();
+	const idToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.id, x]).fromPairs().value();
 	//console.log({idToCarrier})
-	const nameToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).zipObject().value();
+	const nameToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).fromPairs().value();
 	//console.log({nameToCarrier})
-	const nameToLabwareModel = _(models).filter(x => x.type === "LabwareModel").map(x => [x.name, x]).zipObject().value();
+	const nameToLabwareModel = _(models).filter(x => x.type === "LabwareModel").map(x => [x.name, x]).fromPairs().value();
 	//console.log({nameToLabwareModel})
 	const carrierIdToVectors = _(models).filter(x => x.type === "Vector").groupBy('carrierId').value();
 	//console.log({carrierIdToVectors})

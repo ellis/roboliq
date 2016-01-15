@@ -48,12 +48,12 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	//console.log("pipette: "+JSON.stringify(parsed))
+	//console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	let items = (_.isUndefined(parsed.value.items))
 		? []
 		: parsed.value.items.map(parsedItem =>
-				_(parsedItem).map((value, name) => [name, value]).filter(l => !_.isUndefined(l[1])).zipObject().value()
+				_(parsedItem).map((value, name) => [name, value]).filter(l => !_.isUndefined(l[1])).fromPairs().value()
 			);
 	//console.log("items: "+JSON.stringify(items));
 	let agent = parsed.objectName.agent || "?agent";
@@ -119,6 +119,7 @@ function pipette(params, parsed, data) {
 
 	// Find all wells, both sources and destinations
 	var wellName_l = _(items).map(function (item) {
+		//console.log({item})
 		// TODO: allow source to refer to a set of wells, not just a single well
 		// TODO: create a function getSourceWells()
 		return [item.source, item.destination]
@@ -128,6 +129,7 @@ function pipette(params, parsed, data) {
 
 	// Find all labware
 	var labwareName_l = _(wellName_l).map(function (wellName) {
+		//console.log({wellName})
 		var i = wellName.indexOf('(');
 		return (i >= 0) ? wellName.substr(0, i) : wellName;
 	}).uniq().value();
@@ -385,7 +387,7 @@ function pipette(params, parsed, data) {
 
 	// Create clean commands before pipetting this group
 	const createCleanActions = function(syringeToCleanValue) {
-		const items = _(syringeToCleanValue).pairs().filter(([x, n]) => n > 0).map(([syringe, n]) => { return {syringe, intensity: valueToIntensity[n]} }).value();
+		const items = _(syringeToCleanValue).toPairs().filter(([x, n]) => n > 0).map(([syringe, n]) => { return {syringe, intensity: valueToIntensity[n]} }).value();
 		if (_.isEmpty(items)) return [];
 		return [{
 			command: "pipetter.cleanTips",
@@ -679,7 +681,7 @@ const commandHandlers = {
 			}
 		});
 		//console.log("A:", params2.items)
-		params2.items = _.sortByAll.apply(null, [params2.items, ordering]);
+		params2.items = _.sortBy(params2.items, ordering);
 		//console.log("B:", params2.items)
 		params2.items = _.map(params2.items, function(item) { return _.omit(item, 'index'); });
 		//console.log("C:", params2.items)

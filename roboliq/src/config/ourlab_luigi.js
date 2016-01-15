@@ -760,7 +760,7 @@ module.exports = {
 			const expansionList = [];
 			const sub = function(syringeNames, volume) {
 				const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
-					syringeNames.includes(syringeName)
+					_.includes(syringeNames, syringeName)
 				);
 				//console.log({syringeNameToItems2})
 				if (!_.isEmpty(syringeNameToItems2)) {

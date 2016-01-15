@@ -81,7 +81,7 @@ function parse14(carrierData, l, lines) {
 	const externalCarrierNameToGridIndexList = parse14_getExternalCarrierGrids(externalObjects, lines);
 
 	// FIXME: for debug only
-	//const gridToCarrierIdInternal = _(carrierIdsInternal).map((id, index) => [index.toString(), id]).filter(([, id]) => id > -1).zipObject().value();
+	//const gridToCarrierIdInternal = _(carrierIdsInternal).map((id, index) => [index.toString(), id]).filter(([, id]) => id > -1).fromPairs().value();
 	//console.log("gridToCarrierIdInternal: "+JSON.stringify(gridToCarrierIdInternal));
 	// ENDFIX
 

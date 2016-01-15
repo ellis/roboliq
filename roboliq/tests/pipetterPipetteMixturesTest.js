@@ -4,7 +4,7 @@ var roboliq = require('../src/roboliq.js')
 
 describe('pipetter', function() {
 	describe('pipetter.pipetteMixtures', function () {
-		it("should pipette mixtures to destination wells", function() {
+		it.only("should pipette mixtures to destination wells", function() {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
