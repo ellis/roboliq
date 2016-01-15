@@ -38,12 +38,14 @@ function parseEncodedIndexes(encoded) {
 	const col_n = decode(encoded.charAt(1));
 	const row_n = decode(encoded.charAt(3));
 	const s = encoded.substring(4);
-	const indexes = _.map(s, (c, c_i) => {
+	//console.log({col_n, row_n, s})
+	const indexes = _.flatMap(s, (c, c_i) => {
 		const n = decode(c);
 		//const bit_l = (0 to 7).flatMap(bit_i => if ((n & (1 << bit_i)) > 0) Some(bit_i) else None)
-		const bit_l = _.remove(_.range(0, 7).map(bit_i => ((n & (1 << bit_i)) > 0) ? bit_i : undefined), _.isUndefined);
+		const bit_l = _.filter(_.times(7, bit_i => ((n & (1 << bit_i)) > 0) ? bit_i : undefined), x => !_.isUndefined(x));
+		//console.log({c, c_i, n, bit_l});
 		return bit_l.map(bit_i => c_i * 7 + bit_i);
-	})
+	});
 	return [col_n, row_n, indexes];
 }
 

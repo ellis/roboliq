@@ -51,6 +51,7 @@ export class CarrierSiteIndex {
  * @property {integer} siteCount
  * @property {string} [deviceName]
  * @property {string} [partNo]
+ * @property {array} [vectors] - array of vector names for this carrier
  */
 export class Carrier {
 	constructor(name, id, siteCount, deviceName, partNo) {
@@ -60,6 +61,7 @@ export class Carrier {
 		this.siteCount = siteCount;
 		this.deviceName = deviceName;
 		this.partNo = partNo;
+		this.vectors = [];
 	}
 }
 
@@ -107,36 +109,28 @@ export class Vector {
  * An object representing an evoware carrier file
  *
  * @typedef {object} EvowareCarrierData
- * @property {array} models - array of the evoware models
- * @property {object} idToCarrier - map of carrier ID to Carrier object
- * @property {object} nameToCarrier - map of carrier name to Carrier object
- * @property {object} nameToLabwareModel - map of name to LabwareModel
+ * @property {object} models - map from model name to model data
+ * @property {object} idToName - map of model ID to model name
  * @property {object} carrierIdToVectors - map of carrier ID to list of Vectors
  */
 
 export class EvowareCarrierData {
-	constructor(models, idToCarrier, nameToCarrier, nameToLabwareModel, carrierIdToVectors) {
+	constructor(models, idToName) {
 		this.models = models;
-		this.idToCarrier = idToCarrier;
-		this.nameToCarrier = nameToCarrier;
-		this.nameToLabwareModel = nameToLabwareModel;
-		this.carrierIdToVectors = carrierIdToVectors;
+		this.idToName = idToName;
 	}
 
 	getCarrierByName(carrierName) {
-		return this.nameToCarrier[carrierName];
+		return this.models[carrierName];
 	}
 
 	/**
 	 * Print debug output: carrier id, carrier name.
 	 */
 	printCarriersById() {
-		const l0 = _.keys(this.idToCarrier).map(s => parseInt(s));
-		// Sort by carrier ID
-		const ids = _.sortBy(l0, n => n);
-		//console.log({ids})
-		ids.forEach(id => {
-			const name = this.idToCarrier[id.toString()].name
+		const l = _(this.models).map(model => (model.type === "Carrier") ? [model.id, model.name] : undefined).compact().value();
+		//console.log({l})
+		l.forEach(([id, name]) => {
 			console.log(sprintf("%03d\t%s", id, name));
 		});
 	}
@@ -150,39 +144,40 @@ case class CarrierSite(
 */
 
 /**
- * Create an EvowareCarrierData object from an array of evoware models.
- * @param  {array} models - array of evoware models
- * @return {EvowareCarrierData}
- */
-function makeEvowareCarrierData(models) {
-	//console.log({modelsLength: models.length})
-	const idToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.id, x]).fromPairs().value();
-	//console.log({idToCarrier})
-	const nameToCarrier = _(models).filter(x => x.type === "Carrier").map(x => [x.name, x]).fromPairs().value();
-	//console.log({nameToCarrier})
-	const nameToLabwareModel = _(models).filter(x => x.type === "LabwareModel").map(x => [x.name, x]).fromPairs().value();
-	//console.log({nameToLabwareModel})
-	const carrierIdToVectors = _(models).filter(x => x.type === "Vector").groupBy('carrierId').value();
-	//console.log({carrierIdToVectors})
-	return new EvowareCarrierData(
-		models,
-		idToCarrier,
-		nameToCarrier,
-		nameToLabwareModel,
-		carrierIdToVectors
-	);
-}
-
-/**
  * Load an evoware carrier file and return its model data.
  * @param  {string} filename - path to the carrier file
  * @return {EvowareCarrierData}
  */
-export function loadEvowareCarrierData(filename) {
-	const models = loadEvowareModels(filename);
-	const data = makeEvowareCarrierData(models);
+export function load(filename) {
+	const modelList = loadEvowareModels(filename);
+	const data = makeEvowareCarrierData(modelList);
 	//console.log({data});
 	return data;
+}
+
+/**
+ * Create an EvowareCarrierData object from an array of evoware models.
+ * @param  {array} modelList - array of evoware models
+ * @return {EvowareCarrierData}
+ */
+function makeEvowareCarrierData(modelList) {
+	// Create map from name to model
+	const models = _(modelList).map(model => [model.name, model]).fromPairs().value();
+	// Create map from ID to name
+	const idToName = _(modelList).map(model => [model.id, model.name]).fromPairs().value();
+	// Add vectors to carriers
+	const carrierIdToVectors = _(modelList).filter(x => x.type === "Vector").groupBy('carrierId').value();
+	_.forEach(carrierIdToVectors, (vectors, carrierId) => {
+		const carrierName = idToName[carrierId];
+		const carrier = models[carrierName];
+		carrier.vectors = vectors.map(x => x.name);
+	});
+	//console.log({modelList, models, idToName, carrierIdToVectors})
+
+	return new EvowareCarrierData(
+		models,
+		idToName
+	);
 }
 
 /**
@@ -289,6 +284,7 @@ function parse15(l, lines) {
 		const idCarrier = parseInt(ls[0]);
 		const sitemask = ls[1];
 		const [, , site_li] = EvowareUtils.parseEncodedIndexes(sitemask);
+		//console.log({sitemask, site_li})
 		return site_li.map(site_i => new CarrierSiteIndex(idCarrier, site_i));
 	}));
 

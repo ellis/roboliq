@@ -3,12 +3,12 @@ var should = require('should');
 import * as EvowareCarrierFile from '../src/evoware/EvowareCarrierFile.js';
 
 describe('EvowareCarrierFile', function() {
-	describe('loadEvowareCarrierData', function () {
+	describe('load', function () {
 		it('should load models from Carrier.cfg', function () {
-			const result = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
-			//console.log({result})
-			result.printCarriersById();
-			should.deepEqual(_.isEmpty(result), false);
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
+			//console.log({carrierData})
+			//carrierData.printCarriersById();
+			should.deepEqual(_.isEmpty(carrierData), false);
 		});
 	});
 });

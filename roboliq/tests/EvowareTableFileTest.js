@@ -37,18 +37,18 @@ const table1 = {
 describe('EvowareTableFile', function() {
 	describe('load', function () {
 		it('should load table from NewLayout_Feb2015.ewt', function () {
-			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
 			const table = EvowareTableFile.load(carrierData, "../testdata/bsse-mario/NewLayout_Feb2015.ewt");
-			console.log(JSON.stringify(table, null, '\t'));
+			//console.log(JSON.stringify(table, null, '\t'));
 			//result.printCarriersById();
 			//should.deepEqual(_.isEmpty(result), false);
 		});
 	});
 
 	describe('toString_internalCarriers', function() {
-		it.only("should stringify a table with system liquid and wash station", function() {
-			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
-			console.log(JSON.stringify(carrierData, null, '\t'));
+		it("should stringify a table with system liquid and wash station", function() {
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
+			//console.log(JSON.stringify(carrierData, null, '\t'));
 			/*const carrierData = {
 				nameToCarrier
 			}*/
@@ -58,8 +58,8 @@ describe('EvowareTableFile', function() {
 	});
 
 	describe('toStrings_internalLabware', function() {
-		it("should stringify table1", function() {
-			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+		it.only("should stringify table1", function() {
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
 			/*const carrierData = {
 				nameToCarrier
 			}*/
@@ -70,7 +70,7 @@ describe('EvowareTableFile', function() {
 
 	describe('toStrings_hotels', function () {
 		it("should stringify a table with two hotels", function() {
-			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
 			/*const carrierData = {
 				nameToCarrier
 			}*/
@@ -83,7 +83,7 @@ describe('EvowareTableFile', function() {
 
 	describe('toStrings_externals', function () {
 		it("should stringify a table with several external objects", function() {
-			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
 			/*const carrierData = {
 				nameToCarrier
 			}*/
