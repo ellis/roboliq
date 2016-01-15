@@ -370,10 +370,14 @@ function preProcessExclamationMarks(protocol, obj, path) {
  * @return {Object}     result of merging protocol B into A.
  */
 function mergeProtocols(a, b) {
-	//console.log("a.predicates:", a.predicates);
-	//console.log("b.predicates:", b.predicates);
+	//console.log("BEFORE")
+	//console.log("a.predicates: "+JSON.stringify(a.predicates));
+	//console.log("b.predicates: "+JSON.stringify(b.predicates));
 
-	var c = _.merge({}, a, b);
+	var c = _.merge({}, _.omit(a, 'predicates'), _.omit(b, 'predicates'));
+	//console.log("AFTER")
+	//console.log("a.predicates: "+JSON.stringify(a.predicates));
+	//console.log("b.predicates: "+JSON.stringify(b.predicates));
 	c.predicates = a.predicates.concat(b.predicates || []);
 	//console.log("c:", c);
 	return c;
