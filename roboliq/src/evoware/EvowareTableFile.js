@@ -391,20 +391,21 @@ export function toStrings_externals(carrierData, table) {
 		_.forEach(c, (g, gridIndexText) => {
 			if (g.external) {
 				const carrierId = _.get(carrierData.getCarrierByName(carrierName), 'id', -1);
-				items0.push([carrierName, carrierId, parseInt(gridIndexText), g]);
+				items0.push({carrierName, carrierId, gridIndex: parseInt(gridIndexText), g});
 			}
 		});
 	});
 	// Sort by carrierId
-	const items = _.sortBy(items0, x => x[1]);
+	const items = _.sortBy(items0, 'carrierId');
 	// Generate list of external objects and their carriers
 	const l1 = _.flatten([
 		`998;${items.length};`,
-		items.map(([carrierName, , , {external}]) => `998;${external.n1};${external.n2};${carrierName};`)
+		items.map(({carrierName, g}) => `998;${g.external.n1};${g.external.n2};${carrierName};`)
 	]);
 	// Generate list of labware models
+	//const l2 = items.map(([, carrierId, grid]))
 	// Generate grid list
-	const l3 = items.map(([,,gridIndex,]) => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
+	const l3 = items.map(({gridIndex}) => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
 
 	return _.concat(l1, l3);
 }
