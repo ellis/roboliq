@@ -385,11 +385,24 @@ export function toString_hotels(carrierData, table) {
 	]);
 }
 
-/*
-private def toString_externals(): List[String] = {
-	("998;"+externalObject_l.length+";") :: externalObject_l.map(o => "998;"+o.n1+";"+o.n2+";"+o.carrier.sName+";")
+export function toString_externals(carrierData, table) {
+	const items0 = [];
+	_.forEach(table, (c, carrierName) => {
+		_.forEach(c, (g, gridIndexText) => {
+			if (g.external) {
+				items0.push([carrierName, parseInt(gridIndexText), g.external.n1, g.external.n2]);
+			}
+		});
+	});
+	//console.log({hotelItems0});
+	const items = _.sortBy(items0, x => x[1]);
+	return _.flatten([
+		`998;${items.length};`,
+		items.map(([carrierName, , n1, n2]) => `998;${n1};${n2};${carrierName};`)
+	]);
 }
 
+/*
 private def toString_externalLabware(
 	siteIdToLabwareModel_m2: Map[CarrierGridSiteIndex, EvowareLabwareModel]
 ): List[String] = {

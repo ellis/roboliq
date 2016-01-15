@@ -68,4 +68,17 @@ describe('EvowareTableFile', function() {
 			]);
 		});
 	});
+
+	describe('toString_externals', function () {
+		it("should stringify a table with several external objects", function() {
+			const carrierData = EvowareCarrierFile.loadEvowareCarrierData("../testdata/bsse-mario/Carrier.cfg");
+			/*const carrierData = {
+				nameToCarrier
+			}*/
+			const s = EvowareTableFile.toString_externals(carrierData, table1);
+			should.deepEqual(s, [
+				'998;3;', '998;4;0;System;', '998;0;1;Shelf 32Pos Microplate;', '998;0;7;Hotel 4Pos Transfer Grid 69;'
+			]);
+		});
+	});
 });
