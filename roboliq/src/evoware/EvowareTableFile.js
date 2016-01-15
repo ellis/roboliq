@@ -365,11 +365,27 @@ private def toString_tableLabware(
 			)
 	}
 }
+*/
 
-private def toString_hotels(): List[String] = {
-	("998;"+hotelObject_l.length+";") :: hotelObject_l.map(o => "998;"+o.parent.id+";"+o.gridIndex+";")
+export function toString_hotels(carrierData, table) {
+	const hotelItems0 = [];
+	_.forEach(table, (c, carrierName) => {
+		_.forEach(c, (g, gridIndexText) => {
+			if (g.hotel === true) {
+				const carrierId = carrierData.getCarrierByName(carrierName).id;
+				hotelItems0.push([carrierId, parseInt(gridIndexText)]);
+			}
+		});
+	});
+	//console.log({hotelItems0});
+	const hotelItems = _.sortBy(hotelItems0, x => x[1]);
+	return _.flatten([
+		`998;${hotelItems.length};`,
+		hotelItems.map(([carrierId, gridIndex]) => `998;${carrierId};${gridIndex};`)
+	]);
 }
 
+/*
 private def toString_externals(): List[String] = {
 	("998;"+externalObject_l.length+";") :: externalObject_l.map(o => "998;"+o.n1+";"+o.n2+";"+o.carrier.sName+";")
 }

@@ -107,8 +107,7 @@
 		- [x] test contamination upon wet contact
 	- [x] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
 - [x] centrifuge: temperature parameters should require unit (e.g. 'degC')
-- [ ] upgrading lodash and babel
-	- [ ] timerTest shows logic errors: maybe problem merging predicate arrays (overwriting instead of appending?)
+- [x] upgrading lodash and babel
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create
