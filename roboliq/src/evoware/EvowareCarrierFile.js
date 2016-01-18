@@ -161,12 +161,14 @@ export function load(filename) {
  * @return {EvowareCarrierData}
  */
 function makeEvowareCarrierData(modelList) {
+	const [vectors, namedModels] = _.partition(modelList, x => x.type === "Vector");
+	//_.forEach(namedModels, model => { if (!model.name) console.log(model) });
 	// Create map from name to model
-	const models = _(modelList).map(model => [model.name, model]).fromPairs().value();
+	const models = _(namedModels).map(model => [model.name, model]).fromPairs().value();
 	// Create map from ID to name
-	const idToName = _(modelList).map(model => [model.id, model.name]).fromPairs().value();
+	const idToName = _(namedModels).map(model => [model.id, model.name]).fromPairs().value();
 	// Add vectors to carriers
-	const carrierIdToVectors = _(modelList).filter(x => x.type === "Vector").groupBy('carrierId').value();
+	const carrierIdToVectors = _.groupBy(vectors, 'carrierId');
 	_.forEach(carrierIdToVectors, (vectors, carrierId) => {
 		const carrierName = idToName[carrierId];
 		const carrier = models[carrierName];

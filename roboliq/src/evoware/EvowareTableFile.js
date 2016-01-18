@@ -349,7 +349,10 @@ export function toStrings_internalLabware(carrierData, table) {
 	});
 	// Sort by gridIndex
 	const items = _.sortBy(items0, 'gridIndex');
-	const gridIndexToItem = _.groupBy(items, 'gridIndex');
+	//console.log("items:")
+	//console.log(items)
+	const gridIndexToItem = _(items).map(x => [x.gridIndex, x]).fromPairs().value();
+	//console.log({gridIndexToItem})
 
 	return _.flatten(_.times(99, gridIndex => {
 		const item = gridIndexToItem[gridIndex];
@@ -358,10 +361,10 @@ export function toStrings_internalLabware(carrierData, table) {
 		}
 		else {
 			const carrier = carrierData.getCarrierByName(item.carrierName);
-			console.log({item, carrier})
+			//console.log({item, carrier})
 			//val sSiteCount = if (carrier.nSites > 0) carrier.nSites.toString else ""
 			const namesAndLabels = _.times(carrier.siteCount, siteIndex => {
-				console.log({g: item.g})
+				//console.log({g: item.g})
 				const labwareModelName = _.get(item.g, [siteIndex, 'labwareModelName'], "");
 				const label = _.get(item.g, [siteIndex, 'label'], "");
 				return {labwareModelName, label};

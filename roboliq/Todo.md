@@ -109,16 +109,7 @@
 - [x] centrifuge: temperature parameters should require unit (e.g. 'degC')
 - [x] upgrading lodash and babel
 - [ ] CONTINUE:
-	- [ ] test EvowareTableFile.toStrings_internalLabware:
-		we see this, for some reason the wrong carrier selected on EvowareTableFile.js:360 :
-		{ item:
-		   [ { carrierName: 'Wash Station Clean',
-		       carrierId: 239,
-		       gridIndex: 1,
-		       g: [Object] } ],
-		  carrier: Vector { type: 'Vector', carrierId: 322, clazz: 'Narrow', romaId: 1 } }
-		Since vectors don't have names, we probably need to change carrierData.models to be from id to model, and add nameToId map
-
+	- [x] test EvowareTableFile.toStrings_internalLabware:
 - [ ] Evoware: Carrier.cfg: "0100ï¿½300000000000000000000000000000000000", how to interpret those strange characters?
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph

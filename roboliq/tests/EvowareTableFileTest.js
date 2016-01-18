@@ -60,11 +60,16 @@ describe('EvowareTableFile', function() {
 	describe('toStrings_internalLabware', function() {
 		it.only("should stringify table1", function() {
 			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
+			console.log({it1: carrierData.models['Wash Station Clean'], it2: carrierData.getCarrierByName('Wash Station Clean')})
 			/*const carrierData = {
 				nameToCarrier
 			}*/
 			const l = EvowareTableFile.toStrings_internalLabware(carrierData, table1);
-			console.log(JSON.stringify(l, null, '\t'))
+			//console.log(JSON.stringify(l, null, '\t'));
+			should.deepEqual(l[0], "998;0;");
+			should.deepEqual(l[1], "998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;");
+			should.deepEqual(l[2], "998;;;;");
+			should.deepEqual(_.drop(l, 3), _.times(l.length - 3, () => "998;0;"));
 		});
 	});
 
