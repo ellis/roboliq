@@ -35,6 +35,9 @@ function hex(n) {
  * @return {array} tuple of [rows on surface, columns on surface, selected indexes on surface]
  */
 function parseEncodedIndexes(encoded) {
+	// HACK: for some reason, there is this strange sequence "ï¿½" that shows
+	// up in some places.  It appears to simply indicate 7 bits, e.g. "0"+127, e.g. '¯'
+	encoded = encoded.replace(/ï¿½/g, String.fromCharCode(48+127));
 	const col_n = decode(encoded.charAt(1));
 	const row_n = decode(encoded.charAt(3));
 	const s = encoded.substring(4);

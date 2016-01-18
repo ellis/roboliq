@@ -110,13 +110,13 @@ function parse14(carrierData, l, lines) {
 	// Internal carriers
 	carrierIdsInternal.forEach((carrierId, gridIndex) => {
 		if (carrierId > -1) {
-			const carrier = carrierData.idToCarrier[carrierId];
+			const carrier = carrierData.getCarrierById(carrierId);
 			carrierAndGridList.push([carrier.name, gridIndex, "internal", true]);
 		}
 	});
 	// Hotel carriers
 	hotelObjects.forEach(o => {
-		const carrier = carrierData.idToCarrier[o.parentCarrierId];
+		const carrier = carrierData.getCarrierById(o.parentCarrierId);
 		carrierAndGridList.push([carrier.name, o.gridIndex, "hotel", true]);
 	});
 	// External objects
@@ -143,7 +143,7 @@ function parse14(carrierData, l, lines) {
 	});
 	// Add to layout the external site labware
 	externalSiteIdToLabwareModelName.forEach(([carrierId, labwareModelName]) => {
-		const carrier = carrierData.idToCarrier[carrierId];
+		const carrier = carrierData.getCarrierById(carrierId);
 		const result = _.find(externalCarrierNameToGridIndexList, ([carrierName,]) => carrierName === carrier.name);
 		assert(!_.isUndefined(result));
 		const [, gridIndex] = result;
@@ -174,10 +174,10 @@ function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 	const result = [];
 	carrierIdsInternal.forEach((carrierId, gridIndex) => {
 		if (carrierId > -1) {
-			const carrier = carrierData.idToCarrier[carrierId];
+			const carrier = carrierData.getCarrierById(carrierId);
 			const [n0, l0] = lines.nextSplit();
 			const [n1, l1] = lines.nextSplit();
-			//console.log({n0, l0, n1, l1, carrier})
+			//console.log({n0, l0, n1, l1, carrierId, carrierName: carrierData.carrierIdToName[carrierId], carrier})
 			assert(n0 === 998 && n1 === 998 && parseInt(l0[0]) === carrier.siteCount);
 			//println(iGrid+": "+carrier)
 			_.times(carrier.siteCount, siteIndex => {
@@ -261,8 +261,8 @@ function parse14_getExternalCarrierGrids(externalObjects, lines) {
 	});
 }
 
-/*
-export function toStringWithLabware(carrierData, table) {
+export function toString(carrierData, table) {
+	/*
 		siteIdToLabel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (label, _)) =>
 			for {
 				carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
@@ -306,8 +306,30 @@ export function toStringWithLabware(carrierData, table) {
 			List("996;0;0;", "--{ RPG }--")
 		l.mkString("\n")
 	}
+	*/
+	const l1 = [
+		"00000000",
+		"20000101_000000 No log in       ",
+		"                                                                                                                                ",
+		"No user logged in                                                                                                               ",
+		"--{ RES }--",
+		"V;200",
+		"--{ CFG }--",
+		"999;219;32;"
+	];
+	const s2 = toString_internalCarriers(carrierData, table);
+	const l3 = toStrings_internalLabware(carrierData, table);
+	const l4 = toStrings_hotels(carrierData, table);
+	const l5 = toStrings_externals(carrierData, table);
+	const l6 = [
+		"996;0;0;",
+		"--{ RPG }--"
+	];
+	const l = _.flatten([l1, s2, l3, l4, l5, l6]);
+	const s = l.join("\n")+"\n";
+	//const s = l.join("\r\n")+"\r\n";
+	return s;
 }
-*/
 
 export function toString_internalCarriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites

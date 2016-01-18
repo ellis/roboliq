@@ -37,7 +37,7 @@ export function run(argv) {
 		process.exit(0);
 	}
 	else {
-		const carrierData = EvowareCarrierFile.loadEvowareCarrierData(opts.carrier);
+		const carrierData = EvowareCarrierFile.load(opts.carrier);
 		if (_.isEmpty(opts.table)) {
 			carrierData.printCarriersById();
 		}

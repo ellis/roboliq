@@ -115,20 +115,28 @@ export class Vector {
  */
 
 export class EvowareCarrierData {
-	constructor(models, idToName) {
-		this.models = models;
-		this.idToName = idToName;
+	constructor(carrierModels, labwareModels) {
+		this.carrierModels = carrierModels;
+		this.labwareModels = labwareModels;
+		this.carrierIdToName = _(carrierModels).map(x => [x.id, x.name]).fromPairs().value();
+		this.labwareIdToName = _(labwareModels).map(x => [x.id, x.name]).fromPairs().value();
 	}
 
 	getCarrierByName(carrierName) {
-		return this.models[carrierName];
+		return this.carrierModels[carrierName];
+	}
+
+	getCarrierById(id) {
+		const name = this.carrierIdToName[id];
+		return this.carrierModels[name];
 	}
 
 	/**
 	 * Print debug output: carrier id, carrier name.
 	 */
 	printCarriersById() {
-		const l = _(this.models).map(model => (model.type === "Carrier") ? [model.id, model.name] : undefined).compact().value();
+		const l0 = _(this.carrierModels).map(model => [model.id, model.name]).value();
+		const l = _.sortBy(l0, x => x[0]);
 		//console.log({l})
 		l.forEach(([id, name]) => {
 			console.log(sprintf("%03d\t%s", id, name));
@@ -161,24 +169,29 @@ export function load(filename) {
  * @return {EvowareCarrierData}
  */
 function makeEvowareCarrierData(modelList) {
-	const [vectors, namedModels] = _.partition(modelList, x => x.type === "Vector");
-	//_.forEach(namedModels, model => { if (!model.name) console.log(model) });
-	// Create map from name to model
-	const models = _(namedModels).map(model => [model.name, model]).fromPairs().value();
+	// Create maps/lists for the various model types
+	const carrierModels = {};
+	const labwareModels = {};
+	const vectors = [];
+	_.forEach(modelList, model => {
+		if (model.type === "Carrier") carrierModels[model.name] = model;
+		else if (model.type === "LabwareModel") labwareModels[model.name] = model;
+		else vectors.push(model);
+	});
 	// Create map from ID to name
-	const idToName = _(namedModels).map(model => [model.id, model.name]).fromPairs().value();
+	const idToName = _(carrierModels).filter(x => x.type === "Carrier").map(model => [model.id, model.name]).fromPairs().value();
 	// Add vectors to carriers
 	const carrierIdToVectors = _.groupBy(vectors, 'carrierId');
 	_.forEach(carrierIdToVectors, (vectors, carrierId) => {
 		const carrierName = idToName[carrierId];
-		const carrier = models[carrierName];
+		const carrier = carrierModels[carrierName];
 		carrier.vectors = vectors.map(x => x.name);
 	});
 	//console.log({modelList, models, idToName, carrierIdToVectors})
 
 	return new EvowareCarrierData(
-		models,
-		idToName
+		carrierModels,
+		labwareModels
 	);
 }
 

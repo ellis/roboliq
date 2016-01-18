@@ -33,14 +33,140 @@ const table1 = {
 	}
 };
 
+const table1Text =
+"00000000\n"+
+"20000101_000000 No log in       \n"+
+"                                                                                                                                \n"+
+"No user logged in                                                                                                               \n"+
+`--{ RES }--
+V;200
+--{ CFG }--
+999;219;32;
+14;-1;239;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;-1;
+998;0;
+998;3;Wash Station Cleaner shallow;Wash Station Waste;Wash Station Cleaner deep;
+998;;;;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;0;
+998;2;
+998;315;11;
+998;322;69;
+998;3;
+998;4;0;System;
+998;0;1;Shelf 32Pos Microplate;
+998;0;7;Hotel 4Pos Transfer Grid 69;
+998;2;
+998;315;DM Nunc stronghold;
+998;322;DM Nunc stronghold;
+998;1;
+998;11;
+998;69;
+996;0;0;
+--{ RPG }--
+`;
 
 describe('EvowareTableFile', function() {
 	describe('load', function () {
-		it('should load table from NewLayout_Feb2015.ewt', function () {
+		it('should load table from NewLayout_Feb2015.ewt without raising an exception', function () {
 			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
+			//carrierData.printCarriersById();
 			const table = EvowareTableFile.load(carrierData, "../testdata/bsse-mario/NewLayout_Feb2015.ewt");
 			//console.log(JSON.stringify(table, null, '\t'));
-			//result.printCarriersById();
 			//should.deepEqual(_.isEmpty(result), false);
 		});
 	});
@@ -58,9 +184,9 @@ describe('EvowareTableFile', function() {
 	});
 
 	describe('toStrings_internalLabware', function() {
-		it.only("should stringify table1", function() {
+		it("should stringify table1", function() {
 			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
-			console.log({it1: carrierData.models['Wash Station Clean'], it2: carrierData.getCarrierByName('Wash Station Clean')})
+			//console.log({it1: carrierData.models['Wash Station Clean'], it2: carrierData.getCarrierByName('Wash Station Clean')})
 			/*const carrierData = {
 				nameToCarrier
 			}*/
@@ -105,6 +231,20 @@ describe('EvowareTableFile', function() {
 				'998;11;',
 				'998;69;'
 			]);
+		});
+	});
+
+	describe('toString', function() {
+		it("should stringify a table with several external objects", function() {
+			const carrierData = EvowareCarrierFile.load("../testdata/bsse-mario/Carrier.cfg");
+			/*const carrierData = {
+				nameToCarrier
+			}*/
+			const expected = table1Text//.replace(/[^\r]\n/g, "\r\n");
+			const s = EvowareTableFile.toString(carrierData, table1);
+			//s = s.replace(/\r\n/g, "\n");
+			//console.log(s);
+			should.deepEqual(s, expected);
 		});
 	});
 });
