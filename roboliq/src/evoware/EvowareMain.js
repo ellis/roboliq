@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import yaml from 'yamljs';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
 
@@ -44,7 +45,7 @@ export function run(argv) {
 		else {
 			const table = EvowareTableFile.load(carrierData, opts.table);
 			if (_.isEmpty(opts.protocol)) {
-				table.print();
+				console.log(yaml.dump(table));
 			}
 			else {
 
