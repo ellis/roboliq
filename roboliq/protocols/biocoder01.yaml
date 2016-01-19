@@ -1,0 +1,52 @@
+roboliq: v1
+
+description: |
+  Plasmid DNA Extraction - Miniprep (Excerpt)
+  See http://jbioleng.biomedcentral.com/articles/10.1186/1754-1611-4-13
+
+objects:
+  medium:
+    type: Liquid
+    description: >
+     Rich medium (LB, YT, or Terrific medium) containing appropriate antibiotic
+  sol1:
+    type: Liquid
+    description: Alkaline Lysis Solution I
+    made of: 50 mM Glucose, 25 mM Tris-HCl (pH 8.0), 10 mM EDTA (pH 8.0)
+  sol2:
+    type: Liquid
+    description: freshly prepared Alkaline Lysis Solution II
+    made of: 0.2 N NaOH, 1% SDS (w/v)
+  sol3:
+    type: Liquid
+    description: Alkaline Lysis Solution III
+    made of: 5 M sodium acetate, glacial acetic acid
+
+  bacteria:
+    type: Solid
+    description: a single colony of transformed bacteria
+
+  flask:
+    type: Plate
+    contents: ["Infinity l", medium]
+  microfuge_tube:
+    type: Plate
+  sterile_microfuge_tube:
+    type: Plate
+
+steps:
+  1:
+    description: Preparation of cells
+    command: biocoder.inoculation
+    source: bacteria
+    destination: flask
+    temperature: 37 degC
+    duration: 12h
+    SOMETHING?: 1
+
+  2:
+    1:
+      command: biocoder.measure_fluid
+      source: flask
+      destination: microfuge_tube
+      volume: 1.5ml
