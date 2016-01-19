@@ -11,22 +11,22 @@ const table1 = {
 	},
 	"Wash Station Clean": {
 		"1": {
-			"0": { "labwareModelName": "Wash Station Cleaner shallow" },
-			"1": { "labwareModelName": "Wash Station Waste" },
-			"2": { "labwareModelName": "Wash Station Cleaner deep" },
+			"1": { "labwareModelName": "Wash Station Cleaner shallow" },
+			"2": { "labwareModelName": "Wash Station Waste" },
+			"3": { "labwareModelName": "Wash Station Cleaner deep" },
 			"internal": true
 		}
 	},
 	"Shelf 32Pos Microplate": {
 		"11": {
-			"0": { "labwareModelName": "DM Nunc stronghold" },
+			"1": { "labwareModelName": "DM Nunc stronghold" },
 			"hotel": true,
 			"external": { "n1": 0, "n2": 1 }
 		}
 	},
 	"Hotel 4Pos Transfer Grid 69": {
 		"69": {
-			"0": { "labwareModelName": "DM Nunc stronghold" },
+			"1": { "labwareModelName": "DM Nunc stronghold" },
 			"hotel": true,
 			"external": { "n1": 0, "n2": 7 }
 		}
