@@ -5,23 +5,6 @@ import EvowareUtils from './EvowareUtils.js';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
 
 /**
- * Represents the table setup for an Evoware script file.
- * @param {EvowareCarrierData} carrierData
- * @param {array} carrierIdsInternal - array of carrier IDs, whereby the index in the array represents the gridIndex, and a value of -1 indicates no carrier at that grid point
- * @param {array} hotelObjects - array of HotelObjects
- * @param {array} externalObjects - array of ExternalObjects
- * @param {object} layout - map from carrierName to gridIndex to siteIndex to {label, labwareModelName}
- */
-export class EvowareTableData {
-	constructor(carrierIdsInternal, hotelObjects, externalObjects, layout) {
-		this.carrierIdsInternal = carrierIdsInternal;
-		this.hotelObjects = hotelObjects;
-		this.externalObjects = externalObjects;
-		this.layout = layout;
-	}
-}
-
-/**
  * @param {integer} parentCarrierId - carrier ID for the carrier holding this hotel
  * @param {integer} gridIndex - grid index of the hotel
  */
@@ -49,6 +32,7 @@ export class ExternalObject {
  * Parses an Evoware `.esc` script file, extracting the table setup.
  * @param {EvowareCarrierData} carrierData
  * @param {string} filename
+ * @return {object} a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  */
 export function load(carrierData, filename) {
 	const lines = new EvowareUtils.EvowareSemicolonFile(filename, 7);
@@ -147,7 +131,7 @@ function parse14(carrierData, l, lines) {
 		const result = _.find(externalCarrierNameToGridIndexList, ([carrierName,]) => carrierName === carrier.name);
 		assert(!_.isUndefined(result));
 		const [, gridIndex] = result;
-		set(carrier.name, gridIndex, 0, 'labwareModelName', labwareModelName);
+		set(carrier.name, gridIndex, 1, 'labwareModelName', labwareModelName);
 	});
 
 	return layout;
@@ -183,7 +167,7 @@ function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 			_.times(carrier.siteCount, siteIndex => {
 				const labwareModelName = l0[siteIndex+1];
 				if (!_.isEmpty(labwareModelName)) {
-					const item = [carrier.name, gridIndex, siteIndex, l1[siteIndex], labwareModelName];
+					const item = [carrier.name, gridIndex, siteIndex+1, l1[siteIndex], labwareModelName];
 					result.push(item);
 				}
 			});
@@ -261,7 +245,7 @@ function parse14_getExternalCarrierGrids(externalObjects, lines) {
 	});
 }
 
-export function toString(carrierData, table) {
+export function toStrings(carrierData, table) {
 	/*
 		siteIdToLabel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (label, _)) =>
 			for {
@@ -326,9 +310,8 @@ export function toString(carrierData, table) {
 		"--{ RPG }--"
 	];
 	const l = _.flatten([l1, s2, l3, l4, l5, l6]);
-	const s = l.join("\n")+"\n";
-	//const s = l.join("\r\n")+"\r\n";
-	return s;
+	//console.log(l.join("\n"));
+	return l;
 }
 
 export function toString_internalCarriers(carrierData, table) {

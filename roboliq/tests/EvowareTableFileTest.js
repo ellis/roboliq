@@ -167,7 +167,185 @@ describe('EvowareTableFile', function() {
 			//carrierData.printCarriersById();
 			const table = EvowareTableFile.load(carrierData, "../testdata/bsse-mario/NewLayout_Feb2015.ewt");
 			//console.log(JSON.stringify(table, null, '\t'));
-			//should.deepEqual(_.isEmpty(result), false);
+			should.deepEqual(table, {
+				"System": {
+					"-1": {
+						"external": { "n1": 4, "n2": 0 }
+					}
+				},
+				"Wash Station Clean": {
+					"1": {
+						"1": { "labwareModelName": "Wash Station Cleaner shallow" },
+						"2": { "labwareModelName": "Wash Station Waste" },
+						"3": { "labwareModelName": "Wash Station Cleaner deep" },
+						"internal": true
+					}
+				},
+				"Wash Station Dirty": {
+					"2": {
+						"1": { "labwareModelName": "Wash Station Cleaner shallow" },
+						"2": { "labwareModelName": "Wash Station Waste" },
+						"3": { "labwareModelName": "Wash Station Cleaner deep" },
+						"internal": true
+					}
+				},
+				"LI - Trough 3Pos 100ml": {
+					"3": {
+						"2": { "label": "Labware7", "labwareModelName": "Trough 25ml Max. Recovery" },
+						"internal": true
+					}
+				},
+				"Cooled 8Pos*15ml 8Pos*50ml": {
+					"4": {
+						"1": { "label": "Labware3", "labwareModelName": "Reagent Cooled 8*15ml" },
+						"2": { "label": "buffer", "labwareModelName": "Reagent Cooled 8*50ml" },
+						"internal": true
+					}
+				},
+				"Trough 1000ml": {
+					"7": {
+						"1": { "label": "Wash buffer", "labwareModelName": "Trough 1000ml Std Vol Tips" },
+						"internal": true
+					}
+				},
+				"LI - Trough 3Pos 100mlOffset": {
+					"8": { "internal": true }
+				},
+				"Downholder": {
+					"9": { "internal": true }
+				},
+				"MP 2Pos H+P Shake": {
+					"10": {
+						"4": { "label": "Schuettelplatte", "labwareModelName": "DM Nunc stronghold" },
+						"internal": true
+					}
+				},
+				"Shelf 32Pos Microplate": {
+					"11": {
+						"1": { "labwareModelName": "DM Nunc stronghold" },
+						"hotel": true,
+						"external": { "n1": 0, "n2": 1 }
+					}
+				},
+				"RoboPeel": {
+					"12": {
+						"external": { "n1": 0, "n2": 4 }
+					}
+				},
+				"Block 20Pos": {
+					"16": { "internal": true }
+				},
+				"MP 3Pos Cooled 1 PCR": {
+					"17": {
+						"2": { "label": "o/n culture", "labwareModelName": "DM Nunc stronghold" },
+						"4": { "label": "Dilution MTP", "labwareModelName": "DM Nunc stronghold" },
+						"internal": true
+					}
+				},
+				"MP 3Pos Cooled 2 PCR": {
+					"24": {
+						"2": {
+							"label": "MTP1",
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"4": {
+							"label": "MTP2",
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"6": {
+							"label": "MTP3",
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"internal": true
+					}
+				},
+				"Te-VacS": {
+					"30": {
+						"7": {
+							"label": "Waste",
+							"labwareModelName": "MTP Waste"
+						},
+						"internal": true
+					}
+				},
+				"RoboSeal": {
+					"35": {
+						"external": {
+							"n1": 0,
+							"n2": 5
+						}
+					}
+				},
+				"TRobot1": {
+					"40": {
+						"internal": true,
+						"external": {
+							"n1": 0,
+							"n2": 2
+						}
+					}
+				},
+				"TRobot2": {
+					"47": {
+						"internal": true,
+						"external": {
+							"n1": 0,
+							"n2": 3
+						}
+					}
+				},
+				"Symbol954": {
+					"49": {
+						"1": {
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"external": {
+							"n1": 0,
+							"n2": 0
+						}
+					}
+				},
+				"Centrifuge": {
+					"54": {
+						"external": {
+							"n1": 0,
+							"n2": 8
+						}
+					}
+				},
+				"Infinite M200": {
+					"61": {
+						"1": {
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"external": {
+							"n1": 0,
+							"n2": 6
+						}
+					}
+				},
+				"ReGrip Station": {
+					"62": {
+						"1": {
+							"label": "umgreifen",
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"internal": true
+					}
+				},
+				"Hotel 4Pos Transfer Grid 69": {
+					"69": {
+						"1": {
+							"labwareModelName": "DM Nunc stronghold"
+						},
+						"hotel": true,
+						"external": {
+							"n1": 0,
+							"n2": 7
+						}
+					}
+				}
+			});
 		});
 	});
 
@@ -241,7 +419,7 @@ describe('EvowareTableFile', function() {
 				nameToCarrier
 			}*/
 			const expected = table1Text//.replace(/[^\r]\n/g, "\r\n");
-			const s = EvowareTableFile.toString(carrierData, table1);
+			const s = EvowareTableFile.toStrings(carrierData, table1).join("\n")+"\n";
 			//s = s.replace(/\r\n/g, "\n");
 			//console.log(s);
 			should.deepEqual(s, expected);

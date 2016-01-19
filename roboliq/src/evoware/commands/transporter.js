@@ -36,9 +36,9 @@ export function _movePlate(step, objects, protocol, path) {
 		`"${plateOrigCarrierName}"`,
 		"\"\"", //'"'+sCarrierLid+'"',
 		`"${plateDestCarrierName}"`,
-		`"${plateOrigSite}"`,
+		`"${plateOrigSite-1}"`,
 		"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
-		`"${plateDestSite}"`
+		`"${plateDestSite-1}"`
 	];
 	const line = `Transfer_Rack(${l.join(",")});`;
 	//println(s"line: $line")
