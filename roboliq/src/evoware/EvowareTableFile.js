@@ -418,10 +418,10 @@ export function toStrings_externals(carrierData, table) {
 		items.map(({carrierName, g}) => `998;${g.external.n1};${g.external.n2};${carrierName};`)
 	]);
 	// Generate list of labware models
-	const itemsWithLabware = items.filter(item => _.has(item, "g.0.labwareModelName"));
+	const itemsWithLabware = items.filter(item => _.has(item, "g.1.labwareModelName"));
 	const l2 = _.flatten([
 		`998;${itemsWithLabware.length};`,
-		itemsWithLabware.map(({carrierId, g}) => `998;${carrierId};${_.get(g, "0.labwareModelName")};`)
+		itemsWithLabware.map(({carrierId, g}) => `998;${carrierId};${_.get(g, "1.labwareModelName")};`)
 	]);
 	// Generate grid list
 	const l3 = items.map(({gridIndex}) => `998;${(gridIndex === -1) ? 1 : gridIndex};`);
