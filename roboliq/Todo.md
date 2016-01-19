@@ -111,16 +111,13 @@
 - [x] test EvowareTableFile.toStrings_internalLabware
 - [x] test EvowareTableFile.toString
 - [x] Evoware: Carrier.cfg: "0100ï¿½300000000000000000000000000000000000", how to interpret those strange characters? I think that's some quirk representing 7 bits, because I found a carrier with 9 sites on it, and 7 bits plus 2 bits = 9 sites...
-- [ ] evoware compiler: initial functionality
+- [x] evoware compiler: initial functionality
 	- [x] figure out way to unit test the compiler
 	- [x] why isn't table properly updated with labware after `transporter._movePlate`?
 	- [x] for evoware site labels, don't use the full path name (only the last part)
 	- [x] why is labware on RoboSeal missing for protocol3.cmp.json?
-	- [ ] write test for above problem
-- [ ] evoware compiler: add more commands
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
-- [ ] check whether Evoware external n2 is display order
 - [ ] centrifuge.startIncubation: create
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] paper1_protocol3_unfolding.yaml: make sure it compiles
@@ -129,9 +126,6 @@
 - [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] use schemas for directives too
 - [ ] evoware:
-	- [ ] rename `_cleanTips` instruction to `_washTips`
-	- [ ] add command-line option to only process certain steps
-	- [ ] when user specified steps to process but no output name, name the output file according to the steps processed
 	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
 	- [ ] try loading the `tania*` protocols in Tecan Evoware
 - [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
@@ -144,13 +138,19 @@
 
 ## Todos for complex protocol and feedback
 
-- [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
-- [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
+- [ ] evoware compiler: add more commands
+- [ ] check whether Evoware external n2 is display order
+- [ ] compile some simple protocols and try to run them on mario and luigi
+- [ ] evoware: rename `_cleanTips` instruction to `_washTips`
+- [ ] evoware: add command-line option to only process certain steps
+- [ ] evoware: when user specified steps to process but no output name, name the output file according to the steps processed
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
 - [ ] evoware compiler: allow for loading Carrier.json instead of Carrier.cfg
 - [ ] evoware compiler: allow for loading JSON table instead of .ewt or .esc
 - [ ] evoware compiler: add script line for every protocol command to log the start and end times of that command
 - [ ] evoware compiler: add code to process and display measured data after measurement commands
+- [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
+- [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
 
 ## On-going todos with lots of sub-steps
 
