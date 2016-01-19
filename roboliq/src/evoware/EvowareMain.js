@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import jsonfile from 'jsonfile';
 import yaml from 'yamljs';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
+import * as EvowareCompiler from './EvowareCompiler.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
 
 const version = "v1";
@@ -17,6 +19,10 @@ const nomnom = require('nomnom').options({
 	protocol: {
 		position: 2,
 		help: "path to protocol (.json)"
+	},
+	agents: {
+		position: 3,
+		help: "list of agents to compile for (comma-separated)"
 	},
 	version: {
 		flag: true,
@@ -48,7 +54,10 @@ export function run(argv) {
 				console.log(yaml.dump(table));
 			}
 			else {
-
+				const protocol = jsonfile.readFileSync(opts.protocol);
+				const agents = opts.agents.split(",");
+				const result = EvowareCompiler.compile(carrierData, table, protocol, agents);
+				console.log(result);
 			}
 		}
 	}

@@ -111,6 +111,9 @@
 - [x] test EvowareTableFile.toStrings_internalLabware
 - [x] test EvowareTableFile.toString
 - [x] Evoware: Carrier.cfg: "0100ï¿½300000000000000000000000000000000000", how to interpret those strange characters? I think that's some quirk representing 7 bits, because I found a carrier with 9 sites on it, and 7 bits plus 2 bits = 9 sites...
+- [ ] evoware compiler:
+	- [ ] figure out way to unit test the compiler
+	- [ ] why isn't table properly updated with labware after `transporter._movePlate`?
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
 - [ ] check whether Evoware external n2 is display order

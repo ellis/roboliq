@@ -52,7 +52,7 @@ var assert = require('assert');
 var fs = require('fs');
 var jiff = require('jiff');
 var jsonfile = require('jsonfile');
-var naturalSort = require('javascript-natural-sort');
+import naturalSort from 'javascript-natural-sort';
 var path = require('path');
 var yaml = require('yamljs');
 import commandHelper from './commandHelper.js';
