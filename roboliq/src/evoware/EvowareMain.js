@@ -56,8 +56,12 @@ export function run(argv) {
 			else {
 				const protocol = jsonfile.readFileSync(opts.protocol);
 				const agents = opts.agents.split(",");
-				const result = EvowareCompiler.compile(carrierData, table, protocol, agents);
-				console.log(result);
+				const results = EvowareCompiler.compile(carrierData, table, protocol, agents);
+				_.forEach(results, result => {
+					const tableLines = EvowareTableFile.toStrings(carrierData, result.table);
+					console.log(tableLines.join("\n"));
+					console.log(result.lines.join("\n"));
+				});
 			}
 		}
 	}

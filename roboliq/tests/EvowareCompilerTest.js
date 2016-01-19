@@ -22,7 +22,10 @@ describe('EvowareTableFile', function() {
 				'Transfer_Rack("35","10",0,0,0,1,0,"","Ellis Nunc F96 MicroWell","Narrow","","","RoboSeal","","MP 2Pos H+P Shake","0",(Not defined),"1");'
 			]);
 			//console.log(EvowareTableFile.toStrings(carrierData, result[0].table).join("\n"))
-			console.log(JSON.stringify(result[0].table, null, '\t'))
+			//console.log(JSON.stringify(result[0].table, null, '\t'))
+			const table0 = result[0].table;
+			should.deepEqual(_.get(result[0].table, ["MP 2Pos H+P Shake", 10, 2]), {"label": "P2", "labwareModelName": "Ellis Nunc F96 MicroWell"});
+			should.deepEqual(_.get(result[0].table, ["RoboSeal", 35, 1]), {"label": "ROBOSEAL", "labwareModelName": "Ellis Nunc F96 MicroWell"});
 		});
 	});
 });

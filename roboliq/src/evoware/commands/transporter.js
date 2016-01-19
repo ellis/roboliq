@@ -47,8 +47,8 @@ export function _movePlate(step, objects, protocol, path) {
 		line,
 		effects: _.fromPairs([[`${object}.location`, plateDestName]]),
 		tableEffects: [
-			[[plateOrigCarrierName, plateOrigGrid, plateOrigSite], {label: plateOrigName, labwareModelName: plateModelName}],
-			[[plateDestCarrierName, plateDestGrid, plateDestSite], {label: plateDestName, labwareModelName: plateModelName}],
+			[[plateOrigCarrierName, plateOrigGrid, plateOrigSite], {label: _.last(plateOrigName.split('.')), labwareModelName: plateModelName}],
+			[[plateDestCarrierName, plateDestGrid, plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: plateModelName}],
 		]
 	}];
 }
