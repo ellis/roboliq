@@ -116,6 +116,7 @@
 	- [x] why isn't table properly updated with labware after `transporter._movePlate`?
 	- [x] for evoware site labels, don't use the full path name (only the last part)
 	- [x] why is labware on RoboSeal missing for protocol3.cmp.json?
+- [ ] get EvowareCompiler working
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
@@ -139,6 +140,7 @@
 
 ## Todos for complex protocol and feedback
 
+- [ ] implement lookupPath and lookupSpecs
 - [ ] evoware compiler: add more commands
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi

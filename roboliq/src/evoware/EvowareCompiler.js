@@ -4,6 +4,13 @@ import * as EvowareTableFile from './EvowareTableFile.js';
 import * as transporter from './commands/transporter.js';
 
 const commandHandlers = {
+	"evoware._facts": evoware._facts,
+	/*"pipetter._aspirate" -> handlePipetterAspirate,
+	"pipetter._dispense" -> handlePipetterDispense,
+	"pipetter._pipette" -> handlePipetterPipette,
+	"pipetter._cleanTips" -> handlePipetterCleanTips,
+	"timer._start" -> handleTimerStart,
+	"timer._wait" -> handleTimerWait,*/
 	"transporter._movePlate": transporter._movePlate
 }
 

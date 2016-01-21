@@ -7,6 +7,7 @@ export function _movePlate(step, objects, protocol, path) {
 	const object = _.get(objects, step.object);
 	const plateModelName0 = _.get(object, "model");
 	// plateModelName: "((@object).model).evowareName: string"
+	// plateModelName: [["@object", "model"], "evowareName"]
 	const plateModelName = _.get(_.get(objects, plateModelName0), "evowareName");
 	const plateOrigName = _.get(object, "location");
 	const plateOrig = _.get(objects, plateOrigName);
@@ -28,13 +29,13 @@ export function _movePlate(step, objects, protocol, path) {
 		0, // speed: 0 = maximum, 1 = taught in vector dialog
 		romaIndex,
 		0, //if (lidHandling == RemoveAtSource) 1 else 0,
-		"\"\"", //'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
+		'""', //'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
 		`"${plateModelName}"`,
 		`"${programName}"`,
-		"\"\"",
-		"\"\"",
+		'""',
+		'""',
 		`"${plateOrigCarrierName}"`,
-		"\"\"", //'"'+sCarrierLid+'"',
+		'""', //'"'+sCarrierLid+'"',
 		`"${plateDestCarrierName}"`,
 		`"${plateOrigSite-1}"`,
 		"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
