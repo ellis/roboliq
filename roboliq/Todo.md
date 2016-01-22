@@ -628,3 +628,122 @@ So the command should create a report of the well contents before readout.
     1.1: parameter `sources`: value `systemLiquid`: undefined
     1.2: parameters `items`, `sources`, `destinations`: must have equal lengths
     1.3: value `plate1.model`: undefined, please set a value
+
+# Factorial designs
+
+Normally, a design is represented by an array of objects.
+The object's properties are factor names, and the values are the factor values.
+
+Sometimes we need multi-level designs, such as when first one set of master
+mixtures is prepared, and then experiments are done drawing samples from
+each of them.
+
+```
+experiment():
+  factors:
+    saltwater: 40ul
+	bufferSystem:
+      acetate:
+	    , mes, pipes, hepes]
+	sfGFP: 5ul
+    a: [-1, 1]
+    b: [-1, 1]
+    c: [-1, 0, 1]
+
+```
+
+```{yaml}
+- index: 1
+  saltwater: 40ul
+  bufferSystem: acetate
+  acetate_375: 30ul
+  pH: 3.75
+  sfGFP: 5ul
+- index: 2
+  saltwater: 40ul
+  bufferSystem: acetate
+  acetate_375: 25ul
+  acetate_575: 5ul
+  pH: 4
+  sfGFP: 5ul
+- index: 3
+
+  - {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8}
+  - {source1: mes_510,     source2: mes_710,     volume: 30ul, count: 7}
+  - {source1: pipes_575,   source2: pipes_775,   volume: 30ul, count: 5}
+  - {source1: hepes_650,   source2: hepes_850,   volume: 30ul, count: 5}
+```
+
+This has the following structure:
+* for each GFP variant:
+    * denature a sample of GFP
+    * wait for 7 minutes
+	* extract three samples
+	* measure those three samples sequentially (with injected dilution)
+
+The multi-level experiment description could look like this:
+
+```{yaml}
+- index: 1
+  gfpSource: sfGFP
+  denaturantVolume: 85.5ul
+  gfpVolume: 4.5ul
+  wait: 7 minutes
+  well: mixPlate(A01)
+  sampleVolume: 7ul
+  sampleWells: mixPlate(B01,C01,D01)
+```
+
+The code to create that experiment description might look like this:
+
+```{yaml}
+objects:
+  myExperiment:
+    type: Variable
+    calculation:
+      experiment():
+        factors:
+          gfpSource: [sfGFP, ...]
+          denaturantVolume: 85.5ul
+          gfpVolume: 4.5ul
+          mixWell: WELL1
+          wait: 7 minutes
+          sampleVolume: 7ul
+          sampleWells: WELLS3
+        assignWells:
+          WELL1:
+            wells: mixPlate(all)
+          WELLS3:
+            wells: mixPlate(all)
+            count: 3
+        random: 123
+```
+
+The steps to perform the experiment might look like this:
+
+```{yaml}
+command: experiment.run
+experiment: myExperiment
+steps:
+  1:
+    command: pipetter.pipette
+    items:
+    - {source: denaturant, volume: SCOPE.denaturantVolume}
+    - {source: SCOPE.gfpSource, volume: SCOPE.gfpVolume}
+    destinations: SCOPE.mixWell
+  2:
+    command: timer.sleep
+    duration: SCOPE.wait
+  3:
+    command: pipetter.pipette
+    sources: SCOPE.mixWell
+    volumes: SCOPE.sampleVolume
+    destinations: SCOPE.sampleWells
+  4:
+    command: fluorescenceReader.measurePlate
+    object: mixPlate
+    program:
+      wells: SCOPE.sampleWells
+    programTemplate: ./refolding.mdfx.template
+    #outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania15_renaturation--<YYYMMDD_HHmmss>.xml'
+```
