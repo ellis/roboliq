@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import naturalSort from 'javascript-natural-sort';
 import * as EvowareTableFile from './EvowareTableFile.js';
+import * as evoware from './commands/evoware.js';
 import * as transporter from './commands/transporter.js';
 
 const commandHandlers = {

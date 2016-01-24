@@ -1,11 +1,10 @@
-private def handleFacts(
-	objects: JsObject,
-	step: JsObject
-): ResultC[List[Token]] = {
-	for {
-		inst <- JsConverter.fromJs[EvowareFacts](step)
-	} yield {
-		val line = createFactsLine(inst.factsEquipment, inst.factsVariable, inst.factsValue_?.getOrElse(""))
-		List(Token(line))
-	}
+import _ from 'lodash';
+import commandHelper from '../../commandHelper.js';
+import evowareHelper from './evowareHelper.js';
+
+export function _facts(step, objects, protocol, path) {
+	const line = evowareHelper.createFactsLine(step.factsEquipment, step.factsVariable, step.factsValue);
+	return [{
+		line
+	}];
 }

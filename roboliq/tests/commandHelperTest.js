@@ -34,7 +34,7 @@ describe('commandHelper', function() {
 	});
 
 	describe('commandHelper.lookupPath', function() {
-		it.only("should lookup mixtures of parameter and object values", () => {
+		it("should lookup mixtures of parameter and object values", () => {
 			const data = {
 				objects: {
 					model1: {evowareName: "evowareModel1"},
