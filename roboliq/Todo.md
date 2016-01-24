@@ -10,54 +10,54 @@
 - [x] babel-ify for ES6 features
 - [x] write test for construction of well contents during mixing
 - [x] create WellContents.js with functions from pipetterUtils.js
-	- [x] create a function for adding contents, take code from pipetterUtils/getEffects_pipette
-	- [x] refactor pipetterUtils/getEffects_pipette using WellContents.js
+    - [x] create a function for adding contents, take code from pipetterUtils/getEffects_pipette
+    - [x] refactor pipetterUtils/getEffects_pipette using WellContents.js
 - [x] change WellContents.unknownVolume to infinity, and retest
 - [x] implement `tania12` scripts for denaturation
-	- [x] create single protocol for all of the steps that used to be separated
-	- [x] create `#pipetteMixtures` directive
-	- [x] create `centrifuge.insertPlates2` command
-	- [x] try to compile for evoware
+    - [x] create single protocol for all of the steps that used to be separated
+    - [x] create `#pipetteMixtures` directive
+    - [x] create `centrifuge.insertPlates2` command
+    - [x] try to compile for evoware
 - [x] implement `tania15` scripts for renaturation
     - [x] node protocols/tania15_renaturation.js, use `__dirname`
-	- [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
-	- [x] merge protocols together rather than appending them!
+    - [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
+    - [x] merge protocols together rather than appending them!
 - [x] for object of type `Variable`, process a `calculate` property as an alternative to setting the value to a directive.
 - [x] change directive handling to accommodate merging of lab-specific protocol
-	- [x] object variables should have directives parsed before parsing steps, not immediately after loading
-	- [x] directives can have an 'override' property, whose value gets merged into the result of the directive
-	- [x] directives in steps are processed as they are encountered
-	- [x] directives in command parameters are processed before being passed to the command handler
+    - [x] object variables should have directives parsed before parsing steps, not immediately after loading
+    - [x] directives can have an 'override' property, whose value gets merged into the result of the directive
+    - [x] directives in steps are processed as they are encountered
+    - [x] directives in command parameters are processed before being passed to the command handler
 - [x] handle JSON Patch files (as opposed to merge-able files)
 - [x] handle '?'-suffix and '!'-suffix properties in objects and steps
 - [x] split `tania*` protocols into portable vs lab data
-	- [x] tania13_ph: make combined protocol, at first lab-specific
-	- [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
-	- [x] tania13_ph: split combined protocol into portable and lab-specific parts
-	- [x] tani13_ph-ourlab-diff
-	- [x] tania12_denaturation
+    - [x] tania13_ph: make combined protocol, at first lab-specific
+    - [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
+    - [x] tania13_ph: split combined protocol into portable and lab-specific parts
+    - [x] tani13_ph-ourlab-diff
+    - [x] tania12_denaturation
 - [x] if an object has both ! and non ! properties, the ! property should take precedence
 - [x] `npm test`: fix problem with variable that references a source
-	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
-	- [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
+    - [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
+    - [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
 - [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
 - [x] pipetterTest: re-enable all the tests
 - [x] command documentation:
-	- [x] create schemas for all commands (JSON/YAML structured documentation)
-	- [x] move all schemas to YAML files
-	- [x] generate documentation from schemas
-		- [x] write code to do the generation
-		- [x] create an npm command for generating docs
-		- [x] install git version of jsdoc and try to get it to work with our ES6 code
-		- [x] put the command docs somewhere where jsdoc will pick it up
-	- [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
-	- [x] change all schemas to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
-	- [x] use schemas to parse the params before passing them to the commandHandler
-	- [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
-	- [x] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
-	- [x] refactor all commands to accept parsed parameters, using the schemas
-	- [x] remove all uses of commandHelper.parseParams()
-	- [x] rename commandHelper.parseParams2()
+    - [x] create schemas for all commands (JSON/YAML structured documentation)
+    - [x] move all schemas to YAML files
+    - [x] generate documentation from schemas
+        - [x] write code to do the generation
+        - [x] create an npm command for generating docs
+        - [x] install git version of jsdoc and try to get it to work with our ES6 code
+        - [x] put the command docs somewhere where jsdoc will pick it up
+    - [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
+    - [x] change all schemas to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
+    - [x] use schemas to parse the params before passing them to the commandHandler
+    - [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
+    - [x] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
+    - [x] refactor all commands to accept parsed parameters, using the schemas
+    - [x] remove all uses of commandHelper.parseParams()
+    - [x] rename commandHelper.parseParams2()
 - [x] commandSpec: pipetter.cleanTips: define intensity (intensity is a predefined enum)
 - [x] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
 - [x] move around protocols/tania* files so that ./runall.sh works
@@ -72,51 +72,52 @@
 - [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
 - [x] schemas: pipetter.pipetteMixtures.order: should be an enum
 - [x] change `parseParams` function to return a {objectNames, values}
-	- [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
-	- [x] pipetterPipetteTest.js
-	- [x] centrifugeTest.js
+    - [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
+    - [x] pipetterPipetteTest.js
+    - [x] centrifugeTest.js
 - [x] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
 - [x] refactor usage of commandHelper.getParsedValue
-	- [x] figure out why we needed to `_.clone(value1)` -- what is mutating the value?
-	- [x] run `npm test` on branch lookupValue2
-	- [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
-	- [x] finish documenting commandHelper.getParsedValue
+    - [x] figure out why we needed to `_.clone(value1)` -- what is mutating the value?
+    - [x] run `npm test` on branch lookupValue2
+    - [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
+    - [x] finish documenting commandHelper.getParsedValue
 - [x] look at `~/src/roboliq/roboliq/protocols/output/diff.sh`
-	- [x] handle `destinationAfter1: null` for `centrifuge.centrifuge2`: make new type of "SiteOrStay"
-	- [x] fix error in protocols/protocol1_ph.yaml
+    - [x] handle `destinationAfter1: null` for `centrifuge.centrifuge2`: make new type of "SiteOrStay"
+    - [x] fix error in protocols/protocol1_ph.yaml
 - [x] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
-	- [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
-	- [x] change `pipetter._cleanTips` to `pipetter._washTips`
-	- [x] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
-	- [x] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
-	- [x] test for clean all tips
-	- [x] delete protocol8.json, because the tests are in pipetterTest.js
-	- [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
-	- [x] add tips 5-8 to ourlab.js
+    - [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
+    - [x] change `pipetter._cleanTips` to `pipetter._washTips`
+    - [x] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
+    - [x] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
+    - [x] test for clean all tips
+    - [x] delete protocol8.json, because the tests are in pipetterTest.js
+    - [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
+    - [x] add tips 5-8 to ourlab.js
 - [x] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
 - [x] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
-	- [x] `_pipette`: append contaminants from source well to syringe
-	- [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
-	- [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
-	- [x] `_pipette`: clear syringe.cleaned
-	- [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
-	- [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
-	- [x] `_dispense`: remove contents, append contaminants in dest well if syringe touches
-		- [x] test contents=null when dispensing all syringe contents
-		- [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
-		- [x] test contamination upon wet contact
-	- [x] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
+    - [x] `_pipette`: append contaminants from source well to syringe
+    - [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
+    - [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
+    - [x] `_pipette`: clear syringe.cleaned
+    - [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
+    - [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
+    - [x] `_dispense`: remove contents, append contaminants in dest well if syringe touches
+        - [x] test contents=null when dispensing all syringe contents
+        - [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
+        - [x] test contamination upon wet contact
+    - [x] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
 - [x] centrifuge: temperature parameters should require unit (e.g. 'degC')
 - [x] upgrading lodash and babel
 - [x] test EvowareTableFile.toStrings_internalLabware
 - [x] test EvowareTableFile.toString
 - [x] Evoware: Carrier.cfg: "0100ï¿½300000000000000000000000000000000000", how to interpret those strange characters? I think that's some quirk representing 7 bits, because I found a carrier with 9 sites on it, and 7 bits plus 2 bits = 9 sites...
 - [x] evoware compiler: initial functionality
-	- [x] figure out way to unit test the compiler
-	- [x] why isn't table properly updated with labware after `transporter._movePlate`?
-	- [x] for evoware site labels, don't use the full path name (only the last part)
-	- [x] why is labware on RoboSeal missing for protocol3.cmp.json?
+    - [x] figure out way to unit test the compiler
+    - [x] why isn't table properly updated with labware after `transporter._movePlate`?
+    - [x] for evoware site labels, don't use the full path name (only the last part)
+    - [x] why is labware on RoboSeal missing for protocol3.cmp.json?
 - [x] `experiment.run`: implement
+- [ ] consider how to use `experiment.run` in paper1_protocol1_ph
 - [ ] get EvowareCompiler working
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
@@ -129,8 +130,8 @@
 - [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] use schemas for directives too
 - [ ] evoware:
-	- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
-	- [ ] try loading the `tania*` protocols in Tecan Evoware
+    - [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
+    - [ ] try loading the `tania*` protocols in Tecan Evoware
 - [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
 - [ ] review FIXMEs
 - [ ] upload to a public repository
@@ -143,13 +144,13 @@
 
 - [x] implement lookupPath
 - [ ] evoware compiler: add more commands
-	- [x] `evoware._facts`
-	- [ ] `timer._start`
-	- [ ] `timer._wait`
-	- [ ] `pipetter._aspirate`
-	- [ ] `pipetter._dispense`
-	- [ ] `pipetter._pipette`
-	- [ ] `pipetter._cleanTips`
+    - [x] `evoware._facts`
+    - [x] `timer._start`
+    - [x] `timer._wait`
+    - [ ] `pipetter._aspirate`
+    - [ ] `pipetter._dispense`
+    - [ ] `pipetter._pipette`
+    - [ ] `pipetter._cleanTips`
 - [ ] implement lookupSpecs
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi
@@ -163,119 +164,120 @@
 - [ ] evoware compiler: add code to process and display measured data after measurement commands
 - [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
+- [ ] REFACTOR: pass same set of arguments to roboliq and evoware command handlers
 - [ ] test `evoware._facts`
 - [ ] test `EvowareCompiler.compile`
 
 ## On-going todos with lots of sub-steps
 
 - [ ] complex protocol
-	- [ ] write script based on DM_Growthcurves
-	- [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
+    - [ ] write script based on DM_Growthcurves
+    - [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
-	- [x] Commands.md: Add general documentation to each command namespace
-	- [ ] Commands.md: add examples for each command
-	- [ ] document the properties of the types (i.e. add 'description' field)
-	- [ ] Developing_Roboliq.md
-	- [ ] Object_Types.md: Add general documentation to top of page
-	- [ ] Using_Roboliq.md
-		- [ ] add reference to WritingAProtocol.md
-	- [ ] WritingAProtocol.md
-	- [ ] Cookbook.md: explaining how to solve specific problems
-	- [ ] Configuring a lab (e.g. `config/ourlab.js`)
-	- [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
-	- [ ] convention for syringes being in 'syringe' property of pipetter
-	- [ ] pipetter.cleanTips: document the various allowed parameter combinations of equipment, items, syringes, intensity
-	- [ ] document the directives, such as "#createPipetteMixtureList"
+    - [x] Commands.md: Add general documentation to each command namespace
+    - [ ] Commands.md: add examples for each command
+    - [ ] document the properties of the types (i.e. add 'description' field)
+    - [ ] Developing_Roboliq.md
+    - [ ] Object_Types.md: Add general documentation to top of page
+    - [ ] Using_Roboliq.md
+        - [ ] add reference to WritingAProtocol.md
+    - [ ] WritingAProtocol.md
+    - [ ] Cookbook.md: explaining how to solve specific problems
+    - [ ] Configuring a lab (e.g. `config/ourlab.js`)
+    - [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
+    - [ ] convention for syringes being in 'syringe' property of pipetter
+    - [ ] pipetter.cleanTips: document the various allowed parameter combinations of equipment, items, syringes, intensity
+    - [ ] document the directives, such as "#createPipetteMixtureList"
 - [ ] code documentation
-	- [x] roboliq.js
-	- [x] WellContents.js
-	- [x] generateSchemaDocs.js
-	- [x] commandHelper.js
-	- [ ] figure out how to reference an anchor from a separate file (e.g. commands/centrifuge.js should reference 'centrifuge' in Commands.md)
-		- continue with centrifuge.js documentaiton header (currently have experiments in there)
-	- [ ] generateSchemaDocs.js: set anchors for command modules, so they can be referenced from the source code
-	- [ ] generateSchemaDocs.js: why aren't descriptions generated for "Object Types" properties?
-	- [ ] for parameter types, can they be links to the Type definition?
-	- [ ] check generated jsdoc, and make appropriate improvements (e.g. setting modules and indicating which methods are exported)
-	- [ ] generateSchemaDocs.js shouldn't be listed on the Home page of the jsdocs (probably need to remote `@file`)
-	- [ ] expectCore.js
-	- [ ] expect.js
-	- [ ] main.js
-	- [ ] misc.js
-	- [ ] commands...
-	- [ ] document roboliq's extensions to JSON Schema (types, 'module')
+    - [x] roboliq.js
+    - [x] WellContents.js
+    - [x] generateSchemaDocs.js
+    - [x] commandHelper.js
+    - [ ] figure out how to reference an anchor from a separate file (e.g. commands/centrifuge.js should reference 'centrifuge' in Commands.md)
+        - continue with centrifuge.js documentaiton header (currently have experiments in there)
+    - [ ] generateSchemaDocs.js: set anchors for command modules, so they can be referenced from the source code
+    - [ ] generateSchemaDocs.js: why aren't descriptions generated for "Object Types" properties?
+    - [ ] for parameter types, can they be links to the Type definition?
+    - [ ] check generated jsdoc, and make appropriate improvements (e.g. setting modules and indicating which methods are exported)
+    - [ ] generateSchemaDocs.js shouldn't be listed on the Home page of the jsdocs (probably need to remote `@file`)
+    - [ ] expectCore.js
+    - [ ] expect.js
+    - [ ] main.js
+    - [ ] misc.js
+    - [ ] commands...
+    - [ ] document roboliq's extensions to JSON Schema (types, 'module')
 - [ ] implement equivalents for BioCoder commands
-	- [ ] optional_step
-	- [ ] parallel_step
-	- [ ] to_do
-	- [ ] store_until
-	- [ ] use_or_store
-	- [ ] time_constraint
-	- [?] set_value
-	- [?] assign
-	- [ ] add
-	- [ ] divide
-	- [ ] subtract
-	- [ ] multiply
-	- [ ] discard
-	- [ ] drain
-	- [ ] new_solid
-	- [ ] new_container
-	- [ ] new_slide
-	- [ ] new_column
-	- [ ] measure_solid
-	- [ ] measure_prop
-	- [ ] add_to_column
-	- [ ] add_to_slide
-	- [ ] collect_tissue
-	- [ ] plate_out
-	- [?] transfer
-	- [ ] combine
-	- [ ] combine_and_mix
-	- [ ] dissolve
-	- [ ] invert
-	- [?] pipet
-	- [ ] resuspend
-	- [ ] tap
-	- [ ] vortex
-	- [ ] vortex_column
-	- [ ] incubate_and_mix
-	- [ ] mixing_table
-	- [ ] mixing_table_pcr
-	- [ ] immerse_slide
-	- [ ] remove_slide
-	- [ ] wash_slide
-	- [ ] homogenize_tissue
-	- [ ] wash_tissue
-	- [ ] incubate
-	- [ ] store_for
-	- [ ] set_temp
-	- [ ] store_plate
-	- [ ] thermocycler
-	- [ ] thermocycler_anneal
-	- [ ] pcr_init_denat
-	- [ ] pcr_final_ext
-	- [ ] inoculation
-	- [ ] incubate_plate
-	- [ ] invert_dry
-	- [ ] dry_pellet
-	- [ ] dry_slide
-	- [x] centrifuge
-	- [ ] centrifuge_pellet
-	- [ ] centrifuge_phases_top
-	- [ ] centrifuge_phases_bottom
-	- [ ] centrifuge_column
-	- [ ] centrifuge_flow_through()
-	- [ ] ce_detect
-	- [ ] electrophoresis
-	- [ ] facs
-	- [ ] measure_fluorescence
-	- [ ] mount_observe_slide
-	- [ ] sequencing
-	- [ ] electroporate
-	- [ ] weigh
-	- [ ] cell_culture
-	- [ ] transfection
+    - [ ] optional_step
+    - [ ] parallel_step
+    - [ ] to_do
+    - [ ] store_until
+    - [ ] use_or_store
+    - [ ] time_constraint
+    - [?] set_value
+    - [?] assign
+    - [ ] add
+    - [ ] divide
+    - [ ] subtract
+    - [ ] multiply
+    - [ ] discard
+    - [ ] drain
+    - [ ] new_solid
+    - [ ] new_container
+    - [ ] new_slide
+    - [ ] new_column
+    - [ ] measure_solid
+    - [ ] measure_prop
+    - [ ] add_to_column
+    - [ ] add_to_slide
+    - [ ] collect_tissue
+    - [ ] plate_out
+    - [?] transfer
+    - [ ] combine
+    - [ ] combine_and_mix
+    - [ ] dissolve
+    - [ ] invert
+    - [?] pipet
+    - [ ] resuspend
+    - [ ] tap
+    - [ ] vortex
+    - [ ] vortex_column
+    - [ ] incubate_and_mix
+    - [ ] mixing_table
+    - [ ] mixing_table_pcr
+    - [ ] immerse_slide
+    - [ ] remove_slide
+    - [ ] wash_slide
+    - [ ] homogenize_tissue
+    - [ ] wash_tissue
+    - [ ] incubate
+    - [ ] store_for
+    - [ ] set_temp
+    - [ ] store_plate
+    - [ ] thermocycler
+    - [ ] thermocycler_anneal
+    - [ ] pcr_init_denat
+    - [ ] pcr_final_ext
+    - [ ] inoculation
+    - [ ] incubate_plate
+    - [ ] invert_dry
+    - [ ] dry_pellet
+    - [ ] dry_slide
+    - [x] centrifuge
+    - [ ] centrifuge_pellet
+    - [ ] centrifuge_phases_top
+    - [ ] centrifuge_phases_bottom
+    - [ ] centrifuge_column
+    - [ ] centrifuge_flow_through()
+    - [ ] ce_detect
+    - [ ] electrophoresis
+    - [ ] facs
+    - [ ] measure_fluorescence
+    - [ ] mount_observe_slide
+    - [ ] sequencing
+    - [ ] electroporate
+    - [ ] weigh
+    - [ ] cell_culture
+    - [ ] transfection
 - [ ] implement equivalents for PR-PR commands
 
 ## After submission
@@ -291,8 +293,8 @@
 - [ ] write back-end for PR-PR?
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
-	- see http://arqex.com/991/json-editor-react-immutable-data
-	- see https://github.com/jdorn/json-editor
+    - see http://arqex.com/991/json-editor-react-immutable-data
+    - see https://github.com/jdorn/json-editor
 - [ ] UI to create protocol
 - [ ] consider adding constraints to properties using 'property@' properties, e.g. `model@: {rows:8, columns:16}`
 - [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
@@ -309,16 +311,16 @@
 - [ ] change imports to require a version number?
 - [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
 - [ ] improvements to specification/realization splitting
-	- [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
-	- [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
+    - [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
+    - [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
 - [ ] augment protocol design:
- 	- [ ] specify factors
-	- [ ] choose combinations of factor levels (e.g. full-factorial)
-	- [ ] possibly partition blocks of the combinations
-	- [ ] construct mixtures, if relevant
-	- [ ] assign mixtures to wells (probably with randomization)
-	- [ ] specify pipetting details, such as order of sources, and parameters by source
-	- [ ] allow factor values to alter program flow (i.e., heating vs not heating)
+     - [ ] specify factors
+    - [ ] choose combinations of factor levels (e.g. full-factorial)
+    - [ ] possibly partition blocks of the combinations
+    - [ ] construct mixtures, if relevant
+    - [ ] assign mixtures to wells (probably with randomization)
+    - [ ] specify pipetting details, such as order of sources, and parameters by source
+    - [ ] allow factor values to alter program flow (i.e., heating vs not heating)
 - [ ] refactor misc.js, expect.js, and commandHelper.js to remove duplication
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line
@@ -655,21 +657,32 @@ each of them.
 experiment():
   factors:
     saltwater: 40ul
-	bufferSystem:
+    bufferSystem:
       acetate:
-	    , mes, pipes, hepes]
-	sfGFP: 5ul
-    a: [-1, 1]
-    b: [-1, 1]
-    c: [-1, 0, 1]
+	    acidPH: 3.75
+		basePH: 5.75
+		acidSource: acetate_375
+		baseSource: acetate_575
+		acidVolume: {range(): {start: 30ul, end: 0ul, count: 8}}
+		baseVolume: {calculate(): "30 - acidVolume"}
+		pH: {calculate(): "(acidPH * acidVolume + basePH * baseVolume) / 30ul)"}
 
+	    gradient():
+		  {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8, digits: 1, pH_low: 3.75, pH_}
+        , mes, pipes, hepes]
+    sfGFP: 5ul
 ```
 
 ```{yaml}
 - index: 1
-  saltwater: 40ul
+  saltwaterVolume: 40ul
   bufferSystem: acetate
-  acetate_375: 30ul
+  acidPH: 3.75
+  basePH: 5.75
+  acidSource: acetate_375
+  baseSource: acetate_575
+  acidVolume: 30ul
+  baseVolume: 0ul
   pH: 3.75
   sfGFP: 5ul
 - index: 2
@@ -687,12 +700,44 @@ experiment():
   - {source1: hepes_650,   source2: hepes_850,   volume: 30ul, count: 5}
 ```
 
+```
+I want to conver this to an experiment definition:
+
+mixtures:
+  type: Variable
+  calculate:
+    "#createPipetteMixtureList":
+      replicates: 3
+      items:
+      - source: saltwater
+        volume: 40ul
+      - "#gradient":
+        - {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8, decimals: 1}
+        - {source1: mes_510,     source2: mes_710,     volume: 30ul, count: 7, decimals: 1}
+        - {source1: pipes_575,   source2: pipes_775,   volume: 30ul, count: 5, decimals: 1}
+        - {source1: hepes_650,   source2: hepes_850,   volume: 30ul, count: 5, decimals: 1}
+      - source: sfGFP
+        volume: 5ul
+        clean: thorough
+        cleanBetweenSameSource: flush
+        program!: Roboliq_Water_Wet_1000_mix3x50ul
+
+mixtureWells:
+  type: Variable
+  calculate:
+    "#createWellAssignments":
+      list: mixtures
+      wells: mixPlate(all row-jump(1))
+```
+
+
+
 This has the following structure:
 * for each GFP variant:
     * denature a sample of GFP
     * wait for 7 minutes
-	* extract three samples
-	* measure those three samples sequentially (with injected dilution)
+    * extract three samples
+    * measure those three samples sequentially (with injected dilution)
 
 The multi-level experiment description could look like this:
 
