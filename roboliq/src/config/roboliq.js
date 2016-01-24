@@ -131,6 +131,7 @@ var planHandlers = {
 module.exports = {
 	roboliq: "v1",
 	imports: [
+		'../commands/experiment.js',
 		'../commands/system.js',
 		// Equipment
 		'../commands/equipment.js',

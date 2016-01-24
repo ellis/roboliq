@@ -1,0 +1,11 @@
+experiment:
+  module: |
+    The `experiment` module is for working with experimental designs.
+    Currently there is only one command, `experiment.run`.
+
+experiment.run:
+  description: "Run an experiment.  This command will performs its sub-steps for every item in the experiment array, placing the item's values in SCOPE."
+  properties:
+    experiment: {description: "An array holding objects with variations on experimental factors", type: "array"}
+    steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}
+  required: ["experiment"]
