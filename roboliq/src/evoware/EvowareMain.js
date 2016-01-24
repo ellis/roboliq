@@ -57,9 +57,9 @@ export function run(argv) {
 				const protocol = jsonfile.readFileSync(opts.protocol);
 				const agents = opts.agents.split(",");
 				const results = EvowareCompiler.compile(carrierData, table, protocol, agents);
-				console.log()
-				console.log(JSON.stringify(results, null, '\t'))
-				console.log()
+				//console.log()
+				//console.log(JSON.stringify(results, null, '\t'))
+				//console.log()
 				_.forEach(results, result => {
 					const tableLines = EvowareTableFile.toStrings(carrierData, result.table);
 					console.log(tableLines.join("\n"));

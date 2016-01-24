@@ -142,9 +142,15 @@
 ## Todos for complex protocol and feedback
 
 - [x] implement lookupPath
-- [ ] implement lookupSpecs
 - [ ] evoware compiler: add more commands
 	- [x] `evoware._facts`
+	- [ ] `timer._start`
+	- [ ] `timer._wait`
+	- [ ] `pipetter._aspirate`
+	- [ ] `pipetter._dispense`
+	- [ ] `pipetter._pipette`
+	- [ ] `pipetter._cleanTips`
+- [ ] implement lookupSpecs
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi
 - [ ] evoware: rename `_cleanTips` instruction to `_washTips`
@@ -158,6 +164,7 @@
 - [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
 - [ ] test `evoware._facts`
+- [ ] test `EvowareCompiler.compile`
 
 ## On-going todos with lots of sub-steps
 

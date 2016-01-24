@@ -3,6 +3,7 @@ import naturalSort from 'javascript-natural-sort';
 import M from '../Medley.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
 import * as evoware from './commands/evoware.js';
+import * as timer from './commands/timer.js';
 import * as transporter from './commands/transporter.js';
 
 const commandHandlers = {
@@ -10,9 +11,9 @@ const commandHandlers = {
 	/*"pipetter._aspirate" -> handlePipetterAspirate,
 	"pipetter._dispense" -> handlePipetterDispense,
 	"pipetter._pipette" -> handlePipetterPipette,
-	"pipetter._cleanTips" -> handlePipetterCleanTips,
-	"timer._start" -> handleTimerStart,
-	"timer._wait" -> handleTimerWait,*/
+	"pipetter._cleanTips" -> handlePipetterCleanTips,*/
+	"timer._start": timer._start,
+	"timer._wait": timer._wait,
 	"transporter._movePlate": transporter._movePlate
 }
 
@@ -29,14 +30,14 @@ export function compile(carrierData, table, protocol, agents) {
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects);
 	const flat = _.flattenDeep(results);
-	flat.forEach(x => console.log(x));
+	//flat.forEach(x => console.log(x));
 	const lines = _(flat).map(x => x.line).compact().value();
 	return [{table, lines}];
 }
 
 export function compileStep(table, protocol, agents, path, objects) {
-	console.log(`compileStep: ${path.join(".")}`)
-	console.log({steps: protocol.steps})
+	// console.log(`compileStep: ${path.join(".")}`)
+	// console.log({steps: protocol.steps})
 	const step = (_.isEmpty(path)) ? protocol.steps : _.get(protocol.steps, path);
 	if (_.isUndefined(step))
 		return undefined;
@@ -66,7 +67,7 @@ export function compileStep(table, protocol, agents, path, objects) {
 	else {
 		const result0 = commandHandler(step, objects, protocol, path);
 		_.forEach(result0, result1 => {
-			console.log("result1: "+JSON.stringify(result1));
+			// console.log("result1: "+JSON.stringify(result1));
 			results.push(result1);
 			if (result1.effects) {
 				_.forEach(result1.effects, (effect, path2) => {
