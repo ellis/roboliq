@@ -3,6 +3,7 @@ import assert from 'assert';
 //import {sprintf} from 'sprintf-js';
 import EvowareUtils from './EvowareUtils.js';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
+import M from '../Medley.js';
 
 /**
  * @param {integer} parentCarrierId - carrier ID for the carrier holding this hotel
@@ -72,21 +73,21 @@ function parse14(carrierData, l, lines) {
 	function set(carrierName, gridIndex, siteIndex, propertyName, propertyValue) {
 		const c = _.get(layout, carrierName, {});
 		if (_.isUndefined(gridIndex)) {
-			_.set(c, propertyName, propertyValue);
+			M.setMut(c, propertyName, propertyValue);
 		}
 		else {
 			const g = _.get(c, gridIndex, {});
 			if (_.isUndefined(siteIndex)) {
-				_.set(g, propertyName, propertyValue);
+				M.setMut(g, propertyName, propertyValue);
 			}
 			else {
 				const s = _.get(g, siteIndex, {});
-				_.set(s, propertyName, propertyValue);
-				_.set(g, siteIndex, s);
+				M.setMut(s, propertyName, propertyValue);
+				M.setMut(g, siteIndex, s);
 			}
-			_.set(c, gridIndex, g);
+			M.setMut(c, gridIndex, g);
 		}
-		_.set(layout, carrierName, c);
+		M.setMut(layout, carrierName, c);
 	}
 
 	// Get list of all carriers on the table
@@ -318,7 +319,7 @@ export function toString_internalCarriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites
 	// [[a, b]]
 	const gridToCarrierName_l = _(table).map((c, carrierName) => {
-		//console.log({c, carrierName})
+		console.log({c, carrierName})
 		return _.map(c, (x, gridIndexText) => {
 			if (x.internal) {
 				try {

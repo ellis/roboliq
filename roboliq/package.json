@@ -2,7 +2,6 @@
   "name": "roboliq",
   "version": "0.0.1",
   "description": "Roboliq JavaScript library",
-  "main": "test.js",
   "dependencies": {
     "iconv-lite": "^0.4.13",
     "javascript-natural-sort": "~0.7.1",
@@ -35,6 +34,7 @@
     "jsdoc": "jsdoc -r -c jsdoc.json --readme README.md --tutorials tutorials",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
     "roboliq": "babel-node -- src/main.js",
+    "start": "babel-node -- src/main.js",
     "evoware": "babel-node -- src/evoware/EvowareMain.js"
   },
   "author": "Ellis Whitehead",
