@@ -33,6 +33,26 @@ describe('commandHelper', function() {
 		});
 	});
 
+	describe('commandHelper.lookupPath', function() {
+		it.only("should lookup mixtures of parameter and object values", () => {
+			const data = {
+				objects: {
+					model1: {evowareName: "evowareModel1"},
+					plate1: {model: "model1"}
+				},
+				accesses: []
+			};
+			const params = {
+				object: "plate1"
+			};
+			const path = [["@object", "model"], "evowareName"];
+			should.deepEqual(
+				commandHelper.lookupPath(path, params, data),
+				"evowareModel1"
+			);
+		});
+	});
+
 	describe('commandHelper.parseParams', function() {
 		it("should work with values specified in-line", () => {
 			const data = {

@@ -696,10 +696,69 @@ function fixPredicateUndefines(predicate) {
 	}
 }
 
+
+/**
+ * Lookup nested paths.
+ *
+ * This example will first lookup `object` in `params`,
+ * then lookup the result in `data.objects`,
+ * then get the value of `model`,
+ * then lookup it value for `evowareName`:
+ * 
+ * ```
+ * [["@object", "model"], "evowareName"]
+ * ```
+ *
+ * @param  {array} path   [description]
+ * @param  {object} params [description]
+ * @param  {object} data   [description]
+ * @return {any}        [description]
+ */
+function lookupPath(path, params, data) {
+	//console.log({path, params, data})
+	let prev;
+	_.forEach(path, elem => {
+		//console.log({elem})
+		let current = elem;
+		if (_.isArray(elem))
+			current = lookupPath(elem, params, data);
+		else {
+			assert(_.isString(current));
+			if (_.startsWith(current, "@")) {
+				//console.log({current, tail: current.substring(1)})
+				current = current.substring(1);
+				//console.log({current})
+				assert(_.has(params, current));
+				current = _.get(params, current);
+			}
+			else {
+				assert(!_.isUndefined(prev));
+			}
+		}
+
+		//console.log({prev, current})
+		if (_.isUndefined(prev)) {
+			if (_.isString(current)) {
+				const result = {value: {}, objectName: {}};
+				const path2 = []; // FIXME: figure out a sensible path in case of errors
+				current = lookupValue0(result, path2, current, data);
+			}
+			prev = current;
+		}
+		else {
+			assert(_.isString(current));
+			assert(_.has(prev, current));
+			prev = _.get(prev, current);
+		}
+	});
+	return prev;
+}
+
 module.exports = {
 	asArray,
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
+	lookupPath,
 	parseParams,
 	queryLogic,
 }

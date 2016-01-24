@@ -141,7 +141,8 @@
 
 ## Todos for complex protocol and feedback
 
-- [ ] implement lookupPath and lookupSpecs
+- [x] implement lookupPath
+- [ ] implement lookupSpecs
 - [ ] evoware compiler: add more commands
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi
