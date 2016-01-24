@@ -6,15 +6,20 @@ import misc from '../misc.js';
 
 const commandHandlers = {
 	"experiment.run": function(params, parsed, data) {
-		console.log("experiment.run");
-		console.log(JSON.stringify(parsed, null, '\t'));
+		//console.log("experiment.run");
+		//console.log(JSON.stringify(parsed, null, '\t'));
 		const experiment = parsed.value.experiment;
 
-		return {
-			expansion: expansion,
-			effects: effects,
-			alternatives: alternatives
-		};
+		const expansion = {};
+		if (parsed.value.steps) {
+			for (let i = 0; i < experiment.length; i++) {
+				expansion[i+1] = _.cloneDeep(parsed.value.steps);
+				expansion[i+1]._scope = _.cloneDeep(experiment[i]);
+			}
+		}
+
+		//console.log(JSON.stringify(expansion, null, "\t"))
+		return {expansion};
 	}
 };
 

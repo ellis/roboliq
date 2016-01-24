@@ -738,7 +738,7 @@ function _run(opts, userProtocol) {
 	 * @param  {object} step - the current step (initially protocol.steps).
 	 * @param  {object} objects - a mutable copy of the protocol's objects.
 	 */
-	function expandStep(protocol, prefix, step, objects) {
+	function expandStep(protocol, prefix, step, objects, scope = {}) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
@@ -749,6 +749,14 @@ function _run(opts, userProtocol) {
 		// Process any directives in this step
 		const params = misc.handleDirectiveDeep(step, protocol);
 		//console.log({step, params})
+
+		// Add `_scope` variables to scope, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
+		//console.log({_scope: params._scope})
+		if (!_.isEmpty(params._scope)) {
+			scope = _.clone(scope);
+			_.forEach(params._scope, (value, key) => scope[key] = value);
+			//console.log("scope: "+JSON.stringify(scope))
+		}
 
 		// If this step is a command:
 		const commandName = params.command;
@@ -767,13 +775,14 @@ function _run(opts, userProtocol) {
 				let result = {};
 				try {
 					const data = {
-						objects: objects,
+						objects: _.merge({}, objects, {SCOPE: scope}),
 						predicates: predicates,
 						planHandlers: protocol.planHandlers,
 						schemas: protocol.schemas,
 						accesses: [],
 						files: filecache
 					};
+					//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
 					// If a schema is given for the command, parse its parameters
 					const schema = protocol.schemas[commandName];
 					//console.log("params: "+JSON.stringify(params))
@@ -846,7 +855,7 @@ function _run(opts, userProtocol) {
 		keys.sort(naturalSort);
 		// Try to expand the substeps
 		for (const key of keys) {
-			expandStep(protocol, prefix.concat(key), step[key], objects);
+			expandStep(protocol, prefix.concat(key), step[key], objects, scope);
 		}
 	}
 
