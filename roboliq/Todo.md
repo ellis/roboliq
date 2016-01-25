@@ -120,6 +120,7 @@
 - [ ] consider how to use `experiment.run` in paper1_protocol1_ph
 - [ ] get EvowareCompiler working
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
+- [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create
@@ -129,6 +130,7 @@
 - [ ] handle mixture randomization well, and use it for the paper1 protocols (pH and unfolding)
 - [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] use schemas for directives too
+- [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] evoware:
     - [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
     - [ ] try loading the `tania*` protocols in Tecan Evoware
