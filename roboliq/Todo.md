@@ -649,85 +649,91 @@ So the command should create a report of the well contents before readout.
 Normally, a design is represented by an array of objects.
 The object's properties are factor names, and the values are the factor values.
 
-Sometimes we need multi-level designs, such as when first one set of master
-mixtures is prepared, and then experiments are done drawing samples from
-each of them.
+Here's an experiment description for the sample pH experiment:
 
 ```
 experiment():
+  description: |
+    my description...
   factors:
-    saltwater: 40ul
+    saltwaterVolume: 40ul
+    gfpVolume: 5ul
+    gfpSource: sfGFP
     bufferSystem:
       acetate:
-	    acidPH: 3.75
-		basePH: 5.75
-		acidSource: acetate_375
-		baseSource: acetate_575
-		acidVolume: {range(): {start: 30ul, end: 0ul, count: 8}}
-		baseVolume: {calculate(): "30 - acidVolume"}
-		pH: {calculate(): "(acidPH * acidVolume + basePH * baseVolume) / 30ul)"}
-
-	    gradient():
-		  {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8, digits: 1, pH_low: 3.75, pH_}
-        , mes, pipes, hepes]
-    sfGFP: 5ul
+        acidPH: 3.75
+        basePH: 5.75
+        acidSource: acetate_375
+        baseSource: acetate_575
+        count: 8
+      mes:
+        acidPH: 5.10
+        basePH: 7.10
+        acidSource: mes_510
+        baseSource: mes_710
+        count: 7
+      pipes:
+        acidPH: 5.75
+        basePH: 7.75
+        acidSource: pipes_575
+        baseSource: pipes_775
+        count: 5
+      hepes:
+        acidPH: 6.50
+        basePH: 8.50
+        acidSource: hepes_650
+        baseSource: hepes_850
+        count: 5
+    acidVolume: {range(): {start: 30ul, end: 0ul, count: count, decimals: 1}}
+    baseVolume: {calculate(): "30 - acidVolume"}
+    pH: {calculate(): "(acidPH * acidVolume + basePH * baseVolume) / 30ul)"}
+  replicates: 3
+  assignWells:
+    well: mixPlate(all)
+  random: 123
 ```
 
+It should produce output similar to this:
+
 ```{yaml}
+description: my description...
+items:
 - index: 1
+  order: ?
   saltwaterVolume: 40ul
+  gfpVolume: 5ul
+  gfpSource: sfGFP
   bufferSystem: acetate
   acidPH: 3.75
   basePH: 5.75
   acidSource: acetate_375
   baseSource: acetate_575
+  count: 8
   acidVolume: 30ul
   baseVolume: 0ul
   pH: 3.75
-  sfGFP: 5ul
+  well: mixPlate(H01)
 - index: 2
-  saltwater: 40ul
-  bufferSystem: acetate
-  acetate_375: 25ul
-  acetate_575: 5ul
-  pH: 4
-  sfGFP: 5ul
-- index: 3
-
-  - {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8}
-  - {source1: mes_510,     source2: mes_710,     volume: 30ul, count: 7}
-  - {source1: pipes_575,   source2: pipes_775,   volume: 30ul, count: 5}
-  - {source1: hepes_650,   source2: hepes_850,   volume: 30ul, count: 5}
+  ...
 ```
 
-```
-I want to conver this to an experiment definition:
+The protocol steps to run the experiment could be:
 
+CONTINUE
+```
+- {destination: SCOPE.well, source: saltwater, volume: SCOPE.saltwaterVolume}
+- {destination: SCOPE.well, source: SCOPE.acidSource, volume: SCOPE.acidVolume}
+- {destination: SCOPE.well, source: SCOPE.baseSource, volume: SCOPE.baseVolume}
+- {destination: SCOPE.well, source: SCOPE.gfpSource, volume: SCOPE.gfpVolume}
+command: experiment.pipetteMixtures
+experiment: experiment1
 mixtures:
-  type: Variable
-  calculate:
-    "#createPipetteMixtureList":
-      replicates: 3
-      items:
-      - source: saltwater
-        volume: 40ul
-      - "#gradient":
-        - {source1: acetate_375, source2: acetate_575, volume: 30ul, count: 8, decimals: 1}
-        - {source1: mes_510,     source2: mes_710,     volume: 30ul, count: 7, decimals: 1}
-        - {source1: pipes_575,   source2: pipes_775,   volume: 30ul, count: 5, decimals: 1}
-        - {source1: hepes_650,   source2: hepes_850,   volume: 30ul, count: 5, decimals: 1}
-      - source: sfGFP
-        volume: 5ul
-        clean: thorough
-        cleanBetweenSameSource: flush
-        program!: Roboliq_Water_Wet_1000_mix3x50ul
-
-mixtureWells:
-  type: Variable
-  calculate:
-    "#createWellAssignments":
-      list: mixtures
-      wells: mixPlate(all row-jump(1))
+  -
+destinations: mixtureWells
+clean: flush
+cleanBegin: thorough
+cleanBetweenSameSource: none
+cleanEnd: thorough
 ```
 
 
@@ -747,8 +753,8 @@ The multi-level experiment description could look like this:
   denaturantVolume: 85.5ul
   gfpVolume: 4.5ul
   wait: 7 minutes
-  well: mixPlate(A01)
   sampleVolume: 7ul
+  mixWell: mixPlate(A01)
   sampleWells: mixPlate(B01,C01,D01)
 ```
 
@@ -764,14 +770,11 @@ objects:
           gfpSource: [sfGFP, ...]
           denaturantVolume: 85.5ul
           gfpVolume: 4.5ul
-          mixWell: WELL1
           wait: 7 minutes
           sampleVolume: 7ul
-          sampleWells: WELLS3
         assignWells:
-          WELL1:
-            wells: mixPlate(all)
-          WELLS3:
+          mixWell: mixPlate(all)
+          sampleWells:
             wells: mixPlate(all)
             count: 3
         random: 123
@@ -805,3 +808,7 @@ steps:
     programTemplate: ./refolding.mdfx.template
     #outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania15_renaturation--<YYYMMDD_HHmmss>.xml'
 ```
+
+Sometimes we need multi-level designs, such as when first one set of master
+mixtures is prepared, and then experiments are done drawing samples from
+each of them. CONTINUE.
