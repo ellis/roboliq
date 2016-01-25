@@ -117,7 +117,9 @@
     - [x] for evoware site labels, don't use the full path name (only the last part)
     - [x] why is labware on RoboSeal missing for protocol3.cmp.json?
 - [x] `experiment.run`: implement
-- [ ] consider how to use `experiment.run` in paper1_protocol1_ph
+- [x] consider how to use `experiment.run` in paper1_protocol1_ph
+- [ ] create `Conditions` type, and generate its `value` property
+- [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] get EvowareCompiler working
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] change `predicates` field to be a map of arrays instead of an array
@@ -145,6 +147,7 @@
 ## Todos for complex protocol and feedback
 
 - [x] implement lookupPath
+- [ ] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
 - [ ] evoware compiler: add more commands
     - [x] `evoware._facts`
     - [x] `timer._start`
@@ -166,7 +169,6 @@
 - [ ] evoware compiler: add code to process and display measured data after measurement commands
 - [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
-- [ ] REFACTOR: pass same set of arguments to roboliq and evoware command handlers
 - [ ] test `evoware._facts`
 - [ ] test `EvowareCompiler.compile`
 
@@ -654,7 +656,8 @@ The object's properties are factor names, and the values are the factor values.
 Here's an experiment description for the sample pH experiment:
 
 ```
-experiment():
+phConditions:
+  type: Conditions
   description: |
     my description...
   factors:
@@ -723,10 +726,10 @@ The protocol steps to run the experiment could be:
 
 CONTINUE
 ```
-- {destination: SCOPE.well, source: saltwater, volume: SCOPE.saltwaterVolume}
-- {destination: SCOPE.well, source: SCOPE.acidSource, volume: SCOPE.acidVolume}
-- {destination: SCOPE.well, source: SCOPE.baseSource, volume: SCOPE.baseVolume}
-- {destination: SCOPE.well, source: SCOPE.gfpSource, volume: SCOPE.gfpVolume}
+- {destination: $well, source: saltwater, volume: $saltwaterVolume}
+- {destination: $well, source: $acidSource, volume: $acidVolume}
+- {destination: $well, source: $baseSource, volume: $baseVolume}
+- {destination: $well, source: $gfpSource, volume: $gfpVolume}
 command: experiment.pipetteMixtures
 experiment: experiment1
 mixtures:
@@ -754,7 +757,7 @@ The multi-level experiment description could look like this:
   gfpSource: sfGFP
   denaturantVolume: 85.5ul
   gfpVolume: 4.5ul
-  wait: 7 minutes
+  unfoldingTime: 7 minutes
   sampleVolume: 7ul
   mixWell: mixPlate(A01)
   sampleWells: mixPlate(B01,C01,D01)
@@ -764,49 +767,47 @@ The code to create that experiment description might look like this:
 
 ```{yaml}
 objects:
-  myExperiment:
-    type: Variable
-    calculation:
-      experiment():
-        factors:
-          gfpSource: [sfGFP, ...]
-          denaturantVolume: 85.5ul
-          gfpVolume: 4.5ul
-          wait: 7 minutes
-          sampleVolume: 7ul
-        assignWells:
-          mixWell: mixPlate(all)
-          sampleWells:
-            wells: mixPlate(all)
-            count: 3
-        random: 123
+  refoldingConditions:
+    type: Conditions
+    factors:
+      gfpSource: [sfGFP, ...]
+      denaturantVolume: 85.5ul
+      gfpVolume: 4.5ul
+      unfoldingTime: 7 minutes
+      sampleVolume: 7ul
+    assignWells:
+      mixWell: mixPlate(all)
+      sampleWells:
+        wells: mixPlate(all)
+        count: 3
+    random: 123
 ```
 
 The steps to perform the experiment might look like this:
 
 ```{yaml}
 command: experiment.run
-experiment: myExperiment
+conditions: refoldingConditions
 steps:
   1:
     command: pipetter.pipette
     items:
-    - {source: denaturant, volume: SCOPE.denaturantVolume}
-    - {source: SCOPE.gfpSource, volume: SCOPE.gfpVolume}
-    destinations: SCOPE.mixWell
+    - {source: denaturant, volume: $denaturantVolume}
+    - {source: $gfpSource, volume: $gfpVolume}
+    destinations: $mixWell
   2:
     command: timer.sleep
-    duration: SCOPE.wait
+    duration: $unfoldingTime
   3:
     command: pipetter.pipette
-    sources: SCOPE.mixWell
-    volumes: SCOPE.sampleVolume
-    destinations: SCOPE.sampleWells
+    sources: $mixWell
+    volumes: $sampleVolume
+    destinations: $sampleWells
   4:
     command: fluorescenceReader.measurePlate
     object: mixPlate
     program:
-      wells: SCOPE.sampleWells
+      wells: $sampleWells
     programTemplate: ./refolding.mdfx.template
     #outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania15_renaturation--<YYYMMDD_HHmmss>.xml'
 ```
