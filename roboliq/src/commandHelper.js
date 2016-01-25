@@ -51,7 +51,7 @@ function asArray(x) {
  * @return {object} the parsed parameters, if successfully parsed.
  */
 function parseParams(params, data, schema) {
-	const result = {value: {}, objectName: {}};
+	const result = {orig: params, value: {}, objectName: {}};
 	processParamsBySchema(result, [], params, schema, data);
 	return result;
 }
@@ -704,7 +704,7 @@ function fixPredicateUndefines(predicate) {
  * then lookup the result in `data.objects`,
  * then get the value of `model`,
  * then lookup it value for `evowareName`:
- * 
+ *
  * ```
  * [["@object", "model"], "evowareName"]
  * ```

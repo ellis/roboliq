@@ -776,11 +776,13 @@ function _run(opts, userProtocol) {
 				try {
 					const data = {
 						objects: _.merge({}, objects, {SCOPE: scope}),
-						predicates: predicates,
+						predicates,
 						planHandlers: protocol.planHandlers,
 						schemas: protocol.schemas,
 						accesses: [],
-						files: filecache
+						files: filecache,
+						protocol,
+						path: prefix
 					};
 					//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
 					// If a schema is given for the command, parse its parameters

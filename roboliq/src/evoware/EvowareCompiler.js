@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import naturalSort from 'javascript-natural-sort';
 import M from '../Medley.js';
+import commandHelper from '../commandHelper.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
 import * as evoware from './commands/evoware.js';
 import * as timer from './commands/timer.js';
@@ -15,7 +16,7 @@ const commandHandlers = {
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,
 	"transporter._movePlate": transporter._movePlate
-}
+};
 
 /**
  * Compile a protocol for a given evoware setup
@@ -65,7 +66,21 @@ export function compileStep(table, protocol, agents, path, objects) {
 		}
 	}
 	else {
-		const result0 = commandHandler(step, objects, protocol, path);
+		const data = {
+			objects,
+			//predicates,
+			//planHandlers: protocol.planHandlers,
+			schemas: protocol.schemas,
+			accesses: [],
+			//files: filecache,
+			protocol,
+			path
+		};
+		const schema = protocol.schemas[commandName];
+		const parsed = (schema)
+			? commandHelper.parseParams(params, data, schema)
+			: undefined;
+		const result0 = commandHandler(step, parsed, data);
 		_.forEach(result0, result1 => {
 			// console.log("result1: "+JSON.stringify(result1));
 			results.push(result1);

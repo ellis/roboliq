@@ -1,16 +1,19 @@
 import _ from 'lodash';
+import commandHelper from '../../commandHelper.js';
 
-export function _movePlate(step, objects, protocol, path) {
+export function _movePlate(params, parsed, data   step, objects, protocol, path) {
 	// romaIndex: "(@equipment).evowareRoma: integer"
-	const romaIndex = _.get(_.get(objects, step.equipment), "evowareRoma");
+	const romaIndex = commandHelper.lookupPath(["@equipment", "evowareRoma"], params, data);
 	const programName = step.program;
-	const object = _.get(objects, step.object);
-	const plateModelName0 = _.get(object, "model");
+	const object = parsed.value.object;
+	//const plateModelName0 = object.model;
 	// plateModelName: "((@object).model).evowareName: string"
-	// plateModelName: [["@object", "model"], "evowareName"]
-	const plateModelName = _.get(_.get(objects, plateModelName0), "evowareName");
-	const plateOrigName = _.get(object, "location");
+	// plateModelName:
+	//const plateModelName = _.get(_.get(objects, plateModelName0), "evowareName");
+	const plateModelName = commandHelper.lookupPath([["@object", "model"], "evowareName"], params, data);
+	const plateOrigName = parsed.value.object.location;
 	const plateOrig = _.get(objects, plateOrigName);
+	CONTINUE
 	const plateOrigCarrierName = _.get(plateOrig, "evowareCarrier");
 	const plateOrigGrid = _.get(plateOrig, "evowareGrid");
 	const plateOrigSite = _.get(plateOrig, "evowareSite");
