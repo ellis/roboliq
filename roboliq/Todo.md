@@ -144,11 +144,12 @@
 - [ ] test scripts on second Tecan robot
 - [ ] rename '#createPipetteMixtureList' to '#mixtureList' and '#gradient' to '#gradientLinear', so it matches figure in paper
 - [ ] add pipetter commands for dropping tips and getting tips
+- [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
 
 ## Todos for complex protocol and feedback
 
 - [x] implement lookupPath
-- [ ] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
+- [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
 - [ ] evoware compiler: add more commands
     - [x] `evoware._facts`
     - [x] `timer._start`

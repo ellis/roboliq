@@ -319,7 +319,7 @@ export function toString_internalCarriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites
 	// [[a, b]]
 	const gridToCarrierName_l = _(table).map((c, carrierName) => {
-		console.log({c, carrierName})
+		//console.log({c, carrierName})
 		return _.map(c, (x, gridIndexText) => {
 			if (x.internal) {
 				try {
