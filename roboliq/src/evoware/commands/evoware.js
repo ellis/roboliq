@@ -2,9 +2,7 @@ import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 import evowareHelper from './evowareHelper.js';
 
-export function _facts(step, objects, protocol, path) {
-	const line = evowareHelper.createFactsLine(step.factsEquipment, step.factsVariable, step.factsValue);
-	return [{
-		line
-	}];
+export function _facts(params, parsed, data) {
+	const line = evowareHelper.createFactsLine(parsed.orig.factsEquipment, parsed.orig.factsVariable, parsed.orig.factsValue);
+	return [{ line }];
 }

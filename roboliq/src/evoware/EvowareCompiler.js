@@ -79,7 +79,7 @@ export function compileStep(table, protocol, agents, path, objects) {
 		const schema = protocol.schemas[step.command];
 		const parsed = (schema)
 			? commandHelper.parseParams(step, data, schema)
-			: undefined;
+			: {orig: step};
 		const result0 = commandHandler(step, parsed, data);
 		_.forEach(result0, result1 => {
 			// console.log("result1: "+JSON.stringify(result1));

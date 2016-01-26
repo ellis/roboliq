@@ -55,5 +55,30 @@ describe('EvowareCompilerTest', function() {
 				[{line: 'WaitTimer("1","60");'}, {line: 'StopTimer("1");'}]
 			]);
 		});
+
+		it("should compile evoware._facts", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._facts",
+						"agent": "robot1",
+						"factsEquipment": "RoboSeal",
+						"factsVariable": "RoboSeal_Seal",
+						"factsValue": "VALUE"
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
+			should.deepEqual(results, [
+				[{line: "FACTS(\"RoboSeal\",\"RoboSeal_Seal\",\"VALUE\",\"0\",\"\");"}]
+			]);
+		});
+
+		it.skip("should compile transporter._movePlate", function() {
+			//
+		});
 	});
 });

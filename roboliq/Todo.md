@@ -287,6 +287,7 @@
 
 ## After submission
 
+- [ ] `commandHelper.lookupPath()` should accept ParsedParams instead of plain object params (create a ParsedParams class for this)
 - [ ] `commandHelper.lookupPath()` should use `g()` to update `data.accesses` (only with the last element in each path or subpath)
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
 - [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
