@@ -7,7 +7,7 @@ function stripQuotes(s) {
 		? s.substring(1, s.length - 1) : s;
 }
 
-export function _aspirate(parsed, data) {
+export function _aspirate(params, parsed, data) {
 	handlePipetterSpirate(parsed, data, "Aspirate");
 }
 
@@ -23,40 +23,28 @@ function handlePipetterSpirate(parsed, data, func) {
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
 		return {item, labwareName, labware, labwareModel, row, col};
 	});
+	console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 	return handlePipetterSpirateDoGroup(parsed, data, func, tuples)
-
-	COPIED FROM elsewhere
-	// Find all labware
-	var labwareName_l = _(wellName_l).map(function (wellName) {
-		//console.log({wellName})
-		var i = wellName.indexOf('(');
-		return (i >= 0) ? wellName.substr(0, i) : wellName;
-	}).uniq().value();
-	var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
-
 }
+/*
+function handlePipetterSpirateDoGroup(parsed, data, func, tuples) {
+	if (tuples.isEmpty) return [];
 
-function handlePipetterSpirateDoGroup(
-	objects: JsObject,
-	program: String,
-	func: String,
-	tuple_l: List[(PipetterItem, WellNameSingleParsed, LabwareInfo)]
-) {
-	if (tuple_l.isEmpty) return ResultC.unit(Nil)
-	val col = tuple_l.head._2.col
-	val labwareInfo = tuple_l.head._3
+	// Get values from first tuple that should stay constant per group.
+	const {labwareName, labware, labwareModel, col} = tuples[0];
 	// Get all items on the same labware and in the same column
-	val tuple_l2 = tuple_l.takeWhile(tuple => tuple._2.col == col && tuple._3 == labwareInfo)
-	val (tuple_l3, tipSpacing) = {
-		if (tuple_l2.length == 1) {
-			tuple_l.take(1) -> 1
+	const tuples2 = _.takeWhile(tuples, tuple => (tuple.col === col && tuple.labwareName == labwareName));
+	console.log({tuples2});
+	val (tuple_l3, tipSpacing) = (function() {
+		if (tuples2.length === 1) {
+			return [_.take(tuples, 1), 1];
 		}
 		// If there are multiple items, group the ones that are acceptably spaced
 		else {
-			val syringe0 = tuple_l.head._1.syringe
-			val row0 = tuple_l.head._2.row
-			val dsyringe = tuple_l(1)._1.syringe - syringe0
-			val drow = tuple_l(1)._2.row - row0
+			const syringe0 = tuples[0].item.syringe.evowareIndex;
+			const row0 = tuples[0].row;
+			const dsyringe = tuples[1].item.syringe - syringe0;
+			const drow = tuple_l(1)._2.row - row0
 			// Syringes and rows should have ascending indexes, and the spacing should be 4 at most
 			if (dsyringe <= 0 || drow <= 0 || drow / dsyringe > 4) {
 				tuple_l.take(1) -> 1
@@ -68,12 +56,12 @@ function handlePipetterSpirateDoGroup(
 				}).map(_._1) -> drow
 			}
 		}
-	}
+	}());
 	for {
 		token_l1 <- handlePipetterSpirateHandleGroup(objects, program, func, tuple_l3, labwareInfo, tipSpacing)
 		token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
 	} yield token_l1 ++ token_l2
-}
+}*/
 
 /**
  * [handlePipetterSpirateHandleGroup description]
@@ -85,6 +73,7 @@ function handlePipetterSpirateDoGroup(
  * @param  {integer} tipSpacing - how far apart the tips should be (FIXME: is the base value 1 or 0?)
  * @return {array} array of line info
  */
+/*
 function handlePipetterSpirateHandleGroup(
 	objects,
 	program,
@@ -143,3 +132,4 @@ function handlePipetterSpirateHandleGroup(
 		List(Token(line, JsObject(), siteToNameAndModel_m))
 	}
 }
+*/

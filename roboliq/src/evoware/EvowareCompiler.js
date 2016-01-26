@@ -4,13 +4,14 @@ import M from '../Medley.js';
 import commandHelper from '../commandHelper.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
 import * as evoware from './commands/evoware.js';
+import * as pipetter from './commands/pipetter.js';
 import * as timer from './commands/timer.js';
 import * as transporter from './commands/transporter.js';
 
 const commandHandlers = {
 	"evoware._facts": evoware._facts,
-	/*"pipetter._aspirate" -> handlePipetterAspirate,
-	"pipetter._dispense" -> handlePipetterDispense,
+	"pipetter._aspirate" -> pipetter._aspirate,
+	/*"pipetter._dispense" -> handlePipetterDispense,
 	"pipetter._pipette" -> handlePipetterPipette,
 	"pipetter._cleanTips" -> handlePipetterCleanTips,*/
 	"timer._start": timer._start,
