@@ -695,7 +695,11 @@ phConditions:
   replicates: 3
   assignWells:
     well: mixPlate(all)
-  random: 123
+  assign:
+    syringe:
+      items: [1,2,3,4]
+      sequence: order
+  randomSeed: 123
 ```
 
 It should produce output similar to this:
@@ -704,7 +708,7 @@ It should produce output similar to this:
 description: my description...
 items:
 - index: 1
-  order: ?
+  order: 7
   saltwaterVolume: 40ul
   gfpVolume: 5ul
   gfpSource: sfGFP
@@ -718,6 +722,7 @@ items:
   baseVolume: 0ul
   pH: 3.75
   well: mixPlate(H01)
+  syringe: 3
 - index: 2
   ...
 ```
@@ -780,7 +785,7 @@ objects:
       sampleWells:
         wells: mixPlate(all)
         count: 3
-    random: 123
+    randomSeed: 123
 ```
 
 The steps to perform the experiment might look like this:
