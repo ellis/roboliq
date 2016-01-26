@@ -7,19 +7,33 @@ function stripQuotes(s) {
 		? s.substring(1, s.length - 1) : s;
 }
 
-export function _aspirate(step, objects, protocol, path) {
+export function _aspirate(parsed, data) {
+	handlePipetterSpirate(parsed, data, "Aspirate");
 }
 
-function handlePipetterSpirate(step, objects, protocol, path, func) {
-	if (_.isEmpty(step.items) return [];
+function handlePipetterSpirate(parsed, data, func) {
+	if (_.isEmpty(parsed.value.items) return [];
 
-	const tuples = _.map(step.items, item => {
-		wellPosition <- WellNameSingleParser.parse(item.well)
-		labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
-		labwareInfo <- getLabwareInfo(objects, labwareName)
-		return [item, wellPosition, labwareInfo];
+	const tuples = _.map(params.value.items, item => {
+		const {labware: labwareName, subject: location} = wellsParser.parseOne(item.well);
+		const labware = commandHelper.lookupPath(labwareName, {}, data);
+		const labwareModel = commandHelper.lookupPath([labwareName, "model"], {}, data);
+		const [row, col] = wellsParser.locationTextToRowCol(location);
+		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
+		//labwareInfo <- getLabwareInfo(objects, labwareName)
+		return {item, labwareName, labware, labwareModel, row, col};
 	});
-	return handlePipetterSpirateDoGroup(objects, step.program, func, tuples)
+	return handlePipetterSpirateDoGroup(parsed, data, func, tuples)
+
+	COPIED FROM elsewhere
+	// Find all labware
+	var labwareName_l = _(wellName_l).map(function (wellName) {
+		//console.log({wellName})
+		var i = wellName.indexOf('(');
+		return (i >= 0) ? wellName.substr(0, i) : wellName;
+	}).uniq().value();
+	var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
+
 }
 
 function handlePipetterSpirateDoGroup(
