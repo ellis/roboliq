@@ -288,6 +288,7 @@
 
 ## After submission
 
+- [ ] `commandHelper.parseParams`: test that a parameter of type `name` does not expand when the value happens to be a path to an object
 - [ ] `commandHelper.lookupPath()` should accept ParsedParams instead of plain object params (create a ParsedParams class for this)
 - [ ] `commandHelper.lookupPath()` should use `g()` to update `data.accesses` (only with the last element in each path or subpath)
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)

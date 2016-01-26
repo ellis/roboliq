@@ -315,10 +315,10 @@
 		"description": "Parameters for pipette items.",
 		"properties": {
 			"syringe": {
-				"description": "Syring identifier",
+				"description": "Syringe identifier",
 				"type": [
-					"string",
-					"integer"
+					"integer",
+					"name"
 				]
 			},
 			"well": {
@@ -340,7 +340,7 @@
 		"description": "Parameters for pipette items.",
 		"properties": {
 			"syringe": {
-				"description": "Syring identifier",
+				"description": "Syringe identifier",
 				"type": [
 					"string",
 					"integer"
@@ -375,7 +375,7 @@
 		"description": "Parameters for pipette items.",
 		"properties": {
 			"syringe": {
-				"description": "Syring identifier",
+				"description": "Syringe identifier",
 				"type": [
 					"string",
 					"integer"
@@ -399,7 +399,7 @@
 		"description": "Parameters for low-level pipette items.",
 		"properties": {
 			"syringe": {
-				"description": "Syring identifier",
+				"description": "Syringe identifier",
 				"type": [
 					"string",
 					"integer"

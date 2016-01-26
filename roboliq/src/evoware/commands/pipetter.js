@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 import evowareHelper from './evowareHelper.js';
+import wellsParser from '../../parsers/wellsParser.js';
 
 function stripQuotes(s) {
 	return (_.startsWith(s, '"') && _.endsWith(s, '"'))
@@ -8,13 +9,14 @@ function stripQuotes(s) {
 }
 
 export function _aspirate(params, parsed, data) {
-	handlePipetterSpirate(parsed, data, "Aspirate");
+	return handlePipetterSpirate(parsed, data, "Aspirate");
 }
 
 function handlePipetterSpirate(parsed, data, func) {
-	if (_.isEmpty(parsed.value.items) return [];
+	if (_.isEmpty(parsed.value.items)) return [];
 
-	const tuples = _.map(params.value.items, item => {
+	console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
+	const tuples = _.map(parsed.value.items, item => {
 		const {labware: labwareName, subject: location} = wellsParser.parseOne(item.well);
 		const labware = commandHelper.lookupPath(labwareName, {}, data);
 		const labwareModel = commandHelper.lookupPath([labwareName, "model"], {}, data);

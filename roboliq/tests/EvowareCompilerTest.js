@@ -22,7 +22,15 @@ const protocol0 = {
 		transporter1: {
 			type: "Transporter",
 			evowareRoma: 1,
-
+		},
+		pipetter1: {
+			type: "Pipetter",
+			syringe: {
+				1: {
+					type: "Syringe",
+					evowareIndex: 1
+				}
+			}
 		},
 		plateModel1: {
 			type: "PlateModel",
@@ -141,5 +149,57 @@ describe('EvowareCompilerTest', function() {
 				]
 			]);
 		});
+
+		it.only("should compile pipetter._aspirate", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2"
+					},
+					liquid1: {
+						type: "Variable",
+						value: "ourlab.mario.systemLiquid"
+					},
+					ourlab: {
+						mario: {
+							liha: {
+								syringe: {
+									1: {
+										contaminants: undefined,
+										contents: undefined,
+										cleaned: "thorough"
+									}
+								}
+							}
+						}
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter._aspirate",
+						agent: "robot1",
+						equipment: "pipetter1",
+						program: "\"Water free dispense\"",
+						items: [
+							{
+								syringe: "pipetter1.syringe.1",
+								source: "plate1(A01)",
+								volume: "10 ul"
+							}
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
+			should.deepEqual(results, [
+				[{line: "FACTS(\"RoboSeal\",\"RoboSeal_Seal\",\"VALUE\",\"0\",\"\");"}]
+			]);
+		});
+
 	});
 });

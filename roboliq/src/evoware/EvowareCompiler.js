@@ -10,7 +10,7 @@ import * as transporter from './commands/transporter.js';
 
 const commandHandlers = {
 	"evoware._facts": evoware._facts,
-	"pipetter._aspirate" -> pipetter._aspirate,
+	"pipetter._aspirate": pipetter._aspirate,
 	/*"pipetter._dispense" -> handlePipetterDispense,
 	"pipetter._pipette" -> handlePipetterPipette,
 	"pipetter._cleanTips" -> handlePipetterCleanTips,*/
