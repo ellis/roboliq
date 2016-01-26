@@ -18,6 +18,38 @@ const protocol0 = {
 		timer2: {
 			type: "Timer",
 			evowareId: 2
+		},
+		transporter1: {
+			type: "Transporter",
+			evowareRoma: 1,
+
+		},
+		plateModel1: {
+			type: "PlateModel",
+			evowareName: "evowarePlateModel1",
+		},
+		evowarePlateModel1: {
+			type: "PlateModel",
+			rows: 8,
+			columns: 12,
+			evowareName: "96-well plate"
+		},
+		site1: {
+			type: "Site",
+			evowareCarrier: "Some Carrier",
+			evowareGrid: 1,
+			evowareSite: 1
+		},
+		site2: {
+			type: "Site",
+			evowareCarrier: "Some Carrier",
+			evowareGrid: 1,
+			evowareSite: 2
+		},
+		plate1: {
+			type: "Plate",
+			model: "plateModel1",
+			location: "site1"
 		}
 	},
 	predicates: [
@@ -77,8 +109,37 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
-		it.skip("should compile transporter._movePlate", function() {
-			//
+		it("should compile transporter._movePlate", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "transporter._movePlate",
+						"agent": "robot1",
+						"equipment": "transporter1",
+						"object": "plate1",
+						"destination": "site2"
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
+			//console.log(JSON.stringify(results, null, '\t'))
+			should.deepEqual(results, [
+				[
+					{
+						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,1,0,\"\",\"evowarePlateModel1\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"0\",(Not defined),\"1\");",
+						"effects": {
+							"plate1.location": "site2"
+						},
+						"tableEffects": [
+							[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "evowarePlateModel1" } ],
+							[ [ "Some Carrier", 1, 2 ], { "label": "site2", "labwareModelName": "evowarePlateModel1" } ]
+						]
+					}
+				]
+			]);
 		});
 	});
 });

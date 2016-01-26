@@ -10,7 +10,7 @@ export function _start(params, parsed, data) {
 }
 
 export function _wait(params, parsed, data) {
-	console.log(JSON.stringify(parsed, null, '\t'))
+	//console.log(JSON.stringify(parsed, null, '\t'))
 	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
 	const seconds = math.round(parsed.value.till.toNumber('s'));
 	const result = [{line: `WaitTimer("${id}","${seconds}");`}];

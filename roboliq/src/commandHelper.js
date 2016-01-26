@@ -751,11 +751,16 @@ function lookupPath(path, params, data) {
 	return prev;
 }
 
+function lookupPaths(paths, params, data) {
+	return _.mapValues(paths, path => lookupPath(path, params, data));
+}
+
 module.exports = {
 	asArray,
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
 	lookupPath,
+	lookupPaths,
 	parseParams,
 	queryLogic,
 }

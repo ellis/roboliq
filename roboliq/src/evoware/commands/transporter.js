@@ -3,56 +3,53 @@ import commandHelper from '../../commandHelper.js';
 
 export function _movePlate(params, parsed, data) {
 	// romaIndex: "(@equipment).evowareRoma: integer"
-	const romaIndex = commandHelper.lookupPath(["@equipment", "evowareRoma"], params, data);
-	const programName = step.program;
-	const object = parsed.value.object;
-	//const plateModelName0 = object.model;
-	// plateModelName: "((@object).model).evowareName: string"
-	// plateModelName:
-	//const plateModelName = _.get(_.get(objects, plateModelName0), "evowareName");
-	const plateModelName = commandHelper.lookupPath([["@object", "model"], "evowareName"], params, data);
-	const plateOrigName = parsed.value.object.location;
-	const plateOrig = _.get(objects, plateOrigName);
-	CONTINUE
-	const plateOrigCarrierName = _.get(plateOrig, "evowareCarrier");
-	const plateOrigGrid = _.get(plateOrig, "evowareGrid");
-	const plateOrigSite = _.get(plateOrig, "evowareSite");
-	const plateDestName = step.destination;
-	const plateDest = _.get(objects, plateDestName);
-	const plateDestCarrierName = _.get(plateDest, "evowareCarrier");
-	const plateDestGrid = _.get(plateDest, "evowareGrid");
-	const plateDestSite = _.get(plateDest, "evowareSite");
-
-	const bMoveBackToHome = step.evowareMoveBackToHome || false; // 1 = move back to home position
+	const values = commandHelper.lookupPaths({
+		romaIndex: ["@equipment", "evowareRoma"],
+		plateModelName: [["@object", "model"], "evowareName"],
+		plateOrigName: ["@object", "location"],
+		plateOrigCarrierName: [["@object", "location"], "evowareCarrier"],
+		plateOrigGrid: [["@object", "location"], "evowareGrid"],
+		plateOrigSite: [["@object", "location"], "evowareSite"],
+		plateDestCarrierName: ["@destination", "evowareCarrier"],
+		plateDestGrid: ["@destination", "evowareGrid"],
+		plateDestSite: ["@destination", "evowareSite"],
+	}, params, data);
+	values.programName = parsed.value.program;
+	const bMoveBackToHome = parsed.value.evowareMoveBackToHome || false; // 1 = move back to home position
+	values.moveBackToHome = (bMoveBackToHome) ? 1 : 0;
+	//console.log(JSON.stringify(values, null, '\t'))
 	const l = [
-		`"${plateOrigGrid}"`,
-		`"${plateDestGrid}"`,
-		(bMoveBackToHome) ? 1 : 0,
+		`"${values.plateOrigGrid}"`,
+		`"${values.plateDestGrid}"`,
+		values.moveBackToHome,
 		0, //if (lidHandling == NoLid) 0 else 1,
 		0, // speed: 0 = maximum, 1 = taught in vector dialog
-		romaIndex,
+		values.romaIndex,
 		0, //if (lidHandling == RemoveAtSource) 1 else 0,
 		'""', //'"'+(if (lidHandling == NoLid) "" else iGridLid.toString)+'"',
-		`"${plateModelName}"`,
-		`"${programName}"`,
+		`"${values.plateModelName}"`,
+		`"${values.programName}"`,
 		'""',
 		'""',
-		`"${plateOrigCarrierName}"`,
+		`"${values.plateOrigCarrierName}"`,
 		'""', //'"'+sCarrierLid+'"',
-		`"${plateDestCarrierName}"`,
-		`"${plateOrigSite-1}"`,
+		`"${values.plateDestCarrierName}"`,
+		`"${values.plateOrigSite-1}"`,
 		"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
-		`"${plateDestSite-1}"`
+		`"${values.plateDestSite-1}"`
 	];
 	const line = `Transfer_Rack(${l.join(",")});`;
 	//println(s"line: $line")
 	//val let = JsonUtils.makeSimpleObject(x.`object`+".location", JsString(plateDestName))
+
+	const plateName = parsed.objectName.object;
+	const plateDestName = parsed.objectName.destination;
 	return [{
 		line,
-		effects: _.fromPairs([[`${object}.location`, plateDestName]]),
+		effects: _.fromPairs([[`${plateName}.location`, plateDestName]]),
 		tableEffects: [
-			[[plateOrigCarrierName, plateOrigGrid, plateOrigSite], {label: _.last(plateOrigName.split('.')), labwareModelName: plateModelName}],
-			[[plateDestCarrierName, plateDestGrid, plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: plateModelName}],
+			[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
+			[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
 		]
 	}];
 }
