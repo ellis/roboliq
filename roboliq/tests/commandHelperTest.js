@@ -33,7 +33,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe.only('commandHelper.lookupPath', function() {
+	describe('commandHelper.lookupPath', function() {
 		it("should lookup mixtures of parameter and object values", () => {
 			const data = {
 				objects: {
@@ -130,6 +130,7 @@ describe('commandHelper', function() {
 			const parsed = commandHelper.parseParams(params, data, schema);
 			//console.log(JSON.stringify(parsed, null, '\t'))
 			should.deepEqual(parsed, {
+				orig: params,
 				value: {
 					name: "plate1",
 					object1: {a: 1, b: 2},
@@ -194,6 +195,7 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
+				orig: params,
 				value: {
 					objectName: "plate1",
 					agent: {type: "MyAgent"},
@@ -231,6 +233,7 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
+				orig: params,
 				value: {
 					number1: 1,
 					number2: 2
@@ -259,6 +262,7 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
+				orig: params,
 				objectName: {
 					"ns.0": "n1",
 					"ns.1": "n2"
@@ -295,6 +299,7 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
+				orig: params,
 				objectName: {},
 				value: {
 					object: "plate1"
@@ -365,6 +370,7 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
+				orig: params,
 				objectName: {
 					syringe: "ourlab.mario.liha.syringe.1"
 				},
