@@ -23,7 +23,8 @@ const protocol0 = {
 	predicates: [
 		{"timer.canAgentEquipment": {agent: "robot1", equipment: "timer1"}},
 		{"timer.canAgentEquipment": {agent: "robot1", equipment: "timer2"}},
-	]
+	],
+	schemas: require(__dirname+'/schemas.json')
 };
 
 describe('EvowareCompilerTest', function() {
@@ -42,7 +43,8 @@ describe('EvowareCompilerTest', function() {
 						command: "timer._wait",
 						agent: "robot1",
 						equipment: "timer1",
-						till: 1
+						till: "1 minute",
+						stop: true
 					}
 				}
 			});
@@ -50,7 +52,7 @@ describe('EvowareCompilerTest', function() {
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [
 				[{line: 'StartTimer("1");'}],
-				[{line: 'WaitTimer("1","1");'}]
+				[{line: 'WaitTimer("1","60");'}, {line: 'StopTimer("1");'}]
 			]);
 		});
 	});

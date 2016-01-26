@@ -76,9 +76,9 @@ export function compileStep(table, protocol, agents, path, objects) {
 			protocol,
 			path
 		};
-		const schema = protocol.schemas[commandName];
+		const schema = protocol.schemas[step.command];
 		const parsed = (schema)
-			? commandHelper.parseParams(params, data, schema)
+			? commandHelper.parseParams(step, data, schema)
 			: undefined;
 		const result0 = commandHandler(step, parsed, data);
 		_.forEach(result0, result1 => {
