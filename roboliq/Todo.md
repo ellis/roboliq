@@ -118,7 +118,7 @@
     - [x] why is labware on RoboSeal missing for protocol3.cmp.json?
 - [x] `experiment.run`: implement
 - [x] consider how to use `experiment.run` in paper1_protocol1_ph
-- [ ] `lookupPath` should handle an object name as the first path element
+- [x] `lookupPath` should handle an object name as the first path element
 - [ ] create `Conditions` type, and generate its `value` property
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] get EvowareCompiler working
@@ -287,7 +287,7 @@
 
 ## After submission
 
-- [ ] `commandHelper.lookupPath()` should use `g()` to update `data.accesses`
+- [ ] `commandHelper.lookupPath()` should use `g()` to update `data.accesses` (only with the last element in each path or subpath)
 - [ ] improve error reporting (e.g. use try/catch blocks, and prepend context to the Error properties and rethrow)
 - [ ] `pipetter.cleanTips` should call `pipetter.cleanTips|$agent|$equipment` to get the low-level cleaning commands -- but if there are any errors, then return the sub-command instead.
 - [ ] `pipetter.pipette` should call `pipetter.cleanTips|$agent|$equipment` to get the cleaning commands, and then update its syringeClean variables based on the effects of the resulting commands

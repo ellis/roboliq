@@ -731,9 +731,6 @@ function lookupPath(path, params, data) {
 				assert(_.has(params, current));
 				current = _.get(params, current);
 			}
-			else {
-				assert(!_.isUndefined(prev));
-			}
 		}
 
 		//console.log({prev, current})

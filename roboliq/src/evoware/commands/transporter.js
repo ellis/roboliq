@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 
-export function _movePlate(params, parsed, data   step, objects, protocol, path) {
+export function _movePlate(params, parsed, data) {
 	// romaIndex: "(@equipment).evowareRoma: integer"
 	const romaIndex = commandHelper.lookupPath(["@equipment", "evowareRoma"], params, data);
 	const programName = step.program;

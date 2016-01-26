@@ -33,7 +33,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('commandHelper.lookupPath', function() {
+	describe.only('commandHelper.lookupPath', function() {
 		it("should lookup mixtures of parameter and object values", () => {
 			const data = {
 				objects: {
@@ -49,6 +49,20 @@ describe('commandHelper', function() {
 			should.deepEqual(
 				commandHelper.lookupPath(path, params, data),
 				"evowareModel1"
+			);
+		});
+		it("should lookup an object value", () => {
+			const data = {
+				objects: {
+					plate1: {model: "model1"}
+				},
+				accesses: []
+			};
+			const params = {};
+			const path = ["plate1", "model"];
+			should.deepEqual(
+				commandHelper.lookupPath(path, params, data),
+				"model1"
 			);
 		});
 	});
