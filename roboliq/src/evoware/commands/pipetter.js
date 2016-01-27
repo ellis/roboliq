@@ -1,6 +1,9 @@
 import _ from 'lodash';
+import math from 'mathjs';
+import {sprintf} from 'sprintf-js';
 import commandHelper from '../../commandHelper.js';
 import evowareHelper from './evowareHelper.js';
+import EvowareUtils from '../EvowareUtils.js';
 import wellsParser from '../../parsers/wellsParser.js';
 
 function stripQuotes(s) {
@@ -13,57 +16,75 @@ export function _aspirate(params, parsed, data) {
 }
 
 function handlePipetterSpirate(parsed, data, func) {
+	const groups = groupItems(parsed, data);
+	console.log("groups:\n"+JSON.stringify(groups));
+	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
+	return {};
+}
+
+function groupItems(parsed, data) {
 	if (_.isEmpty(parsed.value.items)) return [];
 
 	console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
 	const tuples = _.map(parsed.value.items, item => {
-		const {labware: labwareName, subject: location} = wellsParser.parseOne(item.well);
-		const labware = commandHelper.lookupPath(labwareName, {}, data);
+		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
+		const {labware: labwareName, wellId} = wellsParser.parseOne(item.source);
+		console.log({parseOne: wellsParser.parseOne(item.source)})
+		console.log({labwareName, wellId})
+		const labware = commandHelper.lookupPath([labwareName], {}, data);
 		const labwareModel = commandHelper.lookupPath([labwareName, "model"], {}, data);
-		const [row, col] = wellsParser.locationTextToRowCol(location);
+		const [row, col] = wellsParser.locationTextToRowCol(wellId);
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
 		return {item, labwareName, labware, labwareModel, row, col};
 	});
 	console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
-	return handlePipetterSpirateDoGroup(parsed, data, func, tuples)
-}
-/*
-function handlePipetterSpirateDoGroup(parsed, data, func, tuples) {
-	if (tuples.isEmpty) return [];
 
-	// Get values from first tuple that should stay constant per group.
-	const {labwareName, labware, labwareModel, col} = tuples[0];
-	// Get all items on the same labware and in the same column
-	const tuples2 = _.takeWhile(tuples, tuple => (tuple.col === col && tuple.labwareName == labwareName));
-	console.log({tuples2});
-	val (tuple_l3, tipSpacing) = (function() {
-		if (tuples2.length === 1) {
-			return [_.take(tuples, 1), 1];
+	let ref = tuples[0];
+	let syringeSpacing; // the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
+	function canJoinGroup(tuple) {
+		// Same labware?
+		if (tuple.labwareName === ref.labwareName) {
+			// FIXME: need to accomodate 2D LiHa's by allowing for columns differences too
+			// Same column?
+			if (tuple.col === ref.col) {
+				const dRow1 = tuple.item.syringe.row - ref.item.syringe.row
+				const dRow2 = tuple.row - ref.row;
+				if (_.isUndefined(syringeSpacing)) {
+					syringeSpacing = math.fraction(dRow2, dRow1);
+					// FIXME: need to check wether the syringe spacing is permissible!  Check how much the syringes need to spread physically (not just relative to the plate wells), and whether that's possible for the hardware.  Also, not all fractions will be permissible, probably.
+					if (syringeSpacing < 1) {
+						return false;
+					}
+					else {
+						return true;
+					}
+				}
+				else {
+					if (math.equal(math.fraction(dRow2, dRow1), syringeSpacing))
+						return true;
+				}
+			}
 		}
-		// If there are multiple items, group the ones that are acceptably spaced
+		return false;
+	}
+
+	let group = [ref];
+	const groups = [group];
+	for (let i = 1; i < tuples.length; i++) {
+		const tuple = tuples[i];
+		if (canJoinGroup(tuple)) {
+			group.push(tuple);
+		}
 		else {
-			const syringe0 = tuples[0].item.syringe.evowareIndex;
-			const row0 = tuples[0].row;
-			const dsyringe = tuples[1].item.syringe - syringe0;
-			const drow = tuple_l(1)._2.row - row0
-			// Syringes and rows should have ascending indexes, and the spacing should be 4 at most
-			if (dsyringe <= 0 || drow <= 0 || drow / dsyringe > 4) {
-				tuple_l.take(1) -> 1
-			}
-			else {
-				// Take as many items as preserve the initial deltas for syringe and row
-				tuple_l2.zipWithIndex.takeWhile({ case (tuple, index) =>
-					tuple._2.row == row0 + index * drow && tuple._1.syringe == syringe0 + index * dsyringe
-				}).map(_._1) -> drow
-			}
+			ref = tuple;
+			group = [ref];
+			groups.push(group);
 		}
-	}());
-	for {
-		token_l1 <- handlePipetterSpirateHandleGroup(objects, program, func, tuple_l3, labwareInfo, tipSpacing)
-		token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
-	} yield token_l1 ++ token_l2
-}*/
+	}
+
+	return groups;
+}
 
 /**
  * [handlePipetterSpirateHandleGroup description]
@@ -75,22 +96,17 @@ function handlePipetterSpirateDoGroup(parsed, data, func, tuples) {
  * @param  {integer} tipSpacing - how far apart the tips should be (FIXME: is the base value 1 or 0?)
  * @return {array} array of line info
  */
-/*
-function handlePipetterSpirateHandleGroup(
-	objects,
-	program,
-	func,
-	tuple_l: List[(PipetterItem, WellNameSingleParsed, Any)],
-	labwareInfo: LabwareInfo,
-	tipSpacing
-) {
+function handleGroup(parsed, data, func, tuples) {
+	assert(tuples.length > 0);
+
 	// Calculate syringe mask
-	val syringe_l = tuple_l.map(_._1.syringe)
-	val syringeMask = encodeSyringes(syringe_l)
+	const syringeMask = encodeSyringes(tuples);
 
 	val well_l = tuple_l.map(_._2)
-	val volume_l = Array.fill(12)("0")
+	const volumes = _.fill(Array(12), "0");
 
+	const labwareModel = tuples[0].labwareModel;
+	const plateMask = encodeWells(tuples);
 	for {
 		labwareModelInfo <- getLabwareModelInfo(objects, labwareInfo.labwareModelName0)
 		plateMask <- encodeWells(labwareModelInfo.rowCount, labwareModelInfo.colCount, well_l)
@@ -134,4 +150,34 @@ function handlePipetterSpirateHandleGroup(
 		List(Token(line, JsObject(), siteToNameAndModel_m))
 	}
 }
-*/
+
+/**
+ * Generate a bitmap encoding of syringes to use
+ * @param  {array} syringes - array of syringes to use
+ * @return {integer} an bitmask encoding of the syringes
+ */
+function encodeSyringes(tuples) {
+	return _.sum(_.map(tuples, tuple => 1 << (tuple.item.syringe.row - 1)));
+}
+
+/**
+ * Encode a list of wells on a plate as an evoware bitmask
+ */
+//function encodeWells(rows, cols, well_l: Traversable[WellNameSingleParsed]): ResultC[String] = {
+function encodeWells(tuples) {
+	assert(tuples.length > 0);
+	const labwareModel = tuples[0].labwareModel;
+	//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
+	const nWellMaskChars = math.ceil(labwareModel.rows * labwareModel.columns / 7.0);
+	const amWells = _.fill(Array(nWellMaskChars), 0);
+	_.forEach(tuples, tuple => {
+		const index = tuple.row + tuple.col * labwareModel.rows;
+		const iChar = _.toInteger(index / 7);
+		const iWell1 = index % 7;
+		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+[rows, cols, well, index, iChar, iWell1, well_l]);
+		amWells[iChar] += 1 << iWell1;
+	});
+	const sWellMask = amWells.map(EvowareUtils.encode).join();
+	const sPlateMask = sprintf("%02d%02d", labwareModel.columns, labwareModel.rows) + sWellMask;
+	return sPlateMask;
+}

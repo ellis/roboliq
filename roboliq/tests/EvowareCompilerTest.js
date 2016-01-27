@@ -28,7 +28,7 @@ const protocol0 = {
 			syringe: {
 				1: {
 					type: "Syringe",
-					evowareIndex: 1
+					row: 1
 				}
 			}
 		},
