@@ -36,7 +36,7 @@ const protocol0 = {
 			type: "PlateModel",
 			rows: 8,
 			columns: 12,
-			evowareName: "96-well plate"
+			evowareName: "96-Well Plate"
 		},
 		site1: {
 			type: "Site",
@@ -187,9 +187,12 @@ describe('EvowareCompilerTest', function() {
 			});
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
-			should.deepEqual(results, [
-				[{line: "FACTS(\"RoboSeal\",\"RoboSeal_Seal\",\"VALUE\",\"0\",\"\");"}]
-			]);
+			should.deepEqual(results, [[
+				{line: "Aspirate(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0804000000000000\",0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
 		});
 
 	});

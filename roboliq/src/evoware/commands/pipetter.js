@@ -26,7 +26,7 @@ function handlePipetterSpirate(parsed, data, func) {
 		[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
 		[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
 	];*/
-	return resulsts.concat({tableEffects});
+	return results.concat({tableEffects});
 }
 
 function groupItems(parsed, data) {
@@ -125,7 +125,8 @@ function handleGroup(parsed, data, func, group) {
 	const volumes = _.fill(Array(12), "0");
 	_.forEach(tuples, tuple => {
 		const index = (tuple.item.syringe.row || 1) - 0;
-		volumes[index] = tuple.item.volume.toNumber('ul');
+		const ul = tuple.item.volume.toNumber('ul');
+		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
 	});
 
 	// Script command line
@@ -169,7 +170,7 @@ function encodeWells(tuples) {
 		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
 		amWells[iChar] += 1 << iWell1;
 	});
-	const sWellMask = amWells.map(EvowareUtils.encode).join();
-	const sPlateMask = sprintf("%02d%02d", labwareModel.columns, labwareModel.rows) + sWellMask;
+	const sWellMask = amWells.map(EvowareUtils.encode).join("");
+	const sPlateMask = sprintf("%02X%02X", labwareModel.columns, labwareModel.rows) + sWellMask;
 	return sPlateMask;
 }
