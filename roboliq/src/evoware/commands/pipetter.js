@@ -22,6 +22,12 @@ function handlePipetterSpirate(parsed, data, func) {
 	const results = groups.map(group => handleGroup(parsed, data, func, group));
 	console.log("results:\n"+JSON.stringify(results, null, '\t'))
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
+	/*const tableEffects = Map();
+	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
+		const key = [tuple.site.evowareCarrier, tuple.site.evowareGrid, tuple.site.evowareSite];
+		tableEffects.set(key, {label: })
+	}))*/
+
 	const tableEffects = []/*
 		[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
 		[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
@@ -33,7 +39,9 @@ function groupItems(parsed, data) {
 	if (_.isEmpty(parsed.value.items)) return [];
 
 	console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
-	const tuples = _.map(parsed.value.items, item => {
+	const tuples = [];
+	for (let i = 0; i < parsed.value.items.length; i++) {
+		const item = parsed.value.items[i];
 		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
 		const {labware: labwareName, wellId} = wellsParser.parseOne(item.source);
 		console.log({parseOne: wellsParser.parseOne(item.source)})
@@ -44,8 +52,8 @@ function groupItems(parsed, data) {
 		const site = commandHelper.lookupPath([[labwareName, "location"]], {}, data);
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
-		return {item, labwareName, labware, labwareModel, site, row, col};
-	});
+		tuples.push({item, labwareName, labware, labwareModel, site, row, col});
+	}
 	console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
 	let ref = tuples[0];
