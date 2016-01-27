@@ -34,10 +34,6 @@ const protocol0 = {
 		},
 		plateModel1: {
 			type: "PlateModel",
-			evowareName: "evowarePlateModel1",
-		},
-		evowarePlateModel1: {
-			type: "PlateModel",
 			rows: 8,
 			columns: 12,
 			evowareName: "96-well plate"
@@ -155,11 +151,6 @@ describe('EvowareCompilerTest', function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				objects: {
-					plate1: {
-						type: "Plate",
-						model: "ourlab.model.plateModel_96_square_transparent_nunc",
-						location: "ourlab.mario.site.P2"
-					},
 					liquid1: {
 						type: "Variable",
 						value: "ourlab.mario.systemLiquid"

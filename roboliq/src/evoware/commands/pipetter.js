@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import assert from 'assert';
 import math from 'mathjs';
 import {sprintf} from 'sprintf-js';
 import commandHelper from '../../commandHelper.js';
@@ -18,8 +19,14 @@ export function _aspirate(params, parsed, data) {
 function handlePipetterSpirate(parsed, data, func) {
 	const groups = groupItems(parsed, data);
 	console.log("groups:\n"+JSON.stringify(groups));
+	const results = groups.map(group => handleGroup(parsed, data, func, group));
+	console.log("results:\n"+JSON.stringify(results, null, '\t'))
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
-	return {};
+	const tableEffects = []/*
+		[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
+		[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
+	];*/
+	return resulsts.concat({tableEffects});
 }
 
 function groupItems(parsed, data) {
@@ -32,19 +39,24 @@ function groupItems(parsed, data) {
 		console.log({parseOne: wellsParser.parseOne(item.source)})
 		console.log({labwareName, wellId})
 		const labware = commandHelper.lookupPath([labwareName], {}, data);
-		const labwareModel = commandHelper.lookupPath([labwareName, "model"], {}, data);
+		const labwareModel = commandHelper.lookupPath([[labwareName, "model"]], {}, data);
 		const [row, col] = wellsParser.locationTextToRowCol(wellId);
+		const site = commandHelper.lookupPath([[labwareName, "location"]], {}, data);
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
-		return {item, labwareName, labware, labwareModel, row, col};
+		return {item, labwareName, labware, labwareModel, site, row, col};
 	});
 	console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
 	let ref = tuples[0];
-	let syringeSpacing; // the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
-	function canJoinGroup(tuple) {
+	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
+	let syringeSpacing;
+	function canJoinGroup(group, tuple) {
+		// Make sure the same syringe is not used twice in one group
+		// FIXME: perform a better comparison -- need to compare the names instead of rows, because we might have multiple LiHas or multiple columns
+		const isUniqueSyringe = _.every(group, tuple2 => tuple2.item.syringe.row != tuple.item.syringe.row);
 		// Same labware?
-		if (tuple.labwareName === ref.labwareName) {
+		if (tuple.labwareName === ref.labwareName && isUniqueSyringe) {
 			// FIXME: need to accomodate 2D LiHa's by allowing for columns differences too
 			// Same column?
 			if (tuple.col === ref.col) {
@@ -69,19 +81,23 @@ function groupItems(parsed, data) {
 		return false;
 	}
 
-	let group = [ref];
+	let group = {tuples: [ref]};
 	const groups = [group];
 	for (let i = 1; i < tuples.length; i++) {
 		const tuple = tuples[i];
-		if (canJoinGroup(tuple)) {
+		if (canJoinGroup(group, tuple)) {
 			group.push(tuple);
 		}
 		else {
+			group.syringeSpacing = syringeSpacing || 1;
+			// Start a new group`
 			ref = tuple;
-			group = [ref];
+			group = {tuples: [ref]};
 			groups.push(group);
+			syringeSpacing = undefined;
 		}
 	}
+	group.syringeSpacing = syringeSpacing || 1;
 
 	return groups;
 }
@@ -96,59 +112,35 @@ function groupItems(parsed, data) {
  * @param  {integer} tipSpacing - how far apart the tips should be (FIXME: is the base value 1 or 0?)
  * @return {array} array of line info
  */
-function handleGroup(parsed, data, func, tuples) {
-	assert(tuples.length > 0);
+function handleGroup(parsed, data, func, group) {
+	assert(group.tuples.length > 0);
 
+	const tuples = group.tuples;
 	// Calculate syringe mask
+	const tuple0 = tuples[0];
 	const syringeMask = encodeSyringes(tuples);
-
-	val well_l = tuple_l.map(_._2)
-	const volumes = _.fill(Array(12), "0");
-
-	const labwareModel = tuples[0].labwareModel;
+	const labwareModel = tuple0.labwareModel;
 	const plateMask = encodeWells(tuples);
-	for {
-		labwareModelInfo <- getLabwareModelInfo(objects, labwareInfo.labwareModelName0)
-		plateMask <- encodeWells(labwareModelInfo.rowCount, labwareModelInfo.colCount, well_l)
-		// Create a list of volumes for each used tip, leaving the remaining values at 0
-		_ <- ResultC.foreach(tuple_l) { tuple =>
-			for {
-				amount <- AmountParser.parse(tuple._1.volume)
-				syringe = tuple._1.syringe
-				_ <- ResultC.assert(syringe >= 1 && syringe <= 12, `invalid syringe value ${syringe}: must be between 1 and 12`)
-				volumeString <- amount match {
-					case Amount_Volume(volume) =>
-						ResultC.unit(df.format(volume.ul))
-					case Amount_Variable(name) =>
-						ResultC.unit(name)
-					case _ =>
-						ResultC.error(s"invalid volume `${tuple._1.volume}`: expected liquid volume or evoware variable name, but got $amount")
-				}
-			} yield {
-				volume_l(syringe - 1) = s""""$volumeString""""
-			}
-		}
-	} yield {
-		const l = [
-			syringeMask,
-			`"${program}"`,
-			volume_l.join(","),
-			labwareInfo.cngs.gridIndex, labwareInfo.cngs.siteIndex,
-			tipSpacing,
-			`"${plateMask}"`,
-			0,
-			0
-		];
-		const line = `${func}(${l.join(",")});`;
+	// Volumes for each syringe (in ul)
+	const volumes = _.fill(Array(12), "0");
+	_.forEach(tuples, tuple => {
+		const index = (tuple.item.syringe.row || 1) - 0;
+		volumes[index] = tuple.item.volume.toNumber('ul');
+	});
 
-		val siteToNameAndModel_m: Map[CarrierNameGridSiteIndex, (String, String)] = {
-			// Don't set labware for the "System" liquid site
-			if (labwareInfo.cngs.carrierName == "System") Map()
-			else Map(labwareInfo.cngs -> (labwareInfo.siteName, labwareInfo.labwareModelName))
-		}
-
-		List(Token(line, JsObject(), siteToNameAndModel_m))
-	}
+	// Script command line
+	const l = [
+		syringeMask,
+		`"${stripQuotes(parsed.value.program)}"`,
+		volumes.join(","),
+		tuple0.site.evowareGrid, tuple0.site.evowareSite - 1,
+		group.syringeSpacing,
+		`"${plateMask}"`,
+		0,
+		0
+	];
+	const line = `${func}(${l.join(",")});`;
+	return {line};
 }
 
 /**
@@ -174,7 +166,7 @@ function encodeWells(tuples) {
 		const index = tuple.row + tuple.col * labwareModel.rows;
 		const iChar = _.toInteger(index / 7);
 		const iWell1 = index % 7;
-		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+[rows, cols, well, index, iChar, iWell1, well_l]);
+		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
 		amWells[iChar] += 1 << iWell1;
 	});
 	const sWellMask = amWells.map(EvowareUtils.encode).join();
