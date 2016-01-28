@@ -133,20 +133,20 @@ describe('EvowareCompilerTest', function() {
 			should.deepEqual(results, [
 				[
 					{
-						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,1,0,\"\",\"evowarePlateModel1\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"0\",(Not defined),\"1\");",
+						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,1,0,\"\",\"96-Well Plate\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"0\",(Not defined),\"1\");",
 						"effects": {
 							"plate1.location": "site2"
 						},
 						"tableEffects": [
-							[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "evowarePlateModel1" } ],
-							[ [ "Some Carrier", 1, 2 ], { "label": "site2", "labwareModelName": "evowarePlateModel1" } ]
+							[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ],
+							[ [ "Some Carrier", 1, 2 ], { "label": "site2", "labwareModelName": "96-Well Plate" } ]
 						]
 					}
 				]
 			]);
 		});
 
-		it.only("should compile pipetter._aspirate", function() {
+		it("should compile pipetter._aspirate", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
