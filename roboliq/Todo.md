@@ -119,9 +119,9 @@
 - [x] `experiment.run`: implement
 - [x] consider how to use `experiment.run` in paper1_protocol1_ph
 - [x] `lookupPath` should handle an object name as the first path element
+- [x] get EvowareCompiler working
 - [ ] create `Conditions` type, and generate its `value` property
 - [ ] `experiment.run`: change `experiment` property to `conditions`
-- [ ] get EvowareCompiler working
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
@@ -150,29 +150,32 @@
 
 - [x] implement lookupPath
 - [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
-- [ ] evoware compiler: add more commands
+- [x] evoware compiler: add more commands
     - [x] `evoware._facts`
     - [x] `timer._start`
     - [x] `timer._wait`
     - [x] `pipetter._aspirate`
     - [x] `pipetter._dispense`
-    - [ ] `pipetter._pipette`
-    - [ ] `pipetter._cleanTips`
-- [ ] implement lookupSpecs
+    - [x] `pipetter._pipette`
+    - [x] `pipetter._washTips`
+    - [x] delete scala files
+- [x] implement lookupPaths
+- [x] evoware: rename `_cleanTips` instruction to `_washTips`
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi
-- [ ] evoware: rename `_cleanTips` instruction to `_washTips`
-- [ ] evoware: add command-line option to only process certain steps
-- [ ] evoware: when user specified steps to process but no output name, name the output file according to the steps processed
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
 - [ ] evoware compiler: allow for loading Carrier.json instead of Carrier.cfg
 - [ ] evoware compiler: allow for loading JSON table instead of .ewt or .esc
 - [ ] evoware compiler: add script line for every protocol command to log the start and end times of that command
 - [ ] evoware compiler: add code to process and display measured data after measurement commands
+- [ ] evoware: test `pipetter._cleanTips`
+- [ ] evoware: write more extensive tests for `pipetter._aspirate`, `pipetter._dispense`, and `pipetter._pipette`
 - [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
 - [ ] test `evoware._facts`
 - [ ] test `EvowareCompiler.compile`
+- [ ] evoware: add command-line option to only process certain steps
+- [ ] evoware: when user specifies steps to process but no output name, name the output file according to the steps processed
 
 ## On-going todos with lots of sub-steps
 

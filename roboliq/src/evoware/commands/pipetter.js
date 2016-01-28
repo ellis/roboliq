@@ -23,44 +23,47 @@ export function _dispense(params, parsed, data) {
 export function _pipette(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
-/*
-export function _pipette(params, parsed, data) {
-	CONTINUE
-	for {
-		inst <- JsConverter.fromJs[PipetterSpirate2](step)
-		// Group items together that having increasing syringe indexes
-		item_ll = {
-			var item_ll = Vector[List[PipetterItem2]]()
-			var item_l = inst.items
-			var syringe = -1
-			while (!item_l.isEmpty) {
-				val item_l2 = item_l.takeWhile(item => {
-					if (item.syringe > syringe) {
-						syringe = item.syringe
-						true
-					}
-					else {
-						syringe = -1
-						false
-					}
-				})
-				item_ll :+= item_l
-				item_l = item_l.drop(item_l.length)
-			}
-			item_ll.toList
-		}
-		// For each group, create aspirate and dispense commands
-		token_ll <- ResultC.map(item_ll) { item_l =>
-			val asp_l = item_l.map { item => PipetterItem(item.syringe, item.source, item.volume) }
-			val dis_l = item_l.map { item => PipetterItem(item.syringe, item.destination, item.volume) }
-			for {
-				l1 <- handlePipetterSpirate(objects, stripQuotes(inst.program), asp_l, "Aspirate")
-				l2 <- handlePipetterSpirate(objects, stripQuotes(inst.program), dis_l, "Dispense")
-			} yield l1 ++ l2
-		}
-	} yield token_ll.flatten
+
+export function _washTips(params, parsed, data) {
+	function handleScript(filename) {
+		return `Subroutine("${filename}",0);`;
+	}
+
+	function handleWashProgram() {
+		const program = parsed.value.program;
+		const syringeRows = parsed.value.syringes.map(x => x.row);
+		const syringeMask = encodeSyringesByRow(syringeRows);
+		const bUNKNOWN1 = false;
+		const l = [
+			syringeMask,
+			program.wasteGrid, program.wasteSite,
+			program.cleanerGrid, program.cleanerSite,
+			`"${math.format(program.wasteVolume, {precision: 14})}"`,
+			program.wasteDelay,
+			`"${math.format(program.cleanerVolume, {precision: 14})}"`,
+			program.cleanerDelay,
+			program.airgapVolume,
+			program.airgapSpeed,
+			program.retractSpeed,
+			(program.fastWash) ? 1 : 0,
+			(bUNKNOWN1) ? 1 : 0,
+			1000,
+			0
+		];
+		return `Wash(${l.join(",")});`
+	}
+
+	const results = [];
+	if (!_.isEmpty(parsed.value.script)) {
+		results.push({line: handleScript(parsed.value.script)});
+	}
+	else {
+		results.push({line: handleWashProgram()});
+	}
+	return results;
 }
-*/
+
+
 function handlePipetterSpirate(parsed, data) {
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
@@ -246,6 +249,15 @@ function handleGroup(parsed, data, group) {
  */
 function encodeSyringes(tuples) {
 	return _.sum(_.map(tuples, tuple => 1 << (tuple.item.syringe.row - 1)));
+}
+
+/**
+ * Generate a bitmap encoding of syringes to use
+ * @param  {array} rows - array of syringe rows (base value is 1)
+ * @return {integer} an bitmask encoding of the syringes
+ */
+function encodeSyringesByRow(rows) {
+	return _.sum(_.map(rows, row => 1 << (row - 1)));
 }
 
 /**
