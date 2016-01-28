@@ -68,16 +68,17 @@ function handlePipetterSpirate(parsed, data) {
 
 	// Get list of all accessed sites
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
-	const siteToTuple = {};
+	const siteToWellInfo = {};
 	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
-		//const key = [tuple.site.evowareCarrier, tuple.site.evowareGrid, tuple.site.evowareSite];
-		if (!siteToTuple.hasOwnProperty(tuple.siteName))
-			siteToTuple[tuple.siteName] = tuple;
-	}));
-	const tableEffects = [];
-	_.forEach(siteToTuple, (tuple, siteName) => {
 		for (let propertyName of ["source", "destination"]) {
 			const wellInfo = tuple[propertyName];
+			if (wellInfo && !siteToTuple.hasOwnProperty(wellInfo.siteName))
+				siteToTuple[wellInfo.siteName] = wellInfo;
+		}
+	}));
+	const tableEffects = [];
+	_.forEach(siteToWellInfo, (wellInfo, siteName) => {
+		for (let propertyName of ["source", "destination"]) {
 			if (!_.isUndefined(wellInfo)) {
 				const key = [wellInfo.site.evowareCarrier, wellInfo.site.evowareGrid, wellInfo.site.evowareSite];
 				const label = _.last(siteName.split("."));
