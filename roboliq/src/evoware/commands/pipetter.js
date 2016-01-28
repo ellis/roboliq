@@ -60,11 +60,11 @@ export function _pipette(params, parsed, data) {
 function handlePipetterSpirate(parsed, data) {
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
-	console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+	//console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Create a script line for each group:
 	const results = _.flatMap(groups, group => handleGroup(parsed, data, group));
-	console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
 
 	// Get list of all accessed sites
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
@@ -72,21 +72,18 @@ function handlePipetterSpirate(parsed, data) {
 	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
 		for (let propertyName of ["source", "destination"]) {
 			const wellInfo = tuple[propertyName];
-			if (wellInfo && !siteToTuple.hasOwnProperty(wellInfo.siteName))
-				siteToTuple[wellInfo.siteName] = wellInfo;
+			if (wellInfo && !siteToWellInfo.hasOwnProperty(wellInfo.siteName))
+				siteToWellInfo[wellInfo.siteName] = wellInfo;
 		}
 	}));
+	//console.log({siteToWellInfo})
 	const tableEffects = [];
 	_.forEach(siteToWellInfo, (wellInfo, siteName) => {
-		for (let propertyName of ["source", "destination"]) {
-			if (!_.isUndefined(wellInfo)) {
-				const key = [wellInfo.site.evowareCarrier, wellInfo.site.evowareGrid, wellInfo.site.evowareSite];
-				const label = _.last(siteName.split("."));
-				tableEffects.push([key, {label, labwareModelName: wellInfo.labwareModel.evowareName}]);
-			}
-		}
+		const key = [wellInfo.site.evowareCarrier, wellInfo.site.evowareGrid, wellInfo.site.evowareSite];
+		const label = _.last(siteName.split("."));
+		tableEffects.push([key, {label, labwareModelName: wellInfo.labwareModel.evowareName}]);
 	});
-	console.log(tableEffects)
+	//console.log(tableEffects)
 
 	return results.concat({tableEffects});
 }
@@ -214,7 +211,7 @@ function handleGroup(parsed, data, group) {
 	// Script command line
 	function makeLine(func, propertyName) {
 		const wellInfo = tuple0[propertyName];
-		console.log({func, propertyName, wellInfo})
+		//console.log({func, propertyName, wellInfo})
 		if (_.isUndefined(wellInfo))
 			return undefined;
 
@@ -234,7 +231,7 @@ function handleGroup(parsed, data, group) {
 		return {line};
 	}
 
-	console.log({syringeMask, volumes})
+	//console.log({syringeMask, volumes})
 	return _.compact([makeLine("Aspirate", "source"), makeLine("Dispense", "destination")]);
 }
 
