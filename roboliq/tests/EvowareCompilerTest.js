@@ -226,7 +226,7 @@ describe('EvowareCompilerTest', function() {
 						items: [
 							{
 								syringe: "pipetter1.syringe.1",
-								source: "plate1(A01)",
+								destination: "plate1(A01)",
 								volume: "10 ul"
 							}
 						]

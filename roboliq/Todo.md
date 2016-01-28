@@ -154,8 +154,8 @@
     - [x] `evoware._facts`
     - [x] `timer._start`
     - [x] `timer._wait`
-    - [ ] `pipetter._aspirate`
-    - [ ] `pipetter._dispense`
+    - [x] `pipetter._aspirate`
+    - [x] `pipetter._dispense`
     - [ ] `pipetter._pipette`
     - [ ] `pipetter._cleanTips`
 - [ ] implement lookupSpecs

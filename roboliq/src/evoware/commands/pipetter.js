@@ -20,6 +20,43 @@ export function _dispense(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data, "Dispense");
 }
 
+export function _pipette(params, parsed, data) {
+	CONTINUE
+	for {
+		inst <- JsConverter.fromJs[PipetterSpirate2](step)
+		// Group items together that having increasing syringe indexes
+		item_ll = {
+			var item_ll = Vector[List[PipetterItem2]]()
+			var item_l = inst.items
+			var syringe = -1
+			while (!item_l.isEmpty) {
+				val item_l2 = item_l.takeWhile(item => {
+					if (item.syringe > syringe) {
+						syringe = item.syringe
+						true
+					}
+					else {
+						syringe = -1
+						false
+					}
+				})
+				item_ll :+= item_l
+				item_l = item_l.drop(item_l.length)
+			}
+			item_ll.toList
+		}
+		// For each group, create aspirate and dispense commands
+		token_ll <- ResultC.map(item_ll) { item_l =>
+			val asp_l = item_l.map { item => PipetterItem(item.syringe, item.source, item.volume) }
+			val dis_l = item_l.map { item => PipetterItem(item.syringe, item.destination, item.volume) }
+			for {
+				l1 <- handlePipetterSpirate(objects, stripQuotes(inst.program), asp_l, "Aspirate")
+				l2 <- handlePipetterSpirate(objects, stripQuotes(inst.program), dis_l, "Dispense")
+			} yield l1 ++ l2
+		}
+	} yield token_ll.flatten
+}
+
 function handlePipetterSpirate(parsed, data, func) {
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
@@ -55,19 +92,24 @@ function groupItems(parsed, data) {
 	const tuples = [];
 	for (let i = 0; i < parsed.value.items.length; i++) {
 		const item = parsed.value.items[i];
-		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
-		const {labware: labwareName, wellId} = wellsParser.parseOne(item.source);
-		//console.log({parseOne: wellsParser.parseOne(item.source)})
-		//console.log({labwareName, wellId})
-		const labware = commandHelper.lookupPath([labwareName], {}, data);
-		const labwareModel = commandHelper.lookupPath([[labwareName, "model"]], {}, data);
-		const [row, col] = wellsParser.locationTextToRowCol(wellId);
-		const siteName = commandHelper.lookupPath([labwareName, "location"], {}, data);
-		const site = commandHelper.lookupPath([[labwareName, "location"]], {}, data);
 		const syringeName = parsed.objectName[`items.${i}.syringe`];
+		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
+		const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
+		function getWellInfo(well) {
+			if (_.isUndefined(well)) return undefined;
+			const {labware: labwareName, wellId} = wellsParser.parseOne(well);
+			//console.log({parseOne: wellsParser.parseOne(item.source)})
+			//console.log({labwareName, wellId})
+			const labware = commandHelper.lookupPath([labwareName], {}, data);
+			const labwareModel = commandHelper.lookupPath([[labwareName, "model"]], {}, data);
+			const [row, col] = wellsParser.locationTextToRowCol(wellId);
+			const siteName = commandHelper.lookupPath([labwareName, "location"], {}, data);
+			const site = commandHelper.lookupPath([[labwareName, "location"]], {}, data);
+			return {labwareName, labware, labwareModel, site, siteName, row, col};
+		}
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
-		tuples.push({item, labwareName, labware, labwareModel, site, siteName, row, col, syringeName});
+		tuples.push({item, syringeName, source: getWellInfo(item.source), destination: getWellInfo(item.destination)});
 	}
 	//console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
@@ -77,13 +119,14 @@ function groupItems(parsed, data) {
 	function canJoinGroup(group, tuple) {
 		// Make sure the same syringe is not used twice in one group
 		const isUniqueSyringe = _.every(group, tuple2 => tuple2.syringeName != tuple.syringeName);
-		// Same labware?
-		if (tuple.labwareName === ref.labwareName && isUniqueSyringe) {
-			// FIXME: need to accomodate 2D LiHa's by allowing for columns differences too
+		if (!isUniqueSyringe)
+			return false;
+
+		function checkWellInfo(wellInfo, wellInfoRef) {
 			// Same column?
-			if (tuple.col === ref.col) {
-				const dRow1 = tuple.item.syringe.row - ref.item.syringe.row
-				const dRow2 = tuple.row - ref.row;
+			if (wellInfo.col === wellInfoRef.col) {
+				const dRow1 = tuple.item.syringe.row - wellInfoRef.item.syringe.row
+				const dRow2 = wellInfo.row - wellInfoRef.row;
 				if (_.isUndefined(syringeSpacing)) {
 					syringeSpacing = math.fraction(dRow2, dRow1);
 					// FIXME: need to check wether the syringe spacing is permissible!  Check how much the syringes need to spread physically (not just relative to the plate wells), and whether that's possible for the hardware.  Also, not all fractions will be permissible, probably.
@@ -99,9 +142,24 @@ function groupItems(parsed, data) {
 						return true;
 				}
 			}
+			return false;
 		}
+		// Same labware?
+		if (!_.isUndefined(tuple.source)) {
+			const sourceOk = (tuple.source.labwareName === ref.source.labwareName && checkWellInfo(tuple.source, ref.source));
+			if (sourceOk)
+				return true;
+		}
+		if (!_.isUndefined(tuple.destination)) {
+			const destinationOk = (tuple.destination.labwareName === ref.destination.labwareName && checkWellInfo(tuple.destination, ref.destination));
+			if (destinationOk)
+				return true;
+		}
+
 		return false;
 	}
+
+	CONTINUE to modify code for new tuple.source and tuple.destination properties
 
 	let group = {tuples: [ref]};
 	const groups = [group];
