@@ -133,7 +133,6 @@
 - [ ] handle mixture randomization well, and use it for the paper1 protocols (pH and unfolding)
 - [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] use schemas for directives too
-- [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] evoware:
     - [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
     - [ ] try loading the `tania*` protocols in Tecan Evoware

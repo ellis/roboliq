@@ -1,6 +1,14 @@
 roboliq: v1
 
 objects:
+  growthConditions:
+    type: Conditions
+    factors:
+      strain: [...]
+      media: [...]
+      
+
+
   SamplingNumber:
     type: Variable
     subtype: Integer
