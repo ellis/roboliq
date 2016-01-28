@@ -17,21 +17,30 @@ export function _aspirate(params, parsed, data) {
 }
 
 function handlePipetterSpirate(parsed, data, func) {
+	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
-	console.log("groups:\n"+JSON.stringify(groups));
-	const results = groups.map(group => handleGroup(parsed, data, func, group));
-	console.log("results:\n"+JSON.stringify(results, null, '\t'))
-	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
-	/*const tableEffects = Map();
-	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
-		const key = [tuple.site.evowareCarrier, tuple.site.evowareGrid, tuple.site.evowareSite];
-		tableEffects.set(key, {label: })
-	}))*/
+	//console.log("groups:\n"+JSON.stringify(groups));
 
-	const tableEffects = []/*
-		[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
-		[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
-	];*/
+	// Create a script line for each group:
+	const results = groups.map(group => handleGroup(parsed, data, func, group));
+	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
+
+	// Get list of all accessed sites
+	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
+	const siteToTuple = {};
+	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
+		//const key = [tuple.site.evowareCarrier, tuple.site.evowareGrid, tuple.site.evowareSite];
+		if (!siteToTuple.hasOwnProperty(tuple.siteName))
+			siteToTuple[tuple.siteName] = tuple;
+	}));
+	const tableEffects = [];
+	_.forEach(siteToTuple, (tuple, siteName) => {
+		const key = [tuple.site.evowareCarrier, tuple.site.evowareGrid, tuple.site.evowareSite];
+		const label = _.last(siteName.split("."));
+		tableEffects.push([key, {label, labwareModelName: tuple.labwareModel.evowareName}]);
+	});
+	//console.log(tableEffects)
+
 	return results.concat({tableEffects});
 }
 
@@ -44,15 +53,17 @@ function groupItems(parsed, data) {
 		const item = parsed.value.items[i];
 		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
 		const {labware: labwareName, wellId} = wellsParser.parseOne(item.source);
-		console.log({parseOne: wellsParser.parseOne(item.source)})
-		console.log({labwareName, wellId})
+		//console.log({parseOne: wellsParser.parseOne(item.source)})
+		//console.log({labwareName, wellId})
 		const labware = commandHelper.lookupPath([labwareName], {}, data);
 		const labwareModel = commandHelper.lookupPath([[labwareName, "model"]], {}, data);
 		const [row, col] = wellsParser.locationTextToRowCol(wellId);
+		const siteName = commandHelper.lookupPath([labwareName, "location"], {}, data);
 		const site = commandHelper.lookupPath([[labwareName, "location"]], {}, data);
+		const syringeName = parsed.objectName[`items.${i}.syringe`];
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
-		tuples.push({item, labwareName, labware, labwareModel, site, row, col});
+		tuples.push({item, labwareName, labware, labwareModel, site, siteName, row, col, syringeName});
 	}
 	console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
