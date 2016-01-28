@@ -195,7 +195,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it.only("should compile pipetter._dispense for a single dispense", function() {
+		it("should compile pipetter._dispense for a single dispense", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
