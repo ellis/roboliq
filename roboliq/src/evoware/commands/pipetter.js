@@ -47,7 +47,7 @@ function handlePipetterSpirate(parsed, data, func) {
 function groupItems(parsed, data) {
 	if (_.isEmpty(parsed.value.items)) return [];
 
-	console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
+	//console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
 	const tuples = [];
 	for (let i = 0; i < parsed.value.items.length; i++) {
 		const item = parsed.value.items[i];
@@ -65,15 +65,14 @@ function groupItems(parsed, data) {
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
 		tuples.push({item, labwareName, labware, labwareModel, site, siteName, row, col, syringeName});
 	}
-	console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
+	//console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
 	let ref = tuples[0];
 	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
 	let syringeSpacing;
 	function canJoinGroup(group, tuple) {
 		// Make sure the same syringe is not used twice in one group
-		// FIXME: perform a better comparison -- need to compare the names instead of rows, because we might have multiple LiHas or multiple columns
-		const isUniqueSyringe = _.every(group, tuple2 => tuple2.item.syringe.row != tuple.item.syringe.row);
+		const isUniqueSyringe = _.every(group, tuple2 => tuple2.syringeName != tuple.syringeName);
 		// Same labware?
 		if (tuple.labwareName === ref.labwareName && isUniqueSyringe) {
 			// FIXME: need to accomodate 2D LiHa's by allowing for columns differences too
