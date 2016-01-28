@@ -146,7 +146,7 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
-		it("should compile pipetter._aspirate", function() {
+		it("should compile pipetter._aspirate for a single aspiration", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
@@ -195,7 +195,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it("should compile pipetter._dispense", function() {
+		it.only("should compile pipetter._dispense for a single dispense", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",

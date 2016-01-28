@@ -13,13 +13,13 @@ function stripQuotes(s) {
 }
 
 export function _aspirate(params, parsed, data) {
-	return handlePipetterSpirate(parsed, data, "Aspirate");
+	return handlePipetterSpirate(parsed, data);
 }
 
 export function _dispense(params, parsed, data) {
-	return handlePipetterSpirate(parsed, data, "Dispense");
+	return handlePipetterSpirate(parsed, data);
 }
-
+/*
 export function _pipette(params, parsed, data) {
 	CONTINUE
 	for {
@@ -56,15 +56,15 @@ export function _pipette(params, parsed, data) {
 		}
 	} yield token_ll.flatten
 }
-
-function handlePipetterSpirate(parsed, data, func) {
+*/
+function handlePipetterSpirate(parsed, data) {
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
-	//console.log("groups:\n"+JSON.stringify(groups));
+	console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Create a script line for each group:
-	const results = groups.map(group => handleGroup(parsed, data, func, group));
-	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	const results = _.flatMap(groups, group => handleGroup(parsed, data, group));
+	console.log("results:\n"+JSON.stringify(results, null, '\t'))
 
 	// Get list of all accessed sites
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
@@ -76,11 +76,16 @@ function handlePipetterSpirate(parsed, data, func) {
 	}));
 	const tableEffects = [];
 	_.forEach(siteToTuple, (tuple, siteName) => {
-		const key = [tuple.site.evowareCarrier, tuple.site.evowareGrid, tuple.site.evowareSite];
-		const label = _.last(siteName.split("."));
-		tableEffects.push([key, {label, labwareModelName: tuple.labwareModel.evowareName}]);
+		for (let propertyName of ["source", "destination"]) {
+			const wellInfo = tuple[propertyName];
+			if (!_.isUndefined(wellInfo)) {
+				const key = [wellInfo.site.evowareCarrier, wellInfo.site.evowareGrid, wellInfo.site.evowareSite];
+				const label = _.last(siteName.split("."));
+				tableEffects.push([key, {label, labwareModelName: wellInfo.labwareModel.evowareName}]);
+			}
+		}
 	});
-	//console.log(tableEffects)
+	console.log(tableEffects)
 
 	return results.concat({tableEffects});
 }
@@ -159,8 +164,6 @@ function groupItems(parsed, data) {
 		return false;
 	}
 
-	CONTINUE to modify code for new tuple.source and tuple.destination properties
-
 	let group = {tuples: [ref]};
 	const groups = [group];
 	for (let i = 1; i < tuples.length; i++) {
@@ -189,18 +192,16 @@ function groupItems(parsed, data) {
  * @param  {string} func - "Aspirate" or "Dispense"
  * @param  {array} tuple_l - List[(PipetterItem, WellNameSingleParsed, Any)]
  * @param  {?} labwareInfo - LabwareInfo
- * @param  {integer} tipSpacing - how far apart the tips should be (FIXME: is the base value 1 or 0?)
+ * @param  {integer} tipSpacing - how far apart the tips should be (the base value 1)
  * @return {array} array of line info
  */
-function handleGroup(parsed, data, func, group) {
+function handleGroup(parsed, data, group) {
 	assert(group.tuples.length > 0);
 
 	const tuples = group.tuples;
 	// Calculate syringe mask
 	const tuple0 = tuples[0];
 	const syringeMask = encodeSyringes(tuples);
-	const labwareModel = tuple0.labwareModel;
-	const plateMask = encodeWells(tuples);
 	// Volumes for each syringe (in ul)
 	const volumes = _.fill(Array(12), "0");
 	_.forEach(tuples, tuple => {
@@ -210,18 +211,30 @@ function handleGroup(parsed, data, func, group) {
 	});
 
 	// Script command line
-	const l = [
-		syringeMask,
-		`"${stripQuotes(parsed.value.program)}"`,
-		volumes.join(","),
-		tuple0.site.evowareGrid, tuple0.site.evowareSite - 1,
-		group.syringeSpacing,
-		`"${plateMask}"`,
-		0,
-		0
-	];
-	const line = `${func}(${l.join(",")});`;
-	return {line};
+	function makeLine(func, propertyName) {
+		const wellInfo = tuple0[propertyName];
+		console.log({func, propertyName, wellInfo})
+		if (_.isUndefined(wellInfo))
+			return undefined;
+
+		const labwareModel = wellInfo.labwareModel;
+		const plateMask = encodeWells(tuples, propertyName);
+		const l = [
+			syringeMask,
+			`"${stripQuotes(parsed.value.program)}"`,
+			volumes.join(","),
+			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
+			group.syringeSpacing,
+			`"${plateMask}"`,
+			0,
+			0
+		];
+		const line = `${func}(${l.join(",")});`;
+		return {line};
+	}
+
+	console.log({syringeMask, volumes})
+	return _.compact([makeLine("Aspirate", "source"), makeLine("Dispense", "destination")]);
 }
 
 /**
@@ -237,14 +250,14 @@ function encodeSyringes(tuples) {
  * Encode a list of wells on a plate as an evoware bitmask
  */
 //function encodeWells(rows, cols, well_l: Traversable[WellNameSingleParsed]): ResultC[String] = {
-function encodeWells(tuples) {
+function encodeWells(tuples, propertyName) {
 	assert(tuples.length > 0);
-	const labwareModel = tuples[0].labwareModel;
+	const labwareModel = tuples[0][propertyName].labwareModel;
 	//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
 	const nWellMaskChars = math.ceil(labwareModel.rows * labwareModel.columns / 7.0);
 	const amWells = _.fill(Array(nWellMaskChars), 0);
 	_.forEach(tuples, tuple => {
-		const index = tuple.row + tuple.col * labwareModel.rows;
+		const index = tuple[propertyName].row + tuple[propertyName].col * labwareModel.rows;
 		const iChar = _.toInteger(index / 7);
 		const iWell1 = index % 7;
 		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
