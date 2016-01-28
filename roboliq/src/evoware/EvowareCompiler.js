@@ -12,8 +12,8 @@ const commandHandlers = {
 	"evoware._facts": evoware._facts,
 	"pipetter._aspirate": pipetter._aspirate,
 	"pipetter._dispense": pipetter._dispense,
-	/*"pipetter._pipette" -> handlePipetterPipette,
-	"pipetter._cleanTips" -> handlePipetterCleanTips,*/
+	"pipetter._pipette": pipetter._pipette,
+	/*"pipetter._cleanTips" -> handlePipetterCleanTips,*/
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,
 	"transporter._movePlate": transporter._movePlate

@@ -151,21 +151,9 @@ describe('EvowareCompilerTest', function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				objects: {
-					liquid1: {
-						type: "Variable",
-						value: "ourlab.mario.systemLiquid"
-					},
-					ourlab: {
-						mario: {
-							liha: {
-								syringe: {
-									1: {
-										contaminants: undefined,
-										contents: undefined,
-										cleaned: "thorough"
-									}
-								}
-							}
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
 						}
 					}
 				},
@@ -188,7 +176,7 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [[
-				{line: "Aspirate(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0804000000000000\",0,0);"},
+				{line: "Aspirate(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
@@ -200,19 +188,11 @@ describe('EvowareCompilerTest', function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				objects: {
-					liquid1: {
-						type: "Variable",
-						value: "ourlab.mario.systemLiquid"
-					},
-					ourlab: {
-						mario: {
-							liha: {
-								syringe: {
-									1: {
-										contaminants: ["water"],
-										contents: ["10 ul", "water"]
-									}
-								}
+					pipetter1: {
+						syringe: {
+							1: {
+								contaminants: ["water"],
+								contents: ["10 ul", "water"]
 							}
 						}
 					}
@@ -236,7 +216,46 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [[
-				{line: "Dispense(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0804000000000000\",0,0);"},
+				{line: "Dispense(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
+		});
+
+		it("should compile pipetter._pipette for a single pipette", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
+						}
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter._pipette",
+						agent: "robot1",
+						equipment: "pipetter1",
+						program: "\"Water free dispense\"",
+						items: [
+							{
+								syringe: "pipetter1.syringe.1",
+								source: "plate1(A01)",
+								destination: "plate1(B01)",
+								volume: "10 ul"
+							}
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
+			should.deepEqual(results, [[
+				{line: "Aspirate(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Dispense(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0820000000000000\",0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}

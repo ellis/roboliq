@@ -19,6 +19,10 @@ export function _aspirate(params, parsed, data) {
 export function _dispense(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
+
+export function _pipette(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data);
+}
 /*
 export function _pipette(params, parsed, data) {
 	CONTINUE
@@ -255,7 +259,7 @@ function encodeWells(tuples, propertyName) {
 	const nWellMaskChars = math.ceil(labwareModel.rows * labwareModel.columns / 7.0);
 	const amWells = _.fill(Array(nWellMaskChars), 0);
 	_.forEach(tuples, tuple => {
-		const index = tuple[propertyName].row + tuple[propertyName].col * labwareModel.rows;
+		const index = (tuple[propertyName].row - 1) + (tuple[propertyName].col - 1) * labwareModel.rows;
 		const iChar = _.toInteger(index / 7);
 		const iWell1 = index % 7;
 		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
