@@ -11,8 +11,8 @@ import * as transporter from './commands/transporter.js';
 const commandHandlers = {
 	"evoware._facts": evoware._facts,
 	"pipetter._aspirate": pipetter._aspirate,
-	/*"pipetter._dispense" -> handlePipetterDispense,
-	"pipetter._pipette" -> handlePipetterPipette,
+	"pipetter._dispense": pipetter._dispense,
+	/*"pipetter._pipette" -> handlePipetterPipette,
 	"pipetter._cleanTips" -> handlePipetterCleanTips,*/
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,

@@ -16,6 +16,10 @@ export function _aspirate(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data, "Aspirate");
 }
 
+export function _dispense(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data, "Dispense");
+}
+
 function handlePipetterSpirate(parsed, data, func) {
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
