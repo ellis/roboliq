@@ -54,14 +54,15 @@ objects:
       media: media1
       mediaVolume: 80ul
       pipettingLocation: ?
+      subconditions:
 
   growthConditions:
     type: Conditions
     factors:
       strain: [...]
       media: [...]
-			delay: [0, 1, 2, 3, 4, 5, 6, 7]
-			interval: [1, 2, 3, 4, 5, 6,]
+      delay: [0, 1, 2, 3, 4, 5, 6, 7]
+      interval: [1, 2, 3, 4, 5, 6,]
 
 steps:
   1:
@@ -96,6 +97,9 @@ steps:
           command: transporter.movePlate
           object: $plate
           destination: $pipettingLocation
+        2:
+          command: pipetter.pipette
+          source: $wells
         ?:
           command: absorbanceReader.measurePlease
           program:
