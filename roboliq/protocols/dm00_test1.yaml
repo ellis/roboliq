@@ -54,24 +54,30 @@ objects:
       media: media1
       mediaVolume: 80ul
       pipettingLocation: ?
-      subconditions:
+    subconditions:
+      measurementConditions:
+        replicates: 3
+        assignWells:
+          dilutionWells: { count: 5, from: dilutionPlate(all) }
 
   growthConditions:
     type: Conditions
     factors:
       strain: [...]
       media: [...]
-      delay: [0, 1, 2, 3, 4, 5, 6, 7]
-      interval: [1, 2, 3, 4, 5, 6,]
+			delay: [0, 1, 2, 3, 4, 5, 6, 7]
+			interval: [1, 2, 3, 4, 5, 6,]
 
 steps:
   1:
     command: experiment.run
     conditions: evaporationConditions
-    interleave: 15 minutes
+    interleaveDelay: 15 minutes
     steps:
       1:
         description: Prepare the culture wells
+        _interleave: true
+        _timingAfter: 12 hours
         1:
           command: pipetter.mixtures
           mixtures:
@@ -88,18 +94,19 @@ steps:
           command: transporter.movePlate
           object: $plate
           destination: $shakerLocation
-        4:
-          _sleep: 12 hours
       2:
-        description: Extract sample, dilute it, measure diluted samples
-        _duration: 12 hours
-        1:
-          command: transporter.movePlate
-          object: $plate
-          destination: $pipettingLocation
-        2:
-          command: pipetter.pipette
-          source: $wells
-        ?:
-          command: absorbanceReader.measurePlease
-          program:
+        command: experiment.run
+        conditions: $measurementConditions
+        CONTINUE
+        steps:
+          1:
+            description: Extract sample, dilute it, measure diluted samples
+            _interleave: true
+            _timing: 12 hours
+            1:
+              command: transporter.movePlate
+              object: $plate
+              destination: $pipettingLocation
+            ?:
+              command: absorbanceReader.measurePlease
+              program:
