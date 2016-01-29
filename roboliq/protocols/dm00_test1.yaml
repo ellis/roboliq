@@ -1,10 +1,101 @@
 roboliq: v1
 
+description: |
+  Goal: Quantify the impact of measurement on the growth curve.
+
+  The growth curve has two plateaus: around 16h and 48h.
+
+  There is a limit to how many times a well can be measured, because we need to extract material from it for each measurement.
+
+  All wells should probably be measured at the end around 48h (but this takes time, so they can't be measured simultaneously).
+
+  Measurement(s) should be performed every 15 minutes.
+  A plate has 96 wells.  If one measurement is performed every 15 minutes, 192
+  measurements are performed in 48h.  If only one measurement is made per well,
+  then we need exactly 2 plates.  If each well is measured exactly twice, we
+  would need actly 1 plate.
+
+  Once a well is measured, its seal gets punctured, and evaporation will occur.
+  We need to quantify the impact of evaporation on cell growth.  But how can
+  we disentangle the effect of measurement from the effect of evaporation?
+
+  Also need to quantify the impact on growth of the shaker configuration --
+  i.e. the plate's position in the shaker and how many plates are
+  in the shaker.  In addition, we'll need to quantify the impact of well position
+  on a plate in a shaker position.
+
+  Q: How long does it take to measure one well?
+
 objects:
+  evaporationConditions:
+    type: Conditions
+    description: |
+    documentation:
+      plate: {description: deep well plate, type: Plate}
+      @property {Wells} wells - wells on plate to use
+      @property {Duration} delay - delay between plates w.r.t. preparation and measurement
+      @property {boolean} reseal - whether to reseal the plate after measurement
+      @property {Duration} interval - interval between measurements
+    factors:
+      plate:
+        puncturePlate:
+          wells: puncturePlate(A01 down H01)
+          shakerLocation: SHAKER1
+          delay: 0 minutes
+          reseal: false
+        resealPlate:
+          wells: resealPlate(A01 down H01)
+          shakerLocation: SHAKER2
+          delay: 15 minutes
+          reseal: true
+      interval: 12 hours
+      strain: strain1
+      strainVolume: 20ul
+      media: media1
+      mediaVolume: 80ul
+      pipettingLocation: ?
+
   growthConditions:
     type: Conditions
     factors:
       strain: [...]
       media: [...]
 			delay: [0, 1, 2, 3, 4, 5, 6, 7]
-			betweenMeasureDuration: [1, 2, 3, 4, 5, 6,]
+			interval: [1, 2, 3, 4, 5, 6,]
+
+steps:
+  1:
+    command: experiment.run
+    conditions: evaporationConditions
+    interleave: 15 minutes
+    steps:
+      1:
+        description: Prepare the culture wells
+        1:
+          command: pipetter.mixtures
+          mixtures:
+            mixtures():
+              replicates: 8
+              items:
+              - {source: $strain, volume: $strainVolume}
+              - {source: $media1, volume: $mediaVolume}
+          destinations: $wells
+        2:
+          command: sealer.sealPlate
+          object: $plate
+        3:
+          command: transporter.movePlate
+          object: $plate
+          destination: $shakerLocation
+        4:
+          _sleep: 12 hours
+      2:
+        description: Extract sample, dilute it, measure diluted samples
+        _duration: 12 hours
+        1:
+          command: transporter.movePlate
+          object: $plate
+          destination: $pipettingLocation
+        ?:
+          command: absorbanceReader.measurePlease
+          program:
