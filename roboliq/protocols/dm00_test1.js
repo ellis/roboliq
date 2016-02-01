@@ -11,64 +11,67 @@ const conditions = {
           "cultureWell": "A01",
           "measurement*": [
             {
-              "dilution*": [
-                {
-                  "dilutionFactor": 1,
-                  "dilutionWell": "A01"
-                },
-                {
-                  "dilutionFactor": 2,
-                  "dilutionWell": "A02"
-                },
-                {
-                  "dilutionFactor": 4,
-                  "dilutionWell": "A03"
-                },
-                {
-                  "dilutionFactor": 8,
-                  "dilutionWell": "A04"
-                },
-                {
-                  "dilutionFactor": 16,
-                  "dilutionWell": "A05"
-                }
-              ],
-              "dilutionPlate": "dilutionPlate1"
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ],
+							"dilutionPlate": "dilutionPlate1"
             },
             {
-              "dilution*": [
-                {
-                  "dilutionFactor": 1,
-                  "dilutionWell": "A07"
-                },
-                {
-                  "dilutionFactor": 2,
-                  "dilutionWell": "A08"
-                },
-                {
-                  "dilutionFactor": 4,
-                  "dilutionWell": "A09"
-                },
-                {
-                  "dilutionFactor": 8,
-                  "dilutionWell": "A10"
-                },
-                {
-                  "dilutionFactor": 16,
-                  "dilutionWell": "A11"
-                }
-              ],
-              "dilutionPlate": "dilutionPlate1"
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ],
+							"dilutionPlate": "dilutionPlate1"
             }
           ],
           "syringe": "ourlab.luigi.liha.syringe.1"
         },
         {
-          "cultureWell": "B01"
+          "cultureWell": "B01",
+					"measurement*": [
+            {
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ],
+							"dilutionPlate": "dilutionPlate1"
+            },
+            {
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ],
+							"dilutionPlate": "dilutionPlate1"
+            }
+          ],
+          "syringe": "ourlab.luigi.liha.syringe.2"
         }
       ],
       "reseal": false,
       "shakerLocation": "SHAKER1"
+    },
+		"resealPlate": {
+      "cultureReplicate*": [
+        {
+          "cultureWell": "A01",
+          "measurement*": [
+            {
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ],
+							"dilutionPlate": "dilutionPlate1"
+            },
+            {
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ],
+							"dilutionPlate": "dilutionPlate1"
+            }
+          ],
+          "syringe": "ourlab.luigi.liha.syringe.1"
+        },
+        {
+          "cultureWell": "B01",
+					"measurement*": [
+            {
+							"dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ],
+							"dilutionPlate": "dilutionPlate2"
+            },
+            {
+              "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ],
+							"dilutionPlate": "dilutionPlate2"
+            }
+          ],
+          "syringe": "ourlab.luigi.liha.syringe.2"
+        }
+      ],
+      "reseal": true,
+      "shakerLocation": "SHAKER2"
     }
   },
   "dilutionLocation": "?",
@@ -116,14 +119,34 @@ function flatMap(scope0, conditions, propertyName, fn) {
 	return _.flatten(result);
 }
 
-descend(Map(), conditions, null, (scope, elem) => {
-	descend(scope, elem, "culturePlate", (scope, elem) => {
-		//console.log(`1: move plate ${scope.get("culturePlate")} to ${scope.get("aspirationLocation")}`);
-		console.log(yaml.dump({1: {
-			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("aspirationLocation")
-		}}));
+function appendStep(steps, step) {
+	//console.log({steps, size: _.size(steps), keys: _.keys(steps)})
+	const substeps = _.pickBy(steps, (x, key) => /^[0-9]+$/.test(key));
+	steps[_.size(substeps)+1] = step;
+	return step;
+}
 
-		console.log(yaml.dump({2: {
+descend(Map(), conditions, null, (scope, elem) => {
+	const steps = {};
+	const step1 = appendStep(steps, {
+		description: "prepare plate"
+	});
+
+	/*appendStep(step, {
+		command: "timer.start",
+		equipment: "ourlab.mario.timer1"
+	});*/
+
+	let culturePlateIndex = 0;
+	descend(scope, elem, "culturePlate", (scope, elem) => {
+		const step = {};
+
+		//console.log(`1: move plate ${scope.get("culturePlate")} to ${scope.get("aspirationLocation")}`);
+		appendStep(step, {
+			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("aspirationLocation")
+		});
+
+		appendStep(step, {
 			command: "pipette.pipette",
 			sources: scope.get("strain"),
 			mixtures: map(scope, elem, "cultureReplicate", (scope, elem) => {
@@ -137,18 +160,103 @@ descend(Map(), conditions, null, (scope, elem) => {
 				};
 			}),
 			destinationLabware: scope.get("culturePlate")
-		}}));
+		});
 
-		console.log(yaml.dump({3: {
+		appendStep(step, {
 			command: "sealer.sealPlate",
 			object: scope.get("culturePlate")
-		}}));
+		});
 
-		console.log(yaml.dump({4: {
+		appendStep(step, {
 			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("shakerLocation")
-		}}));
+		});
+
+		appendStep(step, {
+			command: "incubator.start", program: {speed: 100, temperature: "37 degC"}
+		});
+
+		// Start 12h times for the first plate only
+		if (culturePlateIndex === 0) {
+			appendStep(step, {
+				command: "timer.start",
+				equipment: "ourlab.mario.timer2"
+			});
+		}
+
+		appendStep(step1, {
+			command: "timer.doAndWait",
+			equipment: "ourlab.mario.timer1",
+			duration: "15 minutes",
+			steps: step
+		});
+
+		culturePlateIndex++;
 	});
+
+	appendStep(step1, {
+		command: "timer.wait",
+		equipment: "ourlab.mario.timer2",
+		till: "12 hours"
+	});
+
+	culturePlateIndex = 0;
+	descend(scope, elem, "culturePlate", (scope, elem) => {
+		const step = {};
+		descend(scope, elem, "cultureReplicate", (scope, elem) => {
+			descend(scope, elem, "measurement", (scope, elem) => {
+				appendStep(step, {
+					command: "transporter.movePlate",
+					object: scope.get("dilutionPlate"),
+					destination: scope.get("dilutionLocation")
+				});
+				appendStep(step, {
+					command: "incubator.open",
+					site: scope.get("shakerLocation")
+				});
+
+/*
+command: transporter.movePlate
+object: $plate
+destination: $aspirationLocation
+4:
+command: pipetter.pipette
+sources: $wells
+destinations: $dilutionWells
+volume: ?
+5:
+command: system.if
+variable: $reseal
+steps:
+	1:
+		command: sealer.sealPlate
+		object: $plate
+5:
+command: transporter.movePlate
+object: $plate
+destination: $shakerLocation
+6:
+command: incubator.start
+equipment: ?
+program:
+	temperature: ?
+	speed: ?
+7:
+command: pipetter.dilutionSeries
+?:
+command: absorbanceReader.measurePlate
+program:
+	wells: $dilutionWells
+programTemplate: ./dm00.mdfx.template
+
+ */
+				// dilution*
+			});
+		});
+	});
+
+	console.log(yaml.stringify(steps, 4));
 });
+
 /*let scope = _.cloneDeep(conditions);
 _.forEach(conditions["culturePlate*"], (elem, key) => {
 	scope["culturePlate"] = key;
