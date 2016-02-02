@@ -133,7 +133,11 @@ function query(table, q) {
 	if (q.unique) {
 		table2 = _.uniqWith(table2, _.isEqual);
 	}
-	if (q.groupBy) {
+	if (q.uniqueBy) {
+		CONTINUE
+		table2 = _.map(_.groupBy(table2, q.uniqueBy), _.identity);
+	}
+	else if (q.groupBy) {
 		table2 = _.map(_.groupBy(table2, q.groupBy), _.identity);
 	}
 	else {
@@ -149,8 +153,9 @@ let x;
 //x = query(table, {select: "culturePlate"});
 //x = query(table, {select: "culturePlate", groupBy: "culturePlate"});
 //x = query(table, {select: "culturePlate", unique: true, groupBy: "culturePlate"});
-x = query(table, {select: ["culturePlate", "syringe", "cultureWell"], unique: true, groupBy: "culturePlate"});
-console.log(yaml.stringify(x, 4, 2))
+//x = query(table, {select: ["culturePlate", "syringe", "cultureWell"], unique: true, groupBy: "culturePlate"});
+//x = query(table, {select: ["culturePlate", "syringe", "cultureWell", "strain", "strainVolume", "media", "mediaVolume"], unique: true, groupBy: "culturePlate"});
+//console.log(yaml.stringify(x, 4, 2))
 
 function appendStep(steps, step) {
 	//console.log({steps, size: _.size(steps), keys: _.keys(steps)})
@@ -182,6 +187,18 @@ function descend(scope, data, q, fn) {
 	});
 }
 
+function mapConditions(scope, data, q, fn) {
+	let result = [];
+	descend(scope, data, q, (scope2, data2) => {
+		_.forEach(data2, row => {
+			const scope3 = scope2.merge(fromJS(row));
+			const x = fn(scope3)
+			result.push(x);
+		});
+	});
+	return result;
+}
+
 function test() {
 	const steps = {};
 	const step1 = appendStep(steps, {
@@ -193,20 +210,20 @@ function test() {
 		equipment: "ourlab.mario.timer1"
 	});*/
 
+
 	let culturePlateIndex = 0;
 	descend(Map(), table, {groupBy: "culturePlate"}, (scope, data) => {
-		console.log({scope, data})
+		//console.log({scope, data})
 		const step = {};
 
 		//console.log(`1: move plate ${scope.get("culturePlate")} to ${scope.get("aspirationLocation")}`);
 		appendStep(step, {
 			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("aspirationLocation")
 		});
-		/*
+
 		appendStep(step, {
-			command: "pipette.pipette",
-			sources: scope.get("strain"),
-			mixtures: map(scope, elem, "cultureReplicate", (scope, elem) => {
+			command: "pipette.pipetteMixtures",
+			mixtures: mapConditions(scope, data, {uniqueBy: "cultureWell"}, (scope) => {
 				return {
 					destination: scope.get("cultureWell"),
 					syringe: scope.get("syringe"),
@@ -214,11 +231,11 @@ function test() {
 						{source: scope.get("strain"), volume: scope.get("strainVolume")},
 						{source: scope.get("media"), volume: scope.get("mediaVolume")}
 					]
-				};
+				}
 			}),
 			destinationLabware: scope.get("culturePlate")
 		});
-		*/
+
 		appendStep(step, {
 			command: "sealer.sealPlate",
 			object: scope.get("culturePlate")
@@ -256,7 +273,7 @@ function test() {
 		till: "12 hours"
 	});
 
-	console.log(yaml.stringify(steps, 4, 2));
+	console.log(yaml.stringify(steps, 6, 2));
 }
 
 test();
