@@ -4,3 +4,5 @@ deleted before publication.
 npm config set proxy http://proxy.ethz.ch:3128
 npm config set https-proxy http://proxy.ethz.ch:3128
 git config --global http.proxy http://proxy.ethz.ch:3128
+apm config set proxy http://proxy.ethz.ch:3128
+apm config set https_proxy http://proxy.ethz.ch:3128
