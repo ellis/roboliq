@@ -4,6 +4,7 @@
   "description": "Roboliq JavaScript library",
   "dependencies": {
     "iconv-lite": "^0.4.13",
+    "immutable": "^3.7.6",
     "javascript-natural-sort": "~0.7.1",
     "jiff": "^0.7.2",
     "jmespath": "^0.12.0",

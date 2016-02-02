@@ -11,13 +11,24 @@ description: |
 
   Measurement(s) should be performed every 15 minutes.
   A plate has 96 wells.  If one measurement is performed every 15 minutes, 192
-  measurements are performed in 48h.  If only one measurement is made per well,
-  then we need exactly 2 plates.  If each well is measured exactly twice, we
-  would need actly 1 plate.
+  measurements are performed in 48h.  If one measurement is made per well,
+  then we need exactly 2 plates.  If each well is instead measured twice, we
+  would only need 1 plate.
+
+  There are complications with measuring a well multiple times: quantifying
+  the impact of removing volume for measurement, and quantifying the impact
+  of evaporation after the first measurement punctures the well's seal.
 
   Once a well is measured, its seal gets punctured, and evaporation will occur.
   We need to quantify the impact of evaporation on cell growth.  But how can
   we disentangle the effect of measurement from the effect of evaporation?
+
+  Idea:
+  Have one plate.  Wells are paired: in each pair, one is pre-punctured and
+  the other isn't.
+  Every well will be measured 2 to 4 times (24, 16, or 12 hours apart).
+
+  growth ~ f(t, t_puncture, t_measurements, measurements)
 
   Also need to quantify the impact on growth of the shaker configuration --
   i.e. the plate's position in the shaker and how many plates are
@@ -59,14 +70,34 @@ objects:
         replicates: 3
         assignWells:
           dilutionWells: { count: 5, from: dilutionPlate(all) }
+    items:
+    - plate: puncturePlate
+      wells: puncturePlate(A01 down H01)
+      shakerLocation: SHAKER1
+      delay: 0 minutes
+      reseal: false
+      interval: 12 hours
+      strain: strain1
+      strainVolume: 20ul
+      media: media1
+      mediaVolume: 80ul
+      aspirationLocation: ?
+      dilutionLocation: ?
+      dilutionPlate: dilutionPlate1
+      measurementConditions:
+        type: Conditions
+        items:
+        - dilutionWells: dilutionPlate1(A01 down 5)
+        - dilutionWells: dilutionPlate1(B01 down 5)
+        - dilutionWells: dilutionPlate1(C01 down 5)
 
   growthConditions:
     type: Conditions
     factors:
       strain: [...]
       media: [...]
-			delay: [0, 1, 2, 3, 4, 5, 6, 7]
-			interval: [1, 2, 3, 4, 5, 6,]
+      delay: [0, 1, 2, 3, 4, 5, 6, 7]
+      interval: [1, 2, 3, 4, 5, 6,]
 
 steps:
   1:
@@ -76,8 +107,7 @@ steps:
     steps:
       1:
         description: Prepare the culture wells
-        _interleave: true
-        _timingAfter: 12 hours
+        interleave: true
         1:
           command: pipetter.mixtures
           mixtures:
@@ -95,18 +125,264 @@ steps:
           object: $plate
           destination: $shakerLocation
       2:
-        command: experiment.run
-        conditions: $measurementConditions
-        CONTINUE
-        steps:
-          1:
-            description: Extract sample, dilute it, measure diluted samples
-            _interleave: true
-            _timing: 12 hours
+        description: Start initial incubation stage
+        onlyFirst: true
+        duration: 12 hours
+        1:
+          command: incubator.start
+          equipment: ?
+          program:
+            temperature: ?
+            speed: ?
+      3:
+        description: Extract sample, dilute it, measure diluted samples
+        forEach: measurementConditions
+        interleave: true
+        duration: 12 hours
+        sleepAfterLast: false
+        1:
+          command: transporter.movePlate
+          object: $dilutionPlate
+          destination: $dilutionLocation
+        2:
+          command: incubator.open
+          equipment: ?
+        3:
+          command: transporter.movePlate
+          object: $plate
+          destination: $aspirationLocation
+        4:
+          command: pipetter.pipette
+          sources: $wells
+          destinations: $dilutionWells
+          volume: ?
+        5:
+          command: system.if
+          variable: $reseal
+          steps:
             1:
-              command: transporter.movePlate
+              command: sealer.sealPlate
               object: $plate
-              destination: $pipettingLocation
-            ?:
-              command: absorbanceReader.measurePlease
-              program:
+        5:
+          command: transporter.movePlate
+          object: $plate
+          destination: $shakerLocation
+        6:
+          command: incubator.start
+          equipment: ?
+          program:
+            temperature: ?
+            speed: ?
+        7:
+          command: pipetter.dilutionSeries
+        ?:
+          command: absorbanceReader.measurePlate
+          program:
+            wells: $dilutionWells
+          programTemplate: ./dm00.mdfx.template
+
+---
+
+
+    another approach to condition definition:
+      # general parameters for all conditions
+      settings:
+        interval: 12 hours
+        strain: strain1
+        strainVolume: 20ul
+        media: media1
+        mediaVolume: 80ul
+        aspirationLocation: ?
+        dilutionLocation: ?
+      items:
+      - settings:
+          culturePlate: puncturePlate
+          reseal: false
+          shakerLocation: SHAKER1
+        items:
+        - settings:
+            cultureReplicate: 1
+            cultureWell: A01
+            syringe: ourlab.luigi.liha.syringe.1
+          items:
+          - settings:
+              measurement: 1
+              dilutionPlate: dilutionPlate1
+            items:
+            - { dilutionFactor: 1, dilutionWell: A01 }
+            - { dilutionFactor: 2, dilutionWell: A02 }
+            - { dilutionFactor: 4, dilutionWell: A03 }
+            - { dilutionFactor: 8, dilutionWell: A04 }
+            - { dilutionFactor: 16, dilutionWell: A05 }
+          - settings:
+              measurement: 2
+              dilutionPlate: dilutionPlate1
+            items:
+            - { dilutionFactor: 1, dilutionWell: A07 }
+            - { dilutionFactor: 2, dilutionWell: A08 }
+            - { dilutionFactor: 4, dilutionWell: A09 }
+            - { dilutionFactor: 8, dilutionWell: A10 }
+            - { dilutionFactor: 16, dilutionWell: A11 }
+        - ...
+
+    another approach to condition definition:
+      # general parameters for all conditions
+      interval: 12 hours
+      strain: strain1
+      strainVolume: 20ul
+      media: media1
+      mediaVolume: 80ul
+      pipetteLocation: "?"
+      dilutionLocation: "?"
+      culturePlate*:
+        puncturePlate:
+          reseal: false
+          shakerLocation: SHAKER1
+          cultureReplicate*:
+          - cultureWell: A01
+            syringe: ourlab.luigi.liha.syringe.1
+            measurement*:
+            - dilutionPlate: dilutionPlate1
+              dilution*:
+              - { dilutionFactor: 1, dilutionWell: A01 }
+              - { dilutionFactor: 2, dilutionWell: A02 }
+              - { dilutionFactor: 4, dilutionWell: A03 }
+              - { dilutionFactor: 8, dilutionWell: A04 }
+              - { dilutionFactor: 16, dilutionWell: A05 }
+            - dilutionPlate: dilutionPlate1
+              dilution*:
+              - { dilutionFactor: 1, dilutionWell: A07 }
+              - { dilutionFactor: 2, dilutionWell: A08 }
+              - { dilutionFactor: 4, dilutionWell: A09 }
+              - { dilutionFactor: 8, dilutionWell: A10 }
+              - { dilutionFactor: 16, dilutionWell: A11 }
+          - cultureWell: B01
+            ...
+
+more complicated stuff: |
+  - should perhaps define conditions for a single well on the puncturePlate and make 8 replicates of that
+  - the single well on the puncturePlate should be associated with four wells on the dilutionPlate (due to four separate measurements at 12h, 24h, 36h, 48h)
+  - each of those four wells on the dilutionPlate should in turn be associated with 4 or 5 more wells to be used for the dilution series
+  - and then, despite the fact that each well on the puncturePlate was defined separately, we should somehow group them together so that all 8 wells are pipetted simultaneously
+  - one possible solution would be to have the experiment.run command allow the user to control grouping and orderings, similar to dplyr in R?  Could consider the syntax of jmespath.
+
+how we do the experiment: |
+  * groupBy(culturePlate) and interleave groups by 15 minutes
+  * pipette
+      *
+          *
+
+  JMESPath for culture wells on plate 0
+  "culturePlate*".puncturePlate."cultureReplicate*"[].cultureWell
+
+  JMESPath for getting the dilution wells of cultureReplicate [0], measurement [0]
+  "culturePlate*".puncturePlate."cultureReplicate*"[0]."measurement*"[0]."dilution*"[].dilutionWell
+
+  A similar path
+  culturePlate.
+
+steps:
+  1:
+    command: experiment.run
+    conditions: evaporationConditions
+    interleaveDelay: 15 minutes
+    steps:
+      1:
+        description: Prepare the culture wells
+        experiment:
+          scope: culturePlate
+          interleave: true
+        1:
+          command: transporter.movePlate
+          object: $culturePlate
+          destination: $aspirationLocation
+        2:
+          command: system.setInScope
+
+        2:
+          command: pipetter.mixtures
+          forEach: $cultureReplicate
+          mixtures:
+          - {source: $strain, volume: $strainVolume, destination: $cultureWell}
+          - {source: $media1, volume: $mediaVolume, destination: $cultureWell}
+
+---
+
+JMES Path JSON:
+
+{
+    "aspirationLocation": "?",
+    "culturePlate*": {
+      "puncturePlate": {
+        "cultureReplicate*": [
+          {
+            "cultureWell": "A01",
+            "measurement*": [
+              {
+                "dilution*": [
+                  {
+                    "dilutionFactor": 1,
+                    "dilutionWell": "A01"
+                  },
+                  {
+                    "dilutionFactor": 2,
+                    "dilutionWell": "A02"
+                  },
+                  {
+                    "dilutionFactor": 4,
+                    "dilutionWell": "A03"
+                  },
+                  {
+                    "dilutionFactor": 8,
+                    "dilutionWell": "A04"
+                  },
+                  {
+                    "dilutionFactor": 16,
+                    "dilutionWell": "A05"
+                  }
+                ],
+                "dilutionPlate": "dilutionPlate1"
+              },
+              {
+                "dilution*": [
+                  {
+                    "dilutionFactor": 1,
+                    "dilutionWell": "A07"
+                  },
+                  {
+                    "dilutionFactor": 2,
+                    "dilutionWell": "A08"
+                  },
+                  {
+                    "dilutionFactor": 4,
+                    "dilutionWell": "A09"
+                  },
+                  {
+                    "dilutionFactor": 8,
+                    "dilutionWell": "A10"
+                  },
+                  {
+                    "dilutionFactor": 16,
+                    "dilutionWell": "A11"
+                  }
+                ],
+                "dilutionPlate": "dilutionPlate1"
+              }
+            ],
+            "syringe": "ourlab.luigi.liha.syringe.1"
+          },
+          {
+            "cultureWell": "B01"
+          }
+        ],
+        "reseal": false,
+        "shakerLocation": "SHAKER1"
+      }
+    },
+    "dilutionLocation": "?",
+    "interval": "12 hours",
+    "media": "media1",
+    "mediaVolume": "80ul",
+    "strain": "strain1",
+    "strainVolume": "20ul"
+ }
