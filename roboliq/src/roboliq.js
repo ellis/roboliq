@@ -160,7 +160,7 @@ function isAbsolute(p) {
  * @return content at URL.
  */
 function loadUrlContent(url, filecache) {
-	url = path.join(url);
+	url = path.posix.join(url);
 	//if (!path.isAbsolute(url))
 	if (!isAbsolute(url))
 		url = "./" + url;
@@ -195,7 +195,7 @@ function loadProtocol(a, b, url, filecache) {
 	if (b.imports) {
 		var urls = _.map(_.flatten([b.imports]), function(imp) {
 			//console.log("paths:", path.dirname(url), imp, path.join(path.dirname(url), imp))
-			return "./" + path.join(path.dirname(url), imp);
+			return "./" + path.posix.join(path.dirname(url), imp);
 		});
 		var protocols2 = _.map(urls, function(url2) {
 			//console.log("url:", url2)
@@ -250,7 +250,7 @@ function loadProtocol(a, b, url, filecache) {
 		//console.log("x: "+x)
 		// Return filename relative to current directory
 		if (_.isString(x) && _.startsWith(x, ".")) {
-			var filename = "./" + path.join(path.dirname(url), x);
+			var filename = "./" + path.posix.join(path.dirname(url), x);
 			// If the file hasn't been loaded yet:
 			if (!filecache.hasOwnProperty(filename)) {
 				var filedata = fs.readFileSync(filename);
@@ -612,7 +612,7 @@ function _run(opts, userProtocol) {
 	function splitInlineFile(s) {
 		var i = s.indexOf(':');
 		assert(i > 0);
-		var name = "./" + path.join(s.substr(0, i));
+		var name = "./" + path.posix.join(s.substr(0, i));
 		var data = s.substr(i + 1);
 		return [name, data];
 	}
