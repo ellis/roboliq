@@ -130,19 +130,36 @@ function query(table, q) {
 	if (q.select) {
 		table2 = _.map(table2, x => _.pick(x, q.select));
 	}
-	if (q.unique) {
+
+	if (q.uniqueBy) {
+		const groupKeys = (_.isArray(q.uniqueBy)) ? q.uniqueBy : [q.uniqueBy];
+		const groups = _.map(_.groupBy(table2, row => _.map(groupKeys, key => row[key])), _.identity);
+		//console.log({groupsLength: groups.length})
+		table2 = _.flatMap(groups, group => {
+			const first = group[0];
+			// Find the properties that are the same for all items in the group
+			const uniqueKeys = [];
+			_.forEach(first, (value, key) => {
+				const isUnique = _.every(group, row => _.isEqual(row[key], value));
+				if (isUnique) {
+					uniqueKeys.push(key);
+				}
+			});
+			return _.pick(first, uniqueKeys);
+		});
+	}
+	else if (q.unique) {
 		table2 = _.uniqWith(table2, _.isEqual);
 	}
-	if (q.uniqueBy) {
-		CONTINUE
-		table2 = _.map(_.groupBy(table2, q.uniqueBy), _.identity);
-	}
-	else if (q.groupBy) {
-		table2 = _.map(_.groupBy(table2, q.groupBy), _.identity);
+
+	if (q.groupBy) {
+		const groupKeys = (_.isArray(q.groupBy)) ? q.groupBy : [q.groupBy];
+		table2 = _.map(_.groupBy(table2, row => _.map(groupKeys, key => row[key])), _.identity);
 	}
 	else {
 		table2 = [table2];
 	}
+
 	return table2;
 }
 
@@ -155,6 +172,7 @@ let x;
 //x = query(table, {select: "culturePlate", unique: true, groupBy: "culturePlate"});
 //x = query(table, {select: ["culturePlate", "syringe", "cultureWell"], unique: true, groupBy: "culturePlate"});
 //x = query(table, {select: ["culturePlate", "syringe", "cultureWell", "strain", "strainVolume", "media", "mediaVolume"], unique: true, groupBy: "culturePlate"});
+//x = query(table, {uniqueBy: ["culturePlate", "cultureWell"]});
 //console.log(yaml.stringify(x, 4, 2))
 
 function appendStep(steps, step) {
@@ -164,7 +182,7 @@ function appendStep(steps, step) {
 	return step;
 }
 
-function descend(scope, data, q, fn) {
+function narrow(scope, data, q, fn) {
 	const groups = _.isPlainObject(q) ? query(data, q) : [data];
 	_.forEach(groups, group => {
 		if (group.length > 0) {
@@ -189,7 +207,7 @@ function descend(scope, data, q, fn) {
 
 function mapConditions(scope, data, q, fn) {
 	let result = [];
-	descend(scope, data, q, (scope2, data2) => {
+	narrow(scope, data, q, (scope2, data2) => {
 		_.forEach(data2, row => {
 			const scope3 = scope2.merge(fromJS(row));
 			const x = fn(scope3)
@@ -212,7 +230,7 @@ function test() {
 
 
 	let culturePlateIndex = 0;
-	descend(Map(), table, {groupBy: "culturePlate"}, (scope, data) => {
+	narrow(Map(), table, {groupBy: "culturePlate"}, (scope, data) => {
 		//console.log({scope, data})
 		const step = {};
 
@@ -223,6 +241,7 @@ function test() {
 
 		appendStep(step, {
 			command: "pipette.pipetteMixtures",
+			//consider a "narrowBy" or "focusOn" or "restrictBy" field that is kind of equivalent to groupBy + take 1 + flatten
 			mixtures: mapConditions(scope, data, {uniqueBy: "cultureWell"}, (scope) => {
 				return {
 					destination: scope.get("cultureWell"),
@@ -273,7 +292,7 @@ function test() {
 		till: "12 hours"
 	});
 
-	console.log(yaml.stringify(steps, 6, 2));
+	console.log(yaml.stringify(steps, 4, 2));
 }
 
 test();
