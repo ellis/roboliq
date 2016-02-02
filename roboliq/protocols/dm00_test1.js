@@ -254,7 +254,7 @@ programTemplate: ./dm00.mdfx.template
 		});
 	});
 
-	console.log(yaml.stringify(steps, 4));
+	console.log(yaml.stringify(steps, 4, 2));
 });
 
 /*let scope = _.cloneDeep(conditions);
