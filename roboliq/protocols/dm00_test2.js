@@ -301,7 +301,7 @@ function test() {
 	});
 
 	narrow(Map(), table, {groupBy: "measurement"}, (scope, data) => {
-		const measurementStep = {description: `Measurement ${scope.get("measurement")}`};
+		const measurementStep = {};
 
 		//console.log({culturePlate: scope.get("culturePlate")});
 		narrow(scope, data, {groupBy: "culturePlate"}, (scope, data) => {
@@ -326,7 +326,13 @@ function test() {
 			});
 		});
 
-		appendStep(steps, measurementStep);
+		appendStep(steps, {
+			description: `Measurement ${scope.get("measurement")}`,
+			command: "timer.doAndWait",
+			equipment: "ourlab.mario.timer1",
+			duration: "12 hours",
+			steps: measurementStep
+		});
 	});
 	console.log(yaml.stringify(steps, 4, 2));
 }
