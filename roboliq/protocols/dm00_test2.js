@@ -38,7 +38,7 @@ const tree = {
 				}
 			],
 			"reseal": false,
-			"shakerLocation": "SHAKER1"
+			"incubatorLocation": "SHAKER1"
 		},
 		"resealPlate": {
 			"cultureReplicate*": [
@@ -72,7 +72,7 @@ const tree = {
 				}
 			],
 			"reseal": true,
-			"shakerLocation": "SHAKER2"
+			"incubatorLocation": "SHAKER2"
 		}
 	},
 	"dilutionLocation": "?",
@@ -223,15 +223,18 @@ function narrow(scope, data, q, fn) {
 	});
 }
 
-function mapConditions(scope, data, q, fn) {
+function mapConditions(scope, data, q, flatten = 1, fn) {
 	let result = [];
 	narrow(scope, data, q, (scope2, data2) => {
-		_.forEach(data2, row => {
+		const l = _.map(data2, row => {
 			const scope3 = scope2.merge(fromJS(row));
-			const x = fn(scope3)
-			result.push(x);
+			return fn(scope3);
 		});
+		result.push(l);
 	});
+	for (let i = 0; i < flatten; i++) {
+		result = _.flatten(result);
+	}
 	return result;
 }
 
@@ -261,7 +264,7 @@ function test() {
 		appendStep(step, {
 			command: "pipette.pipetteMixtures",
 			//consider a "narrowBy" or "focusOn" or "restrictBy" field that is kind of equivalent to groupBy + take 1 + flatten
-			mixtures: mapConditions(scope, data, {uniqueBy: "cultureWell"}, (scope) => {
+			mixtures: mapConditions(scope, data, {uniqueBy: "cultureWell"}, 1, (scope) => {
 				return {
 					destination: scope.get("cultureWell"),
 					syringe: scope.get("syringe"),
@@ -280,11 +283,11 @@ function test() {
 		});
 
 		appendStep(step, {
-			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("shakerLocation")
+			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("incubatorLocation")
 		});
 
 		appendStep(step, {
-			command: "incubator.start", program: {speed: 100, temperature: "37 degC"}
+			command: "incubator.start", program: "incubatorProgram"
 		});
 
 		// Start 12h times for the first plate only
@@ -326,7 +329,7 @@ function test() {
 			});
 			appendStep(step, {
 				command: "incubator.open",
-				site: scope.get("shakerLocation")
+				site: scope.get("incubatorLocation")
 			});
 			appendStep(step, {
 				command: "transporter.movePlate",
@@ -335,10 +338,11 @@ function test() {
 			});
 			appendStep(step, {
 				command: "pipetter.pipette",
-				items: mapConditions(scope, data, {where: {dilutionFactor: 1}}, (scope) => {
+				items: mapConditions(scope, data, {where: {dilutionFactor: 1}}, 1, (scope) => {
 					return {
 						source: scope.get("cultureWell"),
-						destination: scope.get("dilutionWell")
+						destination: scope.get("dilutionWell"),
+						syringe: scope.get("syringe")
 					}
 				}),
 				volume: scope.get("sampleVolume"),
@@ -355,24 +359,30 @@ function test() {
 			appendStep(step, {
 				command: "transporter.movePlate",
 				object: scope.get("culturePlate"),
-				destination: scope.get("shakerLocation")
+				destination: scope.get("incubatorLocation")
 			});
-			/*
-			6:
-			command: incubator.start
-			equipment: ?
-			program:
-				temperature: ?
-				speed: ?
-			7:
-			command: pipetter.dilutionSeries
-			?:
-			command: absorbanceReader.measurePlate
-			program:
-				wells: $dilutionWells
-			programTemplate: ./dm00.mdfx.template
-
-			 */
+			appendStep(step, {
+				command: "incubator.start", program: "incubatorProgram"
+			});
+			appendStep(step, {
+				command: "pipetter.dilutionSeries",
+				diluent: "water",
+				items: mapConditions(scope, data, {groupBy: "cultureWell"}, 0, (scope) => {
+					return {
+						destination: scope.get("dilutionWell"),
+						dilutionFactor: scope.get("dilutionFactor"),
+						syringe: scope.get("syringe")
+					};
+				})
+			});
+			appendStep(step, {
+				command: "absorbanceReader.measurePlate",
+				object: scope.get("dilutionPlate"),
+				program: {
+					wells: mapConditions(scope, data, {select: "dilutionWell"}, 1, (scope) => scope.get("dilutionWell"))
+				},
+				programTemplate: "./dm00.mdfx.template"
+			});
 
 			appendStep(measurementStep, {
 				description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
