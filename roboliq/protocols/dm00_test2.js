@@ -47,11 +47,11 @@ const tree = {
 					"measurement*": [
 						{
 							"dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ],
-							"dilutionPlate": "dilutionPlate1"
+							"dilutionPlate": "dilutionPlate2"
 						},
 						{
 							"dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ],
-							"dilutionPlate": "dilutionPlate1"
+							"dilutionPlate": "dilutionPlate2"
 						}
 					],
 					"syringe": "ourlab.luigi.liha.syringe.1"
@@ -194,7 +194,14 @@ function narrow(scope, data, q, fn) {
 				if (isUnique) {
 					uniqueKeys.push(key);
 				}
+				// FIXME: for debug only
+				else {
+					if (key == "dilutionPlate")
+					console.log(`not unique ${key}: ${value}, ${_.map(group, x => x[key]).join(",")}`)
+				}
+				// ENDFIX
 			});
+			console.log({uniqueKeys: uniqueKeys.join(",")})
 			let scope2 = scope;
 			// Add those properties to the scope
 			_.forEach(uniqueKeys, key => {
@@ -231,6 +238,7 @@ function test() {
 
 	let culturePlateIndex = 0;
 	narrow(Map(), table, {groupBy: "culturePlate"}, (scope, data) => {
+		console.log({culturePlate: scope.get("culturePlate")});
 		//console.log({scope, data})
 		const step = {};
 
@@ -292,6 +300,34 @@ function test() {
 		till: "12 hours"
 	});
 
+	narrow(Map(), table, {groupBy: "measurement"}, (scope, data) => {
+		const measurementStep = {description: `Measurement ${scope.get("measurement")}`};
+
+		//console.log({culturePlate: scope.get("culturePlate")});
+		narrow(scope, data, {groupBy: "culturePlate"}, (scope, data) => {
+			const step = {};
+
+			appendStep(step, {
+				command: "transporter.movePlate",
+				object: scope.get("dilutionPlate"),
+				destination: scope.get("dilutionLocation")
+			});
+			appendStep(step, {
+				command: "incubator.open",
+				site: scope.get("shakerLocation")
+			});
+
+			appendStep(measurementStep, {
+				description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
+				command: "timer.doAndWait",
+				equipment: "ourlab.mario.timer1",
+				duration: "15 minutes",
+				steps: step
+			});
+		});
+
+		appendStep(steps, measurementStep);
+	});
 	console.log(yaml.stringify(steps, 4, 2));
 }
 
