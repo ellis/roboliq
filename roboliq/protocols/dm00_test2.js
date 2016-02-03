@@ -4,7 +4,7 @@ import Immutable, {Map, fromJS} from 'immutable';
 import yaml from 'yamljs';
 
 const tree = {
-	"aspirationLocation": "?",
+	"pipettingLocation": "?",
 	"culturePlate*": {
 		"puncturePlate": {
 			"cultureReplicate*": [
@@ -80,7 +80,8 @@ const tree = {
 	"media": "media1",
 	"mediaVolume": "80ul",
 	"strain": "strain1",
-	"strainVolume": "20ul"
+	"strainVolume": "20ul",
+	"sampleVolume": "5ul"
 };
 
 // Consider: select, groupBy, orderBy, unique
@@ -112,7 +113,11 @@ function flatten(input, depth = -1) {
 					});
 				}
 				else {
-					_.forEach(rows, row => row[key] = value);
+					_.forEach(rows, row => { row[key] = value; });
+					/*if (key === "reseal") {
+						console.log("reseal: "+value)
+						console.log(rows)
+					}*/
 				}
 			});
 			//console.log({rows})
@@ -129,6 +134,12 @@ function query(table, q) {
 	let table2 = _.clone(table);
 	if (q.select) {
 		table2 = _.map(table2, x => _.pick(x, q.select));
+	}
+
+	if (q.where) {
+		_.forEach(q.where, (value, key) => {
+			table2 = _.filter(table, row => _.isEqual(row[key], value));
+		});
 	}
 
 	if (q.uniqueBy) {
@@ -173,6 +184,7 @@ let x;
 //x = query(table, {select: ["culturePlate", "syringe", "cultureWell"], unique: true, groupBy: "culturePlate"});
 //x = query(table, {select: ["culturePlate", "syringe", "cultureWell", "strain", "strainVolume", "media", "mediaVolume"], unique: true, groupBy: "culturePlate"});
 //x = query(table, {uniqueBy: ["culturePlate", "cultureWell"]});
+//x = query(table, {where: {dilutionFactor: 1}});
 //console.log(yaml.stringify(x, 4, 2))
 
 function appendStep(steps, step) {
@@ -196,12 +208,11 @@ function narrow(scope, data, q, fn) {
 				}
 				// FIXME: for debug only
 				else {
-					if (key == "dilutionPlate")
-					console.log(`not unique ${key}: ${value}, ${_.map(group, x => x[key]).join(",")}`)
+					//if (key == "reseal") console.log(`not unique ${key}: ${value}, ${_.map(group, x => x[key]).join(",")}`)
 				}
 				// ENDFIX
 			});
-			console.log({uniqueKeys: uniqueKeys.join(",")})
+			//console.log({uniqueKeys: uniqueKeys.join(",")})
 			let scope2 = scope;
 			// Add those properties to the scope
 			_.forEach(uniqueKeys, key => {
@@ -238,13 +249,13 @@ function test() {
 
 	let culturePlateIndex = 0;
 	narrow(Map(), table, {groupBy: "culturePlate"}, (scope, data) => {
-		console.log({culturePlate: scope.get("culturePlate")});
+		//console.log({culturePlate: scope.get("culturePlate")});
 		//console.log({scope, data})
 		const step = {};
 
 		//console.log(`1: move plate ${scope.get("culturePlate")} to ${scope.get("aspirationLocation")}`);
 		appendStep(step, {
-			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("aspirationLocation")
+			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("pipettingLocation")
 		});
 
 		appendStep(step, {
@@ -305,6 +316,7 @@ function test() {
 
 		//console.log({culturePlate: scope.get("culturePlate")});
 		narrow(scope, data, {groupBy: "culturePlate"}, (scope, data) => {
+			console.log({reseal1: scope.get("reseal")});
 			const step = {};
 
 			appendStep(step, {
@@ -316,6 +328,51 @@ function test() {
 				command: "incubator.open",
 				site: scope.get("shakerLocation")
 			});
+			appendStep(step, {
+				command: "transporter.movePlate",
+				object: scope.get("culturePlate"),
+				destination: scope.get("pipettingLocation")
+			});
+			appendStep(step, {
+				command: "pipetter.pipette",
+				items: mapConditions(scope, data, {where: {dilutionFactor: 1}}, (scope) => {
+					return {
+						source: scope.get("cultureWell"),
+						destination: scope.get("dilutionWell")
+					}
+				}),
+				volume: scope.get("sampleVolume"),
+				sourceLabware: scope.get("culturePlate"),
+				destinationLabware: scope.get("dilutionPlate")
+			});
+			appendStep(step, {
+				command: "system.if",
+				test: scope.get("reseal"),
+				then: {
+					1: {command: "sealer.sealPlate", object: scope.get("culturePlate")}
+				}
+			});
+			appendStep(step, {
+				command: "transporter.movePlate",
+				object: scope.get("culturePlate"),
+				destination: scope.get("shakerLocation")
+			});
+			/*
+			6:
+			command: incubator.start
+			equipment: ?
+			program:
+				temperature: ?
+				speed: ?
+			7:
+			command: pipetter.dilutionSeries
+			?:
+			command: absorbanceReader.measurePlate
+			program:
+				wells: $dilutionWells
+			programTemplate: ./dm00.mdfx.template
+
+			 */
 
 			appendStep(measurementStep, {
 				description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
@@ -334,7 +391,7 @@ function test() {
 			steps: measurementStep
 		});
 	});
-	console.log(yaml.stringify(steps, 4, 2));
+	console.log(yaml.stringify(steps, 5, 2));
 }
 
 test();
