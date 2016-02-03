@@ -145,6 +145,27 @@
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
 
+- Goals for talk:
+    - have a good Conditions/Data/DataTree format
+    - have a good command for producing steps by processing data
+    - the command should also manage the timing of steps
+    - have a complete protocol as an example
+    - run that protocol on a robot
+    - get the measurement data out of the robot
+    - visualize/analyze the measurement data in R
+- [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
+- [ ] dm00_test3.js: create an protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
+    - something with absorbance OrangeG
+    - two "culture" plates
+    - two dilution plates
+- [ ] compile the experiment for mario
+- [ ] try to extend EvowareCompile to save timing data while executing commands
+- [ ] run the experiment on mario
+- [ ] compile the experiment for luigi
+- [ ] run the experiment on luigi
+- [ ] create a pretty protocol for the experiment
+- [ ] web ui?
+
 ## Todos for complex protocol and feedback
 
 - [x] implement lookupPath
@@ -160,6 +181,7 @@
     - [x] delete scala files
 - [x] implement lookupPaths
 - [x] evoware: rename `_cleanTips` instruction to `_washTips`
+- [ ] Experiment Conditions Data:
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
