@@ -497,7 +497,9 @@ function validateProtocol1(protocol, o, path) {
 		o = protocol.objects;
 		path = [];
 	}
-	for (const [name, value] of _.toPairs(o)) {
+	const keyValuePairs = _.toPairs(o);
+	for (let iPair = 0; iPair < keyValuePairs.length; iPair++) {
+		const [name, value] = keyValuePairs[iPair];
 		const path2 = path.concat(name);
 		const fullName = path2.join(".");
 		expect.context({objectName: fullName}, function() {
