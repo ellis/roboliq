@@ -96,3 +96,13 @@ timer.stop:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
   required: []
+
+timer.wait:
+  description: |
+    Wait until the given timer has reacher the given elapsed time.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    till: {description: "Number of seconds to wait till from the time the timer was started", type: Duration}
+    stop: {description: "Whether to stop the timer after waiting, or let it continue", type: boolean}
+  required: [till, stop]

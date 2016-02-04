@@ -63,6 +63,7 @@ steps:
       command: timer.wait
       equipment: ourlab.mario.timer2
       till: '10 minutes'
+      stop: true
     description: 'prepare plate'
   '2':
     description: 'Measurement 1'
@@ -73,7 +74,7 @@ steps:
       '1':
         description: 'Measurement 1 on stillPlate'
         command: timer.doAndWait
-        equipment: ourlab.mario.timer1
+        equipment: ourlab.mario.timer2
         duration: '3 minutes'
         steps:
           '1':
@@ -110,7 +111,7 @@ steps:
       '2':
         description: 'Measurement 1 on shakePlate'
         command: timer.doAndWait
-        equipment: ourlab.mario.timer1
+        equipment: ourlab.mario.timer2
         duration: '3 minutes'
         steps:
           '1':
@@ -153,7 +154,7 @@ steps:
       '1':
         description: 'Measurement 2 on stillPlate'
         command: timer.doAndWait
-        equipment: ourlab.mario.timer1
+        equipment: ourlab.mario.timer2
         duration: '3 minutes'
         steps:
           '1':
@@ -190,7 +191,7 @@ steps:
       '2':
         description: 'Measurement 2 on shakePlate'
         command: timer.doAndWait
-        equipment: ourlab.mario.timer1
+        equipment: ourlab.mario.timer2
         duration: '3 minutes'
         steps:
           '1':

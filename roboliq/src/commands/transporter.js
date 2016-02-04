@@ -50,7 +50,7 @@ function debug_movePlate_one(input, agentId, labwareId, modelId, originId, desti
 		{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
 		// From openAndMovePlate
 		{"siteIsOpen": {"site": "?origin"}},
-		{"siteIsOpen": {"site": "?destination"}}
+		{"siteIsOpen": {"site": destinationId}}
 	];
 	const queryAll = {"and": criteria};
 	const queryResultsAll = llpl.query(queryAll);

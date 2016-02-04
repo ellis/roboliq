@@ -167,7 +167,7 @@ var commandHandlers = {
 	 */
 	"timer.doAndWait": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
-		if (alternatives.errors) return altenatives;
+		if (alternatives.errors) return alternatives;
 
 		var agent = alternatives[0].agent;
 		var equipment = alternatives[0].equipment;
@@ -205,7 +205,7 @@ var commandHandlers = {
 	 */
 	"timer.sleep": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
-		if (alternatives.errors) return altenatives;
+		if (alternatives.errors) return alternatives;
 
 		var params2 = _.merge(
 			{
@@ -240,7 +240,8 @@ var commandHandlers = {
 	 */
 	"timer.start": function(params, parsed, data) {
 		var alternatives = findAgentEquipmentAlternatives(params, data, false);
-		if (alternatives.errors) return altenatives;
+		//console.log({alternatives})
+		if (alternatives.errors) return alternatives;
 
 		var params2 = _.merge(
 			{
@@ -282,6 +283,36 @@ var commandHandlers = {
 		var params2 = _.merge(
 			{
 				command: "timer._stop"
+			},
+			alternatives[0]
+		);
+
+		var expansion = {
+			"1": params2
+		};
+
+		// Create the effets object
+		var effects = {};
+		//effects[params2.equipment + ".running"] = false;
+
+		return {
+			expansion: expansion,
+			effects: effects,
+			alternatives: alternatives
+		};
+	},
+	"timer.wait": function(params, parsed, data) {
+		var alternatives = findAgentEquipmentAlternatives(params, data, true);
+		if (alternatives.errors) return alternatives;
+		if (alternatives.length > 1) {
+			return {errors: ["ambiguous time.wait command, multiple running timers: "+alternatives]};
+		}
+
+		var params2 = _.merge(
+			{
+				command: "timer._wait",
+				till: parsed.value.till.format({precision: 14}),
+				stop: parsed.value.stop
 			},
 			alternatives[0]
 		);

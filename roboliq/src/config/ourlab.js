@@ -505,6 +505,10 @@ module.exports = {
 		"agent": "ourlab.mario.evoware",
 		"equipment": "ourlab.mario.timer1",
 	}},
+	{"timer.canAgentEquipment": {
+		"agent": "ourlab.mario.evoware",
+		"equipment": "ourlab.mario.timer2",
+	}},
 	_.map([1,2,3,4], function(n) {
 		return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
 			"task": {"generic.closeSite": {"site": "?site"}},

@@ -5,8 +5,8 @@ import yaml from 'yamljs';
 
 // Site and labware:
 // P1 (not used)
-// P2 "culturePlate" pipetting
-// P3 "dilutionPlate" pipetting
+// P2 "dilutionPlate" pipetting
+// P3 "culturePlate" pipetting
 // P4 stillPlate (initial, incubator)
 // P5 shakePlate (initial, incubator)
 // P6 dilutionPlate1 (storage)
@@ -316,7 +316,8 @@ function test() {
 	appendStep(step1, {
 		command: "timer.wait",
 		equipment: "ourlab.mario.timer2",
-		till: "10 minutes"
+		till: "10 minutes",
+		stop: true
 	});
 
 	narrow(Map(), table, {groupBy: "measurement"}, (scope, data) => {
@@ -385,7 +386,7 @@ function test() {
 			appendStep(measurementStep, {
 				description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
 				command: "timer.doAndWait",
-				equipment: "ourlab.mario.timer1",
+				equipment: "ourlab.mario.timer2",
 				duration: "3 minutes",
 				steps: step
 			});

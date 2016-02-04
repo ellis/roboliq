@@ -51,6 +51,7 @@ function addContext(e, context) {
 }
 
 function getErrors(context, errors) {
+	errors = _.isArray(errors) ? errors : [errors];
 	const prefix = getPrefix(context);
 	return _.map(errors || [], s => prefix+s);
 }
@@ -140,7 +141,7 @@ function _try(context, fn) {
 }
 
 function _throw(context, errors) {
-	throw new RoboliqError(context, errors);
+	throw new RoboliqError(context, errors, _throw);
 }
 
 // TODO: get rid of this function after refactoring parameter processing in roboliqDirectives
