@@ -119,34 +119,34 @@ var commandHandlers = {
 	"transporter.movePlate": function(params, parsed, data) {
 		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		var transporterLogic = require('./transporterLogic.json');
-		var taskList = [];
-		if (parsed.objectName.agent) {
-			taskList.push({
-				"movePlate-a-one": {
-					"agent": parsed.objectName.agent,
-					"labware": parsed.objectName.object,
-					"destination": parsed.objectName.destination
-				}
-			});
-		} else {
-			taskList.push({
-				"movePlate-one": {
-					"labware": parsed.objectName.object,
-					"destination": parsed.objectName.destination
-				}
-			});
-		}
-		var tasks = {
-			"tasks": {
-				"ordered": taskList
-			}
-		};
-		var input = [].concat(data.predicates, transporterLogic, [tasks]);
-		//console.log(JSON.stringify(input, null, '\t'));
+		const infix = (parsed.objectName.agent) ? "-a" : "";
+		const taskNames = [`movePlate${infix}-null`, `movePlate${infix}-one`, `movePlate${infix}-two`];
+		const taskParams = _.merge({}, {
+			"agent": parsed.objectName.agent, // this may be undefined
+			"labware": parsed.objectName.object,
+			"destination": parsed.objectName.destination
+		});
+		const input0 = [].concat(data.predicates, transporterLogic);
 
-		var shop = require('../HTN/shop.js');
-		var planner = shop.makePlanner(input);
-		var plan = planner.plan();
+		const shop = require('../HTN/shop.js');
+		let plan;
+		for (let i = 0; i < taskNames.length; i++) {
+			const taskName = taskNames[i];
+			const tasks = {
+				"tasks": {
+					"ordered": [_.fromPairs([[taskName, taskParams]])]
+				}
+			};
+			const input = input0.concat([tasks]);
+			var planner = shop.makePlanner(input);
+			plan = planner.plan();
+			console.log(plan)
+			if (!_.isEmpty(plan)) {
+				console.log("plan found for "+taskName)
+				console.log(planner.ppPlan(plan));
+				break;
+			}
+		}
 		//console.log("plan:\n"+JSON.stringify(plan, null, '  '));
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
@@ -154,7 +154,7 @@ var commandHandlers = {
 			var agentId = params.agent || "?agent";
 			var modelId = parsed.value.object.model || "?model";
 			var originId = parsed.value.object.location || "?site";
-			debug_movePlate_one(input, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+			//debug_movePlate_one(input, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
 			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`"]}
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
