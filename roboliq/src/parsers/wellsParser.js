@@ -269,6 +269,10 @@ function processParserResult(result, objects, text) {
 				return labwareName+'('+location+')';
 			});
 		}
+		else if (clause.subject) {
+			assert(_.isEmpty(clause.phrases));
+			return clause.subject;
+		}
 		else {
 			assert(false);
 		}

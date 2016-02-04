@@ -285,12 +285,12 @@ describe('wellsParser', function() {
 		it('should catch error when missing source', function() {
 			should.throws(() => wellsParser.parse("missing", objects), "Something");
 		});
-		it.only('should parse "A01"', function() {
+		it('should parse "A01"', function() {
 			const text = "A01";
-			testA("A01",
-				[{subject: "A01", phrases: []}]
-				//["A01"]
+			test2("A01",
+				[{subject: "A01", phrases: []}],
+				["A01"]
 			);
-		})
+		});
 	});
 });
