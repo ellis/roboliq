@@ -1,0 +1,223 @@
+roboliq: v1
+objects:
+  stillPlate:
+    type: Plate
+    model: plateModel_96_dwp
+  shakePlate:
+    type: Plate
+    model: plateModel_96_dwp
+  dilutionPlate1:
+    type: Plate
+    model: plateModel_96_square_transparent_nunc
+  dilutionPlate2:
+    type: Plate
+    model: plateModel_96_square_transparent_nunc
+steps:
+  '1':
+    '1':
+      command: timer.doAndWait
+      equipment: ourlab.mario.timer1
+      duration: '3 minutes'
+      steps:
+        '1':
+          command: transporter.movePlate
+          object: stillPlate
+          destination: ourlab.mario.site.P1
+        '2':
+          command: pipette.pipetteMixtures
+          mixtures:
+            - {destination: A01, syringe: ourlab.mario.liha.syringe.1, sources: [{source: strain1, volume: 20ul}, {source: media1, volume: 80ul}]}
+            - {destination: B01, syringe: ourlab.mario.liha.syringe.2, sources: [{source: strain1, volume: 20ul}, {source: media1, volume: 80ul}]}
+          destinationLabware: stillPlate
+        '3':
+          command: transporter.movePlate
+          object: stillPlate
+          destination: ourlab.mario.site.P4
+        '4':
+          command: timer.start
+          equipment: ourlab.mario.timer2
+    '2':
+      command: timer.doAndWait
+      equipment: ourlab.mario.timer1
+      duration: '3 minutes'
+      steps:
+        '1':
+          command: transporter.movePlate
+          object: shakePlate
+          destination: ourlab.mario.site.P1
+        '2':
+          command: pipette.pipetteMixtures
+          mixtures:
+            - {destination: A01, syringe: ourlab.mario.liha.syringe.1, sources: [{source: strain1, volume: 20ul}, {source: media1, volume: 80ul}]}
+            - {destination: B01, syringe: ourlab.mario.liha.syringe.2, sources: [{source: strain1, volume: 20ul}, {source: media1, volume: 80ul}]}
+          destinationLabware: shakePlate
+        '3':
+          command: transporter.movePlate
+          object: shakePlate
+          destination: ourlab.mario.site.P5
+    '3':
+      command: timer.wait
+      equipment: ourlab.mario.timer2
+      till: '10 minutes'
+    description: 'prepare plate'
+  '2':
+    description: 'Measurement 1'
+    command: timer.doAndWait
+    equipment: ourlab.mario.timer1
+    duration: '10 minutes'
+    steps:
+      '1':
+        description: 'Measurement 1 on stillPlate'
+        command: timer.doAndWait
+        equipment: ourlab.mario.timer1
+        duration: '3 minutes'
+        steps:
+          '1':
+            command: transporter.movePlate
+            object: dilutionPlate1
+            destination: ourlab.mario.site.P2
+          '2':
+            command: transporter.movePlate
+            object: stillPlate
+            destination: ourlab.mario.site.P1
+          '3':
+            command: pipetter.pipette
+            items: [{source: A01, destination: A01, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B01, syringe: ourlab.mario.liha.syringe.2}]
+            volume: 5ul
+            sourceLabware: stillPlate
+            destinationLabware: dilutionPlate1
+          '4':
+            command: system.if
+            test: false
+            then: {'1': {command: shaker.shakePlate, object: stillPlate}}
+          '5':
+            command: transporter.movePlate
+            object: stillPlate
+            destination: ourlab.mario.site.P4
+          '6':
+            command: pipetter.dilutionSeries
+            diluent: water
+            items: [[{destination: A01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+          '7':
+            command: absorbanceReader.measurePlate
+            object: dilutionPlate1
+            program: {wells: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05]}
+            programTemplate: ./dm00.mdfx.template
+      '2':
+        description: 'Measurement 1 on shakePlate'
+        command: timer.doAndWait
+        equipment: ourlab.mario.timer1
+        duration: '3 minutes'
+        steps:
+          '1':
+            command: transporter.movePlate
+            object: dilutionPlate2
+            destination: ourlab.mario.site.P2
+          '2':
+            command: transporter.movePlate
+            object: shakePlate
+            destination: ourlab.mario.site.P1
+          '3':
+            command: pipetter.pipette
+            items: [{source: A01, destination: A01, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B01, syringe: ourlab.mario.liha.syringe.2}]
+            volume: 5ul
+            sourceLabware: shakePlate
+            destinationLabware: dilutionPlate2
+          '4':
+            command: system.if
+            test: true
+            then: {'1': {command: shaker.shakePlate, object: shakePlate}}
+          '5':
+            command: transporter.movePlate
+            object: shakePlate
+            destination: ourlab.mario.site.P5
+          '6':
+            command: pipetter.dilutionSeries
+            diluent: water
+            items: [[{destination: A01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+          '7':
+            command: absorbanceReader.measurePlate
+            object: dilutionPlate2
+            program: {wells: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05]}
+            programTemplate: ./dm00.mdfx.template
+  '3':
+    description: 'Measurement 2'
+    command: timer.doAndWait
+    equipment: ourlab.mario.timer1
+    duration: '10 minutes'
+    steps:
+      '1':
+        description: 'Measurement 2 on stillPlate'
+        command: timer.doAndWait
+        equipment: ourlab.mario.timer1
+        duration: '3 minutes'
+        steps:
+          '1':
+            command: transporter.movePlate
+            object: dilutionPlate1
+            destination: ourlab.mario.site.P2
+          '2':
+            command: transporter.movePlate
+            object: stillPlate
+            destination: ourlab.mario.site.P1
+          '3':
+            command: pipetter.pipette
+            items: [{source: A01, destination: A07, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B07, syringe: ourlab.mario.liha.syringe.2}]
+            volume: 5ul
+            sourceLabware: stillPlate
+            destinationLabware: dilutionPlate1
+          '4':
+            command: system.if
+            test: false
+            then: {'1': {command: shaker.shakePlate, object: stillPlate}}
+          '5':
+            command: transporter.movePlate
+            object: stillPlate
+            destination: ourlab.mario.site.P4
+          '6':
+            command: pipetter.dilutionSeries
+            diluent: water
+            items: [[{destination: A07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+          '7':
+            command: absorbanceReader.measurePlate
+            object: dilutionPlate1
+            program: {wells: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11]}
+            programTemplate: ./dm00.mdfx.template
+      '2':
+        description: 'Measurement 2 on shakePlate'
+        command: timer.doAndWait
+        equipment: ourlab.mario.timer1
+        duration: '3 minutes'
+        steps:
+          '1':
+            command: transporter.movePlate
+            object: dilutionPlate2
+            destination: ourlab.mario.site.P2
+          '2':
+            command: transporter.movePlate
+            object: shakePlate
+            destination: ourlab.mario.site.P1
+          '3':
+            command: pipetter.pipette
+            items: [{source: A01, destination: A07, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B07, syringe: ourlab.mario.liha.syringe.2}]
+            volume: 5ul
+            sourceLabware: shakePlate
+            destinationLabware: dilutionPlate2
+          '4':
+            command: system.if
+            test: true
+            then: {'1': {command: shaker.shakePlate, object: shakePlate}}
+          '5':
+            command: transporter.movePlate
+            object: shakePlate
+            destination: ourlab.mario.site.P5
+          '6':
+            command: pipetter.dilutionSeries
+            diluent: water
+            items: [[{destination: A07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+          '7':
+            command: absorbanceReader.measurePlate
+            object: dilutionPlate2
+            program: {wells: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11]}
+            programTemplate: ./dm00.mdfx.template
+

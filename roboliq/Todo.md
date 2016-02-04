@@ -154,6 +154,11 @@
     - get the measurement data out of the robot
     - visualize/analyze the measurement data in R
 - [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
+- [ ] dm00_test3m.js:
+    - [ ] pipetteMixtures: handle new mixture list
+    - [ ] pipetteMixtures: handle `destinationLabware`
+    - [ ] `timer.wait`
+    - [ ] `pipetter.dilutionSeries`
 - [ ] dm00_test3.js: create an protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
     - something with absorbance OrangeG
     - two "culture" plates

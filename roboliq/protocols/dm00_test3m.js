@@ -4,9 +4,9 @@ import Immutable, {Map, fromJS} from 'immutable';
 import yaml from 'yamljs';
 
 const tree = {
-	"pipettingLocation": "?",
+	"pipettingLocation": "ourlab.mario.site.P1",
 	"culturePlate*": {
-		"puncturePlate": {
+		"stillPlate": {
 			"cultureReplicate*": [
 				{
 					"cultureWell": "A01",
@@ -20,7 +20,7 @@ const tree = {
 							"dilutionPlate": "dilutionPlate1"
 						}
 					],
-					"syringe": "ourlab.luigi.liha.syringe.1"
+					"syringe": "ourlab.mario.liha.syringe.1"
 				},
 				{
 					"cultureWell": "B01",
@@ -34,13 +34,13 @@ const tree = {
 							"dilutionPlate": "dilutionPlate1"
 						}
 					],
-					"syringe": "ourlab.luigi.liha.syringe.2"
+					"syringe": "ourlab.mario.liha.syringe.2"
 				}
 			],
-			"reseal": false,
-			"incubatorLocation": "SHAKER1"
+			"shake": false,
+			"incubatorLocation": "ourlab.mario.site.P4"
 		},
-		"resealPlate": {
+		"shakePlate": {
 			"cultureReplicate*": [
 				{
 					"cultureWell": "A01",
@@ -54,7 +54,7 @@ const tree = {
 							"dilutionPlate": "dilutionPlate2"
 						}
 					],
-					"syringe": "ourlab.luigi.liha.syringe.1"
+					"syringe": "ourlab.mario.liha.syringe.1"
 				},
 				{
 					"cultureWell": "B01",
@@ -68,14 +68,14 @@ const tree = {
 							"dilutionPlate": "dilutionPlate2"
 						}
 					],
-					"syringe": "ourlab.luigi.liha.syringe.2"
+					"syringe": "ourlab.mario.liha.syringe.2"
 				}
 			],
-			"reseal": true,
-			"incubatorLocation": "SHAKER2"
+			"shake": true,
+			"incubatorLocation": "ourlab.mario.site.P5"
 		}
 	},
-	"dilutionLocation": "?",
+	"dilutionLocation": "ourlab.mario.site.P2",
 	"interval": "12 hours",
 	"media": "media1",
 	"mediaVolume": "80ul",
@@ -277,17 +277,13 @@ function test() {
 			destinationLabware: scope.get("culturePlate")
 		});
 
-		appendStep(step, {
+		/*appendStep(step, {
 			command: "sealer.sealPlate",
 			object: scope.get("culturePlate")
-		});
+		});*/
 
 		appendStep(step, {
 			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("incubatorLocation")
-		});
-
-		appendStep(step, {
-			command: "incubator.start", program: "incubatorProgram"
 		});
 
 		// Start 12h times for the first plate only
@@ -301,7 +297,7 @@ function test() {
 		appendStep(step1, {
 			command: "timer.doAndWait",
 			equipment: "ourlab.mario.timer1",
-			duration: "15 minutes",
+			duration: "3 minutes",
 			steps: step
 		});
 
@@ -311,7 +307,7 @@ function test() {
 	appendStep(step1, {
 		command: "timer.wait",
 		equipment: "ourlab.mario.timer2",
-		till: "12 hours"
+		till: "10 minutes"
 	});
 
 	narrow(Map(), table, {groupBy: "measurement"}, (scope, data) => {
@@ -326,10 +322,6 @@ function test() {
 				command: "transporter.movePlate",
 				object: scope.get("dilutionPlate"),
 				destination: scope.get("dilutionLocation")
-			});
-			appendStep(step, {
-				command: "incubator.open",
-				site: scope.get("incubatorLocation")
 			});
 			appendStep(step, {
 				command: "transporter.movePlate",
@@ -351,18 +343,15 @@ function test() {
 			});
 			appendStep(step, {
 				command: "system.if",
-				test: scope.get("reseal"),
+				test: scope.get("shake"),
 				then: {
-					1: {command: "sealer.sealPlate", object: scope.get("culturePlate")}
+					1: {command: "shaker.shakePlate", object: scope.get("culturePlate")}
 				}
 			});
 			appendStep(step, {
 				command: "transporter.movePlate",
 				object: scope.get("culturePlate"),
 				destination: scope.get("incubatorLocation")
-			});
-			appendStep(step, {
-				command: "incubator.start", program: "incubatorProgram"
 			});
 			appendStep(step, {
 				command: "pipetter.dilutionSeries",
@@ -388,7 +377,7 @@ function test() {
 				description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
 				command: "timer.doAndWait",
 				equipment: "ourlab.mario.timer1",
-				duration: "15 minutes",
+				duration: "3 minutes",
 				steps: step
 			});
 		});
@@ -397,11 +386,22 @@ function test() {
 			description: `Measurement ${scope.get("measurement")}`,
 			command: "timer.doAndWait",
 			equipment: "ourlab.mario.timer1",
-			duration: "12 hours",
+			duration: "10 minutes",
 			steps: measurementStep
 		});
 	});
-	console.log(yaml.stringify(steps, 5, 2));
+
+	const protocol = {
+		roboliq: "v1",
+		objects: {
+			stillPlate: {type: "Plate", model: "plateModel_96_dwp"},
+			shakePlate: {type: "Plate", model: "plateModel_96_dwp"},
+			dilutionPlate1: {type: "Plate", model: "plateModel_96_square_transparent_nunc"},
+			dilutionPlate2: {type: "Plate", model: "plateModel_96_square_transparent_nunc"},
+		},
+		steps
+	}
+	console.log(yaml.stringify(protocol, 7, 2));
 }
 
 test();
