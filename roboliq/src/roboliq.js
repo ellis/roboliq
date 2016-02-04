@@ -224,6 +224,9 @@ function loadProtocol(a, b, url, filecache) {
 		'errors',
 		'warnings'
 	));
+	if (_.isUndefined(c.errors)) {
+		c.errors = {};
+	}
 
 	// Pre-process properties with ?-suffixes and !-suffixes.
 	if (!c.fillIns)
@@ -253,11 +256,15 @@ function loadProtocol(a, b, url, filecache) {
 			var filename = "./" + path.posix.join(path.dirname(url), x);
 			// If the file hasn't been loaded yet:
 			if (!filecache.hasOwnProperty(filename)) {
-				var filedata = fs.readFileSync(filename);
-				filecache[filename] = filedata;
-				//console.log("filename: "+filename);
-				//console.log(filedata);
-				//console.log(filedata.toString('utf8'))
+				try {
+					var filedata = fs.readFileSync(filename);
+					filecache[filename] = filedata;
+					//console.log("filename: "+filename);
+					//console.log(filedata);
+					//console.log(filedata.toString('utf8'))
+				} catch (e) {
+					c.errors[url] = [`could not load file (${filename})`, e.toString()];
+				}
 			}
 			return filename;
 		}
@@ -491,21 +498,34 @@ function validateProtocol1(protocol, o, path) {
 		path = [];
 	}
 	for (const [name, value] of _.toPairs(o)) {
-		const fullName = path.concat(name).join(".");
-		//console.log({name, value})
-		if (name !== 'type') {
-			expect.truthy({objectName: fullName}, !_.isEmpty(value.type), "Missing `type` property.")
-			if (value.type === "Namespace") {
-				validateProtocol1(protocol, value, path.concat(name));
-			}
-			else {
-				const schema = protocol.schemas[value.type];
-				expect.truthy({objectName: fullName}, schema, "Unknown type: "+value.type);
-				if (schema) {
-					commandHelper.parseParams(value, protocol, schema);
+		const path2 = path.concat(name);
+		const fullName = path2.join(".");
+		expect.context({objectName: fullName}, function() {
+			//console.log({name, value, fullName})
+			if (name !== 'type') {
+				assert(!_.isEmpty(value.type), "Missing `type` property.");
+				if (value.type === "Namespace") {
+					validateProtocol1(protocol, value, path.concat(name));
+				}
+				else {
+					const schema = protocol.schemas[value.type];
+					assert(schema, "Unknown type: "+value.type);
+					if (schema) {
+						const data = {
+							objects: protocol.objects,
+							predicates: protocol.predicates,
+							planHandlers: protocol.planHandlers,
+							schemas: protocol.schemas,
+							accesses: [],
+							files: protocol.files, // or filecache?
+							protocol,
+							path: [fullName]
+						};
+						commandHelper.parseParams(value, data, schema);
+					}
 				}
 			}
-		}
+		});
 	}
 }
 
@@ -532,13 +552,15 @@ function run(argv, userProtocol) {
 		// If _run throws an exception, we don't get any results,
 		// so try to set `error` in the result or at least print
 		// messages to the console.
-		console.log(JSON.stringify(e));
+		console.log("RUN ERROR:")
+		console.log(e);
 		console.log(e.message);
 		console.log(e.stack);
-		if (e.hasOwnProperty("errors")) {
+		if (typeof e === "RoboliqError") {
+			const prefix = e.getPrefix();
 			const path = e.path || "''";
 			result = {}
-			_.set(result, `output.errors[${path}]`, e.errors);
+			_.set(result, `output.errors[${path}]`, _.map(e.errors, s => prefix+s));
 		}
 		else {
 			console.log(JSON.stringify(e));
@@ -668,7 +690,9 @@ function _run(opts, userProtocol) {
 	}*/
 
 	postProcessProtocol(protocol);
+	//console.log("A")
 	validateProtocol1(protocol);
+	//console.log("B")
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
 
@@ -798,8 +822,9 @@ function _run(opts, userProtocol) {
 					//console.log("B")
 					//console.log("result: "+JSON.stringify(result))
 				} catch (e) {
-					if (e.hasOwnProperty("errors")) {
-						result = {errors: e.errors};
+					if (typeof e === "RoboliqError") {
+						const prefix = e.getPrefix();
+						result = {errors: _.map(e.errors, s => prefix+s)};
 					}
 					else {
 						result = {errors: _.compact([e.toString(), e.stack])};
@@ -807,7 +832,7 @@ function _run(opts, userProtocol) {
 					if (opts.throw) {
 						if (_.isPlainObject(e))
 							console.log("e:\n"+JSON.stringify(e));
-						throw e;
+						expect.rethrow(e, {stepName: id});
 					}
 				}
 				// If debugging, store the result verbatim

@@ -14,8 +14,8 @@ npm install
 To run a protocol:
 
 ```{sh}
-./node_modules/.bin/babel-node -- src/main.js --help
-./node_modules/.bin/babel-node -- src/main.js [options] ${PROTOCOL}
+npm start -- --help
+npm start -- [options] ${PROTOCOL}
 ```
 
 To compile a protocol for evoware, use `npm run evoware`.  Here's an example:
