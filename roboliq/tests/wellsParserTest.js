@@ -286,10 +286,15 @@ describe('wellsParser', function() {
 			should.throws(() => wellsParser.parse("missing", objects), "Something");
 		});
 		it('should parse "A01"', function() {
-			const text = "A01";
 			test2("A01",
 				[{subject: "A01", phrases: []}],
 				["A01"]
+			);
+		});
+		it('should parse "A01+B01"', function() {
+			test2("A01+B01",
+				[{subject: "A01", phrases: []}, {subject: "B01", phrases: []}],
+				["A01", "B01"]
 			);
 		});
 	});
