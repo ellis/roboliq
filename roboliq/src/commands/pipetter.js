@@ -44,11 +44,42 @@ function extractLiquidNamesFromContents(contents) {
 	}
 }
 
+/**
+ * Takes a labware name and a well and returns a fully specified well.
+ * If the wells is undefined, return undefined.
+ * @param  {string} [labwareName] - name of labware for wells that don't have specified labware.
+ * @param  {array} [well] - well identifier, with or without labware explicitly specified.
+ * @return {array} fully specified well (e.g. on labware).
+ */
+function getLabwareWell(labwareName, well) {
+	if (_.isString(well) && _.isString(labwareName) && !_.isEmpty(labwareName)) {
+		return (_.includes(well, "(")) ? well : `${labwareName}(${well})`;
+	}
+
+	return well;
+}
+
+/**
+ * Takes a labware name and a list of wells and returns a list of wells.
+ * If the list of wells is empty or undefined, an empty array is returned.
+ * @param  {string} [labwareName] - name of labware for wells that don't have specified labware.
+ * @param  {array} [wells] - list of wells, with or without labware explicitly specified.
+ * @return {array} a list of wells on labware.
+ */
+function getLabwareWellList(labwareName, wells) {
+	const wells1 = wells || [];
+	assert(_.isArray(wells1));
+	const wells2 = (_.isString(labwareName) && !_.isEmpty(labwareName))
+		? _.map(wells1, w => (_.includes(w, "(")) ? w : `${labwareName}(${w})`)
+		: wells1;
+	return wells2;
+}
+
 function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	//console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	let items = (_.isUndefined(parsed.value.items))
 		? []
@@ -61,10 +92,11 @@ function pipette(params, parsed, data) {
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
-	const sourcesTop = parsed.value.sources || [];
+	const sourcesTop = getLabwareWellList(parsed.objectName.sourceLabware, parsed.value.sources);
 	//console.log({sourcesTop})
-	const destinationsTop = parsed.value.destinations || [];
+	const destinationsTop = getLabwareWellList(parsed.objectName.destinationLabware, parsed.value.destinations);
 	const volumesTop = parsed.value.volumes || [];
+	//console.log({sourceLabware})
 
 	// Figure out number of items
 	var itemCount = 0;
@@ -90,6 +122,7 @@ function pipette(params, parsed, data) {
 			for (var i = 0; i < itemCount; i++)
 				items[i] = {};
 		}
+
 		for (var i = 0; i < itemCount; i++) {
 			//console.log("i:", i)
 			if (_.isUndefined(items[i].source)) {
@@ -97,6 +130,9 @@ function pipette(params, parsed, data) {
 					items[i].source = sourcesTop[0];
 				else if (sourcesTop.length > 1)
 					items[i].source = sourcesTop[i];
+			}
+			else if (parsed.objectName.sourceLabware) {
+				items[i].source = getLabwareWell(parsed.objectName.sourceLabware, items[i].source);
 			}
 
 			if (_.isUndefined(items[i].destination)) {
@@ -106,7 +142,12 @@ function pipette(params, parsed, data) {
 				else if (destinationsTop.length > 1)
 					items[i].destination = destinationsTop[i];
 			}
+			else if (parsed.objectName.destinationLabware) {
+				items[i].destination = getLabwareWell(parsed.objectName.destinationLabware, items[i].destination);
+			}
+
 			if (_.isUndefined(items[i].volume)) {
+				console.log(`items[${i}].volume is undefined, volumesTop = ${volumesTop}`)
 				if (volumesTop.length == 1)
 					items[i].volume = volumesTop[0];
 				else if (volumesTop.length > 1)
@@ -219,8 +260,8 @@ function pipette(params, parsed, data) {
 	var sourceToItems = _.groupBy(items, 'source');
 
 	const itemsAll = items;
-	//console.log({itemVolumes: items.map(x => x.volume)})
-	//console.log(_.filter(items, item => item.volume));
+	console.log({itemVolumes: items.map(x => x.volume)})
+	console.log(_.filter(items, item => item.volume));
 	items = _.filter(items, item => item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items
