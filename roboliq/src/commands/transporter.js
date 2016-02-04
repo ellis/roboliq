@@ -49,7 +49,7 @@ function debug_movePlate_one(input, agentId, labwareId, modelId, originId, desti
 		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": destinationId}},
 		{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
 		// From openAndMovePlate
-		{"siteIsOpen": {"site": "?origin"}},
+		{"siteIsOpen": {"site": originId}},
 		{"siteIsOpen": {"site": destinationId}}
 	];
 	const queryAll = {"and": criteria};
@@ -122,7 +122,7 @@ var commandHandlers = {
 		var taskList = [];
 		if (parsed.objectName.agent) {
 			taskList.push({
-				"movePlate-a": {
+				"movePlate-a-one": {
 					"agent": parsed.objectName.agent,
 					"labware": parsed.objectName.object,
 					"destination": parsed.objectName.destination
@@ -130,7 +130,7 @@ var commandHandlers = {
 			});
 		} else {
 			taskList.push({
-				"movePlate": {
+				"movePlate-one": {
 					"labware": parsed.objectName.object,
 					"destination": parsed.objectName.destination
 				}
@@ -144,53 +144,6 @@ var commandHandlers = {
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
 		//console.log(JSON.stringify(input, null, '\t'));
 
-		/*// DEBUG
-		var llpl = require('../HTN/llpl.js').create();
-		llpl.initializeDatabase(input);
-		var agentId = params.agent || "?agent";
-		var modelId = parsed.value.object.model || "?model";
-		var originId = parsed.value.object.location || "?site";
-		console.log("originId: "+originId)
-		var query = {
-			"and": [
-				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": originId}},
-				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": params.destination}}
-			]
-		};
-		query = {"and": [
-			{"model": {"labware": "?labware", "model": modelId}},
-			{"location": {"labware": "?labware", "site": originId}},
-			{"siteModel": {"site": originId, "siteModel": "?originModel"}},
-			{"siteModel": {"site": parsed.objectName.destination, "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": modelId}},
-			{"siteIsClear": {"site": parsed.objectName.destination}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": parsed.objectName.destination}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
-		]};
-		/*query = {
-			"and": [
-				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
-				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
-				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": params.destination}},
-			]
-		};
-		query = {
-			"and": [
-				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
-				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": params.destination}},
-				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
-				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
-				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "siteClique": "?siteClique1"}},
-				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
-				//{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
-			]
-		};
-		var queryResults = llpl.query(query);
-		console.log("queryResults:\n"+JSON.stringify(queryResults, null, '\t'));
-		// END DEBUG*/
-
-		//console.log(JSON.stringify(input, null, '\t'));
 		var shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
