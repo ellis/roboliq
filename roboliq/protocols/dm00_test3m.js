@@ -347,7 +347,7 @@ function test() {
 						syringe: scope.get("syringe")
 					}
 				}),
-				volume: scope.get("sampleVolume"),
+				volumes: scope.get("sampleVolume"),
 				sourceLabware: scope.get("culturePlate"),
 				destinationLabware: scope.get("dilutionPlate")
 			});
