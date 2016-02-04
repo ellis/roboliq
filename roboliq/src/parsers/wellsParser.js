@@ -24,7 +24,7 @@ function parse(text, objects) {
 	try {
 		result = wellsParser0.parse(text);
 	} catch (e) {
-		throw Error(e.toString());
+		expect.rethrow(e);
 	}
 	if (!objects)
 		return result;

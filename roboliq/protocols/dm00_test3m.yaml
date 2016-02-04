@@ -2,10 +2,10 @@ roboliq: v1
 objects:
   stillPlate:
     type: Plate
-    model: plateModel_96_dwp
+    model: ourlab.model.plateModel_96_dwp
   shakePlate:
     type: Plate
-    model: plateModel_96_dwp
+    model: ourlab.model.plateModel_96_dwp
   dilutionPlate1:
     type: Plate
     model: plateModel_96_square_transparent_nunc
@@ -220,4 +220,3 @@ steps:
             object: dilutionPlate2
             program: {wells: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11]}
             programTemplate: ./dm00.mdfx.template
-

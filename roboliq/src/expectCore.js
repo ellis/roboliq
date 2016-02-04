@@ -1,42 +1,53 @@
 import _ from 'lodash';
 import assert from 'assert';
 
+// NOTE: with Babel 6 set to transpile to ES6, classes which extend Error are
+// not properly recognized as subclasses -- so "instanceof RoboliqError" won't
+// work.  We need a number of work-arounds because of that.
 class RoboliqError extends Error {
 	constructor(context = {}, errors, fnIgnore, stack) {
 		super(getErrors(context, errors).join("; "));
-		this.name = this.constructor.name;
+		this.isRoboliqError = true;
+		this.name = "RoboliqError";
 		this.context = _.cloneDeep(context);
 		this.errors = _.isArray(errors) ? errors : [errors];
 		if (_.isUndefined(stack)) {
 			Error.captureStackTrace(this, fnIgnore || this.constructor.name);
+			//Error.captureStackTrace(this);
 		}
 		else {
 			this.stack = stack;
 		}
-	}
 
-	addContext(context) {
-		_.mergeWith(this.context, context || {}, (a, b) => {
-			if (_.isArray(a) && _.isArray(b)) {
-				return a.concat(b);
-			}
-		});
+		// console.log("new RoboliqError: "+this.__proto__)
+		// console.log(this);
+		// console.log(this.stack)
 	}
 
 	getPrefix() { return getPrefix(this.context); }
 
 	toString() { return getErrors(context, errors).join("; "); }
+
+	static getErrors(e) { return getErrors(e.context, e.errors); }
 }
 
 function getPrefix(context) {
 	const prefixes = [];
 	if (_.isPlainObject(context)) {
 		if (_.isString(context.stepName)) prefixes.push(`steps.${context.stepName}`);
+		if (_.isString(context.objectName)) prefixes.push(`objects.${context.objectName}`);
 		if (_.isString(context.paramName)) prefixes.push(`parameter "${context.paramName}"`);
 		else if (_.isArray(context.paramName)) prefixes.push(`parameters "${context.paramName.join('`, `')}"`);
-		if (_.isString(context.objectName)) prefixes.push(`objects.${context.objectName}`);
 	}
 	return (prefixes.length > 0) ? prefixes.join(", ")+": " : "";
+}
+
+function addContext(e, context) {
+	_.mergeWith(e.context, context || {}, (a, b) => {
+		if (_.isArray(a) && _.isArray(b)) {
+			return a.concat(b);
+		}
+	});
 }
 
 function getErrors(context, errors) {
@@ -49,23 +60,30 @@ function _context(context, fn) {
 		fn();
 	}
 	catch (e) {
-		rethrow(e, context, _context);
+		// console.log("_context: "+e.__proto__)
+		// console.log(JSON.stringify(e, null, '\t'))
+		rethrow(e, context);
 	}
 }
 
 function rethrow(e, context, fnIgnore = rethrow) {
-	if (typeof e === "RoboliqError") {
-		e.addContext(context);
-		throw e;
-	}
-	else if (typeof e === "Error") {
-		const error = new RoboliqError(context, [e.message], undefined, e.stack);
-		throw error;
+	if (e instanceof Error) {
+		if (e.isRoboliqError) {
+			// console.log("rethrow1")
+			addContext(e, context);
+			throw e;
+		}
+		else {
+			// console.log("rethrow2")
+			const error = new RoboliqError(context, [e.message], undefined, e.stack);
+			throw error;
+		}
 	}
 	else if (typeof e === "string") {
 		throw new RoboliqError({errors: [e]}, fnIgnore);
 	}
 	else {
+		// console.log("rethrow4")
 		throw new RoboliqError(context, [e.toString()], fnIgnore);
 	}
 }
@@ -130,7 +148,7 @@ function paramsRequired(params, names) {
 	assert(_.isPlainObject(params));
 	assert(_.isArray(names));
 	_.forEach(names, function(name) {
-		truthy({paramName: name}, params.hasOwnProperty(name), "missing required value");
+		truthy({paramName: name}, params.hasOwnProperty(name), "missing required value [CODE 135]");
 	});
 }
 

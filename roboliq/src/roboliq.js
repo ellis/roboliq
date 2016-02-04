@@ -497,12 +497,10 @@ function validateProtocol1(protocol, o, path) {
 		o = protocol.objects;
 		path = [];
 	}
-	const keyValuePairs = _.toPairs(o);
-	for (let iPair = 0; iPair < keyValuePairs.length; iPair++) {
-		const [name, value] = keyValuePairs[iPair];
+	for (const [name, value] of _.toPairs(o)) {
 		const path2 = path.concat(name);
 		const fullName = path2.join(".");
-		expect.context({objectName: fullName}, function() {
+		const doit = () => {
 			//console.log({name, value, fullName})
 			if (name !== 'type') {
 				assert(!_.isEmpty(value.type), "Missing `type` property.");
@@ -527,7 +525,8 @@ function validateProtocol1(protocol, o, path) {
 					}
 				}
 			}
-		});
+		}
+		expect.context({objectName: fullName}, doit);
 	}
 }
 
@@ -554,15 +553,18 @@ function run(argv, userProtocol) {
 		// If _run throws an exception, we don't get any results,
 		// so try to set `error` in the result or at least print
 		// messages to the console.
-		console.log("RUN ERROR:")
-		console.log(e);
-		console.log(e.message);
-		console.log(e.stack);
-		if (typeof e === "RoboliqError") {
-			const prefix = e.getPrefix();
-			const path = e.path || "''";
+		if (opts.debug || opts.throw) {
+			console.log("RUN ERROR:")
+			console.log(e);
+			console.log(e.message);
+			console.log(e.stack);
+		}
+		if (e.isRoboliqError) {
 			result = {}
-			_.set(result, `output.errors[${path}]`, _.map(e.errors, s => prefix+s));
+			const errors = expect.RoboliqError.getErrors(e);
+			const path = e.path || "";
+			_.set(result, `output.errors[${path}]`, errors);
+			//console.log(JSON.stringify(errors))
 		}
 		else {
 			console.log(JSON.stringify(e));

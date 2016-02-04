@@ -119,7 +119,7 @@ function handleDirective(spec, data) {
 				return result.x;
 			}
 			else {
-				throw Error("unknown directive: "+key);
+				throw new Error("unknown directive: "+key);
 			}
 		}
 	}
@@ -137,7 +137,7 @@ function handleDirective(spec, data) {
 				return result;
 			}
 			else {
-				throw Error("unknown directive: "+spec);
+				throw new Error("unknown directive: "+spec);
 			}
 		}
 	}

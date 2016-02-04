@@ -92,7 +92,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 			// If not optional, require the variable's presence:
 			if (required) {
 				//console.log({propertyName, type, info, params})
-				expect.truthy({paramName: propertyName}, !_.isUndefined(value0), "missing required value");
+				expect.truthy({paramName: propertyName}, !_.isUndefined(value0), "missing required value [CODE 95]");
 			}
 		}
 		else {
@@ -103,7 +103,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 			// If not optional, require the variable's presence:
 			else if (required) {
 				//console.log({propertyName, type, info, params})
-				expect.truthy({paramName: propertyName}, false, "missing required value");
+				expect.truthy({paramName: path1.join(".")}, false, "missing required value [CODE 106]");
 			}
 		}
 	}
