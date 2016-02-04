@@ -484,7 +484,10 @@ module.exports = (function() {
 
       s0 = peg$parselabwareClause();
       if (s0 === peg$FAILED) {
-        s0 = peg$parsesource();
+        s0 = peg$parselocationClause();
+        if (s0 === peg$FAILED) {
+          s0 = peg$parsesource();
+        }
       }
 
       return s0;

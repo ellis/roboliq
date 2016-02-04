@@ -43,6 +43,9 @@ describe('wellsParser', function() {
 		}
 	}
 	describe('parse()', function() {
+		const testA = function(text, result) {
+			should.deepEqual(wellsParser.parse(text), result);
+		}
 		const test1 = function(text, wells) {
 			should.deepEqual(wellsParser.parse(text, objects), wells);
 		}
@@ -282,5 +285,12 @@ describe('wellsParser', function() {
 		it('should catch error when missing source', function() {
 			should.throws(() => wellsParser.parse("missing", objects), "Something");
 		});
+		it.only('should parse "A01"', function() {
+			const text = "A01";
+			testA("A01",
+				[{subject: "A01", phrases: []}]
+				//["A01"]
+			);
+		})
 	});
 });

@@ -21,6 +21,7 @@ spaces = [ \t]+
 
 entity
   = labwareClause
+  / locationClause
   / source
 
 labwareClause
