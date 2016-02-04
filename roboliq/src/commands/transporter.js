@@ -32,6 +32,55 @@ var objectToPredicateConverters = {
 	},
 };
 
+function debug_movePlate_one(input, agentId, labwareId, modelId, originId, destinationId) {
+
+	var llpl = require('../HTN/llpl.js').create();
+	llpl.initializeDatabase(input);
+	//console.log("originId: "+originId)
+	const criteria = [
+		// From transporter._movePlate
+		{"model": {"labware": labwareId, "model": modelId}},
+		{"location": {"labware": labwareId, "site": originId}},
+		{"siteModel": {"site": originId, "siteModel": "?originModel"}},
+		{"siteModel": {"site": destinationId, "siteModel": "?destinationModel"}},
+		{"stackable": {"below": "?destinationModel", "above": modelId}},
+		{"siteIsClear": {"site": destinationId}},
+		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
+		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": destinationId}},
+		{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
+		// From openAndMovePlate
+		{"siteIsOpen": {"site": "?origin"}},
+		{"siteIsOpen": {"site": "?destination"}}
+	];
+	const queryAll = {"and": criteria};
+	const queryResultsAll = llpl.query(queryAll);
+	//console.log("queryResultsAll:\n"+JSON.stringify(queryResultsAll, null, '\t'));
+
+	//console.log(queryResultsAll.length);
+	if (queryResultsAll.length === 0) {
+		console.log("movePlate-one failed for ", agentId, labwareId, modelId, originId, destinationId);
+		//console.log("debug: "+criteria);
+		const queryResultLabware = llpl.query({and: [
+			{"location": {"labware": "?labware", "site": destinationId}}
+		]});
+		if (queryResultLabware.length > 0) {
+			console.log("Labware already at destination site:\n"+JSON.stringify(queryResultLabware, null, '\t'));
+		}
+		_.forEach(criteria, criterion => {
+			//console.log({criterion})
+			const queryOne = {"and": [criterion]};
+			const queryResultOne = llpl.query(queryOne);
+			//console.log("queryResultOne: "+JSON.stringify(queryResultOne));
+			if (queryResultOne.length === 0) {
+				console.log("FAILED: "+JSON.stringify(criterion));
+			}
+			else {
+				//console.log("queryResults:\n"+JSON.stringify(queryResultOne, null, '\t'));
+			}
+		});
+	}
+}
+
 /**
  * Handlers for {@link transporter} commands.
  * @static
@@ -95,20 +144,31 @@ var commandHandlers = {
 		var input = [].concat(data.predicates, transporterLogic, [tasks]);
 		//console.log(JSON.stringify(input, null, '\t'));
 
-		// DEBUG
-		/*var llpl = require('../HTN/llpl.js').create();
+		/*// DEBUG
+		var llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(input);
 		var agentId = params.agent || "?agent";
-		var modelId = misc.findObjectsValue(params.object+".model", data.objects) || "?model";
-		var originId = misc.findObjectsValue(params.object+".location", data.objects) || "?site";
+		var modelId = parsed.value.object.model || "?model";
+		var originId = parsed.value.object.location || "?site";
+		console.log("originId: "+originId)
 		var query = {
 			"and": [
 				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": originId}},
 				{"movePlate_canAgentEquipmentProgramModelSite": {"agent": agentId, "equipment": "?equipment", "program": "?program", "model": modelId, "site": params.destination}}
 			]
 		};
-		console.log("originId: "+originId)
-		query = {
+		query = {"and": [
+			{"model": {"labware": "?labware", "model": modelId}},
+			{"location": {"labware": "?labware", "site": originId}},
+			{"siteModel": {"site": originId, "siteModel": "?originModel"}},
+			{"siteModel": {"site": parsed.objectName.destination, "siteModel": "?destinationModel"}},
+			{"stackable": {"below": "?destinationModel", "above": modelId}},
+			{"siteIsClear": {"site": parsed.objectName.destination}},
+			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
+			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": parsed.objectName.destination}},
+			{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
+		]};
+		/*query = {
 			"and": [
 				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
 				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
@@ -138,6 +198,10 @@ var commandHandlers = {
 		//var x = planner.ppPlan(plan);
 		//console.log(x);
 		if (_.isEmpty(plan)) {
+			var agentId = params.agent || "?agent";
+			var modelId = parsed.value.object.model || "?model";
+			var originId = parsed.value.object.location || "?site";
+			debug_movePlate_one(input, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
 			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`"]}
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);

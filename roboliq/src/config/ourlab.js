@@ -120,8 +120,8 @@ module.exports = {
 					P4: { type: "Site", evowareCarrier: "MP 3Pos Cooled 1 PCR", evowareGrid: 17, evowareSite: 2 },
 					P5: { type: "Site", evowareCarrier: "MP 3Pos Cooled 1 PCR", evowareGrid: 17, evowareSite: 4 },
 					P6: { type: "Site", evowareCarrier: "MP 3Pos Cooled 2 PCR", evowareGrid: 17, evowareSite: 2 },
-					P8: { type: "Site", evowareCarrier: "MP 3Pos Cooled 2 PCR", evowareGrid: 17, evowareSite: 4 },
-					P7: { type: "Site", evowareCarrier: "MP 3Pos Cooled 2 PCR", evowareGrid: 17, evowareSite: 6 },
+					P7: { type: "Site", evowareCarrier: "MP 3Pos Cooled 2 PCR", evowareGrid: 17, evowareSite: 4 },
+					P8: { type: "Site", evowareCarrier: "MP 3Pos Cooled 2 PCR", evowareGrid: 17, evowareSite: 6 },
 					R1: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 1 },
 					R2: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 2 },
 					R3: { type: "Site", evowareCarrier: "LI - Trough 3Pos 100ml", evowareGrid: 3, evowareSite: 3 },
@@ -175,6 +175,10 @@ module.exports = {
 				"timer1": {
 					"type": "Timer",
 					"evowareId": 1
+				},
+				"timer2": {
+					"type": "Timer",
+					"evowareId": 2
 				},
 				"washProgram": {
 					"type": "Namespace",
@@ -340,7 +344,7 @@ module.exports = {
 		}
 	},
 	{"#for": {
-		factors: {site: ["ourlab.mario.site.P2", "ourlab.mario.site.P3", "ourlab.mario.site.P4", "ourlab.mario.site.P5"]},
+		factors: {site: ["ourlab.mario.site.P2", "ourlab.mario.site.P3", "ourlab.mario.site.P4", "ourlab.mario.site.P5", "ourlab.mario.site.P6", "ourlab.mario.site.P7", "ourlab.mario.site.P8"]},
 		output: {
 			"siteModel": {
 				"site": "{{site}}",
@@ -366,6 +370,11 @@ module.exports = {
 	}, {
 		"stackable": {
 			"below": "ourlab.siteModel1",
+			"above": "ourlab.model.plateModel_96_dwp"
+		}
+	}, {
+		"stackable": {
+			"below": "ourlab.siteModel1",
 			"above": "ourlab.model.plateModel_96_square_transparent_nunc"
 		}
 	}, {
@@ -384,7 +393,7 @@ module.exports = {
 		}};
 	}),
 	// ROMA1 Narrow
-	_.map(["P1", "P2", "P3", "P4", "P5", "REGRIP"], function(s) {
+	_.map(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"], function(s) {
 		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site."+s}};
 	}),
 	{
@@ -396,7 +405,7 @@ module.exports = {
 		}
 	},
 	// ROMA2 Narrow
-	_.map(["P1", "P2", "P3", "P4", "P5", "ROBOSEAL", "REGRIP"], function(s) {
+	_.map(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "ROBOSEAL", "REGRIP"], function(s) {
 		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique2", "site": "ourlab.mario.site."+s}};
 	}),
 	{
@@ -473,7 +482,7 @@ module.exports = {
 		}
 	},
 	{"#for": {
-		factors: {site: ["P2", "P3", "P4", "P5", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+		factors: {site: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
 		output: {
 			"pipetter.canAgentEquipmentSite": {
 				"agent": "ourlab.mario.evoware",

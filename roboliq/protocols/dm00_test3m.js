@@ -3,6 +3,15 @@ import assert from 'assert';
 import Immutable, {Map, fromJS} from 'immutable';
 import yaml from 'yamljs';
 
+// Site and labware:
+// P1 (not used)
+// P2 "culturePlate" pipetting
+// P3 "dilutionPlate" pipetting
+// P4 stillPlate (initial, incubator)
+// P5 shakePlate (initial, incubator)
+// P6 dilutionPlate1 (storage)
+// P7 dilutionPlate2 (storage)
+
 const tree = {
 	"pipettingLocation": "ourlab.mario.site.P3",
 	"culturePlate*": {
@@ -395,9 +404,9 @@ function test() {
 		roboliq: "v1",
 		objects: {
 			stillPlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P4"},
-			shakePlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P4"},
-			dilutionPlate1: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc"},
-			dilutionPlate2: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc"},
+			shakePlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P5"},
+			dilutionPlate1: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.P6"},
+			dilutionPlate2: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.P7"},
 		},
 		steps
 	}
