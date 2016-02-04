@@ -4,7 +4,7 @@ import Immutable, {Map, fromJS} from 'immutable';
 import yaml from 'yamljs';
 
 const tree = {
-	"pipettingLocation": "ourlab.mario.site.P1",
+	"pipettingLocation": "ourlab.mario.site.P3",
 	"culturePlate*": {
 		"stillPlate": {
 			"cultureReplicate*": [
@@ -394,10 +394,10 @@ function test() {
 	const protocol = {
 		roboliq: "v1",
 		objects: {
-			stillPlate: {type: "Plate", model: "plateModel_96_dwp"},
-			shakePlate: {type: "Plate", model: "plateModel_96_dwp"},
-			dilutionPlate1: {type: "Plate", model: "plateModel_96_square_transparent_nunc"},
-			dilutionPlate2: {type: "Plate", model: "plateModel_96_square_transparent_nunc"},
+			stillPlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P4"},
+			shakePlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P4"},
+			dilutionPlate1: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc"},
+			dilutionPlate2: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc"},
 		},
 		steps
 	}
