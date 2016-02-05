@@ -113,7 +113,7 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
-		it("should compile transporter._movePlate", function() {
+		it("should compile transporter._movePlate #1", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
@@ -140,6 +140,52 @@ describe('EvowareCompilerTest', function() {
 						"tableEffects": [
 							[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ],
 							[ [ "Some Carrier", 1, 2 ], { "label": "site2", "labwareModelName": "96-Well Plate" } ]
+						]
+					}
+				]
+			]);
+		});
+
+		it.only("should compile transporter._movePlate #2", function() {
+			const table = {};
+			const protocol = _.merge({},
+				require(__dirname+"/../src/config/roboliq.js"),
+				require(__dirname+"/../src/config/ourlab.js"),
+				protocol0,
+				{
+					roboliq: "v1",
+					objects: {
+						"stillPlate": {
+							"type": "Plate",
+							"model": "ourlab.model.plateModel_96_dwp",
+							"location": "ourlab.mario.site.P4"
+						}
+					},
+					steps: {
+						1: {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "stillPlate",
+							"destination": "ourlab.mario.site.P3"
+						}
+					}
+				}
+			);
+			const agents = ["ourlab.mario.evoware"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
+			console.log(JSON.stringify(results, null, '\t'))
+			should.deepEqual(results, [
+				[
+					{
+						"line": `Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Narrow","","","MP 3Pos Cooled 1 PCR","","MP 2Pos H+P Shake","2","(Not defined)","4");`,
+						"effects": {
+							"stillPlate.location": "ourlab.mario.site.P3"
+						},
+						"tableEffects": [
+							[ [ "MP 3Pos Cooled 1 PCR", 17, 2 ], { "label": "P4", "labwareModelName": "D-BSSE 96 Well DWP" } ],
+							[ [ "MP 2Pos H+P Shake", 10, 4 ], { "label": "P3", "labwareModelName": "D-BSSE 96 Well DWP" } ]
 						]
 					}
 				]

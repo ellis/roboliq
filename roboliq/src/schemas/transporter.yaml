@@ -19,6 +19,7 @@ transporter._movePlate:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Plate identifier", type: "Plate"}
     destination: {description: "Site to move the plate to", "type": "Site"}
   required: [agent, equipment, object, destination]

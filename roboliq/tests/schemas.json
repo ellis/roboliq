@@ -953,6 +953,10 @@
 				"description": "Equipment identifier",
 				"type": "Equipment"
 			},
+			"program": {
+				"description": "Program identifier",
+				"type": "name"
+			},
 			"object": {
 				"description": "Plate identifier",
 				"type": "Plate"
