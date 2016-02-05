@@ -411,7 +411,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe.only('stepArrayToObject', function () {
+	describe('stepArrayToObject', function () {
 		const steps = {
 			description: "hi",
 			1: {n: 1},

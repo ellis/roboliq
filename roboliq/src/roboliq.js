@@ -864,12 +864,7 @@ function _run(opts, userProtocol) {
 				// If the command was expanded, merge the expansion into the protocol as substeps:
 				if (result.hasOwnProperty("expansion")) {
 					// If an array was returned rather than an object, put it in the proper form
-					if (_.isArray(result.expansion)) {
-						//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
-						var l = _.compact(_.flattenDeep(result.expansion));
-						result.expansion = _.zipObject(_.range(1, l.length + 1), l);
-						//console.log("expansion:\n"+JSON.stringify(result.expansion, null, '  '))
-					}
+					result.expansion = commandHelper.stepArrayToObject(result.expansion);
 					_.merge(step, result.expansion);
 				}
 				// If the command has effects
