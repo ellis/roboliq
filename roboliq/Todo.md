@@ -1,8 +1,5 @@
 ## Before submission
 
-fIX TO:
-Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Wide","","","MP 3Pos Cooled 1 PCR","","MP 2Pos H+P Shake","2","(Not defined)","4");
-
 - [x] add 'roboliq' version to output
 - [x] get running of protocols from command line to work again, and document it
 - [x] main.js: show help if nothing is passed on the command line
@@ -163,9 +160,11 @@ Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Wide","","","MP 3Pos 
 - [ ] dm00_test3m.js:
     - [ ] pipetteMixtures: handle new mixture list
     - [ ] pipetteMixtures: handle `destinationLabware`
+    - [ ] `system.if`
     - [ ] `timer.wait`
     - [ ] `pipetter.dilutionSeries`
     - [ ] need to add liquid and labware for the "media" and "culture" sources
+    - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
     - something with absorbance OrangeG
     - two "culture" plates
