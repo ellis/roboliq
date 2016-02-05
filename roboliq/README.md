@@ -21,7 +21,7 @@ npm start -- [options] ${PROTOCOL}
 To compile a protocol for evoware, use `npm run evoware`.  Here's an example:
 
 ```{sh}
-npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/output/protocol3.cmp.json ourlab.mario.evoware
+npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/dm00_test3m.out.json ourlab.mario.evoware
 
 npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/DM_WorkTable_June2015.ewt protocols/output/protocol3.cmp.json ourlab.mario.evoware
 ```
