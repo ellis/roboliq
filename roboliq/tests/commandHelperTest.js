@@ -91,6 +91,12 @@ describe('commandHelper', function() {
 	});
 
 	describe('commandHelper.parseParams', function() {
+
+		require('mathjs').config({
+			number: 'bignumber', // Default type of number
+			precision: 64        // Number of significant digits for BigNumbers
+		});
+
 		it("should work with values specified in-line", () => {
 			const data = {
 				objects: {
@@ -152,6 +158,7 @@ describe('commandHelper', function() {
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			//console.log(JSON.stringify(parsed, null, '\t'))
+			should.deepEqual(parsed.value.time2, math.unit(math.bignumber(23), 'minutes'));
 			should.deepEqual(parsed, {
 				orig: params,
 				value: {
@@ -161,11 +168,11 @@ describe('commandHelper', function() {
 					string1: "hello",
 					string2: '"hello"',
 					time1: math.unit(23, 's'),
-					time2: math.unit(23, 'minutes'),
+					time2: math.unit(math.bignumber(23), 'minutes'),
 					volume1: math.unit(10, 'l'),
-					volume2: math.unit(10, 'ul'),
-					volumes1: [math.unit(10, 'ul')],
-					volumes2: [math.unit(10, 'ul'), math.unit(20, 'ul')],
+					volume2: math.unit(math.bignumber(10), 'ul'),
+					volumes1: [math.unit(math.bignumber(10), 'ul')],
+					volumes2: [math.unit(math.bignumber(10), 'ul'), math.unit(math.bignumber(20), 'ul')],
 					well1: "p(A01)",
 					wells1: ["p(A01)"],
 					source1: "p(A01)",
