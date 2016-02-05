@@ -335,7 +335,7 @@ describe('transporter', function() {
 	});
 
 	describe('transporter.doThenRestoreLocation', function () {
-		it("should handle doThenRestoreLocation", function() {
+		it.only("should handle doThenRestoreLocation", function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
@@ -365,33 +365,29 @@ describe('transporter', function() {
 					}
 				},
 				1: {
+					"command": "transporter.movePlate",
+					"object": "plate1",
+					"destination": "ourlab.mario.site.P4",
 					1: {
-						"command": "transporter.movePlate",
+						"command": "transporter._movePlate",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.roma1",
+						"program": "Narrow",
 						"object": "plate1",
-						"destination": "ourlab.mario.site.P4",
-						1: {
-							"command": "transporter._movePlate",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.roma1",
-							"program": "Narrow",
-							"object": "plate1",
-							"destination": "ourlab.mario.site.P4"
-						}
+						"destination": "ourlab.mario.site.P4"
 					}
 				},
 				2: {
+					"command": "transporter.movePlate",
+					"object": "plate1",
+					"destination": "ourlab.mario.site.P2",
 					1: {
-						"command": "transporter.movePlate",
+						"command": "transporter._movePlate",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.roma1",
+						"program": "Narrow",
 						"object": "plate1",
-						"destination": "ourlab.mario.site.P2",
-						1: {
-							"command": "transporter._movePlate",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.roma1",
-							"program": "Narrow",
-							"object": "plate1",
-							"destination": "ourlab.mario.site.P2"
-						}
+						"destination": "ourlab.mario.site.P2"
 					}
 				}
 			});

@@ -223,7 +223,7 @@ var commandHandlers = {
 	"transporter.doThenRestoreLocation": function(params, parsed, data) {
 		//console.log("transporter.doThenRestoreLocation("+JSON.stringify(parsed, null, '\t')+")");
 
-		const restoreSteps = {};
+		const restoreSteps = [];
 		for (let i = 0; i < parsed.value.objects.length; i++) {
 			const labwareName = parsed.objectName[`objects.${i}`];
 			const command = _.merge({}, {
@@ -232,13 +232,13 @@ var commandHandlers = {
 				object: labwareName,
 				destination: parsed.value.objects[i].location
 			});
-			restoreSteps[(i+1).toString()] = command;
+			restoreSteps.push(command);
 		}
 
-		const expansion = {
-			1: parsed.value.steps,
-			2: restoreSteps
-		};
+		const expansion = [
+			_.values(parsed.value.steps),
+			restoreSteps
+		];
 		//console.log("expansion:\n"+JSON.stringify(expansion, null, '\t'))
 
 		return { expansion };
