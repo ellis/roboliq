@@ -8,6 +8,7 @@ var assert = require('assert');
 var expect = require('./expect.js');
 var jmespath = require('jmespath');
 import math from 'mathjs';
+import naturalSort from 'javascript-natural-sort';
 import tv4 from 'tv4';
 import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
@@ -758,10 +759,28 @@ function lookupPaths(paths, params, data) {
 	return _.mapValues(paths, path => lookupPath(path, params, data));
 }
 
+/**
+ * Return array of step keys in order.
+ * Any keys that begin with a number will be included,
+ * and they will be sorted in natural order.
+ *
+ * @param  {object|array} o - an object or array of steps
+ * @return {array} an ordered array of keys that represent steps
+ */
+function getStepKeys(o) {
+	// Find all sub-steps (properties that start with a digit)
+	const rx = /^[0-9]/;
+	const keys = _.keys(o).filter(x => rx.test(x));
+	// Sort them in "natural" order
+	keys.sort(naturalSort);
+	return keys;
+}
+
 module.exports = {
 	asArray,
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
+	getStepKeys,
 	lookupPath,
 	lookupPaths,
 	parseParams,

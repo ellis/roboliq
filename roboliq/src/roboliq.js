@@ -886,12 +886,7 @@ function _run(opts, userProtocol) {
 		}
 
 		// Find all sub-steps (properties that start with a digit)
-		var keys = _.filter(_.keys(step), function(key) {
-			var c = key[0];
-			return (c >= '0' && c <= '9');
-		});
-		// Sort them in "natural" order
-		keys.sort(naturalSort);
+		const keys = commandHelper.getStepKeys(step);
 		// Try to expand the substeps
 		for (const key of keys) {
 			expandStep(protocol, prefix.concat(key), step[key], objects, scope);
