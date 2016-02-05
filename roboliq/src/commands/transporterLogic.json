@@ -1,194 +1,200 @@
-[
-	{"action": {"description": "print for debugging",
-		"task": {"print": {"text": "?text"}},
-		"preconditions": [],
-		"deletions": [],
-		"additions": []
-	}},
+{
+	"null": {
+		"print": {"action": {"description": "print for debugging",
+			"task": {"print": {"text": "?text"}},
+			"preconditions": [],
+			"deletions": [],
+			"additions": []
+		}},
 
-	{"action": {"description": "transport plate from origin to destination",
-		"task": {"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-		"preconditions": [
-			{"model": {"labware": "?labware", "model": "?model"}},
-			{"location": {"labware": "?labware", "site": "?origin"}},
-			{"siteIsOpen": {"site": "?origin"}},
-			{"siteIsOpen": {"site": "?destination"}},
-			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"siteIsClear": {"site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
-		],
-		"deletions": [{"location": {"labware": "?labware", "site": "?origin"}}],
-		"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
-	}},
+		"transporter._movePlate": {"action": {"description": "transport plate from origin to destination",
+			"task": {"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"model": {"labware": "?labware", "model": "?model"}},
+				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"siteIsOpen": {"site": "?origin"}},
+				{"siteIsOpen": {"site": "?destination"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": "?model"}},
+				{"siteIsClear": {"site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
+			],
+			"deletions": [{"location": {"labware": "?labware", "site": "?origin"}}],
+			"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
+		}},
 
-	{"method": {"description": "openAndMovePlate-openNeither: neither site needs to be opened before transport",
-		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-		"preconditions": [
-			{"siteIsOpen": {"site": "?origin"}},
-			{"siteIsOpen": {"site": "?destination"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "openAndMovePlate-openNeither"}},
-			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
-		]}
-	}},
+		"movePlate-null": {"method": {"description": "movePlate-null: transport plate from origin to destination",
+			"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+			"preconditions": [
+				{"location": {"labware": "?labware", "site": "?destination"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "movePlate-null"}}
+			]}
+		}},
 
-	{"method": {"description": "openAndMovePlate-openBoth: open both sites before transport, then close them",
-		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-		"preconditions": [
-			{"siteIsClosed": {"site": "?origin"}},
-			{"siteIsClosed": {"site": "?destination"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "openAndMovePlate-openBoth"}},
-			{"generic.openSite": {"site": "?origin"}},
-			{"generic.openSite": {"site": "?destination"}},
-			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-			{"generic.closeSite": {"site": "?origin"}},
-			{"generic.closeSite": {"site": "?destination"}}
-		]}
-	}},
+		"movePlate-a-null": {"method": {"description": "movePlate-a-null: transport plate from origin to destination",
+			"task": {"movePlate-a": {"labware": "?labware", "destination": "?destination"}},
+			"preconditions": [
+				{"location": {"labware": "?labware", "site": "?destination"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "movePlate-a-null"}}
+			]}
+		}}
+	},
 
-	{"method": {"description": "openAndMovePlate-openOrigin: open origin before transport, then close it",
-		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-		"preconditions": [
-			{"siteIsClosed": {"site": "?origin"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "openAndMovePlate-openOrigin"}},
-			{"generic.openSite": {"site": "?origin"}},
-			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-			{"generic.closeSite": {"site": "?origin"}}
-		]}
-	}},
+	"one": {
+		"openAndMovePlate-openNeither": {"method": {"description": "openAndMovePlate-openNeither: neither site needs to be opened before transport",
+			"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"siteIsOpen": {"site": "?origin"}},
+				{"siteIsOpen": {"site": "?destination"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "openAndMovePlate-openNeither"}},
+				{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			]}
+		}},
 
-	{"method": {"description": "openAndMovePlate-openDestination: open destination before transport, then close it",
-		"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-		"preconditions": [
-			{"siteIsClosed": {"site": "?destination"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "openAndMovePlate-openDestination"}},
-			{"generic.openSite": {"site": "?destination"}},
-			{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
-			{"generic.closeSite": {"site": "?destination"}}
-		]}
-	}},
+		"openAndMovePlate-openBoth": {"method": {"description": "openAndMovePlate-openBoth: open both sites before transport, then close them",
+			"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"siteIsClosed": {"site": "?origin"}},
+				{"siteIsClosed": {"site": "?destination"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "openAndMovePlate-openBoth"}},
+				{"generic.openSite": {"site": "?origin"}},
+				{"generic.openSite": {"site": "?destination"}},
+				{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+				{"generic.closeSite": {"site": "?origin"}},
+				{"generic.closeSite": {"site": "?destination"}}
+			]}
+		}},
 
-	{"method": {"description": "movePlate-null: transport plate from origin to destination",
-		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"location": {"labware": "?labware", "site": "?destination"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-null"}}
-		]}
-	}},
+		"openAndMovePlate-openOrigin": {"method": {"description": "openAndMovePlate-openOrigin: open origin before transport, then close it",
+			"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"siteIsClosed": {"site": "?origin"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "openAndMovePlate-openOrigin"}},
+				{"generic.openSite": {"site": "?origin"}},
+				{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+				{"generic.closeSite": {"site": "?origin"}}
+			]}
+		}},
 
-	{"method": {"description": "movePlate-one: transport plate from origin to destination",
-		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"model": {"labware": "?labware", "model": "?model"}},
-			{"location": {"labware": "?labware", "site": "?origin"}},
-			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"siteIsClear": {"site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-one"}},
-			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
-		]}
-	}},
+		"openAndMovePlate-openDestination": {"method": {"description": "openAndMovePlate-openDestination: open destination before transport, then close it",
+			"task": {"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"siteIsClosed": {"site": "?destination"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "openAndMovePlate-openDestination"}},
+				{"generic.openSite": {"site": "?destination"}},
+				{"transporter._movePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+				{"generic.closeSite": {"site": "?destination"}}
+			]}
+		}},
 
-	{"method": {"description": "movePlate-two: transport plate from origin to destination",
-		"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"model": {"labware": "?labware", "model": "?model"}},
-			{"location": {"labware": "?labware", "site": "?origin"}},
-			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"siteIsClear": {"site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
-			{"not": {"same": {"thing1": "?site2", "thing2": "?origin"}}},
-			{"not": {"same": {"thing1": "?site2", "thing2": "?destination"}}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "siteClique": "?siteClique1"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
-			{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
-			{"stackable": {"below": "?site2Model", "above": "?model"}},
-			{"siteIsClear": {"site": "?site2"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-two"}},
-			{"openAndMovePlate": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
-			{"openAndMovePlate": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
-		]}
-	}},
+		"movePlate-one": {"method": {"description": "movePlate-one: transport plate from origin to destination",
+			"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+			"preconditions": [
+				{"model": {"labware": "?labware", "model": "?model"}},
+				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": "?model"}},
+				{"siteIsClear": {"site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "movePlate-one"}},
+				{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			]}
+		}},
 
-	{"method": {"description": "movePlate-a-null: transport plate from origin to destination",
-		"task": {"movePlate-a": {"labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"location": {"labware": "?labware", "site": "?destination"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-a-null"}}
-		]}
-	}},
+		"movePlate-a-one": {"method": {"description": "movePlate-a-one: transport plate from origin to destination",
+			"task": {"movePlate-a": {"agent": "?agent", "labware": "?labware", "destination": "?destination"}},
+			"preconditions": [
+				{"isAgent": {"agent": "?agent"}},
+				{"model": {"labware": "?labware", "model": "?model"}},
+				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": "?model"}},
+				{"siteIsClear": {"site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "movePlate-a-one agent"}},
+				{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			]}
+		}}
+	},
 
-	{"method": {"description": "movePlate-a-one: transport plate from origin to destination",
-		"task": {"movePlate-a": {"agent": "?agent", "labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"isAgent": {"agent": "?agent"}},
-			{"model": {"labware": "?labware", "model": "?model"}},
-			{"location": {"labware": "?labware", "site": "?origin"}},
-			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"siteIsClear": {"site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-a-one agent"}},
-			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}}
-		]}
-	}},
+	"two": {
+		"movePlate-two": {"method": {"description": "movePlate-two: transport plate from origin to destination",
+			"task": {"movePlate": {"labware": "?labware", "destination": "?destination"}},
+			"preconditions": [
+				{"model": {"labware": "?labware", "model": "?model"}},
+				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": "?model"}},
+				{"siteIsClear": {"site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
+				{"not": {"same": {"thing1": "?site2", "thing2": "?origin"}}},
+				{"not": {"same": {"thing1": "?site2", "thing2": "?destination"}}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "siteClique": "?siteClique1"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
+				{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
+				{"stackable": {"below": "?site2Model", "above": "?model"}},
+				{"siteIsClear": {"site": "?site2"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "movePlate-two"}},
+				{"openAndMovePlate": {"agent": "?agent1", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
+				{"openAndMovePlate": {"agent": "?agent2", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			]}
+		}},
 
-	{"method": {"description": "movePlate-a-two: transport plate from origin to destination",
-		"task": {"movePlate-a": {"agent": "?agent", "labware": "?labware", "destination": "?destination"}},
-		"preconditions": [
-			{"model": {"labware": "?labware", "model": "?model"}},
-			{"location": {"labware": "?labware", "site": "?origin"}},
-			{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-			{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-			{"stackable": {"below": "?destinationModel", "above": "?model"}},
-			{"siteIsClear": {"site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?destination"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
-			{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment1", "program": "?program1", "siteClique": "?siteClique1"}},
-			{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
-			{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
-			{"stackable": {"below": "?site2Model", "above": "?model"}},
-			{"siteIsClear": {"site": "?site2"}}
-		],
-		"subtasks": {"ordered": [
-			{"print": {"text": "movePlate-a-two"}},
-			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
-			{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
-		]}
-	}}
-]
+		"movePlate-a-two": {"method": {"description": "movePlate-a-two: transport plate from origin to destination",
+			"task": {"movePlate-a": {"agent": "?agent", "labware": "?labware", "destination": "?destination"}},
+			"preconditions": [
+				{"model": {"labware": "?labware", "model": "?model"}},
+				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": "?model"}},
+				{"siteIsClear": {"site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment1", "program": "?program1", "siteClique": "?siteClique1"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "siteClique": "?siteClique2"}},
+				{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
+				{"stackable": {"below": "?site2Model", "above": "?model"}},
+				{"siteIsClear": {"site": "?site2"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": "movePlate-a-two"}},
+				{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment1", "program": "?program1", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
+				{"openAndMovePlate": {"agent": "?agent", "equipment": "?equipment2", "program": "?program2", "labware": "?labware", "model": "?model", "origin": "?site2", "originModel": "?site2Model", "destination": "?destination", "destinationModel": "?destinationModel"}}
+			]}
+		}}
+	}
+}

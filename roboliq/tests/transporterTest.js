@@ -20,7 +20,7 @@ describe('transporter', function() {
 	};
 
 	describe('transporter.movePlate', function () {
-		it.only("should handle movePlate to the plate's current location", function() {
+		it("should handle movePlate to the plate's current location", function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {

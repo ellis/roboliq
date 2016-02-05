@@ -139,7 +139,7 @@ var commandHandlers = {
 	 */
 	"transporter.movePlate": function(params, parsed, data) {
 		console.log("transporter.movePlate("+JSON.stringify(params)+")")
-		var transporterLogic = require('./transporterLogic.json');
+		const transporterLogic = require('./transporterLogic.json');
 		/*
 		const infix = (parsed.objectName.agent) ? "-a" : "";
 		const taskNames = [`movePlate${infix}-null`, `movePlate${infix}-one`, `movePlate${infix}-two`];
@@ -192,7 +192,8 @@ var commandHandlers = {
 				"ordered": taskList
 			}
 		};
-		var input0 = [].concat(data.predicates, transporterLogic, [tasksOrdered]);
+		const transporterPredicates = _(transporterLogic).values().map(x => _.values(x)).flatten().value();
+		var input0 = [].concat(data.predicates, transporterPredicates, [tasksOrdered]);
 		var input = input0;
 		//console.log(JSON.stringify(input, null, '\t'));
 
