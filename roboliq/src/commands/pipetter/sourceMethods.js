@@ -79,12 +79,13 @@ function sourceMethod3(group, data, effects) {
 				else {
 					var wellAndVolumes = _.map(wells, function(wellName) {
 						var volume = WellContents.getWellVolume(wellName, data, effects);
-						return [wellName, volume.toNumber('ul')];
+						return {wellName, volume: volume.toNumber('ul')};
 					});
 					// Sort by volume
-					math.sort(wellAndVolumes, function(a, b) { return -math.compare(a[1], b[1])});
+					//console.log({wellAndVolumes})
+					math.sort(wellAndVolumes, function(a, b) { return -math.compare(a.volume, b.volume)});
 					// Pick well with greatest volume
-					var wellName = wellAndVolumes[0][0];
+					var wellName = wellAndVolumes[0].wellName;
 					item.source = wellName;
 					//console.log("well chosen:", wellName);
 					// Move the chosen well to the back of the array
