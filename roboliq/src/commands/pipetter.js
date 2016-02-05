@@ -79,7 +79,7 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	//console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	let items = (_.isUndefined(parsed.value.items))
 		? []
@@ -147,7 +147,7 @@ function pipette(params, parsed, data) {
 			}
 
 			if (_.isUndefined(items[i].volume)) {
-				console.log(`items[${i}].volume is undefined, volumesTop = ${volumesTop}`)
+				//console.log(`items[${i}].volume is undefined, volumesTop = ${volumesTop}`)
 				if (volumesTop.length == 1)
 					items[i].volume = volumesTop[0];
 				else if (volumesTop.length > 1)
@@ -260,8 +260,8 @@ function pipette(params, parsed, data) {
 	var sourceToItems = _.groupBy(items, 'source');
 
 	const itemsAll = items;
-	console.log({itemVolumes: items.map(x => x.volume)})
-	console.log(_.filter(items, item => item.volume));
+	//console.log({itemVolumes: items.map(x => x.volume)})
+	//console.log(_.filter(items, item => item.volume));
 	items = _.filter(items, item => item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items

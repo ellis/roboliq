@@ -120,7 +120,9 @@
 - [x] consider how to use `experiment.run` in paper1_protocol1_ph
 - [x] `lookupPath` should handle an object name as the first path element
 - [x] get EvowareCompiler working
-- [ ] troubleshoot sealer.sealPlate
+- [x] troubleshoot sealer.sealPlate
+- [x] remove excess debug output from pipetting
+- [ ] add `--quiet` flag to suppress printing errors
 - [ ] create `Conditions` type, and generate its `value` property
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.

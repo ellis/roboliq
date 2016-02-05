@@ -405,7 +405,6 @@ module.exports = {
 		}
 	},
 	// ROMA2 Narrow
-	// FIXME: for some reason, having P6, P7, or P8 in this list causes sealerTest to fail!!!
 	_.map(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "ROBOSEAL", "REGRIP"], function(s) {
 		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique2", "site": "ourlab.mario.site."+s}};
 	}),
