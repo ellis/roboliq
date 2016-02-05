@@ -33,7 +33,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe.only('getStepKeys', function () {
+	describe('getStepKeys', function () {
 		const steps = {
 			description: "hi",
 			1: {},

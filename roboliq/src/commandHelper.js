@@ -767,20 +767,36 @@ function lookupPaths(paths, params, data) {
  * @param  {object|array} o - an object or array of steps
  * @return {array} an ordered array of keys that represent steps
  */
-function getStepKeys(o) {
-	if (_.isPlainObject(o)) {
+function getStepKeys(steps) {
+	if (_.isPlainObject(steps)) {
 		// Find all sub-steps (properties that start with a digit)
 		const rx = /^[0-9]/;
-		const keys = _.keys(o).filter(x => rx.test(x));
+		const keys = _.keys(steps).filter(x => rx.test(x));
 		// Sort them in "natural" order
 		keys.sort(naturalSort);
 		return keys;
 	}
-	else if (_.isArray(o)) {
-		return _.range(o.length);
+	else if (_.isArray(steps)) {
+		return _.range(steps.length);
 	}
 	else {
-		assert(false);
+		return [];
+	}
+}
+
+function stepArrayToObject(steps) {
+	if (_.isPlainObject(steps)) {
+		return steps;
+	}
+	else if (_.isArray(steps)) {
+		//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
+		const l = _.compact(_.flattenDeep(steps));
+		const steps2 = _.zipObject(_.range(1, l.length + 1), l);
+		//console.log("steps2:\n"+JSON.stringify(steps2, null, '  '))
+		return steps2;
+	}
+	else {
+		assert(false, "expected an object or array");
 	}
 }
 
@@ -793,4 +809,5 @@ module.exports = {
 	lookupPaths,
 	parseParams,
 	queryLogic,
+	stepArrayToObject,
 }
