@@ -33,6 +33,29 @@ describe('commandHelper', function() {
 		});
 	});
 
+	describe.only('getStepKeys', function () {
+		const steps = {
+			description: "hi",
+			1: {},
+			2: {},
+			5: {},
+			3: {},
+			"4a": {}
+		};
+		it('should get step-related keys of an object', () => {
+			should.deepEqual(
+				commandHelper.getStepKeys(steps),
+				["1", "2", "3", "4a", "5"]
+			);
+		});
+		it('should get step-related keys of an array', () => {
+			should.deepEqual(
+				commandHelper.getStepKeys([{}, {}, {}]),
+				[0, 1, 2]
+			);
+		});
+	});
+
 	describe('commandHelper.lookupPath', function() {
 		it("should lookup mixtures of parameter and object values", () => {
 			const data = {

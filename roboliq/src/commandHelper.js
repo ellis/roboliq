@@ -768,12 +768,20 @@ function lookupPaths(paths, params, data) {
  * @return {array} an ordered array of keys that represent steps
  */
 function getStepKeys(o) {
-	// Find all sub-steps (properties that start with a digit)
-	const rx = /^[0-9]/;
-	const keys = _.keys(o).filter(x => rx.test(x));
-	// Sort them in "natural" order
-	keys.sort(naturalSort);
-	return keys;
+	if (_.isPlainObject(o)) {
+		// Find all sub-steps (properties that start with a digit)
+		const rx = /^[0-9]/;
+		const keys = _.keys(o).filter(x => rx.test(x));
+		// Sort them in "natural" order
+		keys.sort(naturalSort);
+		return keys;
+	}
+	else if (_.isArray(o)) {
+		return _.range(o.length);
+	}
+	else {
+		assert(false);
+	}
 }
 
 module.exports = {

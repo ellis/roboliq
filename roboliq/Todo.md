@@ -190,7 +190,7 @@
 - [x] implement lookupPaths
 - [x] evoware: rename `_cleanTips` instruction to `_washTips`
 - [x] test transporter.doThenRestoreLocation
-- [ ] commandHelper.getStepKeys: return array of step keys in order
+- [x] commandHelper.getStepKeys: return array of step keys in order
 - [ ] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
 - [ ] Experiment Conditions Data:
 - [ ] check whether Evoware external n2 is display order
