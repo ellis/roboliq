@@ -23,6 +23,16 @@ transporter._movePlate:
     destination: {description: "Site to move the plate to", "type": "Site"}
   required: [agent, equipment, object, destination]
 
+transporter.doThenRestoreLocation:
+  description: |
+    Perform steps, then make sure that the given labware is stored to the
+    locations before the steps.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    objects: {description: "Plate identifier", type: "array", items: {type: Plate}}
+    steps: {description: "Sub-steps to perform", type: [object, array]}
+  required: [objects]
+
 transporter.movePlate:
   description: |
     Transport a plate to a destination.

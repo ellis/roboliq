@@ -333,4 +333,68 @@ describe('transporter', function() {
 		});
 
 	});
+
+	describe('transporter.doThenRestoreLocation', function () {
+		it.only("should handle doThenRestoreLocation", function() {
+			var protocol = _.merge({}, protocol0, {
+				steps: {
+					1: {
+						"command": "transporter.doThenRestoreLocation",
+						"objects": ["plate1"],
+						steps: {
+							1: {
+								"command": "transporter.movePlate",
+								"object": "plate1",
+								"destination": "ourlab.mario.site.P4"
+							}
+						}
+					}
+				}
+			});
+			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.steps[1], {
+				"command": "transporter.doThenRestoreLocation",
+				"objects": ["plate1"],
+				steps: {
+					1: {
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.P4"
+					}
+				},
+				1: {
+					1: {
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.P4",
+						1: {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.P4"
+						}
+					}
+				},
+				2: {
+					1: {
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.P2",
+						1: {
+							"command": "transporter._movePlate",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.roma1",
+							"program": "Narrow",
+							"object": "plate1",
+							"destination": "ourlab.mario.site.P2"
+						}
+					}
+				}
+			});
+		});
+	});
 });
