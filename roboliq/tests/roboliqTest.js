@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var assert = require('assert');
 var should = require('should');
 var roboliq = require('../src/roboliq.js')
 
@@ -144,8 +145,9 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["-o", ""], protocol);
+			var result = roboliq.run(["-o", "", "--quiet"], protocol);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			assert(_.size(result.output.errors) > 0, "should have an error due to missing steps.1.duration");
 			should.deepEqual(result.output.fillIns, {
 				'objects.plate1.model': {description: "please provide a model"},
 				'steps.1.duration': {description: "please provide a duration"},

@@ -122,7 +122,7 @@
 - [x] get EvowareCompiler working
 - [x] troubleshoot sealer.sealPlate
 - [x] remove excess debug output from pipetting
-- [ ] add `--quiet` flag to suppress printing errors
+- [x] add `--quiet` flag to suppress printing errors
 - [ ] create `Conditions` type, and generate its `value` property
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.

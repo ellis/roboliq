@@ -116,6 +116,10 @@ const nomnom = require('nomnom').options({
 		flag: true,
 		help: 'print progress indicator while processing the protocol'
 	},
+	quiet: {
+		flag: true,
+		help: "suppress printing of information, erros, and warning"
+	},
 	throw: {
 		abbr: 'T',
 		flag: true,
@@ -566,35 +570,37 @@ function run(argv, userProtocol) {
 			_.set(result, `output.errors[${path}]`, errors);
 			//console.log(JSON.stringify(errors))
 		}
-		else {
+		else if (!opts.quiet) {
 			console.log(JSON.stringify(e));
 		}
 	}
 
 	// If processing finished without exceptions:
 	if (result && result.output) {
-		// Print errors, if any:
-		if (!_.isEmpty(result.output.errors)) {
-			console.log();
-			console.log("Errors:");
-			_.forEach(result.output.errors, function(err, id) {
-				if (id)
-					console.log(id+": "+err.toString());
-				else
-					console.log(err.toString());
-			});
-		}
+		if (!opts.quiet) {
+			// Print errors, if any:
+			if (!_.isEmpty(result.output.errors)) {
+				console.log();
+				console.log("Errors:");
+				_.forEach(result.output.errors, function(err, id) {
+					if (id)
+						console.log(id+": "+err.toString());
+					else
+						console.log(err.toString());
+				});
+			}
 
-		// Print warnings, if any:
-		if (!_.isEmpty(result.output.warnings)) {
-			console.log();
-			console.log("Warnings:");
-			_.forEach(result.output.warnings, function(err, id) {
-				if (id)
-					console.log(id+": "+err.toString());
-				else
-					console.log(err.toString());
-			});
+			// Print warnings, if any:
+			if (!_.isEmpty(result.output.warnings)) {
+				console.log();
+				console.log("Warnings:");
+				_.forEach(result.output.warnings, function(err, id) {
+					if (id)
+						console.log(id+": "+err.toString());
+					else
+						console.log(err.toString());
+				});
+			}
 		}
 
 		if (opts.debug) {
@@ -610,7 +616,9 @@ function run(argv, userProtocol) {
 			var inpath = _.last(opts.infiles);
 			var dir = opts.outputDir || path.dirname(inpath);
 			var outpath = opts.output || path.join(dir, path.basename(inpath, path.extname(inpath))+".out.json");
-			console.log("output written to: "+outpath);
+			if (!opts.quiet) {
+				console.log("output written to: "+outpath);
+			}
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 		}
 	}
