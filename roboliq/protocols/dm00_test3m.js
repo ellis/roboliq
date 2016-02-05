@@ -388,7 +388,13 @@ function test() {
 				command: "timer.doAndWait",
 				equipment: "ourlab.mario.timer2",
 				duration: "3 minutes",
-				steps: step
+				steps: {
+					1: {
+						command: "transporter.doThenRestoreLocation",
+						objects: [scope.get("dilutionPlate")],
+						steps: step
+					}
+				}
 			});
 		});
 
@@ -411,7 +417,7 @@ function test() {
 		},
 		steps
 	}
-	console.log(yaml.stringify(protocol, 7, 2));
+	console.log(yaml.stringify(protocol, 9, 2));
 }
 
 test();
