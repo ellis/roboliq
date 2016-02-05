@@ -52,42 +52,50 @@ module.exports = {
 						"1": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000"
+							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"row": 1
 						},
 						"2": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000"
+							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"row": 2
 						},
 						"3": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000"
+							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"row": 3
 						},
 						"4": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000"
+							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"row": 4
 						},
 						"5": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050"
+							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"row": 5
 						},
 						"6": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050"
+							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"row": 6
 						},
 						"7": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050"
+							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"row": 7
 						},
 						"8": {
 							"type": "Syringe",
 							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050"
+							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"row": 8
 						}
 					},
 					"tipModelToSyringes": {

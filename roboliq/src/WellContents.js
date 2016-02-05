@@ -110,7 +110,7 @@ export function getVolume(contents) {
 	checkContents(contents);
 	if (!_.isEmpty(contents)) {
 		const volume = math.eval(contents[0]);
-		if (volume.unit.name === 'l') return volume;
+		if (math.unit('l').equalBase(volume)) return volume;
 	}
 	return emptyVolume;
 }
@@ -139,7 +139,7 @@ export function getWellVolume(wellName, data, effects) {
 	var contents = getWellContents(wellName, data, effects);
 	if (!_.isEmpty(contents)) {
 		var volume = math.eval(contents[0]);
-		if (volume.unit.name === 'l') return volume;
+		if (math.unit('l').equalBase(volume)) return volume;
 	}
 	return emptyVolume;
 }

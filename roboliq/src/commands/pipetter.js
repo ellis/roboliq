@@ -234,7 +234,7 @@ function pipette(params, parsed, data) {
 		_.forEach(items, function(item) {
 			//console.log("item:", item)
 			var volume = item.volume;
-			assert.equal(volume.unit.name, 'l', "expected units to be in liters");
+			assert(math.unit('l').equalBase(volume), "expected units to be in liters");
 			if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
 				canUse0050 = false;
 			}

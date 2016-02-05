@@ -124,6 +124,7 @@ function groupItems(parsed, data) {
 	//console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
 	let ref = tuples[0];
+	//console.log({ref})
 	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
 	let syringeSpacing;
 	function canJoinGroup(group, tuple) {
@@ -135,10 +136,18 @@ function groupItems(parsed, data) {
 		function checkWellInfo(wellInfo, wellInfoRef) {
 			// Same column?
 			if (wellInfo.col === wellInfoRef.col) {
-				const dRow1 = tuple.item.syringe.row - wellInfoRef.item.syringe.row
+				//console.log({tuple})
+				const dRow1 = tuple.item.syringe.row - ref.item.syringe.row
 				const dRow2 = wellInfo.row - wellInfoRef.row;
+				console.log({tupleSyringe: tuple.item.syringe, refSyringe: ref.item.syringe})
 				if (_.isUndefined(syringeSpacing)) {
+					if (dRow1 === 0 || dRow2 === 0) {
+						return false;
+					}
+					console.log(1)
+					console.log({dRow1, dRow2})
 					syringeSpacing = math.fraction(dRow2, dRow1);
+					console.log(2)
 					// FIXME: need to check wether the syringe spacing is permissible!  Check how much the syringes need to spread physically (not just relative to the plate wells), and whether that's possible for the hardware.  Also, not all fractions will be permissible, probably.
 					if (syringeSpacing < 1) {
 						return false;
@@ -148,8 +157,10 @@ function groupItems(parsed, data) {
 					}
 				}
 				else {
+					console.log(3)
 					if (math.equal(math.fraction(dRow2, dRow1), syringeSpacing))
 						return true;
+					console.log(4)
 				}
 			}
 			return false;
