@@ -915,15 +915,8 @@ function _run(opts, userProtocol) {
 	// Otherwise create tables
 	else {
 		const output = _.merge(
-			{},
-			{
-				roboliq: version,
-				objects: protocol.objects,
-				steps: protocol.steps,
-				effects: protocol.effects,
-				warnings: protocol.warnings,
-				errors: protocol.errors
-			}
+			{roboliq: version},
+			_.pick(protocol, "objects", "schemas", "steps", "effects", "warnings", "errors")
 		);
 
 		const tables = {
