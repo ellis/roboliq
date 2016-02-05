@@ -318,6 +318,7 @@
 
 ## After submission
 
+- [ ] BUG: HTN: in transporter.js, if we use all transporterLogic predicates at once for planning, then in sealerTest a two-step route for plate movement is accepted instead of a one-step route -- that's why I had to split up transporterLogic into groups (null, one, two) and iterate through them.
 - [ ] `commandHelper.parseParams`: test that a parameter of type `name` does not expand when the value happens to be a path to an object
 - [ ] `commandHelper.parseParams`: return a list of extra properties in the parameters that aren't in the schema (e.g. `parsed.unknown`)
 - [ ] `commandHelper.parseParams`: test `parsed.unknown` list

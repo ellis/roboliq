@@ -138,60 +138,37 @@ var commandHandlers = {
 	 * @property {string} destination - Location identifier
 	 */
 	"transporter.movePlate": function(params, parsed, data) {
-		console.log("transporter.movePlate("+JSON.stringify(params)+")")
+		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		const transporterLogic = require('./transporterLogic.json');
-		/*
+
+		const keys = ["null", "one", "two"];
 		const infix = (parsed.objectName.agent) ? "-a" : "";
-		const taskNames = [`movePlate${infix}-null`, `movePlate${infix}-one`, `movePlate${infix}-two`];
 		const taskParams = _.merge({}, {
 			"agent": parsed.objectName.agent, // this may be undefined
 			"labware": parsed.objectName.object,
 			"destination": parsed.objectName.destination
 		});
-		const input0 = [].concat(data.predicates, transporterLogic);
 
 		const shop = require('../HTN/shop.js');
+		let input0 = data.predicates;
 		let plan;
-		for (let i = 0; i < taskNames.length; i++) {
-			const taskName = taskNames[i];
-			const tasks = {
-				"tasks": {
-					"ordered": [_.fromPairs([[taskName, taskParams]])]
-				}
-			};
-			console.log(JSON.stringify(tasks))
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			input0 = input0.concat(_.values(transporterLogic[key]));
+			const tasks = { "tasks": { "ordered": [_.fromPairs([[`movePlate${infix}`, taskParams]])] } };
+			//console.log(JSON.stringify(tasks))
 			const input = input0.concat([tasks]);
 			var planner = shop.makePlanner(input);
 			plan = planner.plan();
-			console.log(taskName, plan)
+			//console.log(key, plan)
 			if (!_.isEmpty(plan)) {
-				console.log("plan found for "+taskName)
-				console.log(planner.ppPlan(plan));
+				//console.log("plan found for "+key)
+				//console.log(planner.ppPlan(plan));
 				break;
 			}
-		}*/
-		var taskList = [];
-		if (parsed.objectName.agent) {
-			taskList.push({
-				"movePlate-a": {
-					"agent": parsed.objectName.agent,
-					"labware": parsed.objectName.object,
-					"destination": parsed.objectName.destination
-				}
-			});
-		} else {
-			taskList.push({
-				"movePlate": {
-					"labware": parsed.objectName.object,
-					"destination": parsed.objectName.destination
-				}
-			});
 		}
-		const tasksOrdered = {
-			"tasks": {
-				"ordered": taskList
-			}
-		};
+
+		/*
 		const transporterPredicates = _(transporterLogic).values().map(x => _.values(x)).flatten().value();
 		var input0 = [].concat(data.predicates, transporterPredicates, [tasksOrdered]);
 		var input = input0;
@@ -203,6 +180,8 @@ var commandHandlers = {
 		//console.log("plan:\n"+JSON.stringify(plan, null, '  '));
 		var x = planner.ppPlan(plan);
 		console.log(x);
+		*/
+
 		if (_.isEmpty(plan)) {
 			var agentId = params.agent || "?agent";
 			var modelId = parsed.value.object.model || "?model";

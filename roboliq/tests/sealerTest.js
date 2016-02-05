@@ -15,7 +15,7 @@ describe('commands/sealer', function() {
 	};
 
 	describe('sealer.sealPlate', function () {
-		it.only('should move plate to sealer, seal, then move plate back to original location', function () {
+		it('should move plate to sealer, seal, then move plate back to original location', function () {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
