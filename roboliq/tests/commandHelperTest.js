@@ -411,28 +411,32 @@ describe('commandHelper', function() {
 		});
 	});
 
-	/*
-	describe('commandHelper.getParsedValue', function() {
-		it('should work with error-free input', function() {
-			const data = {
-				objects: {
-					plate1: {type: "Plate", location: "P1"},
-					number1: {type: "Variable", value: 1}
-				},
-				accesses: []
-			};
-			const parsed = {
-				value: {
-					objectName: {objectName: "plate1"},
-					object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
-					count: {objectName: "number1", value: 1}
-				}
-				objectName: {objectName: "plate1"},
-				object: {objectName: "plate1", value: {type: "Plate", location: "P1"}},
-				count: {objectName: "number1", value: 1}
-			};
-			should.deepEqual(commandHelper.getParsedValue(parsed, data, "objectName", "location"), "P1");
-			should.deepEqual(commandHelper.getParsedValue(parsed, data, "object", "location"), "P1");
+	describe.only('stepArrayToObject', function () {
+		const steps = {
+			description: "hi",
+			1: {n: 1},
+			2: {n: 2},
+			5: {n: 5},
+			3: {n: 3},
+			"4a": {n: 4}
+		};
+		it('should leave steps object unchanged', () => {
+			should.deepEqual(
+				commandHelper.stepArrayToObject(steps),
+				steps
+			);
 		});
-	});*/
+		it('should turn array into object', () => {
+			should.deepEqual(
+				commandHelper.stepArrayToObject([{n: 1}, {n: 2}, {n: 3}, {n: 4}, {n: 5}]),
+				{
+					1: {n: 1},
+					2: {n: 2},
+					3: {n: 3},
+					4: {n: 4},
+					5: {n: 5}
+				}
+			);
+		});
+	});
 });
