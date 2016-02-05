@@ -1,5 +1,8 @@
 ## Before submission
 
+fIX TO:
+Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Wide","","","MP 3Pos Cooled 1 PCR","","MP 2Pos H+P Shake","2","(Not defined)","4");
+
 - [x] add 'roboliq' version to output
 - [x] get running of protocols from command line to work again, and document it
 - [x] main.js: show help if nothing is passed on the command line
