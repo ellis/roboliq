@@ -1,6 +1,22 @@
 import _ from 'lodash';
 import assert from 'assert';
 
+export function delMut(data, path) {
+	assert(_.isPlainObject(data));
+	assert(_.isArray(path) || _.isString(path) || _.isNumber(path), `expected an array or string: ${JSON.stringify(path)}`);
+
+	if (path.length === 0) {
+		// do nothing
+	}
+	else if (path.length === 1) {
+		delete data[path[0]];
+	}
+	else {
+		const o = _.get(data, _.initial(path));
+		delete o[_.last(path)];
+	}
+	return data;
+}
 export function setMut(data, path, value) {
 	assert(_.isPlainObject(data));
 	assert(_.isArray(path) || _.isString(path) || _.isNumber(path), `expected an array or string: ${JSON.stringify(path)}`);

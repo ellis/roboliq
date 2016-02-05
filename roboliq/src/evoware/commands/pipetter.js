@@ -185,7 +185,7 @@ function groupItems(parsed, data) {
 	for (let i = 1; i < tuples.length; i++) {
 		const tuple = tuples[i];
 		if (canJoinGroup(group, tuple)) {
-			group.push(tuple);
+			group.tuples.push(tuple);
 		}
 		else {
 			group.syringeSpacing = syringeSpacing || 1;
