@@ -32,12 +32,33 @@ var objectToPredicateConverters = {
 	},
 };
 
+function debug_movePlate_null(input, agentId, labwareId, modelId, originId, destinationId) {
+	var llpl = require('../HTN/llpl.js').create();
+	llpl.initializeDatabase(input);
+	// Preconditions for movePlate-null
+	const query = {"and": [
+		{"location": {"labware": labwareId, "site": destinationId}}
+	]};
+	const queryResult = llpl.query(query);
+	console.log("queryResultNull:\n"+JSON.stringify(queryResult, null, '\t'));
+}
+
 function debug_movePlate_one(input, agentId, labwareId, modelId, originId, destinationId) {
 
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(input);
 	//console.log("originId: "+originId)
 	const criteria = [
+		// From movePlate-one preconditions
+		//{"model": {"labware": "?labware", "model": "?model"}},
+		//{"location": {"labware": "?labware", "site": "?origin"}},
+		//{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+		//{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+		//{"stackable": {"below": "?destinationModel", "above": "?model"}},
+		//{"siteIsClear": {"site": "?destination"}},
+		//{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+		//{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+		//{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
 		// From transporter._movePlate
 		{"model": {"labware": labwareId, "model": modelId}},
 		{"location": {"labware": labwareId, "site": originId}},
@@ -48,7 +69,7 @@ function debug_movePlate_one(input, agentId, labwareId, modelId, originId, desti
 		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
 		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": destinationId}},
 		{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
-		// From openAndMovePlate
+		// From openAndMovePlate-openNeither
 		{"siteIsOpen": {"site": originId}},
 		{"siteIsOpen": {"site": destinationId}}
 	];
@@ -117,8 +138,9 @@ var commandHandlers = {
 	 * @property {string} destination - Location identifier
 	 */
 	"transporter.movePlate": function(params, parsed, data) {
-		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
+		console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		var transporterLogic = require('./transporterLogic.json');
+		/*
 		const infix = (parsed.objectName.agent) ? "-a" : "";
 		const taskNames = [`movePlate${infix}-null`, `movePlate${infix}-one`, `movePlate${infix}-two`];
 		const taskParams = _.merge({}, {
@@ -137,24 +159,57 @@ var commandHandlers = {
 					"ordered": [_.fromPairs([[taskName, taskParams]])]
 				}
 			};
+			console.log(JSON.stringify(tasks))
 			const input = input0.concat([tasks]);
 			var planner = shop.makePlanner(input);
 			plan = planner.plan();
-			console.log(plan)
+			console.log(taskName, plan)
 			if (!_.isEmpty(plan)) {
 				console.log("plan found for "+taskName)
 				console.log(planner.ppPlan(plan));
 				break;
 			}
+		}*/
+		var taskList = [];
+		if (parsed.objectName.agent) {
+			taskList.push({
+				"movePlate-a": {
+					"agent": parsed.objectName.agent,
+					"labware": parsed.objectName.object,
+					"destination": parsed.objectName.destination
+				}
+			});
+		} else {
+			taskList.push({
+				"movePlate": {
+					"labware": parsed.objectName.object,
+					"destination": parsed.objectName.destination
+				}
+			});
 		}
+		const tasksOrdered = {
+			"tasks": {
+				"ordered": taskList
+			}
+		};
+		var input0 = [].concat(data.predicates, transporterLogic, [tasksOrdered]);
+		var input = input0;
+		//console.log(JSON.stringify(input, null, '\t'));
+
+		var shop = require('../HTN/shop.js');
+		var planner = shop.makePlanner(input);
+		var plan = planner.plan();
 		//console.log("plan:\n"+JSON.stringify(plan, null, '  '));
-		//var x = planner.ppPlan(plan);
-		//console.log(x);
+		var x = planner.ppPlan(plan);
+		console.log(x);
 		if (_.isEmpty(plan)) {
 			var agentId = params.agent || "?agent";
 			var modelId = parsed.value.object.model || "?model";
 			var originId = parsed.value.object.location || "?site";
-			//debug_movePlate_one(input, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+			debug_movePlate_null(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+			debug_movePlate_one(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+		}
+		if (_.isEmpty(plan)) {
 			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`"]}
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);

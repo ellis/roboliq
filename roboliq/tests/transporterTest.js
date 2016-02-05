@@ -20,6 +20,25 @@ describe('transporter', function() {
 	};
 
 	describe('transporter.movePlate', function () {
+		it.only("should handle movePlate to the plate's current location", function() {
+			var protocol = _.merge({}, protocol0, {
+				steps: {
+					1: {
+						"command": "transporter.movePlate",
+						"object": "plate1",
+						"destination": "ourlab.mario.site.P2"
+					}
+				}
+			});
+			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.steps[1], {
+				"command": "transporter.movePlate",
+				"object": "plate1",
+				"destination": "ourlab.mario.site.P2"
+			});
+		});
 		it('should handle movePlate into the centrifuge', function () {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
