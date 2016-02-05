@@ -28,7 +28,7 @@ steps:
           object: stillPlate
           destination: ourlab.mario.site.P3
         '2':
-          command: pipette.pipetteMixtures
+          command: pipetter.pipetteMixtures
           mixtures:
             -
               destination: A01
@@ -60,7 +60,7 @@ steps:
           object: shakePlate
           destination: ourlab.mario.site.P3
         '2':
-          command: pipette.pipetteMixtures
+          command: pipetter.pipetteMixtures
           mixtures:
             -
               destination: A01

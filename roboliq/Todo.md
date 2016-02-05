@@ -165,7 +165,8 @@ Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Wide","","","MP 3Pos 
     - [ ] pipetteMixtures: handle `destinationLabware`
     - [ ] `timer.wait`
     - [ ] `pipetter.dilutionSeries`
-- [ ] dm00_test3.js: create an protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
+    - [ ] need to add liquid and labware for the "media" and "culture" sources
+- [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
     - something with absorbance OrangeG
     - two "culture" plates
     - two dilution plates
@@ -175,7 +176,27 @@ Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Wide","","","MP 3Pos 
 - [ ] compile the experiment for luigi
 - [ ] run the experiment on luigi
 - [ ] create a pretty protocol for the experiment
+- [ ] cli ui?
+    - [ ] `load` command
+        - [ ] `--config` for config protocols
+        - [ ] `--protocol` for the main protocol
+        - [ ] `--user` for the user settings
+    - [ ] `evoware` command
+        - [ ] set evoware robot, load carrier and table, flag that evoware compiler is being used
+    - [ ] `compile`
+        - [ ] compile the protocol
+        - [ ] only compile the protocol if there have been relevant changes
+        - [ ] compile evoware if configured
+        - [ ] only compile evoware if there have been relevant changes
+    - [ ] `show`
+        - [ ] show a step
+        - [ ] show an object
+        - [ ] show a table
+    - [ ] `dump`
+        - [ ] dump entire state
+        - [ ] dump part of state
 - [ ] web ui?
+
 
 ## Todos for complex protocol and feedback
 

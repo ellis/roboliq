@@ -271,7 +271,7 @@ function test() {
 		});
 
 		appendStep(step, {
-			command: "pipette.pipetteMixtures",
+			command: "pipetter.pipetteMixtures",
 			//consider a "narrowBy" or "focusOn" or "restrictBy" field that is kind of equivalent to groupBy + take 1 + flatten
 			mixtures: mapConditions(scope, data, {uniqueBy: "cultureWell"}, 1, (scope) => {
 				return {
