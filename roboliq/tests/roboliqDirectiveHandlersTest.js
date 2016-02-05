@@ -29,6 +29,11 @@ var data = {
 
 describe('config/roboliqDirectiveHandlers', function() {
 
+	require('mathjs').config({
+		number: 'bignumber', // Default type of number
+		precision: 64        // Number of significant digits for BigNumbers
+	});
+
 	it('should handle #destinationWells', function() {
 		var spec = "#destinationWells#plate1(A01 down to D01)";
 		should.deepEqual(misc.handleDirective(spec, data), [

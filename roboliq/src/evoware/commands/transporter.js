@@ -2,7 +2,7 @@ import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 
 export function _movePlate(params, parsed, data) {
-	console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
+	//console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
 	// romaIndex: "(@equipment).evowareRoma: integer"
 	const values = commandHelper.lookupPaths({
 		romaIndex: ["@equipment", "evowareRoma"],
@@ -36,7 +36,7 @@ export function _movePlate(params, parsed, data) {
 		'""', //'"'+sCarrierLid+'"',
 		`"${values.plateDestCarrierName}"`,
 		`"${values.plateOrigSite}"`,
-		"(Not defined)", // '"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
+		`"(Not defined)"`, // '"'+(if (lidHandling == NoLid) "(Not defined)" else iSiteLid.toString)+'"',
 		`"${values.plateDestSite}"`
 	];
 	const line = `Transfer_Rack(${l.join(",")});`;

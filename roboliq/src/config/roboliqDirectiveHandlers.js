@@ -309,8 +309,9 @@ function directive_pipetteMixtures(spec, data) {
 		// If one of the components needs to have its volume set:
 		if (missingVolumeIndex >= 0) {
 			assert(volumePerMixture);
+			//console.log({volumePerMixture, volumeTotal, subtract: math.subtract(volumePerMixture, volumeTotal).format({precision: 10})})
 			l[missingVolumeIndex] = _.merge({}, l[missingVolumeIndex], {
-				volume: math.subtract(volumePerMixture, volumeTotal).format({precision: 14})
+				volume: math.subtract(volumePerMixture, volumeTotal).format({precision: 13})
 			});
 		}
 		else if (!_.isUndefined(volumePerMixture)) {

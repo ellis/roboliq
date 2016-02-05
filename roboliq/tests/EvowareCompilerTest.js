@@ -133,7 +133,7 @@ describe('EvowareCompilerTest', function() {
 			should.deepEqual(results, [
 				[
 					{
-						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,1,0,\"\",\"96-Well Plate\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"0\",(Not defined),\"1\");",
+						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,1,0,\"\",\"96-Well Plate\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"1\",\"(Not defined)\",\"2\");",
 						"effects": {
 							"plate1.location": "site2"
 						},
@@ -146,7 +146,7 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
-		it.only("should compile transporter._movePlate #2", function() {
+		it("should compile transporter._movePlate #2", function() {
 			const table = {};
 			const protocol = _.merge({},
 				require(__dirname+"/../src/config/roboliq.js"),
@@ -175,7 +175,7 @@ describe('EvowareCompilerTest', function() {
 			);
 			const agents = ["ourlab.mario.evoware"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
-			console.log(JSON.stringify(results, null, '\t'))
+			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [
 				[
 					{
