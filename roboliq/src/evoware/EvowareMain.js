@@ -1,5 +1,7 @@
 import _ from 'lodash';
+import fs from 'fs';
 import jsonfile from 'jsonfile';
+import path from 'path';
 import yaml from 'yamljs';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
 import * as EvowareCompiler from './EvowareCompiler.js';
@@ -62,8 +64,12 @@ export function run(argv) {
 				//console.log()
 				_.forEach(results, result => {
 					const tableLines = EvowareTableFile.toStrings(carrierData, result.table);
-					console.log(tableLines.join("\n"));
-					console.log(result.lines.join("\n"));
+					const output = tableLines.concat(result.lines).join("\n") + "\n";
+					const inpath = opts.protocol;
+					const dir = path.dirname(inpath);
+					const outpath = path.join(dir, path.basename(inpath, path.extname(inpath))+".esc");
+					fs.writeFileSync(outpath, output);
+					console.log("output written to "+outpath);
 				});
 				//console.log(JSON.stringify(results, null, '\t'))
 			}
