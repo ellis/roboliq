@@ -10,6 +10,14 @@ system.call:
     params: {description: "Parameters to pass to the template function.", type: "object"}
   required: ["name"]
 
+system.if:
+  description: "Conditionally execute steps depending on a conditional test."
+  properties:
+    test: {description: "A boolean value; if true, the `then` steps are executed.", type: "boolean"}
+    then: {description: "The sequence of steps to perform if the test is true.", type: "object"}
+    else: {description: "The sequence of steps to perform if the test is false.", type: "object"}
+  required: ["test"]
+
 system.repeat:
   description: "Repeat the given command a given number of times."
   properties:

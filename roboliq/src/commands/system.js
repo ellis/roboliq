@@ -1,15 +1,15 @@
-var _ = require('lodash');
+import _ from 'lodash';
 import yaml from 'yamljs';
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-var misc = require('../misc.js');
+import commandHelper from '../commandHelper.js';
+import expect from '../expect.js';
+import misc from '../misc.js';
 
 
-var commandHandlers = {
+const commandHandlers = {
 	"system.call": function(params, parsed, data) {
 		switch (parsed.value.name.type) {
 			case "Template":
-				var expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);
+				const expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);
 				return {expansion: expansion};
 				break;
 			default:
@@ -17,8 +17,13 @@ var commandHandlers = {
 				return {};
 		}
 	},
+	"system.if": function(params, parsed, data) {
+		console.log("system.if:")
+		console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
+		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
+	},
 	"system.repeat": function(params, parsed, data) {
-		var expansion = {};
+		const expansion = {};
 		if (parsed.value.steps) {
 			const count = parsed.value.count;
 			for (let i = 1; i <= count; i++) {
