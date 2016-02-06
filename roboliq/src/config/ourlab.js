@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var assert = require('assert');
 var math = require('mathjs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
@@ -907,6 +908,31 @@ module.exports = {
 			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`), "1000");
 			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
 			return {expansion: expansionList};
+		},
+		// Find
+		"pipetter.findTipModel|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
+			const items = parsed.orig.items;
+			let canUse1000 = true;
+			let canUse0050 = true;
+			_.forEach(items, function(item) {
+				//console.log("item:", item)
+				const volume = item.volume;
+				assert(math.unit('l').equalBase(volume), "expected units to be in liters");
+				if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
+					canUse0050 = false;
+				}
+				if (math.compare(volume, math.eval("3ul")) < 0) {
+					canUse1000 = false;
+				}
+			});
+
+			if (canUse1000 || canUse0050) {
+				const tipModel = (canUse1000) ? "ourlab.mario.tipModel1000" : "ourlab.mario.tipModel0050";
+				return {tipModel};
+			}
+			else {
+				return {};
+			}
 		}
 	},
 

@@ -227,23 +227,17 @@ function pipette(params, parsed, data) {
 	// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
 	// Try to find a tipModel for the given items
+	const findTipModelHelperName = `pipetter.findTipModel|${agent}|${equipmentName}`;
+	const findTipModelHelper = data.protocol.commandHandlers[findTipModelHelperName];
+	// TODO: if findTipModelHelper doesn't exist, search through tip models and pick the smallest applicable tip
+	if (!findTipModelHelper) {
+		return {errors: [`your lab configuration needs to specify a pipetter.findTipModel helper function: "${findTipModelHelperName}"`]};
+	}
 	function findTipModel(items) {
-		let canUse1000 = true;
-		let canUse0050 = true;
-		_.forEach(items, function(item) {
-			//console.log("item:", item)
-			const volume = item.volume;
-			assert(math.unit('l').equalBase(volume), "expected units to be in liters");
-			if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
-				canUse0050 = false;
-			}
-			if (math.compare(volume, math.eval("3ul")) < 0) {
-				canUse1000 = false;
-			}
-		});
-
-		if (canUse1000 || canUse0050) {
-			var tipModel = (canUse1000) ? "ourlab.mario.tipModel1000" : "ourlab.mario.tipModel0050";
+		const parsed3 = { orig: { items } };
+		const result = findTipModelHelper(null, parsed3, data);
+		const tipModel = _.get(result, "tipModel");
+		if (tipModel) {
 			_.forEach(items, function(item) {
 				if (!item.tipModel) item.tipModel = tipModel;
 			});
