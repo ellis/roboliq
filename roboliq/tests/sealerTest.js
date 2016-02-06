@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var should = require('should');
-var roboliq = require('../src/roboliq.js')
+import _ from 'lodash';
+import should from 'should';
+import roboliq from '../src/roboliq.js';
 
 describe('commands/sealer', function() {
-	var protocol0 = {
+	const protocol0 = {
 		roboliq: "v1",
 		objects: {
 			plate1: {
@@ -16,7 +16,7 @@ describe('commands/sealer', function() {
 
 	describe('sealer.sealPlate', function () {
 		it('should move plate to sealer, seal, then move plate back to original location', function () {
-			var protocol = _.merge({}, protocol0, {
+			const protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
 						command: "sealer.sealPlate",
@@ -24,7 +24,7 @@ describe('commands/sealer', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T"], protocol);
+			const result = roboliq.run(["-o", "", "-T"], protocol);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps,
 				{
