@@ -784,19 +784,28 @@ function getStepKeys(steps) {
 	}
 }
 
-function stepArrayToObject(steps) {
+/**
+ * Return an object that conforms to the expected format for steps.
+ *
+ * @param  {array|object} steps - input in format of an array of steps, a single step, or propertly formatted steps.
+ * @return {object} an object with only numeric keys, representing a sequence of steps.
+ */
+function stepify(steps) {
 	if (_.isPlainObject(steps)) {
-		return steps;
+		const rx = /^[0-9]/;
+		const hasOnlyStepKeys = _.keys(steps).every(x => rx.test(x));
+		if (hasOnlyStepKeys) {
+			return steps;
+		}
+		else {
+			return {"1": steps};
+		}
 	}
 	else if (_.isArray(steps)) {
-		//console.log("expansion0:\n"+JSON.stringify(result.expansion, null, '  '))
-		const l = _.compact(_.flattenDeep(steps));
-		const steps2 = _.zipObject(_.range(1, l.length + 1), l);
-		//console.log("steps2:\n"+JSON.stringify(steps2, null, '  '))
-		return steps2;
+		return _.zipObject(_.range(1, steps.length+1), steps);
 	}
 	else {
-		assert(false, "expected an object or array");
+		assert(false, "expected an array or a plain object: "+JSON.stringify(steps));
 	}
 }
 
@@ -809,5 +818,5 @@ module.exports = {
 	lookupPaths,
 	parseParams,
 	queryLogic,
-	stepArrayToObject,
+	stepify,
 }

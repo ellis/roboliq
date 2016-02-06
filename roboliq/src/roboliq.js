@@ -871,7 +871,7 @@ function _run(opts, userProtocol) {
 				// If the command was expanded, merge the expansion into the protocol as substeps:
 				if (!_.isEmpty(result.expansion)) {
 					// If an array was returned rather than an object, put it in the proper form
-					result.expansion = commandHelper.stepArrayToObject(result.expansion);
+					result.expansion = commandHelper.stepify(result.expansion);
 					_.merge(step, result.expansion);
 				}
 				// If the command has effects
