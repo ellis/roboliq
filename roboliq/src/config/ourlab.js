@@ -99,6 +99,10 @@ module.exports = {
 							"row": 8
 						}
 					},
+					"tipModel": {
+						"tipModel1000": {"type": "TipModel", "programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true},
+						"tipModel0050": {"type": "TipModel", "programCode": "0050", "min": "0.1ul", "max": "45ul", "canHandleSeal": true, "canHandleCells": false}
+					},
 					"tipModelToSyringes": {
 						"ourlab.mario.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"],
 						"ourlab.mario.tipModel0050": ["ourlab.mario.liha.syringe.5", "ourlab.mario.liha.syringe.6", "ourlab.mario.liha.syringe.7", "ourlab.mario.liha.syringe.8"]
