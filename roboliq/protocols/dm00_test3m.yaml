@@ -1,5 +1,25 @@
 roboliq: v1
 objects:
+  strain1:
+    type: Liquid
+    wells: 'trough1(C01 down to F01)'
+  media1:
+    type: Liquid
+    wells: 'trough2(C01 down to F01)'
+  trough1:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents:
+      - 'Infinity l'
+      - strain1
+  trough2:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents:
+      - 'Infinity l'
+      - media1
   stillPlate:
     type: Plate
     model: ourlab.model.plateModel_96_dwp

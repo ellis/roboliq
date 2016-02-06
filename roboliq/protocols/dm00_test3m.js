@@ -410,14 +410,27 @@ function test() {
 	const protocol = {
 		roboliq: "v1",
 		objects: {
+			strain1: {type: "Liquid", wells: "trough1(C01 down to F01)"},
+			media1: {type: "Liquid", wells: "trough2(C01 down to F01)"},
+			trough1: {type: "Plate", model: "ourlab.model.troughModel_100ml", location: "ourlab.mario.site.R5", contents: ["Infinity l", "strain1"]},
+			trough2: {type: "Plate", model: "ourlab.model.troughModel_100ml", location: "ourlab.mario.site.R6", contents: ["Infinity l", "media1"]},
 			stillPlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P4"},
 			shakePlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P5"},
 			dilutionPlate1: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.P6"},
 			dilutionPlate2: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.P7"},
 		},
 		steps
-	}
-	console.log(yaml.stringify(protocol, 9, 2));
+	};
+
+	return protocol;
 }
 
-test();
+const protocol = test();
+
+// If run from the command line:
+if (require.main === module) {
+	console.log(yaml.stringify(protocol, 9, 2));
+}
+else {
+	module.exports = protocol;
+}

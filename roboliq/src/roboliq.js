@@ -150,11 +150,6 @@ const protocolEmpty = {
 	warnings: {},
 };
 
-// REFACTOR: If nodejs version >= 0.12, then use path.isAbsolute instead
-function isAbsolute(p) {
-	return path.normalize(p + '/') === path.normalize(path.resolve(p) + '/');
-}
-
 /**
  * Loads the raw content at the given URL.
  * Supported formats are: JSON, YAML, JavaScript, and pre-cached file data.
@@ -166,18 +161,24 @@ function isAbsolute(p) {
 function loadUrlContent(url, filecache) {
 	url = path.posix.join(url);
 	//if (!path.isAbsolute(url))
-	if (!isAbsolute(url))
+	if (!path.isAbsolute(url))
 		url = "./" + url;
 	//console.log("in cache:", filecache.hasOwnProperty(url))
-	//console.log("absolute:", path.resolve(url))
+	const absolutePath = path.resolve(url);
 	if (filecache.hasOwnProperty(url))
 		return filecache[url];
 	else if (path.extname(url) === ".yaml")
 		return yaml.load(url);
 	else if (path.extname(url) === ".json")
 		return jsonfile.readFileSync(url);
-	else
-		return require(url);
+	else {
+		let relativePath = path.relative(__dirname, absolutePath);
+		if (!_.startsWith(relativePath, ".")) {
+			relativePath = "./" + relativePath;
+		}
+		//console.log({url, absolutePath, relativePath, __dirname})
+		return require(relativePath);
+	}
 }
 
 /**
@@ -672,7 +673,7 @@ function _run(opts, userProtocol) {
 	// but if --no-ourlab is specified, make sure that config/roboliq.js gets loaded.
 	const urls = _.uniq(_.compact(
 		_.compact([
-			(opts.ourlab) ? 'config/ourlab.js' : 'config/roboliq.js'
+			(opts.ourlab) ? 'src/config/ourlab.js' : 'src/config/roboliq.js'
 		]).concat(opts.infiles)
 	));
 	if (opts.debug) {

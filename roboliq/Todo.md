@@ -123,6 +123,7 @@
 - [x] troubleshoot sealer.sealPlate
 - [x] remove excess debug output from pipetting
 - [x] add `--quiet` flag to suppress printing errors
+- [x] let roboliq load .js protocols from the command line
 - [ ] create `Conditions` type, and generate its `value` property
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
@@ -159,11 +160,11 @@
 - [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
+    - [ ] need to add liquid and labware for the "media" and "culture" sources
     - [ ] pipetteMixtures: handle `destinationLabware`
     - [ ] `system.if`
     - [ ] `timer.wait`
     - [ ] `pipetter.dilutionSeries`
-    - [ ] need to add liquid and labware for the "media" and "culture" sources
     - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
     - something with absorbance OrangeG
@@ -174,9 +175,13 @@
 - [ ] run the experiment on mario
 - [ ] compile the experiment for luigi
 - [ ] run the experiment on luigi
+- [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
+- [ ] mario: can't use tips 1-4 to puncture a seal
 - [ ] make video of same experiment running on both robots
+    - [ ] demonstrate interleaved timing by showing the robot's picture-in-picture starting the same procedures at the same time
+    - [ ] show the data displayed in R/html as soon as the measurement is done
 - [ ] proper randomization
-- [ ] create a pretty protocol for the experiment
+- [ ] generate a pretty HTML/SVG protocol for the experiment
 - [ ] cli ui?
     - [ ] `load` command
         - [ ] `--config` for config protocols
