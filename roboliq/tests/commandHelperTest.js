@@ -363,8 +363,8 @@ describe('commandHelper', function() {
 								syringe: {
 									1: {
 										"type": "Syringe",
-										"tipModel": "ourlab.mario.tipModel1000",
-										"tipModelPermanent": "ourlab.mario.tipModel1000",
+										"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+										"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
 										contaminants: undefined,
 										contents: undefined,
 										cleaned: "thorough"
@@ -407,8 +407,8 @@ describe('commandHelper', function() {
 				value: {
 					syringe: {
 						"type": "Syringe",
-						"tipModel": "ourlab.mario.tipModel1000",
-						"tipModelPermanent": "ourlab.mario.tipModel1000",
+						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
 						contaminants: undefined,
 						contents: undefined,
 						cleaned: "thorough"

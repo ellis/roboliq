@@ -52,50 +52,50 @@ module.exports = {
 					"syringe": {
 						"1": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
 							"row": 1
 						},
 						"2": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
 							"row": 2
 						},
 						"3": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
 							"row": 3
 						},
 						"4": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.tipModel1000",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
 							"row": 4
 						},
 						"5": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel0050",
 							"row": 5
 						},
 						"6": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel0050",
 							"row": 6
 						},
 						"7": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel0050",
 							"row": 7
 						},
 						"8": {
 							"type": "Syringe",
-							"tipModel": "ourlab.mario.tipModel0050",
-							"tipModelPermanent": "ourlab.mario.tipModel0050",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel0050",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel0050",
 							"row": 8
 						}
 					},
@@ -104,8 +104,8 @@ module.exports = {
 						"tipModel0050": {"type": "TipModel", "programCode": "0050", "min": "0.1ul", "max": "45ul", "canHandleSeal": true, "canHandleCells": false}
 					},
 					"tipModelToSyringes": {
-						"ourlab.mario.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"],
-						"ourlab.mario.tipModel0050": ["ourlab.mario.liha.syringe.5", "ourlab.mario.liha.syringe.6", "ourlab.mario.liha.syringe.7", "ourlab.mario.liha.syringe.8"]
+						"ourlab.mario.liha.tipModel.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"],
+						"ourlab.mario.liha.tipModel.tipModel0050": ["ourlab.mario.liha.syringe.5", "ourlab.mario.liha.syringe.6", "ourlab.mario.liha.syringe.7", "ourlab.mario.liha.syringe.8"]
 					}
 				},
 				"sealer": {
@@ -931,7 +931,7 @@ module.exports = {
 			});
 
 			if (canUse1000 || canUse0050) {
-				const tipModel = (canUse1000) ? "ourlab.mario.tipModel1000" : "ourlab.mario.tipModel0050";
+				const tipModel = (canUse1000) ? "ourlab.mario.liha.tipModel.tipModel1000" : "ourlab.mario.liha.tipModel.tipModel0050";
 				return {tipModel};
 			}
 			else {
