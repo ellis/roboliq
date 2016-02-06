@@ -166,8 +166,10 @@ SATURDAY:
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
-    - [ ] `pipetter.dilutionSeries`
     - [ ] `shaker.shakePlate`
+        - [ ] shaker.yaml
+        - [ ] shaker.js
+    - [ ] `pipetter.dilutionSeries`
     - [ ] `absorbanceReader.measurePlate`
 - [ ] try to login remotely to robot computers to test Roboliq scripts
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)

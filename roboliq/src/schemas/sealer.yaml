@@ -17,6 +17,6 @@ sealer.sealPlate:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier for sealing", type: "string"}
     object: {description: "Plate identifier", type: "Plate"}
-    site: {description: "Site identifier in reader", type: "Site"}
-    destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}
+    site: {description: "Site identifier of sealer", type: "Site"}
+    destinationAfter: {description: "Site to move the plate to after this command", "type": "SiteOrStay"}
   required: ["object"]
