@@ -802,6 +802,7 @@ function stepify(steps) {
 		}
 	}
 	else if (_.isArray(steps)) {
+		steps = _.compact(_.flattenDeep(steps));
 		return _.zipObject(_.range(1, steps.length+1), steps);
 	}
 	else {
