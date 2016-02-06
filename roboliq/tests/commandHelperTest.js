@@ -56,7 +56,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('commandHelper.lookupPath', function() {
+	describe('lookupPath', function() {
 		it("should lookup mixtures of parameter and object values", () => {
 			const data = {
 				objects: {
@@ -418,24 +418,37 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('stepArrayToObject', function () {
-		const steps = {
-			description: "hi",
-			1: {n: 1},
-			2: {n: 2},
-			5: {n: 5},
-			3: {n: 3},
-			"4a": {n: 4}
-		};
-		it('should leave steps object unchanged', () => {
+	describe('stepify', function () {
+		it('should leave proper steps object unchanged', () => {
+			const steps = {
+				1: {n: 1},
+				2: {n: 2},
+				5: {n: 5},
+				3: {n: 3},
+				"4a": {n: 4}
+			};
 			should.deepEqual(
-				commandHelper.stepArrayToObject(steps),
+				commandHelper.stepify(steps),
 				steps
+			);
+		});
+		it('should leave steps object unchanged', () => {
+			const steps = {
+				description: "hi",
+				1: {n: 1},
+				2: {n: 2},
+				5: {n: 5},
+				3: {n: 3},
+				"4a": {n: 4}
+			};
+			should.deepEqual(
+				commandHelper.stepify(steps),
+				{"1": steps}
 			);
 		});
 		it('should turn array into object', () => {
 			should.deepEqual(
-				commandHelper.stepArrayToObject([{n: 1}, {n: 2}, {n: 3}, {n: 4}, {n: 5}]),
+				commandHelper.stepify([{n: 1}, {n: 2}, {n: 3}, {n: 4}, {n: 5}]),
 				{
 					1: {n: 1},
 					2: {n: 2},

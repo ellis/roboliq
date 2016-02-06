@@ -18,8 +18,8 @@ const commandHandlers = {
 		}
 	},
 	"system.if": function(params, parsed, data) {
-		console.log("system.if:")
-		console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
+		//console.log("system.if:")
+		//console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
 		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
 	},
 	"system.repeat": function(params, parsed, data) {
