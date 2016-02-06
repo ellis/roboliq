@@ -50,6 +50,7 @@ pipetter.PipetteItem:
     source: {description: Source specifier, type: Source}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
+    layer: {description: "A layer identifier for trying to group items together in the same layer, even if they aren't in adjacent in the items list."}
 
 pipetter._PipetteItem:
   description: Parameters for low-level pipette items.

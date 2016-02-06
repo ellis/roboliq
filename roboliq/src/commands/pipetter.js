@@ -83,9 +83,7 @@ function pipette(params, parsed, data) {
 
 	let items = (_.isUndefined(parsed.value.items))
 		? []
-		: parsed.value.items.map(parsedItem =>
-				_(parsedItem).map((value, name) => [name, value]).filter(l => !_.isUndefined(l[1])).fromPairs().value()
-			);
+		: _.flatten(parsed.value.items);
 	//console.log("items: "+JSON.stringify(items));
 	let agent = parsed.objectName.agent || "?agent";
 	let equipmentName = parsed.objectName.equipment || "?equipment";
@@ -269,6 +267,7 @@ function pipette(params, parsed, data) {
 
 	// Try to find tipModel, first for all items
 	if (!setTipModel(items)) {
+		// TODO: Try to find tipModel for each layer
 		// Try to find tipModel for each source
 		_.forEach(sourceToItems, function(items) {
 			if (!setTipModel(items)) {
