@@ -355,7 +355,7 @@ function test() {
 				command: "system.if",
 				test: scope.get("shake"),
 				then: {
-					1: {command: "shaker.shakePlate", object: scope.get("culturePlate")}
+					1: {command: "shaker.shakePlate", object: scope.get("culturePlate"), program: {duration: "1 minute"}}
 				}
 			});
 			appendStep(step, {

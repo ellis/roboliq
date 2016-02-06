@@ -139,6 +139,7 @@ module.exports = {
 		'../commands/fluorescenceReader.js',
 		'../commands/pipetter.js',
 		'../commands/sealer.js',
+		'../commands/shaker.js',
 		'../commands/timer.js',
 		'../commands/transporter.js',
 	],

@@ -107,6 +107,10 @@ module.exports = {
 					"type": "Sealer",
 					"evowareId": "RoboSeal"
 				},
+				"shaker": {
+					"type": "Shaker",
+					"evowareId": "Shaker"
+				},
 				"site": {
 					"type": "Namespace",
 					"CENTRIFUGE_1": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 1, "closed": true },
@@ -185,6 +189,18 @@ module.exports = {
 					"evowareId": 1
 				},
 				"timer2": {
+					"type": "Timer",
+					"evowareId": 2
+				},
+				"timer3": {
+					"type": "Timer",
+					"evowareId": 2
+				},
+				"timer4": {
+					"type": "Timer",
+					"evowareId": 2
+				},
+				"timer5": {
 					"type": "Timer",
 					"evowareId": 2
 				},
@@ -484,6 +500,13 @@ module.exports = {
 		}
 	},
 	{
+		"shaker.canAgentEquipmentSite": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.shaker",
+			"site": "ourlab.mario.site.P3"
+		}
+	},
+	{
 		"pipetter.canAgentEquipment": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.liha"
@@ -516,6 +539,18 @@ module.exports = {
 	{"timer.canAgentEquipment": {
 		"agent": "ourlab.mario.evoware",
 		"equipment": "ourlab.mario.timer2",
+	}},
+	{"timer.canAgentEquipment": {
+		"agent": "ourlab.mario.evoware",
+		"equipment": "ourlab.mario.timer3",
+	}},
+	{"timer.canAgentEquipment": {
+		"agent": "ourlab.mario.evoware",
+		"equipment": "ourlab.mario.timer4",
+	}},
+	{"timer.canAgentEquipment": {
+		"agent": "ourlab.mario.evoware",
+		"equipment": "ourlab.mario.timer5",
 	}},
 	_.map([1,2,3,4], function(n) {
 		return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
@@ -641,14 +676,6 @@ module.exports = {
 			},
 			required: ["program"]
 		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {description: "Program identifier for sealing", type: "string"}
-			},
-			required: ["agent", "equipment", "program"]
-		},
 		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
@@ -682,12 +709,21 @@ module.exports = {
 			},
 			required: ["outputFile"]
 		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				program: {description: "Program identifier for sealing", type: "string"}
+			},
+			required: ["agent", "equipment", "program"]
+		},
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {description: "Program identifier for shaking", type: "string"}
-			}
+				program: {description: "Program for shaking", type: "object"}
+			},
+			required: ["agent", "equipment", "program"]
 		},
 		"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": {
 			description: "Clean the pipetter tips.",
@@ -807,6 +843,33 @@ module.exports = {
 					factsValue: parsed.value.program
 				}],
 				//effects: _.fromPairs([[params.object + ".sealed", true]])
+			};
+		},
+		// Shaker
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
+			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.shaker: "+JSON.stringify(parsed, null, '\t'))
+			const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+			return {
+				expansion: [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_Init",
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_Shake",
+						factsValue: "1"
+					},
+					{
+						command: "timer.sleep",
+						agent: parsed.objectName.agent,
+						duration: parsed.orig.program.duration
+					},
+				]
 			};
 		},
 		"evoware._facts": function(params, parsed, data) {},

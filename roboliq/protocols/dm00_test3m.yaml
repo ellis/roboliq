@@ -139,7 +139,7 @@ steps:
               '4':
                 command: system.if
                 test: false
-                then: {'1': {command: shaker.shakePlate, object: stillPlate}}
+                then: {'1': {command: shaker.shakePlate, object: stillPlate, program: {duration: '1 minute'}}}
               '5':
                 command: transporter.movePlate
                 object: stillPlate
@@ -181,7 +181,7 @@ steps:
               '4':
                 command: system.if
                 test: true
-                then: {'1': {command: shaker.shakePlate, object: shakePlate}}
+                then: {'1': {command: shaker.shakePlate, object: shakePlate, program: {duration: '1 minute'}}}
               '5':
                 command: transporter.movePlate
                 object: shakePlate
@@ -229,7 +229,7 @@ steps:
               '4':
                 command: system.if
                 test: false
-                then: {'1': {command: shaker.shakePlate, object: stillPlate}}
+                then: {'1': {command: shaker.shakePlate, object: stillPlate, program: {duration: '1 minute'}}}
               '5':
                 command: transporter.movePlate
                 object: stillPlate
@@ -271,7 +271,7 @@ steps:
               '4':
                 command: system.if
                 test: true
-                then: {'1': {command: shaker.shakePlate, object: shakePlate}}
+                then: {'1': {command: shaker.shakePlate, object: shakePlate, program: {duration: '1 minute'}}}
               '5':
                 command: transporter.movePlate
                 object: shakePlate
