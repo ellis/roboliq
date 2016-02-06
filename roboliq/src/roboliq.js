@@ -785,7 +785,7 @@ function _run(opts, userProtocol) {
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
 		if (opts.progress) {
-			console.log("step "+id);
+			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
 
 		// Process any directives in this step

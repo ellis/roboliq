@@ -684,48 +684,49 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
-		const mixtures0 = parsed.value.mixtures;
-		const destinations = parsed.value.destinations;
+		// Obtain a matrix of mixtures (rows for destinations, columns for layers)
+		const mixtures0 = parsed.value.mixtures.map((item, index1) => {
+			if (_.isPlainObject(item)) {
+				return item.sources.map((subitem, index2) => {
+					// If the layer is empty, ignore it
+					if (!_.isEmpty(subitem)) {
+						// Fill in defaults for current destination+layer
+						return _.merge({},
+							{destination: _.get(parsed.value.destinations, index1)},
+							{destination: item.destination, syringe: item.syringe},
+							subitem,
+							{index: index2}
+						);
+					}
+					else {
+						return [];
+					}
+				});
+			}
+			else {
+				assert(_.isArray(item));
+				return item;
+			}
+		});
+		//const destinations = parsed.value.destinations;
 		//console.log("params:", params);
 		//console.log("data.objects.mixtures:", data.objects.mixtures);
 		//console.log("mixtures:\n"+JSON.stringify(mixtures0));
 		//console.log("A:", misc.getVariableValue(params.destinations, data.objects))
 		//console.log("data.objects.mixtureWells:", data.objects.mixtureWells);
 		//console.log("destinations:", destinations);
-		expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
+		//expect.truthy({}, destinations.length >= params.mixtures.length, "length of destinations array must be equal or greater than length of mixtures array.");
 
-		var params2 = _.omit(params, ['mixtures', 'destinations', 'order']);
-		// Put 'index' on all non-null mixture subitems
-		_.forEach(mixtures0, function(mixture) {
-			_.forEach(mixture, function(subitem, index) {
-				if (!_.isEmpty(subitem))
-					subitem.index = index;
-			});
-		});
 		const mixtures = _.compact(mixtures0);
 		//console.log("mixtures:", mixtures);
 
-		params2.items = [];
-		_.forEach(_.zip(mixtures, destinations), function(pair) {
-			var subitems = pair[0];
-			_.forEach(_.compact(subitems), function(subitem, index) {
-				params2.items.push(_.merge({index: index}, subitem, {destination: pair[1]}));
-			});
-		});
+		const params2 = _.omit(params, ['mixtures', 'destinations', 'order']);
+
 		let order = parsed.value.order || ["index"];
 		if (!_.isArray(order)) order = [order];
-		const ordering = _.map(order, function(what) {
-			switch (what) {
-				case 'index': return 'index';
-				case 'destination': return function(item) { destinations.indexOf(item.destination); };
-				default: assert(false, "unknown `order` criterion: "+what);
-			}
-		});
 		//console.log("A:", params2.items)
-		params2.items = _.sortBy(params2.items, ordering);
+		params2.items = _(mixtures).flatten().compact().sortBy(order).map(item => _.omit(item, 'index')).value();
 		//console.log("B:", params2.items)
-		params2.items = _.map(params2.items, function(item) { return _.omit(item, 'index'); });
-		//console.log("C:", params2.items)
 		params2.command = "pipetter.pipette";
 		return {
 			expansion: {

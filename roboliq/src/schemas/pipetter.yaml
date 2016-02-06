@@ -148,4 +148,4 @@ pipetter.pipetteMixtures:
       type: array
       items:
         enum: ["index", "destination"]
-  required: [mixtures, destinations]
+  required: [mixtures]
