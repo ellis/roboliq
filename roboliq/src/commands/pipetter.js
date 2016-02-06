@@ -227,19 +227,29 @@ function pipette(params, parsed, data) {
 	// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
 	// Try to find a tipModel for the given items
-	const findTipModelHelperName = `pipetter.findTipModel|${agent}|${equipmentName}`;
-	const findTipModelHelper = data.protocol.commandHandlers[findTipModelHelperName];
-	// TODO: if findTipModelHelper doesn't exist, search through tip models and pick the smallest applicable tip
-	if (!findTipModelHelper) {
-		return {errors: [`your lab configuration needs to specify a pipetter.findTipModel helper function: "${findTipModelHelperName}"`]};
-	}
 	function findTipModel(items) {
+		const tipModelName = _.findKey(equipment.tipModel, (tipModel) => {
+			return _.every(items, item => {
+				const volume = item.volume;
+				assert(math.unit('l').equalBase(volume), "expected units to be in liters");
+				if (math.compare(volume, math.eval(tipModel.min)) < 0 || math.compare(volume, math.eval(tipModel.max)) > 0) {
+					return false;
+				}
+				// TODO: check whether the labware is sealed
+				// TODO: check whether the well has cells
+				return true;
+			});
+		});
+		return (!_.isEmpty(tipModelName))
+			? `${equipmentName}.tipModel.${tipModelName}`
+			: undefined;
+	}
+	function setTipModel(items) {
 		const parsed3 = { orig: { items } };
-		const result = findTipModelHelper(null, parsed3, data);
-		const tipModel = _.get(result, "tipModel");
-		if (tipModel) {
+		const tipModelName = findTipModel(null, parsed3, data);
+		if (tipModelName) {
 			_.forEach(items, function(item) {
-				if (!item.tipModel) item.tipModel = tipModel;
+				if (!item.tipModel) item.tipModel = tipModelName;
 			});
 			return true;
 		}
@@ -258,13 +268,13 @@ function pipette(params, parsed, data) {
 	items = _.filter(items, item => item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items
-	if (!findTipModel(items)) {
+	if (!setTipModel(items)) {
 		// Try to find tipModel for each source
 		_.forEach(sourceToItems, function(items) {
-			if (!findTipModel(items)) {
+			if (!setTipModel(items)) {
 				// Try to find tipModel for each item for this source
 				_.forEach(items, function(item) {
-					if (!findTipModel([item])) {
+					if (!setTipModel([item])) {
 						throw {name: "ProcessingError", message: "no tip model available for item: "+JSON.stringify(item)};
 					}
 				});
@@ -355,10 +365,10 @@ function pipette(params, parsed, data) {
 			if (!pipettingPosition) return false;
 			var tipModels = _(items).map('tipModel').uniq().value();
 			if (tipModels.length !== 1) return false;
-			var tipModel = tipModels[0];
-			var tipModelCode = (tipModel.indexOf("0050") >= 0)
-				? tipModelCode = "0050"
-				: tipModelCode = "1000";
+			const tipModelName = tipModels[0];
+			const tipModelCode = misc.getObjectsValue(tipModelName+".programCode", data.objects);
+			//console.log({equipment})
+			assert(tipModelCode, `missing value for ${tipModelName}.programCode`);
 			var program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
 			_.forEach(items, function(item) { item.program = program; });
 			return true;

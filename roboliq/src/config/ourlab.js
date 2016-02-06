@@ -101,7 +101,7 @@ module.exports = {
 					},
 					"tipModel": {
 						"tipModel1000": {"type": "TipModel", "programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true},
-						"tipModel0050": {"type": "TipModel", "programCode": "0050", "min": "0.1ul", "max": "45ul", "canHandleSeal": true, "canHandleCells": false}
+						"tipModel0050": {"type": "TipModel", "programCode": "0050", "min": "0.25ul", "max": "45ul", "canHandleSeal": true, "canHandleCells": false}
 					},
 					"tipModelToSyringes": {
 						"ourlab.mario.liha.tipModel.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"],
@@ -913,31 +913,6 @@ module.exports = {
 			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
 			return {expansion: expansionList};
 		},
-		// Find
-		"pipetter.findTipModel|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
-			const items = parsed.orig.items;
-			let canUse1000 = true;
-			let canUse0050 = true;
-			_.forEach(items, function(item) {
-				//console.log("item:", item)
-				const volume = item.volume;
-				assert(math.unit('l').equalBase(volume), "expected units to be in liters");
-				if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
-					canUse0050 = false;
-				}
-				if (math.compare(volume, math.eval("3ul")) < 0) {
-					canUse1000 = false;
-				}
-			});
-
-			if (canUse1000 || canUse0050) {
-				const tipModel = (canUse1000) ? "ourlab.mario.liha.tipModel.tipModel1000" : "ourlab.mario.liha.tipModel.tipModel0050";
-				return {tipModel};
-			}
-			else {
-				return {};
-			}
-		}
 	},
 
 	planHandlers: {
