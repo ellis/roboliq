@@ -686,27 +686,26 @@ const commandHandlers = {
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
 		// Obtain a matrix of mixtures (rows for destinations, columns for layers)
 		const mixtures0 = parsed.value.mixtures.map((item, index1) => {
-			if (_.isPlainObject(item)) {
-				return item.sources.map((subitem, index2) => {
-					// If the layer is empty, ignore it
-					if (!_.isEmpty(subitem)) {
-						// Fill in defaults for current destination+layer
-						return _.merge({},
-							{destination: _.get(parsed.value.destinations, index1)},
-							{destination: item.destination, syringe: item.syringe},
-							subitem,
-							{index: index2}
-						);
-					}
-					else {
-						return [];
-					}
-				});
-			}
-			else {
-				assert(_.isArray(item));
-				return item;
-			}
+			//console.log({index1, destination: item.destination || _.get(parsed.value.destinations, index1), destinations: _.get(parsed.value.destinations, index1)})
+			const {destination, syringe, sources} = (_.isPlainObject(item))
+				? {destination: item.destination || _.get(parsed.value.destinations, index1), syringe: item.syringe, sources: item.sources}
+				: {destination: _.get(parsed.value.destinations, index1), syringe: undefined, sources: item};
+			return sources.map((subitem, index2) => {
+				// If the layer is empty, ignore it
+				if (!_.isEmpty(subitem)) {
+					// Fill in destination and syringe defaults for current destination+layer
+					const item2 = _.merge({},
+						{destination, syringe},
+						subitem,
+						{index: index2}
+					);
+					//console.log({item2})
+					return item2;
+				}
+				else {
+					return [];
+				}
+			});
 		});
 		//const destinations = parsed.value.destinations;
 		//console.log("params:", params);

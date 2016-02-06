@@ -160,6 +160,8 @@
 - [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
 - [x] `timer.wait`
 - [x] `system.if`
+- [x] pipetteMixtures: test mixture items where 'destination' and 'syringe' are specified
+- [ ] test `system.if`
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
