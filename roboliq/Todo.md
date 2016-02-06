@@ -151,7 +151,7 @@
 
 - Goals for talk:
     - have a good Conditions/Data/DataTree format
-    - have a good command for producing steps by processing data
+    - have a good command for expanding steps based on Conditions
     - the command should also manage the timing of steps
     - have a complete protocol as an example
     - run that protocol on a robot
@@ -161,28 +161,34 @@
 - [x] `timer.wait`
 - [x] `system.if`
 - [x] pipetteMixtures: test mixture items where 'destination' and 'syringe' are specified
-- [ ] test `system.if`
+- [x] test `system.if`
+SATURDAY:
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
     - [ ] `pipetter.dilutionSeries`
+    - [ ] `shaker.shakePlate`
     - [ ] `absorbanceReader.measurePlate`
-- [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty)
+- [ ] try to login remotely to robot computers to test Roboliq scripts
+- [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
     - something with absorbance OrangeG
     - two "culture" plates
     - two dilution plates
+    - [ ] mario: can't use tips 1-4 to puncture a seal
+    - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
 - [ ] compile the experiment for mario
 - [ ] try to extend EvowareCompile to save timing data while executing commands
-- [ ] run the experiment on mario
+SUNDAY:
 - [ ] compile the experiment for luigi
+- [ ] run the experiment on mario
 - [ ] run the experiment on luigi
-- [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
-- [ ] mario: can't use tips 1-4 to puncture a seal
 - [ ] make video of same experiment running on both robots
     - [ ] demonstrate interleaved timing by showing the robot's picture-in-picture starting the same procedures at the same time
     - [ ] show the data displayed in R/html as soon as the measurement is done
 - [ ] proper randomization
+LATER:
 - [ ] generate a pretty HTML/SVG protocol for the experiment
+- [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?
     - [ ] `load` command
         - [ ] `--config` for config protocols
