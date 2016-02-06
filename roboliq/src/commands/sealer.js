@@ -1,10 +1,10 @@
-var _ = require('lodash');
+import _ from 'lodash';
 import yaml from 'yamljs';
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-var misc = require('../misc.js');
+import commandHelper from '../commandHelper.js';
+import expect from '../expect.js';
+import misc from '../misc.js';
 
-var objectToPredicateConverters = {
+const objectToPredicateConverters = {
 	"Sealer": function(name, object) {
 		return {
 			value: [{
@@ -16,21 +16,21 @@ var objectToPredicateConverters = {
 	},
 };
 
-var commandHandlers = {
+const commandHandlers = {
 	// TODO:
 	// - [ ] raise and error if the sealer site is occupied
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
 	"sealer.sealPlate": function(params, parsed, data) {
-		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
-		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
+		const model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
+		const location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
 		const destinationAfter
 			= (parsed.value.destinationAfter === "stay") ? null
 			: _.isUndefined(parsed.objectName.destinationAfter) ? location0
 			: parsed.objectName.destinationAfter;
 
-		var predicates = [
+		const predicates = [
 			{"sealer.canAgentEquipmentProgramModelSite": {
 				"agent": parsed.objectName.agent,
 				"equipment": parsed.objectName.equipment,
@@ -39,11 +39,11 @@ var commandHandlers = {
 				"site": parsed.objectName.site
 			}}
 		];
-		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
-		var params2 = alternatives[0];
+		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
+		const params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
-		var expansion = [
+		const expansion = [
 			(params2.site === location0) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.objectName.object,
@@ -63,13 +63,9 @@ var commandHandlers = {
 			},
 		];
 
-		// Create the effects object
-		var effects = {};
-		effects[parsed.objectName.object + ".sealed"] = true;
-
 		return {
 			expansion: expansion,
-			effects: effects,
+			effects: _.fromPairs([[parsed.objectName.object + ".sealed", true]]),
 			alternatives: alternatives
 		};
 	}
