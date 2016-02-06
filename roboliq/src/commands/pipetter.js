@@ -142,7 +142,7 @@ function pipette(params, parsed, data) {
 				else if (destinationsTop.length > 1)
 					items[i].destination = destinationsTop[i];
 			}
-			else if (parsed.objectName.destinationLabware) {
+			if (parsed.objectName.destinationLabware) {
 				items[i].destination = getLabwareWell(parsed.objectName.destinationLabware, items[i].destination);
 			}
 
@@ -227,13 +227,12 @@ function pipette(params, parsed, data) {
 	// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
 	// Try to find a tipModel for the given items
-	var findTipModel = function(items) {
-		var canUse1000 = true;
-		var canUse0050 = true;
-		var pos = "wet";
+	function findTipModel(items) {
+		let canUse1000 = true;
+		let canUse0050 = true;
 		_.forEach(items, function(item) {
 			//console.log("item:", item)
-			var volume = item.volume;
+			const volume = item.volume;
 			assert(math.unit('l').equalBase(volume), "expected units to be in liters");
 			if (math.compare(volume, math.eval("0.25ul")) < 0 || math.compare(volume, math.eval("45ul")) > 0) {
 				canUse0050 = false;
@@ -290,7 +289,7 @@ function pipette(params, parsed, data) {
 			if (!source || _.isEmpty(source)) {
 				console.log({item});
 			}
-			// ENDIFX
+			// ENDFIX
 
 			//console.log({source})
 			if (source.length > 0) {
@@ -303,7 +302,7 @@ function pipette(params, parsed, data) {
 					}).uniq().value();
 					// FIXME: should pick "Water" if water-like liquids have high enough concentration
 					// Use "Water" if present
-					if (!pipettingClasses.indexOf("Water") >= 0) {
+					if (!_.includes(pipettingClasses, "Water")) {
 						if (pipettingClasses.length === 1) {
 							pipettingClass = pipettingClasses[0];
 						}
@@ -355,7 +354,7 @@ function pipette(params, parsed, data) {
 		});
 	}
 	else {
-		var assignProgram = function(items) {
+		function assignProgram(items) {
 			var pipettingClass = findPipettingClass(items);
 			if (!pipettingClass) return false;
 			var pipettingPosition = findPipettingPosition(items);
@@ -683,6 +682,9 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.pipette": pipette,
+	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
+		CONTINUE
+	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
 		// Obtain a matrix of mixtures (rows for destinations, columns for layers)
 		const mixtures0 = parsed.value.mixtures.map((item, index1) => {

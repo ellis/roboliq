@@ -159,23 +159,26 @@
     - visualize/analyze the measurement data in R
 - [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
 - [x] `timer.wait`
+SATURDAY:
 - [x] `system.if`
 - [x] pipetteMixtures: test mixture items where 'destination' and 'syringe' are specified
 - [x] test `system.if`
-SATURDAY:
+- [x] `shaker.shakePlate`
+- [-] try to login remotely to robot computers to test Roboliq scripts
+- [ ] pipetter.pipette: woops! we still have mario-specific code for `findTipModel()` and `assignProgram()`!
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
-    - [ ] `shaker.shakePlate`
-        - [ ] shaker.yaml
-        - [ ] shaker.js
     - [ ] `pipetter.dilutionSeries`
+        - [ ] yaml
+        - [ ] function
+        - [ ] test
     - [ ] `absorbanceReader.measurePlate`
-- [ ] try to login remotely to robot computers to test Roboliq scripts
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
     - something with absorbance OrangeG
     - two "culture" plates
     - two dilution plates
+    - should skip sealing so that we don't need to deal with the complications on Sunday
     - [ ] mario: can't use tips 1-4 to puncture a seal
     - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
 - [ ] compile the experiment for mario
