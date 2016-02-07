@@ -3,7 +3,7 @@ import should from 'should';
 import roboliq from '../src/roboliq.js';
 
 describe('pipetter', function() {
-	describe.skip('pipetter.pipetteDilutionSeries', function() {
+	describe('pipetter.pipetteDilutionSeries2x', function() {
 		const protocolA = {
 			roboliq: "v1",
 			objects: {
@@ -27,103 +27,457 @@ describe('pipetter', function() {
 			},
 			steps: {
 				"1": {
-					command: "pipetter.pipetteDilutionSeries",
+					command: "pipetter.pipetteDilutionSeries2x",
 					clean: 'none',
-					mixtures: [
-						[{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '10ul'}],
-						[{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '20ul'}],
-					],
-					destinations: "plate1(A02 down to D02)"
+					diluent: "ourlab.mario.systemLiquid",
+					destinationLabware: "plate1",
+					items: [
+						{destinations: ["A01", "A02", "A03", "A04", "A05"], syringe: "ourlab.mario.liha.syringe.1"},
+						{destinations: ["B01", "B02", "B03", "B04", "B05"], syringe: "ourlab.mario.liha.syringe.2"}
+					]
 				}
 			}
-		};
-		const protocolB = _.cloneDeep(protocolA);
-		protocolB.steps["1"] = {
-			command: "pipetter.pipetteMixtures",
-			clean: 'none',
-			mixtures: [
-				{destination: "plate1(A02)", sources: [{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '10ul'}]},
-				{destination: "plate1(B02)", sources: [{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '20ul'}]},
-			]
-		};
-		const protocolC = _.cloneDeep(protocolA);
-		protocolC.steps["1"] = {
-			command: "pipetter.pipetteMixtures",
-			clean: 'none',
-			destinationLabware: "plate1",
-			mixtures: [
-				{destination: "A02", sources: [{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '10ul'}]},
-				{destination: "B02", sources: [{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '20ul'}]},
-			]
 		};
 		it("should pipette 2D mixture array to destination wells", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
-			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
-				command: "pipetter.pipette",
-				clean: 'none',
-				items: [
-					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},
-					{source: 'source1', volume: '10ul', destination: 'plate1(B02)'},
-					{source: 'source2', volume: '10ul', destination: 'plate1(A02)'},
-					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
+			//console.log(JSON.stringify(result.output.steps[1], null, '\t'))
+			should.deepEqual(result.output.steps[1], {
+				"1": {
+					"1": {
+						"1": {
+							"1": {
+								"command": "pipetter._washTips",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.liha",
+								"program": "ourlab.mario.washProgram.light_1000",
+								"intensity": "light",
+								"syringes": [
+									"ourlab.mario.liha.syringe.1",
+									"ourlab.mario.liha.syringe.2",
+									"ourlab.mario.liha.syringe.3",
+									"ourlab.mario.liha.syringe.4"
+								]
+							},
+							"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"items": [
+								{
+									"syringe": "ourlab.mario.liha.syringe.1",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.2",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.3",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.4",
+									"intensity": "light"
+								}
+							]
+						},
+						"command": "pipetter.cleanTips",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.3",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.4",
+								"intensity": "light"
+							}
+						]
+					},
+					"2": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "ourlab.mario.systemLiquidLabware(A01)",
+								"destination": "plate1(A02)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "ourlab.mario.systemLiquidLabware(B01)",
+								"destination": "plate1(B02)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.3",
+								"source": "ourlab.mario.systemLiquidLabware(C01)",
+								"destination": "plate1(A03)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.4",
+								"source": "ourlab.mario.systemLiquidLabware(D01)",
+								"destination": "plate1(B03)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"3": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "ourlab.mario.systemLiquidLabware(A01)",
+								"destination": "plate1(A04)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "ourlab.mario.systemLiquidLabware(B01)",
+								"destination": "plate1(B04)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"4": {
+						"1": {
+							"1": {
+								"command": "pipetter._washTips",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.liha",
+								"program": "ourlab.mario.washProgram.light_1000",
+								"intensity": "light",
+								"syringes": [
+									"ourlab.mario.liha.syringe.1",
+									"ourlab.mario.liha.syringe.2",
+									"ourlab.mario.liha.syringe.3",
+									"ourlab.mario.liha.syringe.4"
+								]
+							},
+							"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"items": [
+								{
+									"syringe": "ourlab.mario.liha.syringe.1",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.2",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.3",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.4",
+									"intensity": "light"
+								}
+							]
+						},
+						"command": "pipetter.cleanTips",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.3",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.4",
+								"intensity": "light"
+							}
+						]
+					},
+					"command": "pipetter.pipette",
+					"clean": "none",
+					"destinationLabware": "plate1",
+					"items": [
+						{
+							"layer": 1,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(A02)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 2,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(A03)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 3,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(A04)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 1,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(B02)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						},
+						{
+							"layer": 2,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(B03)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						},
+						{
+							"layer": 3,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(B04)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						}
+					],
+					"cleanBegin": "light",
+					"cleanEnd": "light"
+				},
+				"2": {
+					"1": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Wet_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "plate1(A01)",
+								"destination": "plate1(A02)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "plate1(B01)",
+								"destination": "plate1(B02)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"2": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Wet_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "plate1(A02)",
+								"destination": "plate1(A03)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "plate1(B02)",
+								"destination": "plate1(B03)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"3": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Wet_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "plate1(A03)",
+								"destination": "plate1(A04)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "plate1(B03)",
+								"destination": "plate1(B04)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"4": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "plate1(A04)",
+								"destination": "plate1(A05)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "plate1(B04)",
+								"destination": "plate1(B05)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"5": {
+						"1": {
+							"1": {
+								"command": "pipetter._washTips",
+								"agent": "ourlab.mario.evoware",
+								"equipment": "ourlab.mario.liha",
+								"program": "ourlab.mario.washProgram.light_1000",
+								"intensity": "light",
+								"syringes": [
+									"ourlab.mario.liha.syringe.1",
+									"ourlab.mario.liha.syringe.2",
+									"ourlab.mario.liha.syringe.3",
+									"ourlab.mario.liha.syringe.4"
+								]
+							},
+							"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.liha",
+							"items": [
+								{
+									"syringe": "ourlab.mario.liha.syringe.1",
+									"intensity": "light"
+								},
+								{
+									"syringe": "ourlab.mario.liha.syringe.2",
+									"intensity": "light"
+								}
+							]
+						},
+						"command": "pipetter.cleanTips",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"intensity": "light"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"intensity": "light"
+							}
+						]
+					},
+					"command": "pipetter.pipette",
+					"clean": "none",
+					"destinationLabware": "plate1",
+					"items": [
+						{
+							"layer": 1,
+							"source": "plate1(A01)",
+							"destination": "plate1(A02)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 2,
+							"source": "plate1(A02)",
+							"destination": "plate1(A03)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 3,
+							"source": "plate1(A03)",
+							"destination": "plate1(A04)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 4,
+							"source": "plate1(A04)",
+							"destination": "plate1(A05)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
+							"layer": 1,
+							"source": "plate1(B01)",
+							"destination": "plate1(B02)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						},
+						{
+							"layer": 2,
+							"source": "plate1(B02)",
+							"destination": "plate1(B03)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						},
+						{
+							"layer": 3,
+							"source": "plate1(B03)",
+							"destination": "plate1(B04)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						},
+						{
+							"layer": 4,
+							"source": "plate1(B04)",
+							"destination": "plate1(B05)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						}
+					],
+					"cleanEnd": "light"
+				},
+				"command": "pipetter.pipetteDilutionSeries2x",
+				"clean": "none",
+				"diluent": "ourlab.mario.systemLiquid",
+				"destinationLabware": "plate1",
+				"items": [
+					{
+						"destinations": [
+							"A01",
+							"A02",
+							"A03",
+							"A04",
+							"A05"
+						],
+						"syringe": "ourlab.mario.liha.syringe.1"
+					},
+					{
+						"destinations": [
+							"B01",
+							"B02",
+							"B03",
+							"B04",
+							"B05"
+						],
+						"syringe": "ourlab.mario.liha.syringe.2"
+					}
 				]
 			});
-		});
-		it("should pipette mixtures to destination wells", function() {
-			const protocol = protocolB;
-			const result = roboliq.run(["-o", ""], protocol);
-			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
-				command: "pipetter.pipette",
-				clean: 'none',
-				items: [
-					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},
-					{source: 'source1', volume: '10ul', destination: 'plate1(B02)'},
-					{source: 'source2', volume: '10ul', destination: 'plate1(A02)'},
-					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
-				]
-			});
-		});
-		it("should pipette mixtures to destination wells, with destinationLabware specified separately", function() {
-			const protocol = protocolC;
-			const result = roboliq.run(["-o", ""], protocol);
-			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
-				command: "pipetter.pipette",
-				clean: 'none',
-				destinationLabware: "plate1",
-				items: [
-					{source: 'source1', volume: '10ul', destination: 'A02'},
-					{source: 'source1', volume: '10ul', destination: 'B02'},
-					{source: 'source2', volume: '10ul', destination: 'A02'},
-					{source: 'source2', volume: '20ul', destination: 'B02'},
-				]
-			});
-		});
-		it("should handle order=destination", function() {
-			const protocol = _.merge({}, protocolA, {
-				steps: {"1": {order: ["destination"]}}
-			});
-			const result = roboliq.run(["-o", ""], protocol);
-			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
-				command: "pipetter.pipette",
-				clean: 'none',
-				items: [
-					{source: 'source1', volume: '10ul', destination: 'plate1(A02)'},
-					{source: 'source2', volume: '10ul', destination: 'plate1(A02)'},
-					{source: 'source1', volume: '10ul', destination: 'plate1(B02)'},
-					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
-				]
-			});
-			//console.log(JSON.stringify(result.output.tables.wellContentsFinal, null, '\t'));
-			should.deepEqual(_.get(result, "output.tables.wellContentsFinal"),
-				[
-					{well: 'ourlab.mario.systemLiquidLabware', systemLiquid: 'Infinity l'},
-					{"well": "plate1(A01)", "source1": "80 ul"},
-					{"well": "plate1(B01)", "source2": "70 ul"},
-					{"well": "plate1(A02)", "source1": "10 ul", "source2": "10 ul"},
-					{"well": "plate1(B02)", "source1": "10 ul", "source2": "20 ul"}
-				]
-			)
 		});
 	});
 });

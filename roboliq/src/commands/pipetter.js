@@ -691,7 +691,7 @@ const commandHandlers = {
 		// Fill all destination wells with diluent
 		const diluentItems = [];
 		const items = [];
-		_.forEach(parsed.value.items, item => {
+		_.forEach(parsed.value.items, (item, itemIndex) => {
 			if (_.isEmpty(item.destinations)) return;
 			// FIXME: handle `source`
 			assert(_.isUndefined(item.source), "`source` property not implemented yet");
@@ -704,16 +704,20 @@ const commandHandlers = {
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "first well in dilution series shouldn't be empty");
 			const volume = math.divide(volume0, 2);
 
+			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`];
+			//console.log({syringeName})
+
 			// Distribute diluent to all destination wells
-			_.forEach(_.initial(destinations2), destinationWell => {
-				diluentItems.push({source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: volume.format({precision: 4})});
+			_.forEach(_.initial(destinations2), (destinationWell, index) => {
+				diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: volume.format({precision: 4}), syringe: syringeName});
 			});
 
 			// Pipette the dilutions
 			let source = destination0;
-			_.forEach(destinations2, destinationWell => {
+			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
-				items.push({source, destination, volume: volume.format({precision: 4})});
+				const item2 = _.merge({}, {layer: index+1, source, destination, volume: volume.format({precision: 4}), syringe: syringeName});
+				items.push(item2);
 				source = destination;
 			});
 			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
@@ -727,12 +731,16 @@ const commandHandlers = {
 
 		//const items = [];
 
+		const params1 = _.omit(parsed.orig, ['diluent', 'items']);
+		params1.command = "pipetter.pipette";
+		params1.items = diluentItems;
+		params1.cleanBegin = "light";
+		params1.cleanEnd = "light";
 		const params2 = _.omit(parsed.orig, ['diluent', 'items']);
 		params2.command = "pipetter.pipette";
-		//console.log("A:", params2.items)
-		params2.items = diluentItems.concat(items);
-		//console.log("B:", params2.items)
-		return { expansion: { "1": params2 } };
+		params2.items = items;
+		params2.cleanEnd = "light";
+		return { expansion: { "1": params1, "2": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
 		// Obtain a matrix of mixtures (rows for destinations, columns for layers)

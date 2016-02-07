@@ -175,6 +175,7 @@ SUNDAY:
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
+    - [ ] fix dilution series destinations (putting into A and B rows in the same item)
     - [ ] `pipetter.dilutionSeries`
         - [ ] yaml
         - [ ] function
