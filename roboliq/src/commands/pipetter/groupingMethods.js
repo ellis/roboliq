@@ -124,59 +124,90 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 	//   break
 	//
 	// If no item was added, create a new empty group
-	CONTINUE
-	const groups = [];
-	let group = [];
-	let item = items.unshift();
-	while (!_.isEmpty(items)) {
-		const program = items[0].program;
-		let syringesAvailable = _.clone(syringes);
-		const group = [items.shift()];
-		let cont = (items.length > 0);
-		while (cont) {
-			const item = items[0];
-			//console.log("A "+JSON.stringify(item));
-			// Make sure we still have syringes available
-			if (syringesAvailable.length == 0) return false;
-			// Make sure all items in the group use the same program
-			if (item.program !== program) return false;
+	let current = undefined;
 
-			if (!_.isUndefined(item.layer)) {
-				const j = _.findIndex(items, item => _.isEqual(layer, item.layer));
-				if (j > 0)
-			}
+	function tryAdd(item) {
+		//console.log("A "+JSON.stringify(item));
+		// Make sure we still have syringes available
+		if (current.syringesAvailable.length == 0) return false;
+		// Make sure all items in the group use the same program
+		if (current.program !== item.program) return false;
+		// Make sure source was not previously a destination in this group
+		if (_.some(current.group, item2 => item.source === item2.destination)) return false;
+		//console.log("B");
 
+		assert(item.tipModel);
+
+		// If tipModelToSyringes was provided
+		if (!_.isEmpty(tipModelToSyringes)) {
+			//console.log("C");
+			assert(tipModelToSyringes.hasOwnProperty(item.tipModel));
+			const syringesPossible = tipModelToSyringes[item.tipModel];
+			//console.log({syringesPossible, syringesAvailable})
+			assert(!_.isEmpty(syringesPossible));
+			// Try to find a possible syringe that's still available
+			const l = _.intersection(syringesPossible, current.syringesAvailable);
+			if (_.isEmpty(l)) return false;
+			//console.log("D");
+			// Remove an arbitrary syringe from the list of available syringes
+			current.syringesAvailable = _.without(current.syringesAvailable, l[0]);
 		}
-		const group = _.takeWhile(items, function (item) {
-			//console.log("B");
+		else {
+			//console.log("E");
+			// Remove an arbitrary syringe from the list of available syringes
+			current.syringesAvailable.splice(0, 1);
+		}
 
-			assert(item.tipModel);
+		current.group.push(item);
+		current.layer = item.layer;
 
-			// If tipModelToSyringes was provided
-			if (!_.isEmpty(tipModelToSyringes)) {
-				//console.log("C");
-				assert(tipModelToSyringes.hasOwnProperty(item.tipModel));
-				var syringesPossible = tipModelToSyringes[item.tipModel];
-				//console.log({syringesPossible, syringesAvailable})
-				assert(!_.isEmpty(syringesPossible));
-				// Try to find a possible syringe that's still available
-				var l = _.intersection(syringesPossible, syringesAvailable);
-				if (_.isEmpty(l)) return false;
-				//console.log("D");
-				// Remove an arbitrary syringe from the list of available syringes
-				syringesAvailable = _.without(syringesAvailable, l[0]);
+		return true;
+	}
+
+	const groups = [];
+	while (!_.isEmpty(items)) {
+		// If we need to start a new group:
+		if (_.isUndefined(current)) {
+			const item = items.shift();
+			current = {
+				group: [],
+				syringesAvailable: _.clone(syringes),
+				program: item.program,
+				layer: item.layer
+			};
+			const added = tryAdd(item);
+			assert(added);
+			groups.push(current.group);
+		}
+		// Else, we will try to add an item to the current group
+		else {
+			const nextIndexes = [0];
+			// First check next item that's in the same layer as the last item in group
+			if (!_.isUndefined(current.layer)) {
+				const j = _.findIndex(item => _.isEqual(current.layer, item.layer));
+				if (j >= 0) {
+					nextIndexes.unshift(j);
+				}
 			}
-			else {
-				//console.log("E");
-				// Remove an arbitrary syringe from the list of available syringes
-				syringesAvailable.splice(0, 1);
+
+			// Try to add one of the items in nextIndexes
+			let added = false;
+			for (let k = 0; k < nextIndexes.length; k++) {
+				const j = nextIndexes[k];
+				const item = items[j];
+				if (tryAdd(item)) {
+					// Remove the j-th element
+					items.splice(j, 1);
+					added = true;
+					break;
+				}
 			}
 
-			return true;
-		});
-		assert(group.length > 0);
-		items = _.drop(items, group.length);
-		groups.push(group);
+			// If no item could be added, signal that a new group should be started by undefining `current`
+			if (!added) {
+				current = undefined;
+			}
+		}
 	}
 
 	return groups;

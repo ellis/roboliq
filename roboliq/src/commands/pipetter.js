@@ -393,7 +393,7 @@ function pipette(params, parsed, data) {
 	var syringesAvailable = params.syringes || _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
 	var tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
-	var groups = groupingMethods.groupingMethod2(items, syringesAvailable, tipModelToSyringes);
+	var groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
 	//console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Pick syringe for each item
