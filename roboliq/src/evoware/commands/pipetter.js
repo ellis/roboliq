@@ -25,15 +25,13 @@ export function _pipette(params, parsed, data) {
 }
 
 export function _washTips(params, parsed, data) {
+	//console.log("handleWashProgram: "+JSON.stringify(parsed, null, '\t'))
+
 	function handleScript(filename) {
 		return `Subroutine("${filename}",0);`;
 	}
 
-	function handleWashProgram() {
-		//console.log("handleWashProgram: "+JSON.stringify(parsed, null, '\t'))
-		const program = commandHelper.lookupPath([parsed.value.program], {}, data);
-		assert(!_.isEmpty(program), "missing wash program")
-		//console.log({program})
+	function handleWashProgram(program) {
 		const syringeRows = parsed.value.syringes.map(x => x.row);
 		const syringeMask = encodeSyringesByRow(syringeRows);
 		const bUNKNOWN1 = false;
@@ -56,12 +54,16 @@ export function _washTips(params, parsed, data) {
 		return `Wash(${l.join(",")});`
 	}
 
+	const program = commandHelper.lookupPath([parsed.value.program], {}, data);
+	assert(!_.isEmpty(program), "missing wash program")
+	//console.log({program})
+
 	const results = [];
-	if (!_.isEmpty(parsed.value.script)) {
-		results.push({line: handleScript(parsed.value.script)});
+	if (!_.isEmpty(program.script)) {
+		results.push({line: handleScript(program.script)});
 	}
 	else {
-		results.push({line: handleWashProgram()});
+		results.push({line: handleWashProgram(program)});
 	}
 	return results;
 }
