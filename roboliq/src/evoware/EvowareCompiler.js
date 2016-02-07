@@ -90,8 +90,8 @@ export function compileStep(table, protocol, agents, path, objects) {
 					M.setMut(objects, path2, effect);
 				});
 			}
-			//console.log({tableEffects: result1.tableEffects})
 			if (!_.isEmpty(result1.tableEffects)) {
+				//console.log("tableEffects: "+JSON.stringify(result1.tableEffects))
 				_.forEach(result1.tableEffects, ([path2, value]) => {
 					//console.log({path2, value})
 					// TODO: Need to check whether a table change is required because a different labware model is now used at a given site

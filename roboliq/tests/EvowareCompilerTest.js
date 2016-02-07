@@ -135,7 +135,7 @@ describe('EvowareCompilerTest', function() {
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [
 				[{line: 'StartTimer("1");'}],
-				[{line: 'WaitTimer("1","60");'}, {line: 'StopTimer("1");'}]
+				[{line: 'WaitTimer("1","60");'}]
 			]);
 		});
 
@@ -269,7 +269,7 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [[
-				{line: "Aspirate(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
@@ -309,7 +309,7 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [[
-				{line: "Dispense(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
@@ -347,8 +347,8 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			should.deepEqual(results, [[
-				{line: "Aspirate(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
-				{line: "Dispense(1,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0820000000000000\",0,0);"},
+				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0820000000000000\",0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}

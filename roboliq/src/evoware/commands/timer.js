@@ -14,7 +14,8 @@ export function _wait(params, parsed, data) {
 	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
 	const seconds = math.round(parsed.value.till.toNumber('s'));
 	const result = [{line: `WaitTimer("${id}","${seconds}");`}];
-	if (parsed.value.stop === true)
-		result.push({line: `StopTimer("${id}");`});
+	// There is no Evoware command for stopping the timer, so we can't emit a StopTimer command.
+	//if (parsed.value.stop === true)
+	//	result.push({line: `StopTimer("${id}");`});
 	return result;
 }

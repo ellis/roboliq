@@ -226,7 +226,7 @@ function handleGroup(parsed, data, group) {
 	// Volumes for each syringe (in ul)
 	const volumes = _.fill(Array(12), "0");
 	_.forEach(tuples, tuple => {
-		const index = (tuple.item.syringe.row || 1) - 0;
+		const index = (tuple.item.syringe.row || 1) - 1;
 		const ul = tuple.item.volume.toNumber('ul');
 		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
 	});
