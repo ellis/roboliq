@@ -250,7 +250,9 @@ function mapConditions(scope, data, q, flatten = 1, fn) {
 function mapConditionGroups(scope, data, q, flatten = 1, fn) {
 	let result = [];
 	narrow(scope, data, q, (scope2, data2) => {
-		result.push(fn(scope2));
+		//console.log({scope2, data2})
+		//process.exit(-1);
+		result.push(fn(scope2, data2));
 	});
 	for (let i = 0; i < flatten; i++) {
 		result = _.flatten(result);
@@ -378,7 +380,8 @@ function test() {
 				command: "pipetter.pipetteDilutionSeries2x",
 				diluent: "water",
 				destinationLabware: scope.get("dilutionPlate"),
-				items: mapConditionGroups(scope, data, {groupBy: "cultureWell"}, 0, (scope) => {
+				items: mapConditionGroups(scope, data, {groupBy: "cultureWell"}, 0, (scope, data) => {
+					//console.log({scope2, data2})
 					return {
 						destinations: mapConditions(scope, data, {}, 1, (scope) => scope.get("dilutionWell")),
 						syringe: scope.get("syringe")
