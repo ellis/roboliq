@@ -171,6 +171,7 @@ SATURDAY:
 SUNDAY:
 - [x] groupingMethod3: allow `layer` to take partial priority over item order
 - [x] groupingMethod3: force a group break when previous destination is used as a source
+- [x] pipetter.DilutionItem yaml
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources

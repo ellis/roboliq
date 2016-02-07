@@ -1,9 +1,9 @@
-var _ = require('lodash');
-var should = require('should');
-var roboliq = require('../src/roboliq.js')
+import _ from 'lodash';
+import should from 'should';
+import roboliq from '../src/roboliq.js';
 
 describe('pipetter', function() {
-	describe('pipetter.pipetteMixtures', function () {
+	describe('pipetter.pipetteDilutionSeries', function() {
 		const protocolA = {
 			roboliq: "v1",
 			objects: {
@@ -27,7 +27,7 @@ describe('pipetter', function() {
 			},
 			steps: {
 				"1": {
-					command: "pipetter.pipetteMixtures",
+					command: "pipetter.pipetteDilutionSeries",
 					clean: 'none',
 					mixtures: [
 						[{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '10ul'}],

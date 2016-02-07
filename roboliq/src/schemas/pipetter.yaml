@@ -52,6 +52,16 @@ pipetter.PipetteItem:
     volume: {description: Volume, type: Volume}
     layer: {description: "A layer identifier for trying to group items together in the same layer, even if they aren't in adjacent in the items list."}
 
+pipetter.DilutionItem:
+  description: Parameters for a dilution series.
+  properties:
+    syringe: {description: Syringe identifier, type: Syringe}
+    source: {description: Source specifier, type: Source}
+    destinations: {description: Destination wells, type: Wells}
+    #dilutionFactor: {description: How many times diluted, type: number}
+    volume: {description: Volume, type: Volume}
+  required: [destinations]
+
 pipetter._PipetteItem:
   description: Parameters for low-level pipette items.
   properties:
@@ -135,6 +145,17 @@ pipetter.pipette:
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
   required: []
 
+pipetter.pipetteDilutionSeries2x:
+  description: Pipette a dilution series, whereby a source is serially diluted 2:1.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Array of dilution items", "type": "array", items: {type: pipetter.DilutionItem}}
+    diluent: {description: "Diluent to be used in dilution", type: Source}
+    sourceLabware: {description: "Labware for source wells", "type": "Plate"}
+    destinationLabware: {description: "Labware for source wells", "type": "Plate"}
+  required: [diluent, items]
 
 pipetter.pipetteMixtures:
   description: Pipette the given mixtures into the given destinations.

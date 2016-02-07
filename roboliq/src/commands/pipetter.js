@@ -685,8 +685,38 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.pipette": pipette,
-	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
-		CONTINUE
+	"pipetter.pipetteDilutionSeries2x": function(params, parsed, data) {
+		// Fill all destination wells with diluent
+		const diluentItems = [];
+		_.forEach(parsed.value.items, item => {
+			if (_.isEmpty(item.destinations)) return;
+			// FIXME: handle `source`
+			assert(_.isUndefined(item.source), "`source` property not implemented yet");
+			const destination0 = getLabwareWell(parsed.objectName.destinationLabware, item.destinations[0]);
+			const destinations2 = _.tail(item.destinations);
+			let dilutionFactorPrev = 1;
+			CONTINUE: get volume of destination0, and use half of it as the final volume
+			_.forEach(destinations2, destination => {
+				const diluentVolume = math.divide(parsed.value.volume, 2);
+				diluentItems.push({source: parsed.objectName.diluent, destination: dilution.destination, volume: diluentVolume.format({precision: 14})});
+			});
+			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
+			_.forEach(series, dilution => {
+				// If the first item doesn't define a source, but it's dilutionFactor = 1, then treat the destination well as the source.
+				assert(!_.isUndefined(source), "dilution item requires a source");
+				diluentItems.push({source: parsed.objectName.diluent, destination})
+			});
+			*/
+		});
+
+		//const items = [];
+
+		const params2 = _.omit(parsed.orig, ['diluent', 'items']);
+		params2.command = "pipetter.pipette";
+		//console.log("A:", params2.items)
+		params2.items = diluentItems;
+		//console.log("B:", params2.items)
+		return { expansion: { "1": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
 		// Obtain a matrix of mixtures (rows for destinations, columns for layers)

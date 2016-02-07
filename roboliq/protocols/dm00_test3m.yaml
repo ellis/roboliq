@@ -145,9 +145,10 @@ steps:
                 object: stillPlate
                 destination: ourlab.mario.site.P4
               '6':
-                command: pipetter.dilutionSeries
+                command: pipetter.pipetteDilutionSeries2x
                 diluent: water
-                items: [[{destination: A01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+                destinationLabware: dilutionPlate1
+                items: [{destinations: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.1}, {destinations: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.2}]
               '7':
                 command: absorbanceReader.measurePlate
                 object: dilutionPlate1
@@ -187,9 +188,10 @@ steps:
                 object: shakePlate
                 destination: ourlab.mario.site.P5
               '6':
-                command: pipetter.dilutionSeries
+                command: pipetter.pipetteDilutionSeries2x
                 diluent: water
-                items: [[{destination: A01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B01, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B02, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B03, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B04, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B05, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+                destinationLabware: dilutionPlate2
+                items: [{destinations: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.1}, {destinations: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.2}]
               '7':
                 command: absorbanceReader.measurePlate
                 object: dilutionPlate2
@@ -235,9 +237,10 @@ steps:
                 object: stillPlate
                 destination: ourlab.mario.site.P4
               '6':
-                command: pipetter.dilutionSeries
+                command: pipetter.pipetteDilutionSeries2x
                 diluent: water
-                items: [[{destination: A07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+                destinationLabware: dilutionPlate1
+                items: [{destinations: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.1}, {destinations: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.2}]
               '7':
                 command: absorbanceReader.measurePlate
                 object: dilutionPlate1
@@ -277,9 +280,10 @@ steps:
                 object: shakePlate
                 destination: ourlab.mario.site.P5
               '6':
-                command: pipetter.dilutionSeries
+                command: pipetter.pipetteDilutionSeries2x
                 diluent: water
-                items: [[{destination: A07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.1}, {destination: A08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.1}, {destination: A09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.1}, {destination: A10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.1}, {destination: A11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.1}], [{destination: B07, dilutionFactor: 1, syringe: ourlab.mario.liha.syringe.2}, {destination: B08, dilutionFactor: 2, syringe: ourlab.mario.liha.syringe.2}, {destination: B09, dilutionFactor: 4, syringe: ourlab.mario.liha.syringe.2}, {destination: B10, dilutionFactor: 8, syringe: ourlab.mario.liha.syringe.2}, {destination: B11, dilutionFactor: 16, syringe: ourlab.mario.liha.syringe.2}]]
+                destinationLabware: dilutionPlate2
+                items: [{destinations: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.1}, {destinations: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.2}]
               '7':
                 command: absorbanceReader.measurePlate
                 object: dilutionPlate2
