@@ -686,19 +686,35 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries2x": function(params, parsed, data) {
+		const destinationLabware = parsed.objectName.destinationLabware;
+
 		// Fill all destination wells with diluent
 		const diluentItems = [];
+		const items = [];
 		_.forEach(parsed.value.items, item => {
 			if (_.isEmpty(item.destinations)) return;
 			// FIXME: handle `source`
 			assert(_.isUndefined(item.source), "`source` property not implemented yet");
-			const destination0 = getLabwareWell(parsed.objectName.destinationLabware, item.destinations[0]);
+			const destination0 = getLabwareWell(destinationLabware, item.destinations[0]);
 			const destinations2 = _.tail(item.destinations);
 			let dilutionFactorPrev = 1;
-			CONTINUE: get volume of destination0, and use half of it as the final volume
-			_.forEach(destinations2, destination => {
-				const diluentVolume = math.divide(parsed.value.volume, 2);
-				diluentItems.push({source: parsed.objectName.diluent, destination: dilution.destination, volume: diluentVolume.format({precision: 14})});
+
+			// get volume of destination0, and use half of it as the final volume
+			const volume0 = WellContents.getWellVolume(destination0, data);
+			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "first well in dilution series shouldn't be empty");
+			const volume = math.divide(volume0, 2);
+
+			// Distribute diluent to all destination wells
+			_.forEach(_.initial(destinations2), destinationWell => {
+				diluentItems.push({source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: volume.format({precision: 4})});
+			});
+
+			// Pipette the dilutions
+			let source = destination0;
+			_.forEach(destinations2, destinationWell => {
+				const destination = getLabwareWell(destinationLabware, destinationWell);
+				items.push({source, destination, volume: volume.format({precision: 4})});
+				source = destination;
 			});
 			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
 			_.forEach(series, dilution => {
@@ -714,7 +730,7 @@ const commandHandlers = {
 		const params2 = _.omit(parsed.orig, ['diluent', 'items']);
 		params2.command = "pipetter.pipette";
 		//console.log("A:", params2.items)
-		params2.items = diluentItems;
+		params2.items = diluentItems.concat(items);
 		//console.log("B:", params2.items)
 		return { expansion: { "1": params2 } };
 	},

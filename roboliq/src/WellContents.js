@@ -6,6 +6,7 @@
 import _ from 'lodash';
 var assert = require('assert');
 var math = require('mathjs');
+import expect from './expectCore.js';
 var misc = require('./misc.js');
 var wellsParser = require('./parsers/wellsParser.js');
 
@@ -97,8 +98,12 @@ export function getWellContents(wellName, data, effects) {
 	if (!_.isEmpty(contents)) return contents;
 
 	contents = misc.findObjectsValue(labwareContentsName, data.objects, effects);
-	checkContents(contents);
-	return contents;
+	if (_.isArray(contents)) {
+		expect.try({objectName: wellName}, () => checkContents(contents));
+		return contents;
+	}
+
+	return [];
 }
 
 /**
@@ -231,8 +236,20 @@ export function flattenContents(contents) {
 		var subTotal = _.reduce(merged, function(total, n) { return math.add(total, n); }, emptyVolume);
 		//console.log("total: "+total);
 		//console.log("subTotal: "+subTotal);
-		var factor = math.divide(total.toNumber("l"), subTotal.toNumber("l"));
-		return _.mapValues(merged, function(v) { return math.multiply(v, factor).format({precision: 14}); });
+		//var factor = math.fraction(total, subTotal);
+		try {
+			const result = _.mapValues(merged, function(v) {
+				//console.log({v, totalNumber: total.toNumber("l")})
+				const numerator = math.multiply(v, total.toNumber("l"));
+				const result = math.divide(numerator, subTotal.toNumber("l"))
+				return result.format({precision: 4});
+			});
+			return result;
+		} catch (e) {
+			console.log({total: total.toNumber("l"), subTotal: subTotal.toNumber("l"), factor})
+			console.log(JSON.stringify(contents))
+			throw e;
+		}
 	}
 }
 

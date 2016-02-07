@@ -1,5 +1,8 @@
 roboliq: v1
 objects:
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
   strain1:
     type: Liquid
     wells: 'trough1(C01 down to F01)'

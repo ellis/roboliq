@@ -421,6 +421,7 @@ function test() {
 	const protocol = {
 		roboliq: "v1",
 		objects: {
+			water: { type: "Variable", value: "ourlab.mario.systemLiquid" },
 			strain1: {type: "Liquid", wells: "trough1(C01 down to F01)"},
 			media1: {type: "Liquid", wells: "trough2(C01 down to F01)"},
 			trough1: {type: "Plate", model: "ourlab.model.troughModel_100ml", location: "ourlab.mario.site.R5", contents: ["Infinity l", "strain1"]},

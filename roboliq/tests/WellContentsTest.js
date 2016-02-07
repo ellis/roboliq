@@ -66,6 +66,14 @@ describe('WellContents', function() {
 				water: '10 ul'
 			});
 		});
+		it(`assert flatten ["2.5 ul",["2.5 ul","systemLiquid"],["2.5 ul","systemLiquid"],["2.5 ul",["20 ul","strain1"],["80 ul","media1"]]]`, function() {
+			var contents = ["2.5 ul",["2.5 ul","systemLiquid"],["2.5 ul","systemLiquid"],["2.5 ul",["20 ul","strain1"],["80 ul","media1"]]];
+			assert.deepEqual(WellContents.flattenContents(contents), {
+				"media1": "0.6667 ul",
+				"strain1": "166.7 nl",
+				"systemLiquid": "1.667 ul"
+			});
+		});
 	});
 
 	describe('transferContents', function () {
