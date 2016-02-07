@@ -37,8 +37,8 @@ export function _washTips(params, parsed, data) {
 		const bUNKNOWN1 = false;
 		const l = [
 			syringeMask,
-			program.wasteGrid, program.wasteSite,
-			program.cleanerGrid, program.cleanerSite,
+			program.wasteGrid, program.wasteSite-1,
+			program.cleanerGrid, program.cleanerSite-1,
 			`"${math.format(program.wasteVolume, {precision: 14})}"`,
 			program.wasteDelay,
 			`"${math.format(program.cleanerVolume, {precision: 14})}"`,
