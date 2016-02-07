@@ -114,7 +114,7 @@ module.exports = {
 				},
 				"shaker": {
 					"type": "Shaker",
-					"evowareId": "Shaker"
+					"evowareId": "HPShaker"
 				},
 				"site": {
 					"type": "Namespace",
@@ -726,7 +726,15 @@ module.exports = {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {description: "Program for shaking", type: "object"}
+				//program: {description: "Program for shaking", type: "object"}
+				program: {
+					description: "Program for shaking",
+					properties: {
+						rpm: {description: "Rotations per minute (RPM)", type: "number"},
+						duration: {description: "Duration of shaking", type: "Duration"}
+					},
+					required: ["duration"]
+				}
 			},
 			required: ["agent", "equipment", "program"]
 		},
@@ -854,25 +862,45 @@ module.exports = {
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
 			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.shaker: "+JSON.stringify(parsed, null, '\t'))
 			const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+			const rpm = parsed.value.program.rpm || 750;
+
+			// Construct the shaker program data
+			const shakerNo = 1;
+			// FIXME: Let the user specify mode1, steps1, mode2, steps2, power
+			const mode1 = 2;
+			const steps1 = 0;
+			const mode2 = 1;
+			const steps2 = 0;
+			const freq = (60000000/rpm).toFixed(0);
+			const cycles = Math.floor(rpm * parsed.value.program.duration.toNumber("minute")).toFixed(0);
+			const powerPerc = 50;
+			const power = Math.floor(255 * powerPerc / 100).toFixed(0);
+			const s0 = `*27${shakerNo}|${freq}|${mode1}|${steps1}|${mode2}|${steps2}|${cycles}|${power}*27`;
+			// Replace all occurences of '0' with "*30"
+			const s1 = s0.replace(/0/g, "*30");
+			// Finally, split string into 32 char parts, then rebind them, separated by commas
+			const s2 = _(s1).chunk(32).map(s => s.join("")).join(",");
+
 			return {
 				expansion: [
 					{
 						command: "evoware._facts",
 						agent: parsed.objectName.agent,
 						factsEquipment: carrier,
-						factsVariable: carrier+"_Init",
-					},
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_Shake",
-						factsValue: "1"
+						factsVariable: carrier+"_HP__Start",
+						factsValue: s2
 					},
 					{
 						command: "timer.sleep",
 						agent: parsed.objectName.agent,
 						duration: parsed.orig.program.duration
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: carrier,
+						factsVariable: carrier+"_HP__Stop",
+						factsValue: "1"
 					},
 				]
 			};

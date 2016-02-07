@@ -75,7 +75,7 @@ describe('experiment', function() {
 								command: "timer._sleep",
 								agent: "robot1",
 								equipment: "timer1",
-								duration: 60
+								duration: "1 minute"
 							}
 						}
 					}

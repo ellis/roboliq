@@ -177,7 +177,8 @@ SUNDAY:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
     - [x] fix dilution series destinations (putting into A and B rows in the same item)
-    - [ ] fix evoware Wash output
+    - [x] fix evoware Wash output
+    - [ ] why no `timer._sleep` output from evoware?
     - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
     - something with absorbance OrangeG
@@ -375,6 +376,7 @@ LATER:
 
 ## After submission
 
+- [ ] test equipment.run|ourlab.mario.evoware|ourlab.mario.shaker
 - [ ] replace tests/schema.json with a JS file that loads the files in schemas/?
 - [ ] pipetter.js: figure out a better way to order items using the 'layer' property, maybe have an 'order' parameter of 'index', 'layer', or 'semilayer', where 'semilayer' would do what `groupingMethod3()` currently does, 'index' would ignore 'layer', and 'layer' would sort all items by their layer value.
 - [ ] pipetter.js: disallow pipetting on a plate with a lid (may need to create a LabwareLid type)

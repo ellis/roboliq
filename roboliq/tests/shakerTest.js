@@ -60,20 +60,14 @@ describe('commands/shaker', function() {
 						"1": {
 							"command": "evoware._facts",
 							"agent": "ourlab.mario.evoware",
-							"factsEquipment": "Shaker",
-							"factsVariable": "Shaker_Init"
+							"factsEquipment": "HPShaker",
+							"factsVariable": "HPShaker_HP__Start",
+							"factsValue": "*271|8*30*30*30*30|2|*30|1|*30|7,5*30|127*27"
 						},
 						"2": {
-							"command": "evoware._facts",
-							"agent": "ourlab.mario.evoware",
-							"factsEquipment": "Shaker",
-							"factsVariable": "Shaker_Shake",
-							"factsValue": "1"
-						},
-						"3": {
 							"1": {
 								"command": "timer._sleep",
-								"duration": 60,
+								"duration": "1 minute",
 								"agent": "ourlab.mario.evoware",
 								"equipment": "ourlab.mario.timer1"
 							},
@@ -81,6 +75,13 @@ describe('commands/shaker', function() {
 							"agent": "ourlab.mario.evoware",
 							"duration": "1 minute"
 						},
+						"3": {
+							"command": "evoware._facts",
+							"agent": "ourlab.mario.evoware",
+							"factsEquipment": "HPShaker",
+							"factsVariable": "HPShaker_HP__Stop",
+							"factsValue": "1"
+						}
 					},
 					"3": {
 						"command": "transporter.movePlate",

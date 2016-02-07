@@ -210,7 +210,7 @@ var commandHandlers = {
 		var params2 = _.merge(
 			{
 				command: "timer._sleep",
-				duration: parsed.value.duration.toNumber('s')
+				duration: parsed.value.duration.format({precision: 6})
 			},
 			alternatives[0]
 		);

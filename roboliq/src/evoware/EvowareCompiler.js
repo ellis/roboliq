@@ -14,6 +14,7 @@ const commandHandlers = {
 	"pipetter._dispense": pipetter._dispense,
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,
+	"timer._sleep": timer._sleep,
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,
 	"transporter._movePlate": transporter._movePlate

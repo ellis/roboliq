@@ -81,7 +81,7 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.steps[1].duration, "#length#list1");
-			should.deepEqual(result.output.steps[1][1].duration, 3);
+			should.deepEqual(result.output.steps[1][1].duration, "3 s");
 		});
 
 		it("should handle imports", function() {

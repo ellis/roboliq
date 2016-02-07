@@ -3,6 +3,16 @@ import math from 'mathjs';
 import commandHelper from '../../commandHelper.js';
 //import evowareHelper from './evowareHelper.js';
 
+export function _sleep(params, parsed, data) {
+	//console.log("timer._sleep: "+JSON.stringify(parsed, null, '\t'))
+	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
+	const seconds = math.round(parsed.value.duration.toNumber('s'));
+	return [
+		{line: `StartTimer("${id}");`},
+		{line: `WaitTimer("${id}","${seconds}");`}
+	];
+}
+
 export function _start(params, parsed, data) {
 	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
 	const line = `StartTimer("${id}");`;

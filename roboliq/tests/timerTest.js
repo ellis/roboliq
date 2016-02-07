@@ -28,7 +28,7 @@ describe('timer', function() {
 				steps: {
 					1: {
 						command: "timer.sleep",
-						duration: 10
+						duration: "10s"
 					}
 				}
 			});
@@ -37,7 +37,7 @@ describe('timer', function() {
 				command: "timer._sleep",
 				agent: "robot1",
 				equipment: "timer1",
-				duration: 10
+				duration: "10 s"
 			});
 		});
 	});
