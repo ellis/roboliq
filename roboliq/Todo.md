@@ -168,8 +168,9 @@ SATURDAY:
 - [x] explicitly add TipModels to ourlab, along with their characteristics
 - [x] pipetter.pipette: woops! we still have mario-specific code for `findTipModel()` and `assignProgram()`!
 - [x] replace `pipetter.findTipModel*` with a more generic function
-- [ ] groupingMethod3: allow `layer` to take partial priority over item order
-- [ ] groupingMethod3: force a group break when previous destination is used as a source
+SUNDAY:
+- [x] groupingMethod3: allow `layer` to take partial priority over item order
+- [x] groupingMethod3: force a group break when previous destination is used as a source
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
@@ -374,6 +375,7 @@ LATER:
 
 ## After submission
 
+- [ ] pipetter.js: figure out a better way to order items using the 'layer' property, maybe have an 'order' parameter of 'index', 'layer', or 'semilayer', where 'semilayer' would do what `groupingMethod3()` currently does, 'index' would ignore 'layer', and 'layer' would sort all items by their layer value.
 - [ ] pipetter.js: disallow pipetting on a plate with a lid (may need to create a LabwareLid type)
 - [ ] create schema for pipetter.TipModel and use it (see pipetter.pipette:findTipModel, where min and max volumes are checked)
 - [ ] pipetter.js: findTipModel(): check whether the labware is sealed

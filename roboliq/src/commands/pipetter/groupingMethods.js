@@ -184,8 +184,12 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 			const nextIndexes = [0];
 			// First check next item that's in the same layer as the last item in group
 			if (!_.isUndefined(current.layer)) {
-				const j = _.findIndex(item => _.isEqual(current.layer, item.layer));
-				if (j >= 0) {
+				const j = _.findIndex(items, item => {
+					//console.log({a: current.layer, b: item.layer, c: _.isEqual(current.layer, item.layer), d: current.layer === item.layer});
+					return _.isEqual(current.layer, item.layer);
+				});
+				//console.log({layer: current.layer, j})
+				if (j > 0) {
 					nextIndexes.unshift(j);
 				}
 			}

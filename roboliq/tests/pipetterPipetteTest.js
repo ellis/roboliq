@@ -369,7 +369,7 @@ describe('pipetter', function() {
 					}
 				}
 			});
-		})
+		});
 
 
 
@@ -559,5 +559,299 @@ describe('pipetter', function() {
 				}
 			});
 		});
+
+
+
+		it("should pipette in layers:", function() {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					trough1: {
+						type: "Plate",
+						model: "ourlab.model.troughModel_100ml",
+						location: "ourlab.mario.site.R6",
+						contents: ['Infinity l', 'source1']
+					},
+					trough2: {
+						type: "Plate",
+						model: "ourlab.model.troughModel_100ml",
+						location: "ourlab.mario.site.R6",
+						contents: ['Infinity l', 'source2']
+					},
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2"
+					},
+					source1: {
+						type: "Liquid",
+						wells: "trough1(A01 down to H01)"
+					},
+					source2: {
+						type: "Liquid",
+						wells: "trough2(A01 down to H01)"
+					},
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipette",
+						clean: "none",
+						items: [
+							{layer: 1, source: "source1", destination: "plate1(A01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(A01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(B01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(B01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(C01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(C01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(D01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(D01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(E01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(E01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(F01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(F01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(G01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(G01)", volume: "10ul"},
+							{layer: 1, source: "source1", destination: "plate1(H01)", volume: "10ul"},
+							{layer: 2, source: "source2", destination: "plate1(H01)", volume: "10ul"},
+						]
+					}
+				}
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			//console.log(JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps[1], {
+				"1": {
+					"command": "pipetter._pipette",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Dry_1000\"",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"source": "trough1(A01)",
+							"destination": "plate1(A01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"source": "trough1(B01)",
+							"destination": "plate1(B01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.3",
+							"source": "trough1(C01)",
+							"destination": "plate1(C01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.4",
+							"source": "trough1(D01)",
+							"destination": "plate1(D01)",
+							"volume": "10 ul"
+						}
+					]
+				},
+				"2": {
+					"command": "pipetter._pipette",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Dry_1000\"",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"source": "trough2(A01)",
+							"destination": "plate1(A01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"source": "trough2(B01)",
+							"destination": "plate1(B01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.3",
+							"source": "trough2(C01)",
+							"destination": "plate1(C01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.4",
+							"source": "trough2(D01)",
+							"destination": "plate1(D01)",
+							"volume": "10 ul"
+						}
+					]
+				},
+				"3": {
+					"command": "pipetter._pipette",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Dry_1000\"",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"source": "trough1(A01)",
+							"destination": "plate1(E01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"source": "trough1(B01)",
+							"destination": "plate1(F01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.3",
+							"source": "trough1(C01)",
+							"destination": "plate1(G01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.4",
+							"source": "trough1(D01)",
+							"destination": "plate1(H01)",
+							"volume": "10 ul"
+						}
+					]
+				},
+				"4": {
+					"command": "pipetter._pipette",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Dry_1000\"",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"source": "trough2(A01)",
+							"destination": "plate1(E01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"source": "trough2(B01)",
+							"destination": "plate1(F01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.3",
+							"source": "trough2(C01)",
+							"destination": "plate1(G01)",
+							"volume": "10 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.4",
+							"source": "trough2(D01)",
+							"destination": "plate1(H01)",
+							"volume": "10 ul"
+						}
+					]
+				},
+				"command": "pipetter.pipette",
+				"clean": "none",
+				"items": [
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(A01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(A01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(B01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(B01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(C01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(C01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(D01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(D01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(E01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(E01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(F01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(F01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(G01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(G01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 1,
+						"source": "source1",
+						"destination": "plate1(H01)",
+						"volume": "10ul"
+					},
+					{
+						"layer": 2,
+						"source": "source2",
+						"destination": "plate1(H01)",
+						"volume": "10ul"
+					}
+				]
+			});
+		});
+
+
+
 	});
 });
