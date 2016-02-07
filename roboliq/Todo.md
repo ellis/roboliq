@@ -172,14 +172,12 @@ SUNDAY:
 - [x] groupingMethod3: allow `layer` to take partial priority over item order
 - [x] groupingMethod3: force a group break when previous destination is used as a source
 - [x] pipetter.DilutionItem yaml
+- [x] `pipetter.pipetteDilutionSeries2x`
 - [ ] dm00_test3m.js:
     - [x] pipetteMixtures: handle new mixture list
     - [x] need to add liquid and labware for the "media" and "culture" sources
-    - [ ] fix dilution series destinations (putting into A and B rows in the same item)
-    - [ ] `pipetter.dilutionSeries`
-        - [ ] yaml
-        - [ ] function
-        - [ ] test
+    - [x] fix dilution series destinations (putting into A and B rows in the same item)
+    - [ ] fix evoware Wash output
     - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
     - something with absorbance OrangeG

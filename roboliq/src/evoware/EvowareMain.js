@@ -64,7 +64,7 @@ export function run(argv) {
 				//console.log()
 				_.forEach(results, result => {
 					const tableLines = EvowareTableFile.toStrings(carrierData, result.table);
-					const output = tableLines.concat(result.lines).join("\n") + "\n";
+					const output = tableLines.concat(result.lines).join("\r\n") + "\r\n";
 					const inpath = opts.protocol;
 					const dir = path.dirname(inpath);
 					const outpath = path.join(dir, path.basename(inpath, path.extname(inpath))+".esc");
