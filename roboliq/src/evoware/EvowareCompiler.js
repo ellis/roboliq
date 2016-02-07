@@ -39,6 +39,10 @@ export function compile(carrierData, table, protocol, agents) {
 }
 
 export function compileStep(table, protocol, agents, path, objects) {
+	if (_.isUndefined(objects)) {
+		objects = _.cloneDeep(protocol.objects);
+	}
+	
 	// console.log(`compileStep: ${path.join(".")}`)
 	// console.log({steps: protocol.steps})
 	const step = (_.isEmpty(path)) ? protocol.steps : _.get(protocol.steps, path);
