@@ -181,6 +181,11 @@ SUNDAY:
     - [ ] BUG: why are media and strain sources taken from different syringes?
     - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
     - currently: after pipetting culture, 1m8s left to wait
+    - currently: after second culture preparation (and wait of 1m8s), probably more than 2 minutes left to wait (look at it around 1m18s)
+    - PROBLEM: dilution series failed because it didn't detect enough liquid (but 188ul!)
+    - PROBLEM: then there were only 11s left before next dilution (I manually told evoware to ignore the pipetting errors)
+    - 46s after measurement 1, second dilution
+    - 12s after measurement 2, second dilution
     - [x] why no `timer._sleep` output from evoware?
     - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
