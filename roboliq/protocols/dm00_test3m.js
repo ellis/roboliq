@@ -87,10 +87,10 @@ const tree = {
 	"dilutionLocation": "ourlab.mario.site.P2",
 	"interval": "12 hours",
 	"media": "media1",
-	"mediaVolume": "400ul",
+	"mediaVolume": "800ul",
 	"strain": "strain1",
-	"strainVolume": "400ul",
-	"sampleVolume": "100ul"
+	"strainVolume": "800ul",
+	"sampleVolume": "200ul"
 };
 
 // Consider: select, groupBy, orderBy, unique
@@ -296,7 +296,8 @@ function test() {
 					]
 				}
 			}),
-			destinationLabware: scope.get("culturePlate")
+			destinationLabware: scope.get("culturePlate"),
+			clean: "light"
 		});
 
 		/*appendStep(step, {
@@ -329,7 +330,7 @@ function test() {
 	appendStep(step1, {
 		command: "timer.wait",
 		equipment: "ourlab.mario.timer2",
-		till: "10 minutes",
+		till: "6 minutes",
 		stop: true
 	});
 
@@ -362,7 +363,9 @@ function test() {
 				}),
 				volumes: scope.get("sampleVolume"),
 				sourceLabware: scope.get("culturePlate"),
-				destinationLabware: scope.get("dilutionPlate")
+				destinationLabware: scope.get("dilutionPlate"),
+				cleanBegin: "none",
+				clean: "light"
 			});
 			appendStep(step, {
 				command: "system.if",
@@ -386,16 +389,18 @@ function test() {
 						destinations: mapConditions(scope, data, {}, 1, (scope) => scope.get("dilutionWell")),
 						syringe: scope.get("syringe")
 					};
-				})
+				}),
+				cleanBegin: "none",
+				clean: "light"
 			});
-			appendStep(step, {
+			/*appendStep(step, {
 				command: "absorbanceReader.measurePlate",
 				object: scope.get("dilutionPlate"),
 				program: {
 					wells: mapConditions(scope, data, {select: "dilutionWell"}, 1, (scope) => scope.get("dilutionWell"))
 				},
 				programTemplate: "./dm00.mdfx.template"
-			});
+			});*/
 
 			appendStep(measurementStep, {
 				description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
@@ -416,7 +421,7 @@ function test() {
 			description: `Measurement ${scope.get("measurement")}`,
 			command: "timer.doAndWait",
 			equipment: "ourlab.mario.timer1",
-			duration: "10 minutes",
+			duration: "6 minutes",
 			steps: measurementStep
 		});
 	});

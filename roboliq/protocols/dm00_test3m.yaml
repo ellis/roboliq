@@ -57,15 +57,16 @@ steps:
               destination: A01
               syringe: ourlab.mario.liha.syringe.1
               sources:
-                - {source: strain1, volume: 400ul}
-                - {source: media1, volume: 400ul}
+                - {source: strain1, volume: 800ul}
+                - {source: media1, volume: 800ul}
             -
               destination: B01
               syringe: ourlab.mario.liha.syringe.2
               sources:
-                - {source: strain1, volume: 400ul}
-                - {source: media1, volume: 400ul}
+                - {source: strain1, volume: 800ul}
+                - {source: media1, volume: 800ul}
           destinationLabware: stillPlate
+          clean: light
         '3':
           command: transporter.movePlate
           object: stillPlate
@@ -89,15 +90,16 @@ steps:
               destination: A01
               syringe: ourlab.mario.liha.syringe.1
               sources:
-                - {source: strain1, volume: 400ul}
-                - {source: media1, volume: 400ul}
+                - {source: strain1, volume: 800ul}
+                - {source: media1, volume: 800ul}
             -
               destination: B01
               syringe: ourlab.mario.liha.syringe.2
               sources:
-                - {source: strain1, volume: 400ul}
-                - {source: media1, volume: 400ul}
+                - {source: strain1, volume: 800ul}
+                - {source: media1, volume: 800ul}
           destinationLabware: shakePlate
+          clean: light
         '3':
           command: transporter.movePlate
           object: shakePlate
@@ -105,14 +107,14 @@ steps:
     '3':
       command: timer.wait
       equipment: ourlab.mario.timer2
-      till: '10 minutes'
+      till: '6 minutes'
       stop: true
     description: 'prepare plate'
   '2':
     description: 'Measurement 1'
     command: timer.doAndWait
     equipment: ourlab.mario.timer1
-    duration: '10 minutes'
+    duration: '6 minutes'
     steps:
       '1':
         description: 'Measurement 1 on stillPlate'
@@ -136,9 +138,11 @@ steps:
               '3':
                 command: pipetter.pipette
                 items: [{source: A01, destination: A01, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B01, syringe: ourlab.mario.liha.syringe.2}]
-                volumes: 100ul
+                volumes: 200ul
                 sourceLabware: stillPlate
                 destinationLabware: dilutionPlate1
+                cleanBegin: none
+                clean: light
               '4':
                 command: system.if
                 test: false
@@ -152,11 +156,8 @@ steps:
                 diluent: water
                 destinationLabware: dilutionPlate1
                 items: [{destinations: [A01, A02, A03, A04, A05], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.2}]
-              '7':
-                command: absorbanceReader.measurePlate
-                object: dilutionPlate1
-                program: {wells: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05]}
-                programTemplate: ./dm00.mdfx.template
+                cleanBegin: none
+                clean: light
       '2':
         description: 'Measurement 1 on shakePlate'
         command: timer.doAndWait
@@ -179,9 +180,11 @@ steps:
               '3':
                 command: pipetter.pipette
                 items: [{source: A01, destination: A01, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B01, syringe: ourlab.mario.liha.syringe.2}]
-                volumes: 100ul
+                volumes: 200ul
                 sourceLabware: shakePlate
                 destinationLabware: dilutionPlate2
+                cleanBegin: none
+                clean: light
               '4':
                 command: system.if
                 test: true
@@ -195,16 +198,13 @@ steps:
                 diluent: water
                 destinationLabware: dilutionPlate2
                 items: [{destinations: [A01, A02, A03, A04, A05], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.2}]
-              '7':
-                command: absorbanceReader.measurePlate
-                object: dilutionPlate2
-                program: {wells: [A01, A02, A03, A04, A05, B01, B02, B03, B04, B05]}
-                programTemplate: ./dm00.mdfx.template
+                cleanBegin: none
+                clean: light
   '3':
     description: 'Measurement 2'
     command: timer.doAndWait
     equipment: ourlab.mario.timer1
-    duration: '10 minutes'
+    duration: '6 minutes'
     steps:
       '1':
         description: 'Measurement 2 on stillPlate'
@@ -228,9 +228,11 @@ steps:
               '3':
                 command: pipetter.pipette
                 items: [{source: A01, destination: A07, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B07, syringe: ourlab.mario.liha.syringe.2}]
-                volumes: 100ul
+                volumes: 200ul
                 sourceLabware: stillPlate
                 destinationLabware: dilutionPlate1
+                cleanBegin: none
+                clean: light
               '4':
                 command: system.if
                 test: false
@@ -244,11 +246,8 @@ steps:
                 diluent: water
                 destinationLabware: dilutionPlate1
                 items: [{destinations: [A07, A08, A09, A10, A11], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.2}]
-              '7':
-                command: absorbanceReader.measurePlate
-                object: dilutionPlate1
-                program: {wells: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11]}
-                programTemplate: ./dm00.mdfx.template
+                cleanBegin: none
+                clean: light
       '2':
         description: 'Measurement 2 on shakePlate'
         command: timer.doAndWait
@@ -271,9 +270,11 @@ steps:
               '3':
                 command: pipetter.pipette
                 items: [{source: A01, destination: A07, syringe: ourlab.mario.liha.syringe.1}, {source: B01, destination: B07, syringe: ourlab.mario.liha.syringe.2}]
-                volumes: 100ul
+                volumes: 200ul
                 sourceLabware: shakePlate
                 destinationLabware: dilutionPlate2
+                cleanBegin: none
+                clean: light
               '4':
                 command: system.if
                 test: true
@@ -287,9 +288,6 @@ steps:
                 diluent: water
                 destinationLabware: dilutionPlate2
                 items: [{destinations: [A07, A08, A09, A10, A11], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.2}]
-              '7':
-                command: absorbanceReader.measurePlate
-                object: dilutionPlate2
-                program: {wells: [A07, A08, A09, A10, A11, B07, B08, B09, B10, B11]}
-                programTemplate: ./dm00.mdfx.template
+                cleanBegin: none
+                clean: light
 

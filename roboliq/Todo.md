@@ -178,7 +178,10 @@ SUNDAY:
     - [x] need to add liquid and labware for the "media" and "culture" sources
     - [x] fix dilution series destinations (putting into A and B rows in the same item)
     - [x] fix evoware Wash output
-    - [ ] why no `timer._sleep` output from evoware?
+    - [ ] BUG: why are media and strain sources taken from different syringes?
+    - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
+    - currently: after pipetting culture, 1m8s left to wait
+    - [x] why no `timer._sleep` output from evoware?
     - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
     - something with absorbance OrangeG
@@ -188,6 +191,7 @@ SUNDAY:
     - [ ] mario: can't use tips 1-4 to puncture a seal
     - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
 - [ ] compile the experiment for mario
+- [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
 SUNDAY:
 - [ ] compile the experiment for luigi
 - [ ] run the experiment on mario

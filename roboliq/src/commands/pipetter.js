@@ -734,12 +734,13 @@ const commandHandlers = {
 		const params1 = _.omit(parsed.orig, ['diluent', 'items']);
 		params1.command = "pipetter.pipette";
 		params1.items = diluentItems;
-		params1.cleanBegin = "light";
-		params1.cleanEnd = "light";
+		params1.program = "Roboliq_Water_Air_1000";
+		params1.clean = "none"; // HACK
 		const params2 = _.omit(parsed.orig, ['diluent', 'items']);
 		params2.command = "pipetter.pipette";
 		params2.items = items;
-		params2.cleanEnd = "light";
+		params2.clean = "none"; // HACK
+		params2.cleanEnd = "light"; // HACK
 		return { expansion: { "1": params1, "2": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
