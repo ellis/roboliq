@@ -87,10 +87,10 @@ const tree = {
 	"dilutionLocation": "ourlab.mario.site.P2",
 	"interval": "12 hours",
 	"media": "media1",
-	"mediaVolume": "80ul",
+	"mediaVolume": "400ul",
 	"strain": "strain1",
-	"strainVolume": "20ul",
-	"sampleVolume": "5ul"
+	"strainVolume": "400ul",
+	"sampleVolume": "100ul"
 };
 
 // Consider: select, groupBy, orderBy, unique
