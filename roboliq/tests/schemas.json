@@ -525,7 +525,7 @@
 			},
 			"program": {
 				"description": "Program identifier",
-				"type": "string"
+				"type": "name"
 			},
 			"syringes": {
 				"description": "List of syringe identifiers",

@@ -9,7 +9,54 @@ const protocol0 = {
 	roboliq: "v1",
 	objects: {
 		robot1: {
-			type: "Agent"
+			type: "Agent",
+			"liha": {
+				"type": "Pipetter",
+				"syringe": {
+					"1": {
+						"type": "Syringe",
+						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+						"row": 1
+					},
+					"2": {
+						"type": "Syringe",
+						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+						"row": 2
+					},
+					"3": {
+						"type": "Syringe",
+						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+						"row": 3
+					},
+					"4": {
+						"type": "Syringe",
+						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+						"row": 4
+					},
+				}
+			},
+			"washProgram": {
+				"type": "Namespace",
+				"light_1000": {
+					"type": "EvowareWashProgram",
+					"wasteGrid": 1,
+					"wasteSite": 2,
+					"cleanerGrid": 1,
+					"cleanerSite": 1,
+					"wasteVolume": 4,
+					"wasteDelay": 500,
+					"cleanerVolume": 2,
+					"cleanerDelay": 500,
+					"airgapVolume": 10,
+					"airgapSpeed": 70,
+					"retractSpeed": 30,
+					"fastWash": false
+				},
+			},
 		},
 		timer1: {
 			type: "Timer",
@@ -305,6 +352,41 @@ describe('EvowareCompilerTest', function() {
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
+			]]);
+		});
+
+		it("should compile pipetter._wash light", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
+						}
+					}
+				},
+				steps: {
+					"1": {
+						"command": "pipetter._washTips",
+						"agent": "robot1",
+						"equipment": "robot1.liha",
+						"program": "robot1.washProgram.light_1000",
+						"intensity": "light",
+						"syringes": [
+							"robot1.liha.syringe.1",
+							"robot1.liha.syringe.2",
+							"robot1.liha.syringe.3",
+							"robot1.liha.syringe.4"
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
+			//console.log(JSON.stringify(results, null, '\t'))
+			should.deepEqual(results, [[
+				{line: "Wash(15,1,2,1,1,\"4\",500,\"2\",500,10,70,30,0,0,1000,0);"},
 			]]);
 		});
 	});

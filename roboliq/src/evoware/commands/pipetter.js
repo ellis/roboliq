@@ -30,7 +30,10 @@ export function _washTips(params, parsed, data) {
 	}
 
 	function handleWashProgram() {
-		const program = parsed.value.program;
+		//console.log("handleWashProgram: "+JSON.stringify(parsed, null, '\t'))
+		const program = commandHelper.lookupPath([parsed.value.program], {}, data);
+		assert(!_.isEmpty(program), "missing wash program")
+		//console.log({program})
 		const syringeRows = parsed.value.syringes.map(x => x.row);
 		const syringeMask = encodeSyringesByRow(syringeRows);
 		const bUNKNOWN1 = false;

@@ -375,6 +375,7 @@ LATER:
 
 ## After submission
 
+- [ ] replace tests/schema.json with a JS file that loads the files in schemas/?
 - [ ] pipetter.js: figure out a better way to order items using the 'layer' property, maybe have an 'order' parameter of 'index', 'layer', or 'semilayer', where 'semilayer' would do what `groupingMethod3()` currently does, 'index' would ignore 'layer', and 'layer' would sort all items by their layer value.
 - [ ] pipetter.js: disallow pipetting on a plate with a lid (may need to create a LabwareLid type)
 - [ ] create schema for pipetter.TipModel and use it (see pipetter.pipette:findTipModel, where min and max volumes are checked)
