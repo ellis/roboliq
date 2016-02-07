@@ -386,7 +386,7 @@ describe('EvowareCompilerTest', function() {
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], protocol.objects);
 			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [[
-				{line: "Wash(15,1,2,1,1,\"4\",500,\"2\",500,10,70,30,0,0,1000,0);"},
+				{line: "Wash(15,1,1,1,0,\"4\",500,\"2\",500,10,70,30,0,0,1000,0);"},
 			]]);
 		});
 	});
