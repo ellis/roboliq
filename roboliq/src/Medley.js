@@ -21,7 +21,10 @@ export function setMut(data, path, value) {
 	assert(_.isPlainObject(data));
 	assert(_.isArray(path) || _.isString(path) || _.isNumber(path), `expected an array or string: ${JSON.stringify(path)}`);
 
-	path = (_.isArray(path)) ? path : [path];
+	path
+		= (_.isArray(path)) ? path
+		: (_.isString(path)) ? path.split(".")
+		: [path];
 
 	// If the path should be deleted
 	if (_.isNull(value) || _.isUndefined(value)) {
