@@ -195,8 +195,14 @@ SUNDAY:
     - should skip sealing so that we don't need to deal with the complications on Sunday
     - [ ] mario: can't use tips 1-4 to puncture a seal
     - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
+- [ ] transporter test errors:
+    - [ ] transfers from P2, twice it didn't grip
+    - [ ] why was roma2 used for transfer from REGRIP to READER when we were in the roma1 group?
+    - [ ] roma2, wide grip, from REGRIP to READER: doesn't narrow the grip again, so it pushes aside the transfer hotel
+    - [ ] should automatically move ROMAs to "home position" before a different roma is used.
 - [ ] compile the experiment for mario
 - [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
+- [ ] ourlab.js: DWP cann't go on sealer or peeler
 SUNDAY:
 - [ ] compile the experiment for luigi
 - [ ] run the experiment on mario

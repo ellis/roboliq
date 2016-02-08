@@ -152,6 +152,12 @@ module.exports = {
 						"evowareGrid": 62,
 						"evowareSite": 1
 					},
+					"ROBOPEEL": {
+						"type": "Site",
+						"evowareCarrier": "RoboPeel",
+						"evowareGrid": 12,
+						"evowareSite": 1
+					},
 					"ROBOSEAL": {
 						"type": "Site",
 						"evowareCarrier": "RoboSeal",
