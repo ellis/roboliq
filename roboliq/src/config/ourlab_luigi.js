@@ -150,9 +150,9 @@ module.exports = {
 					"evowareId": 1
 				},
 				"washProgram": {
-					CONTINUE
+					//CONTINUE
 					"type": "Namespace",
-					"flush_2500": { IS THIS REALLY FLUSH?
+					"flush_2500": { // FIXME: IS THIS REALLY FLUSH?
 						"type": "EvowareWashProgram",
 						"wasteGrid": 42,
 						"wasteSite": 2,
@@ -167,74 +167,17 @@ module.exports = {
 						"retractSpeed": 30,
 						"fastWash": true
 					},
-					"light_1000": {
-						"type": "EvowareWashProgram",
-						"wasteGrid": 1,
-						"wasteSite": 2,
-						"cleanerGrid": 1,
-						"cleanerSite": 1,
-						"wasteVolume": 4,
-						"wasteDelay": 500,
-						"cleanerVolume": 2,
-						"cleanerDelay": 500,
-						"airgapVolume": 10,
-						"airgapSpeed": 70,
-						"retractSpeed": 30,
-						"fastWash": false
-					},
-					"thorough_1000": {
-						"type": "EvowareWashProgram",
-						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_1000.esc"
-					},
-					"thorough_0050": {
-						"type": "EvowareWashProgram",
-						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
-					}
 				}
 			},
 			"model": {
 				"type": "Namespace",
-				"plateModel_96_pcr": {
-					"type": "PlateModel",
-					"label": "96 well PCR plate",
-					"rows": 8,
-					"columns": 12,
-					"evowareName": "D-BSSE 96 Well PCR Plate"
-				},
 				"plateModel_96_dwp": {
 					"type": "PlateModel",
 					"label": "96 well deep-well plate",
 					"rows": 8,
 					"columns": 12,
-					"evowareName": "D-BSSE 96 Well DWP"
-				},
-				"plateModel_384_round": {
-					"type": "PlateModel",
-					"label": "384 round-well plate",
-					"rows": 16,
-					"columns": 24,
-					"evowareName": "D-BSSE 384 Well Plate White"
-				},
-				"plateModel_384_square": {
-					"type": "PlateModel",
-					"label": "384 square-flat-well white plate",
-					"rows": 16,
-					"columns": 24,
-					"evowareName": "D-BSSE 384 Well Plate White"
-				},
-				"plateModel_384_square_transparent_greiner": {
-					"type": "PlateModel",
-					"label": "384 square-flat-well transparent Greiner",
-					"rows": 16,
-					"columns": 24,
-					"evowareName": "384 Sqr Flat Trans Greiner"
-				},
-				"plateModel_96_square_transparent_nunc": {
-					"type": "PlateModel",
-					"label": "96 square-well transparent Nunc plate",
-					"rows": 8,
-					"columns": 12,
-					"evowareName": "Ellis Nunc F96 MicroWell"
+					"evowareName": "DM 96-DWB GripUp",
+					"evowareName_sealed": "DM 96-DWB GripUp sealed"
 				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
@@ -243,20 +186,13 @@ module.exports = {
 					"columns": 1,
 					"evowareName": "Trough 100ml"
 				},
-				"troughModel_100ml_lowvol_tips": {
+				"troughModel_1500ml": {
 					"type": "PlateModel",
-					"label": "Trough 100ml LowVol Tips",
+					"label": "Trough 1500ml Stainless",
 					"rows": 8,
 					"columns": 1,
-					"evowareName": "Trough 100ml LowVol Tips"
+					"evowareName": "Trough 1500ml Stainless"
 				},
-				"tubeHolderModel_1500ul": {
-					"type": "PlateModel",
-					"label": "20 tube block 1.5ml",
-					"rows": 4,
-					"columns": 5,
-					"evowareName": "Block 20Pos 1.5 ml Eppendorf"
-				}
 			}
 		}
 	},
