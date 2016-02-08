@@ -3,36 +3,26 @@ import assert from 'assert';
 import Immutable, {Map, fromJS} from 'immutable';
 import yaml from 'yamljs';
 
-const tree = {
-	"strain*": [
-		"strain1",
-		"strain2"
-	],
-	"media*": {
-		"media1": {
-			"replicate*": [1,2]
-		},
-		"media2": {
-			"replicate*": [1]
-		}
-	}
-};
-
-const tree4 = {
+const design = {
 	conditions: {
 		"strain*": [
 			"strain1",
 			"strain2"
 		],
-		"media*": {
-			"media1": {
-				"replicate*": [1,2]
-			},
-			"media2": {
-				"replicate*": [1]
-			}
-		}
-	},
+		"media*": [
+			"media1",
+			"media2"
+		],
+		"sample*": [
+			{time: "12hr"},
+			{time: "24hr"}
+		],
+		"dilution*": [1, 2]
+	}
+};
+
+const tree4 = {
+	conditions: design.conditions,
 	processing: [
 		{}
 	],
@@ -58,8 +48,8 @@ const tree4 = {
 	}
 };
 
-function printTree(tree) {
-	console.log(yaml.stringify(tree, 6, 2));
+function printTree(conditions) {
+	console.log(yaml.stringify(conditions, 6, 2));
 }
 
 function printData(data) {
@@ -193,8 +183,8 @@ function query(table, q) {
 	return table2;
 }
 
-const table = flatten([tree]);
-printTree(tree);
+const table = flatten([design.conditions]);
+printTree(design.conditions);
 printData(table);
 //console.log(yaml.stringify(table, 4, 2))
 
