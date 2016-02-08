@@ -66,7 +66,7 @@ const design = {
 		"cultureWellIndex*": _.range(1, 4+1),
 		//"sample1*": [false, true],
 		//"sample1Cycle*": _.range(0, 4),
-		//"dilution*": [1, 2]
+		"dilutionFactor*": [1, 2]
 	},
 };
 
@@ -83,15 +83,21 @@ const design2 = {
 	assign: {
 		cultureWell: {
 			values: _.range(1, 96+1),
+			groupBy: "cultureWellIndex",
 			random: true
 		},
-		sample1Cycle: {
+		sampleCycle: {
 			values: _.range(1, 4+1),
+			groupBy: "cultureWellIndex",
 			random: true
 		},
-		sample2Cycle: {
-			calculate: (row) => (row.sample1Cycle + 1)
-		}
+		"sampleCycle*": {
+			calculate: (row) => [row.sampleCycle, row.sampleCycle + 1]
+		},
+		dilutionWell: {
+			values: _.range(1, 96+1),
+			random: true
+		},
 		/*order: {
 			index: true,
 			random: true
@@ -240,16 +246,35 @@ function flattenDesign(design) {
 
 	//console.log({assign: design.assign})
 	_.forEach(design.assign, (x, name) => {
+		let groups;
+		if (x.groupBy) {
+			groups = query(table, {groupBy: x.groupBy});
+		}
+		else {
+			groups = _.map(table, row => [row]);
+		}
+
+		let fn;
 		//console.log({name, x})
 		if (_.isArray(x.values)) {
 			const values = _.shuffle(x.values);
-			_.forEach(table, (row, i) => {
-				row[name] = values[i];
-			});
+			fn = (scope, index) => {
+				return values[index];
+			};
 		}
 		else if (_.isFunction(x.calculate)) {
-			_.forEach(table, row => {
-				row[name] = x.calculate(row);
+			fn = (scope, index) => {
+				return x.calculate(scope);
+			};
+		}
+
+		if (fn) {
+			_.forEach(groups, (group, i) => {
+				const value = fn(group[0], i);
+				CONITNUE: handle scope*
+				_.forEach(group, row => {
+					row[name] = value;
+				});
 			});
 		}
 	});
