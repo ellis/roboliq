@@ -63,9 +63,10 @@ const design = {
 	conditions: {
 		"strainSource": "strain1",
 		"mediaSource": "media1",
-		"sample1*": [false, true],
-		"sample1Cycle*": _.range(0, 4),
-		"dilution*": [1, 2]
+		"cultureWellIndex*": _.range(1, 4+1),
+		//"sample1*": [false, true],
+		//"sample1Cycle*": _.range(0, 4),
+		//"dilution*": [1, 2]
 	},
 };
 
@@ -80,19 +81,21 @@ const design2 = {
 		}
 	},
 	assign: {
-		plate: {
-			values: ["plate1", "plate2"],
-			random: true,
-			groupBy: "strain"
-		},
-		well: {
-			values: ["A01", "B01", "C01", "D01", "A02", "B02", "C02", "D02"],
+		cultureWell: {
+			values: _.range(1, 96+1),
 			random: true
 		},
-		order: {
+		sample1Cycle: {
+			values: _.range(1, 4+1),
+			random: true
+		},
+		sample2Cycle: {
+			calculate: (row) => (row.sample1Cycle + 1)
+		}
+		/*order: {
 			index: true,
 			random: true
-		}
+		}*/
 	}
 };
 
@@ -234,10 +237,27 @@ function query(table, q) {
 
 function flattenDesign(design) {
 	const table = flattenConditions(design.conditions);
+
+	//console.log({assign: design.assign})
+	_.forEach(design.assign, (x, name) => {
+		//console.log({name, x})
+		if (_.isArray(x.values)) {
+			const values = _.shuffle(x.values);
+			_.forEach(table, (row, i) => {
+				row[name] = values[i];
+			});
+		}
+		else if (_.isFunction(x.calculate)) {
+			_.forEach(table, row => {
+				row[name] = x.calculate(row);
+			});
+		}
+	});
+
 	return table;
 }
 
-const table = flattenDesign(design);
+const table = flattenDesign(design2);
 printConditions(design.conditions);
 printData(table);
 //console.log(yaml.stringify(table, 4, 2))
