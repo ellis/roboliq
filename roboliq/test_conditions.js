@@ -3,22 +3,70 @@ import assert from 'assert';
 import Immutable, {Map, fromJS} from 'immutable';
 import yaml from 'yamljs';
 
+/*
+ * What's the impact of:
+ * - evaporation
+ * - number of sealing layers
+ * - sampling (removing content from wells)
+ * - position in shaker
+ *
+ * The interactions among the factors are complex:
+ * - sampling causes a seal puncture, which leads to accelerated evaporation
+ * - but if we don't sample all wells at the same time, it's much more difficult to compare readouts at the end
+ * - the experiments take a long time (48h) so if we're going to re-test conditions using swapped shaker positions, it going to take a long time
+ * - we could possible minimize the effect of position by swapping positions frequently, but this seems complex
+ * - each sealing layer reduces air exchange, so if we add another seal layer after puncturing in order to minimize evaporation, we've change the conditions
+ * - could we inject more media to compensate for evaporation?  If so, which effects would this have?
+ *
+ * Additional confounding factors:
+ * - position of well
+ * - syringe used
+ * - frequency and duration of stopping incubator to perform operations
+ *
+ * Design ideas for isolating evaporation:
+ * - puncture wells at various time points; measure all wells at 48h; model could be $y \sim f(48 - t1)$; restricted to 8 wells.
+ * - puncture wells at various time points and measure; measure all wells at 48h; model could be $y \sim f(t1, y1)$ or $y/y1 \sim f(t1)$; restricted to 8 wells.
+ * - puncture wells at various time points; measures wells later; model: $y_t \sim dt$, where $y_t$ are all measurements at a given time, $dt$ is time since puncture.
+ *
+ * Design ideas for isolating site effects:
+ * - use 2, 8, or 16 plates with the same conditions; just interleave their processing
+ *
+ * Design ideas for isolating well position effects:
+ * - randomize wells and see whether col/row have an effect
+ *
+ * Design ideas for isolating sampling:
+ * - pre-puncture all wells before incubation; assign wells to be sampled 1, 2, 3, or 4 times, where the last timepoint is the same for all
+ * - dispense media, seal;
+ * - puncture wells at various time points before 24h and measure; measure again 24h later; model is $y - y1 \sim f(evaporationTime)$
+ * - puncture wells at various time points and measure or not; measures wells 12hr later;
+ *     model 1) $y \sim x$, where $x$ is 1 if first puncture also involved measurement (0 otherwise)
+ *
+ * Design ideas for number of sealing layers:
+ * -
+ * Design ideas for general experiment:
+ * - sample wells at various time points; measure again 12hr later (if we think 12hr is ok for evaporation); 4 wells have first measurement, 4 have second measurement for each time period;
+ *     model 1) $y_i^{(t)} \sim k_i$, where $y_i^{(t)}$ are the measurements at a given time point, and $k$ is 1 for the first measurement and 2 for the second measurement.  This helps us assess the impact of evaporation+priorsampling; if we already quantified the impact of 12hr evaporation, then we may be able to extract the impact of prior sampling.
+ *     model 2) ...
+ * - puncture wells at various time points and measure or not; measures wells later;
+ *     model 1) $y_t \sim x + dt$, where $y_t$ are all measurements at a given time, $x$ is 1 if first puncture also involved measurement (0 otherwise), $dt$ is time since puncture.
+ *     model 2) $y \sim f(t, x, dt)$, full model
+ *
+ * More details for the first general design:
+ * - measure every 15 minutes (=> 12hr = 48 sample times)
+ * - for the first 48 sample times, sample 1 well
+ * - for the next 48 sample times, resample each well from before and 1 new well
+ * - for the next 48 sample times, same as previous cycle
+ * - for the last 48 sample times, resample each well from before
+ */
+
 const design = {
 	conditions: {
-		"strain*": [
-			"strain1",
-			"strain2"
-		],
-		"media*": [
-			"media1",
-			"media2"
-		],
-		"sample*": [
-			{time: "12hr"},
-			{time: "24hr"}
-		],
+		"strainSource": "strain1",
+		"mediaSource": "media1",
+		"sample1*": [false, true],
+		"sample1Cycle*": _.range(0, 4),
 		"dilution*": [1, 2]
-	}
+	},
 };
 
 const design2 = {
@@ -69,7 +117,8 @@ function printData(data) {
 			lines.push(["---"]);
 		}
 		_.forEach(group, row => {
-			const line = _.map(columns, key => row[key] || "");
+			const line = _.map(columns, key => _.get(row, key, ""));
+			// TODO: have option to blank columns that are the same as the column of the previous row
 			lines.push(line);
 		});
 	});
@@ -84,7 +133,7 @@ function printData(data) {
 
 	console.log(columns.map((s, i) => _.padEnd(s, widths[i])).join("  "));
 	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
-	_.forEach(lines, line => {
+	_.forEach(lines, (line, lineIndex) => {
 		const s = line.map((s, i) => _.padEnd(s, widths[i])).join("  ");
 		console.log(s);
 	});
