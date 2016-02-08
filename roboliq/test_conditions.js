@@ -21,7 +21,7 @@ const design = {
 	}
 };
 
-const tree4 = {
+const design2 = {
 	conditions: design.conditions,
 	processing: [
 		{}
@@ -48,7 +48,7 @@ const tree4 = {
 	}
 };
 
-function printTree(conditions) {
+function printConditions(conditions) {
 	console.log(yaml.stringify(conditions, 6, 2));
 }
 
@@ -91,9 +91,9 @@ function printData(data) {
 }
 // Consider: select, groupBy, orderBy, unique
 
-function flatten(input, depth = -1) {
-	assert(_.isArray(input));
-	let flatter = input;
+function flattenConditions(conditions, depth = -1) {
+	assert(_.isPlainObject(conditions));
+	let flatter = [conditions];
 	let again = true;
 	while (again && depth != 0) {
 		//console.log({depth})
@@ -183,8 +183,13 @@ function query(table, q) {
 	return table2;
 }
 
-const table = flatten([design.conditions]);
-printTree(design.conditions);
+function flattenDesign(design) {
+	const table = flattenConditions(design.conditions);
+	return table;
+}
+
+const table = flattenDesign(design);
+printConditions(design.conditions);
 printData(table);
 //console.log(yaml.stringify(table, 4, 2))
 
