@@ -72,70 +72,36 @@ const design = {
 };
 
 const design2 = {
-	conditions: design.conditions,
-	processing: [
-		{}
-	],
-	replicates: {
-		replicate: {
-			count: 2
+	conditions: {
+		"strainSource": "strain1",
+		"mediaSource": "media1",
+		//"cultureNum*": _.range(1, 4+1),
+		"cultureNum*=": {
+			action: "range",
+			till: 4
+		},
+		"cultureWell=": {
+			action: "range",
+			till: 96,
+			random: true
+		},
+		/*
+		"sampleNum": 1,
+		"sampleCycle=": {
+			action: "range",
+			random: true
+		},
+		"sampleNum**": {
+			template: {
+				"sampleNum": 2,
+				"sampleCycle$": "sampleCycle+1"
+			}
 		}
-	},
-	assign: {
-		cultureWell: {
-			values: _.range(1, 96+1),
-			groupBy: "cultureNum",
-			random: true
-		},
-		sampleCycle: {
-			values: _.range(1, 4+1),
-			groupBy: "cultureWellIndex",
-			random: true
-		},
-		"sampleCycle*": {
-			calculate: (row) => [row.sampleCycle, row.sampleCycle + 1]
-		},
-		dilutionWell: {
-			values: _.range(1, 96+1),
-			random: true
-		},
-		/*order: {
-			index: true,
-			random: true
-		}*/
+		*/
 	},
 	// TODO: add cultureRow, cultureCol, syringe, randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
-		{
-			action: "add",
-			object: {
-				"strainSource": "strain1",
-				"mediaSource": "media1",
-				//"cultureNum*": _.range(1, 4+1),
-				"cultureNum*=": {
-					action: "range",
-					till: 4
-				},
-				"cultureWell=": {
-					action: "range",
-					till: 96,
-					random: true
-				},
-				"sampleNum": 1,
-				"sampleCycle=": {
-					action: "range",
-					random: true
-				},
-				/*"sampleNum**": {
-					template: {
-						"sampleNum": 2,
-						"sampleCycle$": "sampleCycle+1"
-					}
-				}
-				*/
-			}
-		},
 		/*{
 			action: "range",
 			name: "cultureWell",
@@ -353,23 +319,7 @@ function query(table, q) {
 // - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
 const actionHandlers = {
 	"add": function(action, data) {
-		const result = {};
-		_.forEach(action.object, (value, key) => {
-			if (_.endsWith(key, "=")) {
-				const handler2 = actionHandlers[value.action];
-				assert(handler2, "unknown action: "+JSON.stringify(action));
-				if (handler2) {
-					const action2 = _.merge({}, value, {name: key.substring(0, key.length - 1)});
-					const result2 = handler2(action2, data);
-					console.log({result2})
-					_.merge(result, result2);
-				}
-			}
-			else {
-				_.merge(result, _.fromPairs([[key, value]]));
-			}
-		});
-		return result;
+		return action.object;
 	},
 	"assign": function(action, data) {
 		//console.log({name, x})
@@ -445,8 +395,23 @@ function flattenDesign(design) {
 		return table;
 	}
 
+	const conditionActions = _.map(design.conditions, (value, key) => {
+		if (_.endsWith(key, "=")) {
+			const handler2 = actionHandlers[value.action];
+			assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
+			if (handler2) {
+				return _.merge({}, value, {name: key.substring(0, key.length - 1)});
+			}
+		}
+		else {
+			return {action: "assign", name: key, values: value};
+		}
+	});
+	const actions = _.compact(conditionActions.concat(design.actions));
+	console.log({actions})
+
 	let table = [{}];
-	_.forEach(design.actions, action => {
+	_.forEach(actions, action => {
 		const handler = actionHandlers[action.action];
 		if (!handler) return;
 
@@ -658,6 +623,6 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 }
 
 const table = flattenDesign(design2);
-printConditions(design.conditions);
+printConditions(design2.conditions);
 printData(table);
 //console.log(yaml.stringify(table, 4, 2))
