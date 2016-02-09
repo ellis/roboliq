@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
 import Immutable, {Map, fromJS} from 'immutable';
+import math from 'mathjs';
 import yaml from 'yamljs';
 
 /*
@@ -71,14 +72,12 @@ const design2 = {
 			till: 96,
 			random: true
 		},
-		/*"cultureCol=": {
-			action: "math",
-			value: "floor(cultureWell % 8)"
-		}
-		"cultureRow=": {
-			action: "math",
-			value: "floor(cultureWell % 8)"
-		}*/
+		"cultureCol=math": {
+			value: "floor((cultureWell - 1) / 8) + 1"
+		},
+		"cultureRow=math": {
+			value: "((cultureWell - 1) % 8) + 1"
+		},
 		"sampleNum": 1,
 		"sampleCycle=range": {
 			random: true
@@ -301,6 +300,12 @@ const actionHandlers = {
 		}
 		else {
 			return _.fromPairs([[action.name, action.values]]);
+		}
+	},
+	"math": function(action, data) {
+		// TODO: adapt so that it can work on groups?
+		if (data.row) {
+			return _.fromPairs([[action.name, math.eval(action.value, data.row)]]);
 		}
 	},
 	"range": function(action, data) {
