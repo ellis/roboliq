@@ -89,11 +89,11 @@ const design2 = {
 	// TODO: add cultureRow, cultureCol, syringe, randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
-		/*{
+		{
 			action: "replicate",
 			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
 		},
-		{
+		/*{
 			action: "add",
 			object: {"dilution*": [1, 2]}
 		},
@@ -331,16 +331,16 @@ function flattenDesign(design) {
 
 	//console.log({assign: design.assign})
 
-	function replicate(table, action) {
-		table = _.flatMap(table, row => {
+	function replicate(action, table, rowIndexes, replacements) {
+		_.forEach(rowIndexes, rowIndex => {
+			const row = table[rowIndex];
 			const row2 = action.map(row);
 			const rows
 			  = (_.isArray(row2)) ? [row].concat(row2)
 			  : (_.isPlainObject(row2)) ? [row, row2]
 			  : [row];
-			return rows;
+			replacements[rowIndex] = rows;
 		});
-		return table;
 	}
 
 	function assignPlates(table, action) {
@@ -384,8 +384,6 @@ function flattenDesign(design) {
 
 	let table = [{}];
 	_.forEach(actions, action => {
-		const handler = actionHandlers[action.action];
-		if (!handler) return;
 
 		console.log("action: "+JSON.stringify(action))
 		const groupsOfSames = groupSameIndexes(table, action);
@@ -396,58 +394,65 @@ function flattenDesign(design) {
 		// - sameBy -- groups rows together that will get the same value
 		// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
 
-		function getValues(action, data) {
-			let values = handler(action, data);
-			if (!_.isUndefined(values)) {
-				if (action.random) {
-					if (_.isArray(values)) {
-						values = _.shuffle(values);
-					}
-					else if (_.isPlainObject(values)) {
-						values = _.mapValues(values, x => {
-							return (_.isArray(x)) ? _.shuffle(x) : x;
-						});
-					}
-				}
-			}
-			return values;
-		}
-
-		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
-
 		const replacements = [];
+		if (action.action === "replicate") {
+			replicate(action, table, _.flattenDeep(groupsOfSames), replacements);
+		}
+		else {
+			const handler = actionHandlers[action.action];
+			if (!handler) return;
 
-		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
-			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
-			const group = _.map(groupOfSames, sames => table[sames[0]]);
-			const valuesGroup = (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex}) : valuesTable;
-			console.log({valuesGroup})
-			_.forEach(groupOfSames, (sames, samesIndex) => {
-				console.log({sames, samesIndex})
-				let values;
-				if (_.isUndefined(valuesGroup)) {
-					const row = table[sames[0]]; // Arbitrarily pick first row of sames
-					values = (_.isUndefined(valuesGroup)) ? getValues(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
-					//console.log("row: "+JSON.stringify(row));
-					//console.log("value: "+JSON.stringify(value));
-				}
-				else {
-					if (_.isArray(valuesGroup)) {
-						values = valuesGroup[samesIndex];
+			function getValues(action, data) {
+				let values = handler(action, data);
+				if (!_.isUndefined(values)) {
+					if (action.random) {
+						if (_.isArray(values)) {
+							values = _.shuffle(values);
+						}
+						else if (_.isPlainObject(values)) {
+							values = _.mapValues(values, x => {
+								return (_.isArray(x)) ? _.shuffle(x) : x;
+							});
+						}
 					}
-					else if (_.isPlainObject(valuesGroup)) {
-						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
-						values = _.mapValues(valuesGroup, (value, key) => {
-							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[samesIndex] : value
-						});
+				}
+				return values;
+			}
+
+			const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
+
+			_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
+				// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
+				const group = _.map(groupOfSames, sames => table[sames[0]]);
+				const valuesGroup = (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex}) : valuesTable;
+				console.log({valuesGroup})
+				_.forEach(groupOfSames, (sames, samesIndex) => {
+					console.log({sames, samesIndex})
+					let values;
+					if (_.isUndefined(valuesGroup)) {
+						const row = table[sames[0]]; // Arbitrarily pick first row of sames
+						values = (_.isUndefined(valuesGroup)) ? getValues(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
+						//console.log("row: "+JSON.stringify(row));
+						//console.log("value: "+JSON.stringify(value));
 					}
 					else {
-						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
+						if (_.isArray(valuesGroup)) {
+							values = valuesGroup[samesIndex];
+						}
+						else if (_.isPlainObject(valuesGroup)) {
+							//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
+							values = _.mapValues(valuesGroup, (value, key) => {
+								return (_.isArray(value) && !_.endsWith(key, "*")) ? value[samesIndex] : value
+							});
+						}
+						else {
+							assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
+						}
 					}
-				}
-				mergeValues(table, sames, values, replacements);
+					mergeValues(table, sames, values, replacements);
+				});
 			});
-		});
+		}
 
 		//console.log("replacements:\n"+replacements.map(JSON.stringify).join("\n"));
 		//console.log({table});
