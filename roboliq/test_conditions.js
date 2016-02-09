@@ -135,13 +135,13 @@ const design2 = {
 				*/
 			}
 		},
-		/*{
+		{
 			action: "assign",
 			name: "cultureWell",
 			values: _.range(1, 96+1),
 			random: true
 		},
-		{
+		/*{
 			action: "add",
 			object: {sampleNum: 1}
 		},
@@ -186,7 +186,7 @@ function printConditions(conditions) {
 function printData(data, hideRedundancies = false) {
 	// Get column names
 	const columnMap = {};
-	_.forEach(table, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
+	_.forEach(data, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
 	const columns = _.keys(columnMap);
 	// console.log({columns})
 
@@ -226,6 +226,7 @@ function printData(data, hideRedundancies = false) {
 		console.log(s);
 		linePrev = line;
 	});
+	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
 }
 // Consider: select, groupBy, orderBy, unique
 
@@ -358,10 +359,10 @@ const actionHandlers = {
 	"assign": function(action, data) {
 		//console.log({name, x})
 		if (_.isArray(action.values)) {
-			return _.fromPairs([[action.name+"*", action.values]]);
+			return _.fromPairs([[action.name, action.values]]);
 		}
 		else if (_.isFunction(action.calculate)) {
-			return action.calculate(data);
+			return _.fromPairs([[action.name, action.calculate(data)]]);
 		}
 	},
 	/*case "assignPlates":
@@ -436,12 +437,31 @@ function flattenDesign(design) {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
 			const group = _.map(groupOfSames, sames => table[sames[0]]);
 			const valuesGroup = (_.isUndefined(valuesTable)) ? handler(action, {table, group, groupIndex}) : valuesTable;
+			console.log({valuesGroup})
 			_.forEach(groupOfSames, (sames, samesIndex) => {
-				const row = table[sames[0]]; // Arbitrarily pick first row of sames
-				const value = (_.isUndefined(valuesGroup)) ? handler(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
-				//console.log("row: "+JSON.stringify(row));
-				//console.log("value: "+JSON.stringify(value));
-				mergeValues(table, sames, value, replacements);
+				console.log({sames, samesIndex})
+				let values;
+				if (_.isUndefined(valuesGroup)) {
+					const row = table[sames[0]]; // Arbitrarily pick first row of sames
+					values = (_.isUndefined(valuesGroup)) ? handler(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
+					//console.log("row: "+JSON.stringify(row));
+					//console.log("value: "+JSON.stringify(value));
+				}
+				else {
+					if (_.isArray(valuesGroup)) {
+						values = valuesGroup[samesIndex];
+					}
+					else if (_.isPlainObject(valuesGroup)) {
+						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
+						values = _.mapValues(valuesGroup, (value, key) => {
+							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[samesIndex] : value
+						});
+					}
+					else {
+						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
+					}
+				}
+				mergeValues(table, sames, values, replacements);
 			});
 		});
 
@@ -455,6 +475,7 @@ function flattenDesign(design) {
 				//console.log("table: "+JSON.stringify(table));
 			}
 		}
+		printData(table);
 		/*
 		switch (action.action) {
 			case "add":
@@ -575,7 +596,7 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 				});
 			}
 			else {
-				assert(false, "expected and array or object");
+				assert(false, "expected and array or object: "+JSON.stringify(starValues));
 			}
 		}
 		else {
