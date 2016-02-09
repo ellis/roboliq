@@ -72,12 +72,8 @@ const design2 = {
 			till: 96,
 			random: true
 		},
-		"cultureCol=math": {
-			value: "floor((cultureWell - 1) / 8) + 1"
-		},
-		"cultureRow=math": {
-			value: "((cultureWell - 1) % 8) + 1"
-		},
+		"cultureCol=math": "floor((cultureWell - 1) / 8) + 1",
+		"cultureRow=math": "((cultureWell - 1) % 8) + 1",
 		"sampleNum": 1,
 		"sampleCycle=range": {
 			random: true
@@ -375,8 +371,9 @@ function flattenDesign(design) {
 			const [name, action] = key.split("=");
 			const handler2 = actionHandlers[action];
 			assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
+			const value2 = _.isString(value) ? {value} : value;
 			if (handler2) {
-				return _.merge({}, {action, name}, value);
+				return _.merge({}, {action, name}, value2);
 			}
 		}
 		else {
