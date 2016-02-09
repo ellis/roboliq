@@ -53,11 +53,10 @@ import yaml from 'yamljs';
  *     model 2) $y \sim f(t, x, dt)$, full model
  *
  * More details for the first general design:
- * - measure every 15 minutes (=> 12hr = 48 sample times)
+ * - measure every 20 minutes (=> 16hr = 48 sample times)
  * - for the first 48 sample times, sample 1 well
  * - for the next 48 sample times, resample each well from before and 1 new well
- * - for the next 48 sample times, same as previous cycle
- * - for the last 48 sample times, resample each well from before
+ * - for the last 48 sample times, resample each well that's only been sampled once
  */
 
 const design2 = {
@@ -84,13 +83,13 @@ const design2 = {
 		"sampleCycle=range": {
 			random: true
 		},
-		/*"*": {
+		"*": {
 			conditions: {
 				sampleNum: 2,
 				"sampleCycle=math": "sampleCycle + 48"
 			}
-		},*/
-		/*"dilution*=range": {till: 5},
+		},
+		"dilution*=range": {till: 5},
 		"dPlate=allocatePlates": {
 			plates: ["dPlate1", "dPlate2", "dPlate3", "dPlate4", "dPlate5", "dPlate6", "dPlate7", "dPlate8", "dPlate9", "dPlate10", "dPlate11"],
 			wellsPerPlate: 96,
@@ -102,7 +101,7 @@ const design2 = {
 			till: 96,
 			groupBy: "dPlate",
 			random: true
-		}*/
+		}
 	},
 	// TODO: add randomSeed
 	actions: [
