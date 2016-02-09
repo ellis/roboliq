@@ -77,15 +77,21 @@ const design2 = {
 		"sampleNum": 1,
 		"sampleCycle=range": {
 			random: true
+		},
+		"*1": {
+			conditions: {
+				sampleNum: 2,
+				"sampleCycle=math": "sampleCycle + 1"
+			}
 		}
 	},
-	// TODO: add cultureRow, cultureCol, syringe, randomSeed, dilution plates
+	// TODO: add syringe, randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
-		{
+		/*{
 			action: "replicate",
 			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
-		},
+		},*/
 		/*{
 			action: "add",
 			object: {"dilution*": [1, 2]}
@@ -330,18 +336,6 @@ function flattenDesign(design) {
 
 	//console.log({assign: design.assign})
 
-	function replicate(action, table, rowIndexes, replacements) {
-		_.forEach(rowIndexes, rowIndex => {
-			const row = table[rowIndex];
-			const row2 = action.map(row);
-			const rows
-			  = (_.isArray(row2)) ? [row].concat(row2)
-			  : (_.isPlainObject(row2)) ? [row, row2]
-			  : [row];
-			replacements[rowIndex] = rows;
-		});
-	}
-
 	function assignPlates(table, action) {
 		const groups = query(table, {orderBy: action.orderBy, groupBy: action.groupBy});
 		let plateIndex = 0;
@@ -366,8 +360,25 @@ function flattenDesign(design) {
 		return table;
 	}
 
-	const conditionActions = _.map(design.conditions, (value, key) => {
-		if (_.includes(key, "=")) {
+	const conditionActions = convertConditionsToActions(design.conditions);
+	const actions = _.compact(conditionActions.concat(design.actions));
+	console.log({actions})
+
+	let table = [{}];
+	_.forEach(actions, action => {
+		applyActionToTable(table, action);
+	});
+
+	return table;
+}
+
+function convertConditionsToActions(conditions) {
+	return _.map(conditions, (value, key) => {
+		// Create replicate rows
+		if (_.startsWith(key, "*")) {
+			return _.merge({}, {action: "replicate"}, value);
+		}
+		else if (_.includes(key, "=")) {
 			const [name, action] = key.split("=");
 			const handler2 = actionHandlers[action];
 			assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
@@ -380,112 +391,106 @@ function flattenDesign(design) {
 			return {action: "assign", name: key, values: value};
 		}
 	});
-	const actions = _.compact(conditionActions.concat(design.actions));
-	console.log({actions})
+}
 
-	let table = [{}];
-	_.forEach(actions, action => {
+function applyActionToTable(table, action) {
+	console.log("action: "+JSON.stringify(action))
+	const groupsOfSames = groupSameIndexes(table, action);
+	console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
 
-		console.log("action: "+JSON.stringify(action))
-		const groupsOfSames = groupSameIndexes(table, action);
-		console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
+	// Action properties:
+	// - groupBy -- creates groupings
+	// - sameBy -- groups rows together that will get the same value
+	// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
 
-		// Action properties:
-		// - groupBy -- creates groupings
-		// - sameBy -- groups rows together that will get the same value
-		// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
+	const replacements = [];
+	if (action.action === "replicate") {
+		replicate(action, table, _.flattenDeep(groupsOfSames), replacements);
+	}
+	else {
+		const handler = actionHandlers[action.action];
+		if (!handler) return;
 
-		const replacements = [];
-		if (action.action === "replicate") {
-			replicate(action, table, _.flattenDeep(groupsOfSames), replacements);
-		}
-		else {
-			const handler = actionHandlers[action.action];
-			if (!handler) return;
-
-			function getValues(action, data) {
-				let values = handler(action, data);
-				if (!_.isUndefined(values)) {
-					if (action.random) {
-						if (_.isArray(values)) {
-							values = _.shuffle(values);
-						}
-						else if (_.isPlainObject(values)) {
-							values = _.mapValues(values, x => {
-								return (_.isArray(x)) ? _.shuffle(x) : x;
-							});
-						}
+		function getValues(action, data) {
+			let values = handler(action, data);
+			if (!_.isUndefined(values)) {
+				if (action.random) {
+					if (_.isArray(values)) {
+						values = _.shuffle(values);
+					}
+					else if (_.isPlainObject(values)) {
+						values = _.mapValues(values, x => {
+							return (_.isArray(x)) ? _.shuffle(x) : x;
+						});
 					}
 				}
-				return values;
 			}
+			return values;
+		}
 
-			const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
+		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
 
-			_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
-				// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
-				const group = _.map(groupOfSames, sames => table[sames[0]]);
-				const valuesGroup = (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex}) : valuesTable;
-				console.log({valuesGroup})
-				_.forEach(groupOfSames, (sames, samesIndex) => {
-					console.log({sames, samesIndex})
-					let values;
-					if (_.isUndefined(valuesGroup)) {
-						const row = table[sames[0]]; // Arbitrarily pick first row of sames
-						values = (_.isUndefined(valuesGroup)) ? getValues(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
-						//console.log("row: "+JSON.stringify(row));
-						//console.log("value: "+JSON.stringify(value));
+		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
+			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
+			const group = _.map(groupOfSames, sames => table[sames[0]]);
+			const valuesGroup = (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex}) : valuesTable;
+			console.log({valuesGroup})
+			_.forEach(groupOfSames, (sames, samesIndex) => {
+				console.log({sames, samesIndex})
+				let values;
+				if (_.isUndefined(valuesGroup)) {
+					const row = table[sames[0]]; // Arbitrarily pick first row of sames
+					values = (_.isUndefined(valuesGroup)) ? getValues(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
+					//console.log("row: "+JSON.stringify(row));
+					//console.log("value: "+JSON.stringify(value));
+				}
+				else {
+					if (_.isArray(valuesGroup)) {
+						values = valuesGroup[samesIndex];
+					}
+					else if (_.isPlainObject(valuesGroup)) {
+						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
+						values = _.mapValues(valuesGroup, (value, key) => {
+							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[samesIndex] : value
+						});
 					}
 					else {
-						if (_.isArray(valuesGroup)) {
-							values = valuesGroup[samesIndex];
-						}
-						else if (_.isPlainObject(valuesGroup)) {
-							//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
-							values = _.mapValues(valuesGroup, (value, key) => {
-								return (_.isArray(value) && !_.endsWith(key, "*")) ? value[samesIndex] : value
-							});
-						}
-						else {
-							assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
-						}
+						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
 					}
-					mergeValues(table, sames, values, replacements);
-				});
+				}
+				mergeValues(table, sames, values, replacements);
 			});
-		}
+		});
+	}
 
-		//console.log("replacements:\n"+replacements.map(JSON.stringify).join("\n"));
-		//console.log({table});
-		for (let i = replacements.length - 1; i >= 0; i--) {
-			const rows = replacements[i];
-			//console.log({i, rows})
-			if (_.isArray(rows)) {
-				table.splice(i, 1, ...rows);
-				//console.log("table: "+JSON.stringify(table));
-			}
+	//console.log("replacements:\n"+replacements.map(JSON.stringify).join("\n"));
+	//console.log({table});
+	for (let i = replacements.length - 1; i >= 0; i--) {
+		const rows = replacements[i];
+		//console.log({i, rows})
+		if (_.isArray(rows)) {
+			table.splice(i, 1, ...rows);
+			//console.log("table: "+JSON.stringify(table));
 		}
-		printData(table);
-		/*
-		switch (action.action) {
-			case "add":
-				_.forEach(action.object, (value, name) => {
-					table = expandRows(table, name, value);
-				});
-				break;
-			case "assign":
-				table = assign(table, action.name, action);
-				break;
-			case "assignPlates":
-				table = assignPlates(table, action);
-				break;
-			case "replicate":
-				table = replicate(table, action);
-				break;
-		}*/
-	});
-
-	return table;
+	}
+	printData(table);
+	/*
+	switch (action.action) {
+		case "add":
+			_.forEach(action.object, (value, name) => {
+				table = expandRows(table, name, value);
+			});
+			break;
+		case "assign":
+			table = assign(table, action.name, action);
+			break;
+		case "assignPlates":
+			table = assignPlates(table, action);
+			break;
+		case "replicate":
+			table = replicate(table, action);
+			break;
+	}*/
 }
 
 function groupSameIndexes(table, action) {
@@ -598,6 +603,29 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 		}
 	});
 	replacements[rowIndex] = rows;
+}
+
+function replicate(action, table, rowIndexes, replacements) {
+	_.forEach(rowIndexes, rowIndex => {
+		const row = table[rowIndex];
+		let row2;
+		if (action.map) {
+			row2 = action.map(row);
+			const rows
+			  = (_.isArray(row2)) ? [row].concat(row2)
+			  : (_.isPlainObject(row2)) ? [row, row2]
+			  : [row];
+			replacements[rowIndex] = rows;
+		}
+		else if (action.conditions) {
+			const conditionActions = convertConditionsToActions(action.conditions);
+			const table2 = [_.cloneDeep(row)];
+			_.forEach(conditionActions, action => {
+				applyActionToTable(table2, action);
+			});
+			replacements[rowIndex] = [row].concat(table2);
+		}
+	});
 }
 
 const table = flattenDesign(design2);
