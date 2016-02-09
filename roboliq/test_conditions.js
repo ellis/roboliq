@@ -111,7 +111,11 @@ const design2 = {
 				"strainSource": "strain1",
 				"mediaSource": "media1",
 				"cultureNum*": _.range(1, 4+1),
-				/*"cultureWell=": {
+				/*
+				"cultureNum*=": {
+					range: 4,
+				},
+				"cultureWell=": {
 					range: 96,
 					random: true
 				},
@@ -120,9 +124,11 @@ const design2 = {
 					range: true,
 					random: true
 				},
-				"*": {
-					sampleNum: 2,
-					sampleCycle: "#math#sampleCycle+1"
+				"sampleNum**": {
+					template: {
+						"sampleNum": 2,
+						"sampleCycle$": "sampleCycle+1"
+					}
 				}
 				*/
 			}
@@ -140,7 +146,8 @@ const design2 = {
 		{
 			action: "assign",
 			name: "sampleCycle",
-			values: _.range(1, rows.length+1)
+			//calculate: (row, index, rows) => _.range(1, rows.length+1),
+			values: _.range(1, 4+1),
 			random: true
 		},
 		{
@@ -294,10 +301,10 @@ function query(table, q) {
 }
 
 function flattenDesign(design) {
-	let table = flattenConditions(design.conditions);
+	//let table = flattenConditions(design.conditions);
 
 	//console.log({assign: design.assign})
-	_.forEach(design.assign, (x, name) => {
+	function assign(table, name, x) {
 		let groups;
 		if (x.groupBy) {
 			groups = query(table, {groupBy: x.groupBy});
@@ -307,24 +314,54 @@ function flattenDesign(design) {
 		}
 
 		let fn;
-		//console.log({name, x})
+		console.log({name, x})
 		if (_.isArray(x.values)) {
 			const values = _.shuffle(x.values);
-			fn = (scope, index) => {
+			fn = (row, index, rows) => {
 				return values[index];
 			};
 		}
 		else if (_.isFunction(x.calculate)) {
-			fn = (scope, index) => {
-				return x.calculate(scope);
+			fn = (row, index, rows) => {
+				return x.calculate(row, index, rows);
 			};
 		}
 
 		if (fn) {
 			table = _.flatMap(groups, (group, i) => {
-				const value = fn(group[0], i);
+				const value = fn(group[0], i, group);
 				return expandRows(group, name, value);
 			});
+		}
+		return table;
+	}
+
+	function replicate(table, action) {
+		table = _.flatMap(table, row => {
+			const row2 = action.map(row);
+			const rows
+			  = (_.isArray(row2)) ? [row].concat(row2)
+			  : (_.isPlainObject(row2)) ? [row, row2]
+			  : [row];
+			return rows;
+		});
+		return table;
+	}
+
+	let table = [{}];
+	_.forEach(design.actions, action => {
+		switch (action.action) {
+			case "add":
+				_.forEach(action.object, (value, name) => {
+					table = expandRows(table, name, value);
+				});
+				break;
+			case "assign":
+				table = assign(table, action.name, action);
+				break;
+			case "replicate":
+				table = replicate(table, action);
+				break;
 		}
 	});
 
