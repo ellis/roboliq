@@ -112,11 +112,12 @@ const design2 = {
 			object: {
 				"strainSource": "strain1",
 				"mediaSource": "media1",
-				"cultureNum*": _.range(1, 4+1),
-				/*
+				//"cultureNum*": _.range(1, 4+1),
 				"cultureNum*=": {
-					range: 4,
+					action: "range",
+					till: 4
 				},
+				/*
 				"cultureWell=": {
 					action: "range",
 					till: 96,
@@ -136,7 +137,7 @@ const design2 = {
 				*/
 			}
 		},
-		{
+		/*{
 			action: "range",
 			name: "cultureWell",
 			till: 96,
@@ -150,7 +151,7 @@ const design2 = {
 			action: "range",
 			name: "sampleCycle",
 			random: true
-		},
+		},*/
 		/*{
 			action: "replicate",
 			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
@@ -353,7 +354,23 @@ function query(table, q) {
 // - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
 const actionHandlers = {
 	"add": function(action, data) {
-		return action.object;
+		const result = {};
+		_.forEach(action.object, (value, key) => {
+			if (_.endsWith(key, "=")) {
+				const handler2 = actionHandlers[value.action];
+				assert(handler2, "unknown action: "+JSON.stringify(action));
+				if (handler2) {
+					const action2 = _.merge({}, value, {name: key.substring(0, key.length - 1)});
+					const result2 = handler2(action2, data);
+					console.log({result2})
+					_.merge(result, result2);
+				}
+			}
+			else {
+				_.merge(result, _.fromPairs([[key, value]]));
+			}
+		});
+		return result;
 	},
 	"assign": function(action, data) {
 		//console.log({name, x})
