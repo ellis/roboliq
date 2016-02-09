@@ -59,18 +59,6 @@ import yaml from 'yamljs';
  * - for the last 48 sample times, resample each well from before
  */
 
-const design = {
-	conditions: {
-		"strainSource": "strain1",
-		"mediaSource": "media1",
-		"cultureNum*": _.range(1, 4+1),
-		"sampleNum*": [1, 2],
-		//"sample1*": [false, true],
-		//"sample1Cycle*": _.range(0, 4),
-		"dilutionFactor*": [1, 2]
-	},
-};
-
 const design2 = {
 	conditions: {
 		"strainSource": "strain1",
@@ -85,12 +73,11 @@ const design2 = {
 			till: 96,
 			random: true
 		},
-		/*
 		"sampleNum": 1,
 		"sampleCycle=": {
 			action: "range",
 			random: true
-		},
+		},/*
 		"sampleNum**": {
 			template: {
 				"sampleNum": 2,
@@ -102,21 +89,6 @@ const design2 = {
 	// TODO: add cultureRow, cultureCol, syringe, randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
-		/*{
-			action: "range",
-			name: "cultureWell",
-			till: 96,
-			random: true
-		},
-		{
-			action: "add",
-			object: {sampleNum: 1}
-		},
-		{
-			action: "range",
-			name: "sampleCycle",
-			random: true
-		},*/
 		/*{
 			action: "replicate",
 			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
