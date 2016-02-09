@@ -135,7 +135,7 @@ const design2 = {
 				*/
 			}
 		},
-		{
+		/*{
 			action: "assign",
 			name: "cultureWell",
 			values: _.range(1, 96+1),
@@ -169,18 +169,13 @@ const design2 = {
 			orderBy: "sampleCycle",
 			groupBy: "sampleCycle",
 		},
-		// TODO: wells on dilution plates need to be unique
-		// figure out better way to chain operations.
-		// In this case, it might be best to 1) group, 2) shuffle, 3) assign to rows
-		// In other cases, we'll want to 1) shuffle, 2) group, 3) assign one value per each group as a whole
-		// An in yet other cases, 1) shuffle, 2) group, 3) assign to rows
 		{
 			action: "assign",
 			name: "dilutionWell",
 			values: _.range(1, 96+1),
 			groupBy: "dilutionPlate",
 			random: true
-		}
+		}*/
 	]
 };
 
@@ -305,8 +300,8 @@ function query(table, q) {
 		table2 = _.orderBy(table2, q.orderBy);
 	}
 
-	if (q.uniqueBy) {
-		const groupKeys = (_.isArray(q.uniqueBy)) ? q.uniqueBy : [q.uniqueBy];
+	if (q.distinctBy) {
+		const groupKeys = (_.isArray(q.distinctBy)) ? q.distinctBy : [q.distinctBy];
 		const groups = _.map(_.groupBy(table2, row => _.map(groupKeys, key => row[key])), _.identity);
 		//console.log({groupsLength: groups.length})
 		table2 = _.flatMap(groups, group => {
@@ -337,41 +332,51 @@ function query(table, q) {
 	return table2;
 }
 
+// TODO: wells on dilution plates need to be unique
+// figure out better way to chain operations.
+// In this case, it might be best to 1) group, 2) shuffle, 3) assign to rows
+// In other cases, we'll want to 1) shuffle, 2) group, 3) assign one value per each group as a whole
+// An in yet other cases, 1) shuffle, 2) group, 3) assign to rows
+//
+// Every action handler is passed: row, rowIndex, group, groupIndex.
+// The action handler returns an array of values to be expanded back into the row.
+// The "row" may, in fact, be the first row of a group, if 'distinctBy' was used.
+//
+// So the options are:
+// 1) group+shuffle+rows (re-shuffled for each group)
+// 2) shuffle+group+rows (same shuffling is applied to each group)
+// 3) shuffle+group+group (one value per group)
+//
+// Action properties:
+// - groupBy -- creates groupings
+// - distinctBy -- groups rows together that will get the same value
+// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
+const actionHandlers = {
+	"add": function(action, data) {
+		return action.object;
+	},
+	"assign": function(action, data) {
+		//console.log({name, x})
+		if (_.isArray(action.values)) {
+			return _.fromPairs([[action.name+"*", action.values]]);
+		}
+		else if (_.isFunction(action.calculate)) {
+			return action.calculate(data);
+		}
+	},
+	/*case "assignPlates":
+		table = assignPlates(table, action);
+		break;
+	case "replicate":
+		table = replicate(table, action);
+		break;
+	*/
+};
+
 function flattenDesign(design) {
 	//let table = flattenConditions(design.conditions);
 
 	//console.log({assign: design.assign})
-	function assign(table, name, x) {
-		let groups;
-		if (x.groupBy) {
-			groups = query(table, {groupBy: x.groupBy});
-		}
-		else {
-			groups = _.map(table, row => [row]);
-		}
-
-		let fn;
-		//console.log({name, x})
-		if (_.isArray(x.values)) {
-			const values = _.shuffle(x.values);
-			fn = (row, index, rows) => {
-				return values[index];
-			};
-		}
-		else if (_.isFunction(x.calculate)) {
-			fn = (row, index, rows) => {
-				return x.calculate(row, index, rows);
-			};
-		}
-
-		if (fn) {
-			table = _.flatMap(groups, (group, i) => {
-				const value = fn(group[0], i, group);
-				return expandRows(group, name, value);
-			});
-		}
-		return table;
-	}
 
 	function replicate(table, action) {
 		table = _.flatMap(table, row => {
@@ -411,6 +416,46 @@ function flattenDesign(design) {
 
 	let table = [{}];
 	_.forEach(design.actions, action => {
+		const handler = actionHandlers[action.action];
+		if (!handler) return;
+
+		console.log("action: "+JSON.stringify(action))
+		const groupsOfSames = groupSameIndexes(table, action);
+		console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
+
+		// Action properties:
+		// - groupBy -- creates groupings
+		// - sameBy -- groups rows together that will get the same value
+		// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
+
+		const valuesTable = (!action.applyPerGroup) ? handler(action, {table}) : undefined;
+
+		const replacements = [];
+
+		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
+			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
+			const group = _.map(groupOfSames, sames => table[sames[0]]);
+			const valuesGroup = (_.isUndefined(valuesTable)) ? handler(action, {table, group, groupIndex}) : valuesTable;
+			_.forEach(groupOfSames, (sames, samesIndex) => {
+				const row = table[sames[0]]; // Arbitrarily pick first row of sames
+				const value = (_.isUndefined(valuesGroup)) ? handler(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
+				//console.log("row: "+JSON.stringify(row));
+				//console.log("value: "+JSON.stringify(value));
+				mergeValues(table, sames, value, replacements);
+			});
+		});
+
+		//console.log("replacements:\n"+replacements.map(JSON.stringify).join("\n"));
+		//console.log({table});
+		for (let i = replacements.length - 1; i >= 0; i--) {
+			const rows = replacements[i];
+			//console.log({i, rows})
+			if (_.isArray(rows)) {
+				table.splice(i, 1, ...rows);
+				//console.log("table: "+JSON.stringify(table));
+			}
+		}
+		/*
 		switch (action.action) {
 			case "add":
 				_.forEach(action.object, (value, name) => {
@@ -426,145 +471,125 @@ function flattenDesign(design) {
 			case "replicate":
 				table = replicate(table, action);
 				break;
-		}
+		}*/
 	});
 
 	return table;
+}
+
+function groupSameIndexes(table, action) {
+	const indexes = _.range(table.length);
+
+	// Group the row indexes
+	let groups = [];
+	if (action.groupBy) {
+		const keys = (_.isArray(action.groupBy)) ? action.groupBy : [action.groupBy];
+		groups = _(indexes).groupBy(rowIndex => _.map(keys, key => table[rowIndex][key])).values().value();
+	}
+	else {
+		groups = [indexes];
+	}
+
+	// For each group, combine the row indexes that should be treated as being the same
+	let groupsOfSames = [];
+	if (action.sameBy) {
+		const keys = (_.isArray(action.sameBy)) ? action.sameBy : [action.sameBy];
+		groupsOfSames = _.map(groups, indexes => {
+			return _(indexes).groupBy(rowIndex => _.map(keys, key => table[rowIndex][key])).values().value();
+		});
+	}
+	else {
+		// Every row should be treated as unique
+		groupsOfSames = _.map(groups, indexes => _.map(indexes, i => [i]));
+	}
+
+	return groupsOfSames;
+}
+
+/**
+ * [mergeValues description]
+ * @param  {[type]} table     [description]
+ * @param  {[type]} sames - indexes of rows to be assigned the same value
+ * @param  {[type]} values    [description]
+ * @param  {[type]} changeMap [description]
+ * @return {[type]}           [description]
+ */
+function mergeValues(table, sames, values, replacements) {
+	if (_.isArray(values)) {
+		_.forEach(sames, (rowIndex, i) => {
+			const values1 = values[i];
+			expandRowByValues(table, rowIndex, values1, replacements)
+		});
+	}
+	else if (_.isPlainObject(values)) {
+		_.forEach(sames, (rowIndex, i) => {
+			expandRowByValues(table, rowIndex, values, replacements)
+		});
+	}
+	else {
+		assert(false);
+	}
+}
+
+/**
+ * Add properties in 'values' to the given row in the table,
+ * possibly expanding the number of rows in the table.
+ * 'replacements' will be updated with the new array of rows.
+ * @param  {[type]} table     [description]
+ * @param  {[type]} rowIndex  [description]
+ * @param  {[type]} values    [description]
+ * @param  {[type]} replacements [description]
+ * @return {[type]}           [description]
+ */
+function expandRowByValues(table, rowIndex, values, replacements) {
+	let rows = [table[rowIndex]];
+	_.forEach(values, (value, key) => {
+		console.log({key, value})
+		if (_.endsWith(key, "*")) {
+			const starName = key.substring(0, key.length - 1);
+			const starValues = value;
+			if (_.isPlainObject(starValues)) {
+				// For each entry in value, make a copy of every row in rows with the properties of the entry
+				rows = _.flatMap(rows, row => {
+					return _.map(starValues, (starValue, starKey) => {
+						assert(_.isPlainObject(starValue));
+						console.log({starName, starKey, starValue});
+						return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
+					});
+				});
+			}
+			else if (_.isArray(starValues)) {
+				// For each entry in value, make a copy of every row in rows with the properties of the entry
+				rows = _.flatMap(rows, row => {
+					return _.map(starValues, (starValue, starValueIndex) => {
+						console.log({starName, starValueIndex, starValue})
+						if (_.isPlainObject(starValue)) {
+							const starKey = starValueIndex + 1;
+							return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
+						}
+						else {
+							const starKey = starValue;
+							return _.merge({}, row, _.fromPairs([[starName, starKey]]));
+						}
+					});
+				});
+			}
+			else {
+				assert(false, "expected and array or object");
+			}
+		}
+		else {
+			_.forEach(rows, row => { row[key] = value; });
+			/*if (key === "reseal") {
+				console.log("reseal: "+value)
+				console.log(rows)
+			}*/
+		}
+	});
+	replacements[rowIndex] = rows;
 }
 
 const table = flattenDesign(design2);
 printConditions(design.conditions);
 printData(table);
 //console.log(yaml.stringify(table, 4, 2))
-
-let x;
-//x = query(table, {select: "culturePlate"});
-//x = query(table, {select: "culturePlate", groupBy: "culturePlate"});
-//x = query(table, {select: "culturePlate", unique: true, groupBy: "culturePlate"});
-//x = query(table, {select: ["culturePlate", "syringe", "cultureWell"], unique: true, groupBy: "culturePlate"});
-//x = query(table, {select: ["culturePlate", "syringe", "cultureWell", "strain", "strainVolume", "media", "mediaVolume"], unique: true, groupBy: "culturePlate"});
-//x = query(table, {uniqueBy: ["culturePlate", "cultureWell"]});
-//x = query(table, {where: {dilutionFactor: 1}});
-//console.log(yaml.stringify(x, 4, 2))
-
-function appendStep(steps, step) {
-	//console.log({steps, size: _.size(steps), keys: _.keys(steps)})
-	const substeps = _.pickBy(steps, (x, key) => /^[0-9]+$/.test(key));
-	steps[_.size(substeps)+1] = step;
-	return step;
-}
-
-function narrow(scope, data, q, fn) {
-	const groups = _.isPlainObject(q) ? query(data, q) : [data];
-	_.forEach(groups, group => {
-		if (group.length > 0) {
-			const first = _.head(group);
-			// Find the properties that are the same for all items in the group
-			const uniqueKeys = [];
-			_.forEach(first, (value, key) => {
-				const isUnique = _.every(group, row => _.isEqual(row[key], value));
-				if (isUnique) {
-					uniqueKeys.push(key);
-				}
-				// FIXME: for debug only
-				else {
-					//if (key == "reseal") console.log(`not unique ${key}: ${value}, ${_.map(group, x => x[key]).join(",")}`)
-				}
-				// ENDFIX
-			});
-			//console.log({uniqueKeys: uniqueKeys.join(",")})
-			let scope2 = scope;
-			// Add those properties to the scope
-			_.forEach(uniqueKeys, key => {
-				scope2 = scope2.set(key, fromJS(first[key]));
-			});
-			fn(scope2, group);
-		}
-	});
-}
-
-function mapConditions(scope, data, q, flatten = 1, fn) {
-	let result = [];
-	narrow(scope, data, q, (scope2, data2) => {
-		const l = _.map(data2, row => {
-			const scope3 = scope2.merge(fromJS(row));
-			return fn(scope3);
-		});
-		result.push(l);
-	});
-	for (let i = 0; i < flatten; i++) {
-		result = _.flatten(result);
-	}
-	return result;
-}
-
-function mapConditionGroups(scope, data, q, flatten = 1, fn) {
-	let result = [];
-	narrow(scope, data, q, (scope2, data2) => {
-		//console.log({scope2, data2})
-		//process.exit(-1);
-		result.push(fn(scope2, data2));
-	});
-	for (let i = 0; i < flatten; i++) {
-		result = _.flatten(result);
-	}
-	return result;
-}
-
-function test() {
-	const steps = {};
-
-	let culturePlateIndex = 0;
-	narrow(Map(), table, {groupBy: ["roma", "vector"]}, (scope, data) => {
-		const data1 = _.shuffle(data);
-		// console.log("A")
-		// console.log({scope, data})
-
-		const stepRomaVector = {comment: `Test plate movements for ${scope.get("roma")} with vector ${scope.get("vector")}`};
-
-		narrow(scope, data1, {groupBy: "site"}, (scope, data) => {
-			// console.log("C")
-			// console.log({scope, data})
-			appendStep(stepRomaVector, {
-				command: "transporter.movePlate",
-				equipment: scope.get("roma"),
-				program: scope.get("vector"),
-				object: scope.get("plate"),
-				destination: scope.get("site")
-			});
-		});
-
-		appendStep(stepRomaVector, {
-			command: "transporter.movePlate",
-			equipment: scope.get("roma"),
-			program: scope.get("vector"),
-			object: scope.get("plate"),
-			destination: scope.get("storageSite")
-		});
-
-		appendStep(steps, stepRomaVector);
-	});
-
-	const protocol = {
-		roboliq: "v1",
-		objects: {
-			plateDWP: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.REGRIP"},
-			//plateNunc: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location:
-		},
-		steps
-	};
-
-	return protocol;
-}
-
-/*const protocol = test();
-
-// If run from the command line:
-if (require.main === module) {
-	//console.log(yaml.stringify(protocol, 9, 2));
-	console.log(JSON.stringify(protocol, null, '\t'))
-}
-else {
-	module.exports = protocol;
-}
-*/
