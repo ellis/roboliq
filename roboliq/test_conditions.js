@@ -429,21 +429,38 @@ function flattenDesign(design) {
 		// - sameBy -- groups rows together that will get the same value
 		// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
 
-		const valuesTable = (!action.applyPerGroup) ? handler(action, {table}) : undefined;
+		function getValues(action, data) {
+			let values = handler(action, data);
+			if (!_.isUndefined(values)) {
+				if (action.random) {
+					if (_.isArray(values)) {
+						values = _.shuffle(values);
+					}
+					else if (_.isPlainObject(values)) {
+						values = _.mapValues(values, x => {
+							return (_.isArray(x)) ? _.shuffle(x) : x;
+						});
+					}
+				}
+			}
+			return values;
+		}
+
+		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
 
 		const replacements = [];
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
 			const group = _.map(groupOfSames, sames => table[sames[0]]);
-			const valuesGroup = (_.isUndefined(valuesTable)) ? handler(action, {table, group, groupIndex}) : valuesTable;
+			const valuesGroup = (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex}) : valuesTable;
 			console.log({valuesGroup})
 			_.forEach(groupOfSames, (sames, samesIndex) => {
 				console.log({sames, samesIndex})
 				let values;
 				if (_.isUndefined(valuesGroup)) {
 					const row = table[sames[0]]; // Arbitrarily pick first row of sames
-					values = (_.isUndefined(valuesGroup)) ? handler(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
+					values = (_.isUndefined(valuesGroup)) ? getValues(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
 					//console.log("row: "+JSON.stringify(row));
 					//console.log("value: "+JSON.stringify(value));
 				}
@@ -548,7 +565,7 @@ function mergeValues(table, sames, values, replacements) {
 		});
 	}
 	else {
-		assert(false);
+		assert(false, "expected and array or object: "+JSON.stringify(values));
 	}
 }
 
