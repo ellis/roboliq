@@ -104,6 +104,8 @@ const design2 = {
 			random: true
 		}*/
 	},
+	// TODO: add cultureRow, cultureCol, syringe, randomSeed, dilution plates
+	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
 		{
 			action: "add",
@@ -154,6 +156,31 @@ const design2 = {
 			action: "replicate",
 			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
 		},
+		{
+			action: "add",
+			object: {"dilution*": [1, 2]}
+		},
+		// TODO: it would be better to alternate, so 1) pick number of plates required, 2) shuffle plates, 3) orderBy sampleCycle, 4) groupBy sampleCycle, 5) assign to groups with recycling
+		{
+			action: "assignPlates",
+			name: "dilutionPlate",
+			plates: ["dilutionPlate1", "dilutionPlate2"],
+			wellsPerPlate: 8,
+			orderBy: "sampleCycle",
+			groupBy: "sampleCycle",
+		},
+		// TODO: wells on dilution plates need to be unique
+		// figure out better way to chain operations.
+		// In this case, it might be best to 1) group, 2) shuffle, 3) assign to rows
+		// In other cases, we'll want to 1) shuffle, 2) group, 3) assign one value per each group as a whole
+		// An in yet other cases, 1) shuffle, 2) group, 3) assign to rows
+		{
+			action: "assign",
+			name: "dilutionWell",
+			values: _.range(1, 96+1),
+			groupBy: "dilutionPlate",
+			random: true
+		}
 	]
 };
 
@@ -161,7 +188,7 @@ function printConditions(conditions) {
 	console.log(yaml.stringify(conditions, 6, 2));
 }
 
-function printData(data) {
+function printData(data, hideRedundancies = false) {
 	// Get column names
 	const columnMap = {};
 	_.forEach(table, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
@@ -179,7 +206,6 @@ function printData(data) {
 		}
 		_.forEach(group, row => {
 			const line = _.map(columns, key => _.get(row, key, ""));
-			// TODO: have option to blank columns that are the same as the column of the previous row
 			lines.push(line);
 		});
 	});
@@ -194,9 +220,16 @@ function printData(data) {
 
 	console.log(columns.map((s, i) => _.padEnd(s, widths[i])).join("  "));
 	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
-	_.forEach(lines, (line, lineIndex) => {
-		const s = line.map((s, i) => _.padEnd(s, widths[i])).join("  ");
+	let linePrev;
+	_.forEach(lines, line => {
+		const s = line.map((s, i) => {
+			const s2 = (s === "") ? "-"
+				: (hideRedundancies && linePrev && s === linePrev[i]) ? ""
+				: s;
+			return _.padEnd(s2, widths[i]);
+		}).join("  ");
 		console.log(s);
+		linePrev = line;
 	});
 }
 // Consider: select, groupBy, orderBy, unique
@@ -268,6 +301,10 @@ function query(table, q) {
 		});
 	}
 
+	if (q.orderBy) {
+		table2 = _.orderBy(table2, q.orderBy);
+	}
+
 	if (q.uniqueBy) {
 		const groupKeys = (_.isArray(q.uniqueBy)) ? q.uniqueBy : [q.uniqueBy];
 		const groups = _.map(_.groupBy(table2, row => _.map(groupKeys, key => row[key])), _.identity);
@@ -314,7 +351,7 @@ function flattenDesign(design) {
 		}
 
 		let fn;
-		console.log({name, x})
+		//console.log({name, x})
 		if (_.isArray(x.values)) {
 			const values = _.shuffle(x.values);
 			fn = (row, index, rows) => {
@@ -348,6 +385,30 @@ function flattenDesign(design) {
 		return table;
 	}
 
+	function assignPlates(table, action) {
+		const groups = query(table, {orderBy: action.orderBy, groupBy: action.groupBy});
+		let plateIndex = 0;
+		let i = 0;
+		let n = 0;
+		while (i < groups.length) {
+			if (n == 0) {
+				; // do nothing
+			}
+			else if (n + groups[i].length <= action.wellsPerPlate) {
+				; // do nothing
+			}
+			else {
+				plateIndex++;
+				n = 0;
+			}
+			_.forEach(groups[i], row => { row[action.name] = action.plates[plateIndex]; });
+			n += groups[i].length;
+			assert(n <= action.wellsPerPlate);
+			i++;
+		}
+		return table;
+	}
+
 	let table = [{}];
 	_.forEach(design.actions, action => {
 		switch (action.action) {
@@ -358,6 +419,9 @@ function flattenDesign(design) {
 				break;
 			case "assign":
 				table = assign(table, action.name, action);
+				break;
+			case "assignPlates":
+				table = assignPlates(table, action);
 				break;
 			case "replicate":
 				table = replicate(table, action);
