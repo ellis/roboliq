@@ -106,6 +106,7 @@ const design2 = {
 			wellsPerPlate: 8,
 			orderBy: "sampleCycle",
 			groupBy: "sampleCycle",
+			alternatePlatesByGroup: true
 		},
 		/*{
 			action: "assign",
@@ -354,7 +355,7 @@ const actionHandlers = {
 
 		assert(plateCount <= action.plates.length, `required ${plateCount} plates, but only ${action.plates.length} supplied: ${action.plates.join(",")}`);
 
-		const groupValues = (action.cyclePlates)
+		const groupValues = (action.alternatePlatesByGroup)
 			? _.map(groups, (group, i) => action.plates[i % plateCount])
 			: _.map(groups, (group, i) => action.plates[sequence[i]]);
 		//console.log({plateCount, groupLength: groups.length, sequence, plateValues: values})
