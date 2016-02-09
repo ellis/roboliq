@@ -66,7 +66,7 @@ const design2 = {
 		"mediaSource": "media1",
 		//"cultureNum*": _.range(1, 4+1),
 		"cultureNum*=range": {
-			till: 4
+			till: 5
 		},
 		"cultureWell=range": {
 			till: 96,
@@ -84,10 +84,13 @@ const design2 = {
 				"sampleCycle=math": "sampleCycle + 1"
 			}
 		},
-		/*"syringe=assign": {
+		"syringe=assign": {
 			values: [1, 2, 3, 4, 5, 6, 7, 8],
-
-		},*/
+			groupBy: "sampleCycle",
+			//applyPerGroup: true,
+			random: true,
+			rotateValues: true
+		},
 		//"dilution*": [1, 2]
 	},
 	// TODO: add syringe, randomSeed, dilution plates
@@ -412,7 +415,9 @@ function applyActionToTable(table, action) {
 		const handler = actionHandlers[action.action];
 		if (!handler) return;
 
+		let valueOffset = 0;
 		function getValues(action, data) {
+			valueOffset = 0;
 			let values = handler(action, data);
 			if (!_.isUndefined(values)) {
 				if (action.random) {
@@ -430,6 +435,7 @@ function applyActionToTable(table, action) {
 		}
 
 		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
+		console.log({valuesTable})
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
@@ -447,19 +453,23 @@ function applyActionToTable(table, action) {
 				}
 				else {
 					if (_.isArray(valuesGroup)) {
-						values = valuesGroup[samesIndex];
+						const j = (action.rotateValues) ? (samesIndex + valueOffset) % valuesGroup.length : samesIndex;
+						values = valuesGroup[j];
 					}
 					else if (_.isPlainObject(valuesGroup)) {
 						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
 						values = _.mapValues(valuesGroup, (value, key) => {
-							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[samesIndex] : value
+							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
+							console.log({j})
+							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[j] : value
 						});
 					}
 					else {
 						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
 					}
 				}
-				mergeValues(table, sames, values, replacements);
+				mergeValues(table, sames, values, valueOffset, action, replacements);
+				valueOffset++;
 			});
 		});
 	}
@@ -531,15 +541,18 @@ function groupSameIndexes(table, action) {
  * @param  {[type]} changeMap [description]
  * @return {[type]}           [description]
  */
-function mergeValues(table, sames, values, replacements) {
+function mergeValues(table, sames, values, valueOffset, action, replacements) {
+	console.log({valueOffset, values})
 	if (_.isArray(values)) {
 		_.forEach(sames, (rowIndex, i) => {
-			const values1 = values[i];
+			const j = (action.rotateValues) ? (valueOffset + i) % values.length : i;
+			const values1 = values[j];
+			console.log({i, j, value1})
 			expandRowByValues(table, rowIndex, values1, replacements)
 		});
 	}
 	else if (_.isPlainObject(values)) {
-		_.forEach(sames, (rowIndex, i) => {
+		_.forEach(sames, rowIndex => {
 			expandRowByValues(table, rowIndex, values, replacements)
 		});
 	}
