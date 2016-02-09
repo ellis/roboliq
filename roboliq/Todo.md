@@ -149,14 +149,50 @@
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
 
+Todos for presentation tomorrow:
+- [ ] practice intro 5 times
+- [ ] make notes about approach
+- [ ] practice approach 5 times
+- [ ] make notes about results
+- [ ] practice results 5 times
+- [ ] practice demo 5 times
+- [ ] write demo ui?
+    - [ ] figure out how to run npm code in browser
+    - [ ] text field for design in YAML
+    - [ ] input field for query
+    - [ ] button to update table
+    - [ ] shortcut to update table
+    - [ ] print table
+- [ ] have a good command for expanding steps and parameters based on data
+    maybe something like this:
+    ```
+    data: {
+        source: myExperiment,
+        distinctBy: "cultureWell",
+        forEach: "row"
+    }
+
+    data(): {
+        distinctBy: "cultureWell",
+        actions: [{
+            action: "math",
+            value: "cultureVolume / 2"
+        }],
+        value: "$cultureWell",
+        join: ",",
+    }
+    ```
+
+- [ ] the command should also manage the timing of steps
+
 - Goals for talk:
-    - have a good Conditions/Data/DataTree format
-    - have a good command for expanding steps based on Conditions
-    - the command should also manage the timing of steps
-    - have a complete protocol as an example
-    - run that protocol on a robot
-    - get the measurement data out of the robot
-    - visualize/analyze the measurement data in R
+    - [x] have a good Conditions/Data/DataTree format
+    - [ ] have a good command for expanding steps based on Conditions
+    - [ ] the command should also manage the timing of steps
+    - [ ] have a complete protocol as an example
+    - [ ] run that protocol on a robot
+    - [-] get the measurement data out of the robot
+    - [-] visualize/analyze the measurement data in R
 - [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
 - [x] `timer.wait`
 SATURDAY:

@@ -59,6 +59,7 @@ import yaml from 'yamljs';
  * - for the last 48 sample times, resample each well that's only been sampled once
  */
 
+// TODO: add cultureOrder so that random groups of items with syringes 1-8 are assigned increasing order numbers
 const design2 = {
 	conditions: {
 		"strainSource": "strain1",
@@ -79,7 +80,7 @@ const design2 = {
 			random: true,
 			rotateValues: true
 		},
-		"sampleNum": 1,
+		/*"sampleNum": 1,
 		"sampleCycle=range": {
 			random: true
 		},
@@ -89,7 +90,7 @@ const design2 = {
 				"sampleCycle=math": "sampleCycle + 48"
 			}
 		},
-		"dilution*=range": {till: 5},
+		"dNum*=range": {till: 5},
 		"dPlate=allocatePlates": {
 			plates: ["dPlate1", "dPlate2", "dPlate3", "dPlate4", "dPlate5", "dPlate6", "dPlate7", "dPlate8", "dPlate9", "dPlate10", "dPlate11"],
 			wellsPerPlate: 96,
@@ -101,7 +102,7 @@ const design2 = {
 			till: 96,
 			groupBy: "dPlate",
 			random: true
-		}
+		}*/
 	},
 	// TODO: add randomSeed
 	actions: [
@@ -257,6 +258,10 @@ function query(table, q) {
 	}
 	else {
 		table2 = [table2];
+	}
+
+	if (q.transpose) {
+		table2 = _.zip.apply(_, table2);
 	}
 
 	return table2;
@@ -671,3 +676,7 @@ const table = flattenDesign(design2);
 printConditions(design2.conditions);
 printData(table);
 //console.log(yaml.stringify(table, 4, 2))
+
+//query(table, {groupBy: "syringe", orderBy: "syringe", transpose: true}).forEach(group => printData(group, true))
+
+//function expandSteps()
