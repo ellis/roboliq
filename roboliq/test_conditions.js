@@ -117,7 +117,6 @@ const design2 = {
 					action: "range",
 					till: 4
 				},
-				/*
 				"cultureWell=": {
 					action: "range",
 					till: 96,
@@ -128,7 +127,7 @@ const design2 = {
 					action: "range",
 					random: true
 				},
-				"sampleNum**": {
+				/*"sampleNum**": {
 					template: {
 						"sampleNum": 2,
 						"sampleCycle$": "sampleCycle+1"
