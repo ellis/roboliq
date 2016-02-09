@@ -63,7 +63,8 @@ const design = {
 	conditions: {
 		"strainSource": "strain1",
 		"mediaSource": "media1",
-		"cultureWellIndex*": _.range(1, 4+1),
+		"cultureNum*": _.range(1, 4+1),
+		"sampleNum*": [1, 2],
 		//"sample1*": [false, true],
 		//"sample1Cycle*": _.range(0, 4),
 		"dilutionFactor*": [1, 2]
@@ -83,7 +84,7 @@ const design2 = {
 	assign: {
 		cultureWell: {
 			values: _.range(1, 96+1),
-			groupBy: "cultureWellIndex",
+			groupBy: "cultureNum",
 			random: true
 		},
 		sampleCycle: {
@@ -102,7 +103,51 @@ const design2 = {
 			index: true,
 			random: true
 		}*/
-	}
+	},
+	actions: [
+		{
+			action: "add",
+			object: {
+				"strainSource": "strain1",
+				"mediaSource": "media1",
+				"cultureNum*": _.range(1, 4+1),
+				/*"cultureWell=": {
+					range: 96,
+					random: true
+				},
+				"sampleNum": 1,
+				"sampleCycle=": {
+					range: true,
+					random: true
+				},
+				"*": {
+					sampleNum: 2,
+					sampleCycle: "#math#sampleCycle+1"
+				}
+				*/
+			}
+		},
+		{
+			action: "assign",
+			name: "cultureWell",
+			values: _.range(1, 96+1),
+			random: true
+		},
+		{
+			action: "add",
+			object: {sampleNum: 1}
+		},
+		{
+			action: "assign",
+			name: "sampleCycle",
+			values: _.range(1, rows.length+1)
+			random: true
+		},
+		{
+			action: "replicate",
+			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
+		},
+	]
 };
 
 function printConditions(conditions) {
@@ -161,31 +206,10 @@ function flattenConditions(conditions, depth = -1) {
 			assert(_.isPlainObject(row));
 			let rows = [{}];
 			_.forEach(row, (value, key) => {
-				//console.log({key, value})
 				if (depth != 0 && _.endsWith(key, "*")) {
 					again = true;
-					const key2 = key.substring(0, key.length - 1);
-					// For each entry in value, make a copy of every row in rows with the properties of the entry
-					rows = _.flatMap(rows, x => {
-						return _.map(value, (value3, key3) => {
-							//console.log({key3, value3})
-							if (_.isPlainObject(value3)) {
-								const value2 = (_.isNumber(key3)) ? key3 + 1 : key3;
-								return _.merge({}, x, _.fromPairs([[key2, value2]]), value3);
-							}
-							else {
-								return _.merge({}, x, _.fromPairs([[key2, value3]]));
-							}
-						});
-					});
 				}
-				else {
-					_.forEach(rows, row => { row[key] = value; });
-					/*if (key === "reseal") {
-						console.log("reseal: "+value)
-						console.log(rows)
-					}*/
-				}
+				rows = expandRows(rows, key, value, depth);
 			});
 			//console.log({rows})
 			return rows;
@@ -195,6 +219,34 @@ function flattenConditions(conditions, depth = -1) {
 	}
 
 	return flatter;
+}
+
+function expandRows(rows, key, value, depth = -1) {
+	//console.log({key, value})
+	if (depth != 0 && _.endsWith(key, "*")) {
+		const key2 = key.substring(0, key.length - 1);
+		// For each entry in value, make a copy of every row in rows with the properties of the entry
+		rows = _.flatMap(rows, x => {
+			return _.map(value, (value3, key3) => {
+				//console.log({key3, value3})
+				if (_.isPlainObject(value3)) {
+					const value2 = (_.isNumber(key3)) ? key3 + 1 : key3;
+					return _.merge({}, x, _.fromPairs([[key2, value2]]), value3);
+				}
+				else {
+					return _.merge({}, x, _.fromPairs([[key2, value3]]));
+				}
+			});
+		});
+	}
+	else {
+		_.forEach(rows, row => { row[key] = value; });
+		/*if (key === "reseal") {
+			console.log("reseal: "+value)
+			console.log(rows)
+		}*/
+	}
+	return rows;
 }
 
 function query(table, q) {
@@ -242,7 +294,7 @@ function query(table, q) {
 }
 
 function flattenDesign(design) {
-	const table = flattenConditions(design.conditions);
+	let table = flattenConditions(design.conditions);
 
 	//console.log({assign: design.assign})
 	_.forEach(design.assign, (x, name) => {
@@ -269,12 +321,9 @@ function flattenDesign(design) {
 		}
 
 		if (fn) {
-			_.forEach(groups, (group, i) => {
+			table = _.flatMap(groups, (group, i) => {
 				const value = fn(group[0], i);
-				CONITNUE: handle scope*
-				_.forEach(group, row => {
-					row[name] = value;
-				});
+				return expandRows(group, name, value);
 			});
 		}
 	});
