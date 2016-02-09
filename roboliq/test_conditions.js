@@ -84,24 +84,19 @@ const design2 = {
 				"sampleCycle=math": "sampleCycle + 1"
 			}
 		},
-		"syringe=assign": {
-			values: [1, 2, 3, 4, 5, 6, 7, 8],
+		"syringe=range": {
+			till: 8,
 			groupBy: "sampleCycle",
-			//applyPerGroup: true,
 			random: true,
 			rotateValues: true
 		},
 		//"dilution*": [1, 2]
 	},
-	// TODO: add syringe, randomSeed, dilution plates
+	// TODO: add randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
-		/*{
-			action: "add",
-			object: {"dilution*": [1, 2]}
-		},
 		// TODO: it would be better to alternate, so 1) pick number of plates required, 2) shuffle plates, 3) orderBy sampleCycle, 4) groupBy sampleCycle, 5) assign to groups with recycling
-		{
+		/*{
 			action: "assignPlates",
 			name: "dilutionPlate",
 			plates: ["dilutionPlate1", "dilutionPlate2"],
