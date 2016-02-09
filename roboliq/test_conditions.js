@@ -78,20 +78,21 @@ const design2 = {
 		"sampleCycle=range": {
 			random: true
 		},
-		"*1": {
+		"*": {
 			conditions: {
 				sampleNum: 2,
 				"sampleCycle=math": "sampleCycle + 1"
 			}
-		}
+		},
+		/*"syringe=assign": {
+			values: [1, 2, 3, 4, 5, 6, 7, 8],
+
+		},*/
+		//"dilution*": [1, 2]
 	},
 	// TODO: add syringe, randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
-		/*{
-			action: "replicate",
-			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
-		},*/
 		/*{
 			action: "add",
 			object: {"dilution*": [1, 2]}
