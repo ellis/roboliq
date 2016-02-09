@@ -100,9 +100,9 @@ const design2 = {
 	actions: [
 		// TODO: it would be better to alternate, so 1) pick number of plates required, 2) shuffle plates, 3) orderBy sampleCycle, 4) groupBy sampleCycle, 5) assign to groups with recycling
 		{
-			action: "assignPlates",
+			action: "allocatePlates",
 			name: "dilutionPlate",
-			plates: ["dilutionPlate1", "dilutionPlate2"],
+			plates: ["dilutionPlate1", "dilutionPlate2", "dilutionPlate3"],
 			wellsPerPlate: 8,
 			orderBy: "sampleCycle",
 			groupBy: "sampleCycle",
@@ -271,6 +271,23 @@ function query(table, q) {
 	return table2;
 }
 
+class ActionResult {
+	constructor(functions) {
+		//console.log({functions})
+		this._functions = functions;
+	}
+
+	getGroupValues(groupIndex) {
+		//console.log("this: "+JSON.stringify(this))
+		if (this._functions.getGroupValues)
+			return this._functions.getGroupValues(groupIndex);
+	}
+
+	getRowValues(rowIndex) {
+
+	}
+}
+
 // TODO: wells on dilution plates need to be unique
 // figure out better way to chain operations.
 // In this case, it might be best to 1) group, 2) shuffle, 3) assign to rows
@@ -306,30 +323,45 @@ const actionHandlers = {
 			return _.fromPairs([[action.name, action.values]]);
 		}
 	},
-	"assignPlates": function(action, data) {
-		CONTINUE
-		if (!data.groups) return;
+	"allocatePlates": function(action, data) {
+		const groups = data.groupsOfSames;
+		if (!groups) return;
 
-		let plateIndex = 0;
-		let i = 0;
+		//printData(groups);
+
+		// Find number of plates required
+		let plateCount = -1;
 		let n = 0;
-		while (i < groups.length) {
-			if (n == 0) {
-				; // do nothing
+		const sequence = [];
+		for (let i = 0; i < groups.length; i++) {
+			const group = groups[i];
+			const n2 = n + group.length;
+			if (plateCount < 0 && n2 > 0) {
+				plateCount = 1;
 			}
-			else if (n + groups[i].length <= action.wellsPerPlate) {
-				; // do nothing
+
+			if (n2 <= action.wellsPerPlate) {
+				n = n2;
 			}
 			else {
-				plateIndex++;
-				n = 0;
+				assert(n > 0, "too many positions in group for plate to accomodate");
+				plateCount++;
+				n = groups[i].length;
 			}
-			_.forEach(groups[i], row => { row[action.name] = action.plates[plateIndex]; });
-			n += groups[i].length;
-			assert(n <= action.wellsPerPlate);
-			i++;
+			sequence.push(plateCount - 1);
+			console.log({i, group, n2, n, plateCount})
 		}
-		return table;
+
+		assert(plateCount <= action.plates.length, `required ${plateCount} plates, but only ${action.plates.length} supplied: ${action.plates.join(",")}`);
+
+		const groupValues = (action.cyclePlates)
+			? _.map(groups, (group, i) => action.plates[i % plateCount])
+			: _.map(groups, (group, i) => action.plates[sequence[i]]);
+		//console.log({plateCount, groupLength: groups.length, sequence, plateValues: values})
+
+		return new ActionResult({
+			getGroupValues: (groupIndex) => _.fromPairs([[action.name, groupValues[groupIndex]]])
+		});
 	},
 	"math": function(action, data) {
 		// TODO: adapt so that it can work on groups?
@@ -433,13 +465,16 @@ function applyActionToTable(table, action) {
 			return values;
 		}
 
-		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table}) : undefined;
+		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table, groupsOfSames}) : undefined;
 		console.log({valuesTable})
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
 			const group = _.map(groupOfSames, sames => table[sames[0]]);
-			const valuesGroup = (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex}) : valuesTable;
+			const valuesGroup
+				= (valuesTable instanceof ActionResult) ? valuesTable.getGroupValues(groupIndex)
+				: (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex})
+				: valuesTable;
 			console.log({valuesGroup})
 			_.forEach(groupOfSames, (sames, samesIndex) => {
 				console.log({sames, samesIndex})
