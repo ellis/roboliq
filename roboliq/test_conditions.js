@@ -91,30 +91,21 @@ const design2 = {
 			rotateValues: true
 		},
 		"dilution*": [1, 2],
-		/*"dilutionPlate=assign": {
-			values: ["plate1"]
-		}*/
-	},
-	// TODO: add randomSeed, dilution plates
-	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
-	actions: [
-		// TODO: it would be better to alternate, so 1) pick number of plates required, 2) shuffle plates, 3) orderBy sampleCycle, 4) groupBy sampleCycle, 5) assign to groups with recycling
-		{
-			action: "allocatePlates",
-			name: "dilutionPlate",
-			plates: ["dilutionPlate1", "dilutionPlate2", "dilutionPlate3"],
+		"dPlate=allocatePlates": {
+			plates: ["dPlate1", "dPlate2", "dPlate3"],
 			wellsPerPlate: 8,
-			orderBy: "sampleCycle",
 			groupBy: "sampleCycle",
+			orderBy: "sampleCycle",
 			alternatePlatesByGroup: true
 		},
-		/*{
-			action: "assign",
-			name: "dilutionWell",
-			values: _.range(1, 96+1),
-			groupBy: "dilutionPlate",
+		"dWell=range": {
+			till: 96,
+			groupBy: "dPlate",
 			random: true
-		}*/
+		}
+	},
+	// TODO: add randomSeed
+	actions: [
 	]
 };
 
