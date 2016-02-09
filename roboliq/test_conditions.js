@@ -118,12 +118,13 @@ const design2 = {
 					range: 4,
 				},
 				"cultureWell=": {
-					range: 96,
+					action: "range",
+					till: 96,
 					random: true
 				},
 				"sampleNum": 1,
 				"sampleCycle=": {
-					range: true,
+					action: "range",
 					random: true
 				},
 				"sampleNum**": {
@@ -136,23 +137,21 @@ const design2 = {
 			}
 		},
 		{
-			action: "assign",
+			action: "range",
 			name: "cultureWell",
-			values: _.range(1, 96+1),
+			till: 96,
 			random: true
 		},
-		/*{
+		{
 			action: "add",
 			object: {sampleNum: 1}
 		},
 		{
-			action: "assign",
+			action: "range",
 			name: "sampleCycle",
-			//calculate: (row, index, rows) => _.range(1, rows.length+1),
-			values: _.range(1, 4+1),
 			random: true
 		},
-		{
+		/*{
 			action: "replicate",
 			map: (row) => (_.merge({}, row, {sampleNum: 2, sampleCycle: row.sampleCycle + 1}))
 		},
@@ -363,6 +362,21 @@ const actionHandlers = {
 		}
 		else if (_.isFunction(action.calculate)) {
 			return _.fromPairs([[action.name, action.calculate(data)]]);
+		}
+		else {
+			return _.fromPairs([[action.name, action.values]]);
+		}
+	},
+	"range": function(action, data) {
+		let from = _.get(action, "from", 1);
+		let till = action.till;
+		if (_.isUndefined(till)) {
+			const rows = data.group || data.table;
+			if (rows)
+				till = rows.length;
+		}
+		if (!_.isUndefined(till)) {
+			return _.fromPairs([[action.name, _.range(from, till+1)]]);
 		}
 	},
 	/*case "assignPlates":
