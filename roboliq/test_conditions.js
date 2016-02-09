@@ -90,13 +90,16 @@ const design2 = {
 			random: true,
 			rotateValues: true
 		},
-		//"dilution*": [1, 2]
+		"dilution*": [1, 2],
+		/*"dilutionPlate=assign": {
+			values: ["plate1"]
+		}*/
 	},
 	// TODO: add randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
 	actions: [
 		// TODO: it would be better to alternate, so 1) pick number of plates required, 2) shuffle plates, 3) orderBy sampleCycle, 4) groupBy sampleCycle, 5) assign to groups with recycling
-		/*{
+		{
 			action: "assignPlates",
 			name: "dilutionPlate",
 			plates: ["dilutionPlate1", "dilutionPlate2"],
@@ -104,7 +107,7 @@ const design2 = {
 			orderBy: "sampleCycle",
 			groupBy: "sampleCycle",
 		},
-		{
+		/*{
 			action: "assign",
 			name: "dilutionWell",
 			values: _.range(1, 96+1),
@@ -303,6 +306,31 @@ const actionHandlers = {
 			return _.fromPairs([[action.name, action.values]]);
 		}
 	},
+	"assignPlates": function(action, data) {
+		CONTINUE
+		if (!data.groups) return;
+
+		let plateIndex = 0;
+		let i = 0;
+		let n = 0;
+		while (i < groups.length) {
+			if (n == 0) {
+				; // do nothing
+			}
+			else if (n + groups[i].length <= action.wellsPerPlate) {
+				; // do nothing
+			}
+			else {
+				plateIndex++;
+				n = 0;
+			}
+			_.forEach(groups[i], row => { row[action.name] = action.plates[plateIndex]; });
+			n += groups[i].length;
+			assert(n <= action.wellsPerPlate);
+			i++;
+		}
+		return table;
+	},
 	"math": function(action, data) {
 		// TODO: adapt so that it can work on groups?
 		if (data.row) {
@@ -334,30 +362,6 @@ function flattenDesign(design) {
 	//let table = flattenConditions(design.conditions);
 
 	//console.log({assign: design.assign})
-
-	function assignPlates(table, action) {
-		const groups = query(table, {orderBy: action.orderBy, groupBy: action.groupBy});
-		let plateIndex = 0;
-		let i = 0;
-		let n = 0;
-		while (i < groups.length) {
-			if (n == 0) {
-				; // do nothing
-			}
-			else if (n + groups[i].length <= action.wellsPerPlate) {
-				; // do nothing
-			}
-			else {
-				plateIndex++;
-				n = 0;
-			}
-			_.forEach(groups[i], row => { row[action.name] = action.plates[plateIndex]; });
-			n += groups[i].length;
-			assert(n <= action.wellsPerPlate);
-			i++;
-		}
-		return table;
-	}
 
 	const conditionActions = convertConditionsToActions(design.conditions);
 	const actions = _.compact(conditionActions.concat(design.actions));
