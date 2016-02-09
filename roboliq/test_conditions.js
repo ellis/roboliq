@@ -64,27 +64,25 @@ const design2 = {
 		"strainSource": "strain1",
 		"mediaSource": "media1",
 		//"cultureNum*": _.range(1, 4+1),
-		"cultureNum*=": {
-			action: "range",
+		"cultureNum*=range": {
 			till: 4
 		},
-		"cultureWell=": {
-			action: "range",
+		"cultureWell=range": {
 			till: 96,
 			random: true
 		},
-		"sampleNum": 1,
-		"sampleCycle=": {
-			action: "range",
-			random: true
-		},/*
-		"sampleNum**": {
-			template: {
-				"sampleNum": 2,
-				"sampleCycle$": "sampleCycle+1"
-			}
+		/*"cultureCol=": {
+			action: "math",
+			value: "floor(cultureWell % 8)"
 		}
-		*/
+		"cultureRow=": {
+			action: "math",
+			value: "floor(cultureWell % 8)"
+		}*/
+		"sampleNum": 1,
+		"sampleCycle=range": {
+			random: true
+		}
 	},
 	// TODO: add cultureRow, cultureCol, syringe, randomSeed, dilution plates
 	// TODO: in assigning dilution plates, it would be better to alternate each cycle, but select minimum number of plates
@@ -368,11 +366,12 @@ function flattenDesign(design) {
 	}
 
 	const conditionActions = _.map(design.conditions, (value, key) => {
-		if (_.endsWith(key, "=")) {
-			const handler2 = actionHandlers[value.action];
+		if (_.includes(key, "=")) {
+			const [name, action] = key.split("=");
+			const handler2 = actionHandlers[action];
 			assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
 			if (handler2) {
-				return _.merge({}, value, {name: key.substring(0, key.length - 1)});
+				return _.merge({}, {action, name}, value);
 			}
 		}
 		else {
