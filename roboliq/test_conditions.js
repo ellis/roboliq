@@ -66,34 +66,34 @@ const design2 = {
 		"mediaSource": "media1",
 		//"cultureNum*": _.range(1, 4+1),
 		"cultureNum*=range": {
-			till: 5
+			till: 96
 		},
 		"cultureWell=range": {
 			till: 96,
 			random: true
 		},
-		"cultureCol=math": "floor((cultureWell - 1) / 8) + 1",
-		"cultureRow=math": "((cultureWell - 1) % 8) + 1",
+		//"cultureCol=math": "floor((cultureWell - 1) / 8) + 1",
+		//"cultureRow=math": "((cultureWell - 1) % 8) + 1",
+		// TODO: syringe should be unique for each cultureWell, and ideally different for every sampleCycle
+		"syringe=range": {
+			till: 8,
+			random: true,
+			rotateValues: true
+		},
 		"sampleNum": 1,
 		"sampleCycle=range": {
 			random: true
 		},
-		"*": {
+		/*"*": {
 			conditions: {
 				sampleNum: 2,
-				"sampleCycle=math": "sampleCycle + 1"
+				"sampleCycle=math": "sampleCycle + 48"
 			}
-		},
-		"syringe=range": {
-			till: 8,
-			groupBy: "sampleCycle",
-			random: true,
-			rotateValues: true
-		},
-		"dilution*": [1, 2],
+		},*/
+		/*"dilution*=range": {till: 5},
 		"dPlate=allocatePlates": {
-			plates: ["dPlate1", "dPlate2", "dPlate3"],
-			wellsPerPlate: 8,
+			plates: ["dPlate1", "dPlate2", "dPlate3", "dPlate4", "dPlate5", "dPlate6", "dPlate7", "dPlate8", "dPlate9", "dPlate10", "dPlate11"],
+			wellsPerPlate: 96,
 			groupBy: "sampleCycle",
 			orderBy: "sampleCycle",
 			alternatePlatesByGroup: true
@@ -102,7 +102,7 @@ const design2 = {
 			till: 96,
 			groupBy: "dPlate",
 			random: true
-		}
+		}*/
 	},
 	// TODO: add randomSeed
 	actions: [
@@ -341,7 +341,7 @@ const actionHandlers = {
 				n = groups[i].length;
 			}
 			sequence.push(plateCount - 1);
-			console.log({i, group, n2, n, plateCount})
+			// console.log({i, group, n2, n, plateCount})
 		}
 
 		assert(plateCount <= action.plates.length, `required ${plateCount} plates, but only ${action.plates.length} supplied: ${action.plates.join(",")}`);
@@ -389,7 +389,7 @@ function flattenDesign(design) {
 
 	const conditionActions = convertConditionsToActions(design.conditions);
 	const actions = _.compact(conditionActions.concat(design.actions));
-	console.log({actions})
+	// console.log({actions})
 
 	let table = [{}];
 	_.forEach(actions, action => {
@@ -421,9 +421,9 @@ function convertConditionsToActions(conditions) {
 }
 
 function applyActionToTable(table, action) {
-	console.log("action: "+JSON.stringify(action))
+	// console.log("action: "+JSON.stringify(action))
 	const groupsOfSames = groupSameIndexes(table, action);
-	console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
+	// console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
 
 	// Action properties:
 	// - groupBy -- creates groupings
@@ -458,7 +458,7 @@ function applyActionToTable(table, action) {
 		}
 
 		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table, groupsOfSames}) : undefined;
-		console.log({valuesTable})
+		// console.log({valuesTable})
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
@@ -467,9 +467,9 @@ function applyActionToTable(table, action) {
 				= (valuesTable instanceof ActionResult) ? valuesTable.getGroupValues(groupIndex)
 				: (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex})
 				: valuesTable;
-			console.log({valuesGroup})
+			// console.log({valuesGroup})
 			_.forEach(groupOfSames, (sames, samesIndex) => {
-				console.log({sames, samesIndex})
+				// console.log({sames, samesIndex})
 				let values;
 				if (_.isUndefined(valuesGroup)) {
 					const row = table[sames[0]]; // Arbitrarily pick first row of sames
@@ -486,7 +486,7 @@ function applyActionToTable(table, action) {
 						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
 						values = _.mapValues(valuesGroup, (value, key) => {
 							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
-							console.log({j})
+							// console.log({j})
 							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[j] : value
 						});
 					}
@@ -510,7 +510,7 @@ function applyActionToTable(table, action) {
 			//console.log("table: "+JSON.stringify(table));
 		}
 	}
-	printData(table);
+	// printData(table);
 	/*
 	switch (action.action) {
 		case "add":
@@ -568,12 +568,12 @@ function groupSameIndexes(table, action) {
  * @return {[type]}           [description]
  */
 function mergeValues(table, sames, values, valueOffset, action, replacements) {
-	console.log({valueOffset, values})
+	// console.log({valueOffset, values})
 	if (_.isArray(values)) {
 		_.forEach(sames, (rowIndex, i) => {
 			const j = (action.rotateValues) ? (valueOffset + i) % values.length : i;
 			const values1 = values[j];
-			console.log({i, j, value1})
+			// console.log({i, j, value1})
 			expandRowByValues(table, rowIndex, values1, replacements)
 		});
 	}
@@ -600,7 +600,7 @@ function mergeValues(table, sames, values, valueOffset, action, replacements) {
 function expandRowByValues(table, rowIndex, values, replacements) {
 	let rows = [table[rowIndex]];
 	_.forEach(values, (value, key) => {
-		console.log({key, value})
+		// console.log({key, value})
 		if (_.endsWith(key, "*")) {
 			const starName = key.substring(0, key.length - 1);
 			const starValues = value;
@@ -609,7 +609,7 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 				rows = _.flatMap(rows, row => {
 					return _.map(starValues, (starValue, starKey) => {
 						assert(_.isPlainObject(starValue));
-						console.log({starName, starKey, starValue});
+						// console.log({starName, starKey, starValue});
 						return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
 					});
 				});
@@ -618,7 +618,7 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 				// For each entry in value, make a copy of every row in rows with the properties of the entry
 				rows = _.flatMap(rows, row => {
 					return _.map(starValues, (starValue, starValueIndex) => {
-						console.log({starName, starValueIndex, starValue})
+						// console.log({starName, starValueIndex, starValue})
 						if (_.isPlainObject(starValue)) {
 							const starKey = starValueIndex + 1;
 							return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
