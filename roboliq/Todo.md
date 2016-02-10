@@ -166,6 +166,7 @@ Todos for presentation tomorrow:
 - [ ] have a good command for expanding steps and parameters based on data
     maybe something like this:
     ```
+    # a data field with a 'forEach' leads to a step being repeated with the appropriate scope
     data: {
         source: myExperiment,
         distinctBy: "cultureWell",
@@ -182,7 +183,6 @@ Todos for presentation tomorrow:
         join: ",",
     }
     ```
-
 - [ ] the command should also manage the timing of steps
 
 - Goals for talk:
