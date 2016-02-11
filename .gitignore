@@ -25,3 +25,4 @@ temp.svg
 lastrun.html
 roboliq.log*
 .DS_Store
+node_modules
