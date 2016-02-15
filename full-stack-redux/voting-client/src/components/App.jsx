@@ -1,9 +1,8 @@
 import React from 'react';
-import {List} from 'immutable';
+import {List, Map} from 'immutable';
 
 const pair = List.of('Trainspotting', '28 Days Later');
-
-import Results from '../components/Results';
+const tally = Map({'Trainspotting': 5, '28 Days Later': 4});
 
 export default React.createClass({
 	render: function() {
@@ -13,10 +12,7 @@ export default React.createClass({
 		//return <div>{this.props.children}</div>;
 		// return React.cloneElement(this.props.children, {pair: pair});
 		return <div>
-			1:
-			<div>{this.props.children}</div>
-			2:
-			{React.cloneElement(this.props.children, {pair: pair})}
+			{React.cloneElement(this.props.children, {pair: pair, tally: tally})}
 		</div>;
 	}
 });
