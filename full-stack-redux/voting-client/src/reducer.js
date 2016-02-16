@@ -1,5 +1,6 @@
 import {Map, fromJS} from 'immutable';
 import {flattenDesign} from './design.js';
+import YAML from 'js-yaml';
 
 function setState(state, newState) {
 	return state.merge(newState);
