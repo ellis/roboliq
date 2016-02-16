@@ -308,6 +308,7 @@ LATER:
 - [ ] test `EvowareCompiler.compile`
 - [ ] evoware: add command-line option to only process certain steps
 - [ ] evoware: when user specifies steps to process but no output name, name the output file according to the steps processed
+- [ ] for ANOVA visualization, consider http://rpsychologist.com/d3-one-way-anova
 
 ## On-going todos with lots of sub-steps
 
