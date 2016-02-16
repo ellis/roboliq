@@ -1,7 +1,8 @@
 import React from 'react';
 import PureRenderMixin from 'react-addons-pure-render-mixin';
+import {connect} from 'react-redux';
 //import YAML from 'yamljs';
-import {flattenDesign, design2} from '../design.js';
+//import {flattenDesign, design2} from '../design.js';
 
 const Table = ({
 	table
@@ -23,15 +24,39 @@ const Table = ({
 	</table>;
 };
 
-export default React.createClass({
+function mapStateToProps(state) {
+	return {
+		designText: state.get("designText"),
+		design: state.get("design"),
+		table: state.get("table")
+	};
+}
+
+export const Design = React.createClass({
 	mixins: [PureRenderMixin],
 	render: function() {
-		const design = design2;
-		const table = flattenDesign(design);
+		const design = this.props.design.toJS();
+		//console.log("design: "+JSON.stringify(design))
+		//const table = flattenDesign(design);
+		const table = (this.props.table) ? this.props.table.toJS() : [];
+		//console.log("table: "+JSON.stringify(table))
 		return <div>
 			{/*<pre>{YAML.stringify(design, 5, 1)}</pre>*/}
-			<pre>{JSON.stringify(design, null, '\t')}</pre>
+			<textarea value={this.props.designText} onChange={this.handleChange}></textarea>
 			<Table table={table}/>
 		</div>;
-	}
+	},
+	handleChange: function(event) {
+		console.log("handleChange:");
+		console.log(event.target.value);
+		this.props.setDesignText(event.target.value);
+	},
 });
+
+const actions = {
+	setDesignText: (text) => {
+		return {type: "setDesignText", text};
+	}
+};
+
+export const DesignContainer = connect(mapStateToProps, actions)(Design);

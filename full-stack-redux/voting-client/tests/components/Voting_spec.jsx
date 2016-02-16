@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactTestUtils from 'react-addons-test-utils';
-import Voting from '../../src/components/Voting';
+import {Voting} from '../../src/components/Voting';
 
 const {renderIntoDocument, scryRenderedDOMComponentsWithTag, Simulate} = ReactTestUtils;
 
