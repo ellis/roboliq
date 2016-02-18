@@ -45,5 +45,39 @@ describe('design', () => {
 				{treatment: "c"},
 			]);
 		});
+
+		it('should produce factors for Box dataset Chapter 3', () => {
+			const design = {
+				conditions: {
+					"treatment*": {
+						"A": { "*": { count: 2 } },
+						"B": { "*": { count: 2 } },
+					},
+					"batch=range": {},
+					"order=range": {},
+				},
+				models: {
+					model1: {
+						treatmentFactors: ["treatment"],
+						experimentalFactors: ["batch"],
+						samplingFactors: ["batch"],
+						measurementFactors: ["yield"],
+						orderFactors: ["batch"],
+						formula: "yield ~ treatment",
+						assumptions: {
+							sameVariance: true
+						}
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			//printData(table);
+			should.deepEqual(table, [
+				{treatment: "A", order: 1},
+				{treatment: "A", order: 2},
+				{treatment: "B", order: 3},
+				{treatment: "B", order: 4},
+			]);
+		});
 	});
 });
