@@ -113,7 +113,7 @@ export const design2 = {
 // 	console.log(yaml.stringify(conditions, 6, 2));
 // }
 
-function printData(data, hideRedundancies = false) {
+export function printData(data, hideRedundancies = false) {
 	// Get column names
 	const columnMap = {};
 	_.forEach(data, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
@@ -498,6 +498,7 @@ function applyActionToTable(table, action) {
 						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
 					}
 				}
+				// console.log({values, valueOffset})
 				mergeValues(table, sames, values, valueOffset, action, replacements);
 				valueOffset++;
 			});
@@ -572,7 +573,8 @@ function groupSameIndexes(table, action) {
  * @return {[type]}           [description]
  */
 function mergeValues(table, sames, values, valueOffset, action, replacements) {
-	// console.log({valueOffset, values})
+	// console.log("mergeValues:")
+	// console.log({valueOffset, values, sames})
 	if (_.isArray(values)) {
 		_.forEach(sames, (rowIndex, i) => {
 			const j = (action.rotateValues) ? (valueOffset + i) % values.length : i;
@@ -602,19 +604,39 @@ function mergeValues(table, sames, values, valueOffset, action, replacements) {
  * @return {[type]}           [description]
  */
 function expandRowByValues(table, rowIndex, values, replacements) {
+	// console.log("expandRowByValues:")
+	// console.log({table, rowIndex, values, replacements})
 	let rows = [table[rowIndex]];
 	_.forEach(values, (value, key) => {
 		// console.log({key, value})
 		if (_.endsWith(key, "*")) {
 			const starName = key.substring(0, key.length - 1);
 			const starValues = value;
+			// console.log({starName, starValues})
 			if (_.isPlainObject(starValues)) {
 				// For each entry in value, make a copy of every row in rows with the properties of the entry
 				rows = _.flatMap(rows, row => {
-					return _.map(starValues, (starValue, starKey) => {
+					return _.flatMap(starValues, (starValue, starKey) => {
 						assert(_.isPlainObject(starValue));
 						// console.log({starName, starKey, starValue});
-						return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
+						// If starValue is an object, need to expand it:
+						if (_.isPlainObject(starValue)) {
+							const conditionActions = convertConditionsToActions(starValue);
+							// Add starName/Key to row
+							const row1 = _.merge({}, row, _.fromPairs([[starName, starKey]]));
+							// Create a table from the row
+							const table2 = [_.cloneDeep(row1)];
+							// Expand the table
+							_.forEach(conditionActions, action => {
+								applyActionToTable(table2, action);
+							});
+							// Return the expanded table
+							return table2;
+						}
+						// Otherwise, just merge:
+						else {
+							return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
+						}
 					});
 				});
 			}
@@ -650,26 +672,38 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 }
 
 function replicate(action, table, rowIndexes, replacements) {
+	// console.log("replicate:")
+	// console.log({action, table, rowIndexes, replacements})
 	_.forEach(rowIndexes, rowIndex => {
-		const row = table[rowIndex];
-		let row2;
+		const row0 = table[rowIndex];
+		const count = _.get(action, "count", 1);
+		let rows1 = (count === 1) ? [row0] : _.map(_.range(count), i => _.clone(row0));
+
 		if (action.map) {
-			row2 = action.map(row);
-			const rows
-			  = (_.isArray(row2)) ? [row].concat(row2)
-			  : (_.isPlainObject(row2)) ? [row, row2]
-			  : [row];
-			replacements[rowIndex] = rows;
+			const rows2 = _.flatMap(rows1, row1 => {
+				const row2 = action.map(row1);
+				return (_.isArray(row2)) ? [row1].concat(row2)
+					: (_.isPlainObject(row2)) ? [row1, row2]
+					: [row1];
+			});
+			replacements[rowIndex] = rows2;
 		}
 		else if (action.conditions) {
-			const conditionActions = convertConditionsToActions(action.conditions);
-			const table2 = [_.cloneDeep(row)];
-			_.forEach(conditionActions, action => {
-				applyActionToTable(table2, action);
+			const rows2 = _.flatMap(rows1, row1 => {
+				const conditionActions = convertConditionsToActions(action.conditions);
+				const table2 = [_.cloneDeep(row1)];
+				_.forEach(conditionActions, action => {
+					applyActionToTable(table2, action);
+				});
+				return [row1].concat(table2);
 			});
-			replacements[rowIndex] = [row].concat(table2);
+			replacements[rowIndex] = rows2;
+		}
+		else {
+			replacements[rowIndex] = rows1;
 		}
 	});
+	// console.log({replacements})
 }
 
 // const table = flattenDesign(design2);
