@@ -124,8 +124,27 @@
 - [x] remove excess debug output from pipetting
 - [x] add `--quiet` flag to suppress printing errors
 - [x] let roboliq load .js protocols from the command line
-- [ ] create `Conditions` type, and generate its `value` property
+- [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
+- [x] `timer.wait`
+- [x] `system.if`
+- [x] pipetteMixtures: test mixture items where 'destination' and 'syringe' are specified
+- [x] test `system.if`
+- [x] `shaker.shakePlate`
+- [x] explicitly add TipModels to ourlab, along with their characteristics
+- [x] pipetter.pipette: woops! we still have mario-specific code for `findTipModel()` and `assignProgram()`!
+- [x] replace `pipetter.findTipModel*` with a more generic function
+- [x] groupingMethod3: allow `layer` to take partial priority over item order
+- [x] groupingMethod3: force a group break when previous destination is used as a source
+- [x] pipetter.DilutionItem yaml
+- [x] `pipetter.pipetteDilutionSeries2x`
+- [x] pipetteMixtures: handle new mixture list
+- [x] need to add liquid and labware for the "media" and "culture" sources
+- [x] fix dilution series destinations (putting into A and B rows in the same item)
+- [x] fix evoware Wash output
+- [x] why no `timer._sleep` output from evoware?
+- [?] create `Design` type
 - [ ] `experiment.run`: change `experiment` property to `conditions`
+- [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
@@ -149,20 +168,6 @@
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
 
-Todos for presentation tomorrow:
-- [ ] practice intro 5 times
-- [ ] make notes about approach
-- [ ] practice approach 5 times
-- [ ] make notes about results
-- [ ] practice results 5 times
-- [ ] practice demo 5 times
-- [ ] write demo ui?
-    - [ ] figure out how to run npm code in browser
-    - [ ] text field for design in YAML
-    - [ ] input field for query
-    - [ ] button to update table
-    - [ ] shortcut to update table
-    - [ ] print table
 - [ ] have a good command for expanding steps and parameters based on data
     maybe something like this:
     ```
@@ -185,35 +190,7 @@ Todos for presentation tomorrow:
     ```
 - [ ] the command should also manage the timing of steps
 
-- Goals for talk:
-    - [x] have a good Conditions/Data/DataTree format
-    - [ ] have a good command for expanding steps based on Conditions
-    - [ ] the command should also manage the timing of steps
-    - [ ] have a complete protocol as an example
-    - [ ] run that protocol on a robot
-    - [-] get the measurement data out of the robot
-    - [-] visualize/analyze the measurement data in R
-- [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
-- [x] `timer.wait`
-SATURDAY:
-- [x] `system.if`
-- [x] pipetteMixtures: test mixture items where 'destination' and 'syringe' are specified
-- [x] test `system.if`
-- [x] `shaker.shakePlate`
-- [-] try to login remotely to robot computers to test Roboliq scripts
-- [x] explicitly add TipModels to ourlab, along with their characteristics
-- [x] pipetter.pipette: woops! we still have mario-specific code for `findTipModel()` and `assignProgram()`!
-- [x] replace `pipetter.findTipModel*` with a more generic function
-SUNDAY:
-- [x] groupingMethod3: allow `layer` to take partial priority over item order
-- [x] groupingMethod3: force a group break when previous destination is used as a source
-- [x] pipetter.DilutionItem yaml
-- [x] `pipetter.pipetteDilutionSeries2x`
 - [ ] dm00_test3m.js:
-    - [x] pipetteMixtures: handle new mixture list
-    - [x] need to add liquid and labware for the "media" and "culture" sources
-    - [x] fix dilution series destinations (putting into A and B rows in the same item)
-    - [x] fix evoware Wash output
     - [ ] BUG: why are media and strain sources taken from different syringes?
     - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
     - currently: after pipetting culture, 1m8s left to wait
@@ -222,7 +199,6 @@ SUNDAY:
     - PROBLEM: then there were only 11s left before next dilution (I manually told evoware to ignore the pipetting errors)
     - 46s after measurement 1, second dilution
     - 12s after measurement 2, second dilution
-    - [x] why no `timer._sleep` output from evoware?
     - [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
     - something with absorbance OrangeG

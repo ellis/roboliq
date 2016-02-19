@@ -6,6 +6,13 @@ Agent:
     label: {type: string}
   required: [type]
 
+Design:
+  description: Specification of an experimental design.
+  properties:
+    type: {enum: [Design]}
+    conditions: {type: object}
+  required: [type]
+
 Liquid:
   description: Liquid substance.
   properties:

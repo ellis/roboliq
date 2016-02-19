@@ -46,14 +46,13 @@ describe('design', () => {
 			]);
 		});
 
-		it('should produce factors for Box dataset Chapter 3', () => {
+		it('should handle conditions nested inside branching values', () => {
 			const design = {
 				conditions: {
 					"treatment*": {
 						"A": { "*": { count: 2 } },
 						"B": { "*": { count: 2 } },
 					},
-					"batch=range": {},
 					"order=range": {},
 				},
 				models: {
@@ -80,10 +79,10 @@ describe('design', () => {
 			]);
 		});
 
-		it.only('should produce factors for Box dataset Chapter 3, boys shoes', () => {
+		it.skip('should produce factors for Box dataset Chapter 3, boys shoes', () => {
 			const design = {
 				conditions: {
-					"boy*=range": {till: 10},
+					"boy*=range": {till: 2},
 					"material*": ["A", "B"],
 					"foot=assign": {
 						values: ["L", "R", "R", "L"],

@@ -60,6 +60,7 @@ var expect = require('./expect.js');
 var misc = require('./misc.js');
 import * as WellContents from './WellContents.js';
 var wellsParser = require('./parsers/wellsParser.js');
+import * as Design from './src/design.js';
 
 const version = "v1";
 
@@ -486,6 +487,11 @@ function postProcessProtocol_variables(protocol) {
 				const value = expandDirectives(calculate);
 				obj.value = value;
 			}
+			/*// HACK: force processing of type Design -- but maybe this should be done
+			else if (obj.type === "Design") {
+				const table = Design.flattenDesign(obj);
+				obj.value = table;
+			}*/
 		});
 	});
 }

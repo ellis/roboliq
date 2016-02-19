@@ -38,7 +38,7 @@ describe('pipetter', function() {
 				}
 			}
 		};
-		it("should pipette 2D mixture array to destination wells", function() {
+		it.skip("should pipette 2D mixture array to destination wells", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
 			//console.log(JSON.stringify(result.output.steps[1], null, '\t'))
