@@ -461,7 +461,16 @@ function applyActionToTable(table, action) {
 			return values;
 		}
 
-		const valuesTable = (!action.applyPerGroup) ? getValues(action, {table, groupsOfSames}) : undefined;
+		// Call getValues for the entire table if:
+		const doGetValuesTable = (
+			// Assume we can,
+			true &&
+			// But don't if 'applyPerGroup' is set
+			!action.applyPerGroup &&
+			// Nor if the value is randomized (and 'randomizeOnce' isn't set)
+			!(action.random && !action.randomizeOnce)
+		)
+		const valuesTable = (doGetValuesTable) ? getValues(action, {table, groupsOfSames}) : undefined;
 		// console.log({valuesTable})
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {

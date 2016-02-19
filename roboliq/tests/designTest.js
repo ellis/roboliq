@@ -79,5 +79,60 @@ describe('design', () => {
 				{treatment: "B", order: 4},
 			]);
 		});
+
+		it.only('should produce factors for Box dataset Chapter 3, boys shoes', () => {
+			const design = {
+				conditions: {
+					"boy*=range": {till: 10},
+					"material*": ["A", "B"],
+					"foot=assign": {
+						values: ["L", "R", "R", "L"],
+						rotateValues: true
+					}
+				},
+				conditions2: {
+					"material": "A",
+					"boy*=range": {till: 10},
+					"foot=assign": {
+						values: ["L", "R"],
+						random: true,
+						rotateValues: true
+					},
+					"*": {
+						conditions: {
+							"material": "B",
+							"foot=math": '(foot == "L") ? "R" : "L"'
+						}
+					}
+				},
+				conditions1: {
+					"boy*=range": {till: 2},
+					"foot*": ["L", "R"],
+					"material=assign": {
+						values: ["A", "B"],
+						groupBy: "boy",
+						random: true
+					}
+				},
+				models: {
+					model1: {
+						treatmentFactors: ["material"],
+						experimentalFactors: ["foot"],
+						samplingFactors: ["foot"],
+						measurementFactors: ["wear"],
+						formula: "wear ~ material",
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			printData(table);
+			should.deepEqual(table, [
+				{material: "A", boy: 1, foot: 1},
+				{treatment: "A", order: 2},
+				{treatment: "B", order: 3},
+				{treatment: "B", order: 4},
+			]);
+		});
+
 	});
 });
