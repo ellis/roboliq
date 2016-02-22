@@ -189,7 +189,7 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.steps['1'].duration, 3);
 		});
 
-		it("should handle 'data' property without groupBy or forEach", () => {
+		it("should handle 'data' property with forEach=row", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -203,30 +203,70 @@ describe('roboliq', function() {
 				steps: {
 					1: {
 						data: {
-							source: "design1"
+							source: "design1",
+							forEach: "row"
 						},
-						CONTINUE
-						command: "timer.sleep",
-						'duration!': 3
+						comment: "$text"
 					}
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
-			should.deepEqual(result.output.objects.plate1.location, "here");
-			should.deepEqual(result.output.objects.plate2.location, "there");
-			should.deepEqual(result.output.steps['1'].duration, 3);
-			assert(false);
+			should.deepEqual(result.output.steps['1'], {
+				{
+					data: {
+						source: "design1",
+						forEach: "row"
+					},
+					comment: "$text",
+					1: { comment: "hello" },
+					2: { comment: "world" }
+				}
+			});
+		});
+
+		it("should handle 'data' property with forEach=group", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					design1: {
+						type: "Design",
+						conditions: {
+							"text*": ["hello", "world"]
+						}
+					}
+				},
+				steps: {
+					1: {
+						data: {
+							source: "design1",
+							forEach: "row"
+						},
+						comment: "$text"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			should.deepEqual(result.output.steps['1'], {
+				{
+					data: {
+						source: "design1",
+						forEach: "row"
+					},
+					comment: "$text",
+					1: { comment: "hello" },
+					2: { comment: "world" }
+				}
+			});
 		});
 
 		it("should handle 'data' property with groupBy", () => {
 			assert(false);
-
 		});
 
-		it("should handle 'data' property with forEach", () => {
+		it("should handle 'data' property without groupBy or forEach", () => {
 			assert(false);
-
 		});
 	});
 });
