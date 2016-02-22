@@ -487,7 +487,7 @@ function postProcessProtocol_variables(protocol) {
 				const value = expandDirectives(calculate);
 				obj.value = value;
 			}
-			/*// HACK: force processing of type Design -- but maybe this should be done
+			/*// HACK: force processing of type Design -- but maybe this should be done in the appropriate command instead
 			else if (obj.type === "Design") {
 				const table = Design.flattenDesign(obj);
 				obj.value = table;
@@ -805,6 +805,27 @@ function _run(opts, userProtocol) {
 			scope = _.clone(scope);
 			_.forEach(params._scope, (value, key) => scope[key] = value);
 			//console.log("scope: "+JSON.stringify(scope))
+		}
+
+		// Handle `data` parameter by loading Design data scope and possibly
+		// repeating the command for each group or each row
+		if (params.data) {
+			// TODO: process params.data using commandHelper.parseParams
+			if (param.data.source) {
+				const source = _.get(objects, [program.data.source]);
+				assert(source);
+				let data;
+				if (_.isArray(source)) {
+					data = source;
+				}
+				if (source.type === "Design") {
+					data = Design.flattenDesign(source);
+				}
+				// Replicate the command for each group
+				if (data.groupBy) {
+					CONTINUE
+				}
+			}
 		}
 
 		// If this step is a command:

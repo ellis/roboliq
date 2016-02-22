@@ -142,7 +142,9 @@
 - [x] fix dilution series destinations (putting into A and B rows in the same item)
 - [x] fix evoware Wash output
 - [x] why no `timer._sleep` output from evoware?
-- [?] create `Design` type
+- [x] create `Design` type in roboliq.yaml (needs more work)
+- [ ] roboliq.js: handle `data` property
+- [ ] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.

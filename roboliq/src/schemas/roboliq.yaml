@@ -11,6 +11,7 @@ Design:
   properties:
     type: {enum: [Design]}
     conditions: {type: object}
+    actions: {type: array}
   required: [type]
 
 Liquid:
