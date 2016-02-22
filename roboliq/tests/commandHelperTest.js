@@ -9,6 +9,13 @@ describe('commandHelper', function() {
 			number1: {type: "Variable", value: 1},
 			number2: {type: "Variable", value: 'number1'},
 			number3: {type: "Variable", value: 'number2'},
+			DATA: [
+				{name: "bob", number: 1},
+				{name: "bob", number: 2},
+			],
+			SCOPE: {
+				name: "bob"
+			}
 		};
 		it('should handle 1-depth', () => {
 			const data = {objects, accesses: []};
@@ -29,6 +36,20 @@ describe('commandHelper', function() {
 			should.deepEqual(
 				commandHelper._dereferenceVariable(data, 'number3'),
 				{objectName: 'number1', value: 1}
+			);
+		});
+		it("should handle SCOPE lookup", () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._dereferenceVariable(data, '$name'),
+				{objectName: 'SCOPE.name', value: "bob"}
+			);
+		});
+		it("should handle DATA lookup", () => {
+			const data = {objects, accesses: []};
+			should.deepEqual(
+				commandHelper._dereferenceVariable(data, '$$number'),
+				{objectName: '$$number', value: [1, 2]}
 			);
 		});
 	});

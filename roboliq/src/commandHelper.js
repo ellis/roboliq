@@ -359,17 +359,32 @@ function lookupValue0(result, path, value0, data) {
  */
 function dereferenceVariable(data, name) {
 	const result = {};
-	while (_.has(data.objects, name)) {
-		const value = g(data, name);
-		result.objectName = name;
-		//console.log({name, value})
-		if (value.type === 'Variable') {
-			result.value = value.value;
-			name = value.value;
+
+	// Query DATA
+	if (_.startsWith(name, "$$")) {
+		if (_.isArray(data.objects.DATA)) {
+			const propertyName = name.substr(2);
+			result.objectName = name;
+			result.value = _(data.objects.DATA).map(propertyName).compact().value();
 		}
-		else {
-			result.value = value;
-			break;
+	}
+	else {
+		// Handle SCOPE abbreviation
+		if (_.startsWith(name, "$"))
+			name = "SCOPE."+name.substr(1);
+
+		while (_.has(data.objects, name)) {
+			const value = g(data, name);
+			result.objectName = name;
+			//console.log({name, value})
+			if (value.type === 'Variable') {
+				result.value = value.value;
+				name = value.value;
+			}
+			else {
+				result.value = value;
+				break;
+			}
 		}
 	}
 	return (_.isEmpty(result)) ? undefined : result;
