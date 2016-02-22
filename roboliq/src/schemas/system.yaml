@@ -3,6 +3,12 @@ system:
     The `system` commands specify several general, high-level actions that are
     not specific to any particular type of equipment.
 
+system._echo:
+  description: "A trouble-shooting function to echo something"
+  properties:
+    name: {description: "Name of echoed thing", type: string}
+    object: {description: "Thing to echo"}
+
 system.call:
   description: "Call a template function.\n\nThe template function should be an object of type `Template` with a property `template` holding either a Mustache template string or an object whose properties may be Mustache template strings. The template will be expanded using the values passed in the `params` property."
   properties:
@@ -24,3 +30,9 @@ system.repeat:
     count: {description: "The number of times to repeat.", type: "integer"}
     steps: {description: "The sequence of commands to repeat.", type: "object"}
   required: ["count"]
+
+system.echo:
+  description: "A trouble-shooting function to echo a variable or text"
+  properties:
+    variable: {description: "Variable whose value should be echoed"}
+    text: {description: "Text to echo", type: string}

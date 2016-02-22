@@ -189,7 +189,7 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.steps['1'].duration, 3);
 		});
 
-		it("should handle 'data' property with forEach=row", () => {
+		it.only("should handle 'data' property with forEach=row", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -206,22 +206,22 @@ describe('roboliq', function() {
 							source: "design1",
 							forEach: "row"
 						},
-						comment: "$text"
+						command: "system.echo",
+						variable: "$text"
 					}
 				}
 			};
-			var result = roboliq.run(["-o", ""], protocol);
-			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps['1'], {
-				{
-					data: {
-						source: "design1",
-						forEach: "row"
-					},
-					comment: "$text",
-					1: { comment: "hello" },
-					2: { comment: "world" }
-				}
+				data: {
+					source: "design1",
+					forEach: "row"
+				},
+				command: "system.echo",
+				variable: "$text",
+				1: { command: "system._echo", name: "$text", object: "hello" },
+				2: { command: "system._echo", name: "$text", object: "world" },
 			});
 		});
 
@@ -232,7 +232,8 @@ describe('roboliq', function() {
 					design1: {
 						type: "Design",
 						conditions: {
-							"text*": ["hello", "world"]
+							"greeting*": ["hello", "goodbye"],
+							"name*": ["john", "jane"]
 						}
 					}
 				},
@@ -240,24 +241,25 @@ describe('roboliq', function() {
 					1: {
 						data: {
 							source: "design1",
-							forEach: "row"
+							groupBy: "name",
+							forEach: "group"
 						},
-						comment: "$text"
+						command: "system.echo",
+						variable: "$$greeting"
 					}
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
-			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps['1'], {
-				{
-					data: {
-						source: "design1",
-						forEach: "row"
-					},
-					comment: "$text",
-					1: { comment: "hello" },
-					2: { comment: "world" }
-				}
+				data: {
+					source: "design1",
+					forEach: "group"
+				},
+				command: "system.echo",
+				variable: "$$greeting",
+				1: { command: "system._echo", name: "$$greeting", object: ["hello", "goodbye"] },
+				2: { command: "system._echo", name: "$$greeting", object: ["hello", "goodbye"] }
 			});
 		});
 

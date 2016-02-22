@@ -60,7 +60,7 @@ var expect = require('./expect.js');
 var misc = require('./misc.js');
 import * as WellContents from './WellContents.js';
 var wellsParser = require('./parsers/wellsParser.js');
-import * as Design from './src/design.js';
+import * as Design from './design.js';
 
 const version = "v1";
 
@@ -787,7 +787,7 @@ function _run(opts, userProtocol) {
 	 * @param  {object} step - the current step (initially protocol.steps).
 	 * @param  {object} objects - a mutable copy of the protocol's objects.
 	 */
-	function expandStep(protocol, prefix, step, objects, scope = {}) {
+	function expandStep(protocol, prefix, step, objects, SCOPE = {}, DATA = []) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
@@ -795,132 +795,190 @@ function _run(opts, userProtocol) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
 
+		let DATAs = [DATA];
+		let foreach = false; // whether we need to replicate the step contents
+		// Handle `data` parameter by loading Design data SCOPE and possibly
+		// repeating the command for each group or each row
+		if (step.data) {
+			const dataInfo = misc.handleDirectiveDeep(step.data, protocol);
+			if (dataInfo.source) {
+				const source = _.get(objects, [dataInfo.source]);
+				assert(source);
+
+				let table;
+				if (_.isArray(source)) {
+					table = source;
+				}
+				else if (source.type === "Design") {
+					table = Design.flattenDesign(source);
+				}
+
+				// Replicate the command for each group
+				const groups = Design.query(table, dataInfo);
+				//console.log("groups: "+JSON.stringify(groups))
+
+				if (dataInfo.forEach === "row") {
+					// console.log({ groups0: JSON.stringify(groups), groups1: _(groups).flatten().value(), groups2: _(groups).flatten().map(x => [x]).value() })
+					// Turn each row into its own group
+					DATAs = _(groups).flatten().map(x => [x]).value();
+					foreach = true;
+				}
+				else if (dataInfo.forEach === "group") {
+					DATAs = groups;
+					foreach = true;
+				}
+				else {
+					DATAs = [_.flatten(groups)];
+				}
+			}
+		}
+
 		// Process any directives in this step
-		const params = misc.handleDirectiveDeep(step, protocol);
+		const params = misc.handleDirectiveDeep(_.omit(step, "data"), protocol);
 		//console.log({step, params})
 
-		// Add `_scope` variables to scope, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
+		// Add `_scope` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
 		//console.log({_scope: params._scope})
 		if (!_.isEmpty(params._scope)) {
-			scope = _.clone(scope);
-			_.forEach(params._scope, (value, key) => scope[key] = value);
-			//console.log("scope: "+JSON.stringify(scope))
+			SCOPE = _.clone(SCOPE);
+			_.forEach(params._scope, (value, key) => SCOPE[key] = value);
+			//console.log("SCOPE: "+JSON.stringify(SCOPE))
 		}
 
-		// Handle `data` parameter by loading Design data scope and possibly
-		// repeating the command for each group or each row
-		if (params.data) {
-			// TODO: process params.data using commandHelper.parseParams
-			if (param.data.source) {
-				const source = _.get(objects, [program.data.source]);
-				assert(source);
-				let data;
-				if (_.isArray(source)) {
-					data = source;
-				}
-				if (source.type === "Design") {
-					data = Design.flattenDesign(source);
-				}
-				// Replicate the command for each group
-				if (data.groupBy) {
-					CONTINUE
-				}
-			}
-		}
-
-		// If this step is a command:
 		const commandName = params.command;
-		if (commandName) {
-			const handler = commandHandlers[commandName];
-			if (!handler) {
-				protocol.warnings[id] = ["unknown command: "+params.command];
-			}
-			// Otherwise, the command has a handler:
-			else {
-				// Take the initial predicates and append predicates for the current state
-				// REFACTOR: this might be a time-consuming process, which could perhaps be
-				// sped up by using Immutablejs and checking which objects have changed
-				// rather than regenerating predicates for all objects.
-				const predicates = protocol.predicates.concat(createStateItems(objects));
-				let result = {};
-				try {
-					const data = {
-						objects: _.merge({}, objects, {SCOPE: scope}),
-						predicates,
-						planHandlers: protocol.planHandlers,
-						schemas: protocol.schemas,
-						accesses: [],
-						files: filecache,
-						protocol,
-						path: prefix
-					};
-					//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
-					// If a schema is given for the command, parse its parameters
-					const schema = protocol.schemas[commandName];
-					//console.log("params: "+JSON.stringify(params))
-					const parsed = (schema)
-						? commandHelper.parseParams(params, data, schema)
-						: undefined;
-					// Try to run the command handler
-					//console.log("A")
-					//console.log(handler)
-					result = handler(params, parsed, data) || {};
-					//console.log("B")
-					//console.log("result: "+JSON.stringify(result))
-				} catch (e) {
-					if (typeof e === "RoboliqError") {
-						const prefix = e.getPrefix();
-						result = {errors: _.map(e.errors, s => prefix+s)};
+		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
+			const DATA = DATAs[groupIndex];
+			if (foreach) {
+				const groupKey = (groupIndex+1).toString();
+				let substeps;
+				// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
+				// then expand for each DATA in DATAs.
+				if (commandName) {
+					if (protocol.schemas[commandName]) {
+						const objects2 = _.merge({}, objects, {DATA, SCOPE});
+						const prefix2 = prefix.concat([groupIndex + 1]);
+						const data = {
+							objects: objects2,
+							schemas: protocol.schemas,
+							accesses: [],
+							files: filecache,
+							protocol,
+							path: prefix2
+						};
+						//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
+						const schema = protocol.schemas[commandName];
+						//console.log("params: "+JSON.stringify(params))
+						const parsed = commandHelper.parseParams(params, data, schema);
+						const params2 = _.merge({}, params, parsed.value, parsed.objectName);
+						step[groupKey] = params2;
 					}
 					else {
-						result = {errors: _.compact([e.toString(), e.stack])};
-					}
-					if (opts.throw) {
-						if (_.isPlainObject(e))
-							console.log("e:\n"+JSON.stringify(e));
-						expect.rethrow(e, {stepName: id});
+						step[groupKey] = params;
 					}
 				}
-				// If debugging, store the result verbatim
-				if (opts.debug)
-					protocol.cache[id] = result;
+				else if (params.steps) {
+					step[groupKey] = steps;
+				}
 
-				// If there were errors:
-				if (!_.isEmpty(result.errors)) {
-					protocol.errors[id] = result.errors;
-					// Abort expansion of protocol
-					return false;
-				}
-				// If there were warnings
-				if (!_.isEmpty(result.warnings)) {
-					protocol.warnings[id] = result.warnings;
-				}
-				// If the command was expanded, merge the expansion into the protocol as substeps:
-				if (!_.isEmpty(result.expansion)) {
-					// If an array was returned rather than an object, put it in the proper form
-					//console.log({expansion: result.expansion, stepified: commandHelper.stepify(result.expansion)})
-					result.expansion = commandHelper.stepify(result.expansion);
-					//console.log({expansion: result.expansion})
-					_.merge(step, result.expansion);
-				}
-				// If the command has effects
-				if (!_.isEmpty(result.effects)) {
-					//console.log(result.effects);
-					// Add effects to protocol's record of effects
-					protocol.effects[id] = result.effects;
-					//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
-					// Update object states
-					_.forEach(result.effects, (value, key) => _.set(objects, key, value));
-					//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
+				if (step[groupKey]) {
+					expandSubsteps(protocol, prefix2, step[groupKey], objects, SCOPE, DATA);
 				}
 			}
-		}
+			else {
+				expandCommand(protocol, prefix, step, objects, SCOPE, params, commandName, handler, DATA, id);
+				expandSubsteps(protocol, prefix, step, objects, SCOPE, DATA);
+			}
+		});
+	}
 
+	function expandSubsteps(protocol, prefix, step, objects, SCOPE, DATA) {
 		// Find all sub-steps (properties that start with a digit)
 		const keys = commandHelper.getStepKeys(step);
 		// Try to expand the substeps
 		for (const key of keys) {
-			expandStep(protocol, prefix.concat(key), step[key], objects, scope);
+			expandStep(protocol, prefix.concat(key), step[key], objects, SCOPE, DATA);
+		}
+	}
+
+	function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandName, handler, DATA, id) {
+		// Take the initial predicates and append predicates for the current state
+		// REFACTOR: this might be a time-consuming process, which could perhaps be
+		// sped up by using Immutablejs and checking which objects have changed
+		// rather than regenerating predicates for all objects.
+		const predicates = protocol.predicates.concat(createStateItems(objects));
+		let result = {};
+		try {
+			const objects2 = _.merge({}, objects, {SCOPE});
+			if (!_.isUndefined(DATA))
+				objects2.DATA = DATA;
+			const data = {
+				objects: objects2,
+				predicates,
+				planHandlers: protocol.planHandlers,
+				schemas: protocol.schemas,
+				accesses: [],
+				files: filecache,
+				protocol,
+				path: prefix
+			};
+			//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
+			// If a schema is given for the command, parse its parameters
+			const schema = protocol.schemas[commandName];
+			//console.log("params: "+JSON.stringify(params))
+			const parsed = (schema)
+				? commandHelper.parseParams(params, data, schema)
+				: undefined;
+			// Try to run the command handler
+			//console.log("A")
+			//console.log(handler)
+			result = handler(params, parsed, data) || {};
+			//console.log("B")
+			//console.log("result: "+JSON.stringify(result))
+		} catch (e) {
+			if (typeof e === "RoboliqError") {
+				const prefix = e.getPrefix();
+				result = {errors: _.map(e.errors, s => prefix+s)};
+			}
+			else {
+				result = {errors: _.compact([e.toString(), e.stack])};
+			}
+			if (opts.throw) {
+				if (_.isPlainObject(e))
+					console.log("e:\n"+JSON.stringify(e));
+				expect.rethrow(e, {stepName: id});
+			}
+		}
+		// If debugging, store the result verbatim
+		if (opts.debug)
+			protocol.cache[id] = result;
+
+		// If there were errors:
+		if (!_.isEmpty(result.errors)) {
+			protocol.errors[id] = result.errors;
+			// Abort expansion of protocol
+			return false;
+		}
+		// If there were warnings
+		if (!_.isEmpty(result.warnings)) {
+			protocol.warnings[id] = result.warnings;
+		}
+		// If the command was expanded, merge the expansion into the protocol as substeps:
+		if (!_.isEmpty(result.expansion)) {
+			// If an array was returned rather than an object, put it in the proper form
+			//console.log({expansion: result.expansion, stepified: commandHelper.stepify(result.expansion)})
+			result.expansion = commandHelper.stepify(result.expansion);
+			//console.log({expansion: result.expansion})
+			_.merge(step, result.expansion);
+		}
+		// If the command has effects
+		if (!_.isEmpty(result.effects)) {
+			//console.log(result.effects);
+			// Add effects to protocol's record of effects
+			protocol.effects[id] = result.effects;
+			//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
+			// Update object states
+			_.forEach(result.effects, (value, key) => _.set(objects, key, value));
+			//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
 		}
 	}
 

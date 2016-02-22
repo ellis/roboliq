@@ -215,7 +215,7 @@ function expandRows(rows, key, value, depth = -1) {
 	return rows;
 }
 
-function query(table, q) {
+export function query(table, q) {
 	let table2 = _.clone(table);
 	if (q.select) {
 		table2 = _.map(table2, x => _.pick(x, q.select));
@@ -715,6 +715,21 @@ function replicate(action, table, rowIndexes, replacements) {
 	// console.log({replacements})
 }
 
+export function getCommonValues(table) {
+	if (_.isEmpty(table)) return {};
+
+	let common = table[0];
+	for (let i = 1; i < table.length; i++) {
+		// Remove any value from common which aren't shared with this row.
+		_.forEach(table[i], (value, name) => {
+			if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
+				delete common[name];
+			}
+		})
+	}
+
+	return common;
+}
 // const table = flattenDesign(design2);
 // printConditions(design2.conditions);
 // printData(table);

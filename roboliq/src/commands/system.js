@@ -6,6 +6,10 @@ import misc from '../misc.js';
 
 
 const commandHandlers = {
+	"system._echo": function(params, parsed, data) {
+		// Do nothing
+		return {};
+	},
 	"system.call": function(params, parsed, data) {
 		switch (parsed.value.name.type) {
 			case "Template":
@@ -21,6 +25,16 @@ const commandHandlers = {
 		//console.log("system.if:")
 		//console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
 		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
+	},
+	"system.echo": function(params, parsed, data) {
+		console.log("system.echo: "+JSON.stringify(parsed, null, '\t'))
+		return {
+			expansion: [{
+				command: "system._echo",
+				name: parsed.objectName.variable,
+				object: parsed.value.variable
+			}]
+		};
 	},
 	"system.repeat": function(params, parsed, data) {
 		const expansion = {};
