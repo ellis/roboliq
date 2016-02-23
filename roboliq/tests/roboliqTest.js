@@ -225,7 +225,7 @@ describe('roboliq', function() {
 			});
 		});
 
-		it.only("should handle 'data' property with forEach=group", () => {
+		it("should handle 'data' property with forEach=group", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -264,11 +264,11 @@ describe('roboliq', function() {
 			});
 		});
 
-		it("should handle 'data' property with groupBy", () => {
+		it.skip("should handle 'data' property with groupBy", () => {
 			assert(false);
 		});
 
-		it("should handle 'data' property without groupBy or forEach", () => {
+		it.skip("should handle 'data' property without groupBy or forEach", () => {
 			assert(false);
 		});
 	});

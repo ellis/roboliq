@@ -143,9 +143,8 @@
 - [x] fix evoware Wash output
 - [x] why no `timer._sleep` output from evoware?
 - [x] create `Design` type in roboliq.yaml (needs more work)
-- [ ] roboliq.js: handle `data` property
-- [ ] commandHelper.js: handle `$$`-prefix for returning column of current data
-- [ ] roboliq.js: need to handle a complication with final instructions: if their parameters contain references to DATA, SCOPE, or string substitutions, we need to either substitute the values into the command or create a sub-command with the concrete values.
+- [x] roboliq.js: handle `data` property
+- [x] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
@@ -407,6 +406,7 @@ LATER:
 
 ## After submission
 
+- [ ] roboliq.js: need to handle a complication with final instructions: if their parameters contain references to DATA, SCOPE, or string substitutions, we need to either substitute the values into the command or create a sub-command with the concrete values.
 - [ ] test equipment.run|ourlab.mario.evoware|ourlab.mario.shaker
 - [ ] replace tests/schema.json with a JS file that loads the files in schemas/?
 - [ ] pipetter.js: figure out a better way to order items using the 'layer' property, maybe have an 'order' parameter of 'index', 'layer', or 'semilayer', where 'semilayer' would do what `groupingMethod3()` currently does, 'index' would ignore 'layer', and 'layer' would sort all items by their layer value.
