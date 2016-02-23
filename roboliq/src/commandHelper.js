@@ -364,8 +364,13 @@ function dereferenceVariable(data, name) {
 	if (_.startsWith(name, "$$")) {
 		if (_.isArray(data.objects.DATA)) {
 			const propertyName = name.substr(2);
-			result.objectName = name;
 			result.value = _(data.objects.DATA).map(propertyName).compact().value();
+
+			const accessName = "DATA."+propertyName;
+			if (_.isArray(data.accesses))
+				data.accesses.push(accessName);
+			else
+				data.accesses = [accessName];
 		}
 	}
 	else {
@@ -375,7 +380,9 @@ function dereferenceVariable(data, name) {
 
 		while (_.has(data.objects, name)) {
 			const value = g(data, name);
-			result.objectName = name;
+			if (!_.startsWith(name, "SCOPE.") && !_.startsWith(name, "DATA.")) {
+				result.objectName = name;
+			}
 			//console.log({name, value})
 			if (value.type === 'Variable') {
 				result.value = value.value;

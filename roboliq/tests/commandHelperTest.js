@@ -42,15 +42,17 @@ describe('commandHelper', function() {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._dereferenceVariable(data, '$name'),
-				{objectName: 'SCOPE.name', value: "bob"}
+				{value: "bob"}
 			);
+			should.deepEqual(data.accesses, ["SCOPE.name"]);
 		});
 		it("should handle DATA lookup", () => {
 			const data = {objects, accesses: []};
 			should.deepEqual(
 				commandHelper._dereferenceVariable(data, '$$number'),
-				{objectName: '$$number', value: [1, 2]}
+				{value: [1, 2]}
 			);
+			should.deepEqual(data.accesses, ["DATA.number"]);
 		});
 	});
 
