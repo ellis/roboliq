@@ -309,7 +309,7 @@ function test() {
 			command: "transporter.movePlate", object: scope.get("culturePlate"), destination: scope.get("incubatorLocation")
 		});
 
-		// Start 12h times for the first plate only
+		// Start 12h timer for the first plate only
 		if (culturePlateIndex === 0) {
 			appendStep(step, {
 				command: "timer.start",

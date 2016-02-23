@@ -146,6 +146,7 @@
 - [x] roboliq.js: handle `data` property
 - [x] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [x] roboliqDirectiveHandlers.js: handle '#data' directive
+- [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] change `predicates` field to be a map of arrays instead of an array

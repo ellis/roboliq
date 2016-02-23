@@ -1,0 +1,208 @@
+roboliq: "v1"
+objects:
+  water: { type: "Variable", value: "ourlab.mario.systemLiquid" }
+  strain1: {type: "Liquid", wells: "trough1(C01 down to F01)"}
+  media1: {type: "Liquid", wells: "trough2(C01 down to F01)"}
+  trough1: {type: "Plate", model: "ourlab.model.troughModel_100ml", location: "ourlab.mario.site.R5", contents: ["Infinity l", "strain1"]}
+  trough2: {type: "Plate", model: "ourlab.model.troughModel_100ml", location: "ourlab.mario.site.R6", contents: ["Infinity l", "media1"]}
+  stillPlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P4"}
+  shakePlate: {type: "Plate", model: "ourlab.model.plateModel_96_dwp", location: "ourlab.mario.site.P5"}
+  dilutionPlate1: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.P6"}
+  dilutionPlate2: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.P7"}
+  design1:
+    type: Design
+    conditions:
+      culturePlate*:
+        stillPlate:
+          cultureReplicate*:
+          - cultureWell: A01
+            mesurement*:
+            - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
+              dilutionPlate: dilutionPlate1
+            - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
+              dilutionPlate: "dilutionPlate1"
+            syringe: ourlab.mario.liha.syringe.1
+          - cultureWell: B01
+            measurement*:
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
+              "dilutionPlate": "dilutionPlate1"
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
+              "dilutionPlate": "dilutionPlate1"
+            "syringe": "ourlab.mario.liha.syringe.2"
+          shake: false
+          incubatorLocation: "ourlab.mario.site.P4"
+        shakePlate:
+          "cultureReplicate*":
+          - "cultureWell": "A01"
+            "measurement*":
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
+              "dilutionPlate": "dilutionPlate2"
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
+              "dilutionPlate": "dilutionPlate2"
+            "syringe": "ourlab.mario.liha.syringe.1"
+          - "cultureWell": "B01"
+            "measurement*":
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
+              "dilutionPlate": "dilutionPlate2"
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
+              "dilutionPlate": "dilutionPlate2"
+            "syringe": "ourlab.mario.liha.syringe.2"
+          "shake": true
+          "incubatorLocation": "ourlab.mario.site.P5"
+      "dilutionLocation": "ourlab.mario.site.P2"
+      "interval": "12 hours"
+      "media": "media1"
+      "mediaVolume": "800ul"
+      "strain": "strain1"
+      "strainVolume": "800ul"
+      "sampleVolume": "200ul"
+
+steps:
+  "@data":
+    source: design1
+  1:
+    command: design.run
+    interleaveOffset: 3 minutes
+    interleaveBy: culturePlate
+    duration: 6 minutes
+    durationTimerStartAfter: 3
+    steps:
+      description: "Prepare plate"
+      1:
+        command: "transporter.movePlate"
+        object: "$culturePlate"
+        destination: "$pipettingLocation"
+      2:
+        command: "pipetter.pipetteMixtures"
+        mixtures:
+          "#data":
+            uniqueBy: cultureWell
+            mapTemplate:
+              destination: $cultureWell
+              syringe: $syringe"
+              sources:
+              - {source: $strain, volume: $strainVolume}
+              - {source: $media, volume: $mediaVolume}
+        destinationLabware: $culturePlate
+        clean: "light"
+      3:
+        command: "transporter.movePlate"
+        object: $culturePlate
+        destination: $incubatorLocation
+
+  2:
+    command: design.run
+    groupBy: measurement
+    duration: 6 minutes
+    steps:
+      description: s"Measurement {{$measurement}}"
+      command: design.run
+      interleaveOffset: 3 minutes
+      interleaveBy: culturePlate
+      steps:
+        description: s"Measurement {{$measurement}} on {{$culturePlate}}"
+        1:
+          command: "transporter.doThenRestoreLocation"
+          objects: [$dilutionPlate]
+          steps:
+            1:
+      appendStep(step, {
+        command: "transporter.movePlate",
+        object: scope.get("dilutionPlate"),
+        destination: scope.get("dilutionLocation")
+      });
+      appendStep(step, {
+        command: "transporter.movePlate",
+        object: scope.get("culturePlate"),
+        destination: scope.get("pipettingLocation")
+      });
+      appendStep(step, {
+        command: "pipetter.pipette",
+        items: mapConditions(scope, data, {where: {dilutionFactor: 1}}, 1, (scope) => {
+          return {
+            source: scope.get("cultureWell"),
+            destination: scope.get("dilutionWell"),
+            syringe: scope.get("syringe")
+          }
+        }),
+        volumes: scope.get("sampleVolume"),
+        sourceLabware: scope.get("culturePlate"),
+        destinationLabware: scope.get("dilutionPlate"),
+        cleanBegin: "none",
+        clean: "light"
+      });
+      appendStep(step, {
+        command: "system.if",
+        test: scope.get("shake"),
+        then: {
+          1: {command: "shaker.shakePlate", object: scope.get("culturePlate"), program: {duration: "1 minute"}}
+        }
+      });
+      appendStep(step, {
+        command: "transporter.movePlate",
+        object: scope.get("culturePlate"),
+        destination: scope.get("incubatorLocation")
+      });
+      appendStep(step, {
+        command: "pipetter.pipetteDilutionSeries2x",
+        diluent: "water",
+        destinationLabware: scope.get("dilutionPlate"),
+        items: mapConditionGroups(scope, data, {groupBy: "cultureWell"}, 0, (scope, data) => {
+          //console.log({scope2, data2})
+          return {
+            destinations: mapConditions(scope, data, {}, 1, (scope) => scope.get("dilutionWell")),
+            syringe: scope.get("syringe")
+          };
+        }),
+        cleanBegin: "none",
+        clean: "light"
+      });
+      /*appendStep(step, {
+        command: "absorbanceReader.measurePlate",
+        object: scope.get("dilutionPlate"),
+        program: {
+          wells: mapConditions(scope, data, {select: "dilutionWell"}, 1, (scope) => scope.get("dilutionWell"))
+        },
+        programTemplate: "./dm00.mdfx.template"
+      });*/
+
+      appendStep(measurementStep, {
+        description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
+        command: "timer.doAndWait",
+        equipment: "ourlab.mario.timer2",
+        duration: "3 minutes",
+        steps: {
+          1: {
+            command: "transporter.doThenRestoreLocation",
+            objects: [scope.get("dilutionPlate")],
+            steps: step
+          }
+        }
+      });
+    });
+
+    appendStep(steps, {
+      description: `Measurement ${scope.get("measurement")}`,
+      command: "timer.doAndWait",
+      equipment: "ourlab.mario.timer1",
+      duration: "6 minutes",
+      steps: measurementStep
+    });
+  });
+
+  const protocol = {
+    steps
+  };
+
+  return protocol;
+}
+
+const protocol = test();
+
+// If run from the command line:
+if (require.main === module) {
+  console.log(yaml.stringify(protocol, 9, 2));
+}
+else {
+  module.exports = protocol;
+}
