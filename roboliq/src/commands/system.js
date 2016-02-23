@@ -29,11 +29,11 @@ const commandHandlers = {
 	"system.echo": function(params, parsed, data) {
 		console.log("system.echo: "+JSON.stringify(parsed, null, '\t'))
 		return {
-			expansion: [{
+			expansion: [_.merge({}, {
 				command: "system._echo",
-				name: parsed.objectName.variable,
-				object: parsed.value.variable
-			}]
+				name: parsed.objectName.value,
+				value: parsed.value.value
+			})]
 		};
 	},
 	"system.repeat": function(params, parsed, data) {

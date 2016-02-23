@@ -863,6 +863,7 @@ function _run(opts, userProtocol) {
 				const groupKey = (groupIndex+1).toString();
 				// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
 				// then expand for each DATA in DATAs.
+				let step2;
 				if (commandName) {
 					if (protocol.schemas[commandName]) {
 						const objects2 = _.merge({}, objects, {DATA, SCOPE: SCOPE2});
@@ -878,20 +879,26 @@ function _run(opts, userProtocol) {
 						const schema = protocol.schemas[commandName];
 						//console.log("params: "+JSON.stringify(params))
 						const parsed = commandHelper.parseParams(params, data, schema);
-						console.log("parsed:"+JSON.stringify(parsed, null, '\t'))
+						//console.log("parsed:"+JSON.stringify(parsed, null, '\t'))
 						const params2 = _.merge({}, params, parsed.value, parsed.objectName);
-						step[groupKey] = params2;
+						step2 = params2;
 					}
 					else {
-						step[groupKey] = params;
+						step2 = params;
 					}
 				}
 				else if (params.steps) {
-					step[groupKey] = params.steps;
+					step2 = params.steps;
 				}
 
-				if (step[groupKey]) {
-					expandStep(protocol, prefix2, step[groupKey], objects, SCOPE2, DATA);
+				if (step2) {
+					expandStep(protocol, prefix2, step2, objects, SCOPE2, DATA);
+					/*Uconst substepKeys = commandHelper.getStepKeys(step2);
+					if (!_.isEmpty(substepKeys)) {
+						if command was expanded, then do not include params2
+					}
+					if (step2.)*/
+					step[groupKey] = step2;
 				}
 			}
 			else {

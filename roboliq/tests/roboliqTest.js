@@ -189,7 +189,7 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.steps['1'].duration, 3);
 		});
 
-		it.only("should handle 'data' property with forEach=row", () => {
+		it("should handle 'data' property with forEach=row", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -207,25 +207,25 @@ describe('roboliq', function() {
 							forEach: "row"
 						},
 						command: "system.echo",
-						variable: "$text"
+						value: "$text"
 					}
 				}
 			};
 			var result = roboliq.run(["-o", "", "-T"], protocol);
-			console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps['1'], {
 				data: {
 					source: "design1",
 					forEach: "row"
 				},
 				command: "system.echo",
-				variable: "$text",
-				1: { command: "system._echo", name: "$text", object: "hello" },
-				2: { command: "system._echo", name: "$text", object: "world" },
+				value: "$text",
+				"1": { "1": { "command": "system._echo", "value": "hello" }, "command": "system.echo", "value": "hello" },
+				"2": { "1": { "command": "system._echo", "value": "world" }, "command": "system.echo", "value": "world" }
 			});
 		});
 
-		it("should handle 'data' property with forEach=group", () => {
+		it.only("should handle 'data' property with forEach=group", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {

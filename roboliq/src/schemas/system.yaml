@@ -7,7 +7,7 @@ system._echo:
   description: "A trouble-shooting function to echo something"
   properties:
     name: {description: "Name of echoed thing", type: string}
-    object: {description: "Thing to echo"}
+    value: {description: "Thing to echo"}
 
 system.call:
   description: "Call a template function.\n\nThe template function should be an object of type `Template` with a property `template` holding either a Mustache template string or an object whose properties may be Mustache template strings. The template will be expanded using the values passed in the `params` property."
@@ -34,5 +34,4 @@ system.repeat:
 system.echo:
   description: "A trouble-shooting function to echo a variable or text"
   properties:
-    variable: {description: "Variable whose value should be echoed"}
-    text: {description: "Text to echo", type: string}
+    value: {description: "Value to echo"}

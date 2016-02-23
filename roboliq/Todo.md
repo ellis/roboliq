@@ -145,6 +145,7 @@
 - [x] create `Design` type in roboliq.yaml (needs more work)
 - [ ] roboliq.js: handle `data` property
 - [ ] commandHelper.js: handle `$$`-prefix for returning column of current data
+- [ ] roboliq.js: need to handle a complication with final instructions: if their parameters contain references to DATA, SCOPE, or string substitutions, we need to either substitute the values into the command or create a sub-command with the concrete values.
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
