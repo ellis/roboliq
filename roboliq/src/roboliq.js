@@ -845,9 +845,20 @@ function _run(opts, userProtocol) {
 			//console.log("SCOPE: "+JSON.stringify(SCOPE))
 		}
 
+		// Check for command and its handler
 		const commandName = params.command;
+		const handler = (commandName) ? commandHandlers[commandName] : undefined;
+		if (commandName && !handler) {
+			protocol.warnings[id] = ["unknown command: "+params.command];
+			return;
+		}
+
 		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 			const DATA = DATAs[groupIndex];
+			const prefix2 = prefix.concat([groupIndex + 1]);
+			const common = Design.getCommonValues(DATA);
+			const SCOPE2 = _.merge({}, SCOPE, common);
+
 			if (foreach) {
 				const groupKey = (groupIndex+1).toString();
 				let substeps;
@@ -855,8 +866,7 @@ function _run(opts, userProtocol) {
 				// then expand for each DATA in DATAs.
 				if (commandName) {
 					if (protocol.schemas[commandName]) {
-						const objects2 = _.merge({}, objects, {DATA, SCOPE});
-						const prefix2 = prefix.concat([groupIndex + 1]);
+						const objects2 = _.merge({}, objects, {DATA, SCOPE: SCOPE2});
 						const data = {
 							objects: objects2,
 							schemas: protocol.schemas,
@@ -869,6 +879,7 @@ function _run(opts, userProtocol) {
 						const schema = protocol.schemas[commandName];
 						//console.log("params: "+JSON.stringify(params))
 						const parsed = commandHelper.parseParams(params, data, schema);
+						console.log("parsed:"+JSON.stringify(parsed, null, '\t'))
 						const params2 = _.merge({}, params, parsed.value, parsed.objectName);
 						step[groupKey] = params2;
 					}
@@ -881,14 +892,16 @@ function _run(opts, userProtocol) {
 				}
 
 				if (step[groupKey]) {
-					expandSubsteps(protocol, prefix2, step[groupKey], objects, SCOPE, DATA);
+					expandSubsteps(protocol, prefix2, step[groupKey], objects, SCOPE2, DATA);
 				}
 			}
 			else {
-				expandCommand(protocol, prefix, step, objects, SCOPE, params, commandName, handler, DATA, id);
-				expandSubsteps(protocol, prefix, step, objects, SCOPE, DATA);
+				if (commandName) {
+					expandCommand(protocol, prefix, step, objects, SCOPE2, params, commandName, handler, DATA, id);
+				}
+				expandSubsteps(protocol, prefix, step, objects, SCOPE2, DATA);
 			}
-		});
+		}
 	}
 
 	function expandSubsteps(protocol, prefix, step, objects, SCOPE, DATA) {
