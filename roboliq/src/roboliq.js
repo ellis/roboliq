@@ -861,7 +861,6 @@ function _run(opts, userProtocol) {
 
 			if (foreach) {
 				const groupKey = (groupIndex+1).toString();
-				let substeps;
 				// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
 				// then expand for each DATA in DATAs.
 				if (commandName) {
@@ -888,11 +887,11 @@ function _run(opts, userProtocol) {
 					}
 				}
 				else if (params.steps) {
-					step[groupKey] = steps;
+					step[groupKey] = params.steps;
 				}
 
 				if (step[groupKey]) {
-					expandSubsteps(protocol, prefix2, step[groupKey], objects, SCOPE2, DATA);
+					expandStep(protocol, prefix2, step[groupKey], objects, SCOPE2, DATA);
 				}
 			}
 			else {
