@@ -245,7 +245,7 @@ describe('roboliq', function() {
 							forEach: "group"
 						},
 						command: "system.echo",
-						variable: "$$greeting"
+						value: "$$greeting"
 					}
 				}
 			};
@@ -254,12 +254,13 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.steps['1'], {
 				data: {
 					source: "design1",
+					groupBy: "name",
 					forEach: "group"
 				},
 				command: "system.echo",
-				variable: "$$greeting",
-				1: { command: "system._echo", name: "$$greeting", object: ["hello", "goodbye"] },
-				2: { command: "system._echo", name: "$$greeting", object: ["hello", "goodbye"] }
+				value: "$$greeting",
+				1: { command: "system.echo", value: ["hello", "goodbye"], 1: { command: "system._echo", value: ["hello", "goodbye"] } },
+				2: { command: "system.echo", value: ["hello", "goodbye"], 1: { command: "system._echo", value: ["hello", "goodbye"] } }
 			});
 		});
 

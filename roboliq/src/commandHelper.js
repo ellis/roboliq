@@ -364,7 +364,9 @@ function dereferenceVariable(data, name) {
 	if (_.startsWith(name, "$$")) {
 		if (_.isArray(data.objects.DATA)) {
 			const propertyName = name.substr(2);
-			result.value = _(data.objects.DATA).map(propertyName).compact().value();
+			result.value = _(data.objects.DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
+			//console.log("data.objects.DATA: "+JSON.stringify(data.objects.DATA, null, '\t'));
+			//console.log({map: _(data.objects.DATA).map(propertyName).value()});
 
 			const accessName = "DATA."+propertyName;
 			if (_.isArray(data.accesses))

@@ -718,7 +718,7 @@ function replicate(action, table, rowIndexes, replacements) {
 export function getCommonValues(table) {
 	if (_.isEmpty(table)) return {};
 
-	let common = table[0];
+	let common = _.clone(table[0]);
 	for (let i = 1; i < table.length; i++) {
 		// Remove any value from common which aren't shared with this row.
 		_.forEach(table[i], (value, name) => {

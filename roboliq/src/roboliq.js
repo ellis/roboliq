@@ -832,6 +832,7 @@ function _run(opts, userProtocol) {
 				}
 			}
 		}
+		//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
 		// Process any directives in this step
 		const params = misc.handleDirectiveDeep(_.omit(step, "data"), protocol);
@@ -855,8 +856,10 @@ function _run(opts, userProtocol) {
 
 		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 			const DATA = DATAs[groupIndex];
+			//console.log("DATA1: "+JSON.stringify(DATA, null, '\t'));
 			const prefix2 = prefix.concat([groupIndex + 1]);
 			const common = Design.getCommonValues(DATA);
+			//console.log("DATA1b: "+JSON.stringify(DATA, null, '\t'));
 			const SCOPE2 = _.merge({}, SCOPE, common);
 
 			if (foreach) {
@@ -866,7 +869,9 @@ function _run(opts, userProtocol) {
 				let step2;
 				if (commandName) {
 					if (protocol.schemas[commandName]) {
-						const objects2 = _.merge({}, objects, {DATA, SCOPE: SCOPE2});
+						const objects2 = _.clone(objects);
+						objects2.DATA = DATA;
+						objects2.SCOPE = SCOPE2;;
 						const data = {
 							objects: objects2,
 							schemas: protocol.schemas,
@@ -893,9 +898,9 @@ function _run(opts, userProtocol) {
 
 				if (step2) {
 					expandStep(protocol, prefix2, step2, objects, SCOPE2, DATA);
-					/*Uconst substepKeys = commandHelper.getStepKeys(step2);
+					/*// if there are substeps, then don't include the parameters again
+					const substepKeys = commandHelper.getStepKeys(step2);
 					if (!_.isEmpty(substepKeys)) {
-						if command was expanded, then do not include params2
 					}
 					if (step2.)*/
 					step[groupKey] = step2;
