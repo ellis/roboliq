@@ -23,7 +23,12 @@ var data = {
 		list1: {
 			type: "Variable",
 			value: [1, 2, 3]
-		}
+		},
+		DATA: [
+			{name: "bob", gender: "male", age: 1},
+			{name: "tom", gender: "male", age: 2},
+			{name: "sue", gender: "female", age: 1}
+		]
 	}
 };
 
@@ -32,6 +37,17 @@ describe('config/roboliqDirectiveHandlers', function() {
 	require('mathjs').config({
 		number: 'bignumber', // Default type of number
 		precision: 64        // Number of significant digits for BigNumbers
+	});
+
+	it('should handle #data', function() {
+		should.deepEqual(misc.handleDirective(
+			{"#data": {where: {age: 1}, value: "name"}}, data),
+			["bob", "sue"]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"#data": {where: {age: 2}, head: true}}, data),
+			{name: "tom", gender: "male", age: 2}
+		);
 	});
 
 	it('should handle #destinationWells', function() {

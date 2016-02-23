@@ -1,4 +1,4 @@
-## Before submission
+## Todos for Paper 1
 
 - [x] add 'roboliq' version to output
 - [x] get running of protocols from command line to work again, and document it
@@ -145,8 +145,8 @@
 - [x] create `Design` type in roboliq.yaml (needs more work)
 - [x] roboliq.js: handle `data` property
 - [x] commandHelper.js: handle `$$`-prefix for returning column of current data
+- [x] roboliqDirectiveHandlers.js: handle '#data' directive
 - [ ] `experiment.run`: change `experiment` property to `conditions`
-- [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
@@ -170,6 +170,9 @@
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
 
+# Todos for paper 2/3
+
+- [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] have a good command for expanding steps and parameters based on data
     maybe something like this:
     ```

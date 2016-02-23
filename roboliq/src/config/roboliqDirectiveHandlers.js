@@ -8,6 +8,7 @@ var assert = require('assert');
 var math = require('mathjs');
 var random = require('random-js');
 import commandHelper from '../commandHelper.js';
+var Design = require('../design.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser = require('../parsers/wellsParser.js');
@@ -32,6 +33,23 @@ function directive_createWellAssignments(spec, data) {
 			required: ["list", "wells"]
 		});
 		return _.take(parsed.value.wells, parsed.value.list.length);
+	});
+}
+
+function directive_data(spec, data) {
+	return expect.try("#data", () => {
+		const groups = Design.query(data.objects.DATA, spec);
+		let result = (spec.groupBy) ? groups : _.flatten(groups);
+		if (spec.value) {
+			result = _.map(result, spec.value);
+		}
+		if (spec.head) {
+			result = _.head(result);
+		}
+		if (spec.join) {
+			result = result.join(spec.join);
+		}
+		return result;
 	});
 }
 
@@ -478,6 +496,7 @@ function directive_zipMerge(spec, data) {
 module.exports = {
 	"#createPipetteMixtureList": directive_pipetteMixtures,
 	"#createWellAssignments": directive_createWellAssignments,
+	"#data": directive_data,
 	"#destinationWells": directive_destinationWells,
 	"#factorialArrays": directive_factorialArrays,
 	"#factorialCols": directive_factorialCols,

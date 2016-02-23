@@ -27,7 +27,7 @@ const commandHandlers = {
 		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
 	},
 	"system.echo": function(params, parsed, data) {
-		console.log("system.echo: "+JSON.stringify(parsed, null, '\t'))
+		//console.log("system.echo: "+JSON.stringify(parsed, null, '\t'))
 		return {
 			expansion: [_.merge({}, {
 				command: "system._echo",
