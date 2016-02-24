@@ -17,6 +17,45 @@ function makeEvowareFacts(parsed, data, variable, value) {
 	return _.merge(result2, {factsValue: value2});
 }
 
+/**
+ * Expect spec of this form:
+ * ``{siteModel: string, sites: [string], labwareModels: [string]}``
+ */
+function makeSiteModelPredicates(spec) {
+	return _.flatten([
+		{isSiteModel: {model: spec.siteModel}},
+		_.map(spec.sites, site => ({siteModel: {site, siteModel: spec.siteModel}})),
+		_.map(spec.labwareModels, labwareModel => ({stackable: {below: spec.siteModel, above: labwareModel}}))
+	]);
+}
+
+/**
+ * Expect specs of this form:
+ * ``{<transporter>: {<program>: [site names]}}``
+ */
+function makeTransporterPredicates(specs) {
+	let siteCliqueId = 1;
+	const l = [];
+	_.forEach(specs, (programs, equipment) => {
+		_.forEach(programs, (sites, program) => {
+			const siteClique = "ourlab.luigi.siteClique"+siteCliqueId;
+			siteCliqueId++;
+			_.forEach(sites, site => {
+				l.push({"siteCliqueSite": {siteClique, site}});
+			});
+			l.push({
+				"transporter.canAgentEquipmentProgramSites": {
+					"agent": "ourlab.luigi.evoware",
+					equipment,
+					program,
+					siteClique
+				}
+			});
+		});
+	});
+	return l;
+}
+
 module.exports = {
 	roboliq: "v1",
 	imports: ["roboliq.js"],
@@ -209,129 +248,17 @@ module.exports = {
 		}
 	},
 
-	predicates: _.flatten([{
-		"isSiteModel": {
-			"model": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.luigi.site.CENTRIFUGE_1",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.luigi.site.CENTRIFUGE_2",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.luigi.site.CENTRIFUGE_3",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.luigi.site.CENTRIFUGE_4",
-			"siteModel": "ourlab.siteModel1"
-		}
-	},
-	{"#for": {
-		factors: {site: ["ourlab.luigi.site.P2", "ourlab.luigi.site.P3", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5"]},
-		output: {
-			"siteModel": {
-				"site": "{{site}}",
-				"siteModel": "ourlab.siteModel1"
+	predicates: _.flatten([
+		makeSiteModelPredicates({
+			siteModel: "ourlab.luigi.siteModel1",
+			sites: ["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3"],
+			labwareModels: ["ourlab.model.plateModel_96_dwp"]
+		}),
+		makeTransporterPredicates({
+			"ourlab.luigi.roma1": {
+				Narrow: ["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3"]
 			}
-		}
-	}},
-	{
-		"siteModel": {
-			"site": "ourlab.luigi.site.READER",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.luigi.site.REGRIP",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.luigi.site.ROBOSEAL",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"stackable": {
-			"below": "ourlab.siteModel1",
-			"above": "ourlab.model.plateModel_96_square_transparent_nunc"
-		}
-	}, {
-		"stackable": {
-			"below": "ourlab.siteModel1",
-			"above": "ourlab.model.plateModel_384_square"
-		}
-	},
-	_.map(["ourlab.model.plateModel_384_square"], function(model) {
-		return {"centrifuge.canAgentEquipmentModelSite1Site2": {
-			"agent": "ourlab.luigi.evoware",
-			"equipment": "ourlab.luigi.centrifuge",
-			"model": model,
-			"site1": "ourlab.luigi.site.CENTRIFUGE_2",
-			"site2": "ourlab.luigi.site.CENTRIFUGE_4"
-		}};
-	}),
-	// ROMA1 Narrow
-	_.map(["P1", "P2", "P3", "P4", "P5", "REGRIP"], function(s) {
-		return {"siteCliqueSite": {"siteClique": "ourlab.luigi.siteClique1", "site": "ourlab.luigi.site."+s}};
-	}),
-	{
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.luigi.evoware",
-			"equipment": "ourlab.luigi.roma1",
-			"program": "Narrow",
-			"siteClique": "ourlab.luigi.siteClique1"
-		}
-	},
-	// ROMA2 Narrow
-	_.map(["P1", "P2", "P3", "P4", "P5", "ROBOSEAL", "REGRIP"], function(s) {
-		return {"siteCliqueSite": {"siteClique": "ourlab.luigi.siteClique2", "site": "ourlab.luigi.site."+s}};
-	}),
-	{
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.luigi.evoware",
-			"equipment": "ourlab.luigi.roma2",
-			"program": "Narrow",
-			"siteClique": "ourlab.luigi.siteClique2"
-		}
-	},
-	// Centrifuge ROMA1 Narrow
-	_(["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"]).map(function(s) {
-		return [
-			{"siteCliqueSite": {"siteClique": "ourlab.luigi.siteClique_"+s, "site": "ourlab.luigi.site.REGRIP"}},
-			{"siteCliqueSite": {"siteClique": "ourlab.luigi.siteClique_"+s, "site": "ourlab.luigi.site."+s}},
-			{
-				"transporter.canAgentEquipmentProgramSites": {
-					"agent": "ourlab.luigi.evoware",
-					"equipment": "ourlab.luigi.roma1",
-					"program": "Narrow",
-					"siteClique": "ourlab.luigi.siteClique_"+s
-				}
-			}
-		];
-	}).flatten().value(),
-	// READER ROMA2 Wide
-	_(["READER"]).map(function(s) {
-		return [
-			{"siteCliqueSite": {"siteClique": "ourlab.luigi.siteClique_"+s, "site": "ourlab.luigi.site.REGRIP"}},
-			{"siteCliqueSite": {"siteClique": "ourlab.luigi.siteClique_"+s, "site": "ourlab.luigi.site."+s}},
-			{
-				"transporter.canAgentEquipmentProgramSites": {
-					"agent": "ourlab.luigi.evoware",
-					"equipment": "ourlab.luigi.roma2",
-					"program": "Wide",
-					"siteClique": "ourlab.luigi.siteClique_"+s
-				}
-			}
-		];
-	}).flatten().value(),
+		}),
 	{"#for": {
 		factors: {model: ["plateModel_384_square"]},
 		output: {
