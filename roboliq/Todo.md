@@ -174,6 +174,30 @@
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
 
+# Todos for luigi
+
+- [ ] need to change evoware's labware model on DWP once its sealed
+- [ ] configure sites and cliques:
+    - [ ] camera
+    - [ ] P1-P3 and camera
+    - [ ] shaker
+    - [ ] sealer
+    - [ ] hotels
+    - [ ] black incubators
+    - [ ] shaker incubators
+    - [ ] regrip
+    - [ ] mario exchange hotel
+    - [ ] reader
+- [ ] test pipetting on P1-P6
+- [ ] test pipetting on troughs
+- [ ] sealer
+- [ ] shaker
+- [ ] black incubators
+- [ ] camera
+- [ ] reader
+- [ ] shaker incubator
+
+
 # Todos for paper 2/3
 
 - [ ] test pipetter.pipetteDilutionSeries2x

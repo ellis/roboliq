@@ -1,0 +1,15 @@
+"roboliq": "v1"
+"objects":
+  "plate1":
+    "type": "Plate"
+    "model": "ourlab.model.plateModel_96_dwp"
+    "location": "ourlab.luigi.site.P1"
+"steps":
+  "1":
+    "command": "transporter.movePlate"
+    "object": "plate1"
+    "destination": "ourlab.luigi.site.P2"
+  "2":
+    "command": "transporter.movePlate"
+    "object": "plate1"
+    "destination": "ourlab.luigi.site.P3"
