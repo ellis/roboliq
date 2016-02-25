@@ -53,35 +53,68 @@ describe('experiment', function() {
 				}
 			});
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
-			console.log(JSON.stringify(result, null, '\t'))
+			console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
-				1: {
-					command: "experiment.run",
-					experiment: "experiment1",
-					steps: {
-						1: {
-							command: "timer.sleep",
-							duration: "SCOPE.wait",
-						}
-					},
-					1: {
-						_scope: {
-							index: 1,
-							wait: "1 minute"
+				"1": {
+					"1": {
+						"1": {
+							"1": {
+								"command": "system._echo",
+								"value": 1
+							},
+							"command": "system.echo",
+							"value": "$b"
 						},
-						1: {
-							command: "timer.sleep",
-							duration: "SCOPE.wait",
-							1: {
-								command: "timer._sleep",
-								agent: "robot1",
-								equipment: "timer1",
-								duration: "1 minute"
-							}
+						"2": {
+							"1": {
+								"command": "system._echo",
+								"value": [
+									1,
+									2
+								]
+							},
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": 1, "b": 1 }, { "a": 2, "b": 1 } ]
+					},
+					"2": {
+						"1": {
+							"1": {
+								"command": "system._echo",
+								"value": 2
+							},
+							"command": "system.echo",
+							"value": "$b"
+						},
+						"2": {
+							"1": {
+								"command": "system._echo",
+								"value": [
+									1,
+									2
+								]
+							},
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": 1, "b": 2 }, { "a": 2, "b": 2 } ]
+					},
+					"command": "experiment.run",
+					"design": "design1",
+					"groupBy": "b",
+					"steps": {
+						"1": {
+							"command": "system.echo",
+							"value": "$b"
+						},
+						"2": {
+							"command": "system.echo",
+							"value": "$$a"
 						}
 					}
 				}
-			})
+			});
 		});
 	});
 });
