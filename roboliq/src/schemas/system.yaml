@@ -3,6 +3,11 @@ system:
     The `system` commands specify several general, high-level actions that are
     not specific to any particular type of equipment.
 
+system._description:
+  description: "Include the value as a description in the generated script"
+  properties:
+    text: {description: "Description text", type: string}
+
 system._echo:
   description: "A trouble-shooting function to echo something"
   properties:
@@ -15,6 +20,11 @@ system.call:
     name: {description: "Name of the template function.", type: "Object"}
     params: {description: "Parameters to pass to the template function.", type: "object"}
   required: ["name"]
+
+system.description:
+  description: "Output the value as a description to the generated script"
+  properties:
+    value: {description: "Value to use as description"}
 
 system.if:
   description: "Conditionally execute steps depending on a conditional test."

@@ -9,7 +9,7 @@ import misc from '../misc.js';
 const commandHandlers = {
 	"experiment.run": function(params, parsed, data) {
 		//console.log("experiment.run");
-		console.log("parsed: "+JSON.stringify(parsed, null, '\t'));
+		//console.log("parsed: "+JSON.stringify(parsed, null, '\t'));
 
 		if (_.isEmpty(parsed.value.steps)) {
 			return {};
@@ -21,7 +21,7 @@ const commandHandlers = {
 		assert(DATA, "missing required parameter 'design'");
 
 		const DATAs = Design.query(DATA, {groupBy: parsed.value.groupBy});
-		console.log("experiment.run DATAs: "+JSON.stringify(DATAs, null, '\t'));
+		//console.log("experiment.run DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
 		// Check how many timers are needed
 		const needTimer1 = !_.isUndefined(parsed.value.duration);

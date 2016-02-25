@@ -200,7 +200,7 @@
 # Todos for paper 2/3
 
 - [ ] qc_mario_vectors_96nunc:
-  - [ ] randomize order of sites
+  - [?] randomize order of sites
   - [ ] implement `system.description`
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] have a good command for expanding steps and parameters based on data

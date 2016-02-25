@@ -6,6 +6,10 @@ import misc from '../misc.js';
 
 
 const commandHandlers = {
+	"system._description": function(params, parsed, data) {
+		// Do nothing
+		return {};
+	},
 	"system._echo": function(params, parsed, data) {
 		// Do nothing
 		return {};
@@ -21,10 +25,14 @@ const commandHandlers = {
 				return {};
 		}
 	},
-	"system.if": function(params, parsed, data) {
-		//console.log("system.if:")
-		//console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
-		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
+	"system.description": function(params, parsed, data) {
+		//console.log("system.echo: "+JSON.stringify(parsed, null, '\t'))
+		return {
+			expansion: [_.merge({}, {
+				command: "system._description",
+				text: parsed.value.value.toString()
+			})]
+		};
 	},
 	"system.echo": function(params, parsed, data) {
 		//console.log("system.echo: "+JSON.stringify(parsed, null, '\t'))
@@ -35,6 +43,11 @@ const commandHandlers = {
 				value: parsed.value.value
 			})]
 		};
+	},
+	"system.if": function(params, parsed, data) {
+		//console.log("system.if:")
+		//console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
+		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
 	},
 	"system.repeat": function(params, parsed, data) {
 		const expansion = {};

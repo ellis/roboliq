@@ -833,7 +833,7 @@ function _run(opts, userProtocol) {
 			}
 			else if (dataInfo.forEach === "group") {
 				DATAs = groups;
-				console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
+				//console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
 				foreach = true;
 			}
 			else {

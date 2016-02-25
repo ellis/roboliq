@@ -54,6 +54,7 @@ steps:
         value: `Test {{$plate}} movements for {{$roma}} with vector {{$vector}}`
       2:
         data:
+          shuffle: true
           forEach: row
         command: transporter.movePlate
         equipment: $roma

@@ -38,6 +38,36 @@ describe('system', function() {
 		});
 	});
 
+	describe.skip("system.description", () => {
+		it("should process a ``-string", () => {
+			const protocol = {
+				roboliq: "v1",
+				steps: {
+					"1": {
+						command: "system.description",
+						value: "`Hello {{}}`",
+						then: {comment: "yep"},
+						else: {"1": {comment: "nope"}}
+					},
+					"2": {
+						command: "system.if",
+						test: false,
+						then: {comment: "yep"},
+						else: {"1": {comment: "nope"}}
+					}
+				}
+			};
+			const result = roboliq.run(["-o", "", "-T"], protocol);
+			should.deepEqual(result.output.steps[1], {
+				command: "system.if",
+				test: true,
+				then: {comment: "yep"},
+				else: {"1": {comment: "nope"}},
+				1: {comment: "yep"},
+			});
+		});
+	});
+
 	describe('system.if', function () {
 		it('should branch based on `test`', function () {
 			const protocol = {
