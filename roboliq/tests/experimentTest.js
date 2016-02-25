@@ -14,6 +14,13 @@ const protocol0 = {
 		},
 		timer2: {
 			type: "Timer"
+		},
+		design1: {
+			type: "Design",
+			conditions: {
+				"a*": [1, 2],
+				"b*": [1, 2]
+			}
 		}
 	},
 	predicates: [
@@ -27,32 +34,26 @@ describe('experiment', function() {
 		it("should handle an experiment array", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
-				objects: {
-					experiment1: {
-						type: "Variable",
-						value: [
-							{
-								index: 1,
-								wait: "1 minute"
-							}
-						]
-					}
-				},
 				steps: {
 					1: {
 						command: "experiment.run",
-						experiment: "experiment1",
+						design: "design1",
+						groupBy: "b",
 						steps: {
 							1: {
-								command: "timer.sleep",
-								duration: "SCOPE.wait"
+								command: "system.echo",
+								value: "$b"
+							},
+							2: {
+								command: "system.echo",
+								value: "$$a"
 							}
 						}
 					}
 				}
 			});
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
-			//console.log(JSON.stringify(result, null, '\t'))
+			console.log(JSON.stringify(result, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				1: {
 					command: "experiment.run",

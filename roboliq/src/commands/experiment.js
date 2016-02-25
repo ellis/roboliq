@@ -1,13 +1,10 @@
 import _ from 'lodash';
+import assert from 'assert';
 import yaml from 'yamljs';
 import commandHelper from '../commandHelper.js';
+import * as Design from '../design.js';
 import expect from '../expect.js';
 import misc from '../misc.js';
-
-interleave: {description: "The time offset for interleaving each group", type: Duration}
-duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
-timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
-startTimerAfterStep: {description: "The duration timer can be started after a given step rather than from the beginning", type: integer}
 
 const commandHandlers = {
 	"experiment.run": function(params, parsed, data) {
@@ -18,40 +15,75 @@ const commandHandlers = {
 			return {};
 		}
 
-		const DATA = (params.value.design)
-		  ? Design.flattenDesign(params.value.design)
+		const DATA = (parsed.value.design)
+		  ? Design.flattenDesign(parsed.value.design)
 			: data.objects.DATA;
 		assert(DATA, "missing required parameter 'design'");
 
-		const DATAs = Design.query(DATA, {groupBy: params.value.groupBy});
+		const DATAs = Design.query(DATA, {groupBy: parsed.value.groupBy});
 
 		// Check how many timers are needed
-		const needTimer1 = !_.isUndefined(params.value.duration);
-		const needTimer2 = !_.isUndefined(params.value.interleave);
+		const needTimer1 = !_.isUndefined(parsed.value.duration);
+		const needTimer2 = !_.isUndefined(parsed.value.interleave);
 		const needTimers = (needTimer1 ? 1 : 0) + (needTimer2 ? 1 : 0);
 
 		// Select the timers
-		let timers = params.value.timers || [];
+		let timers = parsed.value.timers || [];
 		assert(timers.length >= needTimers, `please supply ${needTimers} timers`);
-		const timer1 = (needTimer1) ? timers.shift();
-		const timer2 = (needTimer2) ? timers.shift();
+		const timer1 = (needTimer1) ? timers.shift() : undefined;
+		const timer2 = (needTimer2) ? timers.shift() : undefined;
 
 		const expansion = {};
 
 		// Start timer at beginning?
-		if (params.value.duration && _.isEmpty(params.value.startTimerAfterStep)) {
-			expansion[0] = _.merge({}, {
-				command: "timer.start",
-				agent: parsed.objectName.agent,
-				equipment: timer1
-			};
+		const postponeTimer1 = (_.isString(parsed.value.startTimerAfterStep) && !_.isEmpty(parsed.value.startTimerAfterStep));
+		const timer1Step = _.merge({}, {
+			command: "timer.start",
+			agent: parsed.objectName.agent,
+			equipment: timer1
+		});
+		if (needTimer1 && !postponeTimer1) {
+			expansion["0"] = timer1Step;
 		}
 
 		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 			const DATA = DATAs[groupIndex];
-			expansion[i+1] = _.cloneDeep(parsed.value.steps);
-			expansion[i+1]."@DATA" = _.cloneDeep(DATA);
-			CONTINUE with startTimerAfterStep
+
+			// Step starts out as a copy of the given steps
+			const step = _.cloneDeep(parsed.value.steps);
+			// Set the current DATA group
+			step["@DATA"] = _.cloneDeep(DATA);
+			// Add postponed timer1, if necessary
+			if (postponeTimer1 && groupIndex === 0) {
+				step[parsed.value.startTimerAfterStep+"+"] = timer1Step;
+			}
+
+			const groupKey = (groupIndex + 1).toString();
+			// If interleaving, run the step within timer2
+			if (needTimer2) {
+				const timedStep = _.merge({}, {
+					command: "timer.doAndWait",
+					agent: parsed.objectName.agent,
+					equipment: timer2,
+					duration: parsed.value.interleave.format()
+				});
+				timedStep.steps = step;
+				expansion[groupKey] = timedStep;
+			}
+			else {
+				expansion[groupKey] = step;
+			}
+		}
+
+		// Wait till timer1 has elapsed
+		if (needTimer1) {
+			expansion[expansion.length+1] = _.merge({}, {
+				command: "timer.wait",
+				agent: parsed.objectName.agent,
+				equipment: timer1,
+				till: parsed.value.duration.format(),
+				stop: true
+			});
 		}
 
 		//console.log(JSON.stringify(expansion, null, "\t"))
