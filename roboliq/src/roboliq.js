@@ -805,35 +805,39 @@ function _run(opts, userProtocol) {
 		// repeating the command for each group or each row
 		if (step["data"]) {
 			const dataInfo = misc.handleDirectiveDeep(step.data, protocol);
+			let table = DATA;
 			if (dataInfo.source) {
 				const source = _.get(objects, [dataInfo.source]);
 				assert(source);
 
-				let table;
 				if (_.isArray(source)) {
 					table = source;
 				}
 				else if (source.type === "Design") {
 					table = Design.flattenDesign(source);
 				}
-
-				// Replicate the command for each group
-				const groups = Design.query(table, dataInfo);
-				//console.log("groups: "+JSON.stringify(groups))
-
-				if (dataInfo.forEach === "row") {
-					// console.log({ groups0: JSON.stringify(groups), groups1: _(groups).flatten().value(), groups2: _(groups).flatten().map(x => [x]).value() })
-					// Turn each row into its own group
-					DATAs = _(groups).flatten().map(x => [x]).value();
-					foreach = true;
-				}
-				else if (dataInfo.forEach === "group") {
-					DATAs = groups;
-					foreach = true;
-				}
 				else {
-					DATAs = [_.flatten(groups)];
+					assert(false, "unrecognized data source: "+JSON.stringify(dataInfo.source)+" -> "+JSON.stringify(source));
 				}
+			}
+
+			// Replicate the command for each group
+			const groups = Design.query(table, dataInfo);
+			//console.log("groups: "+JSON.stringify(groups))
+
+			if (dataInfo.forEach === "row") {
+				// Turn each row into its own group
+				DATAs = _(groups).flatten().map(x => [x]).value();
+				//console.log("forEach row DATAs: "+JSON.stringify(DATAs, null, '\t'));
+				foreach = true;
+			}
+			else if (dataInfo.forEach === "group") {
+				DATAs = groups;
+				console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
+				foreach = true;
+			}
+			else {
+				DATAs = [_.flatten(groups)];
 			}
 		}
 		//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));

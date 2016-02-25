@@ -227,6 +227,10 @@ export function query(table, q) {
 		});
 	}
 
+	if (q.shuffle) {
+		table2 = _.shuffle(table);
+	}
+
 	if (q.orderBy) {
 		table2 = _.orderBy(table2, q.orderBy);
 	}

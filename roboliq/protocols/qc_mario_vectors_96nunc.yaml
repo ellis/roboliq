@@ -1,0 +1,68 @@
+roboliq: v1
+
+description: |
+  Test the 96-well NUNC microwell plates on various sites with both romas,
+  and with Narrow and Wide vectors.
+
+  Site and labware:
+  * P1 (not used)
+  * P2 "dilutionPlate" pipetting
+  * P3 "culturePlate" pipetting
+  * P4 stillPlate (initial, incubator)
+  * P5 shakePlate (initial, incubator)
+  * P6 dilutionPlate1 (storage)
+  * P7 dilutionPlate2 (storage)
+
+objects:
+  plateNunc: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.REGRIP"}
+
+  design1:
+    type: Design
+    conditions:
+      "plate*":
+        "plateNunc":
+          "storageSite": "ourlab.mario.site.REGRIP"
+          "roma*":
+            "ourlab.mario.roma1":
+              "vector*":
+                "Narrow":
+                  "site*":
+                  -  "ourlab.mario.site.P2"
+                  -  "ourlab.mario.site.P3"
+                  -  "ourlab.mario.site.P4"
+                  -  "ourlab.mario.site.P5"
+                  -  "ourlab.mario.site.P6"
+                  -  "ourlab.mario.site.P7"
+                  -  "ourlab.mario.site.P8"
+                  -  "ourlab.mario.site.READER"
+                  -  "ourlab.mario.site.CENTRIFUGE_2"
+                  -  "ourlab.mario.site.CENTRIFUGE_4"
+            "ourlab.mario.roma2":
+              "vector*":
+                "Narrow":
+                  "site*":
+                  - "ourlab.mario.site.ROBOSEAL"
+
+steps:
+  1:
+    command: experiment.run
+    design: design1
+    groupBy: ["plate", "roma", "vector"]
+    steps:
+      1:
+        command: system.comment
+        value: `Test {{$plate}} movements for {{$roma}} with vector {{$vector}}`
+      2:
+        data:
+          forEach: row
+        command: transporter.movePlate
+        equipment: $roma
+        program: $vector
+        object: $plate
+        destination: $site
+      3:
+        command: transporter.movePlate
+        equipment: $roma
+        program: $vector
+        object: $plate
+        destination: $storageSite

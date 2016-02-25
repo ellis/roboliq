@@ -10,7 +10,7 @@ experiment.run:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     design: {description: "An experimental design to use", type: "Design"}
-    groupBy: {description: "The factor(s) to group by", type: [string, array], items: {type: string}}
+    groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
     duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
     interleave: {description: "The time offset for interleaving each group", type: Duration}
     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}

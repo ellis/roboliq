@@ -52,6 +52,7 @@ function asArray(x) {
  * @return {object} the parsed parameters, if successfully parsed.
  */
 function parseParams(params, data, schema) {
+	//console.log("SCOPE: "+JSON.stringify(data.objects.SCOPE, null, '\t'))
 	const result = {orig: params, value: {}, objectName: {}, unknown: []};
 	processParamsBySchema(result, [], params, schema, data);
 	if (_.isEmpty(result.unknown)) {
