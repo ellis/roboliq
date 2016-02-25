@@ -18,8 +18,8 @@ const protocol0 = {
 		design1: {
 			type: "Design",
 			conditions: {
-				"a*": [1, 2],
-				"b*": [1, 2]
+				"a*": ["A1", "A2"],
+				"b*": ["B1", "B2"]
 			}
 		}
 	},
@@ -31,7 +31,7 @@ const protocol0 = {
 
 describe('experiment', function() {
 	describe("experiment.run", function() {
-		it("should handle an experiment array", function() {
+		it("should manage without timing specifications", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
@@ -53,14 +53,14 @@ describe('experiment', function() {
 				}
 			});
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
-			console.log(JSON.stringify(result.output.steps, null, '\t'))
+			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				"1": {
 					"1": {
 						"1": {
 							"1": {
 								"command": "system._echo",
-								"value": 1
+								"value": "B1"
 							},
 							"command": "system.echo",
 							"value": "$b"
@@ -68,21 +68,18 @@ describe('experiment', function() {
 						"2": {
 							"1": {
 								"command": "system._echo",
-								"value": [
-									1,
-									2
-								]
+								"value": ["A1", "A2"]
 							},
 							"command": "system.echo",
 							"value": "$$a"
 						},
-						"@DATA": [ { "a": 1, "b": 1 }, { "a": 2, "b": 1 } ]
+						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
 					},
 					"2": {
 						"1": {
 							"1": {
 								"command": "system._echo",
-								"value": 2
+								"value": "B2"
 							},
 							"command": "system.echo",
 							"value": "$b"
@@ -90,15 +87,12 @@ describe('experiment', function() {
 						"2": {
 							"1": {
 								"command": "system._echo",
-								"value": [
-									1,
-									2
-								]
+								"value": ["A1", "A2"]
 							},
 							"command": "system.echo",
 							"value": "$$a"
 						},
-						"@DATA": [ { "a": 1, "b": 2 }, { "a": 2, "b": 2 } ]
+						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
 					"command": "experiment.run",
 					"design": "design1",
@@ -109,6 +103,89 @@ describe('experiment', function() {
 							"value": "$b"
 						},
 						"2": {
+							"command": "system.echo",
+							"value": "$$a"
+						}
+					}
+				}
+			});
+		});
+
+		it.only("should manage with duration", function() {
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "experiment.run",
+						design: "design1",
+						groupBy: "b",
+						duration: "1 minute",
+						timers: ["timer1", "timer2"],
+						steps: {
+							1: {
+								command: "system.echo",
+								value: "$$a"
+							}
+						}
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			console.log(JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"0": {
+						"command": "timer.start",
+						"equipment": {
+							"type": "Timer"
+						}
+					},
+					"1": {
+						"1": {
+							"1": {
+								"command": "system._echo",
+								"value": [
+									"A1",
+									"A2"
+								]
+							},
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
+					},
+					"2": {
+						"1": {
+							"1": {
+								"command": "system._echo",
+								"value": [
+									"A1",
+									"A2"
+								]
+							},
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
+					},
+					"3": {
+						"command": "timer.wait",
+						"equipment": {
+							"type": "Timer"
+						},
+						"till": "1 minute",
+						"stop": true
+					},
+					"command": "experiment.run",
+					"design": "design1",
+					"groupBy": "b",
+					"duration": "1 minute",
+					"timers": [
+						"timer1",
+						"timer2"
+					],
+					"steps": {
+						"1": {
 							"command": "system.echo",
 							"value": "$$a"
 						}

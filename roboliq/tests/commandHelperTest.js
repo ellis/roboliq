@@ -455,7 +455,7 @@ describe('commandHelper', function() {
 				steps
 			);
 		});
-		it('should leave steps object unchanged', () => {
+		it('should wrap steps if the top object has its own properties', () => {
 			const steps = {
 				description: "hi",
 				1: {n: 1},

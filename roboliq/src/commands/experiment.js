@@ -77,7 +77,7 @@ const commandHandlers = {
 
 		// Wait till timer1 has elapsed
 		if (needTimer1) {
-			expansion[expansion.length+1] = _.merge({}, {
+			expansion[DATAs.length+1] = _.merge({}, {
 				command: "timer.wait",
 				agent: parsed.objectName.agent,
 				equipment: timer1,
