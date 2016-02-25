@@ -34,6 +34,7 @@ var objectToPredicateConverters = {
 
 function findAgentEquipmentAlternatives(params, data, running) {
 	var llpl = require('../HTN/llpl.js').create();
+	//console.log("predicates:\n"+JSON.stringify(data.predicates))
 	llpl.initializeDatabase(data.predicates);
 
 	var agent = params.agent || "?agent";
@@ -49,6 +50,7 @@ function findAgentEquipmentAlternatives(params, data, running) {
 		: null;
 	var query = {"and": _.compact([query1, query2])};
 
+	//console.log("query:\n"+JSON.stringify(query, null, '\t'))
 	var resultList = llpl.query(query);
 	//console.log("resultList:\n"+JSON.stringify(resultList))
 	var alternatives = jmespath.search(resultList, '[].and[]."timer.canAgentEquipment"');

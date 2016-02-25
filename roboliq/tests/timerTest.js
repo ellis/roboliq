@@ -126,5 +126,11 @@ describe('timer', function() {
 			var result3 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol3);
 			should.deepEqual(result3.output.steps[1], expected3);
 		});
+		it('should handle specification of explicit timer equipment', function () {
+			var protocol2 = _.merge({}, protocol0, protocol1, {steps: {1: {equipment: "timer1"}}});
+			var expected2 = _.merge({}, expected1, {equipment: "timer1"});
+			var result2 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol2);
+			should.deepEqual(result2.output.steps[1], expected2);
+		});
 	});
 });
