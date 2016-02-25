@@ -795,11 +795,15 @@ function _run(opts, userProtocol) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
 
+		if (step.hasOwnProperty("@DATA")) {
+			DATA = step["@DATA"];
+		}
+
 		let DATAs = [DATA];
 		let foreach = false; // whether we need to replicate the step contents
 		// Handle `data` parameter by loading Design data SCOPE and possibly
 		// repeating the command for each group or each row
-		if (step.data) {
+		if (step["data"]) {
 			const dataInfo = misc.handleDirectiveDeep(step.data, protocol);
 			if (dataInfo.source) {
 				const source = _.get(objects, [dataInfo.source]);

@@ -4,8 +4,16 @@ experiment:
     Currently there is only one command, `experiment.run`.
 
 experiment.run:
-  description: "Run an experiment.  This command will performs its sub-steps for every item in the experiment array, placing the item's values in SCOPE."
+  description: |
+    Run an experiment based on a Design or the currently available `DATA` object.
+    This command will performs its sub-steps for every item in the experiment array, placing the item's values in SCOPE."
   properties:
-    experiment: {description: "An array holding objects with variations on experimental factors", type: "array"}
+    agent: {description: "Agent identifier", type: "Agent"}
+    design: {description: "An experimental design to use", type: "Design"}
+    groupBy: {description: "The factor(s) to group by", type: [string, array], items: {type: string}}
+    duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
+    interleave: {description: "The time offset for interleaving each group", type: Duration}
+    timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
+    startTimerAfterStep: {description: "The duration timer will be started after this step rather than from the beginning, if specified", type: integer}
     steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}
-  required: ["experiment"]
+  required: [groupBy]

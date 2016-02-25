@@ -58,12 +58,13 @@ objects:
       "sampleVolume": "200ul"
 
 steps:
-  "@data":
-    source: design1
+#  "@data":
+#    source: design1
   1:
-    command: design.run
-    interleaveOffset: 3 minutes
-    interleaveBy: culturePlate
+    command: experiment.sequence
+    design: design1
+    groupBy: culturePlate
+    interleave: 3 minutes
     duration: 6 minutes
     durationTimerStartAfter: 3
     steps:
@@ -91,14 +92,15 @@ steps:
         destination: $incubatorLocation
 
   2:
-    command: design.run
+    command: experiment.sequence
+    design: design1
     groupBy: measurement
     duration: 6 minutes
     steps:
       description: s"Measurement {{$measurement}}"
-      command: design.run
-      interleaveOffset: 3 minutes
-      interleaveBy: culturePlate
+      command: experiment.interleave
+      groupBy: culturePlate
+      interleave: 3 minutes
       steps:
         description: s"Measurement {{$measurement}} on {{$culturePlate}}"
         1:
@@ -106,103 +108,45 @@ steps:
           objects: [$dilutionPlate]
           steps:
             1:
-      appendStep(step, {
-        command: "transporter.movePlate",
-        object: scope.get("dilutionPlate"),
-        destination: scope.get("dilutionLocation")
-      });
-      appendStep(step, {
-        command: "transporter.movePlate",
-        object: scope.get("culturePlate"),
-        destination: scope.get("pipettingLocation")
-      });
-      appendStep(step, {
-        command: "pipetter.pipette",
-        items: mapConditions(scope, data, {where: {dilutionFactor: 1}}, 1, (scope) => {
-          return {
-            source: scope.get("cultureWell"),
-            destination: scope.get("dilutionWell"),
-            syringe: scope.get("syringe")
-          }
-        }),
-        volumes: scope.get("sampleVolume"),
-        sourceLabware: scope.get("culturePlate"),
-        destinationLabware: scope.get("dilutionPlate"),
-        cleanBegin: "none",
-        clean: "light"
-      });
-      appendStep(step, {
-        command: "system.if",
-        test: scope.get("shake"),
-        then: {
-          1: {command: "shaker.shakePlate", object: scope.get("culturePlate"), program: {duration: "1 minute"}}
-        }
-      });
-      appendStep(step, {
-        command: "transporter.movePlate",
-        object: scope.get("culturePlate"),
-        destination: scope.get("incubatorLocation")
-      });
-      appendStep(step, {
-        command: "pipetter.pipetteDilutionSeries2x",
-        diluent: "water",
-        destinationLabware: scope.get("dilutionPlate"),
-        items: mapConditionGroups(scope, data, {groupBy: "cultureWell"}, 0, (scope, data) => {
-          //console.log({scope2, data2})
-          return {
-            destinations: mapConditions(scope, data, {}, 1, (scope) => scope.get("dilutionWell")),
-            syringe: scope.get("syringe")
-          };
-        }),
-        cleanBegin: "none",
-        clean: "light"
-      });
-      /*appendStep(step, {
-        command: "absorbanceReader.measurePlate",
-        object: scope.get("dilutionPlate"),
-        program: {
-          wells: mapConditions(scope, data, {select: "dilutionWell"}, 1, (scope) => scope.get("dilutionWell"))
-        },
-        programTemplate: "./dm00.mdfx.template"
-      });*/
-
-      appendStep(measurementStep, {
-        description: `Measurement ${scope.get("measurement")} on ${scope.get("culturePlate")}`,
-        command: "timer.doAndWait",
-        equipment: "ourlab.mario.timer2",
-        duration: "3 minutes",
-        steps: {
-          1: {
-            command: "transporter.doThenRestoreLocation",
-            objects: [scope.get("dilutionPlate")],
-            steps: step
-          }
-        }
-      });
-    });
-
-    appendStep(steps, {
-      description: `Measurement ${scope.get("measurement")}`,
-      command: "timer.doAndWait",
-      equipment: "ourlab.mario.timer1",
-      duration: "6 minutes",
-      steps: measurementStep
-    });
-  });
-
-  const protocol = {
-    steps
-  };
-
-  return protocol;
-}
-
-const protocol = test();
-
-// If run from the command line:
-if (require.main === module) {
-  console.log(yaml.stringify(protocol, 9, 2));
-}
-else {
-  module.exports = protocol;
-}
+              command: transporter.movePlate
+              object: $dilutionPlate
+              destination: $dilutionLocation
+            2:
+              command: "transporter.movePlate"
+              object: $culturePlate
+              destination: "$pipettingLocation"
+            3:
+              command: "pipetter.pipette"
+              items:
+                "#data":
+                  where: {dilutionFactor: 1}
+                  template:
+                    source: $cultureWell
+                    destination: $dilutionWell
+                    syringe: $syringe
+              volumes: $sampleVolume
+              sourceLabware: $culturePlate
+              destinationLabware: $dilutionPlate
+              cleanBegin: "none"
+              clean: "light"
+            4:
+              command: "system.if"
+              test: $shake
+              then:
+                1: {command: "shaker.shakePlate", object: $culturePlate, program: {duration: "1 minute"}}
+            5:
+              command: "transporter.movePlate"
+              object: "$culturePlate"
+              destination: "$incubatorLocation"
+            6:
+              command: "pipetter.pipetteDilutionSeries2x"
+              diluent: "water"
+              destinationLabware: "$dilutionPlate"
+              items:
+                "#data":
+                  groupBy: cultureWell
+                  template:
+                    destinations: "$$dilutionWell"
+                    syringe: $syringe
+              cleanBegin: "none"
+              clean: "light"
