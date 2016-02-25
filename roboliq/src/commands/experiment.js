@@ -28,7 +28,11 @@ const commandHandlers = {
 		const needTimers = (needTimer1 ? 1 : 0) + (needTimer2 ? 1 : 0);
 
 		// Select the timers
-		let timers = parsed.value.timers || [];
+		let timers = [];
+		if (!_.isEmpty(parsed.value.timers)) {
+			timers = _.range(parsed.value.timers.length).map(i => parsed.objectName[`timers.${i}`]);
+			//console.log({timers})
+		}
 		assert(timers.length >= needTimers, `please supply ${needTimers} timers`);
 		const timer1 = (needTimer1) ? timers.shift() : undefined;
 		const timer2 = (needTimer2) ? timers.shift() : undefined;

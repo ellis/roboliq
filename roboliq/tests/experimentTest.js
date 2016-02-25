@@ -135,10 +135,13 @@ describe('experiment', function() {
 			should.deepEqual(result.output.steps, {
 				"1": {
 					"0": {
+						"1": {
+							"command": "timer._start",
+							"agent": "robot1",
+							"equipment": "timer1"
+						},
 						"command": "timer.start",
-						"equipment": {
-							"type": "Timer"
-						}
+						"equipment": "timer1"
 					},
 					"1": {
 						"1": {
@@ -169,10 +172,15 @@ describe('experiment', function() {
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
 					"3": {
-						"command": "timer.wait",
-						"equipment": {
-							"type": "Timer"
+						"1": {
+							"command": "timer._wait",
+							"till": "1 minute",
+							"stop": true,
+							"agent": "robot1",
+							"equipment": "timer1"
 						},
+						"command": "timer.wait",
+						"equipment": "timer1",
 						"till": "1 minute",
 						"stop": true
 					},
@@ -193,5 +201,121 @@ describe('experiment', function() {
 				}
 			});
 		});
+
+		it("should manage with interleave", function() {
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "experiment.run",
+						design: "design1",
+						groupBy: "b",
+						interleave: "1 minute",
+						timers: ["timer1", "timer2"],
+						steps: {
+							1: {
+								command: "system.echo",
+								value: "$$a"
+							}
+						}
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
+			should.deepEqual(result.output.steps["1"], {
+				"1": {
+					"1": {
+						"command": "timer._start",
+						"agent": "robot1",
+						"equipment": "timer1"
+					},
+					"2": {
+						"1": {
+							"1": {
+								"command": "system._echo",
+								"value": [
+									"A1",
+									"A2"
+								]
+							},
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
+					},
+					"3": {
+						"command": "timer._wait",
+						"agent": "robot1",
+						"equipment": "timer1",
+						"till": 60,
+						"stop": true
+					},
+					"command": "timer.doAndWait",
+					"equipment": "timer1",
+					"duration": "1 minute",
+					"steps": {
+						"1": {
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
+					}
+				},
+				"2": {
+					"1": {
+						"command": "timer._start",
+						"agent": "robot1",
+						"equipment": "timer1"
+					},
+					"2": {
+						"1": {
+							"1": {
+								"command": "system._echo",
+								"value": [
+									"A1",
+									"A2"
+								]
+							},
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
+					},
+					"3": {
+						"command": "timer._wait",
+						"agent": "robot1",
+						"equipment": "timer1",
+						"till": 60,
+						"stop": true
+					},
+					"command": "timer.doAndWait",
+					"equipment": "timer1",
+					"duration": "1 minute",
+					"steps": {
+						"1": {
+							"command": "system.echo",
+							"value": "$$a"
+						},
+						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
+					}
+				},
+				"command": "experiment.run",
+				"design": "design1",
+				"groupBy": "b",
+				"interleave": "1 minute",
+				"timers": [
+					"timer1",
+					"timer2"
+				],
+				"steps": {
+					"1": {
+						"command": "system.echo",
+						"value": "$$a"
+					}
+				}
+			});
+		});
+
 	});
 });
