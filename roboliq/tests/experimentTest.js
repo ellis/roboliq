@@ -111,7 +111,7 @@ describe('experiment', function() {
 			});
 		});
 
-		it.only("should manage with duration", function() {
+		it("should manage with duration", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
@@ -131,7 +131,7 @@ describe('experiment', function() {
 				}
 			});
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
-			console.log(JSON.stringify(result.output.steps, null, '\t'))
+			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				"1": {
 					"0": {
@@ -317,5 +317,9 @@ describe('experiment', function() {
 			});
 		});
 
+		it.skip("should handle timing with duration and startTimerAfterStep", function() {
+
+		});
+		
 	});
 });
