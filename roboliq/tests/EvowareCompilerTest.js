@@ -68,7 +68,7 @@ const protocol0 = {
 		},
 		transporter1: {
 			type: "Transporter",
-			evowareRoma: 1,
+			evowareRoma: 0,
 		},
 		pipetter1: {
 			type: "Pipetter",
@@ -180,9 +180,10 @@ describe('EvowareCompilerTest', function() {
 			should.deepEqual(results, [
 				[
 					{
-						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,1,0,\"\",\"96-Well Plate\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"1\",\"(Not defined)\",\"2\");",
+						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,0,0,\"\",\"96-Well Plate\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"1\",\"(Not defined)\",\"2\");",
 						"effects": {
-							"plate1.location": "site2"
+							"plate1.location": "site2",
+							"EVOWARE.romaIndexPrev": 0
 						},
 						"tableEffects": [
 							[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ],
@@ -228,7 +229,8 @@ describe('EvowareCompilerTest', function() {
 					{
 						"line": `Transfer_Rack("17","10",0,0,0,0,0,"","D-BSSE 96 Well DWP","Narrow","","","MP 3Pos Cooled 1 PCR","","MP 2Pos H+P Shake","2","(Not defined)","4");`,
 						"effects": {
-							"stillPlate.location": "ourlab.mario.site.P3"
+							"stillPlate.location": "ourlab.mario.site.P3",
+							"EVOWARE.romaIndexPrev": 0
 						},
 						"tableEffects": [
 							[ [ "MP 3Pos Cooled 1 PCR", 17, 2 ], { "label": "P4", "labwareModelName": "D-BSSE 96 Well DWP" } ],

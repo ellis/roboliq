@@ -111,7 +111,7 @@ describe('experiment', function() {
 			});
 		});
 
-		it.only("should manage with duration", function() {
+		it("should manage with duration", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {

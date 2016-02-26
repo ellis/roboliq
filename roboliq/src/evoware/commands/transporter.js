@@ -2,7 +2,27 @@ import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 
 function getMoveRomaHomeLine(romaIndex) {
-	return `Move Roma(${...});`;
+	return getRomaMoveLine(romaIndex, 2);
+}
+
+/**
+ * Move a ROMA
+ * @param  {number} romaIndex - index of roma
+ * @param  {number} action - 0=open gripper, 1=close gripper, 2=move home, 3=move relative,
+ * @return {[type]}           [description]
+ */
+function getRomaMoveLine(romaIndex, action) {
+	const x0 = {
+		action,
+		gripperDistance: 80,
+		dx: 0,
+		dy: 0,
+		dz: 0,
+		speed: 150,
+		maximumSpeed: 1,
+		romaIndex
+	};
+	return `ROMA(${x.action},${x.gripperDistance},${x.force},${x.dx},${x.dy},${x.dz},${x.speed},${x.maximumSpeed},${x.romaIndex})`;
 }
 
 export function _movePlate(params, parsed, data) {
@@ -19,7 +39,7 @@ export function _movePlate(params, parsed, data) {
 		plateDestGrid: ["@destination", "evowareGrid"],
 		plateDestSite: ["@destination", "evowareSite"],
 	}, params, data);
-	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"], romaIndex);
+	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"], values.romaIndex);
 	values.programName = parsed.value.program;
 	const bMoveBackToHome = parsed.value.evowareMoveBackToHome || false; // 1 = move back to home position
 	values.moveBackToHome = (bMoveBackToHome) ? 1 : 0;
@@ -53,7 +73,7 @@ export function _movePlate(params, parsed, data) {
 
 	const items = [];
 
-	if (romaIndex !== romaIndexPrev) {
+	if (values.romaIndex !== romaIndexPrev) {
 		items.push({
 			line: getMoveRomaHomeLine(romaIndexPrev)
 		});
@@ -61,12 +81,12 @@ export function _movePlate(params, parsed, data) {
 
 	items.push({
 		line,
-		effects: _.fromPairs([[`${plateName}.location`, plateDestName], [`EVOWARE.romaIndexPrev`, romaIndex]]),
+		effects: _.fromPairs([[`${plateName}.location`, plateDestName], [`EVOWARE.romaIndexPrev`, values.romaIndex]]),
 		tableEffects: [
 			[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
 			[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
 		]
-	}};
+	});
 
 	return items;
 }
