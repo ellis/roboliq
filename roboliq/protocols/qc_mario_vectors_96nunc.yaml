@@ -67,3 +67,25 @@ steps:
         program: $vector
         object: $plate
         destination: $storageSite
+  1:
+    command: experiment.forEachGroup
+    design: design1
+    groupBy: ["plate", "roma", "vector"]
+    steps:
+      description: `Test {{$plate}} movements for {{$roma}} with vector {{$vector}}`
+      command: experiment.forEachRow
+      data:
+        shuffle: true
+      steps:
+        1:
+          command: transporter.movePlate
+          equipment: $roma
+          program: $vector
+          object: $plate
+          destination: $site
+        2:
+          command: transporter.movePlate
+          equipment: $roma
+          program: $vector
+          object: $plate
+          destination: $storageSite
