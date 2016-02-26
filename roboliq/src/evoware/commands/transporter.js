@@ -1,6 +1,10 @@
 import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 
+function getMoveRomaHomeLine(romaIndex) {
+	return `Move Roma(${...});`;
+}
+
 export function _movePlate(params, parsed, data) {
 	//console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
 	// romaIndex: "(@equipment).evowareRoma: integer"
@@ -15,6 +19,7 @@ export function _movePlate(params, parsed, data) {
 		plateDestGrid: ["@destination", "evowareGrid"],
 		plateDestSite: ["@destination", "evowareSite"],
 	}, params, data);
+	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"], romaIndex);
 	values.programName = parsed.value.program;
 	const bMoveBackToHome = parsed.value.evowareMoveBackToHome || false; // 1 = move back to home position
 	values.moveBackToHome = (bMoveBackToHome) ? 1 : 0;
@@ -45,12 +50,23 @@ export function _movePlate(params, parsed, data) {
 
 	const plateName = parsed.objectName.object;
 	const plateDestName = parsed.objectName.destination;
-	return [{
+
+	const items = [];
+
+	if (romaIndex !== romaIndexPrev) {
+		items.push({
+			line: getMoveRomaHomeLine(romaIndexPrev)
+		});
+	}
+
+	items.push({
 		line,
-		effects: _.fromPairs([[`${plateName}.location`, plateDestName]]),
+		effects: _.fromPairs([[`${plateName}.location`, plateDestName], [`EVOWARE.romaIndexPrev`, romaIndex]]),
 		tableEffects: [
 			[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
 			[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
 		]
-	}];
+	}};
+
+	return items;
 }
