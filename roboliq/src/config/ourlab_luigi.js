@@ -37,19 +37,21 @@ function makeTransporterPredicates(specs) {
 	let siteCliqueId = 1;
 	const l = [];
 	_.forEach(specs, (programs, equipment) => {
-		_.forEach(programs, (sites, program) => {
-			const siteClique = "ourlab.luigi.siteClique"+siteCliqueId;
-			siteCliqueId++;
-			_.forEach(sites, site => {
-				l.push({"siteCliqueSite": {siteClique, site}});
-			});
-			l.push({
-				"transporter.canAgentEquipmentProgramSites": {
-					"agent": "ourlab.luigi.evoware",
-					equipment,
-					program,
-					siteClique
-				}
+		_.forEach(programs, (cliques, program) => {
+			_.forEach(cliques, (sites) => {
+				const siteClique = "ourlab.luigi.siteClique"+siteCliqueId;
+				siteCliqueId++;
+				_.forEach(sites, site => {
+					l.push({"siteCliqueSite": {siteClique, site}});
+				});
+				l.push({
+					"transporter.canAgentEquipmentProgramSites": {
+						"agent": "ourlab.luigi.evoware",
+						equipment,
+						program,
+						siteClique
+					}
+				});
 			});
 		});
 	});
@@ -144,6 +146,7 @@ module.exports = {
 					R2: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 1 },
 					R3: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 2 },
 					R4: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 3 },
+					LIGHT: { type: "Site", evowareCarrier: "Pickolo-Light-Table", evowareGrid: 29, evowareSite: 1 },
 					"ROBOSEAL": {
 						"type": "Site",
 						"evowareCarrier": "RoboSeal",
@@ -249,14 +252,29 @@ module.exports = {
 	},
 
 	predicates: _.flatten([
+		// Deepwell blocks only
 		makeSiteModelPredicates({
 			siteModel: "ourlab.luigi.siteModel1",
-			sites: ["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3"],
+			sites: ["ourlab.luigi.site.P3"],
+			labwareModels: ["ourlab.model.plateModel_96_dwp"]
+		}),
+		// 96 nuncs only
+		// Deepwell blocks + ...
+		makeSiteModelPredicates({
+			siteModel: "ourlab.luigi.siteModel1",
+			sites: ["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.LIGHT"],
 			labwareModels: ["ourlab.model.plateModel_96_dwp"]
 		}),
 		makeTransporterPredicates({
 			"ourlab.luigi.roma1": {
-				Narrow: ["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3"]
+				Narrow: [
+					["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6"],
+				]
+			},
+			"ourlab.luigi.roma2": {
+				Narrow: [
+					["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.LIGHT"],
+				]
 			}
 		}),
 	{"#for": {

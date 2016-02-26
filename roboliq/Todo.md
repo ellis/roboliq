@@ -197,6 +197,10 @@
 - [ ] camera
 - [ ] reader
 - [ ] shaker incubator
+- [ ] add the extra logic+code for opening a black incubator site
+- [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
+- [ ] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
+- [ ] handle use of different evoware labware for sealed DWB
 
 # Todos for paper 2/3
 

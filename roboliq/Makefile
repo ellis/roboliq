@@ -1,0 +1,4 @@
+# Temporary file for more conveniently compiling several scripts
+
+luigi_protocol2:
+	npm start -- --no-ourlab src/config/ourlab_luigi.js protocols/luigi_protocol2.yaml && npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/DM_WorkTable_June2015.ewt protocols/luigi_protocol2.out.json ourlab.luigi.evoware
