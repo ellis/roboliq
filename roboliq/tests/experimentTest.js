@@ -111,7 +111,7 @@ describe('experiment', function() {
 			});
 		});
 
-		it("should manage with duration", function() {
+		it.only("should manage with duration", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
@@ -145,30 +145,20 @@ describe('experiment', function() {
 					},
 					"1": {
 						"1": {
-							"1": {
-								"command": "system._echo",
-								"value": [
-									"A1",
-									"A2"
-								]
-							},
-							"command": "system.echo",
-							"value": "$$a"
+							"command": "system._echo",
+							"value": [ "A1", "A2" ]
 						},
+						"command": "system.echo",
+						"value": [ "A1", "A2" ],
 						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
 					},
 					"2": {
 						"1": {
-							"1": {
-								"command": "system._echo",
-								"value": [
-									"A1",
-									"A2"
-								]
-							},
-							"command": "system.echo",
-							"value": "$$a"
+							"command": "system._echo",
+							"value": [ "A1", "A2" ]
 						},
+						"command": "system.echo",
+						"value": [ "A1", "A2" ],
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
 					"3": {
@@ -232,16 +222,11 @@ describe('experiment', function() {
 					},
 					"2": {
 						"1": {
-							"1": {
-								"command": "system._echo",
-								"value": [
-									"A1",
-									"A2"
-								]
-							},
-							"command": "system.echo",
-							"value": "$$a"
+							"command": "system._echo",
+							"value": [ "A1", "A2" ]
 						},
+						"command": "system.echo",
+						"value": ["A1", "A2"],
 						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
 					},
 					"3": {
@@ -255,10 +240,8 @@ describe('experiment', function() {
 					"equipment": "timer1",
 					"duration": "1 minute",
 					"steps": {
-						"1": {
-							"command": "system.echo",
-							"value": "$$a"
-						},
+						"command": "system.echo",
+						"value": ["A1", "A2"],
 						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
 					}
 				},
@@ -270,16 +253,11 @@ describe('experiment', function() {
 					},
 					"2": {
 						"1": {
-							"1": {
-								"command": "system._echo",
-								"value": [
-									"A1",
-									"A2"
-								]
-							},
-							"command": "system.echo",
-							"value": "$$a"
+							"command": "system._echo",
+							"value": [ "A1", "A2" ]
 						},
+						"command": "system.echo",
+						"value": ["A1", "A2"],
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
 					"3": {
@@ -293,10 +271,8 @@ describe('experiment', function() {
 					"equipment": "timer1",
 					"duration": "1 minute",
 					"steps": {
-						"1": {
-							"command": "system.echo",
-							"value": "$$a"
-						},
+						"command": "system.echo",
+						"value": ["A1", "A2"],
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					}
 				},
@@ -320,6 +296,66 @@ describe('experiment', function() {
 		it.skip("should handle timing with duration and startTimerAfterStep", function() {
 
 		});
-		
+
+	});
+
+	describe("experiment.forEachGroup", function() {
+		it("should manage without timing specifications", function() {
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "experiment.forEachGroup",
+						design: "design1",
+						groupBy: "b",
+						steps: {
+							description: "`Group for B={{$b}}`",
+							1: {
+								command: "system.echo",
+								value: "$$a"
+							}
+						}
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
+			should.deepEqual(result.output.steps["1"], {
+				command: "experiment.forEachGroup",
+				design: "design1",
+				groupBy: "b",
+				steps: {
+					description: "`Group for B={{$b}}`",
+					1: {
+						command: "system.echo",
+						value: "$$a"
+					}
+				},
+				1: {
+					'@DATA': [ { a: 'A1', b: 'B1' }, { a: 'A2', b: 'B1' } ],
+					description: "Group for B=B1",
+					1: {
+						command: "system.echo",
+						value: "$$a",
+						1: {
+							command: "system._echo",
+							value: ["A1", "A2"]
+						}
+					}
+				},
+				2: {
+					'@DATA': [ { a: 'A1', b: 'B2' }, { a: 'A2', b: 'B2' } ],
+					description: "Group for B=B2",
+					1: {
+						command: "system.echo",
+						value: "$$a",
+						1: {
+							command: "system._echo",
+							value: ["A1", "A2"]
+						}
+					}
+				}
+			});
+		});
 	});
 });
