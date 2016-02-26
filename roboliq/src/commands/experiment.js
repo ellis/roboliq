@@ -6,7 +6,7 @@ import * as Design from '../design.js';
 import expect from '../expect.js';
 import misc from '../misc.js';
 
-function run(params, parsed, data) {
+function run(parsed, data) {
 	//console.log("experiment.run");
 	//console.log("parsed: "+JSON.stringify(parsed, null, '\t'));
 
@@ -17,9 +17,11 @@ function run(params, parsed, data) {
 	const DATA = (parsed.value.design)
 	  ? Design.flattenDesign(parsed.value.design)
 		: data.objects.DATA;
-	assert(DATA, "missing required parameter 'design'");
+	assert(DATA, "missing DATA; you may want to specify the parameter 'design'");
 
-	const DATAs = Design.query(DATA, {groupBy: parsed.value.groupBy});
+	const DATAs = (parsed.value.forEachRow)
+		? DATA.map(x => [x])
+		: Design.query(DATA, {groupBy: parsed.value.groupBy});
 	//console.log("experiment.run DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
 	// Check how many timers are needed
@@ -124,9 +126,15 @@ function makeSubstitutions(x, data) {
 
 const commandHandlers = {
 	"experiment.forEachGroup": function(params, parsed, data) {
-		return run(params, parsed, data);
+		return run(parsed, data);
 	},
-	"experiment.run": run,
+	"experiment.forEachRow": function(params, parsed, data) {
+		parsed.value.forEachRow = true;
+		return run(parsed, data);
+	},
+	"experiment.run": function(params, parsed, data) {
+		return run(parsed, data);
+	},
 };
 
 module.exports = {

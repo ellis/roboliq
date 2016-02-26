@@ -200,8 +200,10 @@
 # Todos for paper 2/3
 
 - [ ] qc_mario_vectors_96nunc:
-  - [?] randomize order of sites
-  - [ ] implement `system.description`
+  - [x] randomize order of sites
+  - [?] implement `system.description`
+  - [ ] allow for setting a random seed
+  - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] have a good command for expanding steps and parameters based on data
     maybe something like this:

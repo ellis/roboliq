@@ -358,4 +358,56 @@ describe('experiment', function() {
 			});
 		});
 	});
+
+	describe("experiment.forEachRow", function() {
+		it("should manage without timing specifications", function() {
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "experiment.forEachRow",
+						design: "design1",
+						steps: {
+							command: "system.echo",
+							value: "`{{$a}} {{$b}}`"
+						}
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
+			should.deepEqual(result.output.steps["1"], {
+				command: "experiment.forEachRow",
+				design: "design1",
+				steps: {
+					command: "system.echo",
+					value: "`{{$a}} {{$b}}`"
+				},
+				1: {
+					'@DATA': [ { a: 'A1', b: 'B1' } ],
+					command: "system.echo",
+					value: "A1 B1",
+					1: { command: "system._echo", value: "A1 B1" }
+				},
+				2: {
+					'@DATA': [ { a: 'A1', b: 'B2' } ],
+					command: "system.echo",
+					value: "A1 B2",
+					1: { command: "system._echo", value: "A1 B2" }
+				},
+				3: {
+					'@DATA': [ { a: 'A2', b: 'B1' } ],
+					command: "system.echo",
+					value: "A2 B1",
+					1: { command: "system._echo", value: "A2 B1" }
+				},
+				4: {
+					'@DATA': [ { a: 'A2', b: 'B2' } ],
+					command: "system.echo",
+					value: "A2 B2",
+					1: { command: "system._echo", value: "A2 B2" }
+				}
+			});
+		});
+	});
 });
