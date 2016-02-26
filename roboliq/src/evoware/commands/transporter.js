@@ -12,7 +12,7 @@ function getMoveRomaHomeLine(romaIndex) {
  * @return {[type]}           [description]
  */
 function getRomaMoveLine(romaIndex, action) {
-	const x0 = {
+	const x = {
 		action,
 		gripperDistance: 80,
 		dx: 0,

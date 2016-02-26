@@ -149,6 +149,7 @@
 - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] `experiment.run`: automatically find timers if non supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
+- [?] implement `system.description`
 - [ ] allow for setting default values in `DEFAULTS`: such as setting `DEFAULTS.agent` in `experiment.run`, then use the value as a default in commandHelper.parseParams
 - [ ] roboliq.js:expandStep: probably shouldn't pass around SCOPE and DATA, since they should be in `objects`.
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
@@ -200,10 +201,15 @@
 # Todos for paper 2/3
 
 - [ ] qc_mario_vectors_96nunc:
-  - [x] randomize order of sites
-  - [?] implement `system.description`
-  - [ ] allow for setting a random seed
-  - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+    - [x] randomize order of sites
+    - [ ] allow for setting a random seed
+    - [ ] output `description` values as evoware comments
+    - [ ] sites:
+        - [ ] RoboPeel
+        - [ ] hotels in back
+        - [ ] transfer hotels
+        - [ ] P1-P3,P6-P8 with ROMA2
+        - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] have a good command for expanding steps and parameters based on data
     maybe something like this:
