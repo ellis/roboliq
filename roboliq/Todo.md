@@ -147,6 +147,8 @@
 - [x] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [x] roboliqDirectiveHandlers.js: handle '#data' directive
 - [?] transporter.movePlate: should handle an `equipment` specification
+    - 1.1.1.2: unable to find a transportation path for `plateNunc` from `ourlab.mario.site.P5` to `ourlab.mario.site.READER`
+    - 1.1.2: unable to find a transportation path for `plateNunc` from `ourlab.mario.site.P4` to `ourlab.mario.site.REGRIP`
 - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [ ] `experiment.run`: automatically find timers if non supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
 - [?] implement `system.description`
