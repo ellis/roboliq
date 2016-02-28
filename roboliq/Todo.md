@@ -146,7 +146,7 @@
 - [x] roboliq.js: handle `data` property
 - [x] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [x] roboliqDirectiveHandlers.js: handle '#data' directive
-- [?] transporter.movePlate: should handle an `equipment` specification
+- [ ] transporter.movePlate: should handle an `equipment` specification
     - 1.1.1.2: unable to find a transportation path for `plateNunc` from `ourlab.mario.site.P5` to `ourlab.mario.site.READER`
     - 1.1.2: unable to find a transportation path for `plateNunc` from `ourlab.mario.site.P4` to `ourlab.mario.site.REGRIP`
 - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
