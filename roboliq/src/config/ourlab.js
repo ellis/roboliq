@@ -466,21 +466,28 @@ module.exports = {
 			}
 		];
 	}).flatten().value(),
+	// READER <-> REGRIP
+	_.map(["READER", "REGRIP"], function(s) {
+		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_READER", "site": "ourlab.mario.site."+s}};
+	}),
+	// READER ROMA1 Narrow
+	{
+		"transporter.canAgentEquipmentProgramSites": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.roma1",
+			"program": "Narrow",
+			"siteClique": "ourlab.mario.siteClique_READER"
+		}
+	},
 	// READER ROMA2 Wide
-	_(["READER"]).map(function(s) {
-		return [
-			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site.REGRIP"}},
-			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site."+s}},
-			{
-				"transporter.canAgentEquipmentProgramSites": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.roma2",
-					"program": "Wide",
-					"siteClique": "ourlab.mario.siteClique_"+s
-				}
-			}
-		];
-	}).flatten().value(),
+	{
+		"transporter.canAgentEquipmentProgramSites": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.roma2",
+			"program": "Wide",
+			"siteClique": "ourlab.mario.siteClique_READER"
+		}
+	},
 	{"#for": {
 		factors: {model: ["plateModel_384_square"]},
 		output: {
