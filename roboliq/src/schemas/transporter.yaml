@@ -31,6 +31,8 @@ transporter.doThenRestoreLocation:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     objects: {description: "Plate identifier", type: "array", items: {type: Plate}}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
     steps: {description: "Sub-steps to perform", type: [object, array]}
   required: [objects]
 
@@ -39,6 +41,8 @@ transporter.movePlate:
     Transport a plate to a destination.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Plate identifier", type: "Plate"}
     destination: {description: "Site to move the plate to", "type": "Site"}
   required: [object, destination]

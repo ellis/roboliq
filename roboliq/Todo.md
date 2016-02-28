@@ -146,12 +146,11 @@
 - [x] roboliq.js: handle `data` property
 - [x] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [x] roboliqDirectiveHandlers.js: handle '#data' directive
+- [?] transporter.movePlate: should handle an `equipment` specification
 - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
-- [ ] `experiment.run`: change `experiment` property to `conditions`
 - [ ] `experiment.run`: automatically find timers if non supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
 - [?] implement `system.description`
 - [ ] allow for setting default values in `DEFAULTS`: such as setting `DEFAULTS.agent` in `experiment.run`, then use the value as a default in commandHelper.parseParams
-- [ ] roboliq.js:expandStep: probably shouldn't pass around SCOPE and DATA, since they should be in `objects`.
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
@@ -200,7 +199,6 @@
 - [ ] add the extra logic+code for opening a black incubator site
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
-- [ ] handle use of different evoware labware for sealed DWB
 
 # Todos for paper 2/3
 
