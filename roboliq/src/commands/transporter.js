@@ -32,7 +32,17 @@ var objectToPredicateConverters = {
 	},
 };
 
-function makePlateLogic(parsed, n) {
+function makeMovePlateParams(parsed) {
+	return _.merge({}, {
+		agent: (parsed.objectName.agent) ? "?agent" : undefined,
+		equipment: (parsed.objectName.equipment) ? "?equipment" : undefined,
+		program: (parsed.objectName.program || parsed.value.program) ? "?program" : undefined,
+		labware: "?labware",
+		destination: "?destination"
+	});
+}
+
+function makePlateLogic(parsed, movePlateParams, n) {
 	//console.log("makePlateLogic: "+JSON.stringify(parsed, null, '\t'));
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
@@ -47,13 +57,6 @@ function makePlateLogic(parsed, n) {
 	const programs = makeArray("?program", parsed.objectName.program || parsed.value.program)
 	//const origin = parsed.value.object.location;
 	//
-	const movePlateParams = _.merge({}, {
-		agent: (parsed.objectName.agent) ? "?agent" : undefined,
-		equipment: (parsed.objectName.equipment) ? "?equipment" : undefined,
-		program: (parsed.objectName.program || parsed.value.program) ? "?program" : undefined,
-		labware: "?labware",
-		destination: "?destination"
-	});
 
 	let name;
 
@@ -251,12 +254,7 @@ var commandHandlers = {
 		const transporterLogic = require('./transporterLogic.json');
 
 		const keys = ["null", "one", "two"];
-		const infix = (parsed.objectName.agent) ? "-a" : "";
-		const taskParams = _.merge({}, {
-			"agent": parsed.objectName.agent, // this may be undefined
-			"labware": parsed.objectName.object,
-			"destination": parsed.objectName.destination
-		});
+		const movePlateParams = makeMovePlateParams(parsed);
 
 		const shop = require('../HTN/shop.js');
 		let input0 = data.predicates;
@@ -264,8 +262,8 @@ var commandHandlers = {
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
 			input0 = input0.concat(_.values(transporterLogic[key]));
-			input0 = input0.concat(makePlateLogic(parsed, i));
-			const tasks = { "tasks": { "ordered": [_.fromPairs([[`movePlate${infix}`, taskParams]])] } };
+			input0 = input0.concat(makePlateLogic(parsed, movePlateParams, i));
+			const tasks = { "tasks": { "ordered": [{ movePlate: movePlateParams }] } };
 			//console.log(JSON.stringify(tasks))
 			const input = input0.concat([tasks]);
 			var planner = shop.makePlanner(input);
