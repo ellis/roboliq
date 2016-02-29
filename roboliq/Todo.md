@@ -151,16 +151,13 @@
 - [x] commandHelper.substituteDeep:
     - [x] should accept SCOPE and DATA instead of data, because we data.objects may change as steps are processed
     - [x] skip objects with 'data' property
-    - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
-- [ ] `experiment.run`: automatically find timers if non supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
-- [?] implement `system.description`
-- [ ] allow for setting default values in `DEFAULTS`: such as setting `DEFAULTS.agent` in `experiment.run`, then use the value as a default in commandHelper.parseParams
-- [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
-- [ ] change `predicates` field to be a map of arrays instead of an array
-- [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
+    - [x] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
+- [ ] tania13_ph.yaml: re-write using Design
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
+- [ ] `experiment.run`: automatically find timers if none supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
+- [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] paper1_protocol3_unfolding.yaml: make sure it compiles
 - [ ] consider having the fluorescenceReader command generate a report with the current plate contents
 - [ ] handle mixture randomization well, and use it for the paper1 protocols (pH and unfolding)
@@ -177,8 +174,11 @@
 - [ ] rename '#createPipetteMixtureList' to '#mixtureList' and '#gradient' to '#gradientLinear', so it matches figure in paper
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
+- [ ] change `predicates` field to be a map of arrays instead of an array
 - [ ] commandHelper.substituteDeep: only substitute template strings whose variables are '$' variables
 - [ ] commandHelper.substituteDeep: support '$$' variables in template strings
+- [?] implement `system.description`
+- [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
 # Todos for luigi
 

@@ -72,6 +72,30 @@ objects:
   N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
   Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
 
+  phDesign:
+    type: Design
+    conditions:
+      waterSource: saltwater
+      waterVolume: 40ul
+      proteinSource: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      proteinVolume: 5ul
+      bufferSystem:
+        hepes:
+          acidSource: hepes_650
+          baseSource: hepes_850
+          acidVolume*=:
+            CONTINUE
+        pipes:
+        mes:
+        acetate:
+      component*:
+        water:
+          source: saltwater
+          volume: 40ul
+        base:
+        acid:
+      replicate*: [1,2,3]
+
   mixtures:
     type: Variable
     calculate:
