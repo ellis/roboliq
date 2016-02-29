@@ -164,6 +164,8 @@ pipetter.pipetteMixtures:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
     mixtures: {description: "Array of arrays, where each sub-array is a list of components to be mixed into a destination well", "type": "array"}
+    sourceLabware: {description: "Labware for source wells", "type": "Plate"}
+    destinationLabware: {description: "Labware for source wells", "type": "Plate"}
     destinations: {description: "Destination specifier", type: Wells}
     order:
       description: "Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array."

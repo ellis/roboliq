@@ -63,7 +63,7 @@ describe('experiment', function() {
 								"value": "B1"
 							},
 							"command": "system.echo",
-							"value": "$b"
+							"value": "B1"
 						},
 						"2": {
 							"1": {
@@ -71,7 +71,7 @@ describe('experiment', function() {
 								"value": ["A1", "A2"]
 							},
 							"command": "system.echo",
-							"value": "$$a"
+							"value": ["A1", "A2"]
 						},
 						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
 					},
@@ -82,7 +82,7 @@ describe('experiment', function() {
 								"value": "B2"
 							},
 							"command": "system.echo",
-							"value": "$b"
+							"value": "B2"
 						},
 						"2": {
 							"1": {
@@ -90,7 +90,7 @@ describe('experiment', function() {
 								"value": ["A1", "A2"]
 							},
 							"command": "system.echo",
-							"value": "$$a"
+							"value": ["A1", "A2"]
 						},
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
@@ -311,7 +311,7 @@ describe('experiment', function() {
 						steps: {
 							description: "`Group for B={{$b}}`",
 							1: {
-								command: "system.echo",
+								command: "system._echo",
 								value: "$$a"
 							}
 						}
@@ -327,7 +327,7 @@ describe('experiment', function() {
 				steps: {
 					description: "`Group for B={{$b}}`",
 					1: {
-						command: "system.echo",
+						command: "system._echo",
 						value: "$$a"
 					}
 				},
@@ -335,24 +335,16 @@ describe('experiment', function() {
 					'@DATA': [ { a: 'A1', b: 'B1' }, { a: 'A2', b: 'B1' } ],
 					description: "Group for B=B1",
 					1: {
-						command: "system.echo",
-						value: "$$a",
-						1: {
-							command: "system._echo",
-							value: ["A1", "A2"]
-						}
+						command: "system._echo",
+						value: ["A1", "A2"]
 					}
 				},
 				2: {
 					'@DATA': [ { a: 'A1', b: 'B2' }, { a: 'A2', b: 'B2' } ],
 					description: "Group for B=B2",
 					1: {
-						command: "system.echo",
-						value: "$$a",
-						1: {
-							command: "system._echo",
-							value: ["A1", "A2"]
-						}
+						command: "system._echo",
+						value: ["A1", "A2"]
 					}
 				}
 			});

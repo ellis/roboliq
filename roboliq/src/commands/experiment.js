@@ -65,7 +65,7 @@ function run(parsed, data) {
 		// Step starts out as a copy of the given steps
 		const step0 = commandHelper.stepify(_.cloneDeep(parsed.value.steps));
 		const step1 = (_.size(step0) === 1) ? _(step0).toPairs().head()[1] : step0;
-		const step = makeSubstitutions(step1, data2);
+		const step = commandHelper.substituteDeep(step1, data2);
 		// Set the current DATA group
 		step["@DATA"] = _.cloneDeep(DATA);
 		// Add postponed timer1, if necessary
@@ -103,25 +103,6 @@ function run(parsed, data) {
 
 	//console.log(JSON.stringify(expansion, null, "\t"))
 	return {expansion};
-}
-
-function makeSubstitutions(x, data) {
-	return _.mapValues(x, (value, name) => {
-		if (_.startsWith(value, "$")) {
-			const result = commandHelper._dereferenceVariable(data, value);
-			//console.log({name, value, SCOPE: data.objects.SCOPE, DATA: data.objects.DATA, result})
-			return (result) ? result.value : undefined;
-		}
-		else if (_.startsWith(value, "`") && _.endsWith(value, "`")) {
-			const value1 = value.substr(1, value.length - 2);
-			const scope = _.mapKeys(data.objects.SCOPE, (value, name) => "$"+name);
-			//console.log({value, value1, scope})
-			return misc.renderTemplate(value1, scope, data);
-		}
-		else {
-			return value;
-		}
-	});
 }
 
 const commandHandlers = {

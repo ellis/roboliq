@@ -113,7 +113,7 @@ describe('commandHelper', function() {
 		});
 	});
 
-	describe('commandHelper.parseParams', function() {
+	describe('parseParams', function() {
 
 		require('mathjs').config({
 			number: 'bignumber', // Default type of number
@@ -494,4 +494,72 @@ describe('commandHelper', function() {
 			);
 		});
 	});
+
+	describe("substituteDeep", () => {
+		const data = {
+			objects: {
+				SCOPE: {
+					a: "A"
+				},
+				DATA: [
+					{n: 1}, {n: 2}
+				]
+			},
+			accesses: []
+		};
+
+		it("should handle SCOPE, DATA, and template substitutions", () => {
+			const x = {
+				x1: "$a",
+				x2: "$$n",
+				x3: {
+					x31: "$a",
+					x32: "$$n"
+				},
+				x4: [
+					"$a",
+					"$$n"
+				],
+				x5: "`My {{$a}}`"
+			};
+			should.deepEqual(
+				commandHelper.substituteDeep(x, data),
+				{
+					x1: "A",
+					x2: [1, 2],
+					x3: {
+						x31: "A",
+						x32: [1, 2]
+					},
+					x4: [
+						"A",
+						[1, 2]
+					],
+					x5: "My A"
+				}
+			);
+		});
+
+		it("should skip directives and 'steps' properties", () => {
+			const x = {
+				x1: "$a",
+				"#x2": "$a",
+				"steps": {
+					1: "$a"
+				}
+			};
+			should.deepEqual(
+				commandHelper.substituteDeep(x, data),
+				{
+					x1: "A",
+					"#x2": "$a",
+					"steps": {
+						1: "$a"
+					}
+				}
+			);
+		});
+
+	});
+
 });

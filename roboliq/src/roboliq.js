@@ -846,11 +846,11 @@ function _run(opts, userProtocol) {
 		const params = misc.handleDirectiveDeep(_.omit(step, "data"), protocol);
 		//console.log({step, params})
 
-		// Add `_scope` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
-		//console.log({_scope: params._scope})
-		if (!_.isEmpty(params._scope)) {
+		// Add `@SCOPE` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
+		//console.log({_scope: params["@SCOPE"]})
+		if (!_.isEmpty(params["@SCOPE"])) {
 			SCOPE = _.clone(SCOPE);
-			_.forEach(params._scope, (value, key) => SCOPE[key] = value);
+			_.forEach(params["@SCOPE"], (value, key) => SCOPE[key] = value);
 			//console.log("SCOPE: "+JSON.stringify(SCOPE))
 		}
 

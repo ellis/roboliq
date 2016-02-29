@@ -10,6 +10,7 @@ var jmespath = require('jmespath');
 import math from 'mathjs';
 import naturalSort from 'javascript-natural-sort';
 import tv4 from 'tv4';
+import misc from './misc.js';
 import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
 
@@ -26,6 +27,66 @@ function asArray(x) {
 	if (_.isArray(x)) return x;
 	else if (_.isUndefined(x)) return [];
 	else return [x];
+}
+
+/**
+ * Recursively replace $-SCOPE, $$-DATA, and template strings in `x`.
+ *
+ * The recursion has the following exceptions:
+ * - skip objects with any of these properties: `data`, `@DATA`, `@SCOPE`
+ * - skip `steps` properties
+ * - skip directives
+ *
+ * @param  {any} x - the variable to perform substitutions on
+ * @param  {object} data - protocol data
+ * @return {any} the value with possible substitutions
+ */
+function substituteDeep(x, data) {
+	let x2 = x;
+	if (_.isString(x)) {
+		// DATA substitution
+		if (_.startsWith(x, "$$")) {
+			if (_.isArray(data.objects.DATA)) {
+				const propertyName = x.substr(2);
+				x2 = _(data.objects.DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
+				//console.log("data.objects.DATA: "+JSON.stringify(data.objects.DATA, null, '\t'));
+				//console.log({map: _(data.objects.DATA).map(propertyName).value()});
+			}
+		}
+		// SCOPE substitution
+		else if (_.startsWith(x, "$")) {
+			const propertyName = x.substr(1);
+			x2 = _.get(data.objects.SCOPE, propertyName, x);
+		}
+		// Template substitution
+		else if (_.startsWith(x, "`") && _.endsWith(x, "`")) {
+			const template = x.substr(1, x.length - 2);
+			const scope = _.mapKeys(data.objects.SCOPE, (value, name) => "$"+name);
+			//console.log({x, template, scope})
+			x2 = misc.renderTemplate(template, scope, data);
+		}
+	}
+	else if (_.isArray(x)) {
+		x2 = _.map(x, y => substituteDeep(y, data));
+	}
+	else if (_.isPlainObject(x)) {
+		// Skip objects with one of these properties:
+		if (x.hasOwnProperty("data") || x.hasOwnProperty("@DATA") || x.hasOwnProperty("@SCOPE")) {
+			// do nothing
+		}
+		else {
+			x2 = _.mapValues(x, (value, name) => {
+				// Skip over directives and 'steps' properties
+				if (_.startsWith(name, "#") || name === "steps") {
+					return value;
+				}
+				else {
+					return substituteDeep(value, data);
+				}
+			});
+		}
+	}
+	return x2;
 }
 
 /**
@@ -850,4 +911,5 @@ module.exports = {
 	parseParams,
 	queryLogic,
 	stepify,
+	substituteDeep
 }

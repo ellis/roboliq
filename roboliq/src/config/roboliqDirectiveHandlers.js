@@ -38,11 +38,22 @@ function directive_createWellAssignments(spec, data) {
 
 function directive_data(spec, data) {
 	return expect.try("#data", () => {
-		const groups = Design.query(data.objects.DATA, spec);
-		let result = (spec.groupBy) ? groups : _.flatten(groups);
+		let result = Design.query(data.objects.DATA, spec);
+		if (spec.template) {
+			const data2 = _.clone(data);
+			data2.objects = _.clone(data2.objects);
+			result = _.map(result, group => _.map(group, row => {
+				data2.objects.DATA = group;
+				data2.objects.SCOPE = _.merge({}, data.objects.SCOPE, row);
+				commandHelper.substituteDeep(row, data2);
+			}));
+		}
+		result = (spec.groupBy) ? result : _.flatten(result);
+
 		if (spec.value) {
 			result = _.map(result, spec.value);
 		}
+
 		if (spec.head) {
 			result = _.head(result);
 		}
