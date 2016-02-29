@@ -189,7 +189,7 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.steps['1'].duration, 3);
 		});
 
-		it("should handle 'data' property with forEach=row", () => {
+		it.only("should handle 'data' property with forEach=row", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -212,7 +212,7 @@ describe('roboliq', function() {
 				}
 			};
 			var result = roboliq.run(["-o", "", "-T"], protocol);
-			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps['1'], {
 				data: {
 					source: "design1",
