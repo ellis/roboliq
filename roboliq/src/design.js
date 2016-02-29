@@ -602,6 +602,21 @@ function mergeValues(table, sames, values, valueOffset, action, replacements) {
 function expandRowByValues(table, rowIndex, values, replacements) {
 	// console.log("expandRowByValues:")
 	// console.log({table, rowIndex, values, replacements})
+
+	function expandRowByObject(row, starName, starKey, starValue) {
+		const conditionActions = convertConditionsToActions(starValue);
+		// Add starName/Key to row
+		const row1 = _.merge({}, row, {[starName]: starKey});
+		// Create a table from the row
+		const table2 = [_.cloneDeep(row1)];
+		// Expand the table
+		_.forEach(conditionActions, action => {
+			applyActionToTable(table2, action);
+		});
+		// Return the expanded table
+		return table2;
+	}
+
 	let rows = [table[rowIndex]];
 	_.forEach(values, (value, key) => {
 		// console.log({key, value})
@@ -614,25 +629,7 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 				rows = _.flatMap(rows, row => {
 					return _.flatMap(starValues, (starValue, starKey) => {
 						assert(_.isPlainObject(starValue));
-						// console.log({starName, starKey, starValue});
-						// If starValue is an object, need to expand it:
-						if (_.isPlainObject(starValue)) {
-							const conditionActions = convertConditionsToActions(starValue);
-							// Add starName/Key to row
-							const row1 = _.merge({}, row, _.fromPairs([[starName, starKey]]));
-							// Create a table from the row
-							const table2 = [_.cloneDeep(row1)];
-							// Expand the table
-							_.forEach(conditionActions, action => {
-								applyActionToTable(table2, action);
-							});
-							// Return the expanded table
-							return table2;
-						}
-						// Otherwise, just merge:
-						else {
-							return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
-						}
+						return expandRowByObject(row, starName, starKey, starValue);
 					});
 				});
 			}
@@ -643,18 +640,7 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 						// console.log({starName, starValueIndex, starValue})
 						if (_.isPlainObject(starValue)) {
 							const starKey = starValueIndex + 1;
-
-							const conditionActions = convertConditionsToActions(starValue);
-							// Add starName/Key to row
-							const row1 = _.merge(row, {[starName]: starKey});
-							// Create a table from the row
-							const table2 = [_.cloneDeep(row1)];
-							// Expand the table
-							_.forEach(conditionActions, action => {
-								applyActionToTable(table2, action);
-							});
-							// Return the expanded table
-							return table2;
+							return expandRowByObject(row, starName, starKey, starValue);
 						}
 						else {
 							const starKey = starValue;
