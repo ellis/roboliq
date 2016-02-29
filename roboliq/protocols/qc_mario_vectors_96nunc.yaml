@@ -27,21 +27,23 @@ objects:
               "vector*":
                 "Narrow":
                   "site*":
-                  -  "ourlab.mario.site.P2"
-                  -  "ourlab.mario.site.P3"
-                  -  "ourlab.mario.site.P4"
-                  -  "ourlab.mario.site.P5"
-                  -  "ourlab.mario.site.P6"
-                  -  "ourlab.mario.site.P7"
-                  -  "ourlab.mario.site.P8"
-                  -  "ourlab.mario.site.READER"
-                  -  "ourlab.mario.site.CENTRIFUGE_2"
-                  -  "ourlab.mario.site.CENTRIFUGE_4"
+                  - "ourlab.mario.site.P2"
+                  - "ourlab.mario.site.P3"
+                  - "ourlab.mario.site.P4"
+                  - "ourlab.mario.site.P5"
+                  - "ourlab.mario.site.P6"
+                  - "ourlab.mario.site.P7"
+                  - "ourlab.mario.site.P8"
+                  - "ourlab.mario.site.CENTRIFUGE_2"
+                  - "ourlab.mario.site.CENTRIFUGE_4"
             "ourlab.mario.roma2":
               "vector*":
                 "Narrow":
                   "site*":
                   - "ourlab.mario.site.ROBOSEAL"
+                "Wide":
+                  "site*":
+                  - "ourlab.mario.site.READER"
 
 steps:
   1:

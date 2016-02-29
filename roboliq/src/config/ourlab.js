@@ -470,7 +470,7 @@ module.exports = {
 	_.map(["READER", "REGRIP"], function(s) {
 		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_READER", "site": "ourlab.mario.site."+s}};
 	}),
-	// READER ROMA1 Narrow
+	/*// READER ROMA1 Narrow
 	{
 		"transporter.canAgentEquipmentProgramSites": {
 			"agent": "ourlab.mario.evoware",
@@ -478,7 +478,7 @@ module.exports = {
 			"program": "Narrow",
 			"siteClique": "ourlab.mario.siteClique_READER"
 		}
-	},
+	},*/
 	// READER ROMA2 Wide
 	{
 		"transporter.canAgentEquipmentProgramSites": {
