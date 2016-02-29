@@ -57,8 +57,8 @@ function run(parsed, data) {
 
 	for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 		const DATA = DATAs[groupIndex];
-		console.log(`DATAs[${groupIndex}]:`);
-		_.forEach(DATA, row => { console.log(JSON.stringify(row)) });
+		// console.log(`DATAs[${groupIndex}]:`);
+		//_.forEach(DATA, row => { console.log(JSON.stringify(row)) });
 
 		// Update the SCOPE
 		const common = Design.getCommonValues(DATA);

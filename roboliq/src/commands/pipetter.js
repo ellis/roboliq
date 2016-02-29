@@ -744,7 +744,7 @@ const commandHandlers = {
 		return { expansion: { "1": params1, "2": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
-		console.log("pipetter.pipetteMixtures: "+JSON.stringify(parsed, null, '\t'));
+		// console.log("pipetter.pipetteMixtures: "+JSON.stringify(parsed, null, '\t'));
 		// Obtain a matrix of mixtures (rows for destinations, columns for layers)
 		const mixtures0 = parsed.value.mixtures.map((item, index1) => {
 			//console.log({index1, destination: item.destination || _.get(parsed.value.destinations, index1), destinations: _.get(parsed.value.destinations, index1)})

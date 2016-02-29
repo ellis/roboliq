@@ -797,7 +797,7 @@ function _run(opts, userProtocol) {
 
 		if (step.hasOwnProperty("@DATA")) {
 			DATA = step["@DATA"];
-			console.log("DATA: "+JSON.stringify(DATA))
+			// console.log("DATA: "+JSON.stringify(DATA))
 		}
 
 		let DATAs = [DATA];
@@ -861,6 +861,7 @@ function _run(opts, userProtocol) {
 			return;
 		}
 
+		const step0 = _.omit(step, "data");
 		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 			const DATA = DATAs[groupIndex];
 			//console.log("DATA1: "+JSON.stringify(DATA, null, '\t'));
@@ -881,7 +882,7 @@ function _run(opts, userProtocol) {
 				protocol,
 				path: prefix2
 			};
-			const params = misc.handleDirectiveDeep(_.omit(step, "data"), data);
+			const params = misc.handleDirectiveDeep(step0, data);
 
 			if (foreach) {
 				const groupKey = (groupIndex+1).toString();

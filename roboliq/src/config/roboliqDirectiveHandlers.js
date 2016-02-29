@@ -37,40 +37,40 @@ function directive_createWellAssignments(spec, data) {
 }
 
 function directive_data(spec, data) {
-	console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
-	console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
+	// console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
+	// console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
 	return expect.try("#data", () => {
 		let result = Design.query(data.objects.DATA, spec);
-		console.log("result0: "+JSON.stringify(result))
+		// console.log("result0: "+JSON.stringify(result))
 		if (spec.templateGroup) {
 			result = _.map(result, DATA => {
 				const SCOPE = _.merge({}, data.objects.SCOPE, Design.getCommonValues(DATA));
 				return commandHelper.substituteDeep(spec.templateGroup, DATA, SCOPE);
 			});
-			console.log("result1: "+JSON.stringify(result))
+			// console.log("result1: "+JSON.stringify(result))
 		}
 		else if (spec.template) {
 			result = _.map(result, DATA => _.map(DATA, row => {
 				const SCOPE = _.merge({}, data.objects.SCOPE, row);
 				return commandHelper.substituteDeep(spec.template, DATA, SCOPE);
 			}));
-			console.log("result1: "+JSON.stringify(result))
+			// console.log("result1: "+JSON.stringify(result))
 		}
 		result = (spec.groupBy) ? result : _.flatten(result);
-		console.log("result2: "+JSON.stringify(result))
+		// console.log("result2: "+JSON.stringify(result))
 
 		if (spec.value) {
 			result = _.map(result, spec.value);
-			console.log("result3: "+JSON.stringify(result))
+			// console.log("result3: "+JSON.stringify(result))
 		}
 
 		if (spec.head) {
 			result = _.head(result);
-			console.log("result4: "+JSON.stringify(result))
+			// console.log("result4: "+JSON.stringify(result))
 		}
 		if (spec.join) {
 			result = result.join(spec.join);
-			console.log("result5: "+JSON.stringify(result))
+			// console.log("result5: "+JSON.stringify(result))
 		}
 		return result;
 	});
