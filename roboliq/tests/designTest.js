@@ -79,7 +79,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should handle a branching array of objects", () => {
+		it("should handle a branching array of objects", () => {
 			const design = {
 				conditions: {
 					"media": "media1",
@@ -98,7 +98,7 @@ describe('design', () => {
 				}
 			}
 			const table = flattenDesign(design);
-			printData(table);
+			//printData(table);
 			should.deepEqual(table, [
 				{media: "media1", culturePlate: "stillPlate", cultureReplicate: 1, cultureWell: "A01", measurement: 1, dilutionPlate: "dilutionPlate1"}
 			]);
