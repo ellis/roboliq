@@ -79,6 +79,31 @@ describe('design', () => {
 			]);
 		});
 
+		it.only("should handle a branching array of objects", () => {
+			const design = {
+				conditions: {
+					"media": "media1",
+					"culturePlate*": {
+						"stillPlate": {
+							"cultureReplicate*": [
+								{
+									"cultureWell": "A01",
+									"measurement*": [
+										{"dilutionPlate": "dilutionPlate1"}
+									]
+								}
+							]
+						}
+					}
+				}
+			}
+			const table = flattenDesign(design);
+			printData(table);
+			should.deepEqual(table, [
+				{media: "media1", culturePlate: "stillPlate", cultureReplicate: 1, cultureWell: "A01", measurement: 1, dilutionPlate: "dilutionPlate1"}
+			]);
+		});
+
 		it.skip('should produce factors for Box dataset Chapter 3, boys shoes', () => {
 			const design = {
 				conditions: {

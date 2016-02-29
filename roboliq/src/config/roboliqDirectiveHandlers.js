@@ -38,6 +38,7 @@ function directive_createWellAssignments(spec, data) {
 
 function directive_data(spec, data) {
 	console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
+	console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
 	return expect.try("#data", () => {
 		let result = Design.query(data.objects.DATA, spec);
 		console.log("result0: "+JSON.stringify(result))

@@ -91,65 +91,65 @@ steps:
         command: "transporter.movePlate"
         object: $culturePlate
         destination: $incubatorLocation
-
-  2:
-    command: experiment.forEachGroup
-    design: design1
-    groupBy: measurement
-    duration: 7 minutes
-    timers: [ourlab.mario.timer1]
-    steps:
-      description: s"Measurement {{$measurement}}"
-      command: experiment.interleave
-      groupBy: culturePlate
-      interleave: 3 minutes
-      timers: [ourlab.mario.timer2]
-      steps:
-        description: s"Measurement {{$measurement}} on {{$culturePlate}}"
-        1:
-          command: "transporter.doThenRestoreLocation"
-          objects: [$dilutionPlate]
-          steps:
-            1:
-              command: transporter.movePlate
-              object: $dilutionPlate
-              destination: $dilutionLocation
-            2:
-              command: "transporter.movePlate"
-              object: $culturePlate
-              destination: "$pipettingLocation"
-            3:
-              command: "pipetter.pipette"
-              items:
-                "#data":
-                  where: {dilutionFactor: 1}
-                  template:
-                    source: $cultureWell
-                    destination: $dilutionWell
-                    syringe: $syringe
-              volumes: $sampleVolume
-              sourceLabware: $culturePlate
-              destinationLabware: $dilutionPlate
-              cleanBegin: "none"
-              clean: "light"
-            4:
-              command: "system.if"
-              test: $shake
-              then:
-                1: {command: "shaker.shakePlate", object: $culturePlate, program: {duration: "1 minute"}}
-            5:
-              command: "transporter.movePlate"
-              object: "$culturePlate"
-              destination: "$incubatorLocation"
-            6:
-              command: "pipetter.pipetteDilutionSeries2x"
-              diluent: "water"
-              destinationLabware: "$dilutionPlate"
-              items:
-                "#data":
-                  groupBy: cultureWell
-                  template:
-                    destinations: "$$dilutionWell"
-                    syringe: $syringe
-              cleanBegin: "none"
-              clean: "light"
+  #
+  # 2:
+  #   command: experiment.forEachGroup
+  #   design: design1
+  #   groupBy: measurement
+  #   duration: 7 minutes
+  #   timers: [ourlab.mario.timer1]
+  #   steps:
+  #     description: "`Measurement {{$measurement}}`"
+  #     command: experiment.interleave
+  #     groupBy: culturePlate
+  #     interleave: 3 minutes
+  #     timers: [ourlab.mario.timer2]
+  #     steps:
+  #       description: "`Measurement {{$measurement}} on {{$culturePlate}}`"
+  #       1:
+  #         command: "transporter.doThenRestoreLocation"
+  #         objects: [$dilutionPlate]
+  #         steps:
+  #           1:
+  #             command: transporter.movePlate
+  #             object: $dilutionPlate
+  #             destination: $dilutionLocation
+  #           2:
+  #             command: "transporter.movePlate"
+  #             object: $culturePlate
+  #             destination: "$pipettingLocation"
+  #           3:
+  #             command: "pipetter.pipette"
+  #             items:
+  #               "#data":
+  #                 where: {dilutionFactor: 1}
+  #                 template:
+  #                   source: $cultureWell
+  #                   destination: $dilutionWell
+  #                   syringe: $syringe
+  #             volumes: $sampleVolume
+  #             sourceLabware: $culturePlate
+  #             destinationLabware: $dilutionPlate
+  #             cleanBegin: "none"
+  #             clean: "light"
+  #           4:
+  #             command: "system.if"
+  #             test: $shake
+  #             then:
+  #               1: {command: "shaker.shakePlate", object: $culturePlate, program: {duration: "1 minute"}}
+  #           5:
+  #             command: "transporter.movePlate"
+  #             object: "$culturePlate"
+  #             destination: "$incubatorLocation"
+  #           6:
+  #             command: "pipetter.pipetteDilutionSeries2x"
+  #             diluent: "water"
+  #             destinationLabware: "$dilutionPlate"
+  #             items:
+  #               "#data":
+  #                 groupBy: cultureWell
+  #                 template:
+  #                   destinations: "$$dilutionWell"
+  #                   syringe: $syringe
+  #             cleanBegin: "none"
+  #             clean: "light"

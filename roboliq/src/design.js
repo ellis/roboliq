@@ -312,7 +312,7 @@ const actionHandlers = {
 		return action.object;
 	},
 	"assign": function(action, data) {
-		//console.log({name, x})
+		console.log("assign: "+JSON.stringify(action));
 		if (_.isArray(action.values)) {
 			return _.fromPairs([[action.name, action.values]]);
 		}
@@ -397,7 +397,7 @@ export function flattenDesign(design) {
 
 	const conditionActions = convertConditionsToActions(design.conditions);
 	const actions = _.compact(conditionActions.concat(design.actions));
-	// console.log({actions})
+	console.log({actions})
 
 	let table = [{}];
 	_.forEach(actions, action => {
@@ -529,23 +529,6 @@ function applyActionToTable(table, action) {
 		}
 	}
 	// printData(table);
-	/*
-	switch (action.action) {
-		case "add":
-			_.forEach(action.object, (value, name) => {
-				table = expandRows(table, name, value);
-			});
-			break;
-		case "assign":
-			table = assign(table, action.name, action);
-			break;
-		case "assignPlates":
-			table = assignPlates(table, action);
-			break;
-		case "replicate":
-			table = replicate(table, action);
-			break;
-	}*/
 }
 
 function groupSameIndexes(table, action) {
@@ -617,21 +600,21 @@ function mergeValues(table, sames, values, valueOffset, action, replacements) {
  * @return {[type]}           [description]
  */
 function expandRowByValues(table, rowIndex, values, replacements) {
-	// console.log("expandRowByValues:")
-	// console.log({table, rowIndex, values, replacements})
+	console.log("expandRowByValues:")
+	console.log({table, rowIndex, values, replacements})
 	let rows = [table[rowIndex]];
 	_.forEach(values, (value, key) => {
-		// console.log({key, value})
+		console.log({key, value})
 		if (_.endsWith(key, "*")) {
 			const starName = key.substring(0, key.length - 1);
 			const starValues = value;
-			// console.log({starName, starValues})
+			console.log({starName, starValues})
 			if (_.isPlainObject(starValues)) {
 				// For each entry in value, make a copy of every row in rows with the properties of the entry
 				rows = _.flatMap(rows, row => {
 					return _.flatMap(starValues, (starValue, starKey) => {
 						assert(_.isPlainObject(starValue));
-						// console.log({starName, starKey, starValue});
+						console.log({starName, starKey, starValue});
 						// If starValue is an object, need to expand it:
 						if (_.isPlainObject(starValue)) {
 							const conditionActions = convertConditionsToActions(starValue);
@@ -656,15 +639,26 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 			else if (_.isArray(starValues)) {
 				// For each entry in value, make a copy of every row in rows with the properties of the entry
 				rows = _.flatMap(rows, row => {
-					return _.map(starValues, (starValue, starValueIndex) => {
+					return _.flatMap(starValues, (starValue, starValueIndex) => {
 						// console.log({starName, starValueIndex, starValue})
 						if (_.isPlainObject(starValue)) {
 							const starKey = starValueIndex + 1;
-							return _.merge({}, row, _.fromPairs([[starName, starKey]]), starValue);
+
+							const conditionActions = convertConditionsToActions(starValue);
+							// Add starName/Key to row
+							const row1 = _.merge(row, {[starName]: starKey});
+							// Create a table from the row
+							const table2 = [_.cloneDeep(row1)];
+							// Expand the table
+							_.forEach(conditionActions, action => {
+								applyActionToTable(table2, action);
+							});
+							// Return the expanded table
+							return table2;
 						}
 						else {
 							const starKey = starValue;
-							return _.merge({}, row, _.fromPairs([[starName, starKey]]));
+							return _.merge({}, row, {[starName]: starKey});
 						}
 					});
 				});

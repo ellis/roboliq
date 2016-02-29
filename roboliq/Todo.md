@@ -147,13 +147,11 @@
 - [x] commandHelper.js: handle `$$`-prefix for returning column of current data
 - [x] roboliqDirectiveHandlers.js: handle '#data' directive
 - [x] transporter.movePlate: should handle specifications of `equipment` and `program`
-- [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [x] experiment.js: replace makeSubstitutions with commandHelper.substituteDeep
-- [ ] commandHelper.substituteDeep:
+- [x] commandHelper.substituteDeep:
     - [x] should accept SCOPE and DATA instead of data, because we data.objects may change as steps are processed
-    - [ ] skip objects with 'data' property
-    - [ ] only substitute template strings whose variables are '$' variables
-    - [ ] support '$$' variables in template strings
+    - [x] skip objects with 'data' property
+    - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [ ] `experiment.run`: automatically find timers if non supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
 - [?] implement `system.description`
 - [ ] allow for setting default values in `DEFAULTS`: such as setting `DEFAULTS.agent` in `experiment.run`, then use the value as a default in commandHelper.parseParams
@@ -179,6 +177,8 @@
 - [ ] rename '#createPipetteMixtureList' to '#mixtureList' and '#gradient' to '#gradientLinear', so it matches figure in paper
 - [ ] add pipetter commands for dropping tips and getting tips
 - [ ] drop the `params` parameter from commandHandler calls, but then rename `parsed` to `params` in commandHandler functions
+- [ ] commandHelper.substituteDeep: only substitute template strings whose variables are '$' variables
+- [ ] commandHelper.substituteDeep: support '$$' variables in template strings
 
 # Todos for luigi
 
