@@ -26,36 +26,36 @@ objects:
             mesurement*:
             - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
               dilutionPlate: dilutionPlate1
-            - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
-              dilutionPlate: "dilutionPlate1"
+            # - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
+            #   dilutionPlate: "dilutionPlate1"
             syringe: ourlab.mario.liha.syringe.1
-          - cultureWell: B01
-            measurement*:
-            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
-              "dilutionPlate": "dilutionPlate1"
-            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
-              "dilutionPlate": "dilutionPlate1"
-            "syringe": "ourlab.mario.liha.syringe.2"
+          # - cultureWell: B01
+          #   measurement*:
+          #   - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
+          #     "dilutionPlate": "dilutionPlate1"
+          #   - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
+          #     "dilutionPlate": "dilutionPlate1"
+          #   "syringe": "ourlab.mario.liha.syringe.2"
           shake: false
           incubatorLocation: "ourlab.mario.site.P4"
-        shakePlate:
-          "cultureReplicate*":
-          - "cultureWell": "A01"
-            "measurement*":
-            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
-              "dilutionPlate": "dilutionPlate2"
-            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
-              "dilutionPlate": "dilutionPlate2"
-            "syringe": "ourlab.mario.liha.syringe.1"
-          - "cultureWell": "B01"
-            "measurement*":
-            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
-              "dilutionPlate": "dilutionPlate2"
-            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
-              "dilutionPlate": "dilutionPlate2"
-            "syringe": "ourlab.mario.liha.syringe.2"
-          "shake": true
-          "incubatorLocation": "ourlab.mario.site.P5"
+        # shakePlate:
+        #   "cultureReplicate*":
+        #   - "cultureWell": "A01"
+        #     "measurement*":
+        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
+        #       "dilutionPlate": "dilutionPlate2"
+        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
+        #       "dilutionPlate": "dilutionPlate2"
+        #     "syringe": "ourlab.mario.liha.syringe.1"
+        #   - "cultureWell": "B01"
+        #     "measurement*":
+        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
+        #       "dilutionPlate": "dilutionPlate2"
+        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
+        #       "dilutionPlate": "dilutionPlate2"
+        #     "syringe": "ourlab.mario.liha.syringe.2"
+        #   "shake": true
+        #   "incubatorLocation": "ourlab.mario.site.P5"
 
 steps:
 #  "@data":
@@ -70,10 +70,10 @@ steps:
     timers: [ourlab.mario.timer1, ourlab.mario.timer2]
     steps:
       description: "`Prepare plate {{$culturePlate}}`"
-      # 1:
-      #   command: "transporter.movePlate"
-      #   object: "$culturePlate"
-      #   destination: "$pipettingLocation"
+      1:
+        command: "transporter.movePlate"
+        object: "$culturePlate"
+        destination: "$pipettingLocation"
       2:
         command: "pipetter.pipetteMixtures"
         mixtures:
@@ -87,69 +87,69 @@ steps:
               - {source: $media, volume: $mediaVolume}
         destinationLabware: $culturePlate
         clean: "light"
-      # 3:
-      #   command: "transporter.movePlate"
-      #   object: $culturePlate
-      #   destination: $incubatorLocation
-  #
-  # 2:
-  #   command: experiment.forEachGroup
-  #   design: design1
-  #   groupBy: measurement
-  #   duration: 7 minutes
-  #   timers: [ourlab.mario.timer1]
-  #   steps:
-  #     description: "`Measurement {{$measurement}}`"
-  #     command: experiment.interleave
-  #     groupBy: culturePlate
-  #     interleave: 3 minutes
-  #     timers: [ourlab.mario.timer2]
-  #     steps:
-  #       description: "`Measurement {{$measurement}} on {{$culturePlate}}`"
-  #       1:
-  #         command: "transporter.doThenRestoreLocation"
-  #         objects: [$dilutionPlate]
-  #         steps:
-  #           1:
-  #             command: transporter.movePlate
-  #             object: $dilutionPlate
-  #             destination: $dilutionLocation
-  #           2:
-  #             command: "transporter.movePlate"
-  #             object: $culturePlate
-  #             destination: "$pipettingLocation"
-  #           3:
-  #             command: "pipetter.pipette"
-  #             items:
-  #               "#data":
-  #                 where: {dilutionFactor: 1}
-  #                 template:
-  #                   source: $cultureWell
-  #                   destination: $dilutionWell
-  #                   syringe: $syringe
-  #             volumes: $sampleVolume
-  #             sourceLabware: $culturePlate
-  #             destinationLabware: $dilutionPlate
-  #             cleanBegin: "none"
-  #             clean: "light"
-  #           4:
-  #             command: "system.if"
-  #             test: $shake
-  #             then:
-  #               1: {command: "shaker.shakePlate", object: $culturePlate, program: {duration: "1 minute"}}
-  #           5:
-  #             command: "transporter.movePlate"
-  #             object: "$culturePlate"
-  #             destination: "$incubatorLocation"
-  #           6:
-  #             command: "pipetter.pipetteDilutionSeries2x"
-  #             diluent: "water"
-  #             destinationLabware: "$dilutionPlate"
-  #             items:
-  #               "#data":
-  #                 groupBy: cultureWell
-  #                 template:
-  #                   destinations: "$$dilutionWell"
-  #                   syringe: $syringe
-  #             cleanBegin: "none"
-  #             clean: "light"
+      3:
+        command: "transporter.movePlate"
+        object: $culturePlate
+        destination: $incubatorLocation
+
+  2:
+    command: experiment.forEachGroup
+    design: design1
+    groupBy: measurement
+    duration: 7 minutes
+    timers: [ourlab.mario.timer1]
+    steps:
+      description: "`Measurement {{$measurement}}`"
+      command: experiment.forEachGroup
+      groupBy: culturePlate
+      interleave: 3 minutes
+      timers: [ourlab.mario.timer2]
+      steps:
+        description: "`Measurement {{$measurement}} on {{$culturePlate}}`"
+        1:
+          command: "transporter.doThenRestoreLocation"
+          objects: [$dilutionPlate]
+          steps:
+            1:
+              command: transporter.movePlate
+              object: $dilutionPlate
+              destination: $dilutionLocation
+            2:
+              command: "transporter.movePlate"
+              object: $culturePlate
+              destination: "$pipettingLocation"
+            3:
+              command: "pipetter.pipette"
+              items:
+                "#data":
+                  where: {dilutionFactor: 1}
+                  template:
+                    source: $cultureWell
+                    destination: $dilutionWell
+                    syringe: $syringe
+              volumes: $sampleVolume
+              sourceLabware: $culturePlate
+              destinationLabware: $dilutionPlate
+              cleanBegin: "none"
+              clean: "light"
+            4:
+              command: "system.if"
+              test: $shake
+              then:
+                1: {command: "shaker.shakePlate", object: $culturePlate, program: {duration: "1 minute"}}
+            5:
+              command: "transporter.movePlate"
+              object: "$culturePlate"
+              destination: "$incubatorLocation"
+            6:
+              command: "pipetter.pipetteDilutionSeries2x"
+              diluent: "water"
+              destinationLabware: "$dilutionPlate"
+              items:
+                "#data":
+                  groupBy: cultureWell
+                  templateGroup:
+                    destinations: "$$dilutionWell"
+                    syringe: $syringe
+              cleanBegin: "none"
+              clean: "light"

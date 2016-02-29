@@ -99,17 +99,18 @@ function getObjectsOfType(objects, types, prefix) {
  * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
  */
 function handleDirective(spec, data) {
+	const directiveHandlers = data.directiveHandlers || data.protocol.directiveHandlers;
 	if (_.isPlainObject(spec)) {
 		const keys = _.keys(spec);
 		if (keys.length === 1 && _.startsWith(keys[0], "#")) {
 			const key = keys[0];
-			if (data.directiveHandlers.hasOwnProperty(key)) {
+			if (directiveHandlers.hasOwnProperty(key)) {
 				var spec2 = spec[key];
 				var spec3 = (_.isPlainObject(spec2))
 					? _.omit(spec2, 'override')
 					: spec2;
 				const result = {
-					x: data.directiveHandlers[key](spec3, data)
+					x: directiveHandlers[key](spec3, data)
 				};
 				if (spec2.hasOwnProperty('override')) {
 					//console.log({result0: result.x})
@@ -127,10 +128,10 @@ function handleDirective(spec, data) {
 		var hash2 = spec.indexOf('#', 1);
 		if (hash2 > 0) {
 			const key = spec.substr(0, hash2);
-			if (data.directiveHandlers.hasOwnProperty(key)) {
+			if (directiveHandlers.hasOwnProperty(key)) {
 				var spec2 = spec.substr(hash2 + 1);
 				var spec3 = handleDirective(spec2, data);
-				const result = data.directiveHandlers[key](spec3, data);
+				const result = directiveHandlers[key](spec3, data);
 				if (spec.hasOwnProperty('override')) {
 					_.merge(result, spec.override);
 				}
@@ -255,14 +256,14 @@ function renderTemplateString(s, scope, data) {
 }
 
 module.exports = {
-	extractValuesFromQueryResults: extractValuesFromQueryResults,
-	getObjectsOfType: getObjectsOfType,
-	getObjectsValue: getObjectsValue,
-	getVariableValue: getVariableValue,
-	handleDirective: handleDirective,
-	handleDirectiveDeep: handleDirectiveDeep,
-	findObjectsValue: findObjectsValue,
-	mutateDeep: mutateDeep,
+	extractValuesFromQueryResults,
+	getObjectsOfType,
+	getObjectsValue,
+	getVariableValue,
+	handleDirective,
+	handleDirectiveDeep,
+	findObjectsValue,
+	mutateDeep,
 	mapDeep,
-	renderTemplate: renderTemplate
+	renderTemplate
 }

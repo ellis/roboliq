@@ -42,13 +42,17 @@ function directive_data(spec, data) {
 	return expect.try("#data", () => {
 		let result = Design.query(data.objects.DATA, spec);
 		console.log("result0: "+JSON.stringify(result))
-		if (spec.template) {
-			const data2 = _.clone(data);
-			data2.objects = _.clone(data2.objects);
-			result = _.map(result, group => _.map(group, row => {
-				data2.objects.DATA = group;
-				data2.objects.SCOPE = _.merge({}, data.objects.SCOPE, row);
-				commandHelper.substituteDeep(row, data2);
+		if (spec.templateGroup) {
+			result = _.map(result, DATA => {
+				const SCOPE = _.merge({}, data.objects.SCOPE, Design.getCommonValues(DATA));
+				return commandHelper.substituteDeep(spec.templateGroup, DATA, SCOPE);
+			});
+			console.log("result1: "+JSON.stringify(result))
+		}
+		else if (spec.template) {
+			result = _.map(result, DATA => _.map(DATA, row => {
+				const SCOPE = _.merge({}, data.objects.SCOPE, row);
+				return commandHelper.substituteDeep(spec.template, DATA, SCOPE);
 			}));
 			console.log("result1: "+JSON.stringify(result))
 		}

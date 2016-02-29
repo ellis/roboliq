@@ -468,7 +468,7 @@ function postProcessProtocol_variables(protocol) {
 			for (var key in x) {
 				var value1 = x[key];
 				if (_.isArray(value1)) {
-					x[key] = _.map(value1, function(x2) { return misc.handleDirectiveDeep(x2, protocol); });
+					x[key] = _.map(value1, function(x2) { return misc.handleDirectiveDeep(x2, data); });
 				}
 				else {
 					x[key] = expandDirectives(value1);
@@ -797,6 +797,7 @@ function _run(opts, userProtocol) {
 
 		if (step.hasOwnProperty("@DATA")) {
 			DATA = step["@DATA"];
+			console.log("DATA: "+JSON.stringify(DATA))
 		}
 
 		let DATAs = [DATA];
@@ -842,23 +843,21 @@ function _run(opts, userProtocol) {
 		}
 		//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
-		// Process any directives in this step
-		const params = misc.handleDirectiveDeep(_.omit(step, "data"), protocol);
 		//console.log({step, params})
 
 		// Add `@SCOPE` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
 		//console.log({_scope: params["@SCOPE"]})
-		if (!_.isEmpty(params["@SCOPE"])) {
+		if (!_.isEmpty(step["@SCOPE"])) {
 			SCOPE = _.clone(SCOPE);
-			_.forEach(params["@SCOPE"], (value, key) => SCOPE[key] = value);
+			_.forEach(step["@SCOPE"], (value, key) => SCOPE[key] = value);
 			//console.log("SCOPE: "+JSON.stringify(SCOPE))
 		}
 
 		// Check for command and its handler
-		const commandName = params.command;
+		const commandName = step.command;
 		const handler = (commandName) ? commandHandlers[commandName] : undefined;
 		if (commandName && !handler) {
-			protocol.warnings[id] = ["unknown command: "+params.command];
+			protocol.warnings[id] = ["unknown command: "+step.command];
 			return;
 		}
 
@@ -870,6 +869,20 @@ function _run(opts, userProtocol) {
 			//console.log("DATA1b: "+JSON.stringify(DATA, null, '\t'));
 			const SCOPE2 = _.merge({}, SCOPE, common);
 
+			// Process any directives in this step
+			const objects2 = _.clone(objects);
+			objects2.DATA = DATA;
+			objects2.SCOPE = SCOPE2;
+			const data = {
+				objects: objects2,
+				schemas: protocol.schemas,
+				accesses: [],
+				files: filecache,
+				protocol,
+				path: prefix2
+			};
+			const params = misc.handleDirectiveDeep(_.omit(step, "data"), data);
+
 			if (foreach) {
 				const groupKey = (groupIndex+1).toString();
 				// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
@@ -877,17 +890,6 @@ function _run(opts, userProtocol) {
 				let step2;
 				if (commandName) {
 					if (protocol.schemas[commandName]) {
-						const objects2 = _.clone(objects);
-						objects2.DATA = DATA;
-						objects2.SCOPE = SCOPE2;;
-						const data = {
-							objects: objects2,
-							schemas: protocol.schemas,
-							accesses: [],
-							files: filecache,
-							protocol,
-							path: prefix2
-						};
 						//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
 						const schema = protocol.schemas[commandName];
 						//console.log("params: "+JSON.stringify(params))
