@@ -37,8 +37,10 @@ function directive_createWellAssignments(spec, data) {
 }
 
 function directive_data(spec, data) {
+	console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
 	return expect.try("#data", () => {
 		let result = Design.query(data.objects.DATA, spec);
+		console.log("result0: "+JSON.stringify(result))
 		if (spec.template) {
 			const data2 = _.clone(data);
 			data2.objects = _.clone(data2.objects);
@@ -47,18 +49,23 @@ function directive_data(spec, data) {
 				data2.objects.SCOPE = _.merge({}, data.objects.SCOPE, row);
 				commandHelper.substituteDeep(row, data2);
 			}));
+			console.log("result1: "+JSON.stringify(result))
 		}
 		result = (spec.groupBy) ? result : _.flatten(result);
+		console.log("result2: "+JSON.stringify(result))
 
 		if (spec.value) {
 			result = _.map(result, spec.value);
+			console.log("result3: "+JSON.stringify(result))
 		}
 
 		if (spec.head) {
 			result = _.head(result);
+			console.log("result4: "+JSON.stringify(result))
 		}
 		if (spec.join) {
 			result = result.join(spec.join);
+			console.log("result5: "+JSON.stringify(result))
 		}
 		return result;
 	});

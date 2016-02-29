@@ -41,33 +41,37 @@ function asArray(x) {
  * @param  {object} data - protocol data
  * @return {any} the value with possible substitutions
  */
-function substituteDeep(x, data) {
+function substituteDeep(x, DATA, SCOPE) {
 	let x2 = x;
 	if (_.isString(x)) {
 		// DATA substitution
 		if (_.startsWith(x, "$$")) {
-			if (_.isArray(data.objects.DATA)) {
+			if (_.isArray(DATA)) {
 				const propertyName = x.substr(2);
-				x2 = _(data.objects.DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
-				//console.log("data.objects.DATA: "+JSON.stringify(data.objects.DATA, null, '\t'));
-				//console.log({map: _(data.objects.DATA).map(propertyName).value()});
+				x2 = _(DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
+				//console.log("DATA: "+JSON.stringify(DATA, null, '\t'));
+				//console.log({map: _(DATA).map(propertyName).value()});
 			}
 		}
 		// SCOPE substitution
 		else if (_.startsWith(x, "$")) {
 			const propertyName = x.substr(1);
-			x2 = _.get(data.objects.SCOPE, propertyName, x);
+			x2 = _.get(SCOPE, propertyName, x);
 		}
 		// Template substitution
 		else if (_.startsWith(x, "`") && _.endsWith(x, "`")) {
 			const template = x.substr(1, x.length - 2);
-			const scope = _.mapKeys(data.objects.SCOPE, (value, name) => "$"+name);
+			const scope = _.mapKeys(SCOPE, (value, name) => "$"+name);
 			//console.log({x, template, scope})
+			const data = {
+				accesses: [],
+				objects: {}
+			};
 			x2 = misc.renderTemplate(template, scope, data);
 		}
 	}
 	else if (_.isArray(x)) {
-		x2 = _.map(x, y => substituteDeep(y, data));
+		x2 = _.map(x, y => substituteDeep(y, DATA, SCOPE));
 	}
 	else if (_.isPlainObject(x)) {
 		// Skip objects with one of these properties:
@@ -81,7 +85,7 @@ function substituteDeep(x, data) {
 					return value;
 				}
 				else {
-					return substituteDeep(value, data);
+					return substituteDeep(value, DATA, SCOPE);
 				}
 			});
 		}

@@ -81,7 +81,7 @@ steps:
             uniqueBy: cultureWell
             template:
               destination: $cultureWell
-              syringe: $syringe"
+              syringe: $syringe
               sources:
               - {source: $strain, volume: $strainVolume}
               - {source: $media, volume: $mediaVolume}

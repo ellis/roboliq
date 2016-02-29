@@ -496,17 +496,12 @@ describe('commandHelper', function() {
 	});
 
 	describe("substituteDeep", () => {
-		const data = {
-			objects: {
-				SCOPE: {
-					a: "A"
-				},
-				DATA: [
-					{n: 1}, {n: 2}
-				]
-			},
-			accesses: []
+		const SCOPE = {
+			a: "A"
 		};
+		const DATA = [
+			{n: 1}, {n: 2}
+		];
 
 		it("should handle SCOPE, DATA, and template substitutions", () => {
 			const x = {
@@ -523,7 +518,7 @@ describe('commandHelper', function() {
 				x5: "`My {{$a}}`"
 			};
 			should.deepEqual(
-				commandHelper.substituteDeep(x, data),
+				commandHelper.substituteDeep(x, DATA, SCOPE),
 				{
 					x1: "A",
 					x2: [1, 2],
@@ -549,7 +544,7 @@ describe('commandHelper', function() {
 				}
 			};
 			should.deepEqual(
-				commandHelper.substituteDeep(x, data),
+				commandHelper.substituteDeep(x, DATA, SCOPE),
 				{
 					x1: "A",
 					"#x2": "$a",

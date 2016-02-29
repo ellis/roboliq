@@ -150,8 +150,8 @@
 - [ ] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [x] experiment.js: replace makeSubstitutions with commandHelper.substituteDeep
 - [ ] commandHelper.substituteDeep:
+    - [x] should accept SCOPE and DATA instead of data, because we data.objects may change as steps are processed
     - [ ] skip objects with 'data' property
-    - [ ] should accept SCOPE and DATA instead of data, because we data.objects may change as steps are processed
     - [ ] only substitute template strings whose variables are '$' variables
     - [ ] support '$$' variables in template strings
 - [ ] `experiment.run`: automatically find timers if non supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)

@@ -57,15 +57,12 @@ function run(parsed, data) {
 
 		// Update the SCOPE
 		const common = Design.getCommonValues(DATA);
-		//console.log("DATA1b: "+JSON.stringify(DATA, null, '\t'));
-		//const SCOPE = _.merge({}, data.objects.SCOPE, common);
-		const data2 = _.merge({}, data, {objects: {SCOPE: common}});
-		data2.objects.DATA = DATA;
+		const SCOPE = _.merge({}, data.objects.SCOPE, common);
 
 		// Step starts out as a copy of the given steps
 		const step0 = commandHelper.stepify(_.cloneDeep(parsed.value.steps));
 		const step1 = (_.size(step0) === 1) ? _(step0).toPairs().head()[1] : step0;
-		const step = commandHelper.substituteDeep(step1, data2);
+		const step = commandHelper.substituteDeep(step1, DATA, SCOPE);
 		// Set the current DATA group
 		step["@DATA"] = _.cloneDeep(DATA);
 		// Add postponed timer1, if necessary
