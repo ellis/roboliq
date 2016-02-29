@@ -298,7 +298,9 @@ var commandHandlers = {
 			debug_movePlate_one(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
 		}
 		if (_.isEmpty(plan)) {
-			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`"]}
+			const x = _.merge({}, {agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.value.object.location, destination: parsed.objectName.destination});
+			//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
+			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")

@@ -90,14 +90,19 @@ function processParamsBySchema(result, path, params, schema, data) {
 		const path1 = path.concat(propertyName);
 		const value0 = _.cloneDeep(_.get(params, propertyName, defaultValue));
 
-		if (type === 'name') {
-			if (!_.isUndefined(value0)) {
-				_.set(result.value, path1, value0);
+		if (type === "name") {
+			// Normally, we don't want to process "name" parameters at all, but we
+			// still need to dereference "$"-scope variables
+			const value1 = (_.startsWith(value0, "$"))
+				? _.get(data.objects.SCOPE, value0.substring(1), value0)
+				: value0;
+			if (!_.isUndefined(value1)) {
+				_.set(result.value, path1, value1);
 			}
 			// If not optional, require the variable's presence:
 			if (required) {
 				//console.log({propertyName, type, info, params})
-				expect.truthy({paramName: propertyName}, !_.isUndefined(value0), "missing required value [CODE 95]");
+				expect.truthy({paramName: propertyName}, !_.isUndefined(value1), "missing required value [CODE 95]");
 			}
 		}
 		else {
