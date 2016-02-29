@@ -12,8 +12,8 @@ objects:
   design1:
     type: Design
     conditions:
-      "pipettingLocation": "ourlab.mario.site.P2"
-      "dilutionLocation": "ourlab.mario.site.P3"
+      "pipettingLocation": "ourlab.mario.site.P3"
+      "dilutionLocation": "ourlab.mario.site.P2"
       "media": "media1"
       "mediaVolume": "800ul"
       "strain": "strain1"
@@ -26,36 +26,36 @@ objects:
             mesurement*:
             - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
               dilutionPlate: dilutionPlate1
-            # - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
-            #   dilutionPlate: "dilutionPlate1"
+            - dilution*: [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
+              dilutionPlate: "dilutionPlate1"
             syringe: ourlab.mario.liha.syringe.1
-          # - cultureWell: B01
-          #   measurement*:
-          #   - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
-          #     "dilutionPlate": "dilutionPlate1"
-          #   - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
-          #     "dilutionPlate": "dilutionPlate1"
-          #   "syringe": "ourlab.mario.liha.syringe.2"
+          - cultureWell: B01
+            measurement*:
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
+              "dilutionPlate": "dilutionPlate1"
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
+              "dilutionPlate": "dilutionPlate1"
+            "syringe": "ourlab.mario.liha.syringe.2"
           shake: false
           incubatorLocation: "ourlab.mario.site.P4"
-        # shakePlate:
-        #   "cultureReplicate*":
-        #   - "cultureWell": "A01"
-        #     "measurement*":
-        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
-        #       "dilutionPlate": "dilutionPlate2"
-        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
-        #       "dilutionPlate": "dilutionPlate2"
-        #     "syringe": "ourlab.mario.liha.syringe.1"
-        #   - "cultureWell": "B01"
-        #     "measurement*":
-        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
-        #       "dilutionPlate": "dilutionPlate2"
-        #     - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
-        #       "dilutionPlate": "dilutionPlate2"
-        #     "syringe": "ourlab.mario.liha.syringe.2"
-        #   "shake": true
-        #   "incubatorLocation": "ourlab.mario.site.P5"
+        shakePlate:
+          "cultureReplicate*":
+          - "cultureWell": "A01"
+            "measurement*":
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A01" }, { "dilutionFactor": 2, "dilutionWell": "A02" }, { "dilutionFactor": 4, "dilutionWell": "A03" }, { "dilutionFactor": 8, "dilutionWell": "A04" }, { "dilutionFactor": 16, "dilutionWell": "A05" } ]
+              "dilutionPlate": "dilutionPlate2"
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "A07" }, { "dilutionFactor": 2, "dilutionWell": "A08" }, { "dilutionFactor": 4, "dilutionWell": "A09" }, { "dilutionFactor": 8, "dilutionWell": "A10" }, { "dilutionFactor": 16, "dilutionWell": "A11" } ]
+              "dilutionPlate": "dilutionPlate2"
+            "syringe": "ourlab.mario.liha.syringe.1"
+          - "cultureWell": "B01"
+            "measurement*":
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B01" }, { "dilutionFactor": 2, "dilutionWell": "B02" }, { "dilutionFactor": 4, "dilutionWell": "B03" }, { "dilutionFactor": 8, "dilutionWell": "B04" }, { "dilutionFactor": 16, "dilutionWell": "B05" } ]
+              "dilutionPlate": "dilutionPlate2"
+            - "dilution*": [ { "dilutionFactor": 1, "dilutionWell": "B07" }, { "dilutionFactor": 2, "dilutionWell": "B08" }, { "dilutionFactor": 4, "dilutionWell": "B09" }, { "dilutionFactor": 8, "dilutionWell": "B10" }, { "dilutionFactor": 16, "dilutionWell": "B11" } ]
+              "dilutionPlate": "dilutionPlate2"
+            "syringe": "ourlab.mario.liha.syringe.2"
+          "shake": true
+          "incubatorLocation": "ourlab.mario.site.P5"
 
 steps:
 #  "@data":
