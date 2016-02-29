@@ -69,11 +69,11 @@ steps:
     durationTimerStartAfter: 3
     timers: [ourlab.mario.timer1, ourlab.mario.timer2]
     steps:
-      description: "Prepare plate"
-      1:
-        command: "transporter.movePlate"
-        object: "$culturePlate"
-        destination: "$pipettingLocation"
+      description: "`Prepare plate {{$culturePlate}}`"
+      # 1:
+      #   command: "transporter.movePlate"
+      #   object: "$culturePlate"
+      #   destination: "$pipettingLocation"
       2:
         command: "pipetter.pipetteMixtures"
         mixtures:
@@ -87,10 +87,10 @@ steps:
               - {source: $media, volume: $mediaVolume}
         destinationLabware: $culturePlate
         clean: "light"
-      3:
-        command: "transporter.movePlate"
-        object: $culturePlate
-        destination: $incubatorLocation
+      # 3:
+      #   command: "transporter.movePlate"
+      #   object: $culturePlate
+      #   destination: $incubatorLocation
   #
   # 2:
   #   command: experiment.forEachGroup

@@ -7,7 +7,7 @@ import expect from '../expect.js';
 import misc from '../misc.js';
 
 function run(parsed, data) {
-	console.log("experiment.run");
+	// console.log("experiment.run");
 	//console.log("parsed: "+JSON.stringify(parsed, null, '\t'));
 
 	if (_.isEmpty(parsed.value.steps)) {
@@ -17,7 +17,9 @@ function run(parsed, data) {
 	const DATA = (parsed.value.design)
 	  ? Design.flattenDesign(parsed.value.design)
 		: data.objects.DATA;
-	console.log("experiment.run DATA: "+JSON.stringify(DATA, null, '\t'));
+	// console.log("experiment.run DATA: "+JSON.stringify(DATA, null, '\t'));
+	// console.log("experiment.run DATA: ");
+	// _.forEach(DATA, row => { console.log(JSON.stringify(row)) });
 	assert(DATA, "missing DATA; you may want to specify the parameter 'design'");
 
 	const DATAs = (parsed.value.forEachRow)
@@ -55,6 +57,8 @@ function run(parsed, data) {
 
 	for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 		const DATA = DATAs[groupIndex];
+		console.log(`DATAs[${groupIndex}]:`);
+		_.forEach(DATA, row => { console.log(JSON.stringify(row)) });
 
 		// Update the SCOPE
 		const common = Design.getCommonValues(DATA);

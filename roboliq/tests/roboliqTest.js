@@ -271,5 +271,84 @@ describe('roboliq', function() {
 		it.skip("should handle 'data' property without groupBy or forEach", () => {
 			assert(false);
 		});
+
+		it("should pass @DATA down to sub-commands", () => {
+			const protocol = {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"@DATA": [
+							{a: "A", b: 1},
+							{a: "A", b: 2}
+						],
+						command: "system.echo",
+						value: "$a"
+					},
+					2: {
+						"@DATA": [
+							{a: "A", b: 1},
+							{a: "A", b: 2}
+						],
+						command: "system.echo",
+						value: "$$b"
+					},
+					3: {
+						"@DATA": [
+							{a: "A", b: 1},
+							{a: "A", b: 2}
+						],
+						1: {
+							command: "system.echo",
+							value: "$a"
+						},
+						2: {
+							command: "system.echo",
+							value: "$$b"
+						}
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"command": "system._echo",
+						"value": "A"
+					},
+					"@DATA": [ { "a": "A", "b": 1 }, { "a": "A", "b": 2 } ],
+					"command": "system.echo",
+					"value": "$a"
+				},
+				"2": {
+					"1": {
+						"command": "system._echo",
+						"value": [ 1, 2 ]
+					},
+					"@DATA": [ { "a": "A", "b": 1 }, { "a": "A", "b": 2 } ],
+					"command": "system.echo",
+					"value": "$$b"
+				},
+				"3": {
+					"1": {
+						"1": {
+							"command": "system._echo",
+							"value": "A"
+						},
+						"command": "system.echo",
+						"value": "$a"
+					},
+					"2": {
+						"1": {
+							"command": "system._echo",
+							"value": [ 1, 2 ]
+						},
+						"command": "system.echo",
+						"value": "$$b"
+					},
+					"@DATA": [ { "a": "A", "b": 1 }, { "a": "A", "b": 2 } ]
+				}
+			});
+		});
 	});
 });
