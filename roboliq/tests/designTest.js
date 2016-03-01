@@ -187,7 +187,7 @@ describe('design', () => {
 			const design =
 				{ conditions:
 					{ source: "water",
-						'volume*=range': { count: 4, from: 0, till: 20, decimals: 1, unit: "ul" } } };
+						'volume*=range': { count: 4, from: 0, till: 20, decimals: 1, units: "ul" } } };
 			const table = flattenDesign(design);
 			//printData(table);
 			should.deepEqual(table, [

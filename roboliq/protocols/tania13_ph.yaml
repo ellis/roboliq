@@ -86,7 +86,7 @@ conditions:
       baseSource: acetate_575
       acidPH: 3.75
       basePH: 5.75
-      acidVolume*=range: {count: 8, from: 0ul, till: 30ul, decimals: 1}
+      acidVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
     mes:
       acidSource: mes_510
       baseSource: mes_710

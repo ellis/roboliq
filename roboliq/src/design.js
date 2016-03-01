@@ -404,8 +404,8 @@ const actionHandlers = {
 			if (_.isNumber(action.decimals)) {
 				range = range.map(n => Number(n.toFixed(action.decimals)));
 			}
-			if (_.isString(action.unit)) {
-				range = range.map(n => `${n} ${action.unit}`);
+			if (_.isString(action.units)) {
+				range = range.map(n => `${n} ${action.units}`);
 			}
 			return { [action.name]: range };
 		}
