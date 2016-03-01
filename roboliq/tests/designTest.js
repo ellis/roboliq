@@ -3,6 +3,11 @@ const should = require('should');
 import {flattenDesign, printData} from '../src/design.js';
 
 describe('design', () => {
+	// Configure mathjs to use bignumbers
+	require('mathjs').config({
+		number: 'bignumber', // Default type of number
+		precision: 64        // Number of significant digits for BigNumbers
+	});
 	describe('flattenDesign', () => {
 		it('should handle two simple branching factors', () => {
 			const design = {
@@ -193,13 +198,13 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support math() assignments", () => {
+		it("should support math() assignments", () => {
 			const design =
 				{ conditions:
 					{ volume1: "20ul",
 						"volume2=math": "30ul - volume1" } };
 			const table = flattenDesign(design);
-			printData(table);
+			//printData(table);
 			should.deepEqual(table, [
 				{volume1: "20ul", volume2: "10 ul"}
 			]);

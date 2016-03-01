@@ -368,12 +368,12 @@ const actionHandlers = {
 		// TODO: adapt so that it can work on groups?
 		if (data.row) {
 			const scope = _.mapValues(data.row, x => {
-				console.log({x})
+				// console.log({x})
 				try { return math.eval(x); }
 				catch (e) {}
 				return x;
 			});
-			console.log("scope:"+JSON.stringify(scope, null, '\t'))
+			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
 			return { [action.name]: math.eval(action.value, scope).format() };
 		}
 	},
