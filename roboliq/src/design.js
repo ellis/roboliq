@@ -367,7 +367,14 @@ const actionHandlers = {
 	"math": function(action, data) {
 		// TODO: adapt so that it can work on groups?
 		if (data.row) {
-			return _.fromPairs([[action.name, math.eval(action.value, data.row)]]);
+			const scope = _.mapValues(data.row, x => {
+				console.log({x})
+				try { return math.eval(x); }
+				catch (e) {}
+				return x;
+			});
+			console.log("scope:"+JSON.stringify(scope, null, '\t'))
+			return { [action.name]: math.eval(action.value, scope).format() };
 		}
 	},
 	"range": function(action, data) {

@@ -192,5 +192,18 @@ describe('design', () => {
 				{source: "water", volume: "20 ul"}
 			]);
 		});
+
+		it.only("should support math() assignments", () => {
+			const design =
+				{ conditions:
+					{ volume1: "20ul",
+						"volume2=math": "30ul - volume1" } };
+			const table = flattenDesign(design);
+			printData(table);
+			should.deepEqual(table, [
+				{volume1: "20ul", volume2: "10 ul"}
+			]);
+		});
+
 	});
 });
