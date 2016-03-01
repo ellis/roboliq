@@ -294,6 +294,7 @@ function parseOne(text) {
 }
 
 module.exports = {
+	locationRowColToText,
 	locationTextToRowCol,
 	parse,
 	parseOne,

@@ -234,5 +234,43 @@ describe('design', () => {
 				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"20 ul","baseVolume":"0.000 ml"}
 			]);
 		});
+
+		it.only("should support allocateWells() assignments", () => {
+			const design1 = {
+				conditions: {
+					"replicate*=range": {till: 5},
+					"well=allocateWells": {rows: 2, columns: 3}
+				}
+			};
+			const table1 = flattenDesign(design1);
+			// console.log(JSON.stringify(table1))
+			// printData(table1);
+			should.deepEqual(table1, [
+				{"replicate":1,"well":"A01"},
+				{"replicate":2,"well":"B01"},
+				{"replicate":3,"well":"A02"},
+				{"replicate":4,"well":"B02"},
+				{"replicate":5,"well":"A03"}
+			]);
+
+			const design2 = {
+				conditions: {
+					"replicate*=range": {till: 5},
+					"well=allocateWells": {rows: 2, columns: 3, byColumns: false}
+				}
+			};
+			const table2 = flattenDesign(design2);
+			// console.log(JSON.stringify(table1))
+			// printData(table1);
+			should.deepEqual(table2, [
+				{"replicate":1,"well":"A01"},
+				{"replicate":2,"well":"A02"},
+				{"replicate":3,"well":"A03"},
+				{"replicate":4,"well":"B01"},
+				{"replicate":5,"well":"B02"}
+			]);
+
+		});
+
 	});
 });

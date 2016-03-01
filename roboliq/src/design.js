@@ -5,6 +5,9 @@ import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
+import {locationRowColToText} from './parsers/wellsParser.js';
+
+
 /*
  * What's the impact of:
  * - evaporation
@@ -364,6 +367,21 @@ const actionHandlers = {
 			getGroupValues: (groupIndex) => _.fromPairs([[action.name, groupValues[groupIndex]]])
 		});
 	},
+	"allocateWells": function(action, data) {
+		const rows = action.rows;
+		const cols = action.columns;
+		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
+		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
+		const byColumns = _.get(action, "byColumns", true);
+		const values = _.range(rows * cols).map(i => {
+			const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+			const s = locationRowColToText(row + 1, col + 1);
+			// console.log({row, col, s});
+			return s;
+		});
+		// console.log({values})
+		return { [action.name]: values };
+	},
 	"math": function(action, data) {
 		// TODO: adapt so that it can work on groups?
 		if (data.row) {
@@ -392,7 +410,9 @@ const actionHandlers = {
 					if (_.isUndefined(result.units))
 						result.units = result.units0;
 					const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+					// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
 					if (_.isEmpty(conversionUnits)) {
+						// TODO: find a better way to get the unit-less quantity from `value`
 						// console.log({action})
 						// console.log({result, conversionUnits});
 						result.unitless = math.eval(value.format());
