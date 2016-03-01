@@ -10,6 +10,12 @@ import {DesignContainer} from './components/Design';
 import Results from './components/Results';
 import {VotingContainer} from './components/Voting';
 
+// Configure mathjs to use bigdecimal
+require('mathjs').config({
+	number: 'bignumber', // Default type of number
+	precision: 64		// Number of significant digits for BigNumbers
+});
+
 const store = createStore(reducer);
 store.dispatch({
 	type: 'SET_STATE',

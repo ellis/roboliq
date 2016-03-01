@@ -6,7 +6,7 @@ describe('design', () => {
 	// Configure mathjs to use bignumbers
 	require('mathjs').config({
 		number: 'bignumber', // Default type of number
-		precision: 64        // Number of significant digits for BigNumbers
+		precision: 64		// Number of significant digits for BigNumbers
 	});
 	describe('flattenDesign', () => {
 		it('should handle two simple branching factors', () => {
@@ -210,5 +210,29 @@ describe('design', () => {
 			]);
 		});
 
+		it("should support math() assignments with parameters", () => {
+			const design = {
+				conditions: {
+					source: 'saltwater',
+					acidPH: 3.75,
+					basePH: 5.75,
+					'acidVolume*=range': { count: 4, from: 0, till: 20, decimals: 1, units: 'ul' },
+					'baseVolume=math': {
+						expression: '20ul - acidVolume',
+						decimals: 3,
+						units: "ml"
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"0 ul","baseVolume":"0.020 ml"},
+				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"6.7 ul","baseVolume":"0.013 ml"},
+				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"13.3 ul","baseVolume":"0.007 ml"},
+				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"20 ul","baseVolume":"0.000 ml"}
+			]);
+		});
 	});
 });

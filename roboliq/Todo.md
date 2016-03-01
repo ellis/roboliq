@@ -319,6 +319,20 @@ LATER:
 - [x] test transporter.doThenRestoreLocation
 - [x] commandHelper.getStepKeys: return array of step keys in order
 - [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
+- [ ] figure out why this Design doesn't have the correct table column order in firefox:
+    ```
+    conditions:
+      waterSource: saltwater
+      waterVolume: 40ul
+      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      proteinVolume: 5ul
+      bufferSystem*:
+        acetate:
+          acidSource: acetate_375
+          baseSource: acetate_575
+          acidPH: 3.75
+          basePH: 5.75
+    ```
 - [ ] Experiment Conditions Data:
 - [ ] check whether Evoware external n2 is display order
 - [ ] compile some simple protocols and try to run them on mario and luigi

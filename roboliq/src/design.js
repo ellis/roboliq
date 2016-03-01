@@ -373,8 +373,42 @@ const actionHandlers = {
 				catch (e) {}
 				return x;
 			});
+			const expr = _.get(action, "expression", action.value);
+			assert(!_.isUndefined(expr), "`expression` property must be specified");
 			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
-			return { [action.name]: math.eval(action.value, scope).format() };
+			let value = math.eval(expr, scope);
+			// console.log({type: value.type, value})
+
+			// Get units to use in the end, and the unitless value
+			const {units0, units, unitless} = (() => {
+				const result = {
+					units0: undefined,
+					units: action.units,
+					unitless: value
+				};
+				// If the result has units:
+				if (value.type === "Unit") {
+					result.units0 = value.formatUnits();
+					if (_.isUndefined(result.units))
+						result.units = result.units0;
+					const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+					result.unitless = value.toNumeric(conversionUnits);
+				}
+				return result;
+			})();
+			// console.log({unitless})
+
+			// Restrict decimal places
+			const unitlessText = (_.isNumber(action.decimals))
+				? unitless.toFixed(action.decimals)
+				: unitless.toNumber().toString();
+
+			// Set units
+			const valueText = (!_.isEmpty(units))
+				? unitlessText + " " + units
+				: unitlessText;
+
+			return { [action.name]: valueText };
 		}
 	},
 	"range": function(action, data) {
