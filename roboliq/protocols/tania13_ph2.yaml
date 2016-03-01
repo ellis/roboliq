@@ -62,7 +62,7 @@ objects:
     conditions:
       waterSource: saltwater
       waterVolume: 40ul
-      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP] #, N149Y, Q204H]
       proteinVolume: 5ul
       bufferSystem*:
         acetate:
@@ -92,36 +92,7 @@ objects:
       baseVolume=math: "30ul - acidVolume"
       pH=math: "(acidPH * acidVolume + basePH * baseVolume) / (30ul)"
       replicate*: [1,2,3]
-      well=range: {till: 384, random: true}
-
-  mixtures:
-    type: Variable
-    calculate:
-      "#createPipetteMixtureList":
-        replicates: 3
-        items:
-        - source: saltwater
-          volume: 40ul
-        - "#gradient":
-            "#tableRows":
-            - {volume: 30ul, decimals: 1}
-            - ['source1',     'source2',     'count']
-            - ['hepes_850',   'hepes_650',   5]
-            - ['pipes_775',   'pipes_575',   5]
-            - ['mes_710',     'mes_510',     7]
-            - ['acetate_575', 'acetate_375', 8]
-        - source: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-          volume: "5ul"
-          clean: thorough
-          cleanBetweenSameSource: flush
-          program!: Roboliq_Water_Wet_1000_mix3x50ul
-
-  mixtureWells:
-    type: Variable
-    calculate:
-      "#createWellAssignments":
-        list: mixtures
-        wells: mixPlate(all row-jump(1))
+      well=allocateWells: {rows: 16, columns: 24, shuffle: true}
 
 steps:
   data:
@@ -193,6 +164,14 @@ steps:
           program:
             excitation: 488nm
             emission: 510nm
+            wells: $$well
+          analysis:
+            measuredFactor: fluorescence
+            plots:
+            - "ggvis(~pH, ~fluorescence)"
+            CONTINUE try: "<http://vega.github.io/vega-lite/tutorials/getting_started.html>"
+            models:
+            - "fluorescence ~ pH + Error(replicate)"
           programFile!: ./tania13_ph-temp.mdfx
           outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
         3:

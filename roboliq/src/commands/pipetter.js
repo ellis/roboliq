@@ -786,7 +786,7 @@ const commandHandlers = {
 		if (!_.isArray(order)) order = [order];
 		//console.log("A:", params2.items)
 		params2.items = _(mixtures).flatten().compact().sortBy(order).map(item => _.omit(item, 'index')).value();
-		//console.log("B:", params2.items)
+		console.log("B:", params2.items)
 		params2.command = "pipetter.pipette";
 		return {
 			expansion: {

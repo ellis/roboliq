@@ -152,7 +152,7 @@
     - [x] should accept SCOPE and DATA instead of data, because we data.objects may change as steps are processed
     - [x] skip objects with 'data' property
     - [x] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
-- [ ] tania13_ph.yaml: re-write using Design
+- [x] tania13_ph.yaml: re-write using Design
 - [ ] create incubator command for tania13_ph
 - [ ] centrifuge.startIncubation: create
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
@@ -218,7 +218,9 @@
         - [ ] transfer hotels
         - [ ] P1-P3,P6-P8 with ROMA2
         - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+- [ ] Create evoware Groups for steps with `description` properties
 - [ ] test pipetter.pipetteDilutionSeries2x
+- [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] have a good command for expanding steps and parameters based on data
     maybe something like this:
     ```

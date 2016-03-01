@@ -552,7 +552,7 @@ function applyActionToTable(table, action, randomEngine) {
 			if (!_.isUndefined(values)) {
 				// TEMPORARY: For legacy reasons, allow for use of deprecated 'random' alias
 				const shuffle = _.get(action, "shuffle", action.random);
-				if (!_.isUndefined(shuffle)) {
+				if (_.isNumber(shuffle) || shuffle === true) {
 					const randomEngine2 = (_.isNumber(shuffle))
 						? Random.engines.mt19937().seed(shuffle)
 						: randomEngine;
