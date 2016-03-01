@@ -2,6 +2,7 @@ import _ from 'lodash';
 import assert from 'assert';
 import Immutable, {Map, fromJS} from 'immutable';
 import math from 'mathjs';
+import Random from 'random-js';
 //import yaml from 'yamljs';
 
 /*
@@ -70,19 +71,19 @@ export const design2 = {
 		},
 		"cultureWell=range": {
 			till: 96,
-			random: true
+			shuffle: true
 		},
 		//"cultureCol=math": "floor((cultureWell - 1) / 8) + 1",
 		//"cultureRow=math": "((cultureWell - 1) % 8) + 1",
 		// TODO: syringe should be unique for each cultureWell, and ideally different for every sampleCycle
 		"syringe=range": {
 			till: 8,
-			random: true,
+			shuffle: true,
 			rotateValues: true
 		},
 		/*"sampleNum": 1,
 		"sampleCycle=range": {
-			random: true
+			shuffle: true
 		},
 		"*": {
 			conditions: {
@@ -101,7 +102,7 @@ export const design2 = {
 		"dWell=range": {
 			till: 96,
 			groupBy: "dPlate",
-			random: true
+			shuffle: true
 		}*/
 	},
 	// TODO: add randomSeed
@@ -370,15 +371,36 @@ const actionHandlers = {
 		}
 	},
 	"range": function(action, data) {
-		let from = _.get(action, "from", 1);
 		let till = action.till;
 		if (_.isUndefined(till)) {
 			const rows = data.group || data.table;
 			if (rows)
 				till = rows.length;
 		}
+		let range;
 		if (!_.isUndefined(till)) {
-			return _.fromPairs([[action.name, _.range(from, till+1)]]);
+			const from = _.get(action, "from", 1);
+			assert(_.isNumber(from), "`from` must be a number");
+			if (_.isNumber(action.count)) {
+				const diff = till - from;
+				range = _.range(action.count).map(i => {
+					const d = diff * i / (action.count - 1);
+					return from + d;
+				});
+			}
+			else {
+				const step = _.get(action, "step", 1);
+				range = _.range(from, till+1, step);
+			}
+		}
+		if (range) {
+			if (_.isNumber(action.decimals)) {
+				range = range.map(n => Number(n.toFixed(action.decimals)));
+			}
+			if (_.isString(action.unit)) {
+				range = range.map(n => `${n} ${action.unit}`);
+			}
+			return { [action.name]: range };
 		}
 	},
 	/*case "assignPlates":
@@ -399,9 +421,18 @@ export function flattenDesign(design) {
 	const actions = _.compact(conditionActions.concat(design.actions));
 	// console.log({actions})
 
+	var randomEngine = Random.engines.mt19937();
+	if (_.isNumber(design.randomSeed)) {
+		randomEngine.seed(design.randomSeed);
+	}
+	else {
+		randomEngine.autoSeed();
+	}
+	//random.shuffle(randomEngine, combined);
+
 	let table = [{}];
 	_.forEach(actions, action => {
-		applyActionToTable(table, action);
+		applyActionToTable(table, action, randomEngine);
 	});
 
 	return table;
@@ -428,7 +459,7 @@ function convertConditionsToActions(conditions) {
 	});
 }
 
-function applyActionToTable(table, action) {
+function applyActionToTable(table, action, randomEngine) {
 	// console.log("action: "+JSON.stringify(action))
 	const groupsOfSames = groupSameIndexes(table, action);
 	// console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
@@ -451,13 +482,18 @@ function applyActionToTable(table, action) {
 			valueOffset = 0;
 			let values = handler(action, data);
 			if (!_.isUndefined(values)) {
-				if (action.random) {
+				// TEMPORARY: For legacy reasons, allow for use of deprecated 'random' alias
+				const shuffle = _.get(action, "shuffle", action.random);
+				if (!_.isUndefined(shuffle)) {
+					const randomEngine2 = (_.isNumber(shuffle))
+						? Random.engines.mt19937().seed(shuffle)
+						: randomEngine;
 					if (_.isArray(values)) {
-						values = _.shuffle(values);
+						values = Random.sample(randomEngine2, values, values.length);
 					}
 					else if (_.isPlainObject(values)) {
 						values = _.mapValues(values, x => {
-							return (_.isArray(x)) ? _.shuffle(x) : x;
+							return (_.isArray(x)) ? Random.sample(randomEngine2, x, x.length) : x;
 						});
 					}
 				}

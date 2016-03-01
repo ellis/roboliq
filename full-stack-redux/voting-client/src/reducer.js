@@ -13,7 +13,8 @@ export default function(state = Map(), action) {
 		case 'setDesignText':
 			state = state.set('designText', action.text);
 			try {
-				const design = JSON.parse(action.text);
+				//const design = JSON.parse(action.text);
+				const design = YAML.safeLoad(action.text);
 				state = state.set('design', fromJS(design));
 				try {
 					const table = flattenDesign(design);

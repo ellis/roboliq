@@ -158,5 +158,39 @@ describe('design', () => {
 			]);
 		});
 
+		it("should keep factors in the correct order", () => {
+			const design =
+				{ conditions:
+					{ waterSource: 'saltwater',
+						waterVolume: '40ul',
+						'proteinSource*': [ 'sfGFP', 'Q204H_N149Y', 'tdGFP', 'N149Y', 'Q204H' ],
+						proteinVolume: '5ul',
+						'bufferSystem*':
+						 { acetate:
+								{ acidSource: 'acetate_375',
+									baseSource: 'acetate_575',
+									acidPH: 3.75,
+									basePH: 5.75 } } } };
+			const table = flattenDesign(design);
+			//printData(table);
+			should.deepEqual(_.keys(table[0]),
+				["waterSource", "waterVolume", "proteinSource", "proteinVolume", "bufferSystem", "acidSource", "baseSource", "acidPH", "basePH"]
+			);
+		});
+
+		it("should support numbers with units in range() assignment", () => {
+			const design =
+				{ conditions:
+					{ source: "water",
+						'volume*=range': { count: 4, from: 0, till: 20, decimals: 1, unit: "ul" } } };
+			const table = flattenDesign(design);
+			//printData(table);
+			should.deepEqual(table, [
+				{source: "water", volume: "0 ul"},
+				{source: "water", volume: "6.7 ul"},
+				{source: "water", volume: "13.3 ul"},
+				{source: "water", volume: "20 ul"}
+			]);
+		});
 	});
 });

@@ -74,27 +74,41 @@ objects:
 
   phDesign:
     type: Design
-    conditions:
-      waterSource: saltwater
-      waterVolume: 40ul
-      proteinSource: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-      proteinVolume: 5ul
-      bufferSystem:
-        hepes:
-          acidSource: hepes_650
-          baseSource: hepes_850
-          acidVolume*=:
-            CONTINUE
-        pipes:
-        mes:
-        acetate:
-      component*:
-        water:
-          source: saltwater
-          volume: 40ul
-        base:
-        acid:
-      replicate*: [1,2,3]
+randomSeed: 0
+conditions:
+  waterSource: saltwater
+  waterVolume: 40ul
+  proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+  proteinVolume: 5ul
+  bufferSystem*:
+    acetate:
+      acidSource: acetate_375
+      baseSource: acetate_575
+      acidPH: 3.75
+      basePH: 5.75
+      acidVolume*=range: {count: 8, from: 0ul, till: 30ul, decimals: 1}
+    mes:
+      acidSource: mes_510
+      baseSource: mes_710
+      acidPH: 5.10
+      basePH: 7.10
+      acidVolume*=range: {count: 8, from: 0ul, till: 30ul, decimals: 1}
+    pipes:
+      acidSource: pipes_575
+      baseSource: pipes_775
+      acidPH: 5.75
+      basePH: 7.75
+      acidVolume*=range: {count: 7, from: 0ul, till: 30ul, decimals: 1}
+    hepes:
+      acidSource: hepes_650
+      baseSource: hepes_850
+      acidPH: 6.50
+      basePH: 8.50
+      acidVolume*=range: {count: 5, from: 0ul, till: 30ul, decimals: 1}
+  baseVolume=math: "30ul - acidVolume"
+  pH=math: "(acidPH * acidVolume + basePH * baseVolume) / (30ul)"
+  replicate*: [1,2,3]
+  well=range: {till: 384, random: true}
 
   mixtures:
     type: Variable
