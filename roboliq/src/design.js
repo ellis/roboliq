@@ -392,7 +392,14 @@ const actionHandlers = {
 					if (_.isUndefined(result.units))
 						result.units = result.units0;
 					const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
-					result.unitless = value.toNumeric(conversionUnits);
+					if (_.isEmpty(conversionUnits)) {
+						// console.log({action})
+						// console.log({result, conversionUnits});
+						result.unitless = math.eval(value.format());
+					}
+					else {
+						result.unitless = value.toNumeric(conversionUnits);
+					}
 				}
 				return result;
 			})();

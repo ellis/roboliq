@@ -9,68 +9,90 @@ objects:
   balancePlate:
     type: Plate
     description: balance plate for centrifuge
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P4
+    model!: ourlab.model.plateModel_384_square
+    location!: ourlab.mario.site.P4
+  mixPlate:
+    type: Plate
+    model!: ourlab.model.plateModel_384_square
+    location!: ourlab.mario.site.P3
 
-  tubes1:
+  tubes1!:
     type: Plate
     description: GFP eppendorf tubes
     model: ourlab.model.tubeHolderModel_1500ul
     location: ourlab.mario.site.T3
-  trough1:
+  trough1!:
     type: Plate
     description: trough for water/glycerol/salt mix
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, saltwater]
-  sourcePlate1:
+  sourcePlate1!:
     type: Plate
     description: buffer plate
     model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P2
-  mixPlate:
-    type: Plate
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P3
-# Reagents used in this protocol
+
+  saltwater:   {type: Liquid, group: Buffers, wells!: trough1(C01 down to F01)}
+  hepes_850:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A01 down to D01)}
+  hepes_650:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A02 down to D02)}
+  pipes_775:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A03 down to D03)}
+  pipes_575:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A04 down to D04)}
+  mes_710:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A05 down to D05)}
+  mes_510:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A06 down to D06)}
+  acetate_575: {type: Liquid, group: Buffers, wells!: sourcePlate1(A07 down to D07)}
+  acetate_375: {type: Liquid, group: Buffers, wells!: sourcePlate1(A08 down to D08)}
+
+  # GFPs
+  sfGFP:       {type: Liquid, group: GFPs, description: wild type, wells!: tubes1(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells!: tubes1(A02)}
+  tdGFP:       {type: Liquid, description: fusion of double mutant, wells!: tubes1(A03)}
+  N149Y:       {type: Liquid, description: single mutant, wells!: tubes1(A04)}
+  Q204H:       {type: Liquid, description: single mutant, wells!: tubes1(A05)}
+
   balanceWater:
     type: Liquid
     description: water used to fill the balance plate
     type!: Variable
     value!: ourlab.mario.systemLiquid
-  saltwater:
-    type: Liquid
-    wells: trough1(C01 down to F01)
-  hepes_850:
-    type: Liquid
-    wells: sourcePlate1(A01 down to D01)
-  hepes_650:
-    type: Liquid
-    wells: sourcePlate1(A02 down to D02)
-  pipes_775:
-    type: Liquid
-    wells: sourcePlate1(A03 down to D03)
-  pipes_575:
-    type: Liquid
-    wells: sourcePlate1(A04 down to D04)
-  mes_710:
-    type: Liquid
-    wells: sourcePlate1(A05 down to D05)
-  mes_510:
-    type: Liquid
-    wells: sourcePlate1(A06 down to D06)
-  acetate_575:
-    type: Liquid
-    wells: sourcePlate1(A07 down to D07)
-  acetate_375:
-    type: Liquid
-    wells: sourcePlate1(A08 down to D08)
-  # GFPs
-  sfGFP: {type: Liquid, description: wild type, wells: tubes1(A01)}
-  Q204H_N149Y: {type: Liquid, description: double mutant, wells: tubes1(A02)}
-  tdGFP: {type: Liquid, description: fusion of double mutant, wells: tubes1(A03)}
-  N149Y: {type: Liquid, description: single mutant, wells: tubes1(A04)}
-  Q204H: {type: Liquid, description: single mutant, wells: tubes1(A05)}
+
+  phDesign:
+    type: Design
+    randomSeed: 0
+    conditions:
+      waterSource: saltwater
+      waterVolume: 40ul
+      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      proteinVolume: 5ul
+      bufferSystem*:
+        acetate:
+          acidSource: acetate_375
+          baseSource: acetate_575
+          acidPH: 3.75
+          basePH: 5.75
+          acidVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
+        mes:
+          acidSource: mes_510
+          baseSource: mes_710
+          acidPH: 5.10
+          basePH: 7.10
+          acidVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
+        pipes:
+          acidSource: pipes_575
+          baseSource: pipes_775
+          acidPH: 5.75
+          basePH: 7.75
+          acidVolume*=range: {count: 7, from: 0, till: 30, decimals: 1, units: ul}
+        hepes:
+          acidSource: hepes_650
+          baseSource: hepes_850
+          acidPH: 6.50
+          basePH: 8.50
+          acidVolume*=range: {count: 5, from: 0, till: 30, decimals: 1, units: ul}
+      baseVolume=math: "30ul - acidVolume"
+      pH=math: "(acidPH * acidVolume + basePH * baseVolume) / (30ul)"
+      replicate*: [1,2,3]
+      well=range: {till: 384, random: true}
 
   mixtures:
     type: Variable
@@ -102,17 +124,16 @@ objects:
         wells: mixPlate(all row-jump(1))
 
 steps:
+  data:
+    source: phDesign
   1:
     description: Fill balance plate with 75ul in 375 wells, store it in the centrifuge
-
     1:
       command: pipetter.pipette
       program!: Roboliq_Water_Air_1000
       sources: balanceWater
-      destinations:
-        "#replaceLabware":
-          list: mixtureWells
-          new: "balancePlate"
+      destinationLabware: balancePlate
+      destinations: $$well
       volumes: 75ul
       cleanBetween: none
 
@@ -128,8 +149,15 @@ steps:
     description: Prepare the mixture plate with a range of pH levels
     1:
       command: pipetter.pipetteMixtures
-      mixtures: mixtures
-      destinations: mixtureWells
+      mixtures:
+        "#data":
+          template:
+            - {source: $waterSource, volume: $waterVolume}
+            - {source: $acidSource, volume: $acidVolume}
+            - {source: $baseSource, volume: $baseVolume}
+            - {source: $proteinSource, volume: $proteinVolume, clean: thorough, cleanBetweenSameSource: flush, program!: Roboliq_Water_Wet_1000_mix3x50ul}
+      destinationLabware: mixPlate
+      destinations: $$well
       clean: flush
       cleanBegin: thorough
       cleanBetweenSameSource: none
@@ -162,7 +190,10 @@ steps:
         2:
           command: fluorescenceReader.measurePlate
           object: mixPlate
-          programFile: ./tania13_ph-temp.mdfx
+          program:
+            excitation: 488nm
+            emission: 510nm
+          programFile!: ./tania13_ph-temp.mdfx
           outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
         3:
           description: Incubate at 25C

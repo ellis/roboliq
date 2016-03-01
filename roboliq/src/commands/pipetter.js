@@ -263,7 +263,7 @@ function pipette(params, parsed, data) {
 	const itemsAll = items;
 	//console.log({itemVolumes: items.map(x => x.volume)})
 	//console.log(_.filter(items, item => item.volume));
-	items = _.filter(items, item => item.volume.toNumber('l') > 0);
+	items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items
 	if (!setTipModel(items)) {
