@@ -452,7 +452,7 @@ module.exports = {
 		makeTransporterPredicates({
 			"ourlab.mario.roma1": {
 				Narrow: [
-					["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
+					["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
 					["CENTRIFUGE_1", "REGRIP"].map(s => "ourlab.mario.site."+s),
 					["CENTRIFUGE_2", "REGRIP"].map(s => "ourlab.mario.site."+s),
 					["CENTRIFUGE_3", "REGRIP"].map(s => "ourlab.mario.site."+s),
@@ -462,7 +462,7 @@ module.exports = {
 			"ourlab.mario.roma2": {
 				Narrow: [
 					[
-						"P1", "P2", "P5", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
+						"P1", "P2", "P3", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
 						"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
 						"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
 						"HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3",
