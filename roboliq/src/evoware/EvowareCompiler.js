@@ -32,6 +32,7 @@ export function compile(carrierData, table, protocol, agents) {
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects);
+	results.push(transporter.moveLastRomaHome({objects}));
 	const flat = _.flattenDeep(results);
 	//flat.forEach(x => console.log(x));
 	const lines = _(flat).map(x => x.line).compact().value();

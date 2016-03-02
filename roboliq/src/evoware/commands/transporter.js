@@ -90,3 +90,15 @@ export function _movePlate(params, parsed, data) {
 
 	return items;
 }
+
+export function moveLastRomaHome(data) {
+	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"]);
+	if (romaIndexPrev) {
+		return [{
+			line: getMoveRomaHomeLine(romaIndexPrev)
+		}];
+	}
+	else {
+		return [];
+	}
+}
