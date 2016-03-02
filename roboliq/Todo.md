@@ -34,7 +34,7 @@
     - [x] tania13_ph: make combined protocol, at first lab-specific
     - [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
     - [x] tania13_ph: split combined protocol into portable and lab-specific parts
-    - [x] tani13_ph-ourlab-diff
+    - [x] tania13_ph-ourlab-diff
     - [x] tania12_denaturation
 - [x] if an object has both ! and non ! properties, the ! property should take precedence
 - [x] `npm test`: fix problem with variable that references a source

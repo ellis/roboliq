@@ -42,7 +42,7 @@ export function compileStep(table, protocol, agents, path, objects) {
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}
-	
+
 	// console.log(`compileStep: ${path.join(".")}`)
 	// console.log({steps: protocol.steps})
 	const step = (_.isEmpty(path)) ? protocol.steps : _.get(protocol.steps, path);
@@ -112,6 +112,15 @@ export function compileStep(table, protocol, agents, path, objects) {
 		_.forEach(effects, (effect, path2) => {
 			M.setMut(objects, path2, effect);
 		});
+	}
+
+	if (!_.isEmpty(step.description)) {
+		results.unshift({line: `Comment("${step.description}");`});
+		// If the description applies to multiple output lines, wrap them in a group
+		if (results.length > 2) {
+			results.unshift({line: `Group("${step.description}");`});
+			results.push({line: `GroupEnd();`});
+		}
 	}
 
 	return results;
