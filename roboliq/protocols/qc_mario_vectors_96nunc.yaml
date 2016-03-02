@@ -41,7 +41,20 @@ objects:
               vector*:
                 Narrow:
                   site*:
+                  - ourlab.mario.site.P2
+                  - ourlab.mario.site.P3
+                  - ourlab.mario.site.P6
+                  - ourlab.mario.site.P7
+                  - ourlab.mario.site.P8
+                  - ourlab.mario.site.HOTEL32_D1
+                  - ourlab.mario.site.HOTEL32_C1
+                  - ourlab.mario.site.HOTEL32_B1
+                  - ourlab.mario.site.HOTEL32_A1
+                  - ourlab.mario.site.HOTEL32_D8
+                  - ourlab.mario.site.HOTEL32_C4
+                  - ourlab.mario.site.HOTEL32_B5
                   - ourlab.mario.site.ROBOSEAL
+                  - ourlab.mario.site.ROBOPEEL
                 Wide:
                   site*:
                   - ourlab.mario.site.READER

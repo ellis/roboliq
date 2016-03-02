@@ -18,6 +18,47 @@ function makeEvowareFacts(parsed, data, variable, value) {
 	return _.merge(result2, {factsValue: value2});
 }
 
+/**
+ * Expect spec of this form:
+ * ``{siteModel: string, sites: [string], labwareModels: [string]}``
+ */
+function makeSiteModelPredicates(spec) {
+	return _.flatten([
+		{isSiteModel: {model: spec.siteModel}},
+		_.map(spec.sites, site => ({siteModel: {site, siteModel: spec.siteModel}})),
+		_.map(spec.labwareModels, labwareModel => ({stackable: {below: spec.siteModel, above: labwareModel}}))
+	]);
+}
+
+/**
+ * Expect specs of this form:
+ * ``{<transporter>: {<program>: [site names]}}``
+ */
+function makeTransporterPredicates(specs) {
+	let siteCliqueId = 1;
+	const l = [];
+	_.forEach(specs, (programs, equipment) => {
+		_.forEach(programs, (cliques, program) => {
+			_.forEach(cliques, (sites) => {
+				const siteClique = "ourlab.luigi.siteClique"+siteCliqueId;
+				siteCliqueId++;
+				_.forEach(sites, site => {
+					l.push({"siteCliqueSite": {siteClique, site}});
+				});
+				l.push({
+					"transporter.canAgentEquipmentProgramSites": {
+						"agent": "ourlab.luigi.evoware",
+						equipment,
+						program,
+						siteClique
+					}
+				});
+			});
+		});
+	});
+	return l;
+}
+
 module.exports = {
 	roboliq: "v1",
 	imports: ["roboliq.js"],
@@ -108,6 +149,10 @@ module.exports = {
 						"ourlab.mario.liha.tipModel.tipModel0050": ["ourlab.mario.liha.syringe.5", "ourlab.mario.liha.syringe.6", "ourlab.mario.liha.syringe.7", "ourlab.mario.liha.syringe.8"]
 					}
 				},
+				/*"peeler": {
+					"type": "Peeler",
+					"evowareId": "RoboPeel"
+				},*/
 				"sealer": {
 					"type": "Sealer",
 					"evowareId": "RoboSeal"
@@ -122,6 +167,38 @@ module.exports = {
 					"CENTRIFUGE_2": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 2, "closed": true },
 					"CENTRIFUGE_3": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 1, "closed": true },
 					"CENTRIFUGE_4": { "type": "Site", "evowareCarrier": "Centrifuge", "evowareGrid": 54, "evowareSite": 2, "closed": true },
+					"HOTEL32_A1": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 4 },
+					"HOTEL32_B1": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 3 },
+					"HOTEL32_C1": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 2 },
+					"HOTEL32_D1": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 1 },
+					"HOTEL32_A2": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 8 },
+					"HOTEL32_B2": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 7 },
+					"HOTEL32_C2": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 6 },
+					"HOTEL32_D2": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 5 },
+					"HOTEL32_A3": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 12 },
+					"HOTEL32_B3": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 11 },
+					"HOTEL32_C3": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 10 },
+					"HOTEL32_D3": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 9 },
+					"HOTEL32_A4": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 16 },
+					"HOTEL32_B4": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 15 },
+					"HOTEL32_C4": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 14 },
+					"HOTEL32_D4": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 13 },
+					"HOTEL32_A5": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 20 },
+					"HOTEL32_B5": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 19 },
+					"HOTEL32_C5": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 18 },
+					"HOTEL32_D5": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 17 },
+					"HOTEL32_A6": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 24 },
+					"HOTEL32_B6": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 23 },
+					"HOTEL32_C6": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 22 },
+					"HOTEL32_D6": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 21 },
+					"HOTEL32_A7": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 28 },
+					"HOTEL32_B7": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 27 },
+					"HOTEL32_C7": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 26 },
+					"HOTEL32_D7": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 25 },
+					"HOTEL32_A8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 32 },
+					"HOTEL32_B8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 31 },
+					"HOTEL32_C8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 30 },
+					"HOTEL32_D8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 29 },
 					"P2": {
 						"type": "Site",
 						"evowareCarrier": "MP 2Pos H+P Shake",
@@ -440,7 +517,7 @@ module.exports = {
 		}
 	},
 	// ROMA2 Narrow
-	_.map(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "ROBOSEAL", "REGRIP"], function(s) {
+	_.map(["P1", "P2", "P5", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8"], function(s) {
 		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique2", "site": "ourlab.mario.site."+s}};
 	}),
 	{

@@ -218,7 +218,9 @@
         - [ ] transfer hotels
         - [ ] P1-P3,P6-P8 with ROMA2
         - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-- [ ] Create evoware Groups for steps with `description` properties
+- [x] Create evoware Groups for steps with `description` properties
+- [ ] Add timing log to all evoware instructions
+    `Execute("node C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\timing.js -- 1.2.3",2,"",2);`
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] have a good command for expanding steps and parameters based on data
