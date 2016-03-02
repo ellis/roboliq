@@ -20,31 +20,31 @@ objects:
     type: Design
     randomSeed: 123
     conditions:
-      "plate*":
-        "plateNunc":
-          "storageSite": "ourlab.mario.site.REGRIP"
-          "roma*":
-            "ourlab.mario.roma1":
-              "vector*":
-                "Narrow":
-                  "site*":
-                  - "ourlab.mario.site.P2"
-                  - "ourlab.mario.site.P3"
-                  - "ourlab.mario.site.P4"
-                  - "ourlab.mario.site.P5"
-                  - "ourlab.mario.site.P6"
-                  - "ourlab.mario.site.P7"
-                  - "ourlab.mario.site.P8"
-                  - "ourlab.mario.site.CENTRIFUGE_2"
-                  - "ourlab.mario.site.CENTRIFUGE_4"
-            "ourlab.mario.roma2":
-              "vector*":
-                "Narrow":
-                  "site*":
-                  - "ourlab.mario.site.ROBOSEAL"
-                "Wide":
-                  "site*":
-                  - "ourlab.mario.site.READER"
+      plate*:
+        plateNunc:
+          storageSite: ourlab.mario.site.REGRIP
+          roma*:
+            ourlab.mario.roma1:
+              vector*:
+                Narrow:
+                  site*:
+                  - ourlab.mario.site.P2
+                  - ourlab.mario.site.P3
+                  - ourlab.mario.site.P4
+                  - ourlab.mario.site.P5
+                  - ourlab.mario.site.P6
+                  - ourlab.mario.site.P7
+                  - ourlab.mario.site.P8
+                  - ourlab.mario.site.CENTRIFUGE_2
+                  - ourlab.mario.site.CENTRIFUGE_4
+            ourlab.mario.roma2:
+              vector*:
+                Narrow:
+                  site*:
+                  - ourlab.mario.site.ROBOSEAL
+                Wide:
+                  site*:
+                  - ourlab.mario.site.READER
       order=range:
         groupBy: [plate, roma, vector]
         shuffle: true
@@ -53,7 +53,7 @@ steps:
   1:
     command: experiment.forEachGroup
     design: design1
-    groupBy: ["plate", "roma", "vector"]
+    groupBy: [plate, roma, vector]
     orderBy: [order]
     steps:
       description: `Test {{$plate}} movements for {{$roma}} with vector {{$vector}}`
