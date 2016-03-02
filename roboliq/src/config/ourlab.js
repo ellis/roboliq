@@ -40,14 +40,14 @@ function makeTransporterPredicates(specs) {
 	_.forEach(specs, (programs, equipment) => {
 		_.forEach(programs, (cliques, program) => {
 			_.forEach(cliques, (sites) => {
-				const siteClique = "ourlab.luigi.siteClique"+siteCliqueId;
+				const siteClique = "ourlab.mario.siteClique"+siteCliqueId;
 				siteCliqueId++;
 				_.forEach(sites, site => {
 					l.push({"siteCliqueSite": {siteClique, site}});
 				});
 				l.push({
 					"transporter.canAgentEquipmentProgramSites": {
-						"agent": "ourlab.luigi.evoware",
+						"agent": "ourlab.mario.evoware",
 						equipment,
 						program,
 						siteClique
@@ -430,141 +430,63 @@ module.exports = {
 		}
 	},
 
-	predicates: _.flatten([{
-		"isSiteModel": {
-			"model": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.mario.site.CENTRIFUGE_1",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.mario.site.CENTRIFUGE_2",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.mario.site.CENTRIFUGE_3",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.mario.site.CENTRIFUGE_4",
-			"siteModel": "ourlab.siteModel1"
-		}
-	},
-	{"#for": {
-		factors: {site: ["ourlab.mario.site.P2", "ourlab.mario.site.P3", "ourlab.mario.site.P4", "ourlab.mario.site.P5", "ourlab.mario.site.P6", "ourlab.mario.site.P7", "ourlab.mario.site.P8"]},
-		output: {
-			"siteModel": {
-				"site": "{{site}}",
-				"siteModel": "ourlab.siteModel1"
+	predicates: _.flatten([
+		// Centrifuge sites
+		makeSiteModelPredicates({
+			siteModel: "ourlab.mario.siteModel_CENTRIFUGE",
+			sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"].map(s => "ourlab.mario.site."+s),
+			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
+		}),
+		// short-format plate sites (non-tall labware, not for deep well plates)
+		makeSiteModelPredicates({
+			siteModel: "ourlab.mario.siteModel_short",
+			sites: ["HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "READER", "ROBOPEEL", "ROBOSEAL"].map(s => "ourlab.mario.site."+s),
+			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
+		}),
+		// Bench sites that don't have any obstructions, so deep well plates can fit on them too
+		makeSiteModelPredicates({
+			siteModel: "ourlab.mario.siteModel_open",
+			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
+			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
+		}),
+		makeTransporterPredicates({
+			"ourlab.mario.roma1": {
+				Narrow: [
+					["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
+					["CENTRIFUGE_1", "REGRIP"].map(s => "ourlab.mario.site."+s),
+					["CENTRIFUGE_2", "REGRIP"].map(s => "ourlab.mario.site."+s),
+					["CENTRIFUGE_3", "REGRIP"].map(s => "ourlab.mario.site."+s),
+					["CENTRIFUGE_4", "REGRIP"].map(s => "ourlab.mario.site."+s),
+				]
+			},
+			"ourlab.mario.roma2": {
+				Narrow: [
+					[
+						"P1", "P2", "P5", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
+						"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
+						"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
+						"HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3",
+						"HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4",
+						"HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5",
+						"HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6",
+						"HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7",
+						"HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8",
+					].map(s => "ourlab.mario.site."+s)
+				],
+				Wide: [
+					["READER", "REGRIP"].map(s => "ourlab.mario.site."+s)
+				]
 			}
-		}
-	}},
-	{
-		"siteModel": {
-			"site": "ourlab.mario.site.READER",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.mario.site.REGRIP",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"siteModel": {
-			"site": "ourlab.mario.site.ROBOSEAL",
-			"siteModel": "ourlab.siteModel1"
-		}
-	}, {
-		"stackable": {
-			"below": "ourlab.siteModel1",
-			"above": "ourlab.model.plateModel_96_dwp"
-		}
-	}, {
-		"stackable": {
-			"below": "ourlab.siteModel1",
-			"above": "ourlab.model.plateModel_96_square_transparent_nunc"
-		}
-	}, {
-		"stackable": {
-			"below": "ourlab.siteModel1",
-			"above": "ourlab.model.plateModel_384_square"
-		}
-	},
-	_.map(["ourlab.model.plateModel_384_square"], function(model) {
-		return {"centrifuge.canAgentEquipmentModelSite1Site2": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.centrifuge",
-			"model": model,
-			"site1": "ourlab.mario.site.CENTRIFUGE_2",
-			"site2": "ourlab.mario.site.CENTRIFUGE_4"
-		}};
-	}),
-	// ROMA1 Narrow
-	_.map(["P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"], function(s) {
-		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site."+s}};
-	}),
-	{
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma1",
-			"program": "Narrow",
-			"siteClique": "ourlab.mario.siteClique1"
-		}
-	},
-	// ROMA2 Narrow
-	_.map(["P1", "P2", "P5", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8"], function(s) {
-		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique2", "site": "ourlab.mario.site."+s}};
-	}),
-	{
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Narrow",
-			"siteClique": "ourlab.mario.siteClique2"
-		}
-	},
-	// Centrifuge ROMA1 Narrow
-	_(["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"]).map(function(s) {
-		return [
-			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site.REGRIP"}},
-			{"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_"+s, "site": "ourlab.mario.site."+s}},
-			{
-				"transporter.canAgentEquipmentProgramSites": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.roma1",
-					"program": "Narrow",
-					"siteClique": "ourlab.mario.siteClique_"+s
-				}
-			}
-		];
-	}).flatten().value(),
-	// READER <-> REGRIP
-	_.map(["READER", "REGRIP"], function(s) {
-		return {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique_READER", "site": "ourlab.mario.site."+s}};
-	}),
-	/*// READER ROMA1 Narrow
-	{
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma1",
-			"program": "Narrow",
-			"siteClique": "ourlab.mario.siteClique_READER"
-		}
-	},*/
-	// READER ROMA2 Wide
-	{
-		"transporter.canAgentEquipmentProgramSites": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.roma2",
-			"program": "Wide",
-			"siteClique": "ourlab.mario.siteClique_READER"
-		}
-	},
+		}),
+		_.map(["ourlab.model.plateModel_384_square"], function(model) {
+			return {"centrifuge.canAgentEquipmentModelSite1Site2": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.centrifuge",
+				"model": model,
+				"site1": "ourlab.mario.site.CENTRIFUGE_2",
+				"site2": "ourlab.mario.site.CENTRIFUGE_4"
+			}};
+		}),
 	{"#for": {
 		factors: {model: ["plateModel_384_square"]},
 		output: {
