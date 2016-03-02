@@ -124,7 +124,7 @@ describe('design', () => {
 					"boy*=range": {till: 10},
 					"foot=assign": {
 						values: ["L", "R"],
-						random: true,
+						shuffle: true,
 						rotateValues: true
 					},
 					"*": {
@@ -140,7 +140,7 @@ describe('design', () => {
 					"material=assign": {
 						values: ["A", "B"],
 						groupBy: "boy",
-						random: true
+						shuffle: true
 					}
 				},
 				models: {
@@ -269,7 +269,88 @@ describe('design', () => {
 				{"replicate":4,"well":"B01"},
 				{"replicate":5,"well":"B02"}
 			]);
+		});
 
+		it("should support range() with groupBy", () => {
+			const design = {
+				conditions: {
+					"a*": [1, 2],
+					"b*": [1, 2, 3],
+					"order=range": {
+						groupBy: "a"
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3},
+				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}
+			]);
+		});
+
+		it("should support range() with sameBy", () => {
+			const design = {
+				conditions: {
+					"a*": [1, 2],
+					"b*": [1, 2, 3],
+					"order=range": {
+						sameBy: "a"
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":1},
+				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":2}
+			]);
+		});
+
+		it("should support range() with groupBy and shuffle", () => {
+			const design = {
+				randomSeed: 444,
+				conditions: {
+					"a*": [1, 2],
+					"b*": [1, 2, 3],
+					"order=range": {
+						groupBy: "a",
+						shuffle: true
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
+				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":3},{"a":2,"b":3,"order":1}
+			]);
+		});
+
+		it("should support range() with groupBy and shuffle and shuffleOnce", () => {
+			const design = {
+				randomSeed: 444,
+				conditions: {
+					"a*": [1, 2],
+					"b*": [1, 2, 3],
+					"order=range": {
+						till: 3,
+						groupBy: "a",
+						shuffle: true,
+						shuffleOnce: true
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
+				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":1},{"a":2,"b":3,"order":3}
+			]);
 		});
 
 	});

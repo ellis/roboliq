@@ -18,6 +18,7 @@ objects:
 
   design1:
     type: Design
+    randomSeed: 123
     conditions:
       "plate*":
         "plateNunc":
@@ -44,18 +45,20 @@ objects:
                 "Wide":
                   "site*":
                   - "ourlab.mario.site.READER"
+      order=range:
+        groupBy: [plate, roma, vector]
+        shuffle: true
 
 steps:
   1:
     command: experiment.forEachGroup
     design: design1
     groupBy: ["plate", "roma", "vector"]
+    orderBy: [order]
     steps:
       description: `Test {{$plate}} movements for {{$roma}} with vector {{$vector}}`
       1:
         command: experiment.forEachRow
-        data:
-          shuffle: true
         steps:
           command: transporter.movePlate
           equipment: $roma

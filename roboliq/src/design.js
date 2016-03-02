@@ -575,8 +575,8 @@ function applyActionToTable(table, action, randomEngine) {
 			true &&
 			// But don't if 'applyPerGroup' is set
 			!action.applyPerGroup &&
-			// Nor if the value is randomized (and 'randomizeOnce' isn't set)
-			!(action.random && !action.randomizeOnce)
+			// Nor if the value is randomized (and 'shuffleOnce' isn't set)
+			!(action.shuffle && !action.shuffleOnce)
 		)
 		const valuesTable = (doGetValuesTable) ? getValues(action, {table, groupsOfSames}) : undefined;
 		// console.log({valuesTable})
