@@ -235,7 +235,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support allocateWells() assignments", () => {
+		it("should support allocateWells() assignments", () => {
 			const design1 = {
 				conditions: {
 					"replicate*=range": {till: 5},

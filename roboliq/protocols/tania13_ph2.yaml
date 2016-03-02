@@ -165,15 +165,40 @@ steps:
             excitation: 488nm
             emission: 510nm
             wells: $$well
-          analysis:
-            measuredFactor: fluorescence
-            plots:
-            - "ggvis(~pH, ~fluorescence)"
-            CONTINUE try: "<http://vega.github.io/vega-lite/tutorials/getting_started.html>"
-            models:
-            - "fluorescence ~ pH + Error(replicate)"
+          # dataOutput:
+          #
+          #   measuredFactor: fluorescence
+          #   plots:
+          #   - mark: point
+          #     encoding:
+          #       x:
+          #         field: pH
+          #         type: quantitative
+          #       y:
+          #         field: fluorescence
+          #         type: quantitative
+          #       shape:
+          #         field: protein
+          #         type: nominal
+          #       color:
+          #         field: measurement
+          #         type: quantitative
+          #   CONTINUE try: "<http://vega.github.io/vega-lite/tutorials/getting_started.html>"
+          #   models:
+          #   - "fluorescence ~ pH + Error(replicate)"
           programFile!: ./tania13_ph-temp.mdfx
-          outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+          # outputFile!: C:\Users\localadmin\Desktop\Ellis\tania13_ph--<YYYYMMDD_HHmmss>.xml
+          # output:
+          #   directory!: (defaults to output directory of Evoware script)
+          #   rawFile: (default to raw_1.2.3.xml)
+          #   dataFile: (default to same a rawFile but with data_1.2.3.json)
+          #   basename: need to have some ID for measurements that should be concatenated together for analysis, even if performed at different times and saved in different files
+          #   then: (by default, rename raw and data files to include date&time)
+          #   timeFactor: time
+          #   measurementFactor: fluorescence
+        # 3:
+        #   command: vegaLite.refresh
+
         3:
           description: Incubate at 25C
           command: centrifuge.centrifuge2
