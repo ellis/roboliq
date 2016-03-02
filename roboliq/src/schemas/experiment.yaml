@@ -11,6 +11,7 @@ experiment.run:
     agent: {description: "Agent identifier", type: "Agent"}
     design: {description: "An experimental design to use", type: "Design"}
     groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
+    orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
     duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
     interleave: {description: "The time offset for interleaving each group", type: Duration}
     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
@@ -26,6 +27,7 @@ experiment.forEachGroup:
     agent: {description: "Agent identifier", type: "Agent"}
     design: {description: "An experimental design to use", type: "Design"}
     groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
+    orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
     duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
     interleave: {description: "The time offset for interleaving each group", type: Duration}
     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
@@ -40,6 +42,7 @@ experiment.forEachRow:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     design: {description: "An experimental design to use", type: "Design"}
+    orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
     duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
     interleave: {description: "The time offset for interleaving each group", type: Duration}
     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}

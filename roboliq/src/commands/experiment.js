@@ -22,9 +22,10 @@ function run(parsed, data) {
 	// _.forEach(DATA, row => { console.log(JSON.stringify(row)) });
 	assert(DATA, "missing DATA; you may want to specify the parameter 'design'");
 
+	const queryResult = Design.query(DATA, {groupBy: parsed.value.groupBy, orderBy: parsed.value.orderBy, where: parsed.value.where});
 	const DATAs = (parsed.value.forEachRow)
-		? DATA.map(x => [x])
-		: Design.query(DATA, {groupBy: parsed.value.groupBy});
+		? _.flatten(queryResult).map(x => [x])
+		: queryResult;
 	//console.log("experiment.run DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
 	// Check how many timers are needed
