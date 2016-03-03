@@ -115,11 +115,22 @@ export function compileStep(table, protocol, agents, path, objects) {
 		});
 	}
 
-	if (!_.isEmpty(step.description)) {
-		results.unshift({line: `Comment("${step.description}");`});
+	const results2 = _.flattenDeep(results);
+	const instructionCount = results2.length;
+
+	if (instructionCount > 0) {
+		results.unshift({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- begin ${path.join(".")}",2,"",2);`})
+		results.push({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- end ${path.join(".")}",2,"",2);`})
+	}
+
+	const addDescription = !_.isEmpty(step.description);
+	if (addDescription) {
+		const text = `${path.join(".")}) ${step.description}`;
+		results.unshift({line: `Comment("${text}");`});
+
 		// If the description applies to multiple output lines, wrap them in a group
-		if (results.length > 2) {
-			results.unshift({line: `Group("${step.description}");`});
+		if (instructionCount > 1) {
+			results.unshift({line: `Group("${text}");`});
 			results.push({line: `GroupEnd();`});
 		}
 	}

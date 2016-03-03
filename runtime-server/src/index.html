@@ -30,6 +30,29 @@
 			socket.on('chat message', function(msg){
 				$('#messages').append($('<li>').text(msg));
 			});
+			socket.on("state", function(state) {
+				$("#messages").val("");
+				if (state.timing) {
+					var i;
+					for (i = 0; i < state.timing.length; i++) {
+						var timing = state.timing[i];
+						if (timing.type === 0) {
+							// Try to find the step in the protocol
+							var step = (state.protocol || {}).steps;
+							var stepParts = timing.step.split(".");
+							for (k = 0; k < stepParts.length; k++) {
+								var stepPart = stepParts[k];
+								if (step) {
+									step = step[stepPart];
+								}
+							}
+							var indent = stepParts.join("");
+							var text = (step) ? JSON.stringify(step) : "";
+							$('#messages').append($('<li>').text(indent + timing.step + ") "+text));
+						}
+					}
+				}
+			});
 		</script>
 	</body>
 </html>

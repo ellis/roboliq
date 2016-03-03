@@ -22,7 +22,7 @@ function getRomaMoveLine(romaIndex, action) {
 		maximumSpeed: 1,
 		romaIndex
 	};
-	return `ROMA(${x.action},${x.gripperDistance},${x.force},${x.dx},${x.dy},${x.dz},${x.speed},${x.maximumSpeed},${x.romaIndex})`;
+	return `ROMA(${x.action},${x.gripperDistance},${x.force},${x.dx},${x.dy},${x.dz},${x.speed},${x.maximumSpeed},${x.romaIndex});`;
 }
 
 export function _movePlate(params, parsed, data) {
