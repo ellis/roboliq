@@ -208,6 +208,7 @@
 
 # Todos for paper 2/3
 
+- [x] have a good command for expanding steps and parameters based on data (see 'data' property handling in roboliq.js and '#data' in roboliq directives)
 - [ ] qc_mario_vectors_96nunc:
     - [x] randomize order of sites
     - [x] allow for setting a random seed
@@ -223,30 +224,13 @@
     - [ ] ERROR: misplaced from hotel32 site 19 to P2
 - [ ] Add timing log to all evoware instructions
     `Execute("node C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\timing.js -- 1.2.3",2,"",2);`
+- [ ] Figure out how to automatically convert reader data to measurement JSON data
+    - [ ] program a little "runtime client" that sends data to a server when called by Evoware
+    - [ ] program a server that accepts data from the runtime client
+    - [ ] program a UI client that displays live data from the server as it's updated by the runtime client
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
-- [ ] have a good command for expanding steps and parameters based on data
-    maybe something like this:
-    ```
-    # a data field with a 'forEach' leads to a step being repeated with the appropriate scope
-    data: {
-        source: myExperiment,
-        distinctBy: "cultureWell",
-        forEach: "row"
-    }
-
-    data(): {
-        distinctBy: "cultureWell",
-        actions: [{
-            action: "math",
-            value: "cultureVolume / 2"
-        }],
-        value: "$cultureWell",
-        join: ",",
-    }
-    ```
-- [ ] the command should also manage the timing of steps
-
+- [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data
 - [ ] dm00_test3m.js:
     - [ ] BUG: why are media and strain sources taken from different syringes?
     - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
@@ -1026,3 +1010,24 @@ steps:
 Sometimes we need multi-level designs, such as when first one set of master
 mixtures is prepared, and then experiments are done drawing samples from
 each of them. CONTINUE.
+
+# Data
+
+```
+# a data field with a 'forEach' leads to a step being repeated with the appropriate scope
+data: {
+    source: myExperiment,
+    distinctBy: "cultureWell",
+    forEach: "row"
+}
+
+data(): {
+    distinctBy: "cultureWell",
+    actions: [{
+        action: "math",
+        value: "cultureVolume / 2"
+    }],
+    value: "$cultureWell",
+    join: ",",
+}
+```
