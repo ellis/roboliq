@@ -26,12 +26,13 @@ const commandHandlers = {
  * @param  {object} table - table object (see EvowareTableFile.load)
  * @param  {roboliq:Protocol} protocol
  * @param  {array} agents - string array of agent names that this script should generate script(s) for
+ * @param  {object} options - an optional map of options; set timing=false to avoid outputting time-logging instructions
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
-export function compile(carrierData, table, protocol, agents) {
+export function compile(carrierData, table, protocol, agents, options = {}) {
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
-	const results = compileStep(table, protocol, agents, [], objects);
+	const results = compileStep(table, protocol, agents, [], objects, options);
 	results.push(transporter.moveLastRomaHome({objects}));
 	const flat = _.flattenDeep(results);
 	//flat.forEach(x => console.log(x));
@@ -39,7 +40,7 @@ export function compile(carrierData, table, protocol, agents) {
 	return [{table, lines}];
 }
 
-export function compileStep(table, protocol, agents, path, objects) {
+export function compileStep(table, protocol, agents, path, objects, options = {}) {
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}
@@ -68,7 +69,7 @@ export function compileStep(table, protocol, agents, path, objects) {
 		//console.log({keys})
 		// Try to expand the substeps
 		for (const key of keys) {
-			const result1 = compileStep(table, protocol, agents, path.concat(key), objects);
+			const result1 = compileStep(table, protocol, agents, path.concat(key), objects, options);
 			results.push(result1);
 		}
 	}
@@ -118,7 +119,8 @@ export function compileStep(table, protocol, agents, path, objects) {
 	const results2 = _.flattenDeep(results);
 	const instructionCount = results2.length;
 
-	if (instructionCount > 0) {
+	// console.log({options, timing: _.get(options, "timing", true)})
+	if (instructionCount > 0 && _.get(options, "timing", true) === true) {
 		results.unshift({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- begin ${path.join(".")}",2,"",2);`})
 		results.push({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- end ${path.join(".")}",2,"",2);`})
 	}

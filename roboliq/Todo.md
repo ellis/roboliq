@@ -213,29 +213,35 @@
 - [x] use `express` to serve up an HTML page from serverUi, automatically display changes in `state.timing`.
 - [x] program a prototype UI client that displays live data from the server as it's updated by the runtime client
 - [x] program a prototype little "runtime client" that sends data to a server when called by Evoware
-- [?] Add timing log to all evoware instructions
-    `Execute("node C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\timing.js -- 1.2.3",2,"",2);`
-- [ ] Test runtime-client/runtime-server/roboliq-runtime-cli
-- [ ] EvowareCompiler: make addition of run-time instructions an option
+- [x] ourlab.js: DWP can't go on sealer or peeler
+- [x] Add timing log to all evoware instructions
+- [x] Test runtime-client/runtime-server/roboliq-runtime-cli
+- [x] EvowareCompiler: make addition of run-time instructions an option
 - [ ] qc_mario_vectors_96nunc:
     - [x] randomize order of sites
     - [x] allow for setting a random seed
     - [x] output `description` values as evoware comments
     - [x] Create evoware Groups for steps with `description` properties
     - [ ] sites:
-        - [ ] RoboPeel
-        - [ ] hotels in back
+        - [x] RoboPeel
+        - [x] hotels in back
+				- [x] P1-P3,P6-P8 with ROMA2
+        - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
         - [ ] transfer hotels
-        - [ ] P1-P3,P6-P8 with ROMA2
-        - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-    - [ ] ERROR: wrongly placed on SEELER
-    - [ ] ERROR: misplaced from hotel32 site 19 to P2
+- [ ] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
+- [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] runtime-server: take as input a `.out.json` file
 - [ ] runtime-client: create a redux version, start with `fullstack-voting-client`
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
+	- [ ] roboliq-runtime-cli: should send XML to runtime-server, then rename XML to include end-time suffix
+	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
+	- [ ] runtime-server: setInfiniteMeasurements: accepts `{step, xml}`
+	- [ ] runtime-client: should display measurements using vega
+	- [ ] runtime-client: should display measurements using a table
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data
+- [ ] consider adding a `summaryTemplate` field to command schemas, allowing for more user friendly summaries in UI
 - [ ] dm00_test3m.js:
     - [ ] BUG: why are media and strain sources taken from different syringes?
     - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
@@ -260,7 +266,6 @@
     - [ ] should automatically move ROMAs to "home position" before a different roma is used.
 - [ ] compile the experiment for mario
 - [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
-- [ ] ourlab.js: DWP cann't go on sealer or peeler
 SUNDAY:
 - [ ] compile the experiment for luigi
 - [ ] run the experiment on mario
