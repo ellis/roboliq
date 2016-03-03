@@ -45,33 +45,40 @@ describe('core logic', () => {
 			state = setStepTime(state, "2015-01-01T00:00:00Z", ["1", "1.1"], []);
 			expect(state).to.equal(fromJS({
 				protocol: protocol1,
-				timing: {
-					"1": {from: "2015-01-01T00:00:00Z"},
-					"1.1": {from: "2015-01-01T00:00:00Z"},
-				}
+				timing: [
+					{time: "2015-01-01T00:00:00Z", step: "1", type: 0},
+					{time: "2015-01-01T00:00:00Z", step: "1.1", type: 0},
+				]
 			}));
 
 			state = setStepTime(state, "2015-01-01T00:01:00Z", ["2", "2.1"], ["1", "1.1"]);
 			expect(state).to.equal(fromJS({
 				protocol: protocol1,
-				timing: {
-					"1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
-					"1.1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
-					"2": {from: "2015-01-01T00:01:00Z"},
-					"2.1": {from: "2015-01-01T00:01:00Z"},
-				}
+				timing: [
+					{time: "2015-01-01T00:00:00Z", step: "1", type: 0},
+					{time: "2015-01-01T00:00:00Z", step: "1.1", type: 0},
+					{time: "2015-01-01T00:01:00Z", step: "1", type: 1},
+					{time: "2015-01-01T00:01:00Z", step: "1.1", type: 1},
+					{time: "2015-01-01T00:01:00Z", step: "2", type: 0},
+					{time: "2015-01-01T00:01:00Z", step: "2.1", type: 0},
+				]
 			}));
 
 			state = setStepTime(state, "2015-01-01T00:02:00Z", [], ["2", "2.1"]);
 			expect(state).to.equal(fromJS({
 				protocol: protocol1,
-				timing: {
-					"1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
-					"1.1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
-					"2": {from: "2015-01-01T00:01:00Z", till: "2015-01-01T00:02:00Z"},
-					"2.1": {from: "2015-01-01T00:01:00Z", till: "2015-01-01T00:02:00Z"},
-				}
+				timing: [
+					{time: "2015-01-01T00:00:00Z", step: "1", type: 0},
+					{time: "2015-01-01T00:00:00Z", step: "1.1", type: 0},
+					{time: "2015-01-01T00:01:00Z", step: "1", type: 1},
+					{time: "2015-01-01T00:01:00Z", step: "1.1", type: 1},
+					{time: "2015-01-01T00:01:00Z", step: "2", type: 0},
+					{time: "2015-01-01T00:01:00Z", step: "2.1", type: 0},
+					{time: "2015-01-01T00:02:00Z", step: "2", type: 1},
+					{time: "2015-01-01T00:02:00Z", step: "2.1", type: 1},
+				]
 			}));
+
 		});
 	});
 });

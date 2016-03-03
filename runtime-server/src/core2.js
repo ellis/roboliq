@@ -8,11 +8,11 @@ export function setProtocol(state, protocol) {
 }
 
 export function setStepTime(state, time, begins, ends) {
-	_.forEach(begins, step => {
-		state = state.setIn(["timing", step, "from"], time);
-	});
 	_.forEach(ends, step => {
-		state = state.setIn(["timing", step, "till"], time);
+		state = state.updateIn(["timing"], List(), l => l.push(Map({time, step, "type": 1})));
+	});
+	_.forEach(begins, step => {
+		state = state.updateIn(["timing"], List(), l => l.push(Map({time, step, "type": 0})));
 	});
 	return state;
 }
