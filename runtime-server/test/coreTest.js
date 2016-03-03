@@ -46,8 +46,8 @@ describe('core logic', () => {
 			expect(state).to.equal(fromJS({
 				protocol: protocol1,
 				timing: [
-					{time: "2015-01-01T00:00:00Z", step: "1", type: 0},
-					{time: "2015-01-01T00:00:00Z", step: "1.1", type: 0},
+					{time: "2015-01-01T00:00:00Z", type: 0, step: "1"},
+					{time: "2015-01-01T00:00:00Z", type: 0, step: "1.1"},
 				]
 			}));
 
@@ -55,12 +55,12 @@ describe('core logic', () => {
 			expect(state).to.equal(fromJS({
 				protocol: protocol1,
 				timing: [
-					{time: "2015-01-01T00:00:00Z", step: "1", type: 0},
-					{time: "2015-01-01T00:00:00Z", step: "1.1", type: 0},
-					{time: "2015-01-01T00:01:00Z", step: "1", type: 1},
-					{time: "2015-01-01T00:01:00Z", step: "1.1", type: 1},
-					{time: "2015-01-01T00:01:00Z", step: "2", type: 0},
-					{time: "2015-01-01T00:01:00Z", step: "2.1", type: 0},
+					{time: "2015-01-01T00:00:00Z", type: 0, step: "1"},
+					{time: "2015-01-01T00:00:00Z", type: 0, step: "1.1"},
+					{time: "2015-01-01T00:01:00Z", type: 1, step: "1"},
+					{time: "2015-01-01T00:01:00Z", type: 1, step: "1.1"},
+					{time: "2015-01-01T00:01:00Z", type: 0, step: "2"},
+					{time: "2015-01-01T00:01:00Z", type: 0, step: "2.1"},
 				]
 			}));
 
@@ -68,14 +68,14 @@ describe('core logic', () => {
 			expect(state).to.equal(fromJS({
 				protocol: protocol1,
 				timing: [
-					{time: "2015-01-01T00:00:00Z", step: "1", type: 0},
-					{time: "2015-01-01T00:00:00Z", step: "1.1", type: 0},
-					{time: "2015-01-01T00:01:00Z", step: "1", type: 1},
-					{time: "2015-01-01T00:01:00Z", step: "1.1", type: 1},
-					{time: "2015-01-01T00:01:00Z", step: "2", type: 0},
-					{time: "2015-01-01T00:01:00Z", step: "2.1", type: 0},
-					{time: "2015-01-01T00:02:00Z", step: "2", type: 1},
-					{time: "2015-01-01T00:02:00Z", step: "2.1", type: 1},
+					{time: "2015-01-01T00:00:00Z", type: 0, step: "1"},
+					{time: "2015-01-01T00:00:00Z", type: 0, step: "1.1"},
+					{time: "2015-01-01T00:01:00Z", type: 1, step: "1"},
+					{time: "2015-01-01T00:01:00Z", type: 1, step: "1.1"},
+					{time: "2015-01-01T00:01:00Z", type: 0, step: "2"},
+					{time: "2015-01-01T00:01:00Z", type: 0, step: "2.1"},
+					{time: "2015-01-01T00:02:00Z", type: 1, step: "2"},
+					{time: "2015-01-01T00:02:00Z", type: 1, step: "2.1"},
 				]
 			}));
 
