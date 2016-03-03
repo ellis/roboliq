@@ -28,7 +28,6 @@ const protocol1 = {
 describe('core logic', () => {
 
 	describe('setProtocol', () => {
-
 		it('adds the protocol to the state', () => {
 			const state0 = Map();
 			const state = setProtocol(state0, protocol1);
@@ -36,7 +35,43 @@ describe('core logic', () => {
 				protocol: protocol1
 			}));
 		});
-
 	});
 
+	describe("setStepTime", () => {
+		it("adds step times to the state", () => {
+			let state = Map();
+			state = setProtocol(state, protocol1);
+
+			state = setStepTime(state, "2015-01-01T00:00:00Z", ["1", "1.1"], []);
+			expect(state).to.equal(fromJS({
+				protocol: protocol1,
+				timing: {
+					"1": {from: "2015-01-01T00:00:00Z"},
+					"1.1": {from: "2015-01-01T00:00:00Z"},
+				}
+			}));
+
+			state = setStepTime(state, "2015-01-01T00:01:00Z", ["2", "2.1"], ["1", "1.1"]);
+			expect(state).to.equal(fromJS({
+				protocol: protocol1,
+				timing: {
+					"1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
+					"1.1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
+					"2": {from: "2015-01-01T00:01:00Z"},
+					"2.1": {from: "2015-01-01T00:01:00Z"},
+				}
+			}));
+
+			state = setStepTime(state, "2015-01-01T00:02:00Z", [], ["2", "2.1"]);
+			expect(state).to.equal(fromJS({
+				protocol: protocol1,
+				timing: {
+					"1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
+					"1.1": {from: "2015-01-01T00:00:00Z", till: "2015-01-01T00:01:00Z"},
+					"2": {from: "2015-01-01T00:01:00Z", till: "2015-01-01T00:02:00Z"},
+					"2.1": {from: "2015-01-01T00:01:00Z", till: "2015-01-01T00:02:00Z"},
+				}
+			}));
+		});
+	});
 });

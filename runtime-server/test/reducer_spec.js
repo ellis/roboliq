@@ -3,17 +3,38 @@ import {expect} from 'chai';
 
 import reducer from '../src/reducer';
 
+const protocol1 = {
+	roboliq: "v1",
+	steps: {
+		1: {
+			command: "system.echo",
+			value: "hello",
+			1: {
+				command: "system._echo",
+				value: "hello"
+			}
+		},
+		2: {
+			command: "system.echo",
+			value: "world",
+			1: {
+				command: "system._echo",
+				value: "world"
+			}
+		}
+	}
+};
+
 describe('reducer', () => {
 
-  it('handles SET_ENTRIES', () => {
-    const initialState = Map();
-    const action = {type: 'SET_ENTRIES', entries: ['Trainspotting']};
-    const nextState = reducer(initialState, action);
+  it('handles setProtocol', () => {
+    const state0 = Map();
+    const action = {type: 'setProtocol', protocol: protocol1};
+    const state = reducer(state0, action);
 
-    expect(nextState).to.equal(fromJS({
-      entries: ['Trainspotting'],
-      initialEntries: ['Trainspotting']
-    }));
+    expect(state).to.equal(fromJS({
+			protocol: protocol1
+		}));
   });
 
   it('handles NEXT', () => {
