@@ -14,7 +14,7 @@ import {ResultsContainer} from './components/Results';
 
 require('./style.css');
 
-const socket = io(`${location.protocol}//${location.hostname}:8090`);
+const socket = io(`${location.protocol}//${location.hostname}:12345`);
 socket.on('state', state =>
   store.dispatch(setState(state))
 );
@@ -37,7 +37,8 @@ const store = createStoreWithMiddleware(reducer);
 store.dispatch(setClientId(getClientId()));
 
 const routes = <Route component={App}>
-  <Route path="/" component={VotingContainer} />
+  <Route path="/" component={RuntimeContainer} />
+  <Route path="/vote" component={VotingContainer} />
   <Route path="/results" component={ResultsContainer} />
 </Route>;
 
