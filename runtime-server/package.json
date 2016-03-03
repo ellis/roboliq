@@ -19,11 +19,14 @@
     "mocha": "2.4.5"
   },
   "dependencies": {
+    "express": "^4.10.2",
     "immutable": "3.7.6",
     "redux": "3.3.1",
     "socket.io": "1.4.5"
   },
   "babel": {
-    "presets": ["es2015"]
+    "presets": [
+      "es2015"
+    ]
   }
 }

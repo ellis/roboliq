@@ -222,12 +222,13 @@
         - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
     - [ ] ERROR: wrongly placed on SEELER
     - [ ] ERROR: misplaced from hotel32 site 19 to P2
+- [ ] Figure out how to automatically convert reader data to measurement JSON data
+    - [?] program a server that accepts data from the runtime client
+		- [ ] use `express` to serve up an HTML page from serverUi, automatically display changes in `state.timing`.
+    - [ ] program a UI client that displays live data from the server as it's updated by the runtime client
+		- [ ] program a little "runtime client" that sends data to a server when called by Evoware
 - [ ] Add timing log to all evoware instructions
     `Execute("node C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\timing.js -- 1.2.3",2,"",2);`
-- [ ] Figure out how to automatically convert reader data to measurement JSON data
-    - [ ] program a little "runtime client" that sends data to a server when called by Evoware
-    - [ ] program a server that accepts data from the runtime client
-    - [ ] program a UI client that displays live data from the server as it's updated by the runtime client
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data
