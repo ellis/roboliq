@@ -216,6 +216,24 @@
 - [x] Add time logging to all evoware instructions
 - [x] Test runtime-client/runtime-server/roboliq-runtime-cli
 - [ ] see about using VB script to avoid the console popup when logging time of commands
+
+    Set objShell = CreateObject("WScript.Shell")
+    ' Set objExec = objShell.Exec("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100")
+    Return = objShell.Run("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100", 0, true)
+
+    Set args = Wscript.Arguments
+
+    For Each arg In args
+      Wscript.Echo arg
+    Next
+
+    CSCRIPT MyScript.vbs
+
+    WScript.Arguments.Item(0)
+    WScript.Arguments.Item(1)
+
+    test from command line with wscript test.vbs
+
 - [ ] qc_mario_vectors_96nunc:
     - [x] randomize order of sites
     - [x] allow for setting a random seed

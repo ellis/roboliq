@@ -119,6 +119,7 @@ export function compileStep(table, protocol, agents, path, objects) {
 	const instructionCount = results2.length;
 
 	if (instructionCount > 0) {
+		// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
 		results.unshift({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin ${path.join(".")}",2,"",2);`})
 		results.push({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js end ${path.join(".")}",2,"",2);`})
 	}
