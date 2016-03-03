@@ -225,9 +225,10 @@
     - [ ] sites:
         - [x] RoboPeel
         - [x] hotels in back
-				- [x] P1-P3,P6-P8 with ROMA2
+        - [x] P1-P3,P6-P8 with ROMA2
         - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
         - [ ] transfer hotels
+        - [ ] PCR machines
 - [ ] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
 - [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] runtime-server: take as input a `.out.json` file
