@@ -11,12 +11,14 @@ function formatLocalDate() {
 	return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + dif + pad(tzo / 60) + ':' + pad(tzo % 60);
 }
 
-socket.on('connect', function(){
-	socket.emit("action", {type: "setStepTime", time: formatLocalDate(), begins: ["1", "1.1"], ends: []});
+socket.on('connect', function() {
+	socket.emit("actionThenDisconnect", {type: "setStepTime", time: formatLocalDate(), begins: ["1", "1.1"], ends: []});
 });
 
-socket.on('state', function(data){console.log(data)});
+socket.on('state', function(data) {
+	console.log(data)
+});
 
-socket.on('disconnect', function(){
+socket.on('disconnect', function() {
 	process.exit(0);
 });

@@ -1,8 +1,10 @@
 import makeStore from './src/store';
-import {startServer} from './src/server';
+import {startServerRuntime} from './src/serverRuntime.js';
+import {startServerUi} from './src/serverUi.js';
 
 export const store = makeStore();
-startServer(store);
+startServerRuntime(store);
+startServerUi(store);
 
 store.dispatch({
   type: 'SET_ENTRIES',
