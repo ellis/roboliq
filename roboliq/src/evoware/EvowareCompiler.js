@@ -119,8 +119,8 @@ export function compileStep(table, protocol, agents, path, objects) {
 	const instructionCount = results2.length;
 
 	if (instructionCount > 0) {
-		results.unshift({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- begin ${path.join(".")}",2,"",2);`})
-		results.push({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- end ${path.join(".")}",2,"",2);`})
+		results.unshift({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin ${path.join(".")}",2,"",2);`})
+		results.push({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js end ${path.join(".")}",2,"",2);`})
 	}
 
 	const addDescription = !_.isEmpty(step.description);

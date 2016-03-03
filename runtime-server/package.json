@@ -21,8 +21,10 @@
   "dependencies": {
     "express": "^4.10.2",
     "immutable": "3.7.6",
+    "lodash": "^4.6.1",
     "redux": "3.3.1",
-    "socket.io": "1.4.5"
+    "socket.io": "1.4.5",
+    "socket.io-client": "^1.4.5"
   },
   "babel": {
     "presets": [

@@ -213,9 +213,9 @@
 - [x] use `express` to serve up an HTML page from serverUi, automatically display changes in `state.timing`.
 - [x] program a prototype UI client that displays live data from the server as it's updated by the runtime client
 - [x] program a prototype little "runtime client" that sends data to a server when called by Evoware
-- [ ] Add timing log to all evoware instructions
-    `Execute("node C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\timing.js -- 1.2.3",2,"",2);`
-- [ ] Test runtime-client/runtime-server/roboliq-runtime-cli
+- [x] Add time logging to all evoware instructions
+- [x] Test runtime-client/runtime-server/roboliq-runtime-cli
+- [ ] see about using VB script to avoid the console popup when logging time of commands
 - [ ] qc_mario_vectors_96nunc:
     - [x] randomize order of sites
     - [x] allow for setting a random seed

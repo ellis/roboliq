@@ -31,7 +31,8 @@
 				$('#messages').append($('<li>').text(msg));
 			});
 			socket.on("state", function(state) {
-				$("#messages").val("");
+				console.log(state);
+				$("#messages").empty();
 				if (state.timing) {
 					var i;
 					for (i = 0; i < state.timing.length; i++) {
@@ -45,10 +46,11 @@
 								if (step) {
 									step = step[stepPart];
 								}
+								//stepParts[k] = "";
 							}
-							var indent = stepParts.join("");
+							//var indent = stepParts.join("__");
 							var text = (step) ? JSON.stringify(step) : "";
-							$('#messages').append($('<li>').text(indent + timing.step + ") "+text));
+							$('#messages').append($('<li>').text(timing.time+" "+/*indent +*/ timing.step + ") "+text));
 						}
 					}
 				}

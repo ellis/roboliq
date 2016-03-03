@@ -34,7 +34,7 @@ for (var i = 2; i < process.argv.length; i++) {
 }
 
 socket.on('connect', function() {
-	socket.emit("actionThenDisconnect", {type: "setStepTime", time: formatLocalDate(), begins: ["1", "1.1"], ends: []});
+	socket.emit("actionThenDisconnect", {type: "setStepTime", time: formatLocalDate(), begins, ends});
 });
 
 socket.on('state', function(data) {
