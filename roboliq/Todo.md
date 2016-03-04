@@ -314,7 +314,7 @@
 - [x] commandHelper.getStepKeys: return array of step keys in order
 - [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
 - [x] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
-- [ ] figure out why this Design doesn't have the correct table column order in firefox:
+- [ ] figure out why this Design doesn't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs):
     ```
     conditions:
       waterSource: saltwater
