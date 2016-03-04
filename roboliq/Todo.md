@@ -232,7 +232,7 @@
 - [x] runtime-client/Log: nicer table format with padding between columns
 - [x] runtime-client/Log: separate bold row for changes in date
 - [x] runtime-client/Log: only display the time in time column instead of whole ISO date
-- [ ] runtime-server: take as input a `.out.json` file
+- [x] runtime-server: accept as input a `.out.json` file
 - [ ] runtime-client/Runtime: display protocol
 - [ ] runtime-client/Runtime: better display of from-till/duration time for each command
 - [ ] runtime-client/Runtime: display checkmark next to commands which are complete

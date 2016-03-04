@@ -6,28 +6,9 @@ export const store = makeStore();
 startServerRuntime(store);
 startServerUi(store);
 
-const protocol1 = {
-	roboliq: "v1",
-	steps: {
-		1: {
-			command: "system.echo",
-			value: "hello",
-			1: {
-				command: "system._echo",
-				value: "hello"
-			}
-		},
-		2: {
-			command: "system.echo",
-			value: "world",
-			1: {
-				command: "system._echo",
-				value: "world"
-			}
-		}
-	}
-}
+const protocol = require(process.argv[2]);
+
 store.dispatch({
   type: "setProtocol",
-  protocol: protocol1
+  protocol: protocol || {}
 });
