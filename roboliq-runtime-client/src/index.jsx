@@ -9,8 +9,9 @@ import {setClientId, setState, setConnectionState} from './action_creators';
 import remoteActionMiddleware from './remote_action_middleware';
 import getClientId from './client_id';
 import App from './components/App';
-import {VotingContainer} from './components/Voting';
+import {RuntimeContainer} from './components/Runtime';
 import {ResultsContainer} from './components/Results';
+import {VotingContainer} from './components/Voting';
 
 require('./style.css');
 

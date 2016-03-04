@@ -217,8 +217,7 @@
 - [x] Add timing log to all evoware instructions
 - [x] Test runtime-client/runtime-server/roboliq-runtime-cli
 - [x] EvowareCompiler: make addition of run-time instructions an option
-- [ ] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
-    - continue with Runtime.jsx
+- [x] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server, then rename XML to include end-time suffix
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
