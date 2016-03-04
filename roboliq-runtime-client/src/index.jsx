@@ -10,8 +10,7 @@ import remoteActionMiddleware from './remote_action_middleware';
 import getClientId from './client_id';
 import App from './components/App';
 import {RuntimeContainer} from './components/Runtime';
-import {ResultsContainer} from './components/Results';
-import {VotingContainer} from './components/Voting';
+import {LogContainer} from './components/Log';
 
 require('./style.css');
 
@@ -39,8 +38,7 @@ store.dispatch(setClientId(getClientId()));
 
 const routes = <Route component={App}>
   <Route path="/" component={RuntimeContainer} />
-  <Route path="/vote" component={VotingContainer} />
-  <Route path="/results" component={ResultsContainer} />
+  <Route path="/log" component={LogContainer} />
 </Route>;
 
 ReactDOM.render(
