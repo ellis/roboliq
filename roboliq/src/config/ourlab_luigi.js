@@ -150,12 +150,8 @@ module.exports = {
 					R3: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 2 },
 					R4: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 3 },
 					LIGHT: { type: "Site", evowareCarrier: "Pickolo-Light-Table", evowareGrid: 29, evowareSite: 1 },
-					"ROBOSEAL": {
-						"type": "Site",
-						"evowareCarrier": "RoboSeal",
-						"evowareGrid": 45,
-						"evowareSite": 1
-					},
+					"ROBOSEAL": { "type": "Site", "evowareCarrier": "RoboSeal", "evowareGrid": 45, "evowareSite": 1 },
+					SHAKER: { type: "Site", evowareCarrier: "Te-Shake 1Pos Front", evowareGrid: 44, evowareSite: 1 },
 					"SYSTEM": {
 						"type": "Site",
 						"evowareCarrier": "System",

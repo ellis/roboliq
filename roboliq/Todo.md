@@ -186,10 +186,10 @@
 
 - [ ] add possibility to configure options in 'ourlab', such as the location wher
 - [ ] configure sites and cliques:
-    - [ ] camera
-    - [ ] P1-P3 and camera
-    - [ ] shaker
-    - [ ] sealer
+    - [x] camera
+    - [x] P1-P3 and camera
+    - [?] shaker
+    - [?] sealer
     - [ ] hotels
     - [ ] black incubators
     - [ ] shaker incubators
@@ -276,6 +276,7 @@
 - [ ] make video of same experiment running on both robots
     - [ ] demonstrate interleaved timing by showing the robot's picture-in-picture starting the same procedures at the same time
     - [ ] show the data displayed in R/html as soon as the measurement is done
+- [ ] use Visual Basic Script to get liquid level detection values from Evoware (see "Pre-defined variables" in Evoware Help)
 - [ ] generate a pretty HTML/SVG protocol for the experiment
 - [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?

@@ -28,6 +28,8 @@ objects:
                   - ourlab.luigi.site.P5
                   - ourlab.luigi.site.P6
                   - ourlab.luigi.site.LIGHT
+                  - ourlab.luigi.site.ROBOSEAL
+                  - ourlab.luigi.site.SHAKER
             ourlab.luigi.roma2:
               vector*:
                 Narrow:
