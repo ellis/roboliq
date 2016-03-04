@@ -219,11 +219,11 @@
 - [x] EvowareCompiler: make addition of run-time instructions an option
 - [x] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
-	- [ ] roboliq-runtime-cli: should send XML to runtime-server, then rename XML to include end-time suffix
+	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
 	- [ ] runtime-server: setInfiniteMeasurements: accepts `{step, xml}`
-	- [ ] runtime-client: should display measurements using vega
-	- [ ] runtime-client: should display measurements using a table
+	- [ ] roboliq-runtime-client: should display measurements using vega
+	- [ ] roboliq-runtime-client: should display measurements using a table
 - [ ] see about using VB script to avoid the console popup when logging time of commands
 
     Set objShell = CreateObject("WScript.Shell")
