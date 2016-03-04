@@ -121,8 +121,9 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 
 	// console.log({options, timing: _.get(options, "timing", true)})
 	if (instructionCount > 0 && _.get(options, "timing", true) === true) {
-		results.unshift({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- begin ${path.join(".")}",2,"",2);`})
-		results.push({line: `Execute("node C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis\\roboliq-runtime-cli.js -- end ${path.join(".")}",2,"",2);`})
+		// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
+		results.unshift({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin ${path.join(".")}",2,"",2);`})
+		results.push({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js end ${path.join(".")}",2,"",2);`})
 	}
 
 	const addDescription = !_.isEmpty(step.description);
