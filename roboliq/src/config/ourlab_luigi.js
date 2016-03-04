@@ -69,7 +69,7 @@ module.exports = {
 				"evoware": {
 					"type": "EvowareRobot",
 					config: {
-						pathToRoboliqRuntimeCli: "C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js"
+						pathToRoboliqRuntimeCli: "C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.vbs"
 					}
 				},
 				"reader": {

@@ -57,7 +57,9 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 		= (_.isUndefined(step.command) || _.isUndefined(step.agent) || !_.includes(agents, step.agent))
 		? undefined
 		: commandHandlers[step.command];
-	//
+	let generatedCommandLines = false;
+	let generatedTimingLogs = false;
+	// If there is no command handler for this step, then handle sub-steps
 	if (_.isUndefined(commandHandler)) {
 		// Find all sub-steps (properties that start with a digit)
 		var keys = _.filter(_.keys(step), function(key) {
@@ -73,6 +75,7 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 			results.push(result1);
 		}
 	}
+	// Else, handle the step's command:
 	else {
 		const data = {
 			objects,
@@ -111,16 +114,19 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 		});
 
 		// Check whether command produced any output lines
-		const hasInstruction = _.find(_.flattenDeep(results), x => _.has(x, "line"));
+		generatedCommandLines = _.find(_.flattenDeep(results), x => _.has(x, "line"));
+
+		// Possibly wrap the instructions in calls to pathToRoboliqRuntimeCli in order to check timing
 		// console.log({options, timing: _.get(options, "timing", true)})
-		if (hasInstruction && _.get(options, "timing", true) === true) {
+		if (generatedCommandLines && _.get(options, "timing", true) === true) {
 			const agent = _.get(objects, step.agent);
 			// console.log({agent})
 			if (_.has(agent, ["config", "pathToRoboliqRuntimeCli"])) {
 				const pathToRoboliqRuntimeCli = agent.config.pathToRoboliqRuntimeCli;
 				// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
-				results.unshift({line: `Execute("node ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",2,"",2);`})
-				results.push({line: `Execute("node ${pathToRoboliqRuntimeCli} end ${path.join(".")}",2,"",2);`})
+				results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",2,"",2);`})
+				results.push({line: `Execute("wscript ${pathToRoboliqRuntimeCli} end ${path.join(".")}",2,"",2);`})
+				generatedTimingLogs = true;
 			}
 		}
 
@@ -134,17 +140,21 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 		});
 	}
 
-	const addDescription = !_.isEmpty(step.description);
-	if (addDescription) {
+	const generatedComment = !_.isEmpty(step.description);
+	if (generatedComment) {
 		const hasInstruction = _.find(_.flattenDeep(results), x => _.has(x, "line"));
 		const text = `${path.join(".")}) ${step.description}`;
 		results.unshift({line: `Comment("${text}");`});
+	}
 
-		// If the description applies to multiple output lines, wrap them in a group
-		if (hasInstruction) {
-			results.unshift({line: `Group("${text}");`});
-			results.push({line: `GroupEnd();`});
-		}
+	// Possibly wrap the instructions in a group
+	const generatedGroup =
+		(generatedTimingLogs) ||
+		(!generatedCommandLines && generatedComment && results.length > 1);
+	if (generatedGroup) {
+		const text = `Step ${path.join(".")}`;
+		results.unshift({line: `Group("${text}");`});
+		results.push({line: `GroupEnd();`});
 	}
 
 	return results;

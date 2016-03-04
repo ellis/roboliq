@@ -53,6 +53,7 @@ steps:
       1:
         command: experiment.forEachRow
         steps:
+          description: `Site {{$site}}`
           command: transporter.movePlate
           equipment: $roma
           program: $vector
