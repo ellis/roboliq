@@ -8,20 +8,32 @@ import * as actionCreators from '../action_creators';
 export const Log = React.createClass({
 	mixins: [PureRenderMixin],
 	render: function() {
-    return (<table className="logTable">
-      <thead>
-        <tr><th>Time</th><th>Step</th><th>Command</th><th>Log</th></tr>
-      </thead>
-      <tbody>
-        {this.props.timing.toJS().map((item, index) => {
-          const path = item.step.split(".");
-          const step = this.props.steps.getIn(path);
-          console.log({item, path, step});
-          const params = _.pickBy(step, (value) => _.isString(value) || _.isNumber(value) || _.isBoolean(value));
-          return <tr key={index}><td>{item.time}</td><td>{item.step})</td><td>{JSON.stringify(params)}</td><td>{(item.type === 0) ? "begin" : "end"}</td></tr>;
-        })}
-      </tbody>
-    </table>);
+		let date;
+		return (<table className="logTable">
+			<thead>
+				<tr><th>Time</th><th>Step</th><th>Command</th><th>Log</th></tr>
+			</thead>
+			<tbody>
+				{_.flatMap(this.props.timing.toJS(), (item, index) => {
+					// See whether we need a new date row
+					const [date0, time0] = item.time.split("T");
+					let dateItem;
+					if (date !== date0) {
+						date = date0;
+						dateItem = <tr key={date}><td colSpan="4"><b>{date}</b></td></tr>;
+					}
+
+					const time = time0.substr(0, 8);
+					const path = item.step.split(".");
+					const step = this.props.steps.getIn(path);
+					//console.log({item, path, step});
+					const params = _.pickBy(step.toJS(), (value) => _.isString(value) || _.isNumber(value) || _.isBoolean(value));
+					const logItem = <tr key={index}><td>{time}</td><td>{item.step})</td><td>{JSON.stringify(params)}</td><td>{(item.type === 0) ? "begin" : "end"}</td></tr>;
+
+					return [dateItem, logItem];
+				})}
+			</tbody>
+		</table>);
 	}
 });
 

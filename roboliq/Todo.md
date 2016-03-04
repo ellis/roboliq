@@ -230,8 +230,8 @@
 - [x] see about using VB script to avoid the console popup when logging time of commands
 - [x] runtime-client/Log: duplicate from Runtime
 - [x] runtime-client/Log: nicer table format with padding between columns
-- [ ] runtime-client/Log: separate bold row for changes in date
-- [ ] runtime-client/Log: only display time in time column instead of whole ISO date
+- [x] runtime-client/Log: separate bold row for changes in date
+- [x] runtime-client/Log: only display the time in time column instead of whole ISO date
 - [ ] runtime-server: take as input a `.out.json` file
 - [ ] runtime-client/Runtime: display protocol
 - [ ] runtime-client/Runtime: better display of from-till/duration time for each command
