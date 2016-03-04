@@ -84,11 +84,14 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 			protocol,
 			path
 		};
+		// Parse command options
 		const schema = protocol.schemas[step.command];
 		const parsed = (schema)
 			? commandHelper.parseParams(step, data, schema)
 			: {orig: step};
+		// Handle the command
 		const result0 = commandHandler(step, parsed, data);
+		// For all returned results:
 		_.forEach(result0, result1 => {
 			// console.log("result1: "+JSON.stringify(result1));
 			results.push(result1);
@@ -106,9 +109,24 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 				});
 			}
 		});
+
+		// Check whether command produced any output lines
+		const hasInstruction = _.find(_.flattenDeep(results), x => _.has(x, "line"));
+		// console.log({options, timing: _.get(options, "timing", true)})
+		if (hasInstruction && _.get(options, "timing", true) === true) {
+			const agent = _.get(objects, step.agent);
+			// console.log({agent})
+			if (_.has(agent, ["config", "pathToRoboliqRuntimeCli"])) {
+				const pathToRoboliqRuntimeCli = agent.config.pathToRoboliqRuntimeCli;
+				// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
+				results.unshift({line: `Execute("node ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",2,"",2);`})
+				results.push({line: `Execute("node ${pathToRoboliqRuntimeCli} end ${path.join(".")}",2,"",2);`})
+			}
+		}
+
 	}
 
-	// Process the effects
+	// Process the protocol's effects
 	const effects = _.get(protocol, ["effects", path.join(".")]);
 	if (!_.isUndefined(effects)) {
 		_.forEach(effects, (effect, path2) => {
@@ -116,23 +134,14 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 		});
 	}
 
-	const results2 = _.flattenDeep(results);
-	const instructionCount = results2.length;
-
-	// console.log({options, timing: _.get(options, "timing", true)})
-	if (instructionCount > 0 && _.get(options, "timing", true) === true) {
-		// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
-		results.unshift({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin ${path.join(".")}",2,"",2);`})
-		results.push({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js end ${path.join(".")}",2,"",2);`})
-	}
-
 	const addDescription = !_.isEmpty(step.description);
 	if (addDescription) {
+		const hasInstruction = _.find(_.flattenDeep(results), x => _.has(x, "line"));
 		const text = `${path.join(".")}) ${step.description}`;
 		results.unshift({line: `Comment("${text}");`});
 
 		// If the description applies to multiple output lines, wrap them in a group
-		if (instructionCount > 1) {
+		if (hasInstruction) {
 			results.unshift({line: `Group("${text}");`});
 			results.push({line: `GroupEnd();`});
 		}

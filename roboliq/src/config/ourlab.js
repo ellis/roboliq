@@ -73,7 +73,10 @@ module.exports = {
 					"evowareId": "Centrifuge"
 				},
 				"evoware": {
-					"type": "EvowareRobot"
+					"type": "EvowareRobot",
+					config: {
+						pathToRoboliqRuntimeCli: "C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js"
+					}
 				},
 				"reader": {
 					"type": "Reader",
@@ -643,7 +646,8 @@ module.exports = {
 	schemas: {
 		"EvowareRobot": {
 			properties: {
-				type: {enum: ["EvowareRobot"]}
+				type: {enum: ["EvowareRobot"]},
+				config: {description: "configuration options for evoware", type: "object"}
 			},
 			required: ["type"]
 		},

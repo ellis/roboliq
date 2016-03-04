@@ -67,7 +67,10 @@ module.exports = {
 			"luigi": {
 				"type": "Namespace",
 				"evoware": {
-					"type": "EvowareRobot"
+					"type": "EvowareRobot",
+					config: {
+						pathToRoboliqRuntimeCli: "C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js"
+					}
 				},
 				"reader": {
 					"type": "Reader",
@@ -268,7 +271,7 @@ module.exports = {
 		makeTransporterPredicates({
 			"ourlab.luigi.roma1": {
 				Narrow: [
-					["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6"],
+					["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.LIGHT"],
 				]
 			},
 			"ourlab.luigi.roma2": {
