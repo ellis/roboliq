@@ -233,8 +233,10 @@
 - [x] runtime-client/Log: separate bold row for changes in date
 - [x] runtime-client/Log: only display the time in time column instead of whole ISO date
 - [x] runtime-server: accept as input a `.out.json` file
-- [ ] runtime-client/Runtime: display protocol
-- [ ] runtime-client/Runtime: better display of from-till/duration time for each command
+- [x] runtime-client/Runtime: display protocol
+- [x] runtime-client/Runtime: better display of from-till/duration time for each command
+- [ ] runtime-client: when we get updated state from server, calculate new Runtime report in order to remove the logic from Runtime.jsx
+- [ ] runtime-client: for the Runtime report, calculate accumulated durations for all steps, and calculate a flag when a step is done
 - [ ] runtime-client/Runtime: display checkmark next to commands which are complete
 - [ ] qc_mario_vectors_96nunc:
     - [x] randomize order of sites
@@ -252,6 +254,10 @@
 - [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] roboliq-runtime-client: rename folder to runtime-client
 - [ ] runtime-server: use REST instead of socket for communication with runtime-client
+- [ ] figure out how to run the runtime-client without webpack-dev-server
+- [ ] consider starting the runtime-server from Evoware, if its not already running
+- [ ] consider opening a browser window for the runtime-client from Evoware
+- [ ] make the runtime programs' ports configurable
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data

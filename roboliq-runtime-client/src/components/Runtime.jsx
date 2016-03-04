@@ -8,23 +8,37 @@ import * as actionCreators from '../action_creators';
 function buildTimingMap(timing) {
 	const timingMap = {};
 	timing.forEach(item => {
-		const when = (timing.get("type") === 0) ? "begin" : "end";
-		_.set(timingMap, [timing.get("step", ""), when], timing.get("time"));
+		console.log(item.toJS())
+		const stepKey = item.get("step", "");
+		const type = item.get("type");
+		console.log({stepKey, type})
+		if (type === 0) {
+			timingMap[stepKey] = {begin: item.get("time")};
+		}
+		else if (type === 1) {
+			_.set(timingMap, [stepKey, "end"], item.get("time"));
+		}
 	});
+	console.log("timingMap:"); console.log(timingMap)
 	return timingMap;
 }
 
 function handleStep(step, path, timingMap, trs) {
-	if (_.isEmpty(step))
+	if (step.isEmpty())
 		return;
 	console.log({path, step});
+	const stepKey = path.join(".");
 	const description = step.get("description");
 	const command = step.get("command");
 	if (description || command) {
 		const descriptionTag = (!_.isEmpty(description)) ? <div className="description">{description}</div> : undefined;
 		const commandTag = (_.isString(command)) ? <span>{command}: </span> : undefined;
 		const params = _.pickBy(_.omit(step.toJS(), ["command", "comment", "description", "steps"]), (value) => _.isString(value) || _.isNumber(value) || _.isBoolean(value));
-		const tr = <tr key={path.join(".")}><td>{path.join(".")}</td><td>{descriptionTag}{commandTag}{JSON.stringify(params)}</td></tr>;
+		const timing = timingMap[stepKey] || {};
+		const begin = timing.begin ? timing.begin.split("T")[1].substr(0, 8) : "";
+		const end = timing.end ? timing.end.split("T")[1].substr(0, 8) : "";
+		const status = (begin || end) ? `${begin} - ${end}` : "";
+		const tr = <tr key={stepKey}><td>{stepKey}</td><td>{descriptionTag}{commandTag}{JSON.stringify(params)}</td><td>{status}</td></tr>;
 		trs.push(tr);
 	}
 
