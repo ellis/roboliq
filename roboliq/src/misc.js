@@ -77,7 +77,7 @@ function getObjectsOfType(objects, types, prefix) {
 	var l = {};
 	_.forEach(objects, function(o, name) {
 		var prefix1 = prefix.concat([name]);
-		if (_.isString(o.type) && types.indexOf(o.type) >= 0) {
+		if (_.has(o, "type") && _.isString(o.type) && types.indexOf(o.type) >= 0) {
 			var id = prefix1.join('.');
 			l[id] = o;
 		}

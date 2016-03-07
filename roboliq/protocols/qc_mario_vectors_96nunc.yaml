@@ -4,15 +4,6 @@ description: |
   Test the 96-well NUNC microwell plates on various sites with both romas,
   and with Narrow and Wide vectors.
 
-  Site and labware:
-  * P1 (not used)
-  * P2 "dilutionPlate" pipetting
-  * P3 "culturePlate" pipetting
-  * P4 stillPlate (initial, incubator)
-  * P5 shakePlate (initial, incubator)
-  * P6 dilutionPlate1 (storage)
-  * P7 dilutionPlate2 (storage)
-
 objects:
   plateNunc: {type: "Plate", model: "ourlab.model.plateModel_96_square_transparent_nunc", location: "ourlab.mario.site.REGRIP"}
 

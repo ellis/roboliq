@@ -1,5 +1,5 @@
 {
-  "name": "voting-server",
+  "name": "roboliq-runtime-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",

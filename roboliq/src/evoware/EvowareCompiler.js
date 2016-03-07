@@ -26,12 +26,13 @@ const commandHandlers = {
  * @param  {object} table - table object (see EvowareTableFile.load)
  * @param  {roboliq:Protocol} protocol
  * @param  {array} agents - string array of agent names that this script should generate script(s) for
+ * @param  {object} options - an optional map of options; set timing=false to avoid outputting time-logging instructions
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
-export function compile(carrierData, table, protocol, agents) {
+export function compile(carrierData, table, protocol, agents, options = {}) {
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
-	const results = compileStep(table, protocol, agents, [], objects);
+	const results = compileStep(table, protocol, agents, [], objects, options);
 	results.push(transporter.moveLastRomaHome({objects}));
 	const flat = _.flattenDeep(results);
 	//flat.forEach(x => console.log(x));
@@ -39,7 +40,7 @@ export function compile(carrierData, table, protocol, agents) {
 	return [{table, lines}];
 }
 
-export function compileStep(table, protocol, agents, path, objects) {
+export function compileStep(table, protocol, agents, path, objects, options = {}) {
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}
@@ -56,7 +57,9 @@ export function compileStep(table, protocol, agents, path, objects) {
 		= (_.isUndefined(step.command) || _.isUndefined(step.agent) || !_.includes(agents, step.agent))
 		? undefined
 		: commandHandlers[step.command];
-	//
+	let generatedCommandLines = false;
+	let generatedTimingLogs = false;
+	// If there is no command handler for this step, then handle sub-steps
 	if (_.isUndefined(commandHandler)) {
 		// Find all sub-steps (properties that start with a digit)
 		var keys = _.filter(_.keys(step), function(key) {
@@ -68,10 +71,11 @@ export function compileStep(table, protocol, agents, path, objects) {
 		//console.log({keys})
 		// Try to expand the substeps
 		for (const key of keys) {
-			const result1 = compileStep(table, protocol, agents, path.concat(key), objects);
+			const result1 = compileStep(table, protocol, agents, path.concat(key), objects, options);
 			results.push(result1);
 		}
 	}
+	// Else, handle the step's command:
 	else {
 		const data = {
 			objects,
@@ -83,11 +87,14 @@ export function compileStep(table, protocol, agents, path, objects) {
 			protocol,
 			path
 		};
+		// Parse command options
 		const schema = protocol.schemas[step.command];
 		const parsed = (schema)
 			? commandHelper.parseParams(step, data, schema)
 			: {orig: step};
+		// Handle the command
 		const result0 = commandHandler(step, parsed, data);
+		// For all returned results:
 		_.forEach(result0, result1 => {
 			// console.log("result1: "+JSON.stringify(result1));
 			results.push(result1);
@@ -105,9 +112,27 @@ export function compileStep(table, protocol, agents, path, objects) {
 				});
 			}
 		});
+
+		// Check whether command produced any output lines
+		generatedCommandLines = _.find(_.flattenDeep(results), x => _.has(x, "line"));
+
+		// Possibly wrap the instructions in calls to pathToRoboliqRuntimeCli in order to check timing
+		// console.log({options, timing: _.get(options, "timing", true)})
+		if (generatedCommandLines && _.get(options, "timing", true) === true) {
+			const agent = _.get(objects, step.agent);
+			// console.log({agent})
+			if (_.has(agent, ["config", "pathToRoboliqRuntimeCli"])) {
+				const pathToRoboliqRuntimeCli = agent.config.pathToRoboliqRuntimeCli;
+				// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
+				results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",2,"",2);`})
+				results.push({line: `Execute("wscript ${pathToRoboliqRuntimeCli} end ${path.join(".")}",2,"",2);`})
+				generatedTimingLogs = true;
+			}
+		}
+
 	}
 
-	// Process the effects
+	// Process the protocol's effects
 	const effects = _.get(protocol, ["effects", path.join(".")]);
 	if (!_.isUndefined(effects)) {
 		_.forEach(effects, (effect, path2) => {
@@ -115,25 +140,21 @@ export function compileStep(table, protocol, agents, path, objects) {
 		});
 	}
 
-	const results2 = _.flattenDeep(results);
-	const instructionCount = results2.length;
-
-	if (instructionCount > 0) {
-		// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
-		results.unshift({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin ${path.join(".")}",2,"",2);`})
-		results.push({line: `Execute("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js end ${path.join(".")}",2,"",2);`})
-	}
-
-	const addDescription = !_.isEmpty(step.description);
-	if (addDescription) {
+	const generatedComment = !_.isEmpty(step.description);
+	if (generatedComment) {
+		const hasInstruction = _.find(_.flattenDeep(results), x => _.has(x, "line"));
 		const text = `${path.join(".")}) ${step.description}`;
 		results.unshift({line: `Comment("${text}");`});
+	}
 
-		// If the description applies to multiple output lines, wrap them in a group
-		if (instructionCount > 1) {
-			results.unshift({line: `Group("${text}");`});
-			results.push({line: `GroupEnd();`});
-		}
+	// Possibly wrap the instructions in a group
+	const generatedGroup =
+		(generatedTimingLogs) ||
+		(!generatedCommandLines && generatedComment && results.length > 1);
+	if (generatedGroup) {
+		const text = `Step ${path.join(".")}`;
+		results.unshift({line: `Group("${text}");`});
+		results.push({line: `GroupEnd();`});
 	}
 
 	return results;

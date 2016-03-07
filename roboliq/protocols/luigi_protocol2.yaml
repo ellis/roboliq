@@ -1,49 +1,61 @@
-"roboliq": "v1"
-"objects":
+roboliq: v1
+
+description: |
+  Test the 96-well NUNC microwell plates on various sites with both romas,
+  and with Narrow and Wide vectors.
+
+roboliq: v1
+objects:
   plateDWB:
-    "type": "Plate"
-    "model": "ourlab.model.plateModel_96_dwp"
-    "location": "ourlab.luigi.site.P1"
+    type: Plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.luigi.site.P1
   design1:
     type: Design
     conditions:
-      "plate*":
-        "plateDWB":
-          "storageSite": "ourlab.luigi.site.P1"
-          "roma*":
-            "ourlab.luigi.roma1":
-              "vector*":
-                "Narrow":
-                  "site*":
-                  - "ourlab.luigi.site.P1"
-                  - "ourlab.luigi.site.P2"
-                  - "ourlab.luigi.site.P3"
-                  - "ourlab.luigi.site.P4"
-                  - "ourlab.luigi.site.P5"
-                  - "ourlab.luigi.site.P6"
-                  - "ourlab.luigi.site.LIGHT"
-            "ourlab.luigi.roma2":
-              "vector*":
-                "Narrow":
-                  "site*":
-                  - "ourlab.luigi.site.P1"
-                  - "ourlab.luigi.site.P2"
-                  - "ourlab.luigi.site.P4"
-                  - "ourlab.luigi.site.P5"
-                  - "ourlab.luigi.site.P6"
-                  - "ourlab.luigi.site.LIGHT"
+      plate*:
+        plateDWB:
+          storageSite: ourlab.luigi.site.P1
+          roma*:
+            ourlab.luigi.roma1:
+              vector*:
+                Narrow:
+                  site*:
+                  - ourlab.luigi.site.P1
+                  - ourlab.luigi.site.P2
+                  - ourlab.luigi.site.P3
+                  - ourlab.luigi.site.P4
+                  - ourlab.luigi.site.P5
+                  - ourlab.luigi.site.P6
+                  - ourlab.luigi.site.LIGHT
+                  - ourlab.luigi.site.ROBOSEAL
+                  - ourlab.luigi.site.SHAKER
+            ourlab.luigi.roma2:
+              vector*:
+                Narrow:
+                  site*:
+                  - ourlab.luigi.site.P1
+                  - ourlab.luigi.site.P2
+                  - ourlab.luigi.site.P4
+                  - ourlab.luigi.site.P5
+                  - ourlab.luigi.site.P6
+                  - ourlab.luigi.site.LIGHT
+      order=range:
+        # groupBy: [plate, roma, vector]
+        # shuffle: true
+
 steps:
   1:
     command: experiment.forEachGroup
     design: design1
-    groupBy: ["plate", "roma", "vector"]
+    groupBy: [plate, roma, vector]
+    orderBy: [order]
     steps:
       description: `Test {{$plate}} movements for {{$roma}} with vector {{$vector}}`
       1:
         command: experiment.forEachRow
-        #data:
-          #shuffle: true
         steps:
+          description: `Site {{$site}}`
           command: transporter.movePlate
           equipment: $roma
           program: $vector

@@ -1,0 +1,9 @@
+table.logTable {
+}
+table.logTable td, th {
+    padding: .2em 1em;
+    border-bottom: 1px solid #ddd;
+}
+div.description {
+    font-weight: bold
+}
