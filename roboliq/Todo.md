@@ -1,4 +1,16 @@
-## Todos for Paper 1
+# Todos
+
+# Top
+
+- work on setting up luigi
+- incubator command and methods
+- finish mario's QC scripts for testing ROMAs
+- Figure out how to automatically convert reader data to measurement JSON data
+- UI: monitor
+- UI: load and compile
+- UI: design
+
+# Todos for Paper 1
 
 - [x] add 'roboliq' version to output
 - [x] get running of protocols from command line to work again, and document it
@@ -153,7 +165,7 @@
     - [x] skip objects with 'data' property
     - [x] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [x] tania13_ph.yaml: re-write using Design
-- [ ] create incubator command for tania13_ph
+- [ ] create incubator command for tania13_ph, and accommodate "methods" for expanding commands
 - [ ] centrifuge.startIncubation: create
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
 - [ ] `experiment.run`: automatically find timers if none supplied, using the current agent value if supplied; may need to implement feature to reserve objects (such as to reserve a duration timer that isn't started at the beginning)
@@ -184,7 +196,6 @@
 
 # Todos for luigi
 
-- [ ] add possibility to configure options in 'ourlab', such as the location wher
 - [ ] configure sites and cliques:
     - [x] camera
     - [x] P1-P3 and camera
@@ -208,9 +219,47 @@
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
+- [ ] add possibility to configure options in 'ourlab'
+
+# Todos for ROMA qc
+
+- [x] qc_mario_vectors_96nunc: randomize order of sites
+- [x] qc_mario_vectors_96nunc: allow for setting a random seed
+- [x] qc_mario_vectors_96nunc: output `description` values as evoware comments
+- [x] qc_mario_vectors_96nunc: Create evoware Groups for steps with `description` properties
+- [ ] qc_mario_vectors_96nunc:
+    - [ ] sites:
+        - [x] RoboPeel
+        - [x] hotels in back
+        - [x] P1-P3,P6-P8 with ROMA2
+        - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+        - [ ] transfer hotels
+        - [ ] PCR machines
+- [ ] qc_mario_vectors_96nunc: configure to omit timing commands
+- [ ] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
+- [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
+- [ ] create script for DWP
+- [ ] create script for PCR plates
 
 # Todos for paper 2/3
 
+- [x] implement lookupPath
+- [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
+- [x] evoware compiler: add more commands
+    - [x] `evoware._facts`
+    - [x] `timer._start`
+    - [x] `timer._wait`
+    - [x] `pipetter._aspirate`
+    - [x] `pipetter._dispense`
+    - [x] `pipetter._pipette`
+    - [x] `pipetter._washTips`
+    - [x] delete scala files
+- [x] implement lookupPaths
+- [x] evoware: rename `_cleanTips` instruction to `_washTips`
+- [x] test transporter.doThenRestoreLocation
+- [x] commandHelper.getStepKeys: return array of step keys in order
+- [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
+- [x] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [x] have a good command for expanding steps and parameters based on data (see 'data' property handling in roboliq.js and '#data' in roboliq directives)
 - [x] program a server that accepts data from the runtime client
 - [x] use `express` to serve up an HTML page from serverUi, automatically display changes in `state.timing`.
@@ -221,12 +270,6 @@
 - [x] Test runtime-client/runtime-server/roboliq-runtime-cli
 - [x] EvowareCompiler: make addition of run-time instructions an option
 - [x] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
-- [ ] Figure out how to automatically convert reader data to measurement JSON data
-	- [ ] roboliq-runtime-cli: should send XML to runtime-server
-	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
-	- [ ] runtime-server: setInfiniteMeasurements: accepts `{step, xml}`
-	- [ ] roboliq-runtime-client: should display measurements using vega
-	- [ ] roboliq-runtime-client: should display measurements using a table
 - [x] see about using VB script to avoid the console popup when logging time of commands
 - [x] runtime-client/Log: duplicate from Runtime
 - [x] runtime-client/Log: nicer table format with padding between columns
@@ -235,23 +278,15 @@
 - [x] runtime-server: accept as input a `.out.json` file
 - [x] runtime-client/Runtime: display protocol
 - [x] runtime-client/Runtime: better display of from-till/duration time for each command
+- [ ] Figure out how to automatically convert reader data to measurement JSON data
+	- [ ] roboliq-runtime-cli: should send XML to runtime-server
+	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
+	- [ ] runtime-server: setInfiniteMeasurements: accepts `{step, xml}`
+	- [ ] roboliq-runtime-client: should display measurements using vega
+	- [ ] roboliq-runtime-client: should display measurements using a table
 - [ ] runtime-client: when we get updated state from server, calculate new Runtime report in order to remove the logic from Runtime.jsx
 - [ ] runtime-client: for the Runtime report, calculate accumulated durations for all steps, and calculate a flag when a step is done
 - [ ] runtime-client/Runtime: display checkmark next to commands which are complete
-- [ ] qc_mario_vectors_96nunc:
-    - [x] randomize order of sites
-    - [x] allow for setting a random seed
-    - [x] output `description` values as evoware comments
-    - [x] Create evoware Groups for steps with `description` properties
-    - [ ] sites:
-        - [x] RoboPeel
-        - [x] hotels in back
-        - [x] P1-P3,P6-P8 with ROMA2
-        - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-        - [ ] transfer hotels
-        - [ ] PCR machines
-- [ ] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
-- [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] roboliq-runtime-client: rename folder to runtime-client
 - [ ] runtime-server: use REST instead of socket for communication with runtime-client
 - [ ] figure out how to run the runtime-client without webpack-dev-server
@@ -304,23 +339,6 @@
 
 ## Todos for complex protocol and feedback
 
-- [x] implement lookupPath
-- [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
-- [x] evoware compiler: add more commands
-    - [x] `evoware._facts`
-    - [x] `timer._start`
-    - [x] `timer._wait`
-    - [x] `pipetter._aspirate`
-    - [x] `pipetter._dispense`
-    - [x] `pipetter._pipette`
-    - [x] `pipetter._washTips`
-    - [x] delete scala files
-- [x] implement lookupPaths
-- [x] evoware: rename `_cleanTips` instruction to `_washTips`
-- [x] test transporter.doThenRestoreLocation
-- [x] commandHelper.getStepKeys: return array of step keys in order
-- [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
-- [x] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [ ] figure out why this Design doesn't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs):
     ```
     conditions:
@@ -335,7 +353,7 @@
           acidPH: 3.75
           basePH: 5.75
     ```
-- [ ] check whether Evoware external n2 is display order
+- [ ] check whether Evoware external n2 represents display order
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
 - [ ] evoware compiler: allow for loading Carrier.json instead of Carrier.cfg
 - [ ] evoware compiler: allow for loading JSON table instead of .ewt or .esc
