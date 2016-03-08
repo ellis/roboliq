@@ -408,5 +408,21 @@ describe('design', () => {
 			]);
 		});
 
+		//it("should support assignment of a nested array of objects, implicitly resulting in branching", () => {
+		it.only("should support assignment of an array of objects", () => {
+			const design = {
+				conditions: {
+					"a*": [1, 2],
+					"b=": [{c: 1}, {c: 2}]
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"c":1}, {"a":2,"b":2,"c":2}
+			]);
+		});
+
 	});
 });

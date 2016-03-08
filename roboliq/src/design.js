@@ -665,7 +665,7 @@ function applyActionToTable(table, action, randomEngine) {
 						const values2 = _(valuesGroup).toPairs().flatMap(([key, value]) => {
 							if (!_.isArray(value) || _.endsWith(key, "*")) return [[key, value]]
 							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
-							if (_.isPlainObject(value[j])) return [[key, j]].concat(_.toPairs(value[j]));
+							if (_.isPlainObject(value[j])) return [[key, j + 1]].concat(_.toPairs(value[j]));
 							return [[key, value[j]]];
 						}).value();
 						console.log("values2: "+JSON.stringify(values2));
