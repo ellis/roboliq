@@ -5,6 +5,7 @@
 - work on setting up luigi
 - incubator command and methods
 - finish mario's QC scripts for testing ROMAs
+- design for Box examples
 - Figure out how to automatically convert reader data to measurement JSON data
 - UI: monitor
 - UI: load and compile

@@ -498,6 +498,9 @@ const actionHandlers = {
 			return { [action.name]: range };
 		}
 	},
+	"sample": function(action, data) {
+		return actionHandlers.assign(_.merge({}, action, {sample: true}), data);
+	}
 	/*case "assignPlates":
 		table = assignPlates(table, action);
 		break;

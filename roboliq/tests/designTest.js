@@ -109,7 +109,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only('should produce factors for Box dataset Chapter 3, boys shoes', () => {
+		it.skip('should produce factors for Box dataset Chapter 3, boys shoes', () => {
 			const design = {
 				randomSeed: 5,
 				conditions: {
