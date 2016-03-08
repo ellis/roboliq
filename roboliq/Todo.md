@@ -198,30 +198,30 @@
 
 # Todos for luigi
 
-- [ ] configure sites and cliques:
+- [ ] configure sites and cliques for transporter.movePlate:
     - [x] camera
     - [x] P1-P3
     - [x] lightbox
     - [x] shaker
     - [x] sealer
-    - [ ] mario exchange hotel
-    - [ ] hotels
+    - [x] mario exchange hotel
+    - [x] hotels
+    - [x] regrip
+        - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
     - [ ] reader
-    - [ ] black incubators
-    - [ ] shaker incubators
-    - [ ] regrip
+    - [ ] incubators
+    - [ ] culture shaker
 - [ ] test pipetting on P1-P6
 - [ ] test pipetting on troughs
 - [ ] sealer
 - [ ] shaker
-- [ ] black incubators
+- [ ] incubators
+    - [ ] add the extra logic+code for opening a black incubator site
 - [ ] camera
 - [ ] reader
-- [ ] shaker incubator
-- [ ] add the extra logic+code for opening a black incubator site
+- [ ] culture shaker
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
-- [ ] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
 - [ ] add possibility to configure options in 'ourlab'
 
 # Todos for ROMA qc

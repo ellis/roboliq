@@ -77,11 +77,6 @@ module.exports = {
 					"sitesInternal": ["ourlab.luigi.site.READER"],
 					"evowareId": "ReaderNETwork"
 				},
-				"roma0": {
-					"type": "Transporter",
-					"description": "Fake transporter that allows for the logical transfer of a plate between REGRIP_ABOVE and REGRIP_BELOW, which are in fact the same location",
-					"evowareRoma": -1
-				},
 				"roma1": {
 					"type": "Transporter",
 					"evowareRoma": 0
@@ -171,8 +166,8 @@ module.exports = {
 					R2: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 1 },
 					R3: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 2 },
 					R4: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 3 },
-					REGRIP_ABOVE: { type: "Site", evowareCarrier: "ReGrip above", evowareGrid: 8, evowareSite: 1 },
-					REGRIP_BELOW: { type: "Site", evowareCarrier: "ReGrip below", evowareGrid: 9, evowareSite: 1 },
+					REGRIP_ABOVE: { type: "Site", evowareCarrier: "ReGrip above", evowareGrid: 8, evowareSite: 1, siteIdUnique: "ourlab.luigi.REGRIP" },
+					REGRIP_BELOW: { type: "Site", evowareCarrier: "ReGrip below", evowareGrid: 9, evowareSite: 1, siteIdUnique: "ourlab.luigi.REGRIP" },
 					ROBOSEAL: { "type": "Site", "evowareCarrier": "RoboSeal", "evowareGrid": 45, "evowareSite": 1 },
 					SHAKER: { type: "Site", evowareCarrier: "Te-Shake 1Pos Front", evowareGrid: 44, evowareSite: 1 },
 					TRANSFER_1: { type: "Site", evowareCarrier: "Hotel 4Pos Transfer Grid 0", evowareGrid: 7, evowareSite: 1 },
@@ -305,16 +300,13 @@ module.exports = {
 				"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
 				"ourlab.luigi.site.LIGHT",
 				"ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW",
+				"ourlab.luigi.site.ROBOSEAL",
+				"ourlab.luigi.site.SHAKER",
 				"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
 			],
 			labwareModels: ["ourlab.model.plateModel_96_dwp", "ourlab.model.plateModel_96_round_transparent_nunc"]
 		}),
 		makeTransporterPredicates({
-			"ourlab.luigi.roma0": {
-				none: [
-					["ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW"]
-				]
-			},
 			"ourlab.luigi.roma1": {
 				Narrow: [
 					[
@@ -331,6 +323,7 @@ module.exports = {
 						"ourlab.luigi.site.REGRIP_BELOW",
 						"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
 					],
+					["ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW"]
 				]
 			},
 			"ourlab.luigi.roma2": {
@@ -338,7 +331,8 @@ module.exports = {
 					[
 						"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
 						"ourlab.luigi.site.LIGHT",
-						"ourlab.luigi.site.ROBOSEAL", "ourlab.luigi.site.SHAKER",
+						"ourlab.luigi.site.ROBOSEAL",
+						"ourlab.luigi.site.SHAKER",
 					],
 				]
 			}
