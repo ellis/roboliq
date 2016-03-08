@@ -2,10 +2,9 @@
 
 # Top
 
-- check ROBOSEAL on mario
+- vector QC on mario
 - work on setting up luigi
 - incubator command and methods
-- finish mario's QC scripts for testing ROMAs
 - design for Box examples
 - Figure out how to automatically convert reader data to measurement JSON data
 - UI: monitor
@@ -230,16 +229,15 @@
 - [x] qc_mario_vectors_96nunc: allow for setting a random seed
 - [x] qc_mario_vectors_96nunc: output `description` values as evoware comments
 - [x] qc_mario_vectors_96nunc: Create evoware Groups for steps with `description` properties
-- [ ] qc_mario_vectors_96nunc:
-    - [ ] sites:
-        - [x] RoboPeel
-        - [x] hotels in back
-        - [x] P1-P3,P6-P8 with ROMA2
-        - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-        - [ ] transfer hotels
-        - [ ] PCR machines
+- [x] qc_mario_vectors_96nunc sites:
+    - [x] RoboPeel
+    - [x] hotels in back
+    - [x] P1-P3,P6-P8 with ROMA2
+    - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+    - [x] transfer hotels
+- [ ] qc_mario_vectors_96nunc: test whether vector works on ROBOSEAL and ROBOPEEL after sealing/peeling
+- [ ] qc_mario_vectors_96nunc: adapt script so that no transfers between hotel sites are made
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
-- [ ] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
 - [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] create script for DWP
 - [ ] create script for PCR plates
