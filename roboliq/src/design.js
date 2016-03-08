@@ -666,6 +666,7 @@ function applyActionToTable(table, action, randomEngine) {
 							if (!_.isArray(value) || _.endsWith(key, "*")) return [[key, value]]
 							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
 							if (_.isPlainObject(value[j])) return [[key, j + 1]].concat(_.toPairs(value[j]));
+							if (_.isArray(value[j])) return [[key, j + 1], [".IGNORE*", value[j]]];
 							return [[key, value[j]]];
 						}).value();
 						console.log("values2: "+JSON.stringify(values2));
@@ -769,8 +770,8 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 
 	function expandRowByObject(row, starName, starKey, starValue) {
 		const conditionActions = convertConditionsToActions(starValue);
-		// Add starName/Key to row
-		const row1 = _.merge({}, row, {[starName]: starKey});
+		// Add starName/Key to row (but ignore names that start with a '.')
+		const row1 = (_.startsWith(starName, ".")) ? row : _.merge({}, row, {[starName]: starKey});
 		// Create a table from the row
 		const table2 = [_.cloneDeep(row1)];
 		// Expand the table
