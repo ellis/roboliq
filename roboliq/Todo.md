@@ -2,6 +2,7 @@
 
 # Top
 
+- check ROBOSEAL on mario
 - work on setting up luigi
 - incubator command and methods
 - finish mario's QC scripts for testing ROMAs
@@ -199,15 +200,16 @@
 
 - [ ] configure sites and cliques:
     - [x] camera
-    - [x] P1-P3 and camera
-    - [?] shaker
-    - [?] sealer
+    - [x] P1-P3
+    - [x] lightbox
+    - [x] shaker
+    - [x] sealer
+    - [ ] mario exchange hotel
     - [ ] hotels
+    - [ ] reader
     - [ ] black incubators
     - [ ] shaker incubators
     - [ ] regrip
-    - [ ] mario exchange hotel
-    - [ ] reader
 - [ ] test pipetting on P1-P6
 - [ ] test pipetting on troughs
 - [ ] sealer

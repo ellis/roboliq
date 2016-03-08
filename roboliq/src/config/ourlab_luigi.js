@@ -77,6 +77,11 @@ module.exports = {
 					"sitesInternal": ["ourlab.luigi.site.READER"],
 					"evowareId": "ReaderNETwork"
 				},
+				"roma0": {
+					"type": "Transporter",
+					"description": "Fake transporter that allows for the logical transfer of a plate between REGRIP_ABOVE and REGRIP_BELOW, which are in fact the same location",
+					"evowareRoma": -1
+				},
 				"roma1": {
 					"type": "Transporter",
 					"evowareRoma": 0
@@ -139,6 +144,23 @@ module.exports = {
 				},
 				"site": {
 					"type": "Namespace",
+					HOTEL12_1: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 4 },
+					HOTEL12_2: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 3 },
+					HOTEL12_3: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 2 },
+					HOTEL12_4: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 1 },
+					HOTEL12_5: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 8 },
+					HOTEL12_6: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 7 },
+					HOTEL12_7: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 6 },
+					HOTEL12_8: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 5 },
+					HOTEL12_9: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 12 },
+					HOTEL12_10: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 11 },
+					HOTEL12_11: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 10 },
+					HOTEL12_12: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 9 },
+					INCUBATOR1_1: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 4, closed: true },
+					INCUBATOR1_2: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 3, closed: true },
+					INCUBATOR1_3: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 2, closed: true },
+					INCUBATOR1_4: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 1, closed: true },
+					LIGHT: { type: "Site", evowareCarrier: "Pickolo-Light-Table", evowareGrid: 29, evowareSite: 1 },
 					P1: { type: "Site", evowareCarrier: "MP 2Pos Flat with Downholder", evowareGrid: 13, evowareSite: 1 },
 					P2: { type: "Site", evowareCarrier: "MP 2Pos Flat with Downholder", evowareGrid: 13, evowareSite: 2 },
 					P3: { type: "Site", evowareCarrier: "Downholder DWB", evowareGrid: 12, evowareSite: 1 },
@@ -149,9 +171,14 @@ module.exports = {
 					R2: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 1 },
 					R3: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 2 },
 					R4: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 3 },
-					LIGHT: { type: "Site", evowareCarrier: "Pickolo-Light-Table", evowareGrid: 29, evowareSite: 1 },
-					"ROBOSEAL": { "type": "Site", "evowareCarrier": "RoboSeal", "evowareGrid": 45, "evowareSite": 1 },
+					REGRIP_ABOVE: { type: "Site", evowareCarrier: "ReGrip above", evowareGrid: 8, evowareSite: 1 },
+					REGRIP_BELOW: { type: "Site", evowareCarrier: "ReGrip below", evowareGrid: 9, evowareSite: 1 },
+					ROBOSEAL: { "type": "Site", "evowareCarrier": "RoboSeal", "evowareGrid": 45, "evowareSite": 1 },
 					SHAKER: { type: "Site", evowareCarrier: "Te-Shake 1Pos Front", evowareGrid: 44, evowareSite: 1 },
+					TRANSFER_1: { type: "Site", evowareCarrier: "Hotel 4Pos Transfer Grid 0", evowareGrid: 7, evowareSite: 1 },
+					TRANSFER_2: { type: "Site", evowareCarrier: "Hotel 4Pos Transfer Grid 0", evowareGrid: 7, evowareSite: 2 },
+					TRANSFER_3: { type: "Site", evowareCarrier: "Hotel 4Pos Transfer Grid 0", evowareGrid: 7, evowareSite: 3 },
+					TRANSFER_4: { type: "Site", evowareCarrier: "Hotel 4Pos Transfer Grid 0", evowareGrid: 7, evowareSite: 4 },
 					"SYSTEM": {
 						"type": "Site",
 						"evowareCarrier": "System",
@@ -220,6 +247,13 @@ module.exports = {
 					"evowareName": "DM 96-DWB GripUp",
 					"evowareName_sealed": "DM 96-DWB GripUp sealed"
 				},
+				"plateModel_96_round_transparent_nunc": {
+					"type": "PlateModel",
+					"label": "96 round-well transparent Nunc plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "Ellis Nunc F96 MicroWell"
+				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
 					"label": "Trough 100ml",
@@ -251,28 +285,61 @@ module.exports = {
 	},
 
 	predicates: _.flatten([
-		// Deepwell blocks only
+		// Deepwell plates only
 		makeSiteModelPredicates({
-			siteModel: "ourlab.luigi.siteModel1",
+			siteModel: "ourlab.luigi.siteModel_DWP",
 			sites: ["ourlab.luigi.site.P3"],
 			labwareModels: ["ourlab.model.plateModel_96_dwp"]
 		}),
-		// 96 nuncs only
-		// Deepwell blocks + ...
+		// Shallow plates only
+		makeSiteModelPredicates({
+			siteModel: "ourlab.luigi.siteModel_shallow",
+			sites: ["ourlab.luigi.site.HOTEL12_4", "ourlab.luigi.site.HOTEL12_8", "ourlab.luigi.site.HOTEL12_12"],
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc"]
+		}),
+		// Deepwell blocks + microwell
 		makeSiteModelPredicates({
 			siteModel: "ourlab.luigi.siteModel1",
-			sites: ["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.LIGHT"],
-			labwareModels: ["ourlab.model.plateModel_96_dwp"]
+			sites: [
+				"ourlab.luigi.site.HOTEL12_1", "ourlab.luigi.site.HOTEL12_2", "ourlab.luigi.site.HOTEL12_3", "ourlab.luigi.site.HOTEL12_5", "ourlab.luigi.site.HOTEL12_6", "ourlab.luigi.site.HOTEL12_7", "ourlab.luigi.site.HOTEL12_9", "ourlab.luigi.site.HOTEL12_10", "ourlab.luigi.site.HOTEL12_11",
+				"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
+				"ourlab.luigi.site.LIGHT",
+				"ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW",
+				"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
+			],
+			labwareModels: ["ourlab.model.plateModel_96_dwp", "ourlab.model.plateModel_96_round_transparent_nunc"]
 		}),
 		makeTransporterPredicates({
+			"ourlab.luigi.roma0": {
+				none: [
+					["ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW"]
+				]
+			},
 			"ourlab.luigi.roma1": {
 				Narrow: [
-					["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.LIGHT"],
+					[
+						"ourlab.luigi.site.REGRIP_ABOVE",
+						"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3",
+						"ourlab.luigi.site.LIGHT",
+						"ourlab.luigi.site.ROBOSEAL",
+					],
+					[
+						"ourlab.luigi.site.HOTEL12_1", "ourlab.luigi.site.HOTEL12_2", "ourlab.luigi.site.HOTEL12_3", "ourlab.luigi.site.HOTEL12_4",
+						"ourlab.luigi.site.HOTEL12_5", "ourlab.luigi.site.HOTEL12_6", "ourlab.luigi.site.HOTEL12_7", "ourlab.luigi.site.HOTEL12_8",
+						"ourlab.luigi.site.HOTEL12_9", "ourlab.luigi.site.HOTEL12_10", "ourlab.luigi.site.HOTEL12_11", "ourlab.luigi.site.HOTEL12_12",
+						"ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
+						"ourlab.luigi.site.REGRIP_BELOW",
+						"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
+					],
 				]
 			},
 			"ourlab.luigi.roma2": {
 				Narrow: [
-					["ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.LIGHT"],
+					[
+						"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
+						"ourlab.luigi.site.LIGHT",
+						"ourlab.luigi.site.ROBOSEAL", "ourlab.luigi.site.SHAKER",
+					],
 				]
 			}
 		}),
