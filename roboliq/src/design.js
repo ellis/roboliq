@@ -147,8 +147,8 @@ export function printData(data, hideRedundancies = false) {
 	});
 	// console.log({widths})
 
-	console.log(columns.map((s, i) => _.padEnd(s, widths[i])).join("  "));
-	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
+	// console.log(columns.map((s, i) => _.padEnd(s, widths[i])).join("  "));
+	// console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
 	let linePrev;
 	_.forEach(lines, line => {
 		const s = line.map((s, i) => {
@@ -157,10 +157,10 @@ export function printData(data, hideRedundancies = false) {
 				: s;
 			return _.padEnd(s2, widths[i]);
 		}).join("  ");
-		console.log(s);
+		// console.log(s);
 		linePrev = line;
 	});
-	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
+	// console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
 }
 // Consider: select, groupBy, orderBy, unique
 
@@ -417,9 +417,9 @@ const actionHandlers = {
 			});
 			const expr = _.get(action, "expression", action.value);
 			assert(!_.isUndefined(expr), "`expression` property must be specified");
-			console.log("scope:"+JSON.stringify(scope, null, '\t'))
+			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
 			let value = math.eval(expr, scope);
-			console.log({type: value.type, value})
+			// console.log({type: value.type, value})
 			if (_.isString(value)) {
 				return { [action.name]: value };
 			}
@@ -563,7 +563,7 @@ function convertConditionsToActions(conditions) {
 }
 
 function applyActionToTable(table, action, randomEngine) {
-	console.log("action: "+JSON.stringify(action))
+	// console.log("action: "+JSON.stringify(action))
 	const groupsOfSames = groupSameIndexes(table, action);
 	// console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
 
@@ -582,11 +582,11 @@ function applyActionToTable(table, action, randomEngine) {
 
 		let valueOffset = 0;
 		function getValues(action, data) {
-			console.log(`getValues, dataKeys=${_.keys(data).join(",")}`)
-			console.log(data)
+			// console.log(`getValues, dataKeys=${_.keys(data).join(",")}`)
+			// console.log(data)
 			valueOffset = 0;
 			let values = handler(action, data);
-			console.log({values})
+			// console.log({values})
 			if (!_.isUndefined(values)) {
 				//console.log("sample? "+(_.isNumber(action.sample) || action.sample === true))
 				// TEMPORARY: For legacy reasons, allow for use of deprecated 'random' alias
@@ -636,7 +636,7 @@ function applyActionToTable(table, action, randomEngine) {
 			!(action.shuffle && !action.shuffleOnce)
 		)
 		const valuesTable = (doGetValuesTable) ? getValues(action, {table, groupsOfSames}) : undefined;
-		console.log({valuesTable})
+		// console.log({valuesTable})
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
@@ -645,7 +645,7 @@ function applyActionToTable(table, action, randomEngine) {
 				= (valuesTable instanceof ActionResult) ? valuesTable.getGroupValues(groupIndex)
 				: (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex})
 				: valuesTable;
-			console.log({valuesGroup})
+			// console.log({valuesGroup})
 			_.forEach(groupOfSames, (sames, samesIndex) => {
 				// console.log({sames, samesIndex})
 				let values;
@@ -666,16 +666,17 @@ function applyActionToTable(table, action, randomEngine) {
 							if (!_.isArray(value) || _.endsWith(key, "*")) return [[key, value]]
 							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
 							if (_.isPlainObject(value[j])) return [[key, j + 1]].concat(_.toPairs(value[j]));
+							if (_.isArray(value[j])) return [[key, j + 1], [".IGNORE*", value[j]]];
 							return [[key, value[j]]];
 						}).value();
-						console.log("values2: "+JSON.stringify(values2));
+						// console.log("values2: "+JSON.stringify(values2));
 						values = _.fromPairs(values2);
 					}
 					else {
 						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
 					}
 				}
-				console.log({values, valueOffset})
+				// console.log({values, valueOffset})
 				mergeValues(table, sames, values, valueOffset, action, replacements);
 				valueOffset++;
 			});
@@ -733,8 +734,8 @@ function groupSameIndexes(table, action) {
  * @return {[type]}           [description]
  */
 function mergeValues(table, sames, values, valueOffset, action, replacements) {
-	console.log("mergeValues:")
-	console.log({valueOffset, values, sames})
+	// console.log("mergeValues:")
+	// console.log({valueOffset, values, sames})
 	if (_.isArray(values)) {
 		_.forEach(sames, (rowIndex, i) => {
 			const j = (action.rotateValues) ? (valueOffset + i) % values.length : i;
@@ -769,8 +770,8 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 
 	function expandRowByObject(row, starName, starKey, starValue) {
 		const conditionActions = convertConditionsToActions(starValue);
-		// Add starName/Key to row
-		const row1 = _.merge({}, row, {[starName]: starKey});
+		// Add starName/Key to row (but ignore names that start with a '.')
+		const row1 = (_.startsWith(starName, ".")) ? row : _.merge({}, row, {[starName]: starKey});
 		// Create a table from the row
 		const table2 = [_.cloneDeep(row1)];
 		// Expand the table
@@ -880,7 +881,7 @@ export function getCommonValues(table) {
 }
 
 function sample(source, count, randomEngine) {
-	console.log("sample", source, count)
+	// console.log("sample", source, count)
 	const output = Array(count);
 	let values = _.clone(source);
 	let j = values.length;
