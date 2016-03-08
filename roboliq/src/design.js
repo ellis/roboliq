@@ -318,15 +318,30 @@ const actionHandlers = {
 	"assign": function(action, data) {
 		// console.log("assign: "+JSON.stringify(action));
 		if (_.isArray(action.values)) {
-			return _.fromPairs([[action.name, action.values]]);
+			return {[action.name]: action.values};
 		}
 		else if (_.isFunction(action.calculate)) {
-			return _.fromPairs([[action.name, action.calculate(data)]]);
+			return {[action.name]: action.calculate(data)};
 		}
 		else {
-			return _.fromPairs([[action.name, action.values]]);
+			return {[action.name]: action.values};
 		}
 	},
+	/*"assignRandomly": function(action, data) {
+		const group = data.group;
+		if (!group) return;
+		const output = Array(group.length);
+		let values = [];
+		let j = 0;
+		for (let i = 0; i < output.length; i++) {
+			if (j >= values.length) {
+				CONTINUE with shuffling values
+				values = _.shuffle(action.values);
+				j = 0;
+			}
+			output[i] = values[j++];
+		}
+	},*/
 	"allocatePlates": function(action, data) {
 		const groups = data.groupsOfSames;
 		if (!groups) return;
@@ -385,17 +400,29 @@ const actionHandlers = {
 	"math": function(action, data) {
 		// TODO: adapt so that it can work on groups?
 		if (data.row) {
+			// Build the scope for evaluating the math expression from the current data row
 			const scope = _.mapValues(data.row, x => {
 				// console.log({x})
-				try { return math.eval(x); }
+				try {
+					const result = math.eval(x);
+					// If evaluation succeeds, but it was just a unit name, then set value as string instead
+ 					if (result.type === "Unit" && result.value === null)
+						return x;
+					else {
+						return result;
+					}
+				}
 				catch (e) {}
 				return x;
 			});
 			const expr = _.get(action, "expression", action.value);
 			assert(!_.isUndefined(expr), "`expression` property must be specified");
-			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+			console.log("scope:"+JSON.stringify(scope, null, '\t'))
 			let value = math.eval(expr, scope);
-			// console.log({type: value.type, value})
+			console.log({type: value.type, value})
+			if (_.isString(value)) {
+				return { [action.name]: value };
+			}
 
 			// Get units to use in the end, and the unitless value
 			const {units0, units, unitless} = (() => {
@@ -514,11 +541,16 @@ function convertConditionsToActions(conditions) {
 		}
 		else if (_.includes(key, "=")) {
 			const [name, action] = key.split("=");
-			const handler2 = actionHandlers[action];
-			assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
-			const value2 = _.isString(value) ? {value} : value;
-			if (handler2) {
+			if (!_.isEmpty(action)) {
+				const handler2 = actionHandlers[action];
+				assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
+				const value2 = _.isString(value) ? {value} : value;
 				return _.merge({}, {action, name}, value2);
+			}
+			else {
+				return (_.isPlainObject(value))
+					? _.merge({action: "assign", name}, value)
+					: {action: "assign", name, values: value};
 			}
 		}
 		else {
@@ -528,7 +560,7 @@ function convertConditionsToActions(conditions) {
 }
 
 function applyActionToTable(table, action, randomEngine) {
-	// console.log("action: "+JSON.stringify(action))
+	console.log("action: "+JSON.stringify(action))
 	const groupsOfSames = groupSameIndexes(table, action);
 	// console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
 
@@ -547,9 +579,13 @@ function applyActionToTable(table, action, randomEngine) {
 
 		let valueOffset = 0;
 		function getValues(action, data) {
+			console.log(`getValues, dataKeys=${_.keys(data).join(",")}`)
+			console.log(data)
 			valueOffset = 0;
 			let values = handler(action, data);
+			console.log({values})
 			if (!_.isUndefined(values)) {
+				//console.log("sample? "+(_.isNumber(action.sample) || action.sample === true))
 				// TEMPORARY: For legacy reasons, allow for use of deprecated 'random' alias
 				const shuffle = _.get(action, "shuffle", action.random);
 				if (_.isNumber(shuffle) || shuffle === true) {
@@ -562,6 +598,24 @@ function applyActionToTable(table, action, randomEngine) {
 					else if (_.isPlainObject(values)) {
 						values = _.mapValues(values, x => {
 							return (_.isArray(x)) ? Random.sample(randomEngine2, x, x.length) : x;
+						});
+					}
+				}
+				else if (_.isNumber(action.sample) || action.sample === true) {
+					const randomEngine2 = (_.isNumber(action.sample))
+						? Random.engines.mt19937().seed(action.sample)
+						: randomEngine;
+					const count
+						= (data.row) ? 1
+						: (data.groups) ? data.groups.length
+						: (data.groupsOfSames) ? _.sum(data.groupsOfSames.map(groupOfSames => groupOfSames.length))
+						: values.length;
+					if (_.isArray(values)) {
+						values = sample(values, count, randomEngine2);
+					}
+					else if (_.isPlainObject(values)) {
+						values = _.mapValues(values, x => {
+							return (_.isArray(x)) ? sample(x, count, randomEngine2) : x;
 						});
 					}
 				}
@@ -579,7 +633,7 @@ function applyActionToTable(table, action, randomEngine) {
 			!(action.shuffle && !action.shuffleOnce)
 		)
 		const valuesTable = (doGetValuesTable) ? getValues(action, {table, groupsOfSames}) : undefined;
-		// console.log({valuesTable})
+		console.log({valuesTable})
 
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
@@ -588,7 +642,7 @@ function applyActionToTable(table, action, randomEngine) {
 				= (valuesTable instanceof ActionResult) ? valuesTable.getGroupValues(groupIndex)
 				: (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex})
 				: valuesTable;
-			// console.log({valuesGroup})
+			console.log({valuesGroup})
 			_.forEach(groupOfSames, (sames, samesIndex) => {
 				// console.log({sames, samesIndex})
 				let values;
@@ -605,17 +659,20 @@ function applyActionToTable(table, action, randomEngine) {
 					}
 					else if (_.isPlainObject(valuesGroup)) {
 						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
-						values = _.mapValues(valuesGroup, (value, key) => {
+						const values2 = _(valuesGroup).toPairs().flatMap(([key, value]) => {
+							if (!_.isArray(value) || _.endsWith(key, "*")) return [[key, value]]
 							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
-							// console.log({j})
-							return (_.isArray(value) && !_.endsWith(key, "*")) ? value[j] : value
-						});
+							if (_.isPlainObject(value[j])) return [[key, j]].concat(_.toPairs(value[j]));
+							return [[key, value[j]]];
+						}).value();
+						console.log("values2: "+JSON.stringify(values2));
+						values = _.fromPairs(values2);
 					}
 					else {
 						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
 					}
 				}
-				// console.log({values, valueOffset})
+				console.log({values, valueOffset})
 				mergeValues(table, sames, values, valueOffset, action, replacements);
 				valueOffset++;
 			});
@@ -673,8 +730,8 @@ function groupSameIndexes(table, action) {
  * @return {[type]}           [description]
  */
 function mergeValues(table, sames, values, valueOffset, action, replacements) {
-	// console.log("mergeValues:")
-	// console.log({valueOffset, values, sames})
+	console.log("mergeValues:")
+	console.log({valueOffset, values, sames})
 	if (_.isArray(values)) {
 		_.forEach(sames, (rowIndex, i) => {
 			const j = (action.rotateValues) ? (valueOffset + i) % values.length : i;
@@ -818,6 +875,22 @@ export function getCommonValues(table) {
 
 	return common;
 }
+
+function sample(source, count, randomEngine) {
+	console.log("sample", source, count)
+	const output = Array(count);
+	let values = _.clone(source);
+	let j = values.length;
+	for (let i = 0; i < output.length; i++) {
+		if (j >= values.length) {
+			Random.shuffle(randomEngine, values);
+			j = 0;
+		}
+		output[i] = values[j++];
+	}
+	return output;
+}
+
 // const table = flattenDesign(design2);
 // printConditions(design2.conditions);
 // printData(table);
