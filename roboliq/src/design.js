@@ -415,7 +415,7 @@ const actionHandlers = {
 				catch (e) {}
 				return x;
 			});
-			const expr = _.get(action, "expression", action.value);
+			const expr = _.get(action, "expression", action.values);
 			assert(!_.isUndefined(expr), "`expression` property must be specified");
 			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
 			let value = math.eval(expr, scope);
@@ -499,6 +499,9 @@ const actionHandlers = {
 		}
 	},
 	"sample": function(action, data) {
+		action.sample = true;
+		console.log('sample')
+		console.log({action})
 		return actionHandlers.assign(_.merge({}, action, {sample: true}), data);
 	}
 	/*case "assignPlates":
@@ -547,7 +550,7 @@ function convertConditionsToActions(conditions) {
 			if (!_.isEmpty(action)) {
 				const handler2 = actionHandlers[action];
 				assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
-				const value2 = _.isString(value) ? {value} : value;
+				const value2 = _.isString(value) || _.isArray(value) ? {values: value} : value;
 				return _.merge({}, {action, name}, value2);
 			}
 			else {
@@ -563,7 +566,7 @@ function convertConditionsToActions(conditions) {
 }
 
 function applyActionToTable(table, action, randomEngine) {
-	// console.log("action: "+JSON.stringify(action))
+	console.log("action: "+JSON.stringify(action))
 	const groupsOfSames = groupSameIndexes(table, action);
 	// console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
 
@@ -613,6 +616,7 @@ function applyActionToTable(table, action, randomEngine) {
 						: (data.groups) ? data.groups.length
 						: (data.groupsOfSames) ? _.sum(data.groupsOfSames.map(groupOfSames => groupOfSames.length))
 						: values.length;
+					console.log({action, count, dataKeys: _.keys(data), values})
 					if (_.isArray(values)) {
 						values = sample(values, count, randomEngine2);
 					}

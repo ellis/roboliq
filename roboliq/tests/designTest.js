@@ -112,13 +112,13 @@ describe('design', () => {
 		it.skip('should produce factors for Box dataset Chapter 3, boys shoes', () => {
 			const design = {
 				randomSeed: 5,
-				conditions: {
+				conditionsWorks: {
 					"boy*=range": {till: 4},
 					"left=": {values: ["A", "B"], sample: true},
 					"material*": ["A", "B"],
 					"foot=math": "(left == material) ? \"left\" : \"right\""
 				},
-				conditionsDesired: {
+				conditions: {
 					"boy*=range": {till: 4},
 					"condition=sample": [
 						[{material: "A", foot: "L"}, {material: "B", foot: "R"}],
@@ -209,6 +209,7 @@ describe('design', () => {
 				}*/
 			};
 			const table = flattenDesign(design);
+			console.log(JSON.stringify(table, null, '\t'))
 			printData(table);
 			should.deepEqual(table, [
 				{material: "A", boy: 1, foot: 1},
@@ -436,6 +437,24 @@ describe('design', () => {
 			should.deepEqual(table, [
 				{"a":1,"b":1,"c":1}, {"a":1,"b":1,"c":2},
 				{"a":2,"b":2,"c":3}, {"a":2,"b":2,"c":4},
+			]);
+		});
+
+		it.skip("should support sampling assignment of a nested array of objects, implicitly resulting in branching", () => {
+			const design = {
+				conditions: {
+					"a*": [1, 2, 3, 4],
+					"b=sample": [[{c: 1}, {c: 2}], [{c: 3}, {c: 4}]]
+				}
+			};
+			const table = flattenDesign(design);
+			console.log(JSON.stringify(table))
+			printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"c":1}, {"a":1,"b":1,"c":2},
+				{"a":2,"b":2,"c":3}, {"a":2,"b":2,"c":4},
+				{"a":3,"b":1,"c":1}, {"a":3,"b":1,"c":2},
+				{"a":4,"b":2,"c":3}, {"a":4,"b":2,"c":4},
 			]);
 		});
 
