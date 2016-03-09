@@ -607,7 +607,7 @@ function applyActionToTable(table, action, randomEngine) {
 						});
 					}
 				}
-				else if (_.isNumber(action.sample) || action.sample === true) {
+				/*else if (_.isNumber(action.sample) || action.sample === true) {
 					const randomEngine2 = (_.isNumber(action.sample))
 						? Random.engines.mt19937().seed(action.sample)
 						: randomEngine;
@@ -625,7 +625,7 @@ function applyActionToTable(table, action, randomEngine) {
 							return (_.isArray(x)) ? sample(x, count, randomEngine2) : x;
 						});
 					}
-				}
+				}*/
 			}
 			return values;
 		}
@@ -642,6 +642,7 @@ function applyActionToTable(table, action, randomEngine) {
 		const valuesTable = (doGetValuesTable) ? getValues(action, {table, groupsOfSames}) : undefined;
 		// console.log({valuesTable})
 
+		let shuffledIndexes = [];
 		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
 			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
 			const group = _.map(groupOfSames, sames => table[sames[0]]);
@@ -661,17 +662,27 @@ function applyActionToTable(table, action, randomEngine) {
 				}
 				else {
 					if (_.isArray(valuesGroup)) {
-						const j = (action.rotateValues) ? (samesIndex + valueOffset) % valuesGroup.length : samesIndex;
+						const j = (action.rotateValues || action.shuffle) ? (samesIndex + valueOffset) % valuesGroup.length : samesIndex;
+						if (j === 0 && action.shuffle) {
+							shuffledIndexes = Random.shuffle(randomEngine, _.range(valuesGroup.length));
+						}
+						const k = (action.shuffle) ? shuffledIndexes[j] : j;
 						values = valuesGroup[j];
 					}
 					else if (_.isPlainObject(valuesGroup)) {
 						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
 						const values2 = _(valuesGroup).toPairs().flatMap(([key, value]) => {
-							if (!_.isArray(value) || _.endsWith(key, "*")) return [[key, value]]
-							const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
-							if (_.isPlainObject(value[j])) return [[key, j + 1]].concat(_.toPairs(value[j]));
-							if (_.isArray(value[j])) return [[key, j + 1], [".IGNORE*", value[j]]];
-							return [[key, value[j]]];
+							if (!_.isArray(value) || _.endsWith(key, "*")) {
+								return [[key, value]];
+							}
+							else {
+								const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
+								return (
+									(_.isPlainObject(value[j])) ? [[key, j + 1]].concat(_.toPairs(value[j])) :
+									(_.isArray(value[j])) ? [[key, j + 1], [".IGNORE*", value[j]]] :
+									[[key, value[j]]]
+								);
+							}
 						}).value();
 						// console.log("values2: "+JSON.stringify(values2));
 						values = _.fromPairs(values2);
@@ -687,6 +698,7 @@ function applyActionToTable(table, action, randomEngine) {
 		});
 	}
 
+	// Apply row replacements to table
 	//console.log("replacements:\n"+replacements.map(JSON.stringify).join("\n"));
 	//console.log({table});
 	for (let i = replacements.length - 1; i >= 0; i--) {
@@ -731,9 +743,10 @@ function groupSameIndexes(table, action) {
 
 /**
  * [mergeValues description]
- * @param  {[type]} table     [description]
- * @param  {[type]} sames - indexes of rows to be assigned the same value
- * @param  {[type]} values    [description]
+ * @param  {array} table - source table
+ * @param  {array} sames - indexes of rows to be assigned the same value
+ * @param  {object} values - map from column keys to new values
+ * @param  {integer} valueOffset CONTINUE
  * @param  {[type]} changeMap [description]
  * @return {[type]}           [description]
  */
@@ -759,14 +772,14 @@ function mergeValues(table, sames, values, valueOffset, action, replacements) {
 }
 
 /**
- * Add properties in 'values' to the given row in the table,
+ * Add the properties in 'values' to the given row in the table,
  * possibly expanding the number of rows in the table.
- * 'replacements' will be updated with the new array of rows.
- * @param  {[type]} table     [description]
- * @param  {[type]} rowIndex  [description]
- * @param  {[type]} values    [description]
- * @param  {[type]} replacements [description]
- * @return {[type]}           [description]
+ * 'replacements' will be updated with the new array of rows to replace the
+ * original row.
+ * @param  {array} table - original table of rows
+ * @param  {integer} rowIndex - index of row to modify
+ * @param  {object} values - map from either colum name to column value, or starred column name to a map of more column names.
+ * @param  {object} replacements - map from rowIndex to array of replacement rows
  */
 function expandRowByValues(table, rowIndex, values, replacements) {
 	// console.log("expandRowByValues:")
@@ -884,6 +897,7 @@ export function getCommonValues(table) {
 	return common;
 }
 
+/*
 function sample(source, count, randomEngine) {
 	// console.log("sample", source, count)
 	const output = Array(count);
@@ -897,7 +911,7 @@ function sample(source, count, randomEngine) {
 		output[i] = values[j++];
 	}
 	return output;
-}
+}*/
 
 // const table = flattenDesign(design2);
 // printConditions(design2.conditions);
