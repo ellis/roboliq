@@ -33,12 +33,29 @@ export function _movePlate(params, parsed, data) {
 		plateModelName: [["@object", "model"], "evowareName"],
 		plateOrigName: ["@object", "location"],
 		plateOrigCarrierName: [["@object", "location"], "evowareCarrier"],
+		plateOrig: [["@object", "location"]],
 		plateOrigGrid: [["@object", "location"], "evowareGrid"],
 		plateOrigSite: [["@object", "location"], "evowareSite"],
+		plateDest: [["@destination"]],
 		plateDestCarrierName: ["@destination", "evowareCarrier"],
 		plateDestGrid: ["@destination", "evowareGrid"],
 		plateDestSite: ["@destination", "evowareSite"],
 	}, params, data);
+
+	const plateDestName = parsed.objectName.destination;
+
+	// It may be that multiple sites are defined which are actually the same physical location.
+	// We can supress transporter commands between the logical sites by checking whether the sames have the same siteIdUnique.
+	// console.log({plateOrig: values.plateOrig, plateDest: values.plateDest})
+	if (values.plateOrig.siteIdUnique && values.plateOrig.siteIdUnique === values.plateDest.siteIdUnique) {
+		return [{
+			tableEffects: [
+				[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
+				[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
+			]
+		}];
+	}
+
 	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"], values.romaIndex);
 	values.programName = parsed.value.program;
 	const bMoveBackToHome = parsed.value.evowareMoveBackToHome || false; // 1 = move back to home position
@@ -69,7 +86,6 @@ export function _movePlate(params, parsed, data) {
 	//val let = JsonUtils.makeSimpleObject(x.`object`+".location", JsString(plateDestName))
 
 	const plateName = parsed.objectName.object;
-	const plateDestName = parsed.objectName.destination;
 
 	const items = [];
 

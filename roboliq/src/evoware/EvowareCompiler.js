@@ -124,8 +124,10 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 			if (_.has(agent, ["config", "pathToRoboliqRuntimeCli"])) {
 				const pathToRoboliqRuntimeCli = agent.config.pathToRoboliqRuntimeCli;
 				// TODO: set 2 => 0 after the command line in order not to wait till execution is complete
-				results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",2,"",2);`})
-				results.push({line: `Execute("wscript ${pathToRoboliqRuntimeCli} end ${path.join(".")}",2,"",2);`})
+				// This will wait: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",2,"",2);`
+				// This wont wait: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",0,"",2);`
+				results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",0,"",2);`})
+				results.push({line: `Execute("wscript ${pathToRoboliqRuntimeCli} end ${path.join(".")}",0,"",2);`})
 				generatedTimingLogs = true;
 			}
 		}

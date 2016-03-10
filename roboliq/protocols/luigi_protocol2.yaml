@@ -9,27 +9,43 @@ objects:
   plateDWB:
     type: Plate
     model: ourlab.model.plateModel_96_dwp
-    location: ourlab.luigi.site.P1
+    location: ourlab.luigi.site.P6
+    # location: ourlab.luigi.site.P1
   design1:
     type: Design
     conditions:
       plate*:
         plateDWB:
-          storageSite: ourlab.luigi.site.P1
+          storageSite: ourlab.luigi.site.P6
           roma*:
             ourlab.luigi.roma1:
               vector*:
                 Narrow:
-                  site*:
-                  - ourlab.luigi.site.P1
-                  - ourlab.luigi.site.P2
-                  - ourlab.luigi.site.P3
-                  - ourlab.luigi.site.P4
-                  - ourlab.luigi.site.P5
-                  - ourlab.luigi.site.P6
-                  - ourlab.luigi.site.LIGHT
-                  - ourlab.luigi.site.ROBOSEAL
-                  - ourlab.luigi.site.SHAKER
+                  orientation*:
+                    right:
+                      site*:
+                      - ourlab.luigi.site.TRANSFER_1
+                      - ourlab.luigi.site.TRANSFER_2
+                      - ourlab.luigi.site.TRANSFER_3
+                      - ourlab.luigi.site.TRANSFER_4
+                      - ourlab.luigi.site.HOTEL12_1
+                      - ourlab.luigi.site.HOTEL12_2
+                      - ourlab.luigi.site.HOTEL12_3
+                      - ourlab.luigi.site.HOTEL12_5
+                      - ourlab.luigi.site.HOTEL12_6
+                      - ourlab.luigi.site.HOTEL12_7
+                      - ourlab.luigi.site.HOTEL12_9
+                      - ourlab.luigi.site.HOTEL12_10
+                      - ourlab.luigi.site.HOTEL12_11
+                      - ourlab.luigi.site.P4
+                      - ourlab.luigi.site.P5
+                      - ourlab.luigi.site.P6
+                    left:
+                      site*:
+                      - ourlab.luigi.site.P1
+                      - ourlab.luigi.site.P2
+                      - ourlab.luigi.site.P3
+                      - ourlab.luigi.site.LIGHT
             ourlab.luigi.roma2:
               vector*:
                 Narrow:
@@ -40,6 +56,8 @@ objects:
                   - ourlab.luigi.site.P5
                   - ourlab.luigi.site.P6
                   - ourlab.luigi.site.LIGHT
+                  - ourlab.luigi.site.ROBOSEAL
+                  - ourlab.luigi.site.SHAKER
       order=range:
         # groupBy: [plate, roma, vector]
         # shuffle: true

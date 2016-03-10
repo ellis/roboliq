@@ -111,12 +111,67 @@ describe('design', () => {
 
 		it.skip('should produce factors for Box dataset Chapter 3, boys shoes', () => {
 			const design = {
+				randomSeed: 5,
 				conditions: {
+					"boy*=range": {till: 4},
+					"left=": {values: ["A", "B"], sample: true},
+					"material*": ["A", "B"],
+					"foot=math": "(left == material) ? \"left\" : \"right\""
+				},
+				conditionsDesired: {
+					"boy*=range": {till: 4},
+					"condition=sample": [
+						[{material: "A", foot: "L"}, {material: "B", foot: "R"}],
+						[{material: "A", foot: "R"}, {material: "B", foot: "L"}]
+					]
+				},
+				conditionsWorkedSortOf1: {
+					"boy*=range": {till: 4},
+					"condition=": {
+						sample: true,
+						values: [
+							{
+								"material*": {
+									"A": {foot: "L"},
+									"B": {foot: "R"}
+								}
+							},
+							{
+								"material*": {
+									"A": {foot: "R"},
+									"B": {foot: "L"}
+								}
+							},
+						]
+					}
+				},/*
+				conditions0: {
 					"boy*=range": {till: 2},
 					"material*": ["A", "B"],
 					"foot=assign": {
 						values: ["L", "R", "R", "L"],
 						rotateValues: true
+					}
+				},
+				conditions4: {
+					"left*": ["A", "B"],
+					"replicate*": [1,2,3,4,5],
+					"boy=range": {
+						shuffle: true
+					},
+					"material*": ["A", "B"],
+					"foot=math": "(left == material) ? \"left\" : \"right\""
+				},
+				consitions3: {
+					"materialA*": {
+						"L": {
+							"material*": ["A", "B"],
+							"foot=assign": ["L", "R"]
+						},
+						"R": {
+							"material*": ["A", "B"],
+							"foot=assign": ["R", "L"]
+						}
 					}
 				},
 				conditions2: {
@@ -151,7 +206,7 @@ describe('design', () => {
 						measurementFactors: ["wear"],
 						formula: "wear ~ material",
 					}
-				}
+				}*/
 			};
 			const table = flattenDesign(design);
 			printData(table);

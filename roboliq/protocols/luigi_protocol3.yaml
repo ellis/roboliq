@@ -1,0 +1,37 @@
+roboliq: v1
+
+description: |
+  Test the REGRIP_ABOVE and REGRIP_BELOW sites.
+
+roboliq: v1
+objects:
+  plateDWB:
+    type: Plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.luigi.site.P6
+    # location: ourlab.luigi.site.P1
+
+steps:
+  # 1:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma1
+  #   program: Narrow
+  #   object: plateDWB
+  #   destination: ourlab.luigi.site.REGRIP_BELOW
+  # 2:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma0
+  #   object: plateDWB
+  #   destination: ourlab.luigi.site.REGRIP_ABOVE
+  # 3:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma1
+  #   program: Narrow
+  #   object: plateDWB
+  #   destination: ourlab.luigi.site.P1
+  4:
+    command: transporter.movePlate
+    equipment: ourlab.luigi.roma1
+    program: Narrow
+    object: plateDWB
+    destination: ourlab.luigi.site.P1

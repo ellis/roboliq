@@ -42,7 +42,7 @@ function makeMovePlateParams(parsed) {
 	});
 }
 
-function makePlateLogic(parsed, movePlateParams, n) {
+function makeMovePlateMethod(parsed, movePlateParams, n) {
 	//console.log("makePlateLogic: "+JSON.stringify(parsed, null, '\t'));
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
@@ -58,11 +58,9 @@ function makePlateLogic(parsed, movePlateParams, n) {
 	//const origin = parsed.value.object.location;
 	//
 
-	let name;
-
-	name = "movePlate-0";
-	const method0 = {
-		"method": {
+	if (n === 0) {
+		const name = "movePlate-0";
+		return {
 			"description": `${name}: transport plate from origin to destination in ${n} step(s)`,
 			"task": {"movePlate": movePlateParams},
 			"preconditions": [
@@ -71,12 +69,11 @@ function makePlateLogic(parsed, movePlateParams, n) {
 			"subtasks": {"ordered": [
 				{"print": {"text": name}}
 			]}
-		}
-	};
-
-	name = "movePlate-1";
-	const method1 = {
-		"method": {
+		};
+	}
+	else if (n === 1) {
+		const name = "movePlate-1";
+		return {
 			"description": `${name}: transport plate from origin to destination in ${n} step(s)`,
 			"task": {"movePlate": movePlateParams},
 			"preconditions": [
@@ -94,12 +91,11 @@ function makePlateLogic(parsed, movePlateParams, n) {
 				{"print": {"text": name}},
 				{"openAndMovePlate": {"agent": agents[0], "equipment": equipments[0], "program": programs[0], "labware": labware, "model": model, "origin": origin, "originModel": "?originModel", "destination": destination, "destinationModel": "?destinationModel"}}
 			]}
-		}
-	};
-
-	name = "movePlate-2";
-	const method2 = {
-		"method": {
+		};
+	}
+	else if (n === 2) {
+		const name = "movePlate-2";
+		return {
 			"description": `${name}: transport plate from origin to destination in ${n} step(s)`,
 			"task": {"movePlate": movePlateParams},
 			"preconditions": [
@@ -126,20 +122,48 @@ function makePlateLogic(parsed, movePlateParams, n) {
 				{"openAndMovePlate": {"agent": agents[0], "equipment": equipments[0], "program": programs[0], "labware": labware, "model": model, "origin": origin, "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
 				{"openAndMovePlate": {"agent": agents[1], "equipment": equipments[1], "program": programs[1], "labware": labware, "model": model, "origin": "?site2", "originModel": "?site2Model", "destination": destination, "destinationModel": "?destinationModel"}}
 			]}
-		}
-	};
-
-	if (n === 0) {
-		//console.log("method0: "+JSON.stringify(method0, null, '\t'))
-		return [method0];
+		};
 	}
-	else if (n === 1) {
-		//console.log("method1: "+JSON.stringify(method1, null, '\t'))
-		return [method1];
-	}
-	else if (n === 2) {
-		//console.log("method2: "+JSON.stringify(method2, null, '\t'))
-		return [method2];
+	else if (n === 3) {
+		const name = "movePlate-3";
+	 	return {
+			"description": `${name}: transport plate from origin to destination in ${n} step(s)`,
+			"task": {"movePlate": movePlateParams},
+			"preconditions": [
+				{"model": {"labware": labware, "model": model}}, // TODO: can handle this in programatically
+				{"location": {"labware": labware, "site": origin}}, // TODO: can handle this in programatically
+				{"siteModel": {"site": origin, "siteModel": "?originModel"}},
+				{"siteModel": {"site": destination, "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": model}},
+				{"siteIsClear": {"site": destination}}, // TODO: Check this programmatically instead of via logic
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": origin}},
+				{"siteCliqueSite": {"siteClique": "?siteClique3", "site": destination}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?site2"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site2"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique2", "site": "?site3"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique3", "site": "?site3"}},
+				{"not": {"same": {"thing1": "?site2", "thing2": origin}}},
+				{"not": {"same": {"thing1": "?site2", "thing2": destination}}},
+				{"not": {"same": {"thing1": "?site2", "thing2": "?site3"}}},
+				{"not": {"same": {"thing1": "?site3", "thing2": origin}}},
+				{"not": {"same": {"thing1": "?site3", "thing2": destination}}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": agents[0], "equipment": equipments[0], "program": programs[0], "siteClique": "?siteClique1"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": agents[1], "equipment": equipments[1], "program": programs[1], "siteClique": "?siteClique2"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": agents[2], "equipment": equipments[2], "program": programs[2], "siteClique": "?siteClique3"}},
+				{"siteModel": {"site": "?site2", "siteModel": "?site2Model"}},
+				{"siteModel": {"site": "?site3", "siteModel": "?site3Model"}},
+				{"stackable": {"below": "?site2Model", "above": model}},
+				{"stackable": {"below": "?site3Model", "above": model}},
+				{"siteIsClear": {"site": "?site2"}},
+				{"siteIsClear": {"site": "?site3"}}
+			],
+			"subtasks": {"ordered": [
+				{"print": {"text": name}},
+				{"openAndMovePlate": {"agent": agents[0], "equipment": equipments[0], "program": programs[0], "labware": labware, "model": model, "origin": origin, "originModel": "?originModel", "destination": "?site2", "destinationModel": "?site2Model"}},
+				{"openAndMovePlate": {"agent": agents[1], "equipment": equipments[1], "program": programs[1], "labware": labware, "model": model, "origin": "?site2", "originModel": "?site2Model", "destination": "?site3", "destinationModel": "?site3Model"}},
+				{"openAndMovePlate": {"agent": agents[2], "equipment": equipments[2], "program": programs[2], "labware": labware, "model": model, "origin": "?site3", "originModel": "?site3Model", "destination": destination, "destinationModel": "?destinationModel"}}
+			]}
+		};
 	}
 	assert(false);
 }
@@ -214,6 +238,37 @@ function debug_movePlate_one(input, agentId, labwareId, modelId, originId, desti
 	}
 }
 
+
+function debugMovePlateMethod(input, method, n) {
+	const lines = [];
+	var llpl = require('../HTN/llpl.js').create();
+	llpl.initializeDatabase(input);
+	//console.log("originId: "+originId)
+	const criteria = method.preconditions;
+	const queryAll = {"and": criteria};
+	const queryResultsAll = llpl.query(queryAll);
+	//console.log("queryResultsAll:\n"+JSON.stringify(queryResultsAll, null, '\t'));
+
+	//console.log(queryResultsAll.length);
+	if (queryResultsAll.length === 0) {
+		lines.push(`\nmovePlate-${n} failed"`);
+		//console.log("debug: "+criteria);
+		_.forEach(criteria, criterion => {
+			//console.log({criterion})
+			const queryOne = {"and": [criterion]};
+			const queryResultOne = llpl.query(queryOne);
+			//console.log("queryResultOne: "+JSON.stringify(queryResultOne));
+			if (queryResultOne.length === 0) {
+				lines.push("FAILED: "+JSON.stringify(criterion));
+			}
+			else {
+				//console.log("queryResults:\n"+JSON.stringify(queryResultOne, null, '\t'));
+			}
+		});
+	}
+	return lines.join("\n");
+}
+
 /**
  * Handlers for {@link transporter} commands.
  * @static
@@ -253,16 +308,18 @@ var commandHandlers = {
 		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
 		const transporterLogic = require('./transporterLogic.json');
 
-		const keys = ["null", "one", "two"];
+		const keys = ["null", "one", "two", "three"];
 		const movePlateParams = makeMovePlateParams(parsed);
 
 		const shop = require('../HTN/shop.js');
 		let input0 = data.predicates;
 		let plan;
+		let errorLog = "";
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
+			const method = {method: makeMovePlateMethod(parsed, movePlateParams, i)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
-			input0 = input0.concat(makePlateLogic(parsed, movePlateParams, i));
+			input0 = input0.concat([method]);
 			const tasks = { "tasks": { "ordered": [{ movePlate: movePlateParams }] } };
 			//console.log(JSON.stringify(tasks))
 			const input = input0.concat([tasks]);
@@ -273,6 +330,9 @@ var commandHandlers = {
 				//console.log("plan found for "+key)
 				//console.log(planner.ppPlan(plan));
 				break;
+			}
+			else {
+				errorLog += debugMovePlateMethod(input, method.method, i);
 			}
 		}
 
@@ -291,11 +351,17 @@ var commandHandlers = {
 		*/
 
 		if (_.isEmpty(plan)) {
+			console.log(errorLog);
+			/*
 			var agentId = params.agent || "?agent";
 			var modelId = parsed.value.object.model || "?model";
 			var originId = parsed.value.object.location || "?site";
 			debug_movePlate_null(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
 			debug_movePlate_one(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+			for (let i = 0; i <= 3; i++) {
+				const method = makeMovePlateMethod(parsed, movePlateParams, i);
+				debugMovePlateMethod()
+			*/
 		}
 		if (_.isEmpty(plan)) {
 			const x = _.merge({}, {agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.value.object.location, destination: parsed.objectName.destination});
