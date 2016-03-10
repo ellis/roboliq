@@ -236,8 +236,11 @@
     - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
     - [x] transfer hotels
 - [x] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
+- [x] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
+- [ ] qc_mario_vectors_96nunc: HOTEL4_2 to ROBOSEAL didn't work great (caught briefly on the ROBOSEAL pins)
+- [ ] qc_mario_vectors_96nunc: for ROBOSEAL and ROBOPEEL, should actually seal in order to check positions afterwards
+- [ ] qc_mario_vectors_96nunc: C4 -> P6 was a bit off on P6
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
-- [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] create script for DWP
 - [ ] create script for PCR plates
 

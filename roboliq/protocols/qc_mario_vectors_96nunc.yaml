@@ -56,10 +56,10 @@ objects:
     description: Design for testing the 32-position hotels
     randomSeed: 123
     conditions:
-      plate: plateNunc:
+      plate: plateNunc
       storageSite: ourlab.mario.site.REGRIP
       roma: ourlab.mario.roma2
-      vector: Narrow:
+      vector: Narrow
       hotelSite*:
       - ourlab.mario.site.HOTEL32_A1
       - ourlab.mario.site.HOTEL32_B1
@@ -78,9 +78,6 @@ objects:
         - ourlab.mario.site.P8
         shuffle: true
         rotateValues: true
-      order=range:
-        groupBy: [plate, roma, vector]
-        shuffle: true
 
 steps:
   1:
@@ -93,6 +90,7 @@ steps:
       1:
         command: experiment.forEachRow
         steps:
+          description: `Site {{$site}}`
           command: transporter.movePlate
           equipment: $roma
           program: $vector
@@ -104,3 +102,26 @@ steps:
         program: $vector
         object: $plate
         destination: $storageSite
+  2:
+    description: `Test movements for hotels`
+    command: experiment.forEachRow
+    design: designHotels
+    steps:
+      1:
+        description: `Site {{$hotelSite}}`
+        command: transporter.movePlate
+        equipment: $roma
+        program: $vector
+        object: $plate
+        destination: $hotelSite
+      2:
+        description: `Site {{$benchSite}}`
+        command: transporter.movePlate
+        equipment: $roma
+        program: $vector
+        object: $plate
+        destination: $benchSite
+  3:
+    command: transporter.movePlate
+    object: plateNunc
+    destination: ourlab.mario.site.REGRIP
