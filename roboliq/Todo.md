@@ -196,7 +196,7 @@
 
 # Todos for luigi
 
-- [ ] configure sites and cliques for transporter.movePlate:
+- [x] configure sites and cliques for transporter.movePlate:
     - [x] camera
     - [x] P1-P3
     - [x] lightbox
@@ -208,20 +208,23 @@
         - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
     - [x] reader
     - [x] culturebox
-    - [ ] incubators
-        - [ ] add the extra logic+code for opening a black incubator site
-- [ ] test pipetting on P1-P6
+    - [x] add possibility to configure options in 'ourlab'
+- [x] perform initial pipetting test
+- [ ] pipetter.cleanTips: test
+- [ ] evoware: after pipetting is done, retract all the tips somehow
 - [ ] test pipetting on troughs
-- [ ] shaker operation
+- [ ] double-check pipetting on P1-P6
 - [ ] sealer operation
-- [ ] incubators operation
 - [ ] reader operation
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
-- [ ] need to change evoware's labware model on DWP once its sealed
-- [ ] add possibility to configure options in 'ourlab'
 - [ ] suboptimal plate transport: P1 -> REGRIP_BELOW (catches on side)
+
+- [ ] shaker operation
+- [ ] incubator sites:
+    - [ ] add the extra logic+code for opening a black incubator site
+- [ ] incubators operation
 - [ ] camera operation
 
 # Todos for ROMA qc

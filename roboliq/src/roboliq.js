@@ -972,12 +972,16 @@ function _run(opts, userProtocol) {
 			//console.log("B")
 			//console.log("result: "+JSON.stringify(result))
 		} catch (e) {
+			console.log("Error type = "+(typeof e).toString());
 			if (typeof e === "RoboliqError") {
 				const prefix = e.getPrefix();
 				result = {errors: _.map(e.errors, s => prefix+s)};
 			}
+			else if (_.has(e, "errors")) {
+				result = {errors: e.errors};
+			}
 			else {
-				result = {errors: _.compact([e.toString(), e.stack])};
+				result = {errors: _.compact([JSON.stringify(e), e.stack])};
 			}
 			if (opts.throw) {
 				if (_.isPlainObject(e))

@@ -45,15 +45,22 @@ steps:
   #   object: plate
   #   destination: ourlab.luigi.site.P6
 
+  # 1:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_1
+  # 2:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_2
+  # 3:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.P6
+
   1:
-    command: transporter.movePlate
-    object: plate
-    destination: ourlab.luigi.site.BOX_1
-  2:
-    command: transporter.movePlate
-    object: plate
-    destination: ourlab.luigi.site.BOX_2
-  3:
-    command: transporter.movePlate
-    object: plate
-    destination: ourlab.luigi.site.P6
+    command: pipetter.pipette
+    sources: ourlab.luigi.systemLiquid
+    destinations: plate(A01)
+    volumes: 50ul
+    clean: none

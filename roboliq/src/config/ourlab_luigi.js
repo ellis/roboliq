@@ -129,8 +129,11 @@ module.exports = {
 							"tipModelPermanent": "ourlab.luigi.tipModel2500"
 						}
 					},
+					"tipModel": {
+						"tipModel2500": {"type": "TipModel", "programCode": "2500", "min": "10ul", "max": "2250ul", "canHandleSeal": true, "canHandleCells": true},
+					},
 					"tipModelToSyringes": {
-						"ourlab.luigi.tipModel2500": ["ourlab.luigi.liha.syringe.1", "ourlab.luigi.liha.syringe.2", "ourlab.luigi.liha.syringe.3", "ourlab.luigi.liha.syringe.4", "ourlab.luigi.liha.syringe.5", "ourlab.luigi.liha.syringe.6", "ourlab.luigi.liha.syringe.7", "ourlab.luigi.liha.syringe.8"]
+						"ourlab.luigi.liha.tipModel.tipModel2500": ["ourlab.luigi.liha.syringe.1", "ourlab.luigi.liha.syringe.2", "ourlab.luigi.liha.syringe.3", "ourlab.luigi.liha.syringe.4", "ourlab.luigi.liha.syringe.5", "ourlab.luigi.liha.syringe.6", "ourlab.luigi.liha.syringe.7", "ourlab.luigi.liha.syringe.8"]
 					}
 				},
 				"sealer": {
@@ -390,7 +393,7 @@ module.exports = {
 		}
 	},
 	{"#for": {
-		factors: {site: ["P2", "P3", "P4", "P5", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+		factors: {site: ["P1", "P2", "P3", "P4", "P5", "P6", "LIGHT", "SYSTEM", "R1", "R2", "R2", "R4"]},
 		output: {
 			"pipetter.canAgentEquipmentSite": {
 				"agent": "ourlab.luigi.evoware",
