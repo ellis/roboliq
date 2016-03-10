@@ -160,8 +160,6 @@
 - [ ] change `#directive` to `directive()`, and if the value is an array, convert it to an object with key `items`.
 - [ ] paper1_protocol3_unfolding.yaml: make sure it compiles
 - [ ] consider having the fluorescenceReader command generate a report with the current plate contents
-- [ ] separate the roboliq repository from lab repository (e.g. ourlab.js, lab-specific protocols)
-- [ ] separate Evoware code from ourlab.js and ourlab_luigi.js into an evoware config file
 - [ ] handle mixture randomization well, and use it for the paper1 protocols (pH and unfolding)
 - [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] use schemas for directives too
@@ -184,12 +182,12 @@
 
 # Todos for luigi
 
-- [ ] add possibility to configure options in 'ourlab', such as the location wher
+- [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] configure sites and cliques:
-    - [x] camera
-    - [x] P1-P3 and camera
-    - [?] shaker
-    - [?] sealer
+    - [ ] camera
+    - [ ] P1-P3 and camera
+    - [ ] shaker
+    - [ ] sealer
     - [ ] hotels
     - [ ] black incubators
     - [ ] shaker incubators
@@ -206,7 +204,6 @@
 - [ ] shaker incubator
 - [ ] add the extra logic+code for opening a black incubator site
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
-- [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
 
 # Todos for paper 2/3
@@ -216,52 +213,46 @@
 - [x] use `express` to serve up an HTML page from serverUi, automatically display changes in `state.timing`.
 - [x] program a prototype UI client that displays live data from the server as it's updated by the runtime client
 - [x] program a prototype little "runtime client" that sends data to a server when called by Evoware
-- [x] ourlab.js: DWP can't go on sealer or peeler
-- [x] Add timing log to all evoware instructions
+- [x] Add time logging to all evoware instructions
 - [x] Test runtime-client/runtime-server/roboliq-runtime-cli
-- [x] EvowareCompiler: make addition of run-time instructions an option
-- [x] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
-- [ ] Figure out how to automatically convert reader data to measurement JSON data
-	- [ ] roboliq-runtime-cli: should send XML to runtime-server
-	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
-	- [ ] runtime-server: setInfiniteMeasurements: accepts `{step, xml}`
-	- [ ] roboliq-runtime-client: should display measurements using vega
-	- [ ] roboliq-runtime-client: should display measurements using a table
-- [x] see about using VB script to avoid the console popup when logging time of commands
-- [x] runtime-client/Log: duplicate from Runtime
-- [x] runtime-client/Log: nicer table format with padding between columns
-- [x] runtime-client/Log: separate bold row for changes in date
-- [x] runtime-client/Log: only display the time in time column instead of whole ISO date
-- [x] runtime-server: accept as input a `.out.json` file
-- [x] runtime-client/Runtime: display protocol
-- [x] runtime-client/Runtime: better display of from-till/duration time for each command
-- [ ] runtime-client: when we get updated state from server, calculate new Runtime report in order to remove the logic from Runtime.jsx
-- [ ] runtime-client: for the Runtime report, calculate accumulated durations for all steps, and calculate a flag when a step is done
-- [ ] runtime-client/Runtime: display checkmark next to commands which are complete
+- [ ] see about using VB script to avoid the console popup when logging time of commands
+
+    Set objShell = CreateObject("WScript.Shell")
+    ' Set objExec = objShell.Exec("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100")
+    Return = objShell.Run("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100", 0, true)
+
+    Set args = Wscript.Arguments
+
+    For Each arg In args
+      Wscript.Echo arg
+    Next
+
+    CSCRIPT MyScript.vbs
+
+    WScript.Arguments.Item(0)
+    WScript.Arguments.Item(1)
+
+    test from command line with wscript test.vbs
+
 - [ ] qc_mario_vectors_96nunc:
     - [x] randomize order of sites
     - [x] allow for setting a random seed
     - [x] output `description` values as evoware comments
     - [x] Create evoware Groups for steps with `description` properties
     - [ ] sites:
-        - [x] RoboPeel
-        - [x] hotels in back
-        - [x] P1-P3,P6-P8 with ROMA2
-        - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+        - [ ] RoboPeel
+        - [ ] hotels in back
         - [ ] transfer hotels
-        - [ ] PCR machines
-- [ ] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
-- [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
-- [ ] roboliq-runtime-client: rename folder to runtime-client
-- [ ] runtime-server: use REST instead of socket for communication with runtime-client
-- [ ] figure out how to run the runtime-client without webpack-dev-server
-- [ ] consider starting the runtime-server from Evoware, if its not already running
-- [ ] consider opening a browser window for the runtime-client from Evoware
-- [ ] make the runtime programs' ports configurable
+        - [ ] P1-P3,P6-P8 with ROMA2
+        - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+    - [ ] ERROR: wrongly placed on SEELER
+    - [ ] ERROR: misplaced from hotel32 site 19 to P2
+- [ ] runtime-server: take as input a `.out.json` file
+- [ ] runtime-client: create a redux version, start with `fullstack-voting-client`
+- [ ] Figure out how to automatically convert reader data to measurement JSON data
 - [ ] test pipetter.pipetteDilutionSeries2x
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data
-- [ ] consider adding a `summaryTemplate` field to command schemas, allowing for more user friendly summaries in UI
 - [ ] dm00_test3m.js:
     - [ ] BUG: why are media and strain sources taken from different syringes?
     - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
@@ -272,11 +263,31 @@
     - 46s after measurement 1, second dilution
     - 12s after measurement 2, second dilution
     - [ ] `absorbanceReader.measurePlate`
+- [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
+    - something with absorbance OrangeG
+    - two "culture" plates
+    - two dilution plates
+    - should skip sealing so that we don't need to deal with the complications on Sunday
+    - [ ] mario: can't use tips 1-4 to puncture a seal
+    - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
+- [ ] transporter test errors:
+    - [ ] transfers from P2, twice it didn't grip
+    - [ ] why was roma2 used for transfer from REGRIP to READER when we were in the roma1 group?
+    - [ ] roma2, wide grip, from REGRIP to READER: doesn't narrow the grip again, so it pushes aside the transfer hotel
+    - [ ] should automatically move ROMAs to "home position" before a different roma is used.
+- [ ] compile the experiment for mario
 - [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
+- [ ] ourlab.js: DWP cann't go on sealer or peeler
+SUNDAY:
+- [ ] compile the experiment for luigi
+- [ ] run the experiment on mario
+- [ ] run the experiment on luigi
+- [ ] try to extend EvowareCompile to save timing data while executing commands
 - [ ] make video of same experiment running on both robots
     - [ ] demonstrate interleaved timing by showing the robot's picture-in-picture starting the same procedures at the same time
     - [ ] show the data displayed in R/html as soon as the measurement is done
-- [ ] use Visual Basic Script to get liquid level detection values from Evoware (see "Pre-defined variables" in Evoware Help)
+- [ ] proper randomization
+LATER:
 - [ ] generate a pretty HTML/SVG protocol for the experiment
 - [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?
@@ -298,9 +309,9 @@
     - [ ] `dump`
         - [ ] dump entire state
         - [ ] dump part of state
+- [ ] web ui?
 - [ ] reduce number of levels of steps generated by commands like `timer.doAndWait`
-- [ ] consider marking expanded commands in some way so that they aren't automatically expanded in the UI, so only the steps that the user explicitly wrote are automatically shown
-- [ ] consider whether to rewrite roboliq-runtime-cli.vbs to send REST requests directly to runtime-server instead of calling roboliq-runtime-cli.js
+
 
 ## Todos for complex protocol and feedback
 
@@ -320,8 +331,7 @@
 - [x] test transporter.doThenRestoreLocation
 - [x] commandHelper.getStepKeys: return array of step keys in order
 - [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
-- [x] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
-- [ ] figure out why this Design doesn't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs):
+- [ ] figure out why this Design doesn't have the correct table column order in firefox:
     ```
     conditions:
       waterSource: saltwater
@@ -335,13 +345,17 @@
           acidPH: 3.75
           basePH: 5.75
     ```
+- [ ] Experiment Conditions Data:
 - [ ] check whether Evoware external n2 is display order
+- [ ] compile some simple protocols and try to run them on mario and luigi
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
 - [ ] evoware compiler: allow for loading Carrier.json instead of Carrier.cfg
 - [ ] evoware compiler: allow for loading JSON table instead of .ewt or .esc
+- [ ] evoware compiler: add script line for every protocol command to log the start and end times of that command
 - [ ] evoware compiler: add code to process and display measured data after measurement commands
 - [ ] evoware: test `pipetter._cleanTips`
 - [ ] evoware: write more extensive tests for `pipetter._aspirate`, `pipetter._dispense`, and `pipetter._pipette`
+- [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
 - [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
 - [ ] test `evoware._facts`
 - [ ] test `EvowareCompiler.compile`
@@ -378,8 +392,6 @@
     - [x] WellContents.js
     - [x] generateSchemaDocs.js
     - [x] commandHelper.js
-    - [ ] design.js
-    - [ ] experiment.js
     - [ ] figure out how to reference an anchor from a separate file (e.g. commands/centrifuge.js should reference 'centrifuge' in Commands.md)
         - continue with centrifuge.js documentaiton header (currently have experiments in there)
     - [ ] generateSchemaDocs.js: set anchors for command modules, so they can be referenced from the source code
