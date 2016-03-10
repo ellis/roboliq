@@ -846,6 +846,211 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 	replacements[rowIndex] = rows;
 }
 
+/**
+ * - extendRowsByValue:
+ *     - for each selected row, call extendRowByValue
+ * - extendRowsByObject:
+ *     - for each key/value pair, call extendRowsByNamedValue
+ * - extendRowsByNamedValue:
+ *     - TODO: turn the name/value into an action in order to allow for more sophisticated expansion
+ *     - if the value is an array or object, for each row and subvalue, call extendRowByNamedValue with subvalue
+ *     - otherwise, for each row, call extendRowByNamedValue
+ * - extendRowByNamedValue:
+ *     - if the value is an array, replicate the row N times, set `$name=i+1`, and then call extendRowByValue for each
+ *     - if the value is an object, replicate the row N times, set `$name=key`, then call extendRowByValue for each
+ *     - otherwise, call setColumnValue
+ * - extendRowByValue:
+ *     - if the value is an array, replicate the row N times, and call extendRowsByValue for each
+ *     - if the value is an object, for each key/value pair, call extendRowsByValue
+ *     - otherwise error
+ * - setColumnValue: sets a basic named value on a row
+ *
+ * PROBLEM: when should an array be assigned to rows, and when should it replicate the rows?
+ */
+/*
+a*: [a, b] # branching
+b: [a, b] # assignment
+c: hello # assignment
+d: [[{e: A, f: L}, {e: B, f: R}], [{e: A, f: R}, {e: B, f: L}]] # Assignment then branching
+e: [[1, 2], [3, 4]] # ERROR
+ */
+
+// TODO: rename extendRow* to expandRow*
+
+export function extendRowsByValue(nestedRows, rowIndexes, value) {
+	assert(_.isArray(nestedRows));
+	assert(_.isArray(rowIndexes));
+
+	for (let i = 0; i < rowIndexes.length; i++) {
+		const rowIndex = rowIndexes[i];
+		extendRowByValue(nestedRows, rowIndex, value);
+	}
+}
+
+export function extendRowsByObject(nestedRows, rowIndexes, o) {
+	assert(_.isArray(nestedRows));
+	assert(_.isArray(rowIndexes));
+
+	_.forEach(o, (name, value) => {
+		extendRowsByNamedValue(nestedRows, rowIndexes, name, value);
+	}
+}
+
+export function extendRowsByNamedValue(nestedRows, rowIndexes, name, value) {
+	assert(_.isArray(nestedRows));
+	assert(_.isArray(rowIndexes));
+	assert(!_.endsWith(name, "*"), `extendRowsByNamedValue() cannot handle branch factor names: ${name}`);
+
+	if (_.isArray(value) || _.isPlainObject(value)) {
+		const valueKeys = (_.isArray(value)) ? _.range(value.length) : _.keys(value);
+		assert(rowIndexes.length <= valueKeys.length, "fewer values than rows: "+JSON.stringify({name, values, rowIndexes}));
+		for (let i = 0; i < rowIndexes.length; i++) {
+			const valueKey = valueKeys[i];
+			const value = values[valueKey];
+			const rowIndex = rowIndexes[i];
+			const row = nestedRows[rowIndex];
+			// If this "row" is has nested rows:
+			if (_.isArray(row)) {
+				extendRowsByNamedValue(row, _.range(row.length), name, value);
+			}
+			// If this is an actual row:
+			else if (_.isPlainObject(row)) {
+				extendRowByNamedValue(nestedRows, rowIndex, name, value);
+				if (_.isArray(value)) {
+					setColumnValue(row, name, valueKey);
+					multiplyRowByArray(nestedRows, rowIndex, value);
+				}
+				else if (_.isPlainObject(value)) {
+					setColumnValue(row, name, valueKey);
+					extendRowByNamedObject(nestedRows, rowIndex, name, value);
+				}
+				else {
+					setColumnValue(row, name, value)
+				}
+			}
+			else {
+				assert(false, "row must be a plain object or an array: "+JSON.stringify(row));
+			}
+		}
+	}
+	else {
+		for (let i = 0; i < rowIndexes.length; i++) {
+			const rowIndex = rowIndexes[i];
+			const row = nestedRows[rowIndex];
+			if (_.isArray(row)) {
+				extendRowsByNamedValue(row, _.range(row.length), name, value);
+			}
+			else {
+				assert(_.isPlainObject(row), "row must be a plain object or an array: "+JSON.stringify(row));
+				setColumnValue(row, name, value);
+			}
+		}
+	}
+}
+
+CONTINUE
+export function extendRowByNamedValue(nestedRows, rowIndex, name, value) {
+	assert(_.isArray(nestedRows));
+	assert(!_.endsWith(name, "*"), `extendRowsByNamedValue() cannot handle branch factor names: ${name}`);
+
+	const row = nestedRows[rowIndex];
+
+	if (_.isArray(value) || _.isPlainObject(value)) {
+		const valueKeys = (_.isArray(value)) ? _.range(value.length) : _.keys(value);
+		assert(rowIndexes.length <= valueKeys.length, "fewer values than rows: "+JSON.stringify({name, values, rowIndexes}));
+			const valueKey = valueKeys[i];
+			const value = values[valueKey];
+			// If this "row" is has nested rows:
+			if (_.isArray(row)) {
+				extendRowsByNamedValue(row, _.range(row.length), name, value);
+			}
+			// If this is an actual row:
+			else if (_.isPlainObject(row)) {
+				if (_.isArray(value)) {
+					setColumnValue(row, name, valueKey);
+					multiplyRowByArray(nestedRows, rowIndex, value);
+				}
+				else if (_.isPlainObject(value)) {
+					setColumnValue(row, name, valueKey);
+					extendRowByNamedObject(nestedRows, rowIndex, name, value);
+				}
+				else {
+					setColumnValue(row, name, value)
+				}
+			}
+			else {
+				assert(false, "row must be a plain object or an array: "+JSON.stringify(row));
+			}
+		}
+	}
+	else {
+		if (_.isArray(row)) {
+			extendRowsByNamedValue(row, _.range(row.length), name, value);
+		}
+		else {
+			assert(_.isPlainObject(row), "row must be a plain object or an array: "+JSON.stringify(row));
+			setColumnValue(row, name, value);
+		}
+	}
+}
+
+// Set the given value, but only if the name doesn't start with a period
+function setColumnValue(row, name, value) {
+	if (name.length > 1 && name[0] != ".") {
+		row[name] = value;
+	}
+}
+
+function multiplyRowByArray(nestedRows, rowIndex, values) {
+	assert(_.isArray(nestedRows));
+	assert(_.isArray(values));
+	const row0 = nestedRows[rowIndex];
+	assert(_.isPlainObject(row));
+	const rows = Array(values.length);
+	nestedRows[rowIndex] = rows;
+
+	for (let i = 0; i < rows.length; i++) {
+		const row = _.clone(row0);
+		rows[i] = row;
+		const value = values[i];
+		// If the value is an array, we set name=index, create another nesting
+		// of rows, and multiply them.
+		if (_.isArray(value)) {
+			rows[i] = [rows[i]];
+			multiplyRowByArray(rows, i, value);
+		}
+		// If the value is an object, we set name=index, create another nesting
+		// of rows, and extend them.
+		else if (_.isPlainObject(value)) {
+			extendRowByObject(rows, i, value);
+		}
+		else {
+			assert(false, "all array items must be objects or arrays: "+JSON.stringify(values[i]));
+		}
+	}
+}
+
+function extendRowByObject(nestedRows, rowIndex, o) {
+	_.forEach(o, (value, name) => {
+		extendRowByNamedValue(nestedRows, rowIndex, name, value);
+	});
+}
+
+function expandRowByNamedValue(nestedRows, rowIndex, name, value) {
+	CONTINUE
+	const conditionActions = convertConditionsToActions(starValue);
+	// Add starName/Key to row (but ignore names that start with a '.')
+	const row1 = (_.startsWith(starName, ".")) ? row : _.merge({}, row, {[starName]: starKey});
+	// Create a table from the row
+	const table2 = [_.cloneDeep(row1)];
+	// Expand the table
+	_.forEach(conditionActions, action => {
+		applyActionToTable(table2, action);
+	});
+	// Return the expanded table
+	return table2;
+}
+
 function replicate(action, table, rowIndexes, replacements) {
 	// console.log("replicate:")
 	// console.log({action, table, rowIndexes, replacements})

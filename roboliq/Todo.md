@@ -235,7 +235,7 @@
     - [x] P1-P3,P6-P8 with ROMA2
     - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
     - [x] transfer hotels
-- [ ] qc_mario_vectors_96nunc: test whether vector works on ROBOSEAL and ROBOPEEL after sealing/peeling
+- [x] qc_mario_vectors_96nunc: test whether vector works on ROBOSEAL and ROBOPEEL after sealing/peeling
 - [ ] qc_mario_vectors_96nunc: adapt script so that no transfers between hotel sites are made
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
 - [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
