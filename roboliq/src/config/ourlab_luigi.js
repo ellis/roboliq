@@ -139,6 +139,14 @@ module.exports = {
 				},
 				"site": {
 					"type": "Namespace",
+					BOX_1: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 2 },
+					BOX_2: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 4 },
+					BOX_3: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 6 },
+					BOX_4: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 8 },
+					BOX_5: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 10 },
+					BOX_6: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 12 },
+					BOX_7: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 14 },
+					BOX_8: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 16 },
 					HOTEL12_1: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 4 },
 					HOTEL12_2: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 3 },
 					HOTEL12_3: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 2 },
@@ -284,7 +292,10 @@ module.exports = {
 		// Deepwell plates only
 		makeSiteModelPredicates({
 			siteModel: "ourlab.luigi.siteModel_DWP",
-			sites: ["ourlab.luigi.site.P3"],
+			sites: [
+				"ourlab.luigi.site.P3",
+				"ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8",
+			],
 			labwareModels: ["ourlab.model.plateModel_96_dwp"]
 		}),
 		// Shallow plates only
@@ -334,6 +345,7 @@ module.exports = {
 			"ourlab.luigi.roma2": {
 				Narrow: [
 					[
+						"ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8",
 						"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
 						"ourlab.luigi.site.LIGHT",
 						"ourlab.luigi.site.ROBOSEAL",

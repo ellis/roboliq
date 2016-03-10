@@ -15,6 +15,7 @@ function getRomaMoveLine(romaIndex, action) {
 	const x = {
 		action,
 		gripperDistance: 80,
+		force: 0,
 		dx: 0,
 		dy: 0,
 		dz: 0,

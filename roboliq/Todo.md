@@ -207,22 +207,22 @@
     - [x] regrip
         - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
     - [x] reader
+    - [x] culturebox
     - [ ] incubators
-    - [ ] culture shaker
+        - [ ] add the extra logic+code for opening a black incubator site
 - [ ] test pipetting on P1-P6
 - [ ] test pipetting on troughs
-- [ ] sealer
-- [ ] shaker
-- [ ] incubators
-    - [ ] add the extra logic+code for opening a black incubator site
-- [ ] camera
-- [ ] reader
-- [ ] culture shaker
+- [ ] shaker operation
+- [ ] sealer operation
+- [ ] incubators operation
+- [ ] reader operation
+- [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] add possibility to configure options in 'ourlab'
 - [ ] suboptimal plate transport: P1 -> REGRIP_BELOW (catches on side)
+- [ ] camera operation
 
 # Todos for ROMA qc
 

@@ -10,8 +10,8 @@ config:
 objects:
   plate:
     type: Plate
-    #model: ourlab.model.plateModel_96_dwp
-    model: ourlab.model.plateModel_96_round_transparent_nunc
+    model: ourlab.model.plateModel_96_dwp
+    #model: ourlab.model.plateModel_96_round_transparent_nunc
     #location: ourlab.luigi.site.REGRIP_BELOW
     location: ourlab.luigi.site.P1
 
@@ -33,13 +33,27 @@ steps:
   #   program: Narrow
   #   object: plateDWB
   #   destination: ourlab.luigi.site.P1
+
+  # 1:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma1
+  #   object: plate
+  #   destination: ourlab.luigi.site.READER
+  # 2:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma1
+  #   object: plate
+  #   destination: ourlab.luigi.site.P6
+
   1:
     command: transporter.movePlate
-    equipment: ourlab.luigi.roma1
     object: plate
-    destination: ourlab.luigi.site.READER
+    destination: ourlab.luigi.site.BOX_1
   2:
     command: transporter.movePlate
-    equipment: ourlab.luigi.roma1
+    object: plate
+    destination: ourlab.luigi.site.BOX_2
+  3:
+    command: transporter.movePlate
     object: plate
     destination: ourlab.luigi.site.P6
