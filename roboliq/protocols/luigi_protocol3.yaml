@@ -1,15 +1,19 @@
 roboliq: v1
 
 description: |
-  Test the REGRIP_ABOVE and REGRIP_BELOW sites.
+  Test transporter to READER
 
-roboliq: v1
+config:
+  evowareCompiler:
+    timing: false
+
 objects:
-  plateDWB:
+  plate:
     type: Plate
-    model: ourlab.model.plateModel_96_dwp
-    location: ourlab.luigi.site.P6
-    # location: ourlab.luigi.site.P1
+    #model: ourlab.model.plateModel_96_dwp
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    #location: ourlab.luigi.site.REGRIP_BELOW
+    location: ourlab.luigi.site.P1
 
 steps:
   # 1:
@@ -29,9 +33,13 @@ steps:
   #   program: Narrow
   #   object: plateDWB
   #   destination: ourlab.luigi.site.P1
-  4:
+  1:
     command: transporter.movePlate
     equipment: ourlab.luigi.roma1
-    program: Narrow
-    object: plateDWB
-    destination: ourlab.luigi.site.P1
+    object: plate
+    destination: ourlab.luigi.site.READER
+  2:
+    command: transporter.movePlate
+    equipment: ourlab.luigi.roma1
+    object: plate
+    destination: ourlab.luigi.site.P6

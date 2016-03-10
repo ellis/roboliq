@@ -217,6 +217,8 @@ function loadProtocol(a, b, url, filecache) {
 
 	// Create a clone keeping only valid protocol properties.
 	var c = _.cloneDeep(_.pick(b,
+		'description',
+		'config',
 		'objects',
 		'steps',
 		'effects',
@@ -1045,7 +1047,7 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "objects", "schemas", "steps", "effects", "warnings", "errors")
+			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "warnings", "errors")
 		);
 
 		const tables = {

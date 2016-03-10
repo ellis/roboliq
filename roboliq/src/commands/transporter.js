@@ -168,77 +168,6 @@ function makeMovePlateMethod(parsed, movePlateParams, n) {
 	assert(false);
 }
 
-function debug_movePlate_null(input, agentId, labwareId, modelId, originId, destinationId) {
-	var llpl = require('../HTN/llpl.js').create();
-	llpl.initializeDatabase(input);
-	// Preconditions for movePlate-null
-	const query = {"and": [
-		{"location": {"labware": labwareId, "site": destinationId}}
-	]};
-	const queryResult = llpl.query(query);
-	console.log("queryResultNull:\n"+JSON.stringify(queryResult, null, '\t'));
-}
-
-function debug_movePlate_one(input, agentId, labwareId, modelId, originId, destinationId) {
-
-	var llpl = require('../HTN/llpl.js').create();
-	llpl.initializeDatabase(input);
-	//console.log("originId: "+originId)
-	const criteria = [
-		// From movePlate-one preconditions
-		//{"model": {"labware": "?labware", "model": "?model"}},
-		//{"location": {"labware": "?labware", "site": "?origin"}},
-		//{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
-		//{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
-		//{"stackable": {"below": "?destinationModel", "above": "?model"}},
-		//{"siteIsClear": {"site": "?destination"}},
-		//{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
-		//{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
-		//{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
-		// From transporter._movePlate
-		{"model": {"labware": labwareId, "model": modelId}},
-		{"location": {"labware": labwareId, "site": originId}},
-		{"siteModel": {"site": originId, "siteModel": "?originModel"}},
-		{"siteModel": {"site": destinationId, "siteModel": "?destinationModel"}},
-		{"stackable": {"below": "?destinationModel", "above": modelId}},
-		{"siteIsClear": {"site": destinationId}},
-		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": originId}},
-		{"siteCliqueSite": {"siteClique": "?siteClique1", "site": destinationId}},
-		{"transporter.canAgentEquipmentProgramSites": {"agent": agentId, "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}},
-		// From openAndMovePlate-openNeither
-		{"siteIsOpen": {"site": originId}},
-		{"siteIsOpen": {"site": destinationId}}
-	];
-	const queryAll = {"and": criteria};
-	const queryResultsAll = llpl.query(queryAll);
-	//console.log("queryResultsAll:\n"+JSON.stringify(queryResultsAll, null, '\t'));
-
-	//console.log(queryResultsAll.length);
-	if (queryResultsAll.length === 0) {
-		console.log("movePlate-one failed for ", agentId, labwareId, modelId, originId, destinationId);
-		//console.log("debug: "+criteria);
-		const queryResultLabware = llpl.query({and: [
-			{"location": {"labware": "?labware", "site": destinationId}}
-		]});
-		if (queryResultLabware.length > 0) {
-			console.log("Labware already at destination site:\n"+JSON.stringify(queryResultLabware, null, '\t'));
-		}
-		_.forEach(criteria, criterion => {
-			//console.log({criterion})
-			const queryOne = {"and": [criterion]};
-			const queryResultOne = llpl.query(queryOne);
-			//console.log("queryResultOne: "+JSON.stringify(queryResultOne));
-			if (queryResultOne.length === 0) {
-				console.log("FAILED: "+JSON.stringify(criterion));
-			}
-			else {
-				//console.log("queryResults:\n"+JSON.stringify(queryResultOne, null, '\t'));
-			}
-		});
-	}
-}
-
-
 function debugMovePlateMethod(input, method, n) {
 	const lines = [];
 	var llpl = require('../HTN/llpl.js').create();
@@ -251,14 +180,16 @@ function debugMovePlateMethod(input, method, n) {
 
 	//console.log(queryResultsAll.length);
 	if (queryResultsAll.length === 0) {
-		lines.push(`\nmovePlate-${n} failed"`);
+		lines.push(`\nmovePlate-${n} failed:`);
 		//console.log("debug: "+criteria);
+		// let failures = 0;
 		_.forEach(criteria, criterion => {
-			//console.log({criterion})
+			// console.log({criterion})
 			const queryOne = {"and": [criterion]};
 			const queryResultOne = llpl.query(queryOne);
 			//console.log("queryResultOne: "+JSON.stringify(queryResultOne));
 			if (queryResultOne.length === 0) {
+				// failures++;
 				lines.push("FAILED: "+JSON.stringify(criterion));
 			}
 			else {

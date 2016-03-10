@@ -206,7 +206,7 @@
     - [x] hotels
     - [x] regrip
         - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
-    - [ ] reader
+    - [x] reader
     - [ ] incubators
     - [ ] culture shaker
 - [ ] test pipetting on P1-P6
@@ -222,6 +222,7 @@
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] add possibility to configure options in 'ourlab'
+- [ ] suboptimal plate transport: P1 -> REGRIP_BELOW (catches on side)
 
 # Todos for ROMA qc
 

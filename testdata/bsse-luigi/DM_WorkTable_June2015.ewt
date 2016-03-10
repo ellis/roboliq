@@ -1,7 +1,7 @@
 6889BAF1
-20150709_154936 Admin           
-Worktable link                                                                                                                  
-Administrator                                                                                                                   
+20150709_154936 Admin
+Worktable link
+Administrator
 --{ RES }--
 V;200
 --{ CFG }--
@@ -15,16 +15,16 @@ V;200
 998;0;
 998;0;
 998;0;
-998;1;DM Nunc stronghold;
-998;Labware6;
+998;1;;
+998;;
 998;1;384 Well Plate portrait;
 998;Labware7;
 998;0;
 998;0;
-998;1;96 DWB sealed;
-998;Labware16;
-998;2;;96 Well DeepWell Ritterplate;
-998;;Labware14;
+998;1;;
+998;;
+998;2;;;
+998;;;
 998;0;
 998;0;
 998;0;
@@ -68,8 +68,8 @@ V;200
 998;0;
 998;0;
 998;0;
-998;16;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;;DM Nunc stronghold;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;
-998;DWP SHAKER 1;DWP SHAKER 2;DWP SHAKER 3;DWP SHAKER 4;DWP SHAKER 5;DWP SHAKER 6;;Labware4;DWP SHAKER 9;DWP SHAKER 10;DWP SHAKER 11;DWP SHAKER 12;DWP SHAKER 13;DWP SHAKER 14;DWP SHAKER 15;DWP SHAKER 16;
+998;16;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;;;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;96 Well DeepWell Ritterplate;
+998;DWP SHAKER 1;DWP SHAKER 2;DWP SHAKER 3;DWP SHAKER 4;DWP SHAKER 5;DWP SHAKER 6;;;DWP SHAKER 9;DWP SHAKER 10;DWP SHAKER 11;DWP SHAKER 12;DWP SHAKER 13;DWP SHAKER 14;DWP SHAKER 15;DWP SHAKER 16;
 998;0;
 998;0;
 998;0;
@@ -136,13 +136,13 @@ V;200
 998;0;0;Hotel 3x4Pos Grid25to39;
 998;0;5;Hotel 4Pos Transfer Grid 0;
 998;8;
-998;70;DM Nunc stronghold;
-998;71;DM Nunc stronghold;
-998;324;DM Nunc stronghold;
-998;321;96 Well DeepWell Ritterplate;
+998;70;;
+998;71;;
+998;324;;
+998;321;;
 998;320;96 DWB sealed;
-998;214;96 Well DeepWell Ritterplate;
-998;318;DM Nunc stronghold;
+998;214;;
+998;318;;
 998;323;6 Well Greiner Plate;
 998;1;
 998;1;

@@ -166,6 +166,7 @@ module.exports = {
 					R2: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 1 },
 					R3: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 2 },
 					R4: { type: "Site", evowareCarrier: "Trough 3Pos 25+100ml", evowareGrid: 40, evowareSite: 3 },
+					READER: { type: "Site", evowareCarrier: "Infinite 200", evowareGrid: 6, evowareSite: 1, closed: true },
 					REGRIP_ABOVE: { type: "Site", evowareCarrier: "ReGrip above", evowareGrid: 8, evowareSite: 1, siteIdUnique: "ourlab.luigi.REGRIP" },
 					REGRIP_BELOW: { type: "Site", evowareCarrier: "ReGrip below", evowareGrid: 9, evowareSite: 1, siteIdUnique: "ourlab.luigi.REGRIP" },
 					ROBOSEAL: { "type": "Site", "evowareCarrier": "RoboSeal", "evowareGrid": 45, "evowareSite": 1 },
@@ -289,7 +290,10 @@ module.exports = {
 		// Shallow plates only
 		makeSiteModelPredicates({
 			siteModel: "ourlab.luigi.siteModel_shallow",
-			sites: ["ourlab.luigi.site.HOTEL12_4", "ourlab.luigi.site.HOTEL12_8", "ourlab.luigi.site.HOTEL12_12"],
+			sites: [
+				"ourlab.luigi.site.HOTEL12_4", "ourlab.luigi.site.HOTEL12_8", "ourlab.luigi.site.HOTEL12_12",
+				"ourlab.luigi.site.READER"
+			],
 			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc"]
 		}),
 		// Deepwell blocks + microwell
@@ -323,8 +327,9 @@ module.exports = {
 						"ourlab.luigi.site.REGRIP_BELOW",
 						"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
 					],
-					["ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW"]
-				]
+					["ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW"],
+					["ourlab.luigi.site.READER", "ourlab.luigi.site.REGRIP_BELOW"],
+				],
 			},
 			"ourlab.luigi.roma2": {
 				Narrow: [
@@ -338,7 +343,7 @@ module.exports = {
 			}
 		}),
 	{"#for": {
-		factors: {model: ["plateModel_384_square"]},
+		factors: {model: ["plateModel_96_square_transparent_nunc"]},
 		output: {
 			"fluorescenceReader.canAgentEquipmentModelSite": {
 				"agent": "ourlab.luigi.evoware",

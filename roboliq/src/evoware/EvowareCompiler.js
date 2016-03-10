@@ -30,6 +30,7 @@ const commandHandlers = {
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
 export function compile(carrierData, table, protocol, agents, options = {}) {
+	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects, options);
