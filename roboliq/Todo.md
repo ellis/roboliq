@@ -210,7 +210,7 @@
     - [x] culturebox
     - [x] add possibility to configure options in 'ourlab'
 - [x] perform initial pipetting test
-- [ ] pipetter.cleanTips: test
+- [ ] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
 - [ ] evoware: after pipetting is done, retract all the tips somehow
 - [ ] test pipetting on troughs
 - [ ] double-check pipetting on P1-P6
@@ -220,6 +220,7 @@
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] suboptimal plate transport: P1 -> REGRIP_BELOW (catches on side)
+- [ ] decide on wash programs with Daniel and Fabian
 
 - [ ] shaker operation
 - [ ] incubator sites:

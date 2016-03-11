@@ -610,9 +610,8 @@ const commandHandlers = {
 		return {effects};
 	},
 	"pipetter.cleanTips": function(params, parsed, data) {
-		//console.log("pipetter.cleanTips:")
-		//console.log(JSON.stringify(params, null, '\t'));
-		//console.log(JSON.stringify(parsed, null, '\t'));
+		// console.log("pipetter.cleanTips:")
+		// console.log(JSON.stringify(parsed, null, '\t'));
 
 		const syringes0 = (params.syringes)
 			? commandHelper.asArray(params.syringes)

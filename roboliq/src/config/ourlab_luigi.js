@@ -225,9 +225,39 @@ module.exports = {
 					"evowareId": 1
 				},
 				"washProgram": {
-					//CONTINUE
+					// FIXME: figure out proper wash programs
 					"type": "Namespace",
-					"flush_2500": { // FIXME: IS THIS REALLY FLUSH?
+					"flush_2500": {
+						"type": "EvowareWashProgram",
+						"wasteGrid": 42,
+						"wasteSite": 2,
+						"cleanerGrid": 42,
+						"cleanerSite": 3,
+						"wasteVolume": 0.15,
+						"wasteDelay": 500,
+						"cleanerVolume": 0.15,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": true
+					},
+					"light_2500": { // FIXME: IS THIS REALLY LIGHT?
+						"type": "EvowareWashProgram",
+						"wasteGrid": 42,
+						"wasteSite": 2,
+						"cleanerGrid": 42,
+						"cleanerSite": 3,
+						"wasteVolume": 1,
+						"wasteDelay": 500,
+						"cleanerVolume": 2,
+						"cleanerDelay": 500,
+						"airgapVolume": 10,
+						"airgapSpeed": 70,
+						"retractSpeed": 30,
+						"fastWash": true
+					},
+					"thorough_2500": { // FIXME: IS THIS REALLY THOROUGH?
 						"type": "EvowareWashProgram",
 						"wasteGrid": 42,
 						"wasteSite": 2,
@@ -241,6 +271,10 @@ module.exports = {
 						"airgapSpeed": 70,
 						"retractSpeed": 30,
 						"fastWash": true
+					},
+					"decontaminate_2500": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Decontaminate.esc"
 					},
 				}
 			},
@@ -711,8 +745,8 @@ module.exports = {
 		"evoware._facts": function(params, parsed, data) {},
 		// Clean tips
 		"pipetter.cleanTips|ourlab.luigi.evoware|ourlab.luigi.liha": function(params, parsed, data) {
-			//console.log("pipetter.cleanTips|ourlab.luigi.evoware|ourlab.luigi.liha")
-			//console.log(JSON.stringify(parsed, null, '  '))
+			// console.log("pipetter.cleanTips|ourlab.luigi.evoware|ourlab.luigi.liha")
+			// console.log(JSON.stringify(parsed, null, '  '))
 
 			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
 			const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
@@ -740,8 +774,7 @@ module.exports = {
 					}
 				}
 			}
-			sub(_.map([1, 2, 3, 4], n => `ourlab.luigi.liha.syringe.${n}`), "1000");
-			sub(_.map([5, 6, 7, 8], n => `ourlab.luigi.liha.syringe.${n}`), "0050");
+			sub(_.map([1, 2, 3, 4, 5, 6, 7, 8], n => `ourlab.luigi.liha.syringe.${n}`), "2500");
 			return {expansion: expansionList};
 		}
 	},
