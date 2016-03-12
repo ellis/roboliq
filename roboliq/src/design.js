@@ -61,6 +61,7 @@ import {locationRowColToText} from './parsers/wellsParser.js';
  * - for the first 48 sample times, sample 1 well
  * - for the next 48 sample times, resample each well from before and 1 new well
  * - for the last 48 sample times, resample each well that's only been sampled once
+ * - PROBLEM: 16hr may be too long with respect to evaporation
  */
 
 // TODO: add cultureOrder so that random groups of items with syringes 1-8 are assigned increasing order numbers
@@ -847,7 +848,61 @@ function expandRowByValues(table, rowIndex, values, replacements) {
 }
 
 /**
+ * expandRowsByConditions:
+ *   for each key/value pair, call expandRowsByNamedValue
+ *
+ * // REQUIRED by: branchRowsByNamedValue
+ * expandRowsByNamedValue:
+ *   TODO: turn the name/value into an action in order to allow for more sophisticated expansion
+ *   if has star-suffix, call branchRowsByNamedValue
+ *   else call assignRowsByNamedValue
+ *
+ * // REQUIRED by: expandRowsByNamedValue, branchRowsByNamedValue
+ * assignRowsByNamedValue: (REQUIRED FOR ASSIGNING ARRAY TO ROWS)
+ *   if value is array:
+ *     for i in count:
+ *       rowIndex = rowIndexes[i]
+ *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, i+1, value[i])
+ *   else if value is object:
+ *     keys = _.keys(value)
+ *     for each i in keys.length:
+ *       key = keys[i]
+ *       item = value[key]
+ *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item)
+ *   else:
+ *     for each row:
+ *       setColumnValue(row, name, value)
+ *
+ * // REQUIRED by: assignRowsByNamedValue
+ * assignRowByNamedKeyItem:
+ *   setColumnValue(row, name, key)
+ *   if item is array:
+ *     branchRowByArray(nestdRows, rowIndex, item)
+ *   else if item is object:
+ *     setColumnValue(row, name, key)
+ *     expandRowsByValue(nestedRows, [rowIndex], value)
+ *   else:
+ *     setColumnValue(row, name, item)
+ *
+ * // REQUIRED by: expandRowsByNamedValue
+ * branchRowsByNamedValue:
+ *   size
+ *     = (value is array) ? value.length
+ *     : (value is object) ? _.size(value)
+ *     : 1
+ *   row0 = nestedRows[rowIndex];
+ *   rows2 = Array(size)
+ *   for each rowIndex2 in _.range(size):
+ *     rows2[rowIndex] = _.cloneDeep(row0)
+ *
+ *   expandRowsByNamedValue(rows2, _.range(size), name, value);
+ *   nestedRows[rowIndex] = _.flattenDeep(rows2);
+ *
+ *
+ *
  * - extendRowsByValue:
+ *     - if value is an object, for each key/value pair, call extendRowsByNamedValue
+ *     - if value is an array of objects, for each object, call extendRows
  *     - for each selected row, call extendRowByValue
  * - extendRowsByObject:
  *     - for each key/value pair, call extendRowsByNamedValue
@@ -873,6 +928,8 @@ b: [a, b] # assignment
 c: hello # assignment
 d: [[{e: A, f: L}, {e: B, f: R}], [{e: A, f: R}, {e: B, f: L}]] # Assignment then branching
 e: [[1, 2], [3, 4]] # ERROR
+
+then figure out actions for sampling and whatnot
  */
 
 // TODO: rename extendRow* to expandRow*
