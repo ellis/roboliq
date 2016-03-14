@@ -56,7 +56,7 @@ export function _washTips(params, parsed, data) {
 		const labwareModel = {rows: 8, columns: 1};
 		const tuples = parsed.value.syringes.map(syringe => ({retract: {row: syringe.row, col: 1, labwareModel}}));
 		const retractWellMask = encodeWells(tuples, "retract");
-		console.log({tuples: JSON.stringify(tuples), retractWellMask})
+		// console.log({tuples: JSON.stringify(tuples), retractWellMask})
 		const lRetract = [
 			syringeMask,
 			program.cleanerGrid, program.cleanerSite-1,
@@ -307,10 +307,10 @@ function encodeWells(tuples, propertyName) {
 		const iChar = _.toInteger(index / 7);
 		const iWell1 = index % 7;
 		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
-		console.log({index, iChar, iWell1})
+		// console.log({index, iChar, iWell1})
 		amWells[iChar] += 1 << iWell1;
 	});
-	console.log({amWells})
+	// console.log({amWells})
 	const sWellMask = amWells.map(EvowareUtils.encode).join("");
 	const sPlateMask = sprintf("%02X%02X", labwareModel.columns, labwareModel.rows) + sWellMask;
 	return sPlateMask;

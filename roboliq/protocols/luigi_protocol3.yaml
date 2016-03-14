@@ -76,4 +76,3 @@ steps:
     command: pipetter.cleanTips
     equipment: ourlab.luigi.liha
     intensity: thorough
-    #clean: none

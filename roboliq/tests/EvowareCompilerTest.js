@@ -389,6 +389,7 @@ describe('EvowareCompilerTest', function() {
 			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [[
 				{line: "Wash(15,1,1,1,0,\"4\",500,\"2\",500,10,70,30,0,0,1000,0);"},
+				{line: "MoveLiha(15,1,0,1,0108?0,0,4,0,10,0,0);"}
 			]]);
 		});
 	});

@@ -2,7 +2,6 @@
 
 # Top
 
-- check ROBOSEAL on mario
 - work on setting up luigi
 - incubator command and methods
 - finish mario's QC scripts for testing ROMAs
@@ -210,7 +209,8 @@
     - [x] culturebox
     - [x] add possibility to configure options in 'ourlab'
 - [x] perform initial pipetting test
-- [ ] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
+- [x] evoware: automatically retract tips after washing
+- [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
 - [ ] evoware: after pipetting is done, retract all the tips somehow
 - [ ] test pipetting on troughs
 - [ ] double-check pipetting on P1-P6
