@@ -74,5 +74,20 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle a branching array of simple objects", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [
+						{b: 1},
+						{b: 2},
+						{b: 3},
+					]
+				}),
+				[
+					{a: 1, b: 1}, {a: 2, b: 2}, {a: 3, b: 3}
+				]
+			);
+		});
+
 	});
 });
