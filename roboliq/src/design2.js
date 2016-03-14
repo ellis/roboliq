@@ -81,12 +81,12 @@ export function flattenArrayM(rows) {
 }
 
 /**
- * expandRowsByConditions:
- *   for each key/value pair, call expandRowsByNamedValue
  */
-export function expandTableByConditions(table, conditions) {
-	expandRowsByObject(table, _.range(table.length), conditions);
+export function expandConditions(conditions) {
+	const table = [{}];
+	expandRowsByObject(table, [0], conditions);
 	flattenArrayM(table);
+	return table;
 }
 
 /**
@@ -94,6 +94,7 @@ export function expandTableByConditions(table, conditions) {
  *   for each key/value pair, call expandRowsByNamedValue
  */
 function expandRowsByObject(nestedRows, rowIndexes, conditions) {
+	// console.log("expandRowsByObject: "+JSON.stringify(conditions));
 	for (let name in conditions) {
 		expandRowsByNamedValue(nestedRows, rowIndexes, name, conditions[name]);
 	}
@@ -107,6 +108,7 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions) {
  *   else call assignRowsByNamedValue
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
+	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 	// TODO: turn the name/value into an action in order to allow for more sophisticated expansion
 	if (_.endsWith(name, "*")) {
 		branchRowsByNamedValue(nestedRows, rowIndexes, name, value);
@@ -134,6 +136,7 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
  *       setColumnValue(row, name, value)
  */
 function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
+	// console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 	if (_.isArray(value)) {
 		assert(rowIndexes.length <= value.length, "fewer values than rows: "+JSON.stringify({name, value, rowIndexes}));
 		for (let i = 0; i < rowIndexes.length; i++) {
@@ -154,6 +157,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 		for (let i = 0; i < rowIndexes.length; i++) {
 			const rowIndex = rowIndexes[i];
 			setColumnValue(nestedRows[rowIndex], name, value);
+			// console.log(JSON.stringify(nestedRows))
 		}
 	}
 }
@@ -233,9 +237,12 @@ function branchRowByArray(nestedRows, rowIndex, array) {
 
 // Set the given value, but only if the name doesn't start with a period
 function setColumnValue(row, name, value) {
-	if (name.length > 1 && name[0] != ".") {
+	// console.log(`setColumnValue: ${name}, ${JSON.stringify(value)}`);
+	// console.log("row: "+JSON.stringify(row))
+	if (name.length >= 1 && name[0] != ".") {
 		// Recurse into sub-rows
 		if (_.isArray(row)) {
+			// console.log("isArray")
 			for (let i = 0; i < row.length; i++) {
 				setColumnValue(row[i], name, value);
 			}
@@ -243,6 +250,7 @@ function setColumnValue(row, name, value) {
 		// Set the value in the row
 		else {
 			row[name] = value;
+			// console.log(`row[name] = ${row[name]}`)
 		}
 	}
 }
