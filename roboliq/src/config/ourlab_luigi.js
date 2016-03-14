@@ -414,17 +414,8 @@ module.exports = {
 		"sealer.canAgentEquipmentProgramModelSite": {
 			"agent": "ourlab.luigi.evoware",
 			"equipment": "ourlab.luigi.sealer",
-			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"site": "ourlab.luigi.site.ROBOSEAL"
-		}
-	},
-	{
-		"sealer.canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.luigi.evoware",
-			"equipment": "ourlab.luigi.sealer",
-			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
-			"model": "ourlab.model.plateModel_384_square",
+			"program": "C:\\INSTALLFOLDER_NOVEMBER2014_30096901_CH_ETHBS\\PLATTENPROGRAMM FUER ROBOSEAL\\MTP Riplate SW 2ml.bcf",
+			"model": "ourlab.model.plateModel_96_dwp",
 			"site": "ourlab.luigi.site.ROBOSEAL"
 		}
 	},

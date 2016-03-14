@@ -213,12 +213,15 @@
 - [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
 - [x] evoware: after pipetting is done, retract all the tips
 - [x] double-check pipetting on troughs
-- [ ] sealer operation
+- [x] sealer operation
+- [ ] shaker operation
 - [ ] reader operation
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
-- [ ] suboptimal plate transport: P1 -> REGRIP_BELOW (catches on side)
+- [ ] suboptimal plate transport:
+    - [ ] ROMA1 P1 -> REGRIP_BELOW (catches on side before falling into place)
+    - [ ] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
 - [ ] decide on wash programs with Daniel and Fabian
 
 - [ ] shaker operation

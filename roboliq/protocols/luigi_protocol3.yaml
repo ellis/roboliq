@@ -14,6 +14,7 @@ objects:
     #model: ourlab.model.plateModel_96_round_transparent_nunc
     #location: ourlab.luigi.site.REGRIP_BELOW
     location: ourlab.luigi.site.P1
+  #plate: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
   trough1: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1}
   trough2: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R2}
   trough3: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3}
@@ -82,8 +83,14 @@ steps:
   #   intensity: thorough
 
   # description: test pipetting into the troughs
+  # 1:
+  #   command: pipetter.pipette
+  #   sources: ourlab.luigi.systemLiquid
+  #   destinations: [trough1(A01), trough2(A01), trough3(A01), trough4(A01)]
+  #   volumes: 100ul
+
+  # description: seal a plate
   1:
-    command: pipetter.pipette
-    sources: ourlab.luigi.systemLiquid
-    destinations: [trough1(A01), trough2(A01), trough3(A01), trough4(A01)]
-    volumes: 100ul
+    command: sealer.sealPlate
+    object: plate
+    
