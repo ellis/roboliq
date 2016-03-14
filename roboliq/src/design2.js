@@ -8,57 +8,6 @@ import assert from 'assert';
 // import {locationRowColToText} from './parsers/wellsParser.js';
 
 
-/**
- * expandRowsByConditions:
- *   for each key/value pair, call expandRowsByNamedValue
- *
- * // REQUIRED by: branchRowsByNamedValue
- * expandRowsByNamedValue:
- *   TODO: turn the name/value into an action in order to allow for more sophisticated expansion
- *   if has star-suffix, call branchRowsByNamedValue
- *   else call assignRowsByNamedValue
- *
- * // REQUIRED by: expandRowsByNamedValue, branchRowsByNamedValue
- * assignRowsByNamedValue: (REQUIRED FOR ASSIGNING ARRAY TO ROWS)
- *   if value is array:
- *     for i in count:
- *       rowIndex = rowIndexes[i]
- *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, i+1, value[i])
- *   else if value is object:
- *     keys = _.keys(value)
- *     for each i in keys.length:
- *       key = keys[i]
- *       item = value[key]
- *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item)
- *   else:
- *     for each row:
- *       setColumnValue(row, name, value)
- *
- * // REQUIRED by: assignRowsByNamedValue
- * assignRowByNamedKeyItem:
- *   setColumnValue(row, name, key)
- *   if item is array:
- *     branchRowByArray(nestdRows, rowIndex, item)
- *   else if item is object:
- *     setColumnValue(row, name, key)
- *     expandRowsByValue(nestedRows, [rowIndex], value)
- *   else:
- *     setColumnValue(row, name, item)
- *
- * // REQUIRED by: expandRowsByNamedValue
- * branchRowsByNamedValue:
- *   size
- *     = (value is array) ? value.length
- *     : (value is object) ? _.size(value)
- *     : 1
- *   row0 = nestedRows[rowIndex];
- *   rows2 = Array(size)
- *   for each rowIndex2 in _.range(size):
- *     rows2[rowIndex] = _.cloneDeep(row0)
- *
- *   expandRowsByNamedValue(rows2, _.range(size), name, value);
- *   nestedRows[rowIndex] = _.flattenDeep(rows2);
- */
 
 /**
  * Is like _.flattenDeep, but it mutates the array in-place.
@@ -101,17 +50,17 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions) {
 }
 
 /**
- * // REQUIRED by: branchRowsByNamedValue
+ * // REQUIRED by: expandRowsByObject
  * expandRowsByNamedValue:
  *   TODO: turn the name/value into an action in order to allow for more sophisticated expansion
  *   if has star-suffix, call branchRowsByNamedValue
  *   else call assignRowsByNamedValue
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
-	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 	// TODO: turn the name/value into an action in order to allow for more sophisticated expansion
 	if (_.endsWith(name, "*")) {
-		branchRowsByNamedValue(nestedRows, rowIndexes, name, value);
+		branchRowsByNamedValue(nestedRows, rowIndexes, name.substr(0, name.length - 1), value);
 	}
 	else {
 		assignRowsByNamedValue(nestedRows, rowIndexes, name, value);
@@ -204,6 +153,7 @@ function assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item) {
  *   nestedRows[rowIndex] = _.flattenDeep(rows2);
  */
 function branchRowsByNamedValue(nestedRows, rowIndexes, name, value) {
+	console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 	const size
 		= (_.isArray(value)) ? value.length
 		: (_.isPlainObject(value)) ? _.size(value)
@@ -217,7 +167,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 			rows2[rowIndex2] = _.cloneDeep(row0);
 		}
 
-		expandRowsByNamedValue(rows2, _.range(size), name, value);
+		assignRowsByNamedValue(rows2, _.range(size), name, value);
 		nestedRows[rowIndex] = _.flattenDeep(rows2);
 	}
 }

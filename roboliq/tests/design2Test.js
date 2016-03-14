@@ -37,7 +37,7 @@ describe('design', () => {
 	});
 
 	describe.only("expandConditions", () => {
-		it("should 1", () => {
+		it("should handle a simple value", () => {
 			should.deepEqual(
 				expandConditions({
 					"a": 1
@@ -46,6 +46,18 @@ describe('design', () => {
 					{a: 1}
 				]
 			);
-		})
+		});
+
+		it("should handle a branching array", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1,2,3]
+				}),
+				[
+					{a: 1}, {a: 2}, {a: 3}
+				]
+			);
+		});
+
 	});
 });
