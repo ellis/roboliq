@@ -214,7 +214,7 @@
 - [x] evoware: after pipetting is done, retract all the tips
 - [x] double-check pipetting on troughs
 - [x] sealer operation
-- [ ] shaker operation
+- [ ] shaker operation (see empty.esc)
 - [ ] reader operation
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
