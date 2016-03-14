@@ -950,7 +950,7 @@ export function extendRowsByObject(nestedRows, rowIndexes, o) {
 
 	_.forEach(o, (name, value) => {
 		extendRowsByNamedValue(nestedRows, rowIndexes, name, value);
-	}
+	});
 }
 
 export function extendRowsByNamedValue(nestedRows, rowIndexes, name, value) {
@@ -1005,7 +1005,6 @@ export function extendRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 	}
 }
 
-CONTINUE
 export function extendRowByNamedValue(nestedRows, rowIndex, name, value) {
 	assert(_.isArray(nestedRows));
 	assert(!_.endsWith(name, "*"), `extendRowsByNamedValue() cannot handle branch factor names: ${name}`);
@@ -1015,29 +1014,28 @@ export function extendRowByNamedValue(nestedRows, rowIndex, name, value) {
 	if (_.isArray(value) || _.isPlainObject(value)) {
 		const valueKeys = (_.isArray(value)) ? _.range(value.length) : _.keys(value);
 		assert(rowIndexes.length <= valueKeys.length, "fewer values than rows: "+JSON.stringify({name, values, rowIndexes}));
-			const valueKey = valueKeys[i];
-			const value = values[valueKey];
-			// If this "row" is has nested rows:
-			if (_.isArray(row)) {
-				extendRowsByNamedValue(row, _.range(row.length), name, value);
+		const valueKey = valueKeys[i];
+		const value = values[valueKey];
+		// If this "row" is has nested rows:
+		if (_.isArray(row)) {
+			extendRowsByNamedValue(row, _.range(row.length), name, value);
+		}
+		// If this is an actual row:
+		else if (_.isPlainObject(row)) {
+			if (_.isArray(value)) {
+				setColumnValue(row, name, valueKey);
+				multiplyRowByArray(nestedRows, rowIndex, value);
 			}
-			// If this is an actual row:
-			else if (_.isPlainObject(row)) {
-				if (_.isArray(value)) {
-					setColumnValue(row, name, valueKey);
-					multiplyRowByArray(nestedRows, rowIndex, value);
-				}
-				else if (_.isPlainObject(value)) {
-					setColumnValue(row, name, valueKey);
-					extendRowByNamedObject(nestedRows, rowIndex, name, value);
-				}
-				else {
-					setColumnValue(row, name, value)
-				}
+			else if (_.isPlainObject(value)) {
+				setColumnValue(row, name, valueKey);
+				extendRowByNamedObject(nestedRows, rowIndex, name, value);
 			}
 			else {
-				assert(false, "row must be a plain object or an array: "+JSON.stringify(row));
+				setColumnValue(row, name, value)
 			}
+		}
+		else {
+			assert(false, "row must be a plain object or an array: "+JSON.stringify(row));
 		}
 	}
 	else {
