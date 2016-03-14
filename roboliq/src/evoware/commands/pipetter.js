@@ -129,7 +129,7 @@ function groupItems(parsed, data) {
 		const item = parsed.value.items[i];
 		const syringeName = parsed.objectName[`items.${i}.syringe`];
 		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
-		const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
+		// const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
 		function getWellInfo(well) {
 			if (_.isUndefined(well)) return undefined;
 			const {labware: labwareName, wellId} = wellsParser.parseOne(well);
@@ -191,14 +191,15 @@ function groupItems(parsed, data) {
 			return false;
 		}
 		// Same labware?
+		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName))
+			return false;
+		// Other things ok?
 		if (!_.isUndefined(tuple.source)) {
-			const sourceOk = (tuple.source.labwareName === ref.source.labwareName && checkWellInfo(tuple.source, ref.source));
-			if (sourceOk)
+			if (checkWellInfo(tuple.source, ref.source))
 				return true;
 		}
 		if (!_.isUndefined(tuple.destination)) {
-			const destinationOk = (tuple.destination.labwareName === ref.destination.labwareName && checkWellInfo(tuple.destination, ref.destination));
-			if (destinationOk)
+			if (checkWellInfo(tuple.destination, ref.destination))
 				return true;
 		}
 

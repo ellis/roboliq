@@ -435,7 +435,7 @@ module.exports = {
 		}
 	},
 	{"#for": {
-		factors: {site: ["P1", "P2", "P3", "P4", "P5", "P6", "LIGHT", "SYSTEM", "R1", "R2", "R2", "R4"]},
+		factors: {site: ["P1", "P2", "P3", "P4", "P5", "P6", "LIGHT", "SYSTEM", "R1", "R2", "R3", "R4"]},
 		output: {
 			"pipetter.canAgentEquipmentSite": {
 				"agent": "ourlab.luigi.evoware",

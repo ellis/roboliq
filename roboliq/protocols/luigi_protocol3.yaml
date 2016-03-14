@@ -14,7 +14,10 @@ objects:
     #model: ourlab.model.plateModel_96_round_transparent_nunc
     #location: ourlab.luigi.site.REGRIP_BELOW
     location: ourlab.luigi.site.P1
-
+  trough1: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1}
+  trough2: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R2}
+  trough3: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3}
+  trough4: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4}
 steps:
   # 1:
   #   command: transporter.movePlate
@@ -58,11 +61,12 @@ steps:
   #   object: plate
   #   destination: ourlab.luigi.site.P6
 
-  1:
-    command: pipetter.pipette
-    sources: ourlab.luigi.systemLiquid
-    destinations: plate(A01)
-    volumes: 50ul
+  # description: test pipetting on a plate
+  # 1:
+  #   command: pipetter.pipette
+  #   sources: ourlab.luigi.systemLiquid
+  #   destinations: plate(A01)
+  #   volumes: 50ul
 
   # 1:
   #   command: pipetter.cleanTips
@@ -76,3 +80,10 @@ steps:
   #   command: pipetter.cleanTips
   #   equipment: ourlab.luigi.liha
   #   intensity: thorough
+
+  # description: test pipetting into the troughs
+  1:
+    command: pipetter.pipette
+    sources: ourlab.luigi.systemLiquid
+    destinations: [trough1(A01), trough2(A01), trough3(A01), trough4(A01)]
+    volumes: 100ul
