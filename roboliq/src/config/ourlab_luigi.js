@@ -91,42 +91,50 @@ module.exports = {
 						"1": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 1
 						},
 						"2": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 2
 						},
 						"3": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 3
 						},
 						"4": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 4
 						},
 						"5": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 5
 						},
 						"6": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 6
 						},
 						"7": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 7
 						},
 						"8": {
 							"type": "Syringe",
 							"tipModel": "ourlab.luigi.tipModel2500",
-							"tipModelPermanent": "ourlab.luigi.tipModel2500"
+							"tipModelPermanent": "ourlab.luigi.tipModel2500",
+							row: 8
 						}
 					},
 					"tipModel": {

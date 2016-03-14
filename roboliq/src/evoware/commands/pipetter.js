@@ -35,7 +35,7 @@ export function _washTips(params, parsed, data) {
 		const syringeRows = parsed.value.syringes.map(x => x.row);
 		const syringeMask = encodeSyringesByRow(syringeRows);
 		const bUNKNOWN1 = false;
-		const l = [
+		const lWash = [
 			syringeMask,
 			program.wasteGrid, program.wasteSite-1,
 			program.cleanerGrid, program.cleanerSite-1,
@@ -51,7 +51,24 @@ export function _washTips(params, parsed, data) {
 			1000,
 			0
 		];
-		return `Wash(${l.join(",")});`
+		const lineWash = `Wash(${lWash.join(",")});`;
+
+		const labwareModel = {rows: 8, columns: 1};
+		const tuples = parsed.value.syringes.map(syringe => ({retract: {row: syringe.row, col: 1, labwareModel}}));
+		const retractWellMask = encodeWells(tuples, "retract");
+		console.log({tuples: JSON.stringify(tuples), retractWellMask})
+		const lRetract = [
+			syringeMask,
+			program.cleanerGrid, program.cleanerSite-1,
+			1,
+			retractWellMask,
+			0, // 0=positioning with global z travel, 4=z-move
+			4, // 4=global z travel
+			0, 10, 0, 0
+		];
+		const lineRetract = `MoveLiha(${lRetract.join(",")});`;
+
+		return [lineWash, lineRetract];
 	}
 
 	const program = commandHelper.lookupPath([parsed.value.program], {}, data);
@@ -63,7 +80,7 @@ export function _washTips(params, parsed, data) {
 		results.push({line: handleScript(program.script)});
 	}
 	else {
-		results.push({line: handleWashProgram(program)});
+		handleWashProgram(program).forEach(line => results.push({line}));
 	}
 	return results;
 }
@@ -283,7 +300,6 @@ function encodeSyringesByRow(rows) {
 function encodeWells(tuples, propertyName) {
 	assert(tuples.length > 0);
 	const labwareModel = tuples[0][propertyName].labwareModel;
-	//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
 	const nWellMaskChars = math.ceil(labwareModel.rows * labwareModel.columns / 7.0);
 	const amWells = _.fill(Array(nWellMaskChars), 0);
 	_.forEach(tuples, tuple => {
@@ -291,8 +307,10 @@ function encodeWells(tuples, propertyName) {
 		const iChar = _.toInteger(index / 7);
 		const iWell1 = index % 7;
 		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
+		console.log({index, iChar, iWell1})
 		amWells[iChar] += 1 << iWell1;
 	});
+	console.log({amWells})
 	const sWellMask = amWells.map(EvowareUtils.encode).join("");
 	const sPlateMask = sprintf("%02X%02X", labwareModel.columns, labwareModel.rows) + sWellMask;
 	return sPlateMask;
