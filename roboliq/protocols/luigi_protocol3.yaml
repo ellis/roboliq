@@ -58,21 +58,21 @@ steps:
   #   object: plate
   #   destination: ourlab.luigi.site.P6
 
-  # 1:
-  #   command: pipetter.pipette
-  #   sources: ourlab.luigi.systemLiquid
-  #   destinations: plate(A01)
-  #   volumes: 50ul
-
   1:
-    command: pipetter.cleanTips
-    equipment: ourlab.luigi.liha
-    intensity: flush
-  2:
-    command: pipetter.cleanTips
-    equipment: ourlab.luigi.liha
-    intensity: light
-  3:
-    command: pipetter.cleanTips
-    equipment: ourlab.luigi.liha
-    intensity: thorough
+    command: pipetter.pipette
+    sources: ourlab.luigi.systemLiquid
+    destinations: plate(A01)
+    volumes: 50ul
+
+  # 1:
+  #   command: pipetter.cleanTips
+  #   equipment: ourlab.luigi.liha
+  #   intensity: flush
+  # 2:
+  #   command: pipetter.cleanTips
+  #   equipment: ourlab.luigi.liha
+  #   intensity: light
+  # 3:
+  #   command: pipetter.cleanTips
+  #   equipment: ourlab.luigi.liha
+  #   intensity: thorough

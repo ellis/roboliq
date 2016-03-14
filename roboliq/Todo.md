@@ -211,7 +211,7 @@
 - [x] perform initial pipetting test
 - [x] evoware: automatically retract tips after washing
 - [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
-- [ ] evoware: after pipetting is done, retract all the tips somehow
+- [x] evoware: after pipetting is done, retract all the tips
 - [ ] test pipetting on troughs
 - [ ] double-check pipetting on P1-P6
 - [ ] sealer operation

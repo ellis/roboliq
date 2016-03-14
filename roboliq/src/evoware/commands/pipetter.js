@@ -61,7 +61,7 @@ export function _washTips(params, parsed, data) {
 			syringeMask,
 			program.cleanerGrid, program.cleanerSite-1,
 			1,
-			retractWellMask,
+			`"${retractWellMask}"`,
 			0, // 0=positioning with global z travel, 4=z-move
 			4, // 4=global z travel
 			0, 10, 0, 0
@@ -94,6 +94,9 @@ function handlePipetterSpirate(parsed, data) {
 	// Create a script line for each group:
 	const results = _.flatMap(groups, group => handleGroup(parsed, data, group));
 	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	if (groups.length > 0) {
+		results.push(handleRetract(parsed, data, _.last(groups)))
+	}
 
 	// Get list of all accessed sites
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
@@ -273,6 +276,36 @@ function handleGroup(parsed, data, group) {
 
 	//console.log({syringeMask, volumes})
 	return _.compact([makeLine("Aspirate", "source"), makeLine("Dispense", "destination")]);
+}
+
+function handleRetract(parsed, data, group) {
+	assert(group.tuples.length > 0);
+
+	const tuples = group.tuples;
+	// Calculate syringe mask
+	const tuple0 = _.last(tuples);
+	const syringeMask = encodeSyringes(tuples);
+
+	// Script command line
+	const propertyName = (tuple0.destination) ? "destination" : "source";
+	const wellInfo = tuple0[propertyName];
+	// console.log({propertyName, wellInfo, tuple0})
+	if (_.isUndefined(wellInfo))
+		return undefined;
+
+	const labwareModel = wellInfo.labwareModel;
+	const plateMask = encodeWells(tuples, propertyName);
+	const l = [
+		syringeMask,
+		wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
+		1,
+		`"${plateMask}"`,
+		0, // 0=positioning with global z travel, 4=z-move
+		4, // 4=global z travel
+		0, 10, 0, 0
+	];
+	const line = `MoveLiha(${l.join(",")});`;
+	return {line};
 }
 
 /**
