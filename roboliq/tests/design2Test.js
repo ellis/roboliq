@@ -48,13 +48,28 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle a branching array", () => {
+		it("should handle a simple branching array", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1,2,3]
 				}),
 				[
 					{a: 1}, {a: 2}, {a: 3}
+				]
+			);
+		});
+
+		it("should handle a simple branching object", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": {
+						"A": {b: 1},
+						"B": {b: 2},
+						"C": {b: 3},
+					}
+				}),
+				[
+					{a: "A", b: 1}, {a: "B", b: 2}, {a: "C", b: 3}
 				]
 			);
 		});

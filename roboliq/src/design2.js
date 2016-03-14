@@ -119,7 +119,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
  *     branchRowByArray(nestdRows, rowIndex, item)
  *   else if item is object:
  *     setColumnValue(row, name, key)
- *     expandRowsByConditions(nestedRows, [rowIndex], item)
+ *     expandRowsByObject(nestedRows, [rowIndex], item)
  *   else:
  *     setColumnValue(row, name, item)
  */
@@ -130,7 +130,7 @@ function assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item) {
 	}
 	else if (_.isObject(item)) {
 		setColumnValue(nestedRows[rowIndex], name, key);
-		expandRowsByConditions(nestedRows, [rowIndex], item);
+		expandRowsByObject(nestedRows, [rowIndex], item);
 	}
 	else {
 		setColumnValue(nestedRows[rowIndex], name, item);
@@ -181,7 +181,7 @@ function branchRowByArray(nestedRows, rowIndex, array) {
 		rows2[rowIndex2] = _.cloneDeep(row0);
 	}
 
-	expandRowsByConditions(rows2, _.range(size), name, value);
+	expandRowsByObject(rows2, _.range(size), name, value);
 	nestedRows[rowIndex] = _.flattenDeep(rows2);
 }
 
