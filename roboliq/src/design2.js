@@ -57,9 +57,9 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions) {
  *   else call assignRowsByNamedValue
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
-	console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
-	console.log({rowIndexes})
-	console.log(nestedRows)
+	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	// console.log({rowIndexes})
+	// console.log(nestedRows)
 	// TODO: turn the name/value into an action in order to allow for more sophisticated expansion
 	if (_.endsWith(name, "*")) {
 		branchRowsByNamedValue(nestedRows, rowIndexes, name.substr(0, name.length - 1), value);
@@ -87,23 +87,22 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
  *       setColumnValue(row, name, value)
  */
 function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
-	console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
-	console.log({rowIndexes})
+	// console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	// console.log({rowIndexes})
 	if (_.isArray(value)) {
 		let valueIndex = 0;
 		for (let i = 0; i < rowIndexes.length; i++) {
-			assert(valueIndex < value.length, "fewer values than rows: "+JSON.stringify({name, value, rowIndexes}));
 			const rowIndex = rowIndexes[i];
 			valueIndex += assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, i + 1, value, valueIndex);
 		}
 	}
 	else if (_.isObject(value)) {
+		let valueIndex = 0;
 		const keys = _.keys(value);
-		assert(rowIndexes.length <= keys.length, "fewer values than rows: "+JSON.stringify({name, keys, rowIndexes}));
 		for (let i = 0; i < rowIndexes.length; i++) {
-			const key = keys[i];
 			const rowIndex = rowIndexes[i];
-			assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, value[key]);
+			const key = keys[valueIndex];
+			valueIndex += assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, key, value, valueIndex, keys);
 		}
 	}
 	else {
@@ -138,8 +137,9 @@ function assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, key, values, v
 		}
 	}
 	else {
+		assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
 		const key = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
-		const keyName = (valueKeys) ? valueKeyIndex : valueKeyIndex + 1;
+		const keyName = (valueKeys) ? key : valueKeyIndex + 1;
 		const item = values[key];
 		if (_.isArray(item)) {
 			setColumnValue(row, name, keyName);
@@ -158,32 +158,6 @@ function assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, key, values, v
 }
 
 /*
- * // REQUIRED by: assignRowsByNamedValue
- * assignRowByNamedKeyItem:
- *   if item is array:
- *     setColumnValue(row, name, key)
- *     branchRowByArray(nestdRows, rowIndex, item)
- *   else if item is object:
- *     setColumnValue(row, name, key)
- *     expandRowsByObject(nestedRows, [rowIndex], item)
- *   else:
- *     setColumnValue(row, name, item)
- */
-function assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item) {
-	if (_.isArray(item)) {
-		setColumnValue(nestedRows[rowIndex], name, key);
-		branchRowByArray(nestedRows, rowIndex, item);
-	}
-	else if (_.isObject(item)) {
-		setColumnValue(nestedRows[rowIndex], name, key);
-		expandRowsByObject(nestedRows, [rowIndex], item);
-	}
-	else {
-		setColumnValue(nestedRows[rowIndex], name, item);
-	}
-}
-
-/*
  * // REQUIRED by: expandRowsByNamedValue
  * branchRowsByNamedValue:
  *   size
@@ -199,7 +173,7 @@ function assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item) {
  *   nestedRows[rowIndex] = _.flattenDeep(rows2);
  */
 function branchRowsByNamedValue(nestedRows, rowIndexes, name, value) {
-	console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	// console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 	const size
 		= (_.isArray(value)) ? value.length
 		: (_.isPlainObject(value)) ? _.size(value)
