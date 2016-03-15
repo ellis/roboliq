@@ -90,7 +90,14 @@ steps:
   #   volumes: 100ul
 
   # description: seal a plate
+  # 1:
+  #   command: sealer.sealPlate
+  #   object: plate
+
+  # description: shake a plate
   1:
-    command: sealer.sealPlate
+    command: shaker.shakePlate
     object: plate
-    
+    program:
+      rpm: 600
+      duration: 20 seconds

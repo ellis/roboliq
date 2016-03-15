@@ -4,12 +4,12 @@ var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 
 function makeEvowareFacts(parsed, data, variable, value) {
-	const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	const result2 = {
 		command: "evoware._facts",
 		agent: parsed.objectName.agent,
-		factsEquipment: carrier,
-		factsVariable: carrier+"_"+variable
+		factsEquipment: equipmentId,
+		factsVariable: equipmentId+"_"+variable
 	};
 	const value2 = (_.isFunction(value))
 		? value(parsed, data)
@@ -147,6 +147,10 @@ module.exports = {
 				"sealer": {
 					"type": "Sealer",
 					"evowareId": "RoboSeal"
+				},
+				"shaker": {
+					"type": "Shaker",
+					"evowareId": "Shaker"
 				},
 				"site": {
 					"type": "Namespace",
@@ -417,6 +421,13 @@ module.exports = {
 			"program": "C:\\INSTALLFOLDER_NOVEMBER2014_30096901_CH_ETHBS\\PLATTENPROGRAMM FUER ROBOSEAL\\MTP Riplate SW 2ml.bcf",
 			"model": "ourlab.model.plateModel_96_dwp",
 			"site": "ourlab.luigi.site.ROBOSEAL"
+		}
+	},
+	{
+		"shaker.canAgentEquipmentSite": {
+			"agent": "ourlab.luigi.evoware",
+			"equipment": "ourlab.luigi.shaker",
+			"site": "ourlab.luigi.site.SHAKER"
 		}
 	},
 	{
@@ -739,6 +750,48 @@ module.exports = {
 					factsValue: parsed.value.program
 				}],
 				//effects: _.fromPairs([[params.object + ".sealed", true]])
+			};
+		},
+		// Shaker
+		"equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker": function(params, parsed, data) {
+			//console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker: "+JSON.stringify(parsed, null, '\t'))
+			const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+			const rpm = parsed.value.program.rpm || 750;
+
+			return {
+				expansion: [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_Init"
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_SetFrequency",
+						factsValue: rpm
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_Start",
+						factsValue: "1"
+					},
+					{
+						command: "timer.sleep",
+						agent: parsed.objectName.agent,
+						duration: parsed.orig.program.duration
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_Stop"
+					},
+				]
 			};
 		},
 		"evoware._facts": function(params, parsed, data) {},
