@@ -58,6 +58,8 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions) {
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 	console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	console.log({rowIndexes})
+	console.log(nestedRows)
 	// TODO: turn the name/value into an action in order to allow for more sophisticated expansion
 	if (_.endsWith(name, "*")) {
 		branchRowsByNamedValue(nestedRows, rowIndexes, name.substr(0, name.length - 1), value);
@@ -85,12 +87,14 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
  *       setColumnValue(row, name, value)
  */
 function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
-	// console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	console.log({rowIndexes})
 	if (_.isArray(value)) {
-		assert(rowIndexes.length <= value.length, "fewer values than rows: "+JSON.stringify({name, value, rowIndexes}));
+		let valueIndex = 0;
 		for (let i = 0; i < rowIndexes.length; i++) {
+			assert(valueIndex < value.length, "fewer values than rows: "+JSON.stringify({name, value, rowIndexes}));
 			const rowIndex = rowIndexes[i];
-			assignRowByNamedKeyItem(nestedRows, rowIndex, name, i + 1, value[i]);
+			valueIndex += assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, i + 1, value, valueIndex);
 		}
 	}
 	else if (_.isObject(value)) {
@@ -109,6 +113,48 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 			// console.log(JSON.stringify(nestedRows))
 		}
 	}
+}
+
+/*
+ * // REQUIRED by: assignRowsByNamedValue
+ * assignRowByNamedKeyValuesKey:
+ *   if item is array:
+ *     setColumnValue(row, name, key)
+ *     branchRowByArray(nestdRows, rowIndex, item)
+ *   else if item is object:
+ *     setColumnValue(row, name, key)
+ *     expandRowsByObject(nestedRows, [rowIndex], item)
+ *   else:
+ *     setColumnValue(row, name, item)
+ */
+function assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, key, values, valueKeyIndex, valueKeys) {
+	let n = 0;
+	const row = nestedRows[rowIndex];
+	if (_.isArray(row)) {
+		for (let i = 0; i < row.length; i++) {
+			const n2 = assignRowByNamedKeyValuesKey(row, i, name, key, values, valueKeyIndex, valueKeys);
+			n += n2;
+			valueKeyIndex += n2;
+		}
+	}
+	else {
+		const key = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
+		const keyName = (valueKeys) ? valueKeyIndex : valueKeyIndex + 1;
+		const item = values[key];
+		if (_.isArray(item)) {
+			setColumnValue(row, name, keyName);
+			branchRowByArray(nestedRows, rowIndex, item);
+		}
+		else if (_.isObject(item)) {
+			setColumnValue(row, name, keyName);
+			expandRowsByObject(nestedRows, [rowIndex], item);
+		}
+		else {
+			setColumnValue(row, name, item);
+		}
+		n = 1;
+	}
+	return n;
 }
 
 /*

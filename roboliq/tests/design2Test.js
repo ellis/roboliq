@@ -36,7 +36,7 @@ describe('design', () => {
 		});
 	});
 
-	describe.only("expandConditions", () => {
+	describe("expandConditions", () => {
 		it("should handle a simple value", () => {
 			should.deepEqual(
 				expandConditions({
@@ -85,6 +85,30 @@ describe('design', () => {
 				}),
 				[
 					{a: 1, b: 1}, {a: 2, b: 2}, {a: 3, b: 3}
+				]
+			);
+		});
+
+		it("should handle assignment of an array", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1,2,3],
+					"b": [4,5,6]
+				}),
+				[
+					{a: 1, b: 4}, {a: 2, b: 5}, {a: 3, b: 6}
+				]
+			);
+		});
+
+		it("should handle assignment of an object", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1,2,3],
+					"b": {a: {c: "q"}, b: {c: "r"}, c: {c: "s"}}
+				}),
+				[
+					{a: 1, b: "a", c: "q"}, {a: 2, b: "b", c: "r"}, {a: 3, b: "c", c: "s"}
 				]
 			);
 		});
