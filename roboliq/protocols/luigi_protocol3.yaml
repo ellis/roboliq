@@ -10,8 +10,8 @@ config:
 objects:
   plate:
     type: Plate
-    model: ourlab.model.plateModel_96_dwp
-    #model: ourlab.model.plateModel_96_round_transparent_nunc
+    # model: ourlab.model.plateModel_96_dwp
+    model: ourlab.model.plateModel_96_round_transparent_nunc
     #location: ourlab.luigi.site.REGRIP_BELOW
     location: ourlab.luigi.site.P1
   #plate: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
@@ -95,9 +95,17 @@ steps:
   #   object: plate
 
   # description: shake a plate
+  # 1:
+  #   command: shaker.shakePlate
+  #   object: plate
+  #   program:
+  #     rpm: 600
+  #     duration: 20 seconds
+
+  # description: read absorbance/fluorescence
   1:
-    command: shaker.shakePlate
+    command: fluorescenceReader.measurePlate
     object: plate
     program:
-      rpm: 600
-      duration: 20 seconds
+      excitationWavelength: 6000
+    outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"

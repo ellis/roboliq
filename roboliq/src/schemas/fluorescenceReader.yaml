@@ -15,6 +15,7 @@ fluorescenceReader.measurePlate:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program parameters"}
     programFile: {description: "Program filename", type: "string"}
     programData: {description: "Program data"}
 #    program: {description: "Program specification for measurement", type: "object"}

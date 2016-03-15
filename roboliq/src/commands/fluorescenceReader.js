@@ -71,8 +71,11 @@ var commandHandlers = {
 				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,
+				measurementType: "fluorescence",
+				program: parsed.value.program,
 				programFile: parsed.value.programFile,
 				programData: parsed.value.programData,
+				object: parsed.objectName.object,
 				outputFile: parsed.value.outputFile
 			}),
 			(destinationAfter === null) ? null : {

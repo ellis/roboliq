@@ -1,7 +1,40 @@
 var _ = require('lodash');
+import assert from 'assert';
 var math = require('mathjs');
+import Mustache from 'mustache';
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
+//import {locationRowColToText, locationTextToRowCol} from '../parsers/wellsParser.js';
+
+const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2015-08-20T07:22:39.4678927Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+    <TecanMeasurement id="1" class="Measurement">
+        <MeasurementManualCycle id="2" number="1" type="Standard">
+            <CyclePlate id="3" file="{{plateFile}}" plateWithCover="False">
+                <PlateRange id="4" range="{{wells}}" auto="false">
+                    <MeasurementAbsorbance id="5" mode="Normal" type="" name="ABS" longname="" description="">
+                        <Well id="6" auto="true">
+                            <MeasurementReading id="7" name="" beamDiameter="500" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+                                <ReadingLabel id="8" name="Label1" scanType="ScanFixed" refID="0">
+                                    <ReadingSettings number="25" rate="25000" />
+                                    <ReadingTime integrationTime="0" lagTime="0" readDelay="10000" flash="0" dark="0" excitationTime="0" />
+                                    <ReadingFilter id="0" type="Ex" wavelength="{{excitationWavelength}}" bandwidth="{{excitationBandwidth}}" attenuation="0" usage="ABS" />
+                                </ReadingLabel>
+                            </MeasurementReading>
+                        </Well>
+                        <CustomData id="9" />
+                    </MeasurementAbsorbance>
+                </PlateRange>
+            </CyclePlate>
+        </MeasurementManualCycle>
+        <MeasurementInfo id="0" description="">
+            <ScriptTemplateSettings id="0">
+                <ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+                <ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+            </ScriptTemplateSettings>
+        </MeasurementInfo>
+    </TecanMeasurement>
+</TecanFile>`;
 
 function makeEvowareFacts(parsed, data, variable, value) {
 	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
@@ -404,7 +437,7 @@ module.exports = {
 			}
 		}),
 	{"#for": {
-		factors: {model: ["plateModel_96_square_transparent_nunc"]},
+		factors: {model: ["plateModel_96_round_transparent_nunc"]},
 		output: {
 			"fluorescenceReader.canAgentEquipmentModelSite": {
 				"agent": "ourlab.luigi.evoware",
@@ -615,15 +648,18 @@ module.exports = {
 			required: ["agent", "equipment", "site"]
 		},
 		"equipment.run|ourlab.luigi.evoware|ourlab.luigi.reader": {
-			description: "Run our Infinit M200 reader using either programFile or programData",
+			description: "Run our Infinite F200 Pro reader",
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
+				measurementType: {description: "Type of measurement, i.e fluorescence or absorbance", enum: ["fluorescence", "absorbance"]},
+				program: {description: "Program definition"},
 				programFile: {description: "Program filename", type: "File"},
 				programData: {description: "Program data"},
+				object: {description: "The labware being measured", type: "Plate"},
 				outputFile: {description: "Filename for measured output", type: "string"}
 			},
-			required: ["outputFile"]
+			required: ["measurementType", "outputFile"]
 		},
 		"equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker": {
 			properties: {
@@ -716,14 +752,43 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		"equipment.run|ourlab.luigi.evoware|ourlab.luigi.reader": function(params, parsed, data) {
-			var hasProgramFile = (parsed.value.programFile) ? 1 : 0;
-			var hasProgramData = (parsed.value.programData) ? 1 : 0;
-			//console.log(parsed);
-			expect.truthy({}, hasProgramFile + hasProgramData >= 1, "either `programFile` or `programData` must be specified.");
-			expect.truthy({}, hasProgramFile + hasProgramData <= 1, "only one of `programFile` or `programData` may be specified.");
-			const content = (hasProgramData)
-				? parsed.value.programData.toString('utf8')
-				: parsed.value.programFile.toString('utf8');
+			console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.reader: "+JSON.stringify(parsed, null, '\t'));
+
+			const hasProgram = (parsed.value.program) ? 1 : 0;
+			const hasProgramFile = (parsed.value.programFile) ? 1 : 0;
+			const hasProgramData = (parsed.value.programData) ? 1 : 0;
+			expect.truthy({}, hasProgram + hasProgramFile + hasProgramData >= 1, "either `program`, `programFile` or `programData` must be specified.");
+			expect.truthy({}, hasProgram + hasProgramFile + hasProgramData <= 1, "only one of `program`, `programFile` or `programData` may be specified.");
+
+			function locationRowColToText(row, col) {
+				var colText = col.toString();
+				return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
+			}
+
+			function getTemplateAbsorbanceParams() {
+				// const labwareModelName = parsed.objectName["object.model"];
+				const labwareModelName = parsed.value.object.model;
+				console.log({labwareModelName})
+				const labwareModel = _.get(data.objects, labwareModelName);
+				console.log({labwareModel})
+				const plateFile = {"ourlab.model.plateModel_96_round_transparent_nunc": "COR96fc UV transparent"}[labwareModelName];
+				assert(plateFile);
+				const wells = "A1:"+locationRowColToText(labwareModel.rows, labwareModel.columns);
+				const params = {
+					plateFile,
+					wells,
+					excitationWavelength: parsed.value.program.excitationWavelength,
+					excitationBandwidth: 90
+				};
+				console.log({params});
+				return params;
+			}
+
+			const content
+				= (hasProgramData) ? parsed.value.programData.toString('utf8')
+				: (hasProgramFile) ? parsed.value.programFile.toString('utf8')
+				: (true || measurementType === "absorbance") ? Mustache.render(templateAbsorbance, getTemplateAbsorbanceParams())
+				: undefined;
 			var start_i = content.indexOf("<TecanFile");
 			if (start_i < 0)
 				start_i = 0;

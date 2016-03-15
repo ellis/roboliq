@@ -214,8 +214,9 @@
 - [x] evoware: after pipetting is done, retract all the tips
 - [x] double-check pipetting on troughs
 - [x] sealer operation
-- [ ] shaker operation (see empty.esc)
+- [x] shaker operation
 - [ ] reader operation
+- [ ] exclude access to HOTEL12_9, because of trough
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
