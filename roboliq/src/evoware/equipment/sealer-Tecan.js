@@ -1,8 +1,8 @@
 import commandHelper from '../../commandHelper.js';
 
 module.exports = {
-	schemas: {
-		"equipment.run": {
+	getSchemas: (agentName, equipmentName) => ({
+		[`equipment.run|${agentName}|${equipmentName}`]: {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
@@ -10,14 +10,14 @@ module.exports = {
 			},
 			required: ["agent", "equipment", "program"]
 		}
-	},
-	commandHandlers: {
-		"equipment.run": function(params, parsed, data) {
+	}),
+	getCommandHandlers: (agentName, equipmentName) => ({
+		[`equipment.run|${agentName}|${equipmentName}`]: function(params, parsed, data) {
 			const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 			return {
 				expansion: [{
 					command: "evoware._facts",
-					agent: parsed.objectName.agent,
+					agent: agentName,
 					factsEquipment: equipmentId,
 					factsVariable: equipmentId+"_Seal",
 					factsValue: parsed.value.program
@@ -25,5 +25,5 @@ module.exports = {
 				//effects: _.fromPairs([[params.object + ".sealed", true]])
 			};
 		},
-	}
+	})
 };

@@ -3,65 +3,13 @@ var assert = require('assert');
 var math = require('mathjs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
+import {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} from '../evoware/equipment/evoware.js';
 
 const Equipment = {
-	sealer: require('../evoware/equipment/sealer-Tecan.js')
+	evoware: require('../evoware/equipment/evoware.js'),
+	reader: require('../evoware/equipment/reader-InfiniteM200Pro.js'),
+	sealer: require('../evoware/equipment/sealer-Tecan.js'),
 };
-
-function makeEvowareFacts(parsed, data, variable, value) {
-	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-	const result2 = {
-		command: "evoware._facts",
-		agent: parsed.objectName.agent,
-		factsEquipment: equipmentId,
-		factsVariable: equipmentId+"_"+variable
-	};
-	const value2 = (_.isFunction(value))
-		? value(parsed, data)
-		: value;
-	return _.merge(result2, {factsValue: value2});
-}
-
-/**
- * Expect spec of this form:
- * ``{siteModel: string, sites: [string], labwareModels: [string]}``
- */
-function makeSiteModelPredicates(spec) {
-	return _.flatten([
-		{isSiteModel: {model: spec.siteModel}},
-		_.map(spec.sites, site => ({siteModel: {site, siteModel: spec.siteModel}})),
-		_.map(spec.labwareModels, labwareModel => ({stackable: {below: spec.siteModel, above: labwareModel}}))
-	]);
-}
-
-/**
- * Expect specs of this form:
- * ``{<transporter>: {<program>: [site names]}}``
- */
-function makeTransporterPredicates(specs) {
-	let siteCliqueId = 1;
-	const l = [];
-	_.forEach(specs, (programs, equipment) => {
-		_.forEach(programs, (cliques, program) => {
-			_.forEach(cliques, (sites) => {
-				const siteClique = "ourlab.mario.siteClique"+siteCliqueId;
-				siteCliqueId++;
-				_.forEach(sites, site => {
-					l.push({"siteCliqueSite": {siteClique, site}});
-				});
-				l.push({
-					"transporter.canAgentEquipmentProgramSites": {
-						"agent": "ourlab.mario.evoware",
-						equipment,
-						program,
-						siteClique
-					}
-				});
-			});
-		});
-	});
-	return l;
-}
 
 module.exports = {
 	roboliq: "v1",
@@ -429,17 +377,9 @@ module.exports = {
 		}
 	},
 
-	objectToPredicateConverters: {
-		"EvowareRobot": function(name) {
-			return {
-				value: [{
-					"isAgent": {
-						"agent": name
-					}
-				}]
-			};
-		}
-	},
+	objectToPredicateConverters: _.merge({},
+		Equipment.evoware.objectToPredicateConverters
+	),
 
 	predicates: _.flatten([
 		// Centrifuge sites
@@ -499,510 +439,393 @@ module.exports = {
 				"site2": "ourlab.mario.site.CENTRIFUGE_4"
 			}};
 		}),
-	{"#for": {
-		factors: {model: ["plateModel_384_square"]},
-		output: {
-			"fluorescenceReader.canAgentEquipmentModelSite": {
-				"agent": "ourlab.mario.evoware",
-				"equipment": "ourlab.mario.reader",
-				"model": "ourlab.model.{{model}}",
-				"site": "ourlab.mario.site.READER"
+		{"#for": {
+			factors: {model: ["plateModel_384_square"]},
+			output: {
+				"fluorescenceReader.canAgentEquipmentModelSite": {
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.reader",
+					"model": "ourlab.model.{{model}}",
+					"site": "ourlab.mario.site.READER"
+				}
 			}
-		}
-	}},
-	{
-		"sealer.canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.sealer",
-			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
-			"model": "ourlab.model.plateModel_96_square_transparent_nunc",
-			"site": "ourlab.mario.site.ROBOSEAL"
-		}
-	},
-	{
-		"sealer.canAgentEquipmentProgramModelSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.sealer",
-			"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
-			"model": "ourlab.model.plateModel_384_square",
-			"site": "ourlab.mario.site.ROBOSEAL"
-		}
-	},
-	{
-		"shaker.canAgentEquipmentSite": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.shaker",
-			"site": "ourlab.mario.site.P3"
-		}
-	},
-	{
-		"pipetter.canAgentEquipment": {
-			"agent": "ourlab.mario.evoware",
-			"equipment": "ourlab.mario.liha"
-		}
-	},
-	{"#for": {
-		factors: {site: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
-		output: {
-			"pipetter.canAgentEquipmentSite": {
+		}},
+		{
+			"sealer.canAgentEquipmentProgramModelSite": {
 				"agent": "ourlab.mario.evoware",
-				"equipment": "ourlab.mario.liha",
-				"site": "ourlab.mario.site.{{site}}"
+				"equipment": "ourlab.mario.sealer",
+				"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
+				"model": "ourlab.model.plateModel_96_square_transparent_nunc",
+				"site": "ourlab.mario.site.ROBOSEAL"
 			}
-		}
-	}},
-	{"#for": {
-		factors: {i: [1, 2, 3, 4, 5, 6, 7, 8]},
-		output: {
-			"pipetter.canAgentEquipmentSyringe": {
+		},
+		{
+			"sealer.canAgentEquipmentProgramModelSite": {
 				"agent": "ourlab.mario.evoware",
-				"equipment": "ourlab.mario.liha",
-				"syringe": "ourlab.mario.liha.syringe.{{i}}"
+				"equipment": "ourlab.mario.sealer",
+				"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
+				"model": "ourlab.model.plateModel_384_square",
+				"site": "ourlab.mario.site.ROBOSEAL"
 			}
-		}
-	}},
-	{"timer.canAgentEquipment": {
-		"agent": "ourlab.mario.evoware",
-		"equipment": "ourlab.mario.timer1",
-	}},
-	{"timer.canAgentEquipment": {
-		"agent": "ourlab.mario.evoware",
-		"equipment": "ourlab.mario.timer2",
-	}},
-	{"timer.canAgentEquipment": {
-		"agent": "ourlab.mario.evoware",
-		"equipment": "ourlab.mario.timer3",
-	}},
-	{"timer.canAgentEquipment": {
-		"agent": "ourlab.mario.evoware",
-		"equipment": "ourlab.mario.timer4",
-	}},
-	{"timer.canAgentEquipment": {
-		"agent": "ourlab.mario.evoware",
-		"equipment": "ourlab.mario.timer5",
-	}},
-	_.map([1,2,3,4], function(n) {
-		return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
-			"task": {"generic.closeSite": {"site": "?site"}},
-			"preconditions": [
-				{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}
-			],
-			"subtasks": {"ordered": [
-				{"ourlab.mario.centrifuge.close": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge"}}
-			]}
-		}}
-	}),
-	{"action": {"description": "ourlab.mario.centrifuge.close: close the centrifuge",
-		"task": {"ourlab.mario.centrifuge.close": {"agent": "?agent", "equipment": "?equipment"}},
-		"preconditions": [],
-		"deletions": [],
-		"additions": [
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_1"}},
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_2"}},
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_3"}},
-			{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}
-		]
-	}},
-	_.map([1,2,3,4], function(n) {
-		return {"method": {"description": "generic.openSite-CENTRIFUGE_"+n,
-			"task": {"generic.openSite": {"site": "?site"}},
-			"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}],
-			"subtasks": {"ordered": [_.fromPairs([["ourlab.mario.centrifuge.open"+n, {}]])]}
-		}};
-	}),
-	_.map([1,2,3,4], function(n) {
-		return {"action": {"description": "ourlab.mario.centrifuge.open: open an internal site on the centrifuge",
-			"task": _.fromPairs([["ourlab.mario.centrifuge.open"+n, {}]]),
+		},
+		{
+			"shaker.canAgentEquipmentSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.shaker",
+				"site": "ourlab.mario.site.P3"
+			}
+		},
+		{
+			"pipetter.canAgentEquipment": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha"
+			}
+		},
+		{"#for": {
+			factors: {site: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+			output: {
+				"pipetter.canAgentEquipmentSite": {
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"site": "ourlab.mario.site.{{site}}"
+				}
+			}
+		}},
+		{"#for": {
+			factors: {i: [1, 2, 3, 4, 5, 6, 7, 8]},
+			output: {
+				"pipetter.canAgentEquipmentSyringe": {
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"syringe": "ourlab.mario.liha.syringe.{{i}}"
+				}
+			}
+		}},
+		{"timer.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.timer1",
+		}},
+		{"timer.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.timer2",
+		}},
+		{"timer.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.timer3",
+		}},
+		{"timer.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.timer4",
+		}},
+		{"timer.canAgentEquipment": {
+			"agent": "ourlab.mario.evoware",
+			"equipment": "ourlab.mario.timer5",
+		}},
+		_.map([1,2,3,4], function(n) {
+			return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
+				"task": {"generic.closeSite": {"site": "?site"}},
+				"preconditions": [
+					{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}
+				],
+				"subtasks": {"ordered": [
+					{"ourlab.mario.centrifuge.close": {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge"}}
+				]}
+			}}
+		}),
+		{"action": {"description": "ourlab.mario.centrifuge.close: close the centrifuge",
+			"task": {"ourlab.mario.centrifuge.close": {"agent": "?agent", "equipment": "?equipment"}},
 			"preconditions": [],
-			"deletions": [
-				{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_"+n}}
-			],
-			"additions": _.map(_.without([1,2,3,4], n), function(n2) {
-				return {"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_"+n2}};
-			})
-		}};
-	}),
-
-	// Open READER
-	{"method": {"description": "generic.openSite-READER",
-		"task": {"generic.openSite": {"site": "?site"}},
-		"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.READER"}}],
-		"subtasks": {"ordered": [{"ourlab.mario.reader.open": {}}]}
-	}},
-	{"action": {"description": "ourlab.mario.reader.open: open the reader",
-		"task": {"ourlab.mario.reader.open": {}},
-		"preconditions": [],
-		"deletions": [{"siteIsClosed": {"site": "ourlab.mario.site.READER"}}],
-		"additions": []
-	}},
-	// Close READER
-	{"method": {"description": "generic.closeSite-READER",
-		"task": {"generic.closeSite": {"site": "?site"}},
-		"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.READER"}}],
-		"subtasks": {"ordered": [{"ourlab.mario.reader.close": {}}]}
-	}},
-	{"action": {"description": "ourlab.mario.reader.close: close the reader",
-		"task": {"ourlab.mario.reader.close": {}},
-		"preconditions": [],
-		"deletions": [],
-		"additions": [
-			{"siteIsClosed": {"site": "ourlab.mario.site.READER"}}
-		]
-	}},
-
+			"deletions": [],
+			"additions": [
+				{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_1"}},
+				{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_2"}},
+				{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_3"}},
+				{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_4"}}
+			]
+		}},
+		_.map([1,2,3,4], function(n) {
+			return {"method": {"description": "generic.openSite-CENTRIFUGE_"+n,
+				"task": {"generic.openSite": {"site": "?site"}},
+				"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}],
+				"subtasks": {"ordered": [_.fromPairs([["ourlab.mario.centrifuge.open"+n, {}]])]}
+			}};
+		}),
+		_.map([1,2,3,4], function(n) {
+			return {"action": {"description": "ourlab.mario.centrifuge.open: open an internal site on the centrifuge",
+				"task": _.fromPairs([["ourlab.mario.centrifuge.open"+n, {}]]),
+				"preconditions": [],
+				"deletions": [
+					{"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_"+n}}
+				],
+				"additions": _.map(_.without([1,2,3,4], n), function(n2) {
+					return {"siteIsClosed": {"site": "ourlab.mario.site.CENTRIFUGE_"+n2}};
+				})
+			}};
+		}),
+		Equipment.reader.getPredicates("ourlab.mario.evoware", "ourlab.mario.reader", "ourlab.mario.site.READER")
 	]),
 
-	schemas: {
-		"EvowareRobot": {
-			properties: {
-				type: {enum: ["EvowareRobot"]},
-				config: {description: "configuration options for evoware", type: "object"}
+	schemas: _.merge(
+		{
+			"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+				},
+				required: ["agent", "equipment"]
 			},
-			required: ["type"]
-		},
-		"EvowareWashProgram": {
-			properties: {
-				type: {enum: ["EvowareWashProgram"]}
+			"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+				},
+				required: ["agent", "equipment"]
 			},
-			required: ["type"]
-		},
-		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
+			"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+					site: {description: "Site identifier", type: "Site"}
+				},
+				required: ["agent", "equipment", "site"]
 			},
-			required: ["agent", "equipment"]
-		},
-		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-			},
-			required: ["agent", "equipment"]
-		},
-		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				site: {description: "Site identifier", type: "Site"}
-			},
-			required: ["agent", "equipment", "site"]
-		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {
-					description: "Program for centrifuging",
-					type: "object",
-					properties: {
-						rpm: {type: "number", default: 3000},
-						duration: {type: "Duration", default: "30 s"},
-						spinUpTime: {type: "Duration", default: "9 s"},
-						spinDownTime: {type: "Duration", default: "9 s"},
-						temperature: {type: "Temperature", default: "25 degC"}
-					}
-				}
-			},
-			required: ["program"]
-		},
-		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-			},
-			required: ["agent", "equipment"]
-		},
-		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-			},
-			required: ["agent", "equipment"]
-		},
-		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				site: {description: "Site identifier", type: "Site"}
-			},
-			required: ["agent", "equipment", "site"]
-		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": {
-			description: "Run our Infinit M200 reader using either programFile or programData",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				programFile: {description: "Program filename", type: "File"},
-				programData: {description: "Program data"},
-				outputFile: {description: "Filename for measured output", type: "string"}
-			},
-			required: ["outputFile"]
-		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": Equipment.sealer.schemas["equipment.run"],
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				//program: {description: "Program for shaking", type: "object"}
-				program: {
-					description: "Program for shaking",
-					properties: {
-						rpm: {description: "Rotations per minute (RPM)", type: "number"},
-						duration: {description: "Duration of shaking", type: "Duration"}
-					},
-					required: ["duration"]
-				}
-			},
-			required: ["agent", "equipment", "program"]
-		},
-		"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": {
-			description: "Clean the pipetter tips.",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {description: "Program identifier", type: "string"},
-				items: {
-					description: "List of which syringes to clean at which intensity",
-					type: "array",
-					items: {
+			"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+					program: {
+						description: "Program for centrifuging",
 						type: "object",
 						properties: {
-							syringe: {description: "Syringe identifier", type: "Syringe"},
-							intensity: {description: "Intensity of the cleaning", type: "pipetter.CleaningIntensity"}
-						},
-						required: ["syringe", "intensity"]
+							rpm: {type: "number", default: 3000},
+							duration: {type: "Duration", default: "30 s"},
+							spinUpTime: {type: "Duration", default: "9 s"},
+							spinDownTime: {type: "Duration", default: "9 s"},
+							temperature: {type: "Temperature", default: "25 degC"}
+						}
 					}
-				}
+				},
+				required: ["program"]
 			},
-			required: ["agent", "equipment", "items"]
-		}
-	},
+			"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+					//program: {description: "Program for shaking", type: "object"}
+					program: {
+						description: "Program for shaking",
+						properties: {
+							rpm: {description: "Rotations per minute (RPM)", type: "number"},
+							duration: {description: "Duration of shaking", type: "Duration"}
+						},
+						required: ["duration"]
+					}
+				},
+				required: ["agent", "equipment", "program"]
+			},
+			"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": {
+				description: "Clean the pipetter tips.",
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+					program: {description: "Program identifier", type: "string"},
+					items: {
+						description: "List of which syringes to clean at which intensity",
+						type: "array",
+						items: {
+							type: "object",
+							properties: {
+								syringe: {description: "Syringe identifier", type: "Syringe"},
+								intensity: {description: "Intensity of the cleaning", type: "pipetter.CleaningIntensity"}
+							},
+							required: ["syringe", "intensity"]
+						}
+					}
+				},
+				required: ["agent", "equipment", "items"]
+			}
+		},
+		Equipment.evoware.getSchemas(),
+		Equipment.reader.getSchemas("ourlab.mario.evoware", "ourlab.mario.reader"),
+		Equipment.sealer.getSchemas("ourlab.mario.evoware", "ourlab.mario.sealer")
+	),
 
-	commandHandlers: {
-		"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
-		},
-		"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
-		},
-		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
-			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
-			return {
-				expansion: [
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_MoveToPos",
-						factsValue: (siteIndex+1).toString()
-					},
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_Open"
-					},
-				]
-			};
-		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
-			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge:")
-			//console.log({parsed, params})
-			const parsedProgram = parsed.value.program;
-			//console.log({parsedProgram});
-			var list = [
-				math.round(parsedProgram.rpm),
-				math.round(parsedProgram.duration.toNumber('s')),
-				math.round(parsedProgram.spinUpTime.toNumber('s')),
-				math.round(parsedProgram.spinDownTime.toNumber('s')),
-				math.round(parsedProgram.temperature.toNumber('degC'))
-			];
-			var value = list.join(",");
-			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
-		},
-		// Reader
-		"equipment.close|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
-		},
-		"equipment.open|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
-		},
-		"equipment.openSite|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
-			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
-
-			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
-		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.reader": function(params, parsed, data) {
-			var hasProgramFile = (parsed.value.programFile) ? 1 : 0;
-			var hasProgramData = (parsed.value.programData) ? 1 : 0;
-			//console.log(parsed);
-			expect.truthy({}, hasProgramFile + hasProgramData >= 1, "either `programFile` or `programData` must be specified.");
-			expect.truthy({}, hasProgramFile + hasProgramData <= 1, "only one of `programFile` or `programData` may be specified.");
-			const content = (hasProgramData)
-				? parsed.value.programData.toString('utf8')
-				: parsed.value.programFile.toString('utf8');
-			var start_i = content.indexOf("<TecanFile");
-			if (start_i < 0)
-				start_i = 0;
-			var programData = content.substring(start_i).
-				replace(/[\r\n]/g, "").
-				replace(/&/g, "&amp;"). // "&amp;" is probably not needed, since I didn't find it in the XML files
-				replace(/=/g, "&equal;").
-				replace(/"/g, "&quote;").
-				replace(/~/, "&tilde;").
-				replace(/>[ \t]+</g, "><");
-			// Token
-			var value = parsed.value.outputFile + "|" + programData;
-			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value)]};
-		},
-		// Sealer
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": Equipment.sealer.commandHandlers["equipment.run"],
-		// Shaker
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
-			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.shaker: "+JSON.stringify(parsed, null, '\t'))
-			const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-			const rpm = parsed.value.program.rpm || 750;
-
-			// Construct the shaker program data
-			const shakerNo = 1;
-			// FIXME: Let the user specify mode1, steps1, mode2, steps2, power
-			const mode1 = 2;
-			const steps1 = 0;
-			const mode2 = 1;
-			const steps2 = 0;
-			const freq = (60000000/rpm).toFixed(0);
-			const cycles = Math.floor(rpm * parsed.value.program.duration.toNumber("minute")).toFixed(0);
-			const powerPerc = 50;
-			const power = Math.floor(255 * powerPerc / 100).toFixed(0);
-			const s0 = `*27${shakerNo}|${freq}|${mode1}|${steps1}|${mode2}|${steps2}|${cycles}|${power}*27`;
-			// Replace all occurences of '0' with "*30"
-			const s1 = s0.replace(/0/g, "*30");
-			// Finally, split string into 32 char parts, then rebind them, separated by commas
-			const s2 = _(s1).chunk(32).map(s => s.join("")).join(",");
-
-			return {
-				expansion: [
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: equipmentId,
-						factsVariable: equipmentId+"_HP__Start",
-						factsValue: s2
-					},
-					{
-						command: "timer.sleep",
-						agent: parsed.objectName.agent,
-						duration: parsed.orig.program.duration
-					},
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: equipmentId,
-						factsVariable: equipmentId+"_HP__Stop",
-						factsValue: "1"
-					},
-				]
-			};
-		},
-		"evoware._facts": function(params, parsed, data) {},
-		// Clean tips
-		"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
-			//console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
-			//console.log(JSON.stringify(parsed, null, '  '))
-
-			const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
-			const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
-			//console.log(syringeNameToItems);
-
-			const expansionList = [];
-			const sub = function(syringeNames, volume) {
-				const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
-					_.includes(syringeNames, syringeName)
-				);
-				//console.log({syringeNameToItems2})
-				if (!_.isEmpty(syringeNameToItems2)) {
-					const value = _.max(_.map(syringeNameToItems2, ([, item]) => cleaningIntensities.indexOf(item.intensity)));
-					if (value >= 0) {
-						const intensity = cleaningIntensities[value];
-						const syringes = _.map(syringeNameToItems2, ([syringeName, ]) => syringeName);
-						expansionList.push({
-							command: "pipetter._washTips",
+	commandHandlers: _.merge(
+		{
+			"equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+				return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
+			},
+			"equipment.open|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+				return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
+			},
+			"equipment.openSite|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+				var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+				var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+				var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
+				expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
+				return {
+					expansion: [
+						{
+							command: "evoware._facts",
 							agent: parsed.objectName.agent,
-							equipment: parsed.objectName.equipment,
-							program: `ourlab.mario.washProgram.${intensity}_${volume}`,
-							intensity: intensity,
-							syringes: syringeNames
-						});
+							factsEquipment: carrier,
+							factsVariable: carrier+"_MoveToPos",
+							factsValue: (siteIndex+1).toString()
+						},
+						{
+							command: "evoware._facts",
+							agent: parsed.objectName.agent,
+							factsEquipment: carrier,
+							factsVariable: carrier+"_Open"
+						},
+					]
+				};
+			},
+			"equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge": function(params, parsed, data) {
+				//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.centrifuge:")
+				//console.log({parsed, params})
+				const parsedProgram = parsed.value.program;
+				//console.log({parsedProgram});
+				var list = [
+					math.round(parsedProgram.rpm),
+					math.round(parsedProgram.duration.toNumber('s')),
+					math.round(parsedProgram.spinUpTime.toNumber('s')),
+					math.round(parsedProgram.spinDownTime.toNumber('s')),
+					math.round(parsedProgram.temperature.toNumber('degC'))
+				];
+				var value = list.join(",");
+				return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
+			},
+			// Shaker
+			"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
+				//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.shaker: "+JSON.stringify(parsed, null, '\t'))
+				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+				const rpm = parsed.value.program.rpm || 750;
+
+				// Construct the shaker program data
+				const shakerNo = 1;
+				// FIXME: Let the user specify mode1, steps1, mode2, steps2, power
+				const mode1 = 2;
+				const steps1 = 0;
+				const mode2 = 1;
+				const steps2 = 0;
+				const freq = (60000000/rpm).toFixed(0);
+				const cycles = Math.floor(rpm * parsed.value.program.duration.toNumber("minute")).toFixed(0);
+				const powerPerc = 50;
+				const power = Math.floor(255 * powerPerc / 100).toFixed(0);
+				const s0 = `*27${shakerNo}|${freq}|${mode1}|${steps1}|${mode2}|${steps2}|${cycles}|${power}*27`;
+				// Replace all occurences of '0' with "*30"
+				const s1 = s0.replace(/0/g, "*30");
+				// Finally, split string into 32 char parts, then rebind them, separated by commas
+				const s2 = _(s1).chunk(32).map(s => s.join("")).join(",");
+
+				return {
+					expansion: [
+						{
+							command: "evoware._facts",
+							agent: parsed.objectName.agent,
+							factsEquipment: equipmentId,
+							factsVariable: equipmentId+"_HP__Start",
+							factsValue: s2
+						},
+						{
+							command: "timer.sleep",
+							agent: parsed.objectName.agent,
+							duration: parsed.orig.program.duration
+						},
+						{
+							command: "evoware._facts",
+							agent: parsed.objectName.agent,
+							factsEquipment: equipmentId,
+							factsVariable: equipmentId+"_HP__Stop",
+							factsValue: "1"
+						},
+					]
+				};
+			},
+			// Clean tips
+			"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
+				//console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
+				//console.log(JSON.stringify(parsed, null, '  '))
+
+				const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
+				const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
+				//console.log(syringeNameToItems);
+
+				const expansionList = [];
+				const sub = function(syringeNames, volume) {
+					const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
+						_.includes(syringeNames, syringeName)
+					);
+					//console.log({syringeNameToItems2})
+					if (!_.isEmpty(syringeNameToItems2)) {
+						const value = _.max(_.map(syringeNameToItems2, ([, item]) => cleaningIntensities.indexOf(item.intensity)));
+						if (value >= 0) {
+							const intensity = cleaningIntensities[value];
+							const syringes = _.map(syringeNameToItems2, ([syringeName, ]) => syringeName);
+							expansionList.push({
+								command: "pipetter._washTips",
+								agent: parsed.objectName.agent,
+								equipment: parsed.objectName.equipment,
+								program: `ourlab.mario.washProgram.${intensity}_${volume}`,
+								intensity: intensity,
+								syringes: syringeNames
+							});
+						}
 					}
 				}
-			}
-			sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`), "1000");
-			sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
-			return {expansion: expansionList};
+				sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`), "1000");
+				sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
+				return {expansion: expansionList};
+			},
 		},
-	},
+		Equipment.evoware.getCommandHandlers(),
+		Equipment.reader.getCommandHandlers("ourlab.mario.evoware", "ourlab.mario.reader"),
+		Equipment.sealer.getCommandHandlers("ourlab.mario.evoware", "ourlab.mario.sealer")
+	),
 
-	planHandlers: {
-		"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
-			return [{
-				command: "equipment.close",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.centrifuge"
-			}];
+	planHandlers: _.merge(
+		{
+			"ourlab.mario.centrifuge.close": function(params, parentParams, data) {
+				return [{
+					command: "equipment.close",
+					agent: "ourlab.mario.evoware",
+					equipment: "ourlab.mario.centrifuge"
+				}];
+			},
+			"ourlab.mario.centrifuge.open1": function(params, parentParams, data) {
+				return [{
+					command: "equipment.openSite",
+					agent: "ourlab.mario.evoware",
+					equipment: "ourlab.mario.centrifuge",
+					site: "ourlab.mario.site.CENTRIFUGE_1"
+				}];
+			},
+			"ourlab.mario.centrifuge.open2": function(params, parentParams, data) {
+				return [{
+					command: "equipment.openSite",
+					agent: "ourlab.mario.evoware",
+					equipment: "ourlab.mario.centrifuge",
+					site: "ourlab.mario.site.CENTRIFUGE_2"
+				}];
+			},
+			"ourlab.mario.centrifuge.open3": function(params, parentParams, data) {
+				return [{
+					command: "equipment.openSite",
+					agent: "ourlab.mario.evoware",
+					equipment: "ourlab.mario.centrifuge",
+					site: "ourlab.mario.site.CENTRIFUGE_3"
+				}];
+			},
+			"ourlab.mario.centrifuge.open4": function(params, parentParams, data) {
+				return [{
+					command: "equipment.openSite",
+					agent: "ourlab.mario.evoware",
+					equipment: "ourlab.mario.centrifuge",
+					site: "ourlab.mario.site.CENTRIFUGE_4"
+				}];
+			},
 		},
-		"ourlab.mario.centrifuge.open1": function(params, parentParams, data) {
-			return [{
-				command: "equipment.openSite",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.centrifuge",
-				site: "ourlab.mario.site.CENTRIFUGE_1"
-			}];
-		},
-		"ourlab.mario.centrifuge.open2": function(params, parentParams, data) {
-			return [{
-				command: "equipment.openSite",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.centrifuge",
-				site: "ourlab.mario.site.CENTRIFUGE_2"
-			}];
-		},
-		"ourlab.mario.centrifuge.open3": function(params, parentParams, data) {
-			return [{
-				command: "equipment.openSite",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.centrifuge",
-				site: "ourlab.mario.site.CENTRIFUGE_3"
-			}];
-		},
-		"ourlab.mario.centrifuge.open4": function(params, parentParams, data) {
-			return [{
-				command: "equipment.openSite",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.centrifuge",
-				site: "ourlab.mario.site.CENTRIFUGE_4"
-			}];
-		},
-		"ourlab.mario.reader.close": function(params, parentParams, data) {
-			return [{
-				command: "equipment.close",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.reader"
-			}];
-		},
-		"ourlab.mario.reader.open": function(params, parentParams, data) {
-			return [{
-				command: "equipment.openSite",
-				agent: "ourlab.mario.evoware",
-				equipment: "ourlab.mario.reader",
-				site: "ourlab.mario.site.READER"
-			}];
-		},
-	}
+		Equipment.reader.getPlanHandlers("ourlab.mario.evoware", "ourlab.mario.reader", "ourlab.mario.site.READER")
+	)
 }
