@@ -108,11 +108,13 @@ module.exports = {
 			function getTemplateAbsorbanceParams() {
 				// const labwareModelName = parsed.objectName["object.model"];
 				const labwareModelName = parsed.value.object.model;
-				console.log({labwareModelName})
+				// console.log({labwareModelName})
 				const labwareModel = _.get(data.objects, labwareModelName);
-				console.log({labwareModel})
-				const plateFile = {"ourlab.model.plateModel_96_round_transparent_nunc": "COR96fc UV transparent"}[labwareModelName];
-				assert(plateFile);
+				// console.log({labwareModel})
+				const modelToPlateFile = parsed.value.equipment.modelToPlateFile;
+				assert(modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
+				const plateFile = modelToPlateFile[labwareModelName];
+				assert(plateFile, `please define ${parsed.objectName.equipment}.plateFile."${labwareModelName}"`);
 				const wells = "A1:"+locationRowColToText(labwareModel.rows, labwareModel.columns);
 				const params = {
 					plateFile,

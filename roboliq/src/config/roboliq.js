@@ -135,6 +135,7 @@ module.exports = {
 		'../commands/system.js',
 		// Equipment
 		'../commands/equipment.js',
+		'../commands/absorbanceReader.js',
 		'../commands/centrifuge.js',
 		'../commands/fluorescenceReader.js',
 		'../commands/pipetter.js',

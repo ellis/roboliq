@@ -28,7 +28,10 @@ module.exports = {
 				"reader": {
 					"type": "Reader",
 					"sitesInternal": ["ourlab.luigi.site.READER"],
-					"evowareId": "ReaderNETwork"
+					"evowareId": "ReaderNETwork",
+					"modelToPlateFile": {
+						"ourlab.model.plateModel_96_round_transparent_nunc": "COR96fc UV transparent"
+					}
 				},
 				"roma1": {
 					"type": "Transporter",
@@ -348,6 +351,17 @@ module.exports = {
 				]
 			}
 		}),
+		{"#for": {
+			factors: {model: ["plateModel_96_round_transparent_nunc"]},
+			output: {
+				"absorbanceReader.canAgentEquipmentModelSite": {
+					"agent": "ourlab.luigi.evoware",
+					"equipment": "ourlab.luigi.reader",
+					"model": "ourlab.model.{{model}}",
+					"site": "ourlab.luigi.site.READER"
+				}
+			}
+		}},
 		{"#for": {
 			factors: {model: ["plateModel_96_round_transparent_nunc"]},
 			output: {

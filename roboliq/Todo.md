@@ -216,8 +216,8 @@
 - [x] sealer operation
 - [x] shaker operation
 - [ ] reader operation
+	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
     - [ ] create absorbanceReader instructions
-    - [ ] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
 - [ ] exclude access to HOTEL12_9, because of trough
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture

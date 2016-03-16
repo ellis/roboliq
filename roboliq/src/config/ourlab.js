@@ -33,7 +33,10 @@ module.exports = {
 				"reader": {
 					"type": "Reader",
 					"sitesInternal": ["ourlab.mario.site.READER"],
-					"evowareId": "ReaderNETwork"
+					"evowareId": "ReaderNETwork",
+					"modelToPlateFile": {
+						"ourlab.model.plateModel_384_square": "Which One?"
+					}
 				},
 				"roma1": {
 					"type": "Transporter",
@@ -324,6 +327,20 @@ module.exports = {
 					"columns": 12,
 					"evowareName": "D-BSSE 96 Well DWP"
 				},
+				"plateModel_96_round_transparent_nunc": {
+					"type": "PlateModel",
+					"label": "96 round-well transparent Nunc plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "Ellis Nunc F96 MicroWell"
+				},
+				"plateModel_96_square_transparent_nunc": {
+					"type": "PlateModel",
+					"label": "96 square-well transparent Nunc plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "Ellis Nunc F96 MicroWell"
+				},
 				"plateModel_384_round": {
 					"type": "PlateModel",
 					"label": "384 round-well plate",
@@ -344,13 +361,6 @@ module.exports = {
 					"rows": 16,
 					"columns": 24,
 					"evowareName": "384 Sqr Flat Trans Greiner"
-				},
-				"plateModel_96_square_transparent_nunc": {
-					"type": "PlateModel",
-					"label": "96 square-well transparent Nunc plate",
-					"rows": 8,
-					"columns": 12,
-					"evowareName": "Ellis Nunc F96 MicroWell"
 				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
@@ -439,6 +449,17 @@ module.exports = {
 				"site2": "ourlab.mario.site.CENTRIFUGE_4"
 			}};
 		}),
+		{"#for": {
+			factors: {model: ["plateModel_384_square"]},
+			output: {
+				"absorbanceReader.canAgentEquipmentModelSite": {
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.reader",
+					"model": "ourlab.model.{{model}}",
+					"site": "ourlab.mario.site.READER"
+				}
+			}
+		}},
 		{"#for": {
 			factors: {model: ["plateModel_384_square"]},
 			output: {
