@@ -32,20 +32,20 @@ function makeSiteModelPredicates(spec) {
  * Expect specs of this form:
  * ``{<transporter>: {<program>: [site names]}}``
  */
-function makeTransporterPredicates(specs) {
+function makeTransporterPredicates(namespaceName, agentName, specs) {
 	let siteCliqueId = 1;
 	const l = [];
 	_.forEach(specs, (programs, equipment) => {
 		_.forEach(programs, (cliques, program) => {
 			_.forEach(cliques, (sites) => {
-				const siteClique = "ourlab.mario.siteClique"+siteCliqueId;
+				const siteClique = `${namespaceName}.siteClique${siteCliqueId}`;
 				siteCliqueId++;
 				_.forEach(sites, site => {
 					l.push({"siteCliqueSite": {siteClique, site}});
 				});
 				l.push({
 					"transporter.canAgentEquipmentProgramSites": {
-						"agent": "ourlab.mario.evoware",
+						"agent": agentName,
 						equipment,
 						program,
 						siteClique

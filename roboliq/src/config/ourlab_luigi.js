@@ -3,67 +3,13 @@ import assert from 'assert';
 var math = require('mathjs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
-//import {locationRowColToText, locationTextToRowCol} from '../parsers/wellsParser.js';
+import {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} from '../evoware/equipment/evoware.js';
 
 const Equipment = {
+	evoware: require('../evoware/equipment/evoware.js'),
 	reader: require('../evoware/equipment/reader-InfiniteM200Pro.js'),
 	sealer: require('../evoware/equipment/sealer-Tecan.js'),
 };
-
-function makeEvowareFacts(parsed, data, variable, value) {
-	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-	const result2 = {
-		command: "evoware._facts",
-		agent: parsed.objectName.agent,
-		factsEquipment: equipmentId,
-		factsVariable: equipmentId+"_"+variable
-	};
-	const value2 = (_.isFunction(value))
-		? value(parsed, data)
-		: value;
-	return _.merge(result2, {factsValue: value2});
-}
-
-/**
- * Expect spec of this form:
- * ``{siteModel: string, sites: [string], labwareModels: [string]}``
- */
-function makeSiteModelPredicates(spec) {
-	return _.flatten([
-		{isSiteModel: {model: spec.siteModel}},
-		_.map(spec.sites, site => ({siteModel: {site, siteModel: spec.siteModel}})),
-		_.map(spec.labwareModels, labwareModel => ({stackable: {below: spec.siteModel, above: labwareModel}}))
-	]);
-}
-
-/**
- * Expect specs of this form:
- * ``{<transporter>: {<program>: [site names]}}``
- */
-function makeTransporterPredicates(specs) {
-	let siteCliqueId = 1;
-	const l = [];
-	_.forEach(specs, (programs, equipment) => {
-		_.forEach(programs, (cliques, program) => {
-			_.forEach(cliques, (sites) => {
-				const siteClique = "ourlab.luigi.siteClique"+siteCliqueId;
-				siteCliqueId++;
-				_.forEach(sites, site => {
-					l.push({"siteCliqueSite": {siteClique, site}});
-				});
-				l.push({
-					"transporter.canAgentEquipmentProgramSites": {
-						"agent": "ourlab.luigi.evoware",
-						equipment,
-						program,
-						siteClique
-					}
-				});
-			});
-		});
-	});
-	return l;
-}
 
 module.exports = {
 	roboliq: "v1",
@@ -332,17 +278,9 @@ module.exports = {
 		}
 	},
 
-	objectToPredicateConverters: {
-		"EvowareRobot": function(name) {
-			return {
-				value: [{
-					"isAgent": {
-						"agent": name
-					}
-				}]
-			};
-		}
-	},
+	objectToPredicateConverters: _.merge({},
+		Equipment.evoware.objectToPredicateConverters
+	),
 
 	predicates: _.flatten([
 		// Deepwell plates only
@@ -377,7 +315,7 @@ module.exports = {
 			],
 			labwareModels: ["ourlab.model.plateModel_96_dwp", "ourlab.model.plateModel_96_round_transparent_nunc"]
 		}),
-		makeTransporterPredicates({
+		makeTransporterPredicates("ourlab.luigi", "ourlab.luigi.evoware", {
 			"ourlab.luigi.roma1": {
 				Narrow: [
 					[
@@ -508,23 +446,11 @@ module.exports = {
 				})
 			}};
 		}),
-		Equipment.reader.getPredicates("ourlab.luigi.reader", "ourlab.luigi.site.READER")
+		Equipment.reader.getPredicates("ourlab.luigi.evoware", "ourlab.luigi.reader", "ourlab.luigi.site.READER")
 	]),
 
 	schemas: _.merge(
 		{
-			"EvowareRobot": {
-				properties: {
-					type: {enum: ["EvowareRobot"]}
-				},
-				required: ["type"]
-			},
-			"EvowareWashProgram": {
-				properties: {
-					type: {enum: ["EvowareWashProgram"]}
-				},
-				required: ["type"]
-			},
 			"equipment.close|ourlab.luigi.evoware|ourlab.luigi.centrifuge": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
@@ -594,8 +520,9 @@ module.exports = {
 				required: ["agent", "equipment", "items"]
 			}
 		},
-		Equipment.reader.schemas.mapKeys((value, key) => key+"|ourlab.luigi.evoware|ourlab.luigi.reader"),
-		Equipment.sealer.schemas.mapKeys((value, key) => key+"|ourlab.luigi.evoware|ourlab.luigi.sealer")
+		Equipment.evoware.getSchemas(),
+		Equipment.reader.getSchemas("ourlab.luigi.evoware", "ourlab.luigi.reader"),
+		Equipment.sealer.getSchemas("ourlab.luigi.evoware", "ourlab.luigi.sealer")
 	),
 
 	commandHandlers: _.merge(
@@ -678,8 +605,9 @@ module.exports = {
 				return {expansion: expansionList};
 			}
 		},
-		Equipment.reader.commandHandlers.mapKeys((value, key) => key+"|ourlab.luigi.evoware|ourlab.luigi.reader"),
-		Equipment.sealer.commandHandlers.mapKeys((value, key) => key+"|ourlab.luigi.evoware|ourlab.luigi.sealer")
+		Equipment.evoware.getCommandHandlers(),
+		Equipment.reader.getCommandHandlers("ourlab.luigi.evoware", "ourlab.luigi.reader"),
+		Equipment.sealer.getCommandHandlers("ourlab.luigi.evoware", "ourlab.luigi.sealer")
 	),
 
 	planHandlers: _.merge(
@@ -725,5 +653,5 @@ module.exports = {
 			},
 		},
 		Equipment.reader.getPlanHandlers("ourlab.luigi.evoware", "ourlab.luigi.reader", "ourlab.luigi.site.READER")
-	);
+	)
 }

@@ -1,3 +1,5 @@
+import _ from 'lodash';
+import assert from 'assert';
 import Mustache from 'mustache';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';

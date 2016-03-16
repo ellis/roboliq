@@ -400,7 +400,7 @@ module.exports = {
 			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
 			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
 		}),
-		makeTransporterPredicates({
+		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
 			"ourlab.mario.roma1": {
 				Narrow: [
 					["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
