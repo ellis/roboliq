@@ -113,5 +113,34 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle assignment of an array of arrays", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1,2],
+					"b": [
+						[{c: "p"}, {c: "q"}],
+						[{c: "r"}, {c: "s"}]
+					]
+				}),
+				[
+					{a: 1, b: 1, c: "p"}, {a: 1, b: 1, c: "q"},
+					{a: 2, b: 2, c: "r"}, {a: 2, b: 2, c: "s"}
+				]
+			);
+		});
+
+		it("should handle assignment of an object of arrays", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1,2],
+					"b": {a: [{c: "p"}, {c: "q"}], b: [{c: "r"}, {c: "s"}]}
+				}),
+				[
+					{a: 1, b: "a", c: "p"}, {a: 1, b: "a", c: "q"},
+					{a: 2, b: "b", c: "r"}, {a: 2, b: "b", c: "s"}
+				]
+			);
+		});
+
 	});
 });

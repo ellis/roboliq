@@ -93,16 +93,15 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 		let valueIndex = 0;
 		for (let i = 0; i < rowIndexes.length; i++) {
 			const rowIndex = rowIndexes[i];
-			valueIndex += assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, i + 1, value, valueIndex);
+			valueIndex += assignRowByNamedValuesKey(nestedRows, rowIndex, name, value, valueIndex);
 		}
 	}
-	else if (_.isObject(value)) {
+	else if (_.isPlainObject(value)) {
 		let valueIndex = 0;
 		const keys = _.keys(value);
 		for (let i = 0; i < rowIndexes.length; i++) {
 			const rowIndex = rowIndexes[i];
-			const key = keys[valueIndex];
-			valueIndex += assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, key, value, valueIndex, keys);
+			valueIndex += assignRowByNamedValuesKey(nestedRows, rowIndex, name, value, valueIndex, keys);
 		}
 	}
 	else {
@@ -116,7 +115,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 
 /*
  * // REQUIRED by: assignRowsByNamedValue
- * assignRowByNamedKeyValuesKey:
+ * assignRowByNamedValuesKey:
  *   if item is array:
  *     setColumnValue(row, name, key)
  *     branchRowByArray(nestdRows, rowIndex, item)
@@ -126,27 +125,28 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
  *   else:
  *     setColumnValue(row, name, item)
  */
-function assignRowByNamedKeyValuesKey(nestedRows, rowIndex, name, key, values, valueKeyIndex, valueKeys) {
-	let n = 0;
+function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyIndex, valueKeys) {
+	// console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`);
 	const row = nestedRows[rowIndex];
+	let n = 0;
 	if (_.isArray(row)) {
 		for (let i = 0; i < row.length; i++) {
-			const n2 = assignRowByNamedKeyValuesKey(row, i, name, key, values, valueKeyIndex, valueKeys);
+			const n2 = assignRowByNamedValuesKey(row, i, name, values, valueKeyIndex, valueKeys);
 			n += n2;
 			valueKeyIndex += n2;
 		}
 	}
 	else {
 		assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
-		const key = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
-		const keyName = (valueKeys) ? key : valueKeyIndex + 1;
-		const item = values[key];
+		const valueKey = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
+		const key = (valueKeys) ? valueKey : valueKey + 1;
+		const item = values[valueKey];
 		if (_.isArray(item)) {
-			setColumnValue(row, name, keyName);
+			setColumnValue(row, name, key);
 			branchRowByArray(nestedRows, rowIndex, item);
 		}
-		else if (_.isObject(item)) {
-			setColumnValue(row, name, keyName);
+		else if (_.isPlainObject(item)) {
+			setColumnValue(row, name, key);
 			expandRowsByObject(nestedRows, [rowIndex], item);
 		}
 		else {
@@ -192,16 +192,18 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 	}
 }
 
-function branchRowByArray(nestedRows, rowIndex, array) {
-	const size = array.length;
+function branchRowByArray(nestedRows, rowIndex, values) {
+	// console.log(`branchRowByArray: ${JSON.stringify(values)}`);
+	const size = values.length;
 	// Make replicates of row
 	const row0 = nestedRows[rowIndex];
 	const rows2 = Array(size);
 	for (let rowIndex2 = 0; rowIndex2 < size; rowIndex2++) {
+		const value = values[rowIndex2];
 		rows2[rowIndex2] = _.cloneDeep(row0);
+		expandRowsByObject(rows2, [rowIndex2], values[rowIndex2]);
 	}
 
-	expandRowsByObject(rows2, _.range(size), name, value);
 	nestedRows[rowIndex] = _.flattenDeep(rows2);
 }
 
