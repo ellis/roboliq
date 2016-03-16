@@ -78,7 +78,7 @@ var commandHandlers = {
 				object: parsed.objectName.object,
 				outputFile: parsed.value.outputFile
 			}),
-			(destinationAfter === null) ? null : {
+			(destinationAfter === null || destinationAfter === params2.site) ? null : {
 				command: "transporter.movePlate",
 				object: parsed.objectName.object,
 				destination: destinationAfter

@@ -3,6 +3,7 @@ import assert from 'assert';
 import Mustache from 'mustache';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
+import wellsParser from '../../parsers/wellsParser.js';
 
 import {makeEvowareFacts} from './evoware.js';
 
@@ -106,6 +107,7 @@ module.exports = {
 			}
 
 			function getTemplateAbsorbanceParams() {
+				const program = parsed.value.program || {};
 				// const labwareModelName = parsed.objectName["object.model"];
 				const labwareModelName = parsed.value.object.model;
 				// console.log({labwareModelName})
@@ -115,12 +117,55 @@ module.exports = {
 				assert(modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
 				const plateFile = modelToPlateFile[labwareModelName];
 				assert(plateFile, `please define ${parsed.objectName.equipment}.plateFile."${labwareModelName}"`);
-				const wells = "A1:"+locationRowColToText(labwareModel.rows, labwareModel.columns);
+
+				let wells;
+				if (program.wells) {
+					// Get well list
+					const wells0 = wellsParser.parse(program.wells, data.objects);
+					// console.log({wells0})
+					const rx = /\(([^)]*)\)/;
+					const wells1 = wells0.map(s => {
+						const match = s.match(rx);
+						return (match) ? match[1] : s;
+					})
+					// console.log({wells1})
+					const rowcols = wells1.map(s => wellsParser.locationTextToRowCol(s));
+					// console.log({rowcols})
+					// rowcols.sort();
+					//rowcols.sort((a, b) => (a[0] == b[0]) ? a[1] - b[1] : a[0] - b[0]);
+					// console.log({rowcols})
+
+					if (_.isEmpty(rowcols)) {
+						wells = "";
+					}
+					else {
+						let prev = rowcols[0];
+						let indexOnPlatePrev = (prev[0] - 1) * labwareModel.columns + prev[1];
+						wells = locationRowColToText(prev[0], prev[1])+":";
+						for (let i = 1; i < rowcols.length; i++) {
+							const rowcol = rowcols[i];
+							const indexOnPlate = (rowcol[0] - 1) * labwareModel.columns + rowcol[1];
+							// If continuity is broken:
+							if (true || indexOnPlate !== indexOnPlatePrev + 1) {
+								wells += locationRowColToText(prev[0], prev[1])+"|"+locationRowColToText(rowcol[0], rowcol[1])+":";
+							}
+							prev = rowcol;
+							indexOnPlatePrev = indexOnPlate;
+						}
+						wells += locationRowColToText(prev[0], prev[1]);
+					}
+				}
+				// If not specified, read all wells on plate
+				else {
+					wells = "A1:"+locationRowColToText(labwareModel.rows, labwareModel.columns);
+				}
+				// console.log({wells})
+
 				const params = {
 					plateFile,
 					wells,
-					excitationWavelength: parsed.value.program.excitationWavelength,
-					excitationBandwidth: 90
+					excitationWavelength: program.excitationWavelength,
+					excitationBandwidth: program.excitationBandwidth || 90
 				};
 				// console.log({params});
 				return params;

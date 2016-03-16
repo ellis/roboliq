@@ -108,4 +108,5 @@ steps:
     object: plate
     program:
       excitationWavelength: 6000
+      wells: A01, H12
     outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
