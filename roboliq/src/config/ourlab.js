@@ -4,6 +4,10 @@ var math = require('mathjs');
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 
+const Equipment = {
+	sealer: require('../evoware/equipment/sealer-Tecan.js')
+};
+
 function makeEvowareFacts(parsed, data, variable, value) {
 	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	const result2 = {
@@ -735,14 +739,7 @@ module.exports = {
 			},
 			required: ["outputFile"]
 		},
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": {
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {description: "Program identifier for sealing", type: "string"}
-			},
-			required: ["agent", "equipment", "program"]
-		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": Equipment.sealer.schemas["equipment.run"],
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
@@ -866,19 +863,7 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value)]};
 		},
 		// Sealer
-		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": function(params, parsed, data) {
-			const carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-			return {
-				expansion: [{
-					command: "evoware._facts",
-					agent: parsed.objectName.agent,
-					factsEquipment: carrier,
-					factsVariable: carrier+"_Seal",
-					factsValue: parsed.value.program
-				}],
-				//effects: _.fromPairs([[params.object + ".sealed", true]])
-			};
-		},
+		"equipment.run|ourlab.mario.evoware|ourlab.mario.sealer": Equipment.sealer.commandHandlers["equipment.run"],
 		// Shaker
 		"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
 			//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.shaker: "+JSON.stringify(parsed, null, '\t'))

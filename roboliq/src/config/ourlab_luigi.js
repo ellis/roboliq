@@ -692,50 +692,6 @@ module.exports = {
 	},
 
 	commandHandlers: {
-		"equipment.close|ourlab.luigi.evoware|ourlab.luigi.centrifuge": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
-		},
-		"equipment.open|ourlab.luigi.evoware|ourlab.luigi.centrifuge": function(params, parsed, data) {
-			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
-		},
-		"equipment.openSite|ourlab.luigi.evoware|ourlab.luigi.centrifuge": function(params, parsed, data) {
-			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
-			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-			var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
-			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
-			return {
-				expansion: [
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_MoveToPos",
-						factsValue: (siteIndex+1).toString()
-					},
-					{
-						command: "evoware._facts",
-						agent: parsed.objectName.agent,
-						factsEquipment: carrier,
-						factsVariable: carrier+"_Open"
-					},
-				]
-			};
-		},
-		"equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge": function(params, parsed, data) {
-			//console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge:")
-			//console.log({parsed, params})
-			const parsedProgram = parsed.value.program;
-			//console.log({parsedProgram});
-			var list = [
-				math.round(parsedProgram.rpm),
-				math.round(parsedProgram.duration.toNumber('s')),
-				math.round(parsedProgram.spinUpTime.toNumber('s')),
-				math.round(parsedProgram.spinDownTime.toNumber('s')),
-				math.round(parsedProgram.temperature.toNumber('degC'))
-			];
-			var value = list.join(",");
-			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
-		},
 		// Reader
 		"equipment.close|ourlab.luigi.evoware|ourlab.luigi.reader": function(params, parsed, data) {
 			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
