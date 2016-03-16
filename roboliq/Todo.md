@@ -217,7 +217,9 @@
 - [x] shaker operation
 - [ ] reader operation
 	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
-    - [ ] create absorbanceReader instructions
+    - [x] create absorbanceReader instructions
+	- [ ] luigi_protocol3: why does fluorescenceReader command measure absorbance?
+	- [ ] luigi_protocol3: change to measure absorbance
 - [ ] exclude access to HOTEL12_9, because of trough
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
