@@ -320,7 +320,7 @@ function setColumnValue(row, name, value) {
 }
 
 class Special {
-	constructor(params) {
+	constructor(params, next) {
 		this.params = params;
 		this.next = next;
 	}
@@ -344,7 +344,9 @@ function countRows(nestedRows, rowIndexes) {
 const actionHandlers = {
 	"assign":  (nestedRows, rowIndexes, name, action, randomEngine) => {
 		assert(_.isArray(action.values), "should have 'values' array: "+JSON.stringify(action));
-		if (_.get(action, "shuffle", false) !== false) {
+		const shuffle = _.get(action, "shuffle", false);
+		if (shuffle !== false) {
+			console.log("SHUFFLE!")
 			const randomEngine2 = (_.isNumber(shuffle))
 				? Random.engines.mt19937().seed(shuffle)
 				: randomEngine;
@@ -352,10 +354,13 @@ const actionHandlers = {
 				console.log({params: this.params});
 				this.nextIndex = this.nextIndex || 0;
 				if (this.nextIndex === 0) {
-					this.values = Random.sample(randomEngine2, values, values.length);
+					this.values = Random.sample(randomEngine2, action.values, action.values.length);
 				}
 				const value = this.values[this.nextIndex];
 				this.nextIndex++;
+				if (this.nextIndex >= action.values.length) {
+					this.nextIndex = 0;
+				}
 				return value;
 			});
 		}

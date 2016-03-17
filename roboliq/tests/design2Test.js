@@ -191,13 +191,14 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle range() with shuffle", () => {
+		it("should handle assign() with shuffle", () => {
 			const design = {
 				randomSeed: 444,
 				conditions: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
-					"order=range": {
+					"order=assign": {
+						values: [1, 2, 3, 4, 5, 6],
 						shuffle: true
 					}
 				}
@@ -206,8 +207,8 @@ describe('design', () => {
 			// console.log(JSON.stringify(table))
 			// printData(table);
 			should.deepEqual(table, [
-				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
-				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":3},{"a":2,"b":3,"order":1}
+				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":5},{"a":1,"b":3,"order":3},
+				{"a":2,"b":1,"order":4},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":6}
 			]);
 		});
 
