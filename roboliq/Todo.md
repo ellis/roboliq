@@ -222,8 +222,11 @@
 	- [x] luigi_protocol3: change to measure absorbance
 - [x] exclude access to HOTEL12_9, because of trough
 - [ ] culturebox operation
-	- [ ] add to ourlab_luigi.objects
-	- [ ] make sure it has internal sites
+	- [x] add to ourlab_luigi.objects
+	- [x] make sure it has internal sites
+	- [ ] test moving plates into it
+	- [ ] test running the shaker with open cover
+	- [ ] test running the incubator
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] suboptimal plate transport:

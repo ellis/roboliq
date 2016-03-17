@@ -10,15 +10,16 @@ config:
 objects:
   plate:
     type: Plate
-    # model: ourlab.model.plateModel_96_dwp
-    model: ourlab.model.plateModel_96_round_transparent_nunc
+    model: ourlab.model.plateModel_96_dwp
+    # model: ourlab.model.plateModel_96_round_transparent_nunc
     #location: ourlab.luigi.site.REGRIP_BELOW
-    location: ourlab.luigi.site.P1
+    # location: ourlab.luigi.site.P1
+    location: ourlab.luigi.site.LIGHT
   #plate: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
-  trough1: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1}
-  trough2: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R2}
-  trough3: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3}
-  trough4: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4}
+  # trough1: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1}
+  # trough2: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R2}
+  # trough3: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3}
+  # trough4: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4}
 steps:
   # 1:
   #   command: transporter.movePlate
@@ -112,11 +113,21 @@ steps:
   #   outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
 
   # description: open the culturebox
+  # 1:
+  #   command: equipment.open
+  #   agent: ourlab.luigi.evoware
+  #   equipment: ourlab.luigi.culturebox
+  # 2:
+  #   command: equipment.close
+  #   agent: ourlab.luigi.evoware
+  #   equipment: ourlab.luigi.culturebox
+
+  # description: move plate into closed culturebox
   1:
-    command: equipment.open
-    agent: ourlab.luigi.evoware
-    equipment: ourlab.luigi.culturebox
+    command: transporter.movePlate
+    object: plate
+    destination: ourlab.luigi.site.BOX_2
   2:
-    command: equipment.close
-    agent: ourlab.luigi.evoware
-    equipment: ourlab.luigi.culturebox
+    command: transporter.movePlate
+    object: plate
+    destination: ourlab.luigi.site.P6

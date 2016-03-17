@@ -168,20 +168,22 @@ function makeMovePlateMethod(parsed, movePlateParams, n) {
 	assert(false);
 }
 
-function debugMovePlateMethod(input, method, n) {
-	const lines = [];
-	var llpl = require('../HTN/llpl.js').create();
-	llpl.initializeDatabase(input);
+function queryMovePlateMethod(llpl, method, n) {
 	//console.log("originId: "+originId)
 	const criteria = method.preconditions;
 	const queryAll = {"and": criteria};
 	const queryResultsAll = llpl.query(queryAll);
-	//console.log("queryResultsAll:\n"+JSON.stringify(queryResultsAll, null, '\t'));
+	return queryResultsAll;
+}
+
+function debugMovePlateMethod(llpl, method, queryResultsAll, n) {
+	const lines = [];
+	const criteria = method.preconditions;
 
 	//console.log(queryResultsAll.length);
 	if (queryResultsAll.length === 0) {
 		lines.push(`\nmovePlate-${n} failed:`);
-		//console.log("debug: "+criteria);
+		// console.log("debug: "+criteria);
 		// let failures = 0;
 		_.forEach(criteria, criterion => {
 			// console.log({criterion})
@@ -196,6 +198,9 @@ function debugMovePlateMethod(input, method, n) {
 				//console.log("queryResults:\n"+JSON.stringify(queryResultOne, null, '\t'));
 			}
 		});
+	}
+	else {
+		console.log("found paths: "+queryResultsAll)
 	}
 	return lines.join("\n");
 }
@@ -251,19 +256,30 @@ var commandHandlers = {
 			const method = {method: makeMovePlateMethod(parsed, movePlateParams, i)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
 			input0 = input0.concat([method]);
-			const tasks = { "tasks": { "ordered": [{ movePlate: movePlateParams }] } };
-			//console.log(JSON.stringify(tasks))
-			const input = input0.concat([tasks]);
-			var planner = shop.makePlanner(input);
-			plan = planner.plan();
-			//console.log(key, plan)
-			if (!_.isEmpty(plan)) {
-				//console.log("plan found for "+key)
-				//console.log(planner.ppPlan(plan));
-				break;
+			const llpl = require('../HTN/llpl.js').create();
+			llpl.initializeDatabase(input0);
+			const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
+			// If we didn't find a path for this method:
+			if (queryResultsAll.length === 0) {
+				const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
+				errorLog += text;
 			}
+			// If we did find a path:
 			else {
-				errorLog += debugMovePlateMethod(input, method.method, i);
+				// console.log(`${queryResultsAll.length} path(s) found, e.g.: ${JSON.stringify(queryResultsAll[0])}`);
+				const tasks = { "tasks": { "ordered": [{ movePlate: movePlateParams }] } };
+				const input = input0.concat([tasks]);
+				var planner = shop.makePlanner(input);
+				plan = planner.plan();
+				//console.log(key, plan)
+				if (!_.isEmpty(plan)) {
+					//console.log("plan found for "+key)
+					//console.log(planner.ppPlan(plan));
+				}
+				else {
+					console.log("apparently unable to open some site or something")
+				}
+				break;
 			}
 		}
 
