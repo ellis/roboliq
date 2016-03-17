@@ -22,7 +22,7 @@ module.exports = {
 				"culturebox": {
 					"type": "Incubator",
 					"sitesInternal": ["ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8"],
-					"evowareId": "Kuener"
+					"evowareId": "Kuehner"
 				},
 				"evoware": {
 					"type": "EvowareRobot",
@@ -391,6 +391,18 @@ module.exports = {
 			}
 		},
 		{
+			"shaker.canAgentEquipment": {
+				"agent": "ourlab.luigi.evoware",
+				"equipment": "ourlab.luigi.culturebox"
+			}
+		},
+		{
+			"shaker.canAgentEquipment": {
+				"agent": "ourlab.luigi.evoware",
+				"equipment": "ourlab.luigi.shaker"
+			}
+		},
+		{
 			"shaker.canAgentEquipmentSite": {
 				"agent": "ourlab.luigi.evoware",
 				"equipment": "ourlab.luigi.shaker",
@@ -502,11 +514,9 @@ module.exports = {
 						description: "Program for shaking and incubating",
 						type: "object",
 						properties: {
-							rpm: {type: "number", default: 3000},
-							duration: {type: "Duration", default: "30 s"},
-							spinUpTime: {type: "Duration", default: "9 s"},
-							spinDownTime: {type: "Duration", default: "9 s"},
-							temperature: {type: "Temperature", default: "25 degC"}
+							rpm: {type: "number", default: 300},
+							duration: {type: "Duration"},
+							temperature: {type: "Temperature"}
 						}
 					}
 				},
@@ -588,22 +598,33 @@ module.exports = {
 
 				return {expansion, effects};
 			},
-			/*CONTINUE
-			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge": function(params, parsed, data) {
-				//console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge:")
-				//console.log({parsed, params})
+			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
+				console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
+				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 				const parsedProgram = parsed.value.program;
 				//console.log({parsedProgram});
-				var list = [
-					math.round(parsedProgram.rpm),
-					math.round(parsedProgram.duration.toNumber('s')),
-					math.round(parsedProgram.spinUpTime.toNumber('s')),
-					math.round(parsedProgram.spinDownTime.toNumber('s')),
-					math.round(parsedProgram.temperature.toNumber('degC'))
+				const expansion = [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_start",
+						factsValue: parsedProgram.rpm
+					},
+					{
+						command: "timer.sleep",
+						agent: parsed.objectName.agent,
+						duration: parsed.orig.program.duration
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_stop"
+					},
 				];
-				var value = list.join(",");
-				return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
-			},*/
+				return {expansion};
+			},
 			// Shaker
 			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker": function(params, parsed, data) {
 				//console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker: "+JSON.stringify(parsed, null, '\t'))

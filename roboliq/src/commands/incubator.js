@@ -269,7 +269,68 @@ var commandHandlers = {
 			expansion: expansion,
 			alternatives: alternatives
 		};
-	}
+	},
+	"incubator.run": function(params, parsed, data) {
+		var llpl = require('../HTN/llpl.js').create();
+		llpl.initializeDatabase(data.predicates);
+
+		//console.log(JSON.stringify(parsed, null, '\t'))
+
+		var agent = parsed.objectName.agent || "?agent";
+		var equipment = parsed.objectName.equipment || "?equipment";
+
+		var object1 = parsed.value.object1;
+		var object2 = parsed.value.object2;
+		if (object1.model != object2.model)
+			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
+
+		var query0 = {
+			"incubator.canAgentEquipment": {
+				"agent": "?agent",
+				"equipment": "?equipment"
+			}
+		};
+		var query = _.merge({}, query0,
+			{"incubator.canAgentEquipment": {
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment
+			}}
+		);
+		var resultList = llpl.query(query);
+		var alternatives = jmespath.search(resultList, '[]."incubator.canAgentEquipment"');
+		if (_.isEmpty(resultList)) {
+			var resultList2 = llpl.query(query0);
+			if (_.isEmpty(resultList2)) {
+				return {
+					errors: ["missing equipment data (please add predicates `incubator.canAgentEquipment`)"]
+				};
+			} else {
+				return {
+					errors: ["missing equipment configuration for " + JSON.stringify(query)]
+				};
+			}
+		}
+
+		// Find any parameters which can only take one specific value
+		var params2 = alternatives[0];
+		//console.log("alternatives[0]:\n"+JSON.stringify(params2))
+
+		var expansion = [
+			{
+				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
+				agent: params2.agent,
+				equipment: params2.equipment,
+				program: parsed.objectName.program || parsed.value.program
+			},
+		];
+
+		//console.log("incubator2 expansion:")
+		//console.log(JSON.stringify(expansion, null, '\t'))
+		return {
+			expansion: expansion,
+			alternatives: alternatives
+		};
+	},
 };
 
 module.exports = {

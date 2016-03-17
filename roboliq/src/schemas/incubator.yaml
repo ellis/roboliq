@@ -29,13 +29,13 @@ incubator.incubatePlates:
     destinationAfters: {description: "Location identifier for where the plates should be placed after incubation", "type": array, items: {type: SiteOrStay}}
   required: ["program", "plates"]
   example: |
-    This will incubate 2 plates at 3000rpm for 2 minutes at 25°C:
+    This will incubate 2 plates at 300rpm for 2 minutes at 25°C:
     ```
     {
       "command": "incubator.incubatePlates",
       "plates": ["plate1", "plate2"],
       "program": {
-        "rpm": 3000,
+        "rpm": 300,
         "duration": "2 minutes",
         "temperature": "25 degC"
       }
@@ -56,5 +56,36 @@ incubator.insertPlates:
     {
       "command": "incubator.insertPlates",
       "plates": ["plate1", "plate2"]
+    }
+    ```
+
+incubator.run:
+  description: "Run the incubator with the given program"
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program:
+      description: "Program for shaking and incubating"
+      type: "object"
+      properties:
+        rpm: {type: "number"}
+        duration: {type: "Duration"}
+        temperature: {type: "Temperature"}
+      required: [duration]
+    plates: {description: "List of plates to incubate", type: array, items: {type: Plate}}
+    sites: {description: "Internal sites to put the plates on", type: array, items: {type: Site}}
+    destinationAfters: {description: "Location identifier for where the plates should be placed after incubation", "type": array, items: {type: SiteOrStay}}
+  required: ["program", "plates"]
+  example: |
+    This will incubate 2 plates at 300rpm for 2 minutes at 25°C:
+    ```
+    {
+      "command": "incubator.incubatePlates",
+      "plates": ["plate1", "plate2"],
+      "program": {
+        "rpm": 300,
+        "duration": "2 minutes",
+        "temperature": "25 degC"
+      }
     }
     ```

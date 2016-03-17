@@ -123,11 +123,27 @@ steps:
   #   equipment: ourlab.luigi.culturebox
 
   # description: move plate into closed culturebox
+  # 1:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_2
+  # 2:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.P6
+
+  # description: move plate into culturebox and shake it
   1:
-    command: transporter.movePlate
-    object: plate
-    destination: ourlab.luigi.site.BOX_2
+    command: equipment.open
+    agent: ourlab.luigi.evoware
+    equipment: ourlab.luigi.culturebox
   2:
     command: transporter.movePlate
     object: plate
-    destination: ourlab.luigi.site.P6
+    destination: ourlab.luigi.site.BOX_2
+  3:
+    command: shaker.run
+    equipment: ourlab.luigi.culturebox
+    program:
+      rpm: 300
+      duration: 30s
