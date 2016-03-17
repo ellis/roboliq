@@ -104,7 +104,7 @@ steps:
 
   # description: read absorbance/fluorescence
   1:
-    command: fluorescenceReader.measurePlate
+    command: absorbanceReader.measurePlate
     object: plate
     program:
       excitationWavelength: 6000

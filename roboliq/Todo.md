@@ -166,6 +166,7 @@
     - [x] skip objects with 'data' property
     - [x] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
 - [x] tania13_ph.yaml: re-write using Design
+- [ ] reader-InfiniteM200Pro.js: add support for generating fluorescence programs, see `(true || measurementType === "absorbance")` around line 177
 - [ ] create incubator command for tania13_ph, and accommodate "methods" for expanding commands
 - [ ] centrifuge.startIncubation: create
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
@@ -218,9 +219,8 @@
 - [ ] reader operation
 	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
     - [x] create absorbanceReader instructions
-	- [ ] luigi_protocol3: why does fluorescenceReader command measure absorbance?
-	- [ ] luigi_protocol3: change to measure absorbance
-- [ ] exclude access to HOTEL12_9, because of trough
+	- [x] luigi_protocol3: change to measure absorbance
+- [x] exclude access to HOTEL12_9, because of trough
 - [ ] culturebox operation
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
