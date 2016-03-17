@@ -60,6 +60,25 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 	// console.log({rowIndexes})
 	// console.log(nestedRows)
+	// If an action is specified using the "=" symbol:
+	const iEquals = name.indexOf("=");
+	if (iEquals >= 0) {
+		const actionType = name.substr(iEquals + 1);
+		const actionHandler = actionHandlers[actionType];
+		assert(actionHandler, `unknown action type: ${actionType} in ${name}`)
+		name = name.substr(0, iEquals);
+
+		const result = actionHandler(nestedRows, rowIndexes, name, value);
+		// If no result was returned, the action handled modified the rows directly:
+		if (_.isUndefined(result)) {
+			return;
+		}
+		// Otherwise, continue processing using the actino's results
+		else {
+			value = result;
+		}
+	}
+
 	// TODO: turn the name/value into an action in order to allow for more sophisticated expansion
 	if (_.endsWith(name, "*")) {
 		branchRowsByNamedValue(nestedRows, rowIndexes, name.substr(0, name.length - 1), value);
@@ -104,6 +123,13 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value) {
 			valueIndex += assignRowByNamedValuesKey(nestedRows, rowIndex, name, value, valueIndex, keys);
 		}
 	}
+	/*else if (value instanceof Special) {
+		let valueIndex = 0;
+		for (let i = 0; i < rowIndexes.length; i++) {
+			const rowIndex = rowIndexes[i];
+			valueIndex += assignRowByNamedValuesKey(nestedRows, rowIndex, name, value, valueIndex);
+		}
+	}*/
 	else {
 		for (let i = 0; i < rowIndexes.length; i++) {
 			const rowIndex = rowIndexes[i];
@@ -223,6 +249,42 @@ function setColumnValue(row, name, value) {
 		else {
 			row[name] = value;
 			// console.log(`row[name] = ${row[name]}`)
+		}
+	}
+}
+
+const actionHandlers = {
+	"range": (nestedRows, rowIndexes, name, action) => {
+		let till = action.till;
+		if (_.isUndefined(till)) {
+			const rows = data.group || data.table;
+			if (rows)
+				till = rows.length;
+		}
+		let range;
+		if (!_.isUndefined(till)) {
+			const from = _.get(action, "from", 1);
+			assert(_.isNumber(from), "`from` must be a number");
+			if (_.isNumber(action.count)) {
+				const diff = till - from;
+				range = _.range(action.count).map(i => {
+					const d = diff * i / (action.count - 1);
+					return from + d;
+				});
+			}
+			else {
+				const step = _.get(action, "step", 1);
+				range = _.range(from, till+1, step);
+			}
+		}
+		if (range) {
+			if (_.isNumber(action.decimals)) {
+				range = range.map(n => Number(n.toFixed(action.decimals)));
+			}
+			if (_.isString(action.units)) {
+				range = range.map(n => `${n} ${action.units}`);
+			}
+			return range;
 		}
 	}
 }

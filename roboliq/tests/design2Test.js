@@ -142,5 +142,18 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle 'range' action", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*=range": {till: 4},
+					"b=range": {from: 0, till: 3},
+					"c=range": {from: 10, till: 100, step: 10}
+				}),
+				[
+					{a: 1, b: 0, c: 10}, {a: 2, b: 1, c: 20}, {a: 3, b: 2, c: 30}, {a: 4, b: 3, c: 40}
+				]
+			);
+		});
+
 	});
 });
