@@ -218,8 +218,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
 	else {
 		let item, key;
 		if (values instanceof Special) {
-			item = values.next();
-			key = valueKeyIndex;
+			[key, item] = values.next();
 		}
 		else {
 			assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
@@ -354,14 +353,17 @@ const actionHandlers = {
 				console.log({params: this.params});
 				this.nextIndex = this.nextIndex || 0;
 				if (this.nextIndex === 0) {
-					this.values = Random.sample(randomEngine2, action.values, action.values.length);
+					const n = _.size(this.params.values);
+					this.indexes = Random.sample(randomEngine2, _.range(n), n);
 				}
-				const value = this.values[this.nextIndex];
+				const index = this.indexes[this.nextIndex];
+				const key = index + 1;
+				const value = this.params.values[index];
 				this.nextIndex++;
-				if (this.nextIndex >= action.values.length) {
+				if (this.nextIndex >= this.params.values.length) {
 					this.nextIndex = 0;
 				}
-				return value;
+				return [key, value];
 			});
 		}
 		else {
