@@ -116,7 +116,7 @@ steps:
     command: equipment.open
     agent: ourlab.luigi.evoware
     equipment: ourlab.luigi.culturebox
-  1:
+  2:
     command: equipment.close
     agent: ourlab.luigi.evoware
     equipment: ourlab.luigi.culturebox
