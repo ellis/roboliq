@@ -57,7 +57,7 @@ export function printRows(rows, hideRedundancies = false) {
 }
 
 export function flattenDesign(design) {
-	var randomEngine = Random.engines.mt19937();
+	const randomEngine = Random.engines.mt19937();
 	if (_.isNumber(design.randomSeed)) {
 		randomEngine.seed(design.randomSeed);
 	}
@@ -90,6 +90,7 @@ export function flattenArrayM(rows) {
 /**
  */
 export function expandConditions(conditions, randomEngine) {
+	console.log("expandConditions: "+JSON.stringify(conditions))
 	const table = [{}];
 	expandRowsByObject(table, [0], conditions, randomEngine);
 	flattenArrayM(table);
@@ -171,7 +172,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 		let valueIndex = 0;
 		for (let i = 0; i < rowIndexes.length; i++) {
 			const rowIndex = rowIndexes[i];
-			valueIndex += assignRowByNamedValuesKey(nestedRows, rowIndex, name, value, valueIndex, randomEngine);
+			valueIndex += assignRowByNamedValuesKey(nestedRows, rowIndex, name, value, valueIndex, undefined, randomEngine);
 		}
 	}
 	else if (_.isPlainObject(value)) {

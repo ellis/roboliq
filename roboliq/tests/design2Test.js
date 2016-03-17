@@ -172,7 +172,26 @@ describe('design', () => {
 			);
 		});
 
-		it.skip("should handle range() with shuffle", () => {
+	});
+
+	describe("flattenDesign", () => {
+
+		it("should handle assignment of two branching arrays", () => {
+			should.deepEqual(
+				flattenDesign({
+					conditions: {
+						"a*": [1,2],
+						"b*": [1, 2, 3]
+					}
+				}),
+				[
+					{a: 1, b: 1}, {a: 1, b: 2}, {a: 1, b: 3},
+					{a: 2, b: 1}, {a: 2, b: 2}, {a: 2, b: 3}
+				]
+			);
+		});
+
+		it("should handle range() with shuffle", () => {
 			const design = {
 				randomSeed: 444,
 				conditions: {
