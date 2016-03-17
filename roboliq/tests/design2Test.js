@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const should = require('should');
 import {printData} from '../src/design.js';
-import {flattenArrayM, expandConditions} from '../src/design2.js';
+import {flattenDesign, flattenArrayM, expandConditions} from '../src/design2.js';
 
 describe('design', () => {
 	// Configure mathjs to use bignumbers
@@ -142,17 +142,54 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle assignment of two branching arrays", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1,2],
+					"b*": [1, 2, 3]
+				}),
+				[
+					{a: 1, b: 1}, {a: 1, b: 2}, {a: 1, b: 3},
+					{a: 2, b: 1}, {a: 2, b: 2}, {a: 2, b: 3}
+				]
+			);
+		});
+
 		it("should handle 'range' action", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {till: 4},
 					"b=range": {from: 0, till: 3},
-					"c=range": {from: 10, till: 100, step: 10}
+					"c=range": {from: 10, till: 100, step: 10},
+					"d=range": {}
 				}),
 				[
-					{a: 1, b: 0, c: 10}, {a: 2, b: 1, c: 20}, {a: 3, b: 2, c: 30}, {a: 4, b: 3, c: 40}
+					{a: 1, b: 0, c: 10, d: 1},
+					{a: 2, b: 1, c: 20, d: 2},
+					{a: 3, b: 2, c: 30, d: 3},
+					{a: 4, b: 3, c: 40, d: 4}
 				]
 			);
+		});
+
+		it.skip("should handle range() with shuffle", () => {
+			const design = {
+				randomSeed: 444,
+				conditions: {
+					"a*": [1, 2],
+					"b*": [1, 2, 3],
+					"order=range": {
+						shuffle: true
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printData(table);
+			should.deepEqual(table, [
+				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
+				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":3},{"a":2,"b":3,"order":1}
+			]);
 		});
 
 	});
