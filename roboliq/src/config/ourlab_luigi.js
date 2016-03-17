@@ -19,6 +19,11 @@ module.exports = {
 			"type": "Namespace",
 			"luigi": {
 				"type": "Namespace",
+				"culturebox": {
+					"type": "Incubator",
+					"sitesInternal": ["ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8"],
+					"evowareId": "Kuener"
+				},
 				"evoware": {
 					"type": "EvowareRobot",
 					config: {
@@ -343,6 +348,9 @@ module.exports = {
 				Narrow: [
 					[
 						"ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8",
+						"ourlab.luigi.site.LIGHT"
+					],
+					[
 						"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
 						"ourlab.luigi.site.LIGHT",
 						"ourlab.luigi.site.ROBOSEAL",
@@ -419,80 +427,79 @@ module.exports = {
 			"agent": "ourlab.luigi.evoware",
 			"equipment": "ourlab.luigi.timer1",
 		}},
-		_.map([1,2,3,4], function(n) {
-			return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
+		_.map([1,2,3,4,5,6,7,8], function(n) {
+			return {"method": {"description": "generic.closeSite-BOX_"+n,
 				"task": {"generic.closeSite": {"site": "?site"}},
 				"preconditions": [
-					{"same": {"thing1": "?site", "thing2": "ourlab.luigi.site.CENTRIFUGE_"+n}}
+					{"same": {"thing1": "?site", "thing2": "ourlab.luigi.site.BOX_"+n}}
 				],
 				"subtasks": {"ordered": [
-					{"ourlab.luigi.centrifuge.close": {"agent": "ourlab.luigi.evoware", "equipment": "ourlab.luigi.centrifuge"}}
+					{"ourlab.luigi.culturebox.close": {"agent": "ourlab.luigi.evoware", "equipment": "ourlab.luigi.culturebox"}}
 				]}
 			}}
 		}),
-		{"action": {"description": "ourlab.luigi.centrifuge.close: close the centrifuge",
-			"task": {"ourlab.luigi.centrifuge.close": {"agent": "?agent", "equipment": "?equipment"}},
+		{"action": {"description": "ourlab.luigi.culturebox.close: close the culturebox",
+			"task": {"ourlab.luigi.culturebox.close": {"agent": "?agent", "equipment": "?equipment"}},
 			"preconditions": [],
 			"deletions": [],
 			"additions": [
-				{"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_1"}},
-				{"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_2"}},
-				{"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_3"}},
-				{"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_4"}}
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_1"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_2"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_3"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_4"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_5"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_6"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_7"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_8"}}
 			]
 		}},
-		_.map([1,2,3,4], function(n) {
-			return {"method": {"description": "generic.openSite-CENTRIFUGE_"+n,
+		_.map([1,2,3,4,5,6,7,8], function(n) {
+			return {"method": {"description": "generic.openSite-BOX_"+n,
 				"task": {"generic.openSite": {"site": "?site"}},
-				"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.luigi.site.CENTRIFUGE_"+n}}],
-				"subtasks": {"ordered": [_.fromPairs([["ourlab.luigi.centrifuge.open"+n, {}]])]}
+				"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.luigi.site.BOX_"+n}}],
+				"subtasks": {"ordered": [{"ourlab.luigi.culturebox.stopAndOpen": {}}]}
 			}};
 		}),
-		_.map([1,2,3,4], function(n) {
-			return {"action": {"description": "ourlab.luigi.centrifuge.open: open an internal site on the centrifuge",
-				"task": _.fromPairs([["ourlab.luigi.centrifuge.open"+n, {}]]),
-				"preconditions": [],
-				"deletions": [
-					{"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_"+n}}
-				],
-				"additions": _.map(_.without([1,2,3,4], n), function(n2) {
-					return {"siteIsClosed": {"site": "ourlab.luigi.site.CENTRIFUGE_"+n2}};
-				})
-			}};
-		}),
+		{"action": {"description": "ourlab.luigi.culturebox.open: open the culturebox",
+			"task": {"ourlab.luigi.culturebox.stopAndOpen": {"agent": "?agent", "equipment": "?equipment"}},
+			"preconditions": [],
+			"deletions": [
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_1"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_2"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_3"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_4"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_5"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_6"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_7"}},
+				{"siteIsClosed": {"site": "ourlab.luigi.site.BOX_8"}}
+			],
+			"additions": []
+		}},
 		Equipment.reader.getPredicates("ourlab.luigi.evoware", "ourlab.luigi.reader", "ourlab.luigi.site.READER")
 	]),
 
 	schemas: _.merge(
 		{
-			"equipment.close|ourlab.luigi.evoware|ourlab.luigi.centrifuge": {
+			"equipment.close|ourlab.luigi.evoware|ourlab.luigi.culturebox": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
 					equipment: {description: "Equipment identifier", type: "Equipment"},
 				},
 				required: ["agent", "equipment"]
 			},
-			"equipment.open|ourlab.luigi.evoware|ourlab.luigi.centrifuge": {
+			"equipment.open|ourlab.luigi.evoware|ourlab.luigi.culturebox": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
 					equipment: {description: "Equipment identifier", type: "Equipment"},
 				},
 				required: ["agent", "equipment"]
 			},
-			"equipment.openSite|ourlab.luigi.evoware|ourlab.luigi.centrifuge": {
-				properties: {
-					agent: {description: "Agent identifier", type: "Agent"},
-					equipment: {description: "Equipment identifier", type: "Equipment"},
-					site: {description: "Site identifier", type: "Site"}
-				},
-				required: ["agent", "equipment", "site"]
-			},
-			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge": {
+			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
 					equipment: {description: "Equipment identifier", type: "Equipment"},
 					program: {
-						description: "Program for centrifuging",
+						description: "Program for shaking and incubating",
 						type: "object",
 						properties: {
 							rpm: {type: "number", default: 3000},
@@ -541,6 +548,62 @@ module.exports = {
 
 	commandHandlers: _.merge(
 		{
+			"equipment.close|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
+				const expansion = [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: "Cover",
+						factsVariable: "Cover_Close"
+					}
+				];
+				return {expansion};
+			},
+			"equipment.open|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
+				var effects = _.merge(
+					// Indicate the the equipment is open and not running
+					{
+						[`${parsed.objectName.equipment}.open`]: true,
+						[`${parsed.objectName.equipment}.running`]: false
+					},
+					// Indicate that the internal sites are open
+					_.fromPairs(_.map(parsed.value.equipment.sitesInternal, site => [`${site}.closed`, false]))
+				);
+
+				// Stop and open
+				const expansion = [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: "Kuehner",
+						factsVariable: "Kuehner_stop"
+					},
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: "Cover",
+						factsVariable: "Cover_Open"
+					}
+				];
+
+				return {expansion, effects};
+			},
+			/*CONTINUE
+			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge": function(params, parsed, data) {
+				//console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.centrifuge:")
+				//console.log({parsed, params})
+				const parsedProgram = parsed.value.program;
+				//console.log({parsedProgram});
+				var list = [
+					math.round(parsedProgram.rpm),
+					math.round(parsedProgram.duration.toNumber('s')),
+					math.round(parsedProgram.spinUpTime.toNumber('s')),
+					math.round(parsedProgram.spinDownTime.toNumber('s')),
+					math.round(parsedProgram.temperature.toNumber('degC'))
+				];
+				var value = list.join(",");
+				return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
+			},*/
 			// Shaker
 			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker": function(params, parsed, data) {
 				//console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker: "+JSON.stringify(parsed, null, '\t'))
@@ -583,7 +646,6 @@ module.exports = {
 					]
 				};
 			},
-			"evoware._facts": function(params, parsed, data) {},
 			// Clean tips
 			"pipetter.cleanTips|ourlab.luigi.evoware|ourlab.luigi.liha": function(params, parsed, data) {
 				// console.log("pipetter.cleanTips|ourlab.luigi.evoware|ourlab.luigi.liha")
@@ -626,43 +688,18 @@ module.exports = {
 
 	planHandlers: _.merge(
 		{
-			"ourlab.luigi.centrifuge.close": function(params, parentParams, data) {
+			"ourlab.luigi.culturebox.close": function(params, parentParams, data) {
 				return [{
 					command: "equipment.close",
 					agent: "ourlab.luigi.evoware",
-					equipment: "ourlab.luigi.centrifuge"
+					equipment: "ourlab.luigi.culturebox"
 				}];
 			},
-			"ourlab.luigi.centrifuge.open1": function(params, parentParams, data) {
+			"ourlab.luigi.culturebox.stopAndOpen": function(params, parentParams, data) {
 				return [{
-					command: "equipment.openSite",
+					command: "equipment.open",
 					agent: "ourlab.luigi.evoware",
-					equipment: "ourlab.luigi.centrifuge",
-					site: "ourlab.luigi.site.CENTRIFUGE_1"
-				}];
-			},
-			"ourlab.luigi.centrifuge.open2": function(params, parentParams, data) {
-				return [{
-					command: "equipment.openSite",
-					agent: "ourlab.luigi.evoware",
-					equipment: "ourlab.luigi.centrifuge",
-					site: "ourlab.luigi.site.CENTRIFUGE_2"
-				}];
-			},
-			"ourlab.luigi.centrifuge.open3": function(params, parentParams, data) {
-				return [{
-					command: "equipment.openSite",
-					agent: "ourlab.luigi.evoware",
-					equipment: "ourlab.luigi.centrifuge",
-					site: "ourlab.luigi.site.CENTRIFUGE_3"
-				}];
-			},
-			"ourlab.luigi.centrifuge.open4": function(params, parentParams, data) {
-				return [{
-					command: "equipment.openSite",
-					agent: "ourlab.luigi.evoware",
-					equipment: "ourlab.luigi.centrifuge",
-					site: "ourlab.luigi.site.CENTRIFUGE_4"
+					equipment: "ourlab.luigi.culturebox"
 				}];
 			},
 		},

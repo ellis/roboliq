@@ -138,6 +138,7 @@ module.exports = {
 		'../commands/absorbanceReader.js',
 		'../commands/centrifuge.js',
 		'../commands/fluorescenceReader.js',
+		'../commands/incubator.js',
 		'../commands/pipetter.js',
 		'../commands/sealer.js',
 		'../commands/shaker.js',

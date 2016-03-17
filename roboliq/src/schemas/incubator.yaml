@@ -1,0 +1,60 @@
+incubator:
+  module: |
+    The `incubator` commands specify actions using incubator equipment.
+
+Incubator:
+  description: Incubator equipment.
+  properties:
+    type: {enum: [Incubator]}
+    description: {type: string}
+    label: {type: string}
+    sitesInternal: {type: array, items: {type: Site}}
+  required: [type, sitesInternal]
+  example: |
+    ```
+    "incubator": {
+      "type": "Incubator",
+      "sitesInternal": ["ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8"],
+    }
+    ```
+
+incubator.incubatePlates:
+  description: "Incubate the given plates"
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program for incubation"}
+    plates: {description: "List of plates to incubate", type: array, items: {type: Plate}}
+    sites: {description: "Internal sites to put the plates on", type: array, items: {type: Site}}
+    destinationAfters: {description: "Location identifier for where the plates should be placed after incubation", "type": array, items: {type: SiteOrStay}}
+  required: ["program", "plates"]
+  example: |
+    This will incubate 2 plates at 3000rpm for 2 minutes at 25°C:
+    ```
+    {
+      "command": "incubator.incubatePlates",
+      "plates": ["plate1", "plate2"],
+      "program": {
+        "rpm": 3000,
+        "duration": "2 minutes",
+        "temperature": "25 degC"
+      }
+    }
+    ```
+
+incubator.insertPlates:
+  description: "Insert up to two plates into the incubator."
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    plates: {description: "List of plates to incubate", type: array, items: {type: Plate}}
+    sites: {description: "Internal sites to put the plates on", type: array, items: {type: Site}}
+  required: []
+  example: |
+    This will insert two plates into the incubator:
+    ```
+    {
+      "command": "incubator.insertPlates",
+      "plates": ["plate1", "plate2"]
+    }
+    ```
