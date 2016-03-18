@@ -105,6 +105,7 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
 	// console.log("expandRowsByObject: "+JSON.stringify(conditions));
 	for (let name in conditions) {
 		expandRowsByNamedValue(nestedRows, rowIndexes, name, conditions[name], randomEngine);
+		// flattenArrayM(nestedRows); // this doesn't work because rowIndexes needs to change when array is flattened
 	}
 }
 

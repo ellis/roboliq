@@ -114,7 +114,9 @@
 - [ ] design2:
 	- [x] various ways to draw from a list: direct, direct/restart, direct/reverse, shuffle, shuffle/restart, shuffle/reshuffle, sample (with replacement)
 	- [x] combine draw+reuse into "order" property
+	- [ ] range: make it reuse "assign" functionality
 	- [ ] groupBy
+		- may need to create a flattenArrayM function that simultaneously fixes the rowIndexes array
 	- [ ] sameBy
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
