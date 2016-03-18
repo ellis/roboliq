@@ -172,13 +172,13 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with reuse=restart", () => {
+		it("should handle assign() with order=restart", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1, 2, 3, 4],
 					"b=": {
 						values: [1, 2],
-						reuse: "restart"
+						order: "restart"
 					}
 				}),
 				[
@@ -188,13 +188,13 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with reuse=reverse", () => {
+		it("should handle assign() with order=reverse", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1, 2, 3, 4],
 					"b=": {
 						values: [1, 2],
-						reuse: "reverse"
+						order: "reverse"
 					}
 				}),
 				[
@@ -204,20 +204,19 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with reuse=reshuffle", () => {
+		it("should handle assign() with order=reshuffle", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1, 2, 3, 4, 5, 6],
 					"b=": {
 						randomSeed: 444,
-						values: [1, 2],
-						reuse: "reshuffle"
+						values: [1, 2, 3],
+						order: "reshuffle"
 					}
 				}),
 				[
-					{a: 1, b: 1}, {a: 2, b: 2},
-					{a: 3, b: 1}, {a: 4, b: 2},
-					{a: 5, b: 2}, {a: 6, b: 1}
+					{a: 1, b: 2}, {a: 2, b: 1}, {a: 3, b: 3},
+					{a: 4, b: 2}, {a: 5, b: 3}, {a: 6, b: 1}
 				]
 			);
 		});
@@ -241,7 +240,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with draw=shuffle", () => {
+		it("should handle assign() with order=shuffle", () => {
 			const design = {
 				randomSeed: 444,
 				conditions: {
@@ -249,7 +248,7 @@ describe('design', () => {
 					"b*": [1, 2, 3],
 					"order=": {
 						values: [1, 2, 3, 4, 5, 6],
-						draw: "shuffle"
+						order: "shuffle"
 					}
 				}
 			};

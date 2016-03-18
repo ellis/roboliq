@@ -405,8 +405,21 @@ function countRows(nestedRows, rowIndexes) {
 const actionHandlers = {
 	"assign":  (nestedRows, rowIndexes, name, action, randomEngine) => {
 		assert(_.isArray(action.values), "should have 'values' array: "+JSON.stringify(action));
-		const draw = _.get(action, "draw", "direct");
-		const reuse = _.get(action, "reuse", "none");
+		let draw = "direct";
+		let reuse = "none";
+		if (!_.isEmpty(action.order)) {
+			switch (action.order) {
+				case "direct": case "direct/none": break;
+				case "direct/restart": case "restart": draw = "direct"; reuse = "restart"; break;
+				case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
+				case "shuffle": draw = "shuffle"; reuse = "none"; break;
+				case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+				case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+				case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
+				case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
+				case "sample": draw = "sample"; break;
+			}
+		}
 		const randomSeed = action.randomSeed;
 		if (draw === "direct" && reuse === "none") {
 			return action.values;
