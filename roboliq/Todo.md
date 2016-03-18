@@ -279,6 +279,10 @@
 - [x] runtime-server: accept as input a `.out.json` file
 - [x] runtime-client/Runtime: display protocol
 - [x] runtime-client/Runtime: better display of from-till/duration time for each command
+- [ ] design2:
+	- [ ] various ways to draw from a list: direct, direct-restart, direct-reverse, shuffle, shuffle-restart, shuffle-reshuffle, sample (with replacement)
+	- [ ] groupBy
+	- [ ] sameBy
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix

@@ -122,7 +122,7 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 	// If an action is specified using the "=" symbol:
 	const iEquals = name.indexOf("=");
 	if (iEquals >= 0) {
-		const actionType = name.substr(iEquals + 1);
+		const actionType = name.substr(iEquals + 1) || "assign";
 		const actionHandler = actionHandlers[actionType];
 		assert(actionHandler, `unknown action type: ${actionType} in ${name}`)
 		name = name.substr(0, iEquals);
@@ -319,9 +319,62 @@ function setColumnValue(row, name, value) {
 }
 
 class Special {
-	constructor(params, next) {
-		this.params = params;
-		this.next = next;
+	constructor({action, draw, reuse, randomEngine}, next) {
+		this.action = action;
+		this.draw = draw;
+		this.reuse = reuse;
+		this.randomEngine = randomEngine;
+		this.nextIndex = 0;
+		this.valueCount = _.size(this.action.values);
+		this.next = (next || this.defaultNext);
+	}
+
+	defaultNext() {
+		console.log({this});
+		if (this.nextIndex >= this.valueCount) {
+			switch (this.reuse) {
+				case "restart":
+					this.nextIndex = 0;
+					break;
+				case "reverse":
+					this.indexes = _.reverse(this.indexes || _.range(this.valueCount));
+					this.nextIndex = 0;
+					break;
+				case "reshuffle":
+					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+					break;
+				default:
+					assert(false, "not enough values supplied to fill the rows: "+JSON.stringify(this.action));
+			}
+		}
+
+		let index, key;
+		switch (this.draw) {
+			case "direct":
+				index = this.nextIndex;
+				key = index + 1;
+				break;
+			case "shuffle":
+				if (!this.indexes) {
+					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+				}
+				index = this.indexes[this.nextIndex];
+				key = index + 1;
+				break;
+			case "sample":
+				index = Random.integer(0, this.valueCount - 1)(this.randomEngine);
+				key = index + 1;
+				break;
+			default:
+				assert(false, "unknown 'draw' value: "+JSON.stringify(this.draw)+" in "+JSON.stringify(this.action));
+		}
+
+		const value = this.action.values[index]
+		if (this.draw !== "sample") {
+			this.nextIndex++;
+		}
+
+		return [key, value];
 	}
 }
 
@@ -343,31 +396,18 @@ function countRows(nestedRows, rowIndexes) {
 const actionHandlers = {
 	"assign":  (nestedRows, rowIndexes, name, action, randomEngine) => {
 		assert(_.isArray(action.values), "should have 'values' array: "+JSON.stringify(action));
-		const shuffle = _.get(action, "shuffle", false);
-		if (shuffle !== false) {
-			console.log("SHUFFLE!")
-			const randomEngine2 = (_.isNumber(shuffle))
-				? Random.engines.mt19937().seed(shuffle)
-				: randomEngine;
-			return new Special(action, function() {
-				console.log({params: this.params});
-				this.nextIndex = this.nextIndex || 0;
-				if (this.nextIndex === 0) {
-					const n = _.size(this.params.values);
-					this.indexes = Random.sample(randomEngine2, _.range(n), n);
-				}
-				const index = this.indexes[this.nextIndex];
-				const key = index + 1;
-				const value = this.params.values[index];
-				this.nextIndex++;
-				if (this.nextIndex >= this.params.values.length) {
-					this.nextIndex = 0;
-				}
-				return [key, value];
-			});
+		const draw = _.get(action, "draw", "direct");
+		const reuse = _.get(action, "reuse", "none");
+		const randomSeed = action.randomSeed;
+		if (draw === "direct" && reuse === "none") {
+			return action.values;
 		}
 		else {
-			return action.values;
+			console.log("SPECIAL!")
+			const randomEngine2 = (_.isNumber(randomSeed))
+				? Random.engines.mt19937().seed(randomSeed)
+				: randomEngine;
+			return new Special({action, draw, reuse, randomEngine: randomEngine2});
 		}
 	},
 	"range": (nestedRows, rowIndexes, name, action, randomEngine) => {

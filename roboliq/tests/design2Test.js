@@ -197,9 +197,9 @@ describe('design', () => {
 				conditions: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
-					"order=assign": {
+					"order=": {
 						values: [1, 2, 3, 4, 5, 6],
-						shuffle: true
+						draw: "shuffle"
 					}
 				}
 			};
