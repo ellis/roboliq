@@ -2,7 +2,7 @@ import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
 
-function makeEvowareFacts(parsed, data, variable, value) {
+function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	const result2 = {
 		command: "evoware._facts",
@@ -13,7 +13,7 @@ function makeEvowareFacts(parsed, data, variable, value) {
 	const value2 = (_.isFunction(value))
 		? value(parsed, data)
 		: value;
-	return _.merge(result2, {factsValue: value2});
+	return _.merge(result2, {factsValue: value2, labware: labwareName});
 }
 
 /**
@@ -86,6 +86,17 @@ module.exports = {
 				type: {enum: ["EvowareWashProgram"]}
 			},
 			required: ["type"]
+		},
+		"evoware._facts": {
+			description: "An Evoware FACTS command",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				factsEquipment: {type: "string"},
+				factsVariable: {type: "string"},
+				factsValue: {type: "string"},
+				labware: {type: "Plate"}
+			},
+			required: ["factsEquipment", "factsVariable"]
 		},
 	}),
 	getCommandHandlers: () => ({

@@ -149,14 +149,20 @@ describe('EvowareCompilerTest', function() {
 						"agent": "robot1",
 						"factsEquipment": "RoboSeal",
 						"factsVariable": "RoboSeal_Seal",
-						"factsValue": "VALUE"
+						"factsValue": "VALUE",
+						"labware": "plate1"
 					}
 				}
 			});
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
 			should.deepEqual(results, [
-				[{line: "FACTS(\"RoboSeal\",\"RoboSeal_Seal\",\"VALUE\",\"0\",\"\");"}]
+				[{
+					line: "FACTS(\"RoboSeal\",\"RoboSeal_Seal\",\"VALUE\",\"0\",\"\");",
+					tableEffects: [
+						[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+					]
+				}]
 			]);
 		});
 

@@ -188,7 +188,7 @@ module.exports = {
 				replace(/>[ \t]+</g, "><");
 			// Token
 			var value = parsed.value.outputFile + "|" + programData;
-			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value)]};
+			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object)]};
 		}
 	}),
 	getPredicates: (agentName, equipmentName, siteName) => [
