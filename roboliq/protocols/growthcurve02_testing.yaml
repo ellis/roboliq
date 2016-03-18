@@ -11,9 +11,10 @@ description: |
       * [ ] fill the throughs
   * [x] move DWP to pipetter location, fill it with media, then add inoculum
   - [ ] seal DWP twice
-  - [ ] DWP model now needs to change, manage starting a new script!
+  - [ ] DWP model now needs to change to the "sealed" variant, manage starting a new script!
   - [ ] move DWP to shaker, start shaking with cover closed
   - [ ] after 15 minutes, take dilution plate out of hotel, take DWP out of shaker
+  - [ ] Q: how large should each sample volume be?
   - [ ] sample 8 wells, transfer to a dilution plate
     - [ ] put DWP back in shaker, restart incubation
     - [ ] create dilution series
@@ -33,12 +34,14 @@ objects:
   inoculum: {type: Liquid, wells: inoculumLabware(A1 down H1)}
 
   culturePlate1: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
-  dilutionPlate2: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_1}
+  dilutionPlate1: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_1}
 
   design1:
     type: Design
     randomSeed: 444
     conditions:
+      aspirationSite: ourlab.luigi.site.P3
+      dilutionSite: ourlab.luigi.site.P6
       culturePlate: culturePlate1
       incubatorSite: ourlab.luigi.site.BOX_2
       dilutionPlate: dilutionPlate1
@@ -102,11 +105,15 @@ steps:
       equipment: ourlab.luigi.liha
       intensity: decontaminate
   2:
+    command: equipment.open
+    agent: ourlab.luigi.evoware
+    equipment: ourlab.luigi.culturebox
+  3:
     command: experiment.forEachGroup
     design: design1
     groupBy: culturePlate
     steps:
-      description: "`Fill {{$culturePlate}}`"
+      description: "`Fill {{$culturePlate}} and seal it twice`"
       1:
         command: transporter.movePlate
         object: $culturePlate
@@ -125,9 +132,13 @@ steps:
         destinations: $$well
         volumes: 20ul
         cleanBetween: none
-      4:
+      # 4:
+      #   command: transporter.movePlate
+      #   object: $culturePlate
+      #   destination: ourlab.luigi.site.ROBOSEAL
+      5:
         command: transporter.movePlate
-        object: culturePlate1
+        object: $culturePlate
         destination: $incubatorSite
     # command: experiment
     # command: absorbanceReader.measurePlate
@@ -136,3 +147,43 @@ steps:
     #   excitationWavelength: 6000
     #   wells: plate1(B1 right B6)
     # outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
+  4:
+    command: equipment.close
+    agent: ourlab.luigi.evoware
+    equipment: ourlab.luigi.culturebox
+  5:
+    command: shaker.run
+    equipment: ourlab.luigi.culturebox
+    program:
+      rpm: 300
+      duration: 30s
+  6:
+    command: experiment.forEachGroup
+    design: design1
+    groupBy: culturePlate
+    steps:
+      description: "`Extract samples from {{$culturePlate}}`"
+      1:
+        command: equipment.open
+        agent: ourlab.luigi.evoware
+        equipment: ourlab.luigi.culturebox
+      2:
+        command: transporter.movePlate
+        object: $dilutionPlate
+        destination: $dilutionSite
+      3:
+        command: transporter.movePlate
+        object: $culturePlate
+        destination: $aspirationSite
+      4:
+        command: pipetter.pipette
+        sourceLabware: $culturePlate
+        sources: B01
+        CONTINUE
+        # sources: $$well
+        destinationLabware: $culturePlate
+        destinations: $$well
+        #destinationLabware: $dilutionPlate
+        #destinations: dilutionPlate1(A01+B01+C01+D01+E01+F01+G01+H01)
+        # destinations: dilutionPlate1(A01 down H01)
+        volumes: 50ul

@@ -54,13 +54,16 @@
 	- [ ] notify user where to put labware
 	- [ ] pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes)
 - [ ] growthcurve02_testing:
+	- [ ] BUG: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
 	- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
-	- [ ] DWP on P1, fill it with media, then add inoculum
+	- [x] DWP on P1, fill it with media, then add inoculum
 	- [ ] seal DWP twice
 	- [ ] DWP model now needs to change, manage starting a new script!
+	- [ ] BUG: why doesn't `sources: $$well` work?
 	- [ ] move DWP to shaker, start shaking with cover closed
 	- [ ] after 15 minutes, take out DWP
 	- [ ] sample 8 wells
+- [ ] let wellsParser handle `destinations: A01 down H01`?
 
 # Todos for ROMA qc
 
@@ -84,7 +87,8 @@
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
 - [ ] qc_mario_vectors_96dwp: create script for DWP
 - [ ] qc_mario_vectors_96pcr: create script for PCR plates
-\
+- [ ] align all luigi's ROMA2 vectors
+
 # Todos for paper 2/3
 
 - [x] implement lookupPath
