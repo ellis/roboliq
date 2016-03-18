@@ -13,159 +13,6 @@
 
 # Todos for Paper 1
 
-- [x] add 'roboliq' version to output
-- [x] get running of protocols from command line to work again, and document it
-- [x] main.js: show help if nothing is passed on the command line
-- [x] main.js: fix `--ourlab` help description
-- [x] make sure tests run again
-- [x] make sure that the scala program runs again
-- [x] BUG: track down bad construction of WellContents
-- [x] babel-ify for ES6 features
-- [x] write test for construction of well contents during mixing
-- [x] create WellContents.js with functions from pipetterUtils.js
-    - [x] create a function for adding contents, take code from pipetterUtils/getEffects_pipette
-    - [x] refactor pipetterUtils/getEffects_pipette using WellContents.js
-- [x] change WellContents.unknownVolume to infinity, and retest
-- [x] implement `tania12` scripts for denaturation
-    - [x] create single protocol for all of the steps that used to be separated
-    - [x] create `#pipetteMixtures` directive
-    - [x] create `centrifuge.insertPlates2` command
-    - [x] try to compile for evoware
-- [x] implement `tania15` scripts for renaturation
-    - [x] node protocols/tania15_renaturation.js, use `__dirname`
-    - [x] errors aren't indicating the command they came from (e.g. movePlate & site/destination, something with programFile)
-    - [x] merge protocols together rather than appending them!
-- [x] for object of type `Variable`, process a `calculate` property as an alternative to setting the value to a directive.
-- [x] change directive handling to accommodate merging of lab-specific protocol
-    - [x] object variables should have directives parsed before parsing steps, not immediately after loading
-    - [x] directives can have an 'override' property, whose value gets merged into the result of the directive
-    - [x] directives in steps are processed as they are encountered
-    - [x] directives in command parameters are processed before being passed to the command handler
-- [x] handle JSON Patch files (as opposed to merge-able files)
-- [x] handle '?'-suffix and '!'-suffix properties in objects and steps
-- [x] split `tania*` protocols into portable vs lab data
-    - [x] tania13_ph: make combined protocol, at first lab-specific
-    - [x] `./node_modules/.bin/babel-node -- src/main.js -p --progress -r protocols/tania13_ph-spec.yaml`
-    - [x] tania13_ph: split combined protocol into portable and lab-specific parts
-    - [x] tania13_ph-ourlab-diff
-    - [x] tania12_denaturation
-- [x] if an object has both ! and non ! properties, the ! property should take precedence
-- [x] `npm test`: fix problem with variable that references a source
-    - [x] node_modules/.bin/mocha --compilers js:babel/register tests/wellsParserTest.js
-    - [x] node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js
-- [x] `diff tania12_denaturation.out.json tania12_denaturation-new.out.json > x`
-- [x] pipetterTest: re-enable all the tests
-- [x] command documentation:
-    - [x] create schemas for all commands (JSON/YAML structured documentation)
-    - [x] move all schemas to YAML files
-    - [x] generate documentation from schemas
-        - [x] write code to do the generation
-        - [x] create an npm command for generating docs
-        - [x] install git version of jsdoc and try to get it to work with our ES6 code
-        - [x] put the command docs somewhere where jsdoc will pick it up
-    - [x] generateCommandSpecDocs.js: load yaml files instead of command handler files
-    - [x] change all schemas to use roboliq types, rather than just JSON Schema types (continue with sealer.yaml)
-    - [x] use schemas to parse the params before passing them to the commandHandler
-    - [x] pipetterUtils.getEffects_pipette: line 38 (items are parsed)
-    - [x] checkout fluorescenceReaderTest, because the relevant ourlab.js command handlers haven't been updated yet to use schemas
-    - [x] refactor all commands to accept parsed parameters, using the schemas
-    - [x] remove all uses of commandHelper.parseParams()
-    - [x] rename commandHelper.parseParams2()
-- [x] commandSpec: pipetter.cleanTips: define intensity (intensity is a predefined enum)
-- [x] protocols/protocol4.json: pipetter.AspirateItem should maybe have 'well' property instead of 'source'...
-- [x] move around protocols/tania* files so that ./runall.sh works
-- [x] commandSpec: pipetter: need to declare some more pipetter typedefs, such as pipetter.AspirateItem
-- [x] schemas/objects.yaml: add schemas for object types
-- [x] validate `protocol.objects` using object schemas
-- [x] enforce all objects in protocol.objects to have a type (see roboliq.js:validateProtocol1())
-- [x] commandHelperTest.js: test array of variables of integers
-- [x] generate documentation for object schemas
-- [x] rename commandSpec to schema everywhere
-- [x] refactor: can I remove parsers/sourceParser?
-- [x] create commandHelper.parseParams test for misspelled `sources` specifier (e.g. removing `balanceWater` from tania13)
-- [x] schemas: pipetter.pipetteMixtures.order: should be an enum
-- [x] change `parseParams` function to return a {objectNames, values}
-    - [x] figure out problem with processOneOrArray as currently testing in commandHelperTest
-    - [x] pipetterPipetteTest.js
-    - [x] centrifugeTest.js
-- [x] can `name` parameter be removed from commandHelper functions such as `processValue0AsEnum`?
-- [x] refactor usage of commandHelper.getParsedValue
-    - [x] figure out why we needed to `_.clone(value1)` -- what is mutating the value?
-    - [x] run `npm test` on branch lookupValue2
-    - [x] remove commandHelper.lookupValue (currently fixing processParamsBySchema())
-    - [x] finish documenting commandHelper.getParsedValue
-- [x] look at `~/src/roboliq/roboliq/protocols/output/diff.sh`
-    - [x] handle `destinationAfter1: null` for `centrifuge.centrifuge2`: make new type of "SiteOrStay"
-    - [x] fix error in protocols/protocol1_ph.yaml
-- [x] fixup pipetter.js to not hardcode our `syringesAvailable` and `tipModelToSyringes`
-    - [x] create `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha` command handler
-    - [x] change `pipetter._cleanTips` to `pipetter._washTips`
-    - [x] `./node_modules/.bin/mocha --compilers js:babel/register tests/pipetterTest.js`
-    - [x] `pipetter.cleanTips` should perform logical query to figure out which sub-command to call (e.g. `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`)
-    - [x] test for clean all tips
-    - [x] delete protocol8.json, because the tests are in pipetterTest.js
-    - [x] can probably get rid of `pipetter.cleanTips.canAgentEquipmentProgramModelIntensity` logic and program it directly in `pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha`
-    - [x] add tips 5-8 to ourlab.js
-- [x] copy fixed mixtures specification from protocols/protocol1_ph.yaml to paper1 supporting information
-- [x] `pipetter._washTips` `_aspirate` `_dispense` should update syringe state
-    - [x] `_pipette`: append contaminants from source well to syringe
-    - [x] `_washTips`: used 'parsed' instead of 'params' for the syringe names
-    - [x] `_aspirate`: add contents, append contaminants in source well, remove `cleaned`
-    - [x] `_pipette`: clear syringe.cleaned
-    - [x] `_washTips`: remove contents, remove contaminants, set `cleaned`
-    - [x] `_washTips`: should not set cleaned state on syringe if there was no change (see e.g. pipetterPipetteTest, first test)
-    - [x] `_dispense`: remove contents, append contaminants in dest well if syringe touches
-        - [x] test contents=null when dispensing all syringe contents
-        - [x] getEffects_dispense: need to track syringe content state through iterations, in case of multi-dispense
-        - [x] test contamination upon wet contact
-    - [x] merge pipetterUtils.getEffects... functions by having condition branches for 'destination' and 'source' properties
-- [x] centrifuge: temperature parameters should require unit (e.g. 'degC')
-- [x] upgrading lodash and babel
-- [x] test EvowareTableFile.toStrings_internalLabware
-- [x] test EvowareTableFile.toString
-- [x] Evoware: Carrier.cfg: "0100ï¿½300000000000000000000000000000000000", how to interpret those strange characters? I think that's some quirk representing 7 bits, because I found a carrier with 9 sites on it, and 7 bits plus 2 bits = 9 sites...
-- [x] evoware compiler: initial functionality
-    - [x] figure out way to unit test the compiler
-    - [x] why isn't table properly updated with labware after `transporter._movePlate`?
-    - [x] for evoware site labels, don't use the full path name (only the last part)
-    - [x] why is labware on RoboSeal missing for protocol3.cmp.json?
-- [x] `experiment.run`: implement
-- [x] consider how to use `experiment.run` in paper1_protocol1_ph
-- [x] `lookupPath` should handle an object name as the first path element
-- [x] get EvowareCompiler working
-- [x] troubleshoot sealer.sealPlate
-- [x] remove excess debug output from pipetting
-- [x] add `--quiet` flag to suppress printing errors
-- [x] let roboliq load .js protocols from the command line
-- [x] dm00_test2.js: create output we want from the `experiment.run` command for a sample experiment
-- [x] `timer.wait`
-- [x] `system.if`
-- [x] pipetteMixtures: test mixture items where 'destination' and 'syringe' are specified
-- [x] test `system.if`
-- [x] `shaker.shakePlate`
-- [x] explicitly add TipModels to ourlab, along with their characteristics
-- [x] pipetter.pipette: woops! we still have mario-specific code for `findTipModel()` and `assignProgram()`!
-- [x] replace `pipetter.findTipModel*` with a more generic function
-- [x] groupingMethod3: allow `layer` to take partial priority over item order
-- [x] groupingMethod3: force a group break when previous destination is used as a source
-- [x] pipetter.DilutionItem yaml
-- [x] `pipetter.pipetteDilutionSeries2x`
-- [x] pipetteMixtures: handle new mixture list
-- [x] need to add liquid and labware for the "media" and "culture" sources
-- [x] fix dilution series destinations (putting into A and B rows in the same item)
-- [x] fix evoware Wash output
-- [x] why no `timer._sleep` output from evoware?
-- [x] create `Design` type in roboliq.yaml (needs more work)
-- [x] roboliq.js: handle `data` property
-- [x] commandHelper.js: handle `$$`-prefix for returning column of current data
-- [x] roboliqDirectiveHandlers.js: handle '#data' directive
-- [x] transporter.movePlate: should handle specifications of `equipment` and `program`
-- [x] experiment.js: replace makeSubstitutions with commandHelper.substituteDeep
-- [x] commandHelper.substituteDeep:
-    - [x] should accept SCOPE and DATA instead of data, because we data.objects may change as steps are processed
-    - [x] skip objects with 'data' property
-    - [x] figure out dm00_test4m.yaml equivalent to dm00_test3m.js
-- [x] tania13_ph.yaml: re-write using Design
 - [ ] reader-InfiniteM200Pro.js: add support for generating fluorescence programs, see `(true || measurementType === "absorbance")` around line 177
 - [ ] create incubator command for tania13_ph, and accommodate "methods" for expanding commands
 - [ ] centrifuge.startIncubation: create
@@ -194,72 +41,18 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
-# Todos for luigi
+# Todos for growth curve experiment
 
-- [x] configure sites and cliques for transporter.movePlate:
-    - [x] camera
-    - [x] P1-P3
-    - [x] lightbox
-    - [x] shaker
-    - [x] sealer
-    - [x] mario exchange hotel
-    - [x] hotels
-    - [x] regrip
-        - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
-    - [x] reader
-    - [x] culturebox
-    - [x] add possibility to configure options in 'ourlab'
-- [x] perform initial pipetting test
-- [x] evoware: automatically retract tips after washing
-- [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
-- [x] evoware: after pipetting is done, retract all the tips
-- [x] double-check pipetting on troughs
-- [x] sealer operation
-- [x] shaker operation
-- [ ] reader operation
-	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
-    - [x] create absorbanceReader instructions
-	- [x] luigi_protocol3: change to measure absorbance
-- [x] exclude access to HOTEL12_9, because of trough
-- [ ] culturebox operation
-	- [x] add to ourlab_luigi.objects
-	- [x] make sure it has internal sites
-	- [x] test moving plates into it
-	- [x] test running the shaker with open cover
-	- [ ] test running the incubator
-- [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
-- [ ] need to change evoware's labware model on DWP once its sealed
-- [ ] suboptimal plate transport:
-    - [ ] ROMA1 P1 -> REGRIP_BELOW (catches on side before falling into place)
-    - [ ] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
-- [ ] decide on wash programs with Daniel and Fabian
-
-- [ ] shaker operation
-- [ ] incubator sites:
-    - [ ] add the extra logic+code for opening a black incubator site
-- [ ] incubators operation
-- [ ] camera operation
+- [ ]
 
 # Todos for ROMA qc
 
-- [x] qc_mario_vectors_96nunc: randomize order of sites
-- [x] qc_mario_vectors_96nunc: allow for setting a random seed
-- [x] qc_mario_vectors_96nunc: output `description` values as evoware comments
-- [x] qc_mario_vectors_96nunc: Create evoware Groups for steps with `description` properties
-- [x] qc_mario_vectors_96nunc sites:
-    - [x] RoboPeel
-    - [x] hotels in back
-    - [x] P1-P3,P6-P8 with ROMA2
-    - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-    - [x] transfer hotels
-- [x] qc_mario_vectors_96nunc: ERROR: wrongly placed on SEELER
-- [x] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
 - [ ] qc_mario_vectors_96nunc: HOTEL4_2 to ROBOSEAL didn't work great (caught briefly on the ROBOSEAL pins)
 - [ ] qc_mario_vectors_96nunc: for ROBOSEAL and ROBOPEEL, should actually seal in order to check positions afterwards
 - [ ] qc_mario_vectors_96nunc: C4 -> P6 was a bit off on P6
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
-- [ ] create script for DWP
-- [ ] create script for PCR plates
+- [ ] qc_mario_vectors_96dwp: create script for DWP
+- [ ] qc_mario_vectors_96pcr: create script for PCR plates
 
 # Todos for paper 2/3
 
@@ -287,43 +80,6 @@
 - [x] program a prototype little "runtime client" that sends data to a server when called by Evoware
 - [x] Add time logging to all evoware instructions
 - [x] Test runtime-client/runtime-server/roboliq-runtime-cli
-<<<<<<< HEAD
-- [ ] see about using VB script to avoid the console popup when logging time of commands
-
-    Set objShell = CreateObject("WScript.Shell")
-    ' Set objExec = objShell.Exec("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100")
-    Return = objShell.Run("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100", 0, true)
-
-    Set args = Wscript.Arguments
-
-    For Each arg In args
-      Wscript.Echo arg
-    Next
-
-    CSCRIPT MyScript.vbs
-
-    WScript.Arguments.Item(0)
-    WScript.Arguments.Item(1)
-
-    test from command line with wscript test.vbs
-
-- [ ] qc_mario_vectors_96nunc:
-    - [x] randomize order of sites
-    - [x] allow for setting a random seed
-    - [x] output `description` values as evoware comments
-    - [x] Create evoware Groups for steps with `description` properties
-    - [ ] sites:
-        - [ ] RoboPeel
-        - [ ] hotels in back
-        - [ ] transfer hotels
-        - [ ] P1-P3,P6-P8 with ROMA2
-        - [ ] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-    - [ ] ERROR: wrongly placed on SEELER
-    - [ ] ERROR: misplaced from hotel32 site 19 to P2
-- [ ] runtime-server: take as input a `.out.json` file
-- [ ] runtime-client: create a redux version, start with `fullstack-voting-client`
-- [ ] Figure out how to automatically convert reader data to measurement JSON data
-=======
 - [x] EvowareCompiler: make addition of run-time instructions an option
 - [x] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
 - [x] see about using VB script to avoid the console popup when logging time of commands
@@ -349,8 +105,37 @@
 - [ ] consider starting the runtime-server from Evoware, if its not already running
 - [ ] consider opening a browser window for the runtime-client from Evoware
 - [ ] make the runtime programs' ports configurable
->>>>>>> 4877f16d0564fed243f509fce6fce98448d9b1ee
 - [ ] test pipetter.pipetteDilutionSeries2x
+- [ ] figure out why this Design doesn't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs):
+    ```
+    conditions:
+      waterSource: saltwater
+      waterVolume: 40ul
+      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      proteinVolume: 5ul
+      bufferSystem*:
+        acetate:
+          acidSource: acetate_375
+          baseSource: acetate_575
+          acidPH: 3.75
+          basePH: 5.75
+    ```
+- [ ] compile some simple protocols and try to run them on mario and luigi
+- [ ] check whether Evoware external n2 represents display order
+- [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
+- [ ] evoware compiler: allow for loading Carrier.json instead of Carrier.cfg
+- [ ] evoware compiler: allow for loading JSON table instead of .ewt or .esc
+- [ ] evoware compiler: add script line for every protocol command to log the start and end times of that command
+- [ ] evoware compiler: add code to process and display measured data after measurement commands
+- [ ] evoware: test `pipetter._cleanTips`
+- [ ] evoware: write more extensive tests for `pipetter._aspirate`, `pipetter._dispense`, and `pipetter._pipette`
+- [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
+- [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
+- [ ] test `evoware._facts`
+- [ ] test `EvowareCompiler.compile`
+- [ ] evoware: add command-line option to only process certain steps
+- [ ] evoware: when user specifies steps to process but no output name, name the output file according to the steps processed
+- [ ] for ANOVA visualization, consider http://rpsychologist.com/d3-one-way-anova
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data
 - [ ] dm00_test3m.js:
@@ -370,25 +155,8 @@
     - should skip sealing so that we don't need to deal with the complications on Sunday
     - [ ] mario: can't use tips 1-4 to puncture a seal
     - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
-- [ ] transporter test errors:
-    - [ ] transfers from P2, twice it didn't grip
-    - [ ] why was roma2 used for transfer from REGRIP to READER when we were in the roma1 group?
-    - [ ] roma2, wide grip, from REGRIP to READER: doesn't narrow the grip again, so it pushes aside the transfer hotel
-    - [ ] should automatically move ROMAs to "home position" before a different roma is used.
-- [ ] compile the experiment for mario
 - [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
-- [ ] ourlab.js: DWP cann't go on sealer or peeler
-SUNDAY:
-- [ ] compile the experiment for luigi
-- [ ] run the experiment on mario
-- [ ] run the experiment on luigi
-- [ ] try to extend EvowareCompile to save timing data while executing commands
-- [ ] make video of same experiment running on both robots
-    - [ ] demonstrate interleaved timing by showing the robot's picture-in-picture starting the same procedures at the same time
-    - [ ] show the data displayed in R/html as soon as the measurement is done
-- [ ] proper randomization
-LATER:
-- [ ] generate a pretty HTML/SVG protocol for the experiment
+- [ ] generate a pretty HTML/SVG protocol for interleaved experiment steps
 - [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?
     - [ ] `load` command
@@ -412,66 +180,7 @@ LATER:
 - [ ] web ui?
 - [ ] reduce number of levels of steps generated by commands like `timer.doAndWait`
 
-
-## Todos for complex protocol and feedback
-
-<<<<<<< HEAD
-- [x] implement lookupPath
-- [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
-- [x] evoware compiler: add more commands
-    - [x] `evoware._facts`
-    - [x] `timer._start`
-    - [x] `timer._wait`
-    - [x] `pipetter._aspirate`
-    - [x] `pipetter._dispense`
-    - [x] `pipetter._pipette`
-    - [x] `pipetter._washTips`
-    - [x] delete scala files
-- [x] implement lookupPaths
-- [x] evoware: rename `_cleanTips` instruction to `_washTips`
-- [x] test transporter.doThenRestoreLocation
-- [x] commandHelper.getStepKeys: return array of step keys in order
-- [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
-- [ ] figure out why this Design doesn't have the correct table column order in firefox:
-=======
-- [ ] figure out why this Design doesn't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs):
->>>>>>> 4877f16d0564fed243f509fce6fce98448d9b1ee
-    ```
-    conditions:
-      waterSource: saltwater
-      waterVolume: 40ul
-      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-      proteinVolume: 5ul
-      bufferSystem*:
-        acetate:
-          acidSource: acetate_375
-          baseSource: acetate_575
-          acidPH: 3.75
-          basePH: 5.75
-    ```
-<<<<<<< HEAD
-- [ ] Experiment Conditions Data:
-- [ ] check whether Evoware external n2 is display order
-- [ ] compile some simple protocols and try to run them on mario and luigi
-=======
-- [ ] check whether Evoware external n2 represents display order
->>>>>>> 4877f16d0564fed243f509fce6fce98448d9b1ee
-- [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
-- [ ] evoware compiler: allow for loading Carrier.json instead of Carrier.cfg
-- [ ] evoware compiler: allow for loading JSON table instead of .ewt or .esc
-- [ ] evoware compiler: add script line for every protocol command to log the start and end times of that command
-- [ ] evoware compiler: add code to process and display measured data after measurement commands
-- [ ] evoware: test `pipetter._cleanTips`
-- [ ] evoware: write more extensive tests for `pipetter._aspirate`, `pipetter._dispense`, and `pipetter._pipette`
-- [ ] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
-- [ ] maybe move evoware folder up one level (e.g. to ~/src/roboliq/evoware)
-- [ ] test `evoware._facts`
-- [ ] test `EvowareCompiler.compile`
-- [ ] evoware: add command-line option to only process certain steps
-- [ ] evoware: when user specifies steps to process but no output name, name the output file according to the steps processed
-- [ ] for ANOVA visualization, consider http://rpsychologist.com/d3-one-way-anova
-
-## On-going todos with lots of sub-steps
+# On-going todos with lots of sub-steps
 
 - [ ] complex protocol
     - [ ] write script based on DM_Growthcurves
@@ -587,7 +296,51 @@ LATER:
     - [ ] transfection
 - [ ] implement equivalents for PR-PR commands
 
-## After submission
+# Todos for luigi
+
+- [x] configure sites and cliques for transporter.movePlate:
+    - [x] camera
+    - [x] P1-P3
+    - [x] lightbox
+    - [x] shaker
+    - [x] sealer
+    - [x] mario exchange hotel
+    - [x] hotels
+    - [x] regrip
+        - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
+    - [x] reader
+    - [x] culturebox
+    - [x] add possibility to configure options in 'ourlab'
+- [x] perform initial pipetting test
+- [x] evoware: automatically retract tips after washing
+- [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
+- [x] evoware: after pipetting is done, retract all the tips
+- [x] double-check pipetting on troughs
+- [x] sealer operation
+- [x] shaker operation
+- [x] reader operation
+	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
+    - [x] create absorbanceReader instructions
+	- [x] luigi_protocol3: change to measure absorbance
+- [x] exclude access to HOTEL12_9, because of trough
+- [x] culturebox operation
+	- [x] add to ourlab_luigi.objects
+	- [x] make sure it has internal sites
+	- [x] test moving plates into it
+	- [x] test running the shaker with open cover
+- [ ] culturebox: test running as an incubator
+- [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
+- [ ] need to change evoware's labware model on DWP once its sealed
+- [ ] suboptimal plate transport:
+    - [ ] ROMA1 P1 -> REGRIP_BELOW (catches on side before falling into place)
+    - [ ] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
+- [ ] decide on wash programs with Daniel and Fabian
+- [ ] incubator sites:
+    - [ ] add the extra logic+code for opening a black incubator site
+- [ ] incubators operation
+- [ ] camera operation
+
+# After submission
 
 - [ ] roboliq.js: need to handle a complication with final instructions: if their parameters contain references to DATA, SCOPE, or string substitutions, we need to either substitute the values into the command or create a sub-command with the concrete values.
 - [ ] test equipment.run|ourlab.mario.evoware|ourlab.mario.shaker
