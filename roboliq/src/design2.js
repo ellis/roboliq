@@ -327,6 +327,16 @@ class Special {
 		this.nextIndex = 0;
 		this.valueCount = _.size(this.action.values);
 		this.next = (next || this.defaultNext);
+
+		// Initialize this.indexes
+		switch (this.draw) {
+			case "direct":
+				this.indexes = _.range(this.valueCount);
+				break;
+			case "shuffle":
+				this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+				break;
+		}
 	}
 
 	defaultNext() {
@@ -337,7 +347,7 @@ class Special {
 					this.nextIndex = 0;
 					break;
 				case "reverse":
-					this.indexes = _.reverse(this.indexes || _.range(this.valueCount));
+					this.indexes = _.reverse(this.indexes);
 					this.nextIndex = 0;
 					break;
 				case "reshuffle":
@@ -351,13 +361,10 @@ class Special {
 		let index, key;
 		switch (this.draw) {
 			case "direct":
-				index = this.nextIndex;
+				index = this.indexes[this.nextIndex];
 				key = index + 1;
 				break;
 			case "shuffle":
-				if (!this.indexes) {
-					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
-				}
 				index = this.indexes[this.nextIndex];
 				key = index + 1;
 				break;
