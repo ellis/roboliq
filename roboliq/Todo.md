@@ -43,7 +43,15 @@
 
 # Todos for growth curve experiment
 
-- [ ]
+- [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
+- [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
+- [ ] growthcurve01_testing:
+	- [ ] reader command needs to update tableEffects
+	- [ ] initialize with switching system liquid source
+	- [ ] initialize with custom wash steps
+	- [ ] initialize with decontamination wash
+	- [ ] notify user where to put stuff
+	- [ ] pipette a dilution series using OrangeG to see which volumes we can use
 
 # Todos for ROMA qc
 

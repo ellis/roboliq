@@ -1,12 +1,28 @@
 roboliq: v1
 
+description: |
+
+  * Initialize
+      * send raw command to select the correct system liquid
+      * initialize pipetting by flushing a whole lot of water through
+      * decontaminate tips
+  * prompt user to:
+      * turn on heater
+      * place all the plates
+      * fill the throughs
+
 objects:
+  mediumLabware: {type: Plate, model: the big trough, location: R1}
+  inoculatedMediumLabware: {type: Plate, model: 100ul trough, location: R2}
+  inactivationLabware: {type: Plate, model: 100ul trough, location: R3}
+  inoculumLabware: {type: Plate, model: 100ul trough, location: R4}
+
   growthConditions:
     type: Conditions
     factors:
       strain: [...]
       media: [...]
-      
+
 
 
   SamplingNumber:

@@ -71,7 +71,9 @@ export function _washTips(params, parsed, data) {
 		return [lineWash, lineRetract];
 	}
 
-	const program = commandHelper.lookupPath([parsed.value.program], {}, data);
+	const program = (_.isString(parsed.value.program))
+		? commandHelper.lookupPath([parsed.value.program], {}, data)
+		: parsed.value.program;
 	assert(!_.isEmpty(program), "missing wash program")
 	//console.log({program})
 

@@ -247,7 +247,7 @@ module.exports = {
 					},
 					"decontaminate_2500": {
 						"type": "EvowareWashProgram",
-						"script": "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Decontaminate.esc"
+						"script": "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Roboliq_Clean_Decontaminate.esc"
 					},
 				}
 			},
