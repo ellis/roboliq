@@ -217,6 +217,8 @@ function loadProtocol(a, b, url, filecache) {
 
 	// Create a clone keeping only valid protocol properties.
 	var c = _.cloneDeep(_.pick(b,
+		'description',
+		'config',
 		'objects',
 		'steps',
 		'effects',
@@ -970,12 +972,16 @@ function _run(opts, userProtocol) {
 			//console.log("B")
 			//console.log("result: "+JSON.stringify(result))
 		} catch (e) {
+			console.log("Error type = "+(typeof e).toString());
 			if (typeof e === "RoboliqError") {
 				const prefix = e.getPrefix();
 				result = {errors: _.map(e.errors, s => prefix+s)};
 			}
+			else if (_.has(e, "errors")) {
+				result = {errors: e.errors};
+			}
 			else {
-				result = {errors: _.compact([e.toString(), e.stack])};
+				result = {errors: _.compact([JSON.stringify(e), e.stack])};
 			}
 			if (opts.throw) {
 				if (_.isPlainObject(e))
@@ -1045,7 +1051,7 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "objects", "schemas", "steps", "effects", "warnings", "errors")
+			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "warnings", "errors")
 		);
 
 		const tables = {

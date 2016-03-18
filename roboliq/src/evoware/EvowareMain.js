@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import fs from 'fs';
+import iconv from 'iconv-lite';
 import jsonfile from 'jsonfile';
 import path from 'path';
 import yaml from 'yamljs';
@@ -68,7 +69,8 @@ export function run(argv) {
 					const inpath = opts.protocol;
 					const dir = path.dirname(inpath);
 					const outpath = path.join(dir, path.basename(inpath, path.extname(inpath))+".esc");
-					fs.writeFileSync(outpath, output);
+					const encoded = iconv.encode(output, "ISO-8859-1");
+					fs.writeFileSync(outpath, encoded);
 					console.log("output written to "+outpath);
 				});
 				//console.log(JSON.stringify(results, null, '\t'))

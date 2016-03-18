@@ -141,7 +141,7 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 		// If tipModelToSyringes was provided
 		if (!_.isEmpty(tipModelToSyringes)) {
 			//console.log("C");
-			assert(tipModelToSyringes.hasOwnProperty(item.tipModel));
+			assert(tipModelToSyringes.hasOwnProperty(item.tipModel), `tipModelToSyringes must contain an entry for "${item.tipModel}"`);
 			const syringesPossible = tipModelToSyringes[item.tipModel];
 			//console.log({syringesPossible, syringesAvailable})
 			assert(!_.isEmpty(syringesPossible));

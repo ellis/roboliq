@@ -1,0 +1,87 @@
+roboliq: v1
+
+description: |
+  * Initialize
+      * send raw command to select the correct system liquid
+      * initialize pipetting by flushing a whole lot of water through
+      * decontaminate tips
+  * prompt user to:
+      * turn on heater
+      * place all the plates
+      * fill the throughs
+
+config:
+  evowareCompiler:
+    timing: false
+
+objects:
+  #mediumLabware: {type: Plate, model: ourlab.model.troughModel_1500ml, location: R1}
+  #inoculatedMediumLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: R2}
+  inactivationLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3, "contents": ["100 ml", "inactivator"]}
+  #inoculumLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: R4}
+  dye1Labware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R2, "contents": ["100 ml", "dye1"]}
+  dye2Labware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4, "contents": ["100 ml", "dye2"]}
+
+  inactivator: {type: Liquid, wells: inactivationLabware(A1 down H1)}
+  dye1: {type: Liquid, wells: dye1Labware(A1 down H1)}
+  dye2: {type: Liquid, wells: dye2Labware(A1 down H1)}
+
+  plate1: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.READER}
+
+steps:
+  1:
+    description: Initialize
+    1:
+      command: evoware._raw
+      agent: ourlab.luigi.evoware
+      commands: |
+        Command("O2SSO5,0",1,1,,,2,2,0);
+    2:
+      command: pipetter._washTips
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.liha
+      program:
+        "wasteGrid": 42
+        "wasteSite": 2
+        "cleanerGrid": 42
+        "cleanerSite": 3
+        "wasteVolume": 20
+        "wasteDelay": 500
+        "cleanerVolume": 15
+        "cleanerDelay": 500
+        "airgapVolume": 10
+        "airgapSpeed": 70
+        "retractSpeed": 30
+        "fastWash": true
+      syringes: [ourlab.luigi.liha.syringe.1, ourlab.luigi.liha.syringe.2, ourlab.luigi.liha.syringe.3, ourlab.luigi.liha.syringe.4, ourlab.luigi.liha.syringe.5, ourlab.luigi.liha.syringe.6, ourlab.luigi.liha.syringe.7, ourlab.luigi.liha.syringe.8]
+      intensity: thorough
+    3:
+      command: pipetter._washTips
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.liha
+      program:
+        "wasteGrid": 42
+        "wasteSite": 2
+        "cleanerGrid": 42
+        "cleanerSite": 3
+        "wasteVolume": 15
+        "wasteDelay": 500
+        "cleanerVolume": 10
+        "cleanerDelay": 500
+        "airgapVolume": 10
+        "airgapSpeed": 70
+        "retractSpeed": 30
+        "fastWash": false
+      syringes: [ourlab.luigi.liha.syringe.1, ourlab.luigi.liha.syringe.2, ourlab.luigi.liha.syringe.3, ourlab.luigi.liha.syringe.4, ourlab.luigi.liha.syringe.5, ourlab.luigi.liha.syringe.6, ourlab.luigi.liha.syringe.7, ourlab.luigi.liha.syringe.8]
+      intensity: thorough
+    4:
+      command: pipetter.cleanTips
+      equipment: ourlab.luigi.liha
+      intensity: decontaminate
+  2:
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 475
+      wells: plate1(B1 right B6)
+    outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"

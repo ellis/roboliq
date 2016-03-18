@@ -1,6 +1,6 @@
-fluorescenceReader:
+absorbanceReader:
   module: |
-    The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
+    The `absorbanceReader` commands specify actions using equipment for absorbance readouts.
 
 Reader:
   description: Reader equipment.
@@ -10,8 +10,8 @@ Reader:
     label: {type: string}
   required: [type]
 
-fluorescenceReader.measurePlate:
-  description: "Measure the fluorescence of a plate."
+absorbanceReader.measurePlate:
+  description: "Measure the absorbance of a plate."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

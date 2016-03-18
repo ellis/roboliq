@@ -30,6 +30,7 @@ const commandHandlers = {
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
 export function compile(carrierData, table, protocol, agents, options = {}) {
+	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects, options);
@@ -95,7 +96,7 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 		// Handle the command
 		const result0 = commandHandler(step, parsed, data);
 		// For all returned results:
-		_.forEach(result0, result1 => {
+		_.forEach(_.compact(result0), result1 => {
 			// console.log("result1: "+JSON.stringify(result1));
 			results.push(result1);
 			if (result1.effects) {

@@ -72,7 +72,7 @@ var commandHandlers = {
 
 		return {
 			expansion: expansion,
-			effects: _.fromPairs([[parsed.objectName.equipment+".open", true]])
+			effects: {[parsed.objectName.equipment+".open"]: true}
 		};
 	},
 	/**

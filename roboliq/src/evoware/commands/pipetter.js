@@ -35,7 +35,7 @@ export function _washTips(params, parsed, data) {
 		const syringeRows = parsed.value.syringes.map(x => x.row);
 		const syringeMask = encodeSyringesByRow(syringeRows);
 		const bUNKNOWN1 = false;
-		const l = [
+		const lWash = [
 			syringeMask,
 			program.wasteGrid, program.wasteSite-1,
 			program.cleanerGrid, program.cleanerSite-1,
@@ -51,10 +51,29 @@ export function _washTips(params, parsed, data) {
 			1000,
 			0
 		];
-		return `Wash(${l.join(",")});`
+		const lineWash = `Wash(${lWash.join(",")});`;
+
+		const labwareModel = {rows: 8, columns: 1};
+		const tuples = parsed.value.syringes.map(syringe => ({retract: {row: syringe.row, col: 1, labwareModel}}));
+		const retractWellMask = encodeWells(tuples, "retract");
+		// console.log({tuples: JSON.stringify(tuples), retractWellMask})
+		const lRetract = [
+			syringeMask,
+			program.cleanerGrid, program.cleanerSite-1,
+			1,
+			`"${retractWellMask}"`,
+			0, // 0=positioning with global z travel, 4=z-move
+			4, // 4=global z travel
+			0, 10, 0, 0
+		];
+		const lineRetract = `MoveLiha(${lRetract.join(",")});`;
+
+		return [lineWash, lineRetract];
 	}
 
-	const program = commandHelper.lookupPath([parsed.value.program], {}, data);
+	const program = (_.isString(parsed.value.program))
+		? commandHelper.lookupPath([parsed.value.program], {}, data)
+		: parsed.value.program;
 	assert(!_.isEmpty(program), "missing wash program")
 	//console.log({program})
 
@@ -63,7 +82,7 @@ export function _washTips(params, parsed, data) {
 		results.push({line: handleScript(program.script)});
 	}
 	else {
-		results.push({line: handleWashProgram(program)});
+		handleWashProgram(program).forEach(line => results.push({line}));
 	}
 	return results;
 }
@@ -77,6 +96,9 @@ function handlePipetterSpirate(parsed, data) {
 	// Create a script line for each group:
 	const results = _.flatMap(groups, group => handleGroup(parsed, data, group));
 	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	if (groups.length > 0) {
+		results.push(handleRetract(parsed, data, _.last(groups)))
+	}
 
 	// Get list of all accessed sites
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
@@ -109,7 +131,7 @@ function groupItems(parsed, data) {
 		const item = parsed.value.items[i];
 		const syringeName = parsed.objectName[`items.${i}.syringe`];
 		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
-		const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
+		// const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
 		function getWellInfo(well) {
 			if (_.isUndefined(well)) return undefined;
 			const {labware: labwareName, wellId} = wellsParser.parseOne(well);
@@ -171,14 +193,15 @@ function groupItems(parsed, data) {
 			return false;
 		}
 		// Same labware?
+		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName))
+			return false;
+		// Other things ok?
 		if (!_.isUndefined(tuple.source)) {
-			const sourceOk = (tuple.source.labwareName === ref.source.labwareName && checkWellInfo(tuple.source, ref.source));
-			if (sourceOk)
+			if (checkWellInfo(tuple.source, ref.source))
 				return true;
 		}
 		if (!_.isUndefined(tuple.destination)) {
-			const destinationOk = (tuple.destination.labwareName === ref.destination.labwareName && checkWellInfo(tuple.destination, ref.destination));
-			if (destinationOk)
+			if (checkWellInfo(tuple.destination, ref.destination))
 				return true;
 		}
 
@@ -258,6 +281,36 @@ function handleGroup(parsed, data, group) {
 	return _.compact([makeLine("Aspirate", "source"), makeLine("Dispense", "destination")]);
 }
 
+function handleRetract(parsed, data, group) {
+	assert(group.tuples.length > 0);
+
+	const tuples = group.tuples;
+	// Calculate syringe mask
+	const tuple0 = _.last(tuples);
+	const syringeMask = encodeSyringes(tuples);
+
+	// Script command line
+	const propertyName = (tuple0.destination) ? "destination" : "source";
+	const wellInfo = tuple0[propertyName];
+	// console.log({propertyName, wellInfo, tuple0})
+	if (_.isUndefined(wellInfo))
+		return undefined;
+
+	const labwareModel = wellInfo.labwareModel;
+	const plateMask = encodeWells(tuples, propertyName);
+	const l = [
+		syringeMask,
+		wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
+		1,
+		`"${plateMask}"`,
+		0, // 0=positioning with global z travel, 4=z-move
+		4, // 4=global z travel
+		0, 10, 0, 0
+	];
+	const line = `MoveLiha(${l.join(",")});`;
+	return {line};
+}
+
 /**
  * Generate a bitmap encoding of syringes to use
  * @param  {array} syringes - array of syringes to use
@@ -283,7 +336,6 @@ function encodeSyringesByRow(rows) {
 function encodeWells(tuples, propertyName) {
 	assert(tuples.length > 0);
 	const labwareModel = tuples[0][propertyName].labwareModel;
-	//println("encodeWells:", holder.nRows, holder.nCols, aiWells)
 	const nWellMaskChars = math.ceil(labwareModel.rows * labwareModel.columns / 7.0);
 	const amWells = _.fill(Array(nWellMaskChars), 0);
 	_.forEach(tuples, tuple => {
@@ -291,8 +343,10 @@ function encodeWells(tuples, propertyName) {
 		const iChar = _.toInteger(index / 7);
 		const iWell1 = index % 7;
 		assert(iChar < amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
+		// console.log({index, iChar, iWell1})
 		amWells[iChar] += 1 << iWell1;
 	});
+	// console.log({amWells})
 	const sWellMask = amWells.map(EvowareUtils.encode).join("");
 	const sPlateMask = sprintf("%02X%02X", labwareModel.columns, labwareModel.rows) + sWellMask;
 	return sPlateMask;

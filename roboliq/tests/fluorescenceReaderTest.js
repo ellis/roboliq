@@ -99,6 +99,8 @@ describe('commands/fluorescenceReader', function() {
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.reader",
+						"measurementType": "fluorescence",
+						"object": "plate1",
 						"programFile": "./protocols/tania13_ph-temp.mdfx",
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},

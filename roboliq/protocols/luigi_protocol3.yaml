@@ -1,16 +1,25 @@
 roboliq: v1
 
 description: |
-  Test the REGRIP_ABOVE and REGRIP_BELOW sites.
+  Test transporter to READER
 
-roboliq: v1
+config:
+  evowareCompiler:
+    timing: false
+
 objects:
-  plateDWB:
+  plate:
     type: Plate
     model: ourlab.model.plateModel_96_dwp
-    location: ourlab.luigi.site.P6
+    # model: ourlab.model.plateModel_96_round_transparent_nunc
+    #location: ourlab.luigi.site.REGRIP_BELOW
     # location: ourlab.luigi.site.P1
-
+    location: ourlab.luigi.site.LIGHT
+  #plate: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
+  # trough1: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1}
+  # trough2: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R2}
+  # trough3: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3}
+  # trough4: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4}
 steps:
   # 1:
   #   command: transporter.movePlate
@@ -29,9 +38,112 @@ steps:
   #   program: Narrow
   #   object: plateDWB
   #   destination: ourlab.luigi.site.P1
-  4:
+
+  # 1:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma1
+  #   object: plate
+  #   destination: ourlab.luigi.site.READER
+  # 2:
+  #   command: transporter.movePlate
+  #   equipment: ourlab.luigi.roma1
+  #   object: plate
+  #   destination: ourlab.luigi.site.P6
+
+  # 1:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_1
+  # 2:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_2
+  # 3:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.P6
+
+  # description: test pipetting on a plate
+  # 1:
+  #   command: pipetter.pipette
+  #   sources: ourlab.luigi.systemLiquid
+  #   destinations: plate(A01)
+  #   volumes: 50ul
+
+  # 1:
+  #   command: pipetter.cleanTips
+  #   equipment: ourlab.luigi.liha
+  #   intensity: flush
+  # 2:
+  #   command: pipetter.cleanTips
+  #   equipment: ourlab.luigi.liha
+  #   intensity: light
+  # 3:
+  #   command: pipetter.cleanTips
+  #   equipment: ourlab.luigi.liha
+  #   intensity: thorough
+
+  # description: test pipetting into the troughs
+  # 1:
+  #   command: pipetter.pipette
+  #   sources: ourlab.luigi.systemLiquid
+  #   destinations: [trough1(A01), trough2(A01), trough3(A01), trough4(A01)]
+  #   volumes: 100ul
+
+  # description: seal a plate
+  # 1:
+  #   command: sealer.sealPlate
+  #   object: plate
+
+  # description: shake a plate
+  # 1:
+  #   command: shaker.shakePlate
+  #   object: plate
+  #   program:
+  #     rpm: 600
+  #     duration: 20 seconds
+
+  # description: read absorbance/fluorescence
+  # 1:
+  #   command: absorbanceReader.measurePlate
+  #   object: plate
+  #   program:
+  #     excitationWavelength: 6000
+  #     wells: "A01+H12"
+  #   outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
+
+  # description: open the culturebox
+  # 1:
+  #   command: equipment.open
+  #   agent: ourlab.luigi.evoware
+  #   equipment: ourlab.luigi.culturebox
+  # 2:
+  #   command: equipment.close
+  #   agent: ourlab.luigi.evoware
+  #   equipment: ourlab.luigi.culturebox
+
+  # description: move plate into closed culturebox
+  # 1:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_2
+  # 2:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.P6
+
+  # description: move plate into culturebox and shake it
+  1:
+    command: equipment.open
+    agent: ourlab.luigi.evoware
+    equipment: ourlab.luigi.culturebox
+  2:
     command: transporter.movePlate
-    equipment: ourlab.luigi.roma1
-    program: Narrow
-    object: plateDWB
-    destination: ourlab.luigi.site.P1
+    object: plate
+    destination: ourlab.luigi.site.BOX_2
+  3:
+    command: shaker.run
+    equipment: ourlab.luigi.culturebox
+    program:
+      rpm: 300
+      duration: 30s

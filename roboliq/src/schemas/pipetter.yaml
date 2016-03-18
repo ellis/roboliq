@@ -103,10 +103,10 @@ pipetter._washTips:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "name"}
+    program: {description: "Program identifier", type: [name, object]}
     syringes: {description: "List of syringe identifiers", type: array, items: {type: Syringe}}
     intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
-  required: [agent, equipment, syringes, intensity]
+  required: [agent, equipment, program, syringes, intensity]
 
 pipetter.cleanTips:
   description: Clean the pipetter tips.

@@ -27,3 +27,17 @@ shaker.shakePlate:
     site: {description: "Site identifier on shaker", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after this command", "type": "SiteOrStay"}
   required: ["program", "object"]
+
+shaker.run:
+  description: "Run the shaker."
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program:
+      description: "Program for shaking"
+      type: "object"
+      properties:
+        rpm: {type: "number"}
+        duration: {type: "Duration"}
+      required: [duration]
+  required: ["program"]

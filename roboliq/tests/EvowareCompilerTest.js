@@ -272,6 +272,7 @@ describe('EvowareCompilerTest', function() {
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
 			should.deepEqual(results, [[
 				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "MoveLiha(1,1,0,1,\"0C0810000000000000\",0,4,0,10,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
@@ -312,6 +313,7 @@ describe('EvowareCompilerTest', function() {
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
 			should.deepEqual(results, [[
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "MoveLiha(1,1,0,1,\"0C0810000000000000\",0,4,0,10,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
@@ -351,6 +353,7 @@ describe('EvowareCompilerTest', function() {
 			should.deepEqual(results, [[
 				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0820000000000000\",0,0);"},
+				{line: "MoveLiha(1,1,0,1,\"0C0820000000000000\",0,4,0,10,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}
@@ -389,6 +392,7 @@ describe('EvowareCompilerTest', function() {
 			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [[
 				{line: "Wash(15,1,1,1,0,\"4\",500,\"2\",500,10,70,30,0,0,1000,0);"},
+				{line: "MoveLiha(15,1,0,1,\"0108?0\",0,4,0,10,0,0);"}
 			]]);
 		});
 	});

@@ -21,6 +21,35 @@ const commandHandlers = {
 	// - [ ] raise and error if the shaker site is occupied
 	// - [ ] raise error if plate's location isn't set
 	// - [ ] return result of query for possible alternative settings
+	"shaker.run": function(params, parsed, data) {
+		const predicates = [
+			{"shaker.canAgentEquipment": {
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment
+			}}
+		];
+		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."shaker.canAgentEquipment"');
+		const params2 = alternatives[0];
+		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
+
+		const expansion = [
+			{
+				command: "equipment.run|"+params2.agent+"|"+params2.equipment,
+				agent: params2.agent,
+				equipment: params2.equipment,
+				program: parsed.orig.program
+			}
+		];
+
+		return {
+			expansion,
+			alternatives
+		};
+	},
+	// TODO:
+	// - [ ] raise and error if the shaker site is occupied
+	// - [ ] raise error if plate's location isn't set
+	// - [ ] return result of query for possible alternative settings
 	"shaker.shakePlate": function(params, parsed, data) {
 		const model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		const location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
@@ -63,7 +92,6 @@ const commandHandlers = {
 
 		return {
 			expansion: expansion,
-			effects: _.fromPairs([[parsed.objectName.object + ".sealed", true]]),
 			alternatives: alternatives
 		};
 	}

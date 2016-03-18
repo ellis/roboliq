@@ -41,13 +41,6 @@ objects:
                   - ourlab.mario.site.HOTEL4_2
                   - ourlab.mario.site.HOTEL4_3
                   - ourlab.mario.site.HOTEL4_4
-                  - ourlab.mario.site.HOTEL32_D1
-                  - ourlab.mario.site.HOTEL32_C1
-                  - ourlab.mario.site.HOTEL32_B1
-                  - ourlab.mario.site.HOTEL32_A1
-                  - ourlab.mario.site.HOTEL32_D8
-                  - ourlab.mario.site.HOTEL32_C4
-                  - ourlab.mario.site.HOTEL32_B5
                   - ourlab.mario.site.ROBOSEAL
                   - ourlab.mario.site.ROBOPEEL
                 Wide:
@@ -56,6 +49,35 @@ objects:
       order=range:
         groupBy: [plate, roma, vector]
         shuffle: true
+
+
+  designHotels:
+    type: Design
+    description: Design for testing the 32-position hotels
+    randomSeed: 123
+    conditions:
+      plate: plateNunc
+      storageSite: ourlab.mario.site.REGRIP
+      roma: ourlab.mario.roma2
+      vector: Narrow
+      hotelSite*:
+      - ourlab.mario.site.HOTEL32_A1
+      - ourlab.mario.site.HOTEL32_B1
+      - ourlab.mario.site.HOTEL32_C1
+      - ourlab.mario.site.HOTEL32_D1
+      - ourlab.mario.site.HOTEL32_C4
+      - ourlab.mario.site.HOTEL32_B5
+      - ourlab.mario.site.HOTEL32_A8
+      - ourlab.mario.site.HOTEL32_D8
+      benchSite=assign:
+        values:
+        - ourlab.mario.site.P2
+        - ourlab.mario.site.P3
+        - ourlab.mario.site.P6
+        - ourlab.mario.site.P7
+        - ourlab.mario.site.P8
+        shuffle: true
+        rotateValues: true
 
 steps:
   1:
@@ -68,6 +90,7 @@ steps:
       1:
         command: experiment.forEachRow
         steps:
+          description: `Site {{$site}}`
           command: transporter.movePlate
           equipment: $roma
           program: $vector
@@ -79,3 +102,26 @@ steps:
         program: $vector
         object: $plate
         destination: $storageSite
+  2:
+    description: `Test movements for hotels`
+    command: experiment.forEachRow
+    design: designHotels
+    steps:
+      1:
+        description: `Site {{$hotelSite}}`
+        command: transporter.movePlate
+        equipment: $roma
+        program: $vector
+        object: $plate
+        destination: $hotelSite
+      2:
+        description: `Site {{$benchSite}}`
+        command: transporter.movePlate
+        equipment: $roma
+        program: $vector
+        object: $plate
+        destination: $benchSite
+  3:
+    command: transporter.movePlate
+    object: plateNunc
+    destination: ourlab.mario.site.REGRIP
