@@ -45,14 +45,22 @@
 - [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
 - [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
 - [ ] growthcurve01_testing:
+	- [x] initialize with custom wash steps
+	- [x] initialize with decontamination wash
 	- [?] reader command needs to update tableEffects
 	- [ ] absorbance reader: the F200 Pro can apparently only read at 600nm
-	- [ ] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm")
-	- [ ] initialize with switching system liquid source
-	- [ ] initialize with custom wash steps
-	- [ ] initialize with decontamination wash
-	- [ ] notify user where to put stuff
-	- [ ] pipette a dilution series using OrangeG to see which volumes we can use
+	- [ ] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
+	- [ ] initialize by switching system liquid to correct source
+	- [ ] notify user where to put labware
+	- [ ] pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes)
+- [ ] growthcurve02_testing:
+	- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
+	- [ ] DWP on P1, fill it with media, then add inoculum
+	- [ ] seal DWP twice
+	- [ ] DWP model now needs to change, manage starting a new script!
+	- [ ] move DWP to shaker, start shaking with cover closed
+	- [ ] after 15 minutes, take out DWP
+	- [ ] sample 8 wells
 
 # Todos for ROMA qc
 

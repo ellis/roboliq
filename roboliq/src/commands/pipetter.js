@@ -358,6 +358,7 @@ function pipette(params, parsed, data) {
 	}
 	else {
 		function assignProgram(items) {
+			console.log("assignProgram: "+JSON.stringify(items))
 			var pipettingClass = findPipettingClass(items);
 			if (!pipettingClass) return false;
 			var pipettingPosition = findPipettingPosition(items);

@@ -1,0 +1,138 @@
+roboliq: v1
+
+description: |
+  * [ ] Initialize
+      * [ ] send raw command to select the correct system liquid
+      * [x] initialize pipetting by flushing a whole lot of water through
+      * [x] decontaminate tips
+  * [ ] prompt user to:
+      * [ ] turn on heater
+      * [ ] place all the plates
+      * [ ] fill the throughs
+  * [x] move DWP to pipetter location, fill it with media, then add inoculum
+  - [ ] seal DWP twice
+  - [ ] DWP model now needs to change, manage starting a new script!
+  - [ ] move DWP to shaker, start shaking with cover closed
+  - [ ] after 15 minutes, take dilution plate out of hotel, take DWP out of shaker
+  - [ ] sample 8 wells, transfer to a dilution plate
+    - [ ] put DWP back in shaker, restart incubation
+    - [ ] create dilution series
+    - [ ] read dilution plate and put it back in hotel
+
+
+config:
+  evowareCompiler:
+    timing: false
+
+objects:
+  #mediumLabware: {type: Plate, model: ourlab.model.troughModel_1500ml, location: R1}
+  inactivationLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3, contents: ["100 ml", "inactivator"]}
+  inoculumLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4, contents: ["100 ml", "inoculum"]}
+
+  inactivator: {type: Liquid, wells: inactivationLabware(A1 down H1)}
+  inoculum: {type: Liquid, wells: inoculumLabware(A1 down H1)}
+
+  culturePlate1: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
+  dilutionPlate2: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_1}
+
+  design1:
+    type: Design
+    randomSeed: 444
+    conditions:
+      culturePlate: culturePlate1
+      incubatorSite: ourlab.luigi.site.BOX_2
+      dilutionPlate: dilutionPlate1
+      group*: [1]
+      stage=: [1]
+      stageOrder=: [1]
+      groupWellNo*: [1,2,3,4,5,6,7,8]
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        shuffle: true
+
+steps:
+  1:
+    description: Initialize
+    1:
+      command: evoware._raw
+      agent: ourlab.luigi.evoware
+      commands: |
+        Command("O2SSO5,0",1,1,,,2,2,0);
+    2:
+      command: pipetter._washTips
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.liha
+      program:
+        "wasteGrid": 42
+        "wasteSite": 2
+        "cleanerGrid": 42
+        "cleanerSite": 3
+        "wasteVolume": 20
+        "wasteDelay": 500
+        "cleanerVolume": 15
+        "cleanerDelay": 500
+        "airgapVolume": 10
+        "airgapSpeed": 70
+        "retractSpeed": 30
+        "fastWash": true
+      syringes: [ourlab.luigi.liha.syringe.1, ourlab.luigi.liha.syringe.2, ourlab.luigi.liha.syringe.3, ourlab.luigi.liha.syringe.4, ourlab.luigi.liha.syringe.5, ourlab.luigi.liha.syringe.6, ourlab.luigi.liha.syringe.7, ourlab.luigi.liha.syringe.8]
+      intensity: thorough
+    3:
+      command: pipetter._washTips
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.liha
+      program:
+        "wasteGrid": 42
+        "wasteSite": 2
+        "cleanerGrid": 42
+        "cleanerSite": 3
+        "wasteVolume": 15
+        "wasteDelay": 500
+        "cleanerVolume": 10
+        "cleanerDelay": 500
+        "airgapVolume": 10
+        "airgapSpeed": 70
+        "retractSpeed": 30
+        "fastWash": false
+      syringes: [ourlab.luigi.liha.syringe.1, ourlab.luigi.liha.syringe.2, ourlab.luigi.liha.syringe.3, ourlab.luigi.liha.syringe.4, ourlab.luigi.liha.syringe.5, ourlab.luigi.liha.syringe.6, ourlab.luigi.liha.syringe.7, ourlab.luigi.liha.syringe.8]
+      intensity: thorough
+    4:
+      command: pipetter.cleanTips
+      equipment: ourlab.luigi.liha
+      intensity: decontaminate
+  2:
+    command: experiment.forEachGroup
+    design: design1
+    groupBy: culturePlate
+    steps:
+      description: "`Fill {{$culturePlate}}`"
+      1:
+        command: transporter.movePlate
+        object: $culturePlate
+        destination: ourlab.luigi.site.LIGHT
+      2:
+        command: pipetter.pipette
+        sources: ourlab.luigi.systemLiquid
+        destinationLabware: $culturePlate
+        destinations: $$well
+        volumes: 980ul
+        cleanBetween: none
+      3:
+        command: pipetter.pipette
+        sources: inoculum
+        destinationLabware: $culturePlate
+        destinations: $$well
+        volumes: 20ul
+        cleanBetween: none
+      4:
+        command: transporter.movePlate
+        object: culturePlate1
+        destination: $incubatorSite
+    # command: experiment
+    # command: absorbanceReader.measurePlate
+    # object: plate1
+    # program:
+    #   excitationWavelength: 6000
+    #   wells: plate1(B1 right B6)
+    # outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
