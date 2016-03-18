@@ -64,7 +64,7 @@
     - [x] P1-P3,P6-P8 with ROMA2
     - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
     - [x] transfer hotels
-- [ ] qc_mario_vectors_96nunc: test whether vector works on ROBOSEAL and ROBOPEEL after sealing/peeling
+- [x] qc_mario_vectors_96nunc: test whether vector works on ROBOSEAL and ROBOPEEL after sealing/peeling
 - [ ] qc_mario_vectors_96nunc: adapt script so that no transfers between hotel sites are made
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
 - [ ] qc_mario_vectors_96nunc: ERROR: misplaced from hotel32 site 19 to P2
@@ -111,6 +111,11 @@
 - [x] runtime-server: accept as input a `.out.json` file
 - [x] runtime-client/Runtime: display protocol
 - [x] runtime-client/Runtime: better display of from-till/duration time for each command
+- [ ] design2:
+	- [x] various ways to draw from a list: direct, direct/restart, direct/reverse, shuffle, shuffle/restart, shuffle/reshuffle, sample (with replacement)
+	- [x] combine draw+reuse into "order" property
+	- [ ] groupBy
+	- [ ] sameBy
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
