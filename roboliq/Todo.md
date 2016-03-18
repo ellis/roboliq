@@ -46,6 +46,8 @@
 - [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
 - [ ] growthcurve01_testing:
 	- [?] reader command needs to update tableEffects
+	- [ ] absorbance reader: the F200 Pro can apparently only read at 600nm
+	- [ ] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm")
 	- [ ] initialize with switching system liquid source
 	- [ ] initialize with custom wash steps
 	- [ ] initialize with decontamination wash
