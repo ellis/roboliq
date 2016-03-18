@@ -172,6 +172,56 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle assign() with reuse=restart", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2, 3, 4],
+					"b=": {
+						values: [1, 2],
+						reuse: "restart"
+					}
+				}),
+				[
+					{a: 1, b: 1}, {a: 2, b: 2},
+					{a: 3, b: 1}, {a: 4, b: 2}
+				]
+			);
+		});
+
+		it("should handle assign() with reuse=reverse", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2, 3, 4],
+					"b=": {
+						values: [1, 2],
+						reuse: "reverse"
+					}
+				}),
+				[
+					{a: 1, b: 1}, {a: 2, b: 2},
+					{a: 3, b: 2}, {a: 4, b: 1}
+				]
+			);
+		});
+
+		it("should handle assign() with reuse=reshuffle", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2, 3, 4, 5, 6],
+					"b=": {
+						randomSeed: 444,
+						values: [1, 2],
+						reuse: "reshuffle"
+					}
+				}),
+				[
+					{a: 1, b: 1}, {a: 2, b: 2},
+					{a: 3, b: 1}, {a: 4, b: 2},
+					{a: 5, b: 2}, {a: 6, b: 1}
+				]
+			);
+		});
+
 	});
 
 	describe("flattenDesign", () => {
@@ -209,46 +259,6 @@ describe('design', () => {
 			should.deepEqual(table, [
 				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":5},{"a":1,"b":3,"order":3},
 				{"a":2,"b":1,"order":4},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":6}
-			]);
-		});
-
-		it("should handle assign() with reuse=restart", () => {
-			const design = {
-				randomSeed: 444,
-				conditions: {
-					"a*": [1, 2, 3, 4],
-					"b=": {
-						values: [1, 2],
-						reuse: "restart"
-					}
-				}
-			};
-			const table = flattenDesign(design);
-			// console.log(JSON.stringify(table))
-			// printData(table);
-			should.deepEqual(table, [
-				{a: 1, b: 1}, {a: 2, b: 2},
-				{a: 3, b: 1}, {a: 4, b: 2}
-			]);
-		});
-
-		it("should handle assign() with reuse=reverse", () => {
-			const design = {
-				randomSeed: 444,
-				conditions: {
-					"a*": [1, 2, 3, 4],
-					"b=": {
-						values: [1, 2],
-						reuse: "reverse"
-					}
-				}
-			};
-			const table = flattenDesign(design);
-			// console.log(JSON.stringify(table))
-			// printData(table);
-			should.deepEqual(table, [
-				{a: 1, b: 1}, {a: 2, b: 2},
-				{a: 3, b: 2}, {a: 4, b: 1}
 			]);
 		});
 

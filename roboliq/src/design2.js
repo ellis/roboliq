@@ -352,6 +352,8 @@ class Special {
 					break;
 				case "reshuffle":
 					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+					this.nextIndex = 0;
+					console.log("shuffled indexes: "+this.indexes)
 					break;
 				default:
 					assert(false, "not enough values supplied to fill the rows: "+JSON.stringify(this.action));
