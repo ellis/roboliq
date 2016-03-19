@@ -88,6 +88,40 @@ export function flattenArrayM(rows) {
 }
 
 /**
+ * Is like _.flattenDeep, but only for the given rows, and it mutates both the rows array and rowIndexes array in-place.
+ *
+ * @param {array} rows - array to flatten
+ * @param {array} rowIndexes - array of row indexes to flatten
+ * @param {integer} rowIndexesOffset - index in rowIndexes to start at
+ */
+export function flattenArrayAndIndexes(rows, rowIndexes) {
+	let i = 0;
+	while (i < rowIndexes.length) {
+		const rowIndex = rowIndexes[i];
+		const item = rows[rowIndex];
+		if (_.isArray(item)) {
+			// Flatten the sub-array
+			flattenArrayM(item);
+			// Splice the original sub-array back into the parent array
+			rows.splice(rowIndex, 1, ...item);
+
+			// Update rowIndexes
+			for (let j = i + 1; j < rowIndexes.length; j++) {
+				rowIndexes[j] += item.length - 1;
+			}
+			const x = _.range(rowIndex, rowIndex + item.length);
+			console.log({x})
+			rowIndexes.splice(i, 1, ...x);
+
+			i += item.length;
+		}
+		else {
+			i++;
+		}
+	}
+}
+
+/**
  */
 export function expandConditions(conditions, randomEngine) {
 	console.log("expandConditions: "+JSON.stringify(conditions))
@@ -106,6 +140,7 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
 	for (let name in conditions) {
 		expandRowsByNamedValue(nestedRows, rowIndexes, name, conditions[name], randomEngine);
 		// flattenArrayM(nestedRows); // this doesn't work because rowIndexes needs to change when array is flattened
+		//flattenArrayAndIndexes(nestedRows, rowIndexes);
 	}
 }
 

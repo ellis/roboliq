@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const should = require('should');
 import {printData} from '../src/design.js';
-import {flattenDesign, flattenArrayM, expandConditions} from '../src/design2.js';
+import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, expandConditions} from '../src/design2.js';
 
 describe('design', () => {
 	// Configure mathjs to use bignumbers
@@ -33,6 +33,74 @@ describe('design', () => {
 				[[{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}]]
 			];
 			should.deepEqual(flattenArrayM(_.cloneDeep(l)), l0);
+		});
+	});
+
+	describe("flattenArrayAndIndexes", () => {
+		const l0 = [
+			{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3},
+			{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}
+		];
+		it('should handle an already-flat array', () => {
+			const rows = _.cloneDeep(l0);
+			const rowIndexes = _.range(rows.length);
+			flattenArrayAndIndexes(rows, rowIndexes);
+			should.deepEqual(rows, l0);
+			should.deepEqual(rowIndexes, _.range(6));
+		});
+
+		it('should handle one level of nesting', () => {
+			const rows = [
+				[{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3}],
+				[{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}]
+			];
+			const rowIndexes = _.range(rows.length);
+			flattenArrayAndIndexes(rows, rowIndexes);
+			// console.log(JSON.stringify(rowIndexes))
+			// console.log(JSON.stringify(rows, null, '\t'))
+			should.deepEqual(rows, l0);
+			should.deepEqual(rowIndexes, _.range(6));
+		});
+
+		it('should handle partial flattening #1', () => {
+			const rows = [
+				[{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3}],
+				[{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}]
+			];
+			const rowIndexes = [0];
+			flattenArrayAndIndexes(rows, rowIndexes);
+			should.deepEqual(rows, [
+				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3},
+				[{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}]
+			]);
+			should.deepEqual(rowIndexes, [0, 1, 2]);
+		});
+
+		it('should handle partial flattening #2', () => {
+			const rows = [
+				[{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3}],
+				[{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}]
+			];
+			const rowIndexes = [1];
+			flattenArrayAndIndexes(rows, rowIndexes);
+			// console.log(JSON.stringify(rowIndexes))
+			// console.log(JSON.stringify(rows, null, '\t'))
+			should.deepEqual(rows, [
+				[{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3}],
+				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}
+			]);
+			should.deepEqual(rowIndexes, [1, 2, 3]);
+		});
+
+		it('should handle two levels of nesting', () => {
+			const rows = [
+				[{"a":1,"b":1,"order":1},[{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3}]],
+				[[{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}]]
+			];
+			const rowIndexes = _.range(rows.length);
+			flattenArrayAndIndexes(rows, rowIndexes);
+			should.deepEqual(rows, l0);
+			should.deepEqual(rowIndexes, _.range(6));
 		});
 	});
 
