@@ -139,8 +139,6 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
 	// console.log("expandRowsByObject: "+JSON.stringify(conditions));
 	for (let name in conditions) {
 		expandRowsByNamedValue(nestedRows, rowIndexes, name, conditions[name], randomEngine);
-		// flattenArrayM(nestedRows); // this doesn't work because rowIndexes needs to change when array is flattened
-		//flattenArrayAndIndexes(nestedRows, rowIndexes);
 	}
 }
 
@@ -158,6 +156,8 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 	// If an action is specified using the "=" symbol:
 	const iEquals = name.indexOf("=");
 	if (iEquals >= 0) {
+		// Need to flatten the rows in case the action uses groupBy or sameBy
+		flattenArrayAndIndexes(nestedRows, rowIndexes);
 		const actionType = name.substr(iEquals + 1) || "assign";
 		const actionHandler = actionHandlers[actionType];
 		assert(actionHandler, `unknown action type: ${actionType} in ${name}`)
