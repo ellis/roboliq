@@ -44,6 +44,16 @@
 
 - [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
 - [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
+- [ ] growthcurve02_testing:
+	- [ ] BUG: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
+	- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
+	- [x] DWP on P1, fill it with media, then add inoculum
+	- [x] BUG: why doesn't `sources: $$well` work?
+	- [ ] seal DWP twice
+	- [ ] DWP model now needs to change, manage starting a new script!
+	- [ ] move DWP to shaker, start shaking with cover closed
+	- [ ] after 15 minutes, take out DWP
+	- [ ] sample 8 wells
 - [ ] growthcurve01_testing:
 	- [x] initialize with custom wash steps
 	- [x] initialize with decontamination wash
@@ -53,16 +63,6 @@
 	- [ ] initialize by switching system liquid to correct source
 	- [ ] notify user where to put labware
 	- [ ] pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes)
-- [ ] growthcurve02_testing:
-	- [ ] BUG: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
-	- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
-	- [x] DWP on P1, fill it with media, then add inoculum
-	- [ ] seal DWP twice
-	- [ ] DWP model now needs to change, manage starting a new script!
-	- [ ] BUG: why doesn't `sources: $$well` work?
-	- [ ] move DWP to shaker, start shaking with cover closed
-	- [ ] after 15 minutes, take out DWP
-	- [ ] sample 8 wells
 - [ ] let wellsParser handle `destinations: A01 down H01`?
 
 # Todos for ROMA qc

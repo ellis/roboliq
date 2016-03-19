@@ -578,6 +578,7 @@ function processSiteOrStay(result, path, x, data) {
  * @param {object} data - protocol data
  */
 function processSource(result, path, x, data) {
+	// console.log(`processSource: ${JSON.stringify(path)}, ${JSON.stringify(x)}`)
 	const l = processSources(result, path, x, data);
 	expect.truthy({paramName: path.join('.')}, _.isArray(l) && l.length === 1, "expected a single liquid source: "+JSON.stringify(x));
 	_.set(result.value, path, l[0]);
@@ -608,10 +609,12 @@ function processSources(result, path, x, data) {
 			return expect.try({paramName: path2.join('.')}, () => {
 				const result2 = {value: {}, objectName: {}};
 				processSource(result2, path2, x2, data);
-				return result2.value.x;
+				// console.log(`result2: ${JSON.stringify(result2)}`)
+				return _.get(result2.value, path2);
 			});
 		});
 	}
+	// console.log({x})
 	_.set(result.value, path, x);
 	return x;
 }

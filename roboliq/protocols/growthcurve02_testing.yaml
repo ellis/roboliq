@@ -178,9 +178,7 @@ steps:
       4:
         command: pipetter.pipette
         sourceLabware: $culturePlate
-        sources: B01
-        CONTINUE
-        # sources: $$well
+        sources: $$well
         destinationLabware: $culturePlate
         destinations: $$well
         #destinationLabware: $dilutionPlate
