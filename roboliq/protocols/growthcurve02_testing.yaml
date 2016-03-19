@@ -12,10 +12,11 @@ description: |
   * [x] move DWP to pipetter location, fill it with media, then add inoculum
   - [ ] seal DWP twice
   - [ ] DWP model now needs to change to the "sealed" variant, manage starting a new script!
-  - [ ] move DWP to shaker, start shaking with cover closed
-  - [ ] after 15 minutes, take dilution plate out of hotel, take DWP out of shaker
+  - [.] move DWP to shaker, start shaking with cover closed
+  - [.] after 15 minutes, take dilution plate out of hotel, take DWP out of shaker
   - [ ] Q: how large should each sample volume be?
   - [ ] sample 8 wells, transfer to a dilution plate
+    - [.] transfer samples
     - [ ] put DWP back in shaker, restart incubation
     - [ ] create dilution series
     - [ ] read dilution plate and put it back in hotel
@@ -48,7 +49,7 @@ objects:
       group*: [1]
       stage=: [1]
       stageOrder=: [1]
-      groupWellNo*: [1,2,3,4,5,6,7,8]
+      syringe*: [1,2,3,4,5,6,7,8]
       well=allocateWells:
         rows: 8
         columns: 12
@@ -162,26 +163,59 @@ steps:
     design: design1
     groupBy: culturePlate
     steps:
-      description: "`Extract samples from {{$culturePlate}}`"
       1:
-        command: equipment.open
-        agent: ourlab.luigi.evoware
-        equipment: ourlab.luigi.culturebox
+        description: "`Extract samples from {{$culturePlate}}`"
+        1:
+          command: equipment.open
+          agent: ourlab.luigi.evoware
+          equipment: ourlab.luigi.culturebox
+        2:
+          command: transporter.movePlate
+          object: $dilutionPlate
+          destination: $dilutionSite
+        3:
+          command: transporter.movePlate
+          object: $culturePlate
+          destination: $aspirationSite
+        4:
+          command: pipetter.pipette
+          sourceLabware: $culturePlate
+          sources: $$well
+          destinationLabware: $dilutionPlate
+          destinations: A01+B01+C01+D01+E01+F01+G01+H01
+          # destinations: dilutionPlate1(A01 down H01)
+          volumes: 50ul
       2:
-        command: transporter.movePlate
-        object: $dilutionPlate
-        destination: $dilutionSite
+        description: "`Put {{$culturePlate}} back in incubator`"
+        1:
+          command: transporter.movePlate
+          object: $culturePlate
+          destination: $incubatorSite
+        2:
+          command: equipment.close
+          agent: ourlab.luigi.evoware
+          equipment: ourlab.luigi.culturebox
+        3:
+          command: shaker.start
+          equipment: ourlab.luigi.culturebox
       3:
-        command: transporter.movePlate
-        object: $culturePlate
-        destination: $aspirationSite
+        description: "`Create dilutions from {{$culturePlate}} {{$wells}}`"
+        command: pipetter.pipetteDilutionSeries2x
+        diluent: water
+        destinationLabware: $dilutionPlate
+        items:
+          "#data":
+            groupBy: cultureWell
+            template:
+              destination: $dilutionWell
+              syringe: $syringe
+        clean: none
+        cleanEnd: decontaminate
       4:
-        command: pipetter.pipette
-        sourceLabware: $culturePlate
-        sources: $$well
-        destinationLabware: $culturePlate
-        destinations: $$well
-        #destinationLabware: $dilutionPlate
-        #destinations: dilutionPlate1(A01+B01+C01+D01+E01+F01+G01+H01)
-        # destinations: dilutionPlate1(A01 down H01)
-        volumes: 50ul
+        description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$wells}}`"
+        command: absorbanceReader.measurePlate
+        object: $dilutionPlate
+        program:
+          excitationWavelength: 600nm
+          wells: $$dilutionWells
+        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
