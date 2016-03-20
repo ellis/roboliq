@@ -46,6 +46,7 @@ objects:
       culturePlate: culturePlate1
       incubatorSite: ourlab.luigi.site.BOX_2
       dilutionPlate: dilutionPlate1
+      syringe*=range: {till: 8}
       cultureWell=allocateWells:
         rows: 8
         columns: 12

@@ -366,6 +366,29 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle branching range() with custom 'from' value", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*=range": {from: 0, till: 3}
+				}),
+				[
+					{a: 0}, {a: 1}, {a: 2}, {a: 3}
+				]
+			);
+			should.deepEqual(
+				expandConditions({
+					"a*=range": {from: 0, till: 3},
+					"b*=range": {from: 0, till: 1}
+				}),
+				[
+					{a: 0, b: 0}, {a: 0, b: 1},
+					{a: 1, b: 0}, {a: 1, b: 1},
+					{a: 2, b: 0}, {a: 2, b: 1},
+					{a: 3, b: 0}, {a: 3, b: 1},
+				]
+			);
+		});
+
 	});
 
 	describe("flattenDesign", () => {
