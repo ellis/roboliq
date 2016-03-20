@@ -386,7 +386,11 @@ class Special {
 				this.indexes = _.range(this.valueCount);
 				break;
 			case "shuffle":
-				this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+				if (this.action.shuffleOnce !== true || !this.indexes) {
+					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+				} else {
+					// FIXME: if this.valueCount is now larger than this.indexes.length, then generate more indexes
+				}
 				break;
 		}
 	}
@@ -591,7 +595,7 @@ function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
 	for (let i = 0; i < rowIndexesSame.length; i++) {
 		const rowIndexes3 = rowIndexesSame[i];
 		if (isSpecial) {
-			value.nextIndex = key;
+			value.nextIndex = i;
 		}
 		const value2
 			= (isArray) ? value[i]

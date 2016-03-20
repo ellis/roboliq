@@ -747,7 +747,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support range() with sameBy", () => {
+		it("should support range() with sameBy", () => {
 			const design = {
 				conditions: {
 					"a*": [1, 2],
@@ -796,7 +796,7 @@ describe('design', () => {
 					"order=range": {
 						till: 3,
 						groupBy: "a",
-						shuffle: true,
+						order: "shuffle",
 						shuffleOnce: true
 					}
 				}
@@ -810,7 +810,7 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support assignment of an array of objects", () => {
+		it.only("should support assignment of an array of objects", () => {
 			const design = {
 				conditions: {
 					"a*": [1, 2],
