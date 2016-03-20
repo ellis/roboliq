@@ -174,9 +174,20 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 		}
 	}
 
-	// TODO: turn the name/value into an action in order to allow for more sophisticated expansion
-	if (_.endsWith(name, "*")) {
-		branchRowsByNamedValue(nestedRows, rowIndexes, name.substr(0, name.length - 1), value, randomEngine);
+	const starIndex = name.indexOf("*");
+	if (starIndex >= 0) {
+		// Remove the branching suffix from the name
+		name = name.substr(0, starIndex);
+		// If the name is empty, automatically pick a dummy name that will be omitted
+		if (_.isEmpty(name)) {
+			name = ".HIDDEN";
+		}
+		// If the branching value is just a number, then assume it means the number of replicates
+		if (_.isNumber(value)) {
+			value = _.range(1, value + 1);
+		}
+
+		branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine);
 	}
 	else {
 		assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine);
@@ -460,6 +471,9 @@ const actionHandlers = {
 			}
 		}
 
+		const randomEngine2 = (_.isNumber(action.randomSeed))
+			? Random.engines.mt19937().seed(action.randomSeed)
+			: randomEngine;
 		const value2 = (draw === "direct" && reuse === "none")
 			? action.values
 			: new Special({action, draw, reuse, randomEngine: randomEngine2});
@@ -469,9 +483,6 @@ const actionHandlers = {
 		}
 		else {
 			console.log("SPECIAL!")
-			const randomEngine2 = (_.isNumber(action.randomSeed))
-				? Random.engines.mt19937().seed(action.randomSeed)
-				: randomEngine;
 
 			if (action.groupBy) {
 				printRows(rows);
