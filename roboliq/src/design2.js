@@ -110,7 +110,7 @@ export function flattenArrayAndIndexes(rows, rowIndexes) {
 				rowIndexes[j] += item.length - 1;
 			}
 			const x = _.range(rowIndex, rowIndex + item.length);
-			console.log({x})
+			// console.log({x})
 			rowIndexes.splice(i, 1, ...x);
 
 			i += item.length;
@@ -124,7 +124,7 @@ export function flattenArrayAndIndexes(rows, rowIndexes) {
 /**
  */
 export function expandConditions(conditions, randomEngine) {
-	console.log("expandConditions: "+JSON.stringify(conditions))
+	// console.log("expandConditions: "+JSON.stringify(conditions))
 	const table = [{}];
 	expandRowsByObject(table, [0], conditions, randomEngine);
 	flattenArrayM(table);
@@ -150,9 +150,9 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
  *   else call assignRowsByNamedValue
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
-	console.log({rowIndexes})
-	console.log(nestedRows)
+	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	// console.log({rowIndexes})
+	// console.log(nestedRows)
 	// If an action is specified using the "=" symbol:
 	const iEquals = name.indexOf("=");
 	if (iEquals >= 0) {
@@ -212,9 +212,9 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
  *       setColumnValue(row, name, value)
  */
 function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
-	printRows(nestedRows)
-	console.log({rowIndexes})
+	// console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+	// printRows(nestedRows)
+	// console.log({rowIndexes})
 	if (value instanceof Special || _.isArray(value)) {
 		let valueIndex = 0;
 		for (let i = 0; i < rowIndexes.length; i++) {
@@ -252,7 +252,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
  *     setColumnValue(row, name, item)
  */
 function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyIndex, valueKeys, randomEngine) {
-	console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`);
+	// console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`);
 	const row = nestedRows[rowIndex];
 	let n = 0;
 	if (_.isArray(row)) {
@@ -312,7 +312,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
  *   nestedRows[rowIndex] = _.flattenDeep(rows2);
  */
 function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log(JSON.stringify(nestedRows))
+	// console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log(JSON.stringify(nestedRows))
 	const size
 		= (_.isArray(value)) ? value.length
 		: (_.isPlainObject(value)) ? _.size(value)
@@ -330,7 +330,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 			for (let rowIndex2 = 0; rowIndex2 < size; rowIndex2++) {
 				rows2[rowIndex2] = _.cloneDeep(row0);
 			}
-			console.log(rows2)
+			// console.log(rows2)
 			assignRowsByNamedValue(rows2, _.range(size), name, value, randomEngine);
 			nestedRows[rowIndex] = _.flattenDeep(rows2);
 		}
@@ -402,7 +402,7 @@ class Special {
 	}
 
 	defaultNext() {
-		console.log({this});
+		// console.log({this});
 		if (this.nextIndex >= this.valueCount) {
 			switch (this.reuse) {
 				case "restart":
@@ -415,7 +415,7 @@ class Special {
 				case "reshuffle":
 					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
 					this.nextIndex = 0;
-					console.log("shuffled indexes: "+this.indexes)
+					// console.log("shuffled indexes: "+this.indexes)
 					break;
 				default:
 					assert(false, "not enough values supplied to fill the rows: "+JSON.stringify(this.action));
@@ -542,12 +542,12 @@ function handleAssignmentWithQueries(rows, rowIndexes, name, action, randomEngin
 		return value;
 	}
 	else {
-		console.log("GROUP!")
+		// console.log("GROUP!")
 
 		if (action.groupBy) {
-			printRows(rows);
+			// printRows(rows);
 			const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
-			console.log({rowIndexesGroups})
+			// console.log({rowIndexesGroups})
 			for (let i = 0; i < rowIndexesGroups.length; i++) {
 				const rowIndexes2 = rowIndexesGroups[i];
 
@@ -576,12 +576,12 @@ function handleAssignmentWithQueries(rows, rowIndexes, name, action, randomEngin
 }
 
 function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
-	console.log(`assignSameBy: ${rowIndexes}, ${name}, ${action.sameBy}, ${JSON.stringify(value)}`)
+	// console.log(`assignSameBy: ${rowIndexes}, ${name}, ${action.sameBy}, ${JSON.stringify(value)}`)
 	const isArray = _.isArray(value);
 	const isObject = _.isPlainObject(value);
 	const isSpecial = value instanceof Special;
 	const rowIndexesSame = query_groupBy(rows, rowIndexes, action.sameBy);
-	console.log({rowIndexesSame})
+	// console.log({rowIndexesSame})
 
 	/*
 	for (let i = 0; i < rowIndexesSame.length; i++) {
@@ -609,7 +609,7 @@ function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
 			: (isObject) ? value[keys[i]]
 			: (isSpecial) ? value.next(rows, [rowIndexes3[0]])
 			: value;
-		console.log({i, rowIndexes3, value2})
+		// console.log({i, rowIndexes3, value2})
 		for (let i = 0; i < rowIndexes3.length; i++) {
 			const rowIndex = rowIndexes3[i];
 			expandRowsByNamedValue(rows, [rowIndex], name, value2, randomEngine);
@@ -640,7 +640,7 @@ function assign_calculate_next(expr, action) {
 		assert(!_.isUndefined(expr), "`expression` property must be specified");
 		// console.log("scope:"+JSON.stringify(scope, null, '\t'))
 		let value = math.eval(expr, scope);
-		console.log({type: value.type, value})
+		// console.log({type: value.type, value})
 		if (_.isString(value) || _.isNumber(value)) {
 			return [0, value];
 		}
@@ -713,7 +713,7 @@ function assign_range_initGroup(rows, rowIndexes) {
 		}
 	}
 	this.action.values = values;
-	console.log({this_action_values: this.action.values});
+	// console.log({this_action_values: this.action.values});
 
 	this.defaultInitGroup(rows, rowIndexes);
 }
