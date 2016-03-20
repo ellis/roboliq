@@ -389,6 +389,21 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle calculateWell()", () => {
+			should.deepEqual(
+				expandConditions({
+					"i*": [1,2,3],
+					"j*": [1,2,3],
+					"well=calculateWell": {row: "i+1", column: "j*2"}
+				}),
+				[
+					{i: 1, j: 1, well: "B02"}, {i: 1, j: 2, well: "B04"}, {i: 1, j: 3, well: "B06"},
+					{i: 2, j: 1, well: "C02"}, {i: 2, j: 2, well: "C04"}, {i: 2, j: 3, well: "C06"},
+					{i: 3, j: 1, well: "D02"}, {i: 3, j: 2, well: "D04"}, {i: 3, j: 3, well: "D06"}
+				]
+			);
+		});
+
 	});
 
 	describe("flattenDesign", () => {

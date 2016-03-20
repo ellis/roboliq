@@ -274,6 +274,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
  */
 function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyIndex, valueKeys, randomEngine) {
 	// console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`);
+	// console.log(JSON.stringify({rowIndex, name, valueKeyIndex, valueKeys}))
 	const row = nestedRows[rowIndex];
 	let n = 0;
 	if (_.isArray(row)) {
@@ -288,7 +289,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
 		// console.log("A")
 		let item, key;
 		if (values instanceof Special) {
-			// console.log("B")
+			// console.log("B: "+rowIndex)
 			[key, item] = values.next(nestedRows, rowIndex);
 		}
 		else {
@@ -334,15 +335,21 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
  */
 function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
 	// console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log(JSON.stringify(nestedRows))
+	const isSpecial = (value instanceof Special);
 	const size
 		= (_.isArray(value)) ? value.length
 		: (_.isPlainObject(value)) ? _.size(value)
-		: (value instanceof Special) ? value.valueCount
+		: (isSpecial) ? value.valueCount
 		: 1;
 	for (let i = 0; i < rowIndexes.length; i++) {
 		const rowIndex = rowIndexes[i];
 		// Make replicates of row
 		const row0 = nestedRows[rowIndex];
+
+		if (isSpecial) {
+			value.initGroup(nestedRows, [rowIndex]);
+		}
+
 		if (_.isArray(row0)) {
 			branchRowsByNamedValue(row0, _.range(row0.length), name, value, randomEngine);
 		}

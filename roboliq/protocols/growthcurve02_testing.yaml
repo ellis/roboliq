@@ -41,18 +41,20 @@ objects:
     type: Design
     randomSeed: 444
     conditions:
-      aspirationSite: ourlab.luigi.site.P3
-      dilutionSite: ourlab.luigi.site.P6
+      aspirationSite: P3
+      dilutionSite: P6
       culturePlate: culturePlate1
-      incubatorSite: ourlab.luigi.site.BOX_2
+      incubatorSite: BOX_2
       dilutionPlate: dilutionPlate1
       syringe*=range: {till: 8}
       cultureWell=allocateWells:
         rows: 8
         columns: 12
         order: shuffle
-      dilutionStep*=range: {from: 0, till: 5}
-      dilutionCol=calculate: syringe
+      dilutionStep*: [0,1,2,3,4,5]
+      dilutionRow=calculate: syringe
+      dilutionCol=calculate: dilutionStep+1
+
 steps:
   1:
     description: Initialize
