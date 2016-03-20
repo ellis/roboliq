@@ -5,8 +5,13 @@ import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
-import {locationRowColToText} from './parsers/wellsParser.js';
-
+//import {locationRowColToText} from './parsers/wellsParser.js';
+// FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
+function locationRowColToText(row, col) {
+	var colText = col.toString();
+	if (colText.length == 1) colText = "0"+colText;
+	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
+}
 
 export function printRows(rows, hideRedundancies = false) {
 	const data = _.flattenDeep(rows);

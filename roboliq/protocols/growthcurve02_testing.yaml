@@ -46,17 +46,12 @@ objects:
       culturePlate: culturePlate1
       incubatorSite: ourlab.luigi.site.BOX_2
       dilutionPlate: dilutionPlate1
-      group*: [1]
-      stage=: [1]
-      stageOrder=: [1]
-      syringe*: [1,2,3,4,5,6,7,8]
       cultureWell=allocateWells:
         rows: 8
         columns: 12
-        shuffle: true
-      .dilutionWellIndex*:
-        CONTINUE
-
+        order: shuffle
+      dilutionStep*=range: {from: 0, till: 5}
+      dilutionCol=calculate: syringe
 steps:
   1:
     description: Initialize

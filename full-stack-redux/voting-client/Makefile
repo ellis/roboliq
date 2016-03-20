@@ -1,2 +1,2 @@
-src/design.js: ../../roboliq/src/design.js
+src/design.js: ../../roboliq/src/design2.js
 	cp $< $@
