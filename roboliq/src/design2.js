@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
 // import Immutable, {Map, fromJS} from 'immutable';
-// import math from 'mathjs';
+import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
@@ -265,7 +265,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
 	else {
 		let item, key;
 		if (values instanceof Special) {
-			[key, item] = values.next();
+			[key, item] = values.next(nestedRows, rowIndex);
 		}
 		else {
 			assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
@@ -498,6 +498,78 @@ const actionHandlers = {
 				return value2;
 			}
 		}
+	},
+	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
+		function next(nestedRows, rowIndex) {
+			const row0 = nestedRows[rowIndex];
+			const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+			// Build the scope for evaluating the math expression from the current data row
+			const scope = _.mapValues(row, x => {
+				// console.log({x})
+				try {
+					const result = math.eval(x);
+					// If evaluation succeeds, but it was just a unit name, then set value as string instead
+					if (result.type === "Unit" && result.value === null)
+						return x;
+					else {
+						return result;
+					}
+				}
+				catch (e) {}
+				return x;
+			});
+
+			const expr = action;
+			assert(!_.isUndefined(expr), "`expression` property must be specified");
+			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+			let value = math.eval(expr, scope);
+			console.log({type: value.type, value})
+			if (_.isString(value) || _.isNumber(value)) {
+				return [0, value];
+			}
+
+			// Get units to use in the end, and the unitless value
+			const {units0, units, unitless} = (() => {
+				const result = {
+					units0: undefined,
+					units: action.units,
+					unitless: value
+				};
+				// If the result has units:
+				if (value.type === "Unit") {
+					result.units0 = value.formatUnits();
+					if (_.isUndefined(result.units))
+						result.units = result.units0;
+					const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+					// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
+					if (_.isEmpty(conversionUnits)) {
+						// TODO: find a better way to get the unit-less quantity from `value`
+						// console.log({action})
+						// console.log({result, conversionUnits});
+						result.unitless = math.eval(value.format());
+					}
+					else {
+						result.unitless = value.toNumeric(conversionUnits);
+					}
+				}
+				return result;
+			})();
+			// console.log({unitless})
+
+			// Restrict decimal places
+			const unitlessText = (_.isNumber(action.decimals))
+				? unitless.toFixed(action.decimals)
+				: unitless.toNumber();
+
+			// Set units
+			const valueText = (!_.isEmpty(units))
+				? unitlessText + " " + units
+				: unitlessText;
+
+			return [0, valueText];
+		}
+
+		return new Special({action, draw: "direct", reuse: "none", randomEngine}, next);
 	},
 	"range": (rows, rowIndexes, name, action, randomEngine) => {
 		let till = action.till;

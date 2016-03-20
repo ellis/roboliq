@@ -245,6 +245,19 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle branching factors whose value is a number, and without a name", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": 2,
+					"*": 2
+				}),
+				[
+					{a: 1}, {a: 1},
+					{a: 2}, {a: 2}
+				]
+			);
+		});
+
 		it("should handle 'range' action", () => {
 			should.deepEqual(
 				expandConditions({
@@ -328,15 +341,14 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle branching factors whose value is a number, and without a name", () => {
+		it("should handle calculate()", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": 2,
-					"*": 2
+					"b=calculate": "a * 2"
 				}),
 				[
-					{a: 1}, {a: 1},
-					{a: 2}, {a: 2}
+					{a: 1, b: 2}, {a: 2, b: 4}
 				]
 			);
 		});
