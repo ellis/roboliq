@@ -508,6 +508,10 @@ function assign(rows, rowIndexes, name, action, randomEngine, next, initGroup) {
 		}
 	}
 
+	if (_.isString(action.calculate)) {
+		next = assign_calculate_next(action.calculate, action)
+	}
+
 	const randomEngine2 = (_.isNumber(action.randomSeed))
 		? Random.engines.mt19937().seed(action.randomSeed)
 		: randomEngine;

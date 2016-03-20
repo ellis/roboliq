@@ -353,6 +353,20 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle assign() with calculate value", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": 2,
+					"b=": {
+						calculate: "a * 2"
+					}
+				}),
+				[
+					{a: 1, b: 2}, {a: 2, b: 4}
+				]
+			);
+		});
+
 	});
 
 	describe("flattenDesign", () => {
@@ -733,7 +747,7 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support range() with sameBy", () => {
+		it.only("should support range() with sameBy", () => {
 			const design = {
 				conditions: {
 					"a*": [1, 2],
