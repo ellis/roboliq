@@ -67,6 +67,22 @@ export function flattenDesign(design) {
 	return expandConditions(design.conditions, randomEngine);
 }
 
+export function getCommonValues(table) {
+	if (_.isEmpty(table)) return {};
+
+	let common = _.clone(table[0]);
+	for (let i = 1; i < table.length; i++) {
+		// Remove any value from common which aren't shared with this row.
+		_.forEach(table[i], (value, name) => {
+			if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
+				delete common[name];
+			}
+		})
+	}
+
+	return common;
+}
+
 /**
  * Is like _.flattenDeep, but it mutates the array in-place.
  *
@@ -732,7 +748,6 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
 	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
 }
 
-/*
 export function query(table, q) {
 	let table2 = _.clone(table);
 	if (q.select) {
@@ -788,4 +803,3 @@ export function query(table, q) {
 
 	return table2;
 }
-*/

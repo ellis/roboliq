@@ -399,7 +399,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":5},{"a":1,"b":3,"order":3},
 				{"a":2,"b":1,"order":4},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":6}
@@ -440,7 +440,7 @@ describe('design', () => {
 				}
 			};
 			const table = flattenDesign(design);
-			//printData(table);
+			//printRows(table);
 			should.deepEqual(table, [
 				{treatment: "a"},
 				{treatment: "b"},
@@ -475,7 +475,7 @@ describe('design', () => {
 				}
 			};
 			const table = flattenDesign(design);
-			//printData(table);
+			//printRows(table);
 			should.deepEqual(table, [
 				{treatment: "A", order: 1},
 				{treatment: "A", order: 2},
@@ -503,7 +503,7 @@ describe('design', () => {
 				}
 			}
 			const table = flattenDesign(design);
-			//printData(table);
+			//printRows(table);
 			should.deepEqual(table, [
 				{media: "media1", culturePlate: "stillPlate", cultureReplicate: 1, cultureWell: "A01", measurement: 1, dilutionPlate: "dilutionPlate1"}
 			]);
@@ -610,7 +610,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			console.log(JSON.stringify(table, null, '\t'))
-			printData(table);
+			printRows(table);
 			should.deepEqual(table, [
 				{material: "A", boy: 1, foot: 1},
 				{treatment: "A", order: 2},
@@ -633,7 +633,7 @@ describe('design', () => {
 									acidPH: 3.75,
 									basePH: 5.75 } } } };
 			const table = flattenDesign(design);
-			//printData(table);
+			//printRows(table);
 			should.deepEqual(_.keys(table[0]),
 				["waterSource", "waterVolume", "proteinSource", "proteinVolume", "bufferSystem", "acidSource", "baseSource", "acidPH", "basePH"]
 			);
@@ -645,7 +645,7 @@ describe('design', () => {
 					{ source: "water",
 						'volume*=range': { count: 4, from: 0, till: 20, decimals: 1, units: "ul" } } };
 			const table = flattenDesign(design);
-			//printData(table);
+			//printRows(table);
 			should.deepEqual(table, [
 				{source: "water", volume: "0 ul"},
 				{source: "water", volume: "6.7 ul"},
@@ -660,7 +660,7 @@ describe('design', () => {
 					{ volume1: "20ul",
 						"volume2=calculate": "30ul - volume1" } };
 			const table = flattenDesign(design);
-			//printData(table);
+			//printRows(table);
 			should.deepEqual(table, [
 				{volume1: "20ul", volume2: "10 ul"}
 			]);
@@ -682,7 +682,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"0 ul","baseVolume":"0.020 ml"},
 				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"6.7 ul","baseVolume":"0.013 ml"},
@@ -700,7 +700,7 @@ describe('design', () => {
 			};
 			const table1 = flattenDesign(design1);
 			// console.log(JSON.stringify(table1))
-			// printData(table1);
+			// printRows(table1);
 			should.deepEqual(table1, [
 				{"replicate":1,"well":"A01"},
 				{"replicate":2,"well":"B01"},
@@ -717,7 +717,7 @@ describe('design', () => {
 			};
 			const table2 = flattenDesign(design2);
 			// console.log(JSON.stringify(table1))
-			// printData(table1);
+			// printRows(table1);
 			should.deepEqual(table2, [
 				{"replicate":1,"well":"A01"},
 				{"replicate":2,"well":"A02"},
@@ -739,7 +739,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":3},
 				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}
@@ -758,7 +758,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":1},
 				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":2}
@@ -779,7 +779,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
 				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":3},{"a":2,"b":3,"order":1}
@@ -802,7 +802,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
 				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":1},{"a":2,"b":3,"order":3}
@@ -818,7 +818,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"c":1}, {"a":2,"b":2,"c":2}
 			]);
@@ -833,7 +833,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			// console.log(JSON.stringify(table))
-			// printData(table);
+			// printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"c":1}, {"a":1,"b":1,"c":2},
 				{"a":2,"b":2,"c":3}, {"a":2,"b":2,"c":4},
@@ -849,7 +849,7 @@ describe('design', () => {
 			};
 			const table = flattenDesign(design);
 			console.log(JSON.stringify(table))
-			printData(table);
+			printRows(table);
 			should.deepEqual(table, [
 				{"a":1,"b":1,"c":1}, {"a":1,"b":1,"c":2},
 				{"a":2,"b":2,"c":3}, {"a":2,"b":2,"c":4},
