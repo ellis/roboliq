@@ -310,6 +310,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 	const size
 		= (_.isArray(value)) ? value.length
 		: (_.isPlainObject(value)) ? _.size(value)
+		: (value instanceof Special) ? value.valueCount
 		: 1;
 	for (let i = 0; i < rowIndexes.length; i++) {
 		const rowIndex = rowIndexes[i];
@@ -366,16 +367,19 @@ function setColumnValue(row, name, value) {
 }
 
 class Special {
-	constructor({action, draw, reuse, randomEngine}, next) {
+	constructor({action, draw, reuse, randomEngine}, next, initGroup) {
 		this.action = action;
 		this.draw = draw;
 		this.reuse = reuse;
 		this.randomEngine = randomEngine;
+		this.next = (next || this.defaultNext);
+		this.initGroup = (initGroup || this.defaultInitGroup);
+
+	}
+
+	defaultInitGroup(nestedRows, rowIndexes) {
 		this.nextIndex = 0;
 		this.valueCount = _.size(this.action.values);
-		this.next = (next || this.defaultNext);
-		this.reset = this.defaultReset;
-
 		// Initialize this.indexes
 		switch (this.draw) {
 			case "direct":
@@ -385,10 +389,6 @@ class Special {
 				this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
 				break;
 		}
-	}
-
-	defaultReset() {
-		this.nextIndex = 0;
 	}
 
 	defaultNext() {
@@ -430,7 +430,7 @@ class Special {
 				assert(false, "unknown 'draw' value: "+JSON.stringify(this.draw)+" in "+JSON.stringify(this.action));
 		}
 
-		const value = this.action.values[index]
+		const value = this.action.values[index];
 		if (this.draw !== "sample") {
 			this.nextIndex++;
 		}
@@ -439,6 +439,7 @@ class Special {
 	}
 }
 
+/*
 function countRows(nestedRows, rowIndexes) {
 	let sum = 0;
 	for (let i = 0; i < rowIndexes.length; i++) {
@@ -452,7 +453,7 @@ function countRows(nestedRows, rowIndexes) {
 		}
 	}
 	return sum;
-}
+}*/
 
 const actionHandlers = {
 	"allocateWells": (_rows, rowIndexes, name, action, randomEngine) => {
@@ -470,93 +471,59 @@ const actionHandlers = {
 		const action2 = _.cloneDeep(action);
 		action2.values = values;
 		// console.log({values})
-		return handleAssign(rows, rowIndexes, name, action2, randomEngine);
+		return assign(rows, rowIndexes, name, action2, randomEngine);
 	},
-	"assign": handleAssign,
+	"assign": assign,
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
-		return new Special({action, draw: "direct", reuse: "none", randomEngine}, assign_calculate_next(action, {}));
+		return assign(rows, rowIndexes, name, action, randomEngine, assign_calculate_next(action, {}));
 	},
 	"range": (rows, rowIndexes, name, action, randomEngine) => {
-		let till = action.till;
-		if (_.isUndefined(till)) {
-			till = countRows(rows, rowIndexes);
-		}
-		let range;
-		if (!_.isUndefined(till)) {
-			const from = _.get(action, "from", 1);
-			assert(_.isNumber(from), "`from` must be a number");
-			if (_.isNumber(action.count)) {
-				const diff = till - from;
-				range = _.range(action.count).map(i => {
-					const d = diff * i / (action.count - 1);
-					return from + d;
-				});
-			}
-			else {
-				const step = _.get(action, "step", 1);
-				range = _.range(from, till+1, step);
-			}
-		}
-		if (range) {
-			if (_.isNumber(action.decimals)) {
-				range = range.map(n => Number(n.toFixed(action.decimals)));
-			}
-			if (_.isString(action.units)) {
-				range = range.map(n => `${n} ${action.units}`);
-			}
-
-			const action2 = _.cloneDeep(action);
-			action2.values = range;
-			return handleAssign(rows, rowIndexes, name, action2, randomEngine);
-		}
+		const action2 = _.cloneDeep(action);
+		_.defaults(action2, {from: 1, step: 1});
+		const end = (_.isNumber(action2.till))
+		 	? action2.till + 1 : rowIndexes.length + 1;
+		return assign(rows, rowIndexes, name, action2, randomEngine, undefined, assign_range_initGroup);
 	},
 	"sample": {
 
 	}
 }
 
-function handleAssign(rows, rowIndexes, name, action, randomEngine, value) {
-	// Assign an array
-	if (_.isArray(action.values)) {
-		// Handle order in which to assign values
-		let draw = "direct";
-		let reuse = "none";
-		if (!_.isEmpty(action.order)) {
-			switch (action.order) {
-				case "direct": case "direct/none": break;
-				case "direct/restart": case "restart": draw = "direct"; reuse = "restart"; break;
-				case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
-				case "shuffle": draw = "shuffle"; reuse = "none"; break;
-				case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
-				case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
-				case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
-				case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
-				case "sample": draw = "sample"; break;
-				default: assert(false, "unrecognized 'order' value: "+action.order);
-			}
+function assign(rows, rowIndexes, name, action, randomEngine, next, initGroup) {
+	// Handle order in which to assign values
+	let draw = "direct";
+	let reuse = "none";
+	if (!_.isEmpty(action.order)) {
+		switch (action.order) {
+			case "direct": case "direct/none": break;
+			case "direct/restart": case "restart": draw = "direct"; reuse = "restart"; break;
+			case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
+			case "shuffle": draw = "shuffle"; reuse = "none"; break;
+			case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+			case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+			case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
+			case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
+			case "sample": draw = "sample"; break;
+			default: assert(false, "unrecognized 'order' value: "+action.order);
 		}
+	}
 
-		const randomEngine2 = (_.isNumber(action.randomSeed))
-			? Random.engines.mt19937().seed(action.randomSeed)
-			: randomEngine;
-		const value2 = (draw === "direct" && reuse === "none")
-			? action.values
-			: new Special({action, draw, reuse, randomEngine: randomEngine2});
+	const randomEngine2 = (_.isNumber(action.randomSeed))
+		? Random.engines.mt19937().seed(action.randomSeed)
+		: randomEngine;
+	const value2 = ((_.isArray(action.values)) && draw === "direct" && reuse === "none" && !initGroup)
+		? action.values
+		: new Special({action, draw, reuse, randomEngine: randomEngine2}, next, initGroup);
 
-		return assign(rows, rowIndexes, name, action, randomEngine2, value2);
-	}
-	// Assign a calculation
-	else if (_.isString(action.calculate)) {
-		return new Special({action, draw: "direct", reuse: "none", randomEngine}, assign_calculate_next(action.calculate, action));
-	}
-	else {
-		assert(false, "should have 'values' array: "+JSON.stringify(action));
-	}
+	return handleAssignmentWithQueries(rows, rowIndexes, name, action, randomEngine2, value2);
 }
 
-function assign(rows, rowIndexes, name, action, randomEngine, value) {
+function handleAssignmentWithQueries(rows, rowIndexes, name, action, randomEngine, value) {
 	const isSpecial = value instanceof Special;
 	if (!action.groupBy && !action.sameBy) {
+		if (isSpecial) {
+			value.initGroup(rows, rowIndexes);
+		}
 		return value;
 	}
 	else {
@@ -564,17 +531,18 @@ function assign(rows, rowIndexes, name, action, randomEngine, value) {
 
 		if (action.groupBy) {
 			printRows(rows);
-			if (isSpecial) {
-				value.reset();
-			}
 			const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
 			console.log({rowIndexesGroups})
 			for (let i = 0; i < rowIndexesGroups.length; i++) {
 				const rowIndexes2 = rowIndexesGroups[i];
+
 				if (action.sameBy) {
 					assignSameBy(rows, rowIndexes2, name, action, randomEngine, value);
 				}
 				else {
+					if (isSpecial) {
+						value.initGroup(rows, rowIndexes2);
+					}
 					expandRowsByNamedValue(rows, rowIndexes2, name, value, randomEngine);
 				}
 			}
@@ -584,6 +552,9 @@ function assign(rows, rowIndexes, name, action, randomEngine, value) {
 			assignSameBy(rows, rowIndexes, name, action, randomEngine, value);
 		}
 		else {
+			if (isSpecial) {
+				value.initGroup(rows, rowIndexes);
+			}
 			return value;
 		}
 	}
@@ -606,6 +577,10 @@ function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
 		for (let j = 0; j < rowIndexesSame.length;)
 	}
 	*/
+	if (isSpecial) {
+		const rowIndexesFirst = rowIndexesSame.map(l => l[0]);
+		value.initGroup(rows, rowIndexesFirst);
+	}
 
 	const keys = (isObject) ? _.keys(value) : 0;
 	const table2 = _.zip.apply(_, table2);
@@ -698,9 +673,41 @@ function assign_calculate_next(expr, action) {
 	}
 }
 
-/*const assign_range_next = (expr, action) => (nestedRows, rowIndex) => {
+function assign_range_initGroup(rows, rowIndexes) {
+	const from = this.action.from;
+	const till = (_.isNumber(this.action.till)) ? this.action.till : rowIndexes.length;
+	const end = till + 1;
+
+	let values;
+	if (_.isNumber(this.action.count)) {
+		const diff = till - from;
+		values = _.range(this.action.count).map(i => {
+			const d = diff * i / (this.action.count - 1);
+			return from + d;
+		});
+	}
+	else {
+		values = _.range(from, end, this.action.step);
+	}
+	if (values) {
+		if (_.isNumber(this.action.decimals)) {
+			values = values.map(n => Number(n.toFixed(this.action.decimals)));
+		}
+		if (_.isString(this.action.units)) {
+			values = values.map(n => `${n} ${this.action.units}`);
+		}
+	}
+	this.action.values = values;
+	console.log({this_action_values: this.action.values});
+
+	this.defaultInitGroup(rows, rowIndexes);
+}
+
+/*
+const assign_range_next = (expr, action) => function(nestedRows, rowIndex) {
 	console.log("assign_range_next: "+JSON.stringify(this));
 	const n = this.action.from + this.nextIndex * this.action.step;
+	assert(!_.isNumber(this.action.till) || n < this.action.till, "range could not fill rows");
 	this.nextIndex++;
 	return [this.nextIndex, n];
 }*/

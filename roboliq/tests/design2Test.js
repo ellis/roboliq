@@ -752,7 +752,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support range() with groupBy and shuffle", () => {
+		it("should support range() with groupBy and shuffle", () => {
 			const design = {
 				randomSeed: 444,
 				conditions: {
@@ -760,7 +760,7 @@ describe('design', () => {
 					"b*": [1, 2, 3],
 					"order=range": {
 						groupBy: "a",
-						shuffle: true
+						order: "shuffle"
 					}
 				}
 			};
