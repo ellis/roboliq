@@ -256,6 +256,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
 	const row = nestedRows[rowIndex];
 	let n = 0;
 	if (_.isArray(row)) {
+		// console.log("0")
 		for (let i = 0; i < row.length; i++) {
 			const n2 = assignRowByNamedValuesKey(row, i, name, values, valueKeyIndex, valueKeys, randomEngine);
 			n += n2;
@@ -263,17 +264,22 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
 		}
 	}
 	else {
+		// console.log("A")
 		let item, key;
 		if (values instanceof Special) {
+			// console.log("B")
 			[key, item] = values.next(nestedRows, rowIndex);
 		}
 		else {
+			// console.log("C")
 			assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
 			const valueKey = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
 			key = (valueKeys) ? valueKey : valueKey + 1;
 			item = values[valueKey];
 		}
 
+		// console.log("D")
+		// console.log({item})
 		if (_.isArray(item)) {
 			setColumnValue(row, name, key);
 			branchRowByArray(nestedRows, rowIndex, item, randomEngine);
@@ -479,7 +485,7 @@ const actionHandlers = {
 	},
 	"assign": assign,
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
-		return assign(rows, rowIndexes, name, action, randomEngine, assign_calculate_next(action, {}));
+		return assign(rows, rowIndexes, name, {}, randomEngine, assign_calculate_next(action, {}));
 	},
 	"range": (rows, rowIndexes, name, action, randomEngine) => {
 		const action2 = _.cloneDeep(action);
@@ -494,6 +500,7 @@ const actionHandlers = {
 }
 
 function assign(rows, rowIndexes, name, action, randomEngine, next, initGroup) {
+	assert(_.isPlainObject(action), "expect an object for assignment")
 	// Handle order in which to assign values
 	let draw = "direct";
 	let reuse = "none";

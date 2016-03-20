@@ -810,11 +810,11 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support assignment of an array of objects", () => {
+		it("should support assignment of an array of objects", () => {
 			const design = {
 				conditions: {
 					"a*": [1, 2],
-					"b=": [{c: 1}, {c: 2}]
+					"b": [{c: 1}, {c: 2}]
 				}
 			};
 			const table = flattenDesign(design);
@@ -829,7 +829,7 @@ describe('design', () => {
 			const design = {
 				conditions: {
 					"a*": [1, 2],
-					"b=": [[{c: 1}, {c: 2}], [{c: 3}, {c: 4}]]
+					"b": [[{c: 1}, {c: 2}], [{c: 3}, {c: 4}]]
 				}
 			};
 			const table = flattenDesign(design);
