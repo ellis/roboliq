@@ -23,7 +23,7 @@ Syringe:
 pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: Syringe}
+    syringe: {description: Syringe identifier, type: [number, Syringe]}
     source: {description: Source specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, source, volume]
@@ -31,7 +31,7 @@ pipetter._AspirateItem:
 pipetter._DispenseItem:
   description: Parameters for pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: Syringe}
+    syringe: {description: Syringe identifier, type: [number, Syringe]}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, destination, volume]
@@ -46,7 +46,7 @@ pipetter.CleaningIntensity:
 pipetter.PipetteItem:
   description: Parameters for pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: Syringe}
+    syringe: {description: Syringe identifier, type: [number, Syringe]}
     source: {description: Source specifier, type: Source}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
@@ -55,7 +55,7 @@ pipetter.PipetteItem:
 pipetter.DilutionItem:
   description: Parameters for a dilution series.
   properties:
-    syringe: {description: Syringe identifier, type: Syringe}
+    syringe: {description: Syringe identifier, type: [number, Syringe]}
     source: {description: Source specifier, type: Source}
     destinations: {description: Destination wells, type: Wells}
     #dilutionFactor: {description: How many times diluted, type: number}
@@ -120,7 +120,7 @@ pipetter.cleanTips:
       items:
         type: object
         properties:
-          syringe: {description: "Syringe identifier", type: Syringe}
+          syringe: {description: Syringe identifier, type: [number, Syringe]}
           intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
         required: [syringe]
     syringes: {description: "Optional list of syringes to serve as default for missing syringes in items list", type: array, items: {type: Syringe}}

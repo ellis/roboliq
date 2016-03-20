@@ -42,11 +42,12 @@
 
 # Todos for growth curve experiment
 
+- [ ] BUG: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
+- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
+- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 - [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
 - [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
 - [ ] growthcurve02_testing:
-	- [ ] BUG: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
-	- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
 	- [x] DWP on P1, fill it with media, then add inoculum
 	- [x] BUG: why doesn't `sources: $$well` work?
 	- [ ] seal DWP twice
@@ -125,13 +126,12 @@
 - [x] runtime-server: accept as input a `.out.json` file
 - [x] runtime-client/Runtime: display protocol
 - [x] runtime-client/Runtime: better display of from-till/duration time for each command
-- [ ] design2:
+- [x] design2:
 	- [x] various ways to draw from a list: direct, direct/restart, direct/reverse, shuffle, shuffle/restart, shuffle/reshuffle, sample (with replacement)
 	- [x] combine draw+reuse into "order" property
-	- [ ] range: make it reuse "assign" functionality
-	- [ ] groupBy
-		- may need to create a flattenArrayM function that simultaneously fixes the rowIndexes array
-	- [ ] sameBy
+	- [x] range: make it reuse "assign" functionality
+	- [x] groupBy
+	- [x] sameBy
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix

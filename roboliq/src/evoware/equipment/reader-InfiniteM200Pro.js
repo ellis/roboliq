@@ -121,15 +121,16 @@ module.exports = {
 				let wells;
 				if (program.wells) {
 					// Get well list
-					const wells0 = wellsParser.parse(program.wells, data.objects);
+					const wells0 = commandHelper.asArray(program.wells);
+					const wells1 = _.flatMap(wells0, s => wellsParser.parse(s, data.objects));
 					// console.log({wells0})
 					const rx = /\(([^)]*)\)/;
-					const wells1 = wells0.map(s => {
+					const wells2 = wells1.map(s => {
 						const match = s.match(rx);
 						return (match) ? match[1] : s;
 					})
 					// console.log({wells1})
-					const rowcols = wells1.map(s => wellsParser.locationTextToRowCol(s));
+					const rowcols = wells2.map(s => wellsParser.locationTextToRowCol(s));
 					// console.log({rowcols})
 					// rowcols.sort();
 					//rowcols.sort((a, b) => (a[0] == b[0]) ? a[1] - b[1] : a[0] - b[0]);

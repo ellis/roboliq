@@ -599,7 +599,7 @@ module.exports = {
 				return {expansion, effects};
 			},
 			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
-				console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
+				// console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
 				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 				const parsedProgram = parsed.value.program;
 				//console.log({parsedProgram});

@@ -208,13 +208,12 @@ steps:
       3:
         description: "`Create dilutions from {{$culturePlate}} {{$$cultureWell}}`"
         command: pipetter.pipetteDilutionSeries2x
-        diluent: water
+        diluent: ourlab.luigi.systemLiquid
         destinationLabware: $dilutionPlate
         items:
           "#data":
             groupBy: cultureWell
-            distinctBy: cultureWell
-            template:
+            templateGroup:
               destinations: $$dilutionWell
               syringe: $syringe
         clean: none

@@ -142,6 +142,7 @@ function pipette(params, parsed, data) {
 			}
 			if (parsed.objectName.destinationLabware) {
 				items[i].destination = getLabwareWell(parsed.objectName.destinationLabware, items[i].destination);
+				console.log({item_destinations: items.map(x => x.destination)})
 			}
 
 			if (_.isUndefined(items[i].volume)) {
@@ -164,7 +165,7 @@ function pipette(params, parsed, data) {
 		return [item.source, item.destination]
 	}).flatten().compact().value();
 	wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
-	//console.log("wellName_l", JSON.stringify(wellName_l))
+	console.log("wellName_l", JSON.stringify(wellName_l))
 
 	// Find all labware
 	var labwareName_l = _(wellName_l).map(function (wellName) {
@@ -194,6 +195,7 @@ function pipette(params, parsed, data) {
 		}
 		query2_l.push(query);
 	});
+	console.log({query2_l})
 
 	// Check whether the same agent and equipment can be used for all the pipetting steps
 	if (!_.isEmpty(query2_l)) {
@@ -686,6 +688,7 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries2x": function(params, parsed, data) {
+		console.log("pipetter.pipetteDilutionSeries2x: "+JSON.stringify(parsed))
 		const destinationLabware = parsed.objectName.destinationLabware;
 
 		// Fill all destination wells with diluent
@@ -696,7 +699,8 @@ const commandHandlers = {
 			// FIXME: handle `source`
 			assert(_.isUndefined(item.source), "`source` property not implemented yet");
 			const destination0 = getLabwareWell(destinationLabware, item.destinations[0]);
-			const destinations2 = _.tail(item.destinations);
+			const destinations2 = _.tail(item.destinations).map(s => getLabwareWell(destinationLabware, s));
+			console.log({destination0, destinations2})
 			let dilutionFactorPrev = 1;
 
 			// get volume of destination0, and use half of it as the final volume
@@ -704,13 +708,14 @@ const commandHandlers = {
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "first well in dilution series shouldn't be empty");
 			const volume = math.divide(volume0, 2);
 
-			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`];
+			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`] || item.syringe;
 			//console.log({syringeName})
 
 			// Distribute diluent to all destination wells
-			_.forEach(_.initial(destinations2), (destinationWell, index) => {
+			_.forEach(destinations2, (destinationWell, index) => {
 				diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: volume.format({precision: 4}), syringe: syringeName});
 			});
+			console.log({diluentItems})
 
 			// Pipette the dilutions
 			let source = destination0;
@@ -741,6 +746,7 @@ const commandHandlers = {
 		params2.items = items;
 		// params2.clean = "none"; // HACK
 		// params2.cleanEnd = "light"; // HACK
+		console.log({params1, params2})
 		return { expansion: { "1": params1, "2": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
