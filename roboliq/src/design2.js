@@ -5,7 +5,7 @@ import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
-// import {locationRowColToText} from './parsers/wellsParser.js';
+import {locationRowColToText} from './parsers/wellsParser.js';
 
 
 export function printRows(rows, hideRedundancies = false) {
@@ -450,36 +450,24 @@ function countRows(nestedRows, rowIndexes) {
 }
 
 const actionHandlers = {
-	"assign": (rows, rowIndexes, name, action, randomEngine) => {
-		assert(_.isArray(action.values), "should have 'values' array: "+JSON.stringify(action));
-
-		// Handle order in which to assign values
-		let draw = "direct";
-		let reuse = "none";
-		if (!_.isEmpty(action.order)) {
-			switch (action.order) {
-				case "direct": case "direct/none": break;
-				case "direct/restart": case "restart": draw = "direct"; reuse = "restart"; break;
-				case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
-				case "shuffle": draw = "shuffle"; reuse = "none"; break;
-				case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
-				case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
-				case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
-				case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
-				case "sample": draw = "sample"; break;
-				default: assert(false, "unrecognized 'order' value: "+action.order);
-			}
-		}
-
-		const randomEngine2 = (_.isNumber(action.randomSeed))
-			? Random.engines.mt19937().seed(action.randomSeed)
-			: randomEngine;
-		const value2 = (draw === "direct" && reuse === "none")
-			? action.values
-			: new Special({action, draw, reuse, randomEngine: randomEngine2});
-
-		return assign(rows, rowIndexes, name, action, randomEngine2, value2);
+	"allocateWells": (_rows, rowIndexes, name, action, randomEngine) => {
+		const rows = action.rows;
+		const cols = action.columns;
+		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
+		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
+		const byColumns = _.get(action, "byColumns", true);
+		const values = _.range(rows * cols).map(i => {
+			const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+			const s = locationRowColToText(row + 1, col + 1);
+			// console.log({row, col, s});
+			return s;
+		});
+		const action2 = _.cloneDeep(action);
+		action2.values = values;
+		// console.log({values})
+		return handleAssign(rows, rowIndexes, name, action2, randomEngine);
 	},
+	"assign": handleAssign,
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
 		return new Special({action, draw: "direct", reuse: "none", randomEngine}, assign_calculate_next(action, {}));
 	},
@@ -516,6 +504,45 @@ const actionHandlers = {
 	},
 	"sample": {
 
+	}
+}
+
+function handleAssign(rows, rowIndexes, name, action, randomEngine, value) {
+	// Assign an array
+	if (_.isArray(action.values)) {
+		// Handle order in which to assign values
+		let draw = "direct";
+		let reuse = "none";
+		if (!_.isEmpty(action.order)) {
+			switch (action.order) {
+				case "direct": case "direct/none": break;
+				case "direct/restart": case "restart": draw = "direct"; reuse = "restart"; break;
+				case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
+				case "shuffle": draw = "shuffle"; reuse = "none"; break;
+				case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+				case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+				case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
+				case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
+				case "sample": draw = "sample"; break;
+				default: assert(false, "unrecognized 'order' value: "+action.order);
+			}
+		}
+
+		const randomEngine2 = (_.isNumber(action.randomSeed))
+			? Random.engines.mt19937().seed(action.randomSeed)
+			: randomEngine;
+		const value2 = (draw === "direct" && reuse === "none")
+			? action.values
+			: new Special({action, draw, reuse, randomEngine: randomEngine2});
+
+		return assign(rows, rowIndexes, name, action, randomEngine2, value2);
+	}
+	// Assign a calculation
+	else if (_.isString(action.calculate)) {
+		return new Special({action, draw: "direct", reuse: "none", randomEngine}, assign_calculate_next(action.calculate, action));
+	}
+	else {
+		assert(false, "should have 'values' array: "+JSON.stringify(action));
 	}
 }
 

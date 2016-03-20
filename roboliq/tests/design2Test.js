@@ -126,7 +126,7 @@ describe('design', () => {
 		});
 	});
 
-	describe.only("expandConditions", () => {
+	describe("expandConditions", () => {
 		it("should handle a simple value", () => {
 			should.deepEqual(
 				expandConditions({
@@ -653,15 +653,15 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support calculate() assignments with parameters", () => {
+		it("should support assign() with calculate parameters", () => {
 			const design = {
 				conditions: {
 					source: 'saltwater',
 					acidPH: 3.75,
 					basePH: 5.75,
 					'acidVolume*=range': { count: 4, from: 0, till: 20, decimals: 1, units: 'ul' },
-					'baseVolume=calculate': {
-						expression: '20ul - acidVolume',
+					'baseVolume=assign': {
+						calculate: '20ul - acidVolume',
 						decimals: 3,
 						units: "ml"
 					}
