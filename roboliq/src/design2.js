@@ -374,6 +374,7 @@ class Special {
 		this.nextIndex = 0;
 		this.valueCount = _.size(this.action.values);
 		this.next = (next || this.defaultNext);
+		this.reset = this.defaultReset;
 
 		// Initialize this.indexes
 		switch (this.draw) {
@@ -384,6 +385,10 @@ class Special {
 				this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
 				break;
 		}
+	}
+
+	defaultReset() {
+		this.nextIndex = 0;
 	}
 
 	defaultNext() {
@@ -499,7 +504,10 @@ const actionHandlers = {
 			if (_.isString(action.units)) {
 				range = range.map(n => `${n} ${action.units}`);
 			}
-			return range;
+
+			const action2 = _.cloneDeep(action);
+			action2.values = range;
+			return handleAssign(rows, rowIndexes, name, action2, randomEngine);
 		}
 	},
 	"sample": {
@@ -556,6 +564,9 @@ function assign(rows, rowIndexes, name, action, randomEngine, value) {
 
 		if (action.groupBy) {
 			printRows(rows);
+			if (isSpecial) {
+				value.reset();
+			}
 			const rowIndexeses = query_groupBy(rows, rowIndexes, action.groupBy);
 			console.log({rowIndexeses})
 			for (let i = 0; i < rowIndexeses.length; i++) {
@@ -635,8 +646,16 @@ const assign_calculate_next = (expr, action) => (nestedRows, rowIndex) => {
 		? unitlessText + " " + units
 		: unitlessText;
 
-	return [0, valueText];
+	this.nextIndex++;
+	return [this.nextIndex, valueText];
 }
+
+/*const assign_range_next = (expr, action) => (nestedRows, rowIndex) => {
+	console.log("assign_range_next: "+JSON.stringify(this));
+	const n = this.action.from + this.nextIndex * this.action.step;
+	this.nextIndex++;
+	return [this.nextIndex, n];
+}*/
 
 export function query_groupBy(rows, rowIndexes, groupBy) {
 	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
