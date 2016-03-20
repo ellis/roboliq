@@ -41,21 +41,24 @@ objects:
     type: Design
     randomSeed: 444
     conditions:
-      aspirationSite: P3
-      dilutionSite: P6
+      aspirationSite: ourlab.luigi.site.P3
+      dilutionSite: ourlab.luigi.site.P6
       culturePlate: culturePlate1
-      incubatorSite: BOX_2
+      incubatorSite: ourlab.luigi.site.BOX_2
       dilutionPlate: dilutionPlate1
-      syringe*=range: {till: 8}
+      syringe*: 2
       cultureWell=allocateWells:
         rows: 8
         columns: 12
         order: shuffle
-      dilutionStep*: [0,1,2,3,4,5]
-      dilutionRow=calculate: syringe
-      dilutionCol=calculate: dilutionStep+1
+      dilutionStep*: [0,1]
+      dilutionWell=calculateWell:
+        row: syringe
+        column: dilutionStep+1
 
 steps:
+  data:
+    source: design1
   1:
     description: Initialize
     1:
@@ -113,6 +116,7 @@ steps:
     command: experiment.forEachGroup
     design: design1
     groupBy: culturePlate
+    distinctBy: cultureWell
     steps:
       description: "`Fill {{$culturePlate}} and seal it twice`"
       1:
@@ -165,6 +169,9 @@ steps:
     steps:
       1:
         description: "`Extract samples from {{$culturePlate}}`"
+        data:
+          where:
+            dilutionStep: 0
         1:
           command: equipment.open
           agent: ourlab.luigi.evoware
@@ -182,7 +189,7 @@ steps:
           sourceLabware: $culturePlate
           sources: $$cultureWell
           destinationLabware: $dilutionPlate
-          destinations: A01+B01+C01+D01+E01+F01+G01+H01
+          destinations: $$dilutionWell
           # destinations: dilutionPlate1(A01 down H01)
           volumes: 50ul
       2:
@@ -199,21 +206,21 @@ steps:
           command: shaker.start
           equipment: ourlab.luigi.culturebox
       3:
-        description: "`Create dilutions from {{$culturePlate}} {{$cultureWell}}`"
+        description: "`Create dilutions from {{$culturePlate}} {{$$cultureWell}}`"
         command: pipetter.pipetteDilutionSeries2x
         diluent: water
         destinationLabware: $dilutionPlate
         items:
           "#data":
             groupBy: cultureWell
-            head: true
+            distinctBy: cultureWell
             template:
-              destination: $dilutionWell
+              destinations: $$dilutionWell
               syringe: $syringe
         clean: none
         cleanEnd: decontaminate
       4:
-        description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
+        description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
         command: absorbanceReader.measurePlate
         object: $dilutionPlate
         program:

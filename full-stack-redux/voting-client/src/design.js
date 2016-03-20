@@ -515,6 +515,9 @@ const actionHandlers = {
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
 		return assign(rows, rowIndexes, name, {}, randomEngine, assign_calculate_next(action, {}));
 	},
+	"calculateWell": (rows, rowIndexes, name, action, randomEngine) => {
+		return assign(rows, rowIndexes, name, {}, randomEngine, assign_calculateWell_next(action, {}));
+	},
 	"range": (rows, rowIndexes, name, action, randomEngine) => {
 		const action2 = _.cloneDeep(action);
 		_.defaults(action2, {from: 1, step: 1});
@@ -713,6 +716,37 @@ function assign_calculate_next(expr, action) {
 
 		this.nextIndex++;
 		return [this.nextIndex, valueText];
+	}
+}
+
+function assign_calculateWell_next(action) {
+	return function(nestedRows, rowIndex) {
+		const row0 = nestedRows[rowIndex];
+		const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+		// Build the scope for evaluating the math expression from the current data row
+		const scope = _.mapValues(row, x => {
+			// console.log({x})
+			try {
+				const result = math.eval(x);
+				// If evaluation succeeds, but it was just a unit name, then set value as string instead
+				if (result.type === "Unit" && result.value === null)
+					return x;
+				else {
+					return result;
+				}
+			}
+			catch (e) {}
+			return x;
+		});
+
+		// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+		let wellRow = math.eval(action.row, scope).toNumber();
+		let wellCol = math.eval(action.column, scope).toNumber();
+		const wellName = locationRowColToText(wellRow, wellCol);
+		// console.log({wellRow, wellCol, wellName})
+
+		this.nextIndex++;
+		return [this.nextIndex, wellName];
 	}
 }
 

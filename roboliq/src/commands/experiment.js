@@ -22,7 +22,7 @@ function run(parsed, data) {
 	// _.forEach(DATA, row => { console.log(JSON.stringify(row)) });
 	assert(DATA, "missing DATA; you may want to specify the parameter 'design'");
 
-	const queryResult = Design.query(DATA, {groupBy: parsed.value.groupBy, orderBy: parsed.value.orderBy, where: parsed.value.where});
+	const queryResult = Design.query(DATA, {groupBy: parsed.value.groupBy, distinctBy: parsed.value.distinctBy, orderBy: parsed.value.orderBy, where: parsed.value.where});
 	const DATAs = (parsed.value.forEachRow)
 		? _.flatten(queryResult).map(x => [x])
 		: queryResult;

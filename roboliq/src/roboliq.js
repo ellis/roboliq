@@ -808,6 +808,7 @@ function _run(opts, userProtocol) {
 		// repeating the command for each group or each row
 		if (step["data"]) {
 			const dataInfo = misc.handleDirectiveDeep(step.data, protocol);
+			console.log({dataInfo})
 			let table = DATA;
 			if (dataInfo.source) {
 				const source = _.get(objects, [dataInfo.source]);
@@ -826,7 +827,7 @@ function _run(opts, userProtocol) {
 
 			// Replicate the command for each group
 			const groups = Design.query(table, dataInfo);
-			//console.log("groups: "+JSON.stringify(groups))
+			console.log("groups: "+JSON.stringify(groups))
 
 			if (dataInfo.forEach === "row") {
 				// Turn each row into its own group

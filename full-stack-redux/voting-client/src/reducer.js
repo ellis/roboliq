@@ -1,4 +1,4 @@
-import {Map, fromJS} from 'immutable';
+import {List, OrderedMap, Map, fromJS} from 'immutable';
 import {flattenDesign} from './design.js';
 import YAML from 'js-yaml';
 
@@ -18,7 +18,8 @@ export default function(state = Map(), action) {
 				state = state.set('design', fromJS(design));
 				try {
 					const table = flattenDesign(design);
-					state = state.set('table', fromJS(table));
+					const table2 = List(table.map(row => OrderedMap(row)));
+					state = state.set('table', table2);
 				} catch (e) {
 					console.log("couldn't flatten:")
 					console.log(e)

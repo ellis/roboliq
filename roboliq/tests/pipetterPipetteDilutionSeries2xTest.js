@@ -38,72 +38,13 @@ describe('pipetter', function() {
 				}
 			}
 		};
-		it.skip("should pipette 2D mixture array to destination wells", function() {
+		it("should pipette 2D mixture array to destination wells", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
-			//console.log(JSON.stringify(result.output.steps[1], null, '\t'))
+			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1], {
 				"1": {
 					"1": {
-						"1": {
-							"1": {
-								"command": "pipetter._washTips",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.liha",
-								"program": "ourlab.mario.washProgram.light_1000",
-								"intensity": "light",
-								"syringes": [
-									"ourlab.mario.liha.syringe.1",
-									"ourlab.mario.liha.syringe.2",
-									"ourlab.mario.liha.syringe.3",
-									"ourlab.mario.liha.syringe.4"
-								]
-							},
-							"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"items": [
-								{
-									"syringe": "ourlab.mario.liha.syringe.1",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.2",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.3",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.4",
-									"intensity": "light"
-								}
-							]
-						},
-						"command": "pipetter.cleanTips",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.3",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.4",
-								"intensity": "light"
-							}
-						]
-					},
-					"2": {
 						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
@@ -135,7 +76,7 @@ describe('pipetter', function() {
 							}
 						]
 					},
-					"3": {
+					"2": {
 						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
@@ -152,65 +93,6 @@ describe('pipetter', function() {
 								"source": "ourlab.mario.systemLiquidLabware(B01)",
 								"destination": "plate1(B04)",
 								"volume": "50 ul"
-							}
-						]
-					},
-					"4": {
-						"1": {
-							"1": {
-								"command": "pipetter._washTips",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.liha",
-								"program": "ourlab.mario.washProgram.light_1000",
-								"intensity": "light",
-								"syringes": [
-									"ourlab.mario.liha.syringe.1",
-									"ourlab.mario.liha.syringe.2",
-									"ourlab.mario.liha.syringe.3",
-									"ourlab.mario.liha.syringe.4"
-								]
-							},
-							"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"items": [
-								{
-									"syringe": "ourlab.mario.liha.syringe.1",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.2",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.3",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.4",
-									"intensity": "light"
-								}
-							]
-						},
-						"command": "pipetter.cleanTips",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.3",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.4",
-								"intensity": "light"
 							}
 						]
 					},
@@ -260,9 +142,7 @@ describe('pipetter', function() {
 							"volume": "50 ul",
 							"syringe": "ourlab.mario.liha.syringe.2"
 						}
-					],
-					"cleanBegin": "light",
-					"cleanEnd": "light"
+					]
 				},
 				"2": {
 					"1": {
@@ -345,49 +225,6 @@ describe('pipetter', function() {
 							}
 						]
 					},
-					"5": {
-						"1": {
-							"1": {
-								"command": "pipetter._washTips",
-								"agent": "ourlab.mario.evoware",
-								"equipment": "ourlab.mario.liha",
-								"program": "ourlab.mario.washProgram.light_1000",
-								"intensity": "light",
-								"syringes": [
-									"ourlab.mario.liha.syringe.1",
-									"ourlab.mario.liha.syringe.2",
-									"ourlab.mario.liha.syringe.3",
-									"ourlab.mario.liha.syringe.4"
-								]
-							},
-							"command": "pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha",
-							"agent": "ourlab.mario.evoware",
-							"equipment": "ourlab.mario.liha",
-							"items": [
-								{
-									"syringe": "ourlab.mario.liha.syringe.1",
-									"intensity": "light"
-								},
-								{
-									"syringe": "ourlab.mario.liha.syringe.2",
-									"intensity": "light"
-								}
-							]
-						},
-						"command": "pipetter.cleanTips",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"intensity": "light"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"intensity": "light"
-							}
-						]
-					},
 					"command": "pipetter.pipette",
 					"clean": "none",
 					"destinationLabware": "plate1",
@@ -448,8 +285,7 @@ describe('pipetter', function() {
 							"volume": "50 ul",
 							"syringe": "ourlab.mario.liha.syringe.2"
 						}
-					],
-					"cleanEnd": "light"
+					]
 				},
 				"command": "pipetter.pipetteDilutionSeries2x",
 				"clean": "none",
