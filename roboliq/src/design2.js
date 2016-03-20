@@ -478,98 +478,10 @@ const actionHandlers = {
 			? action.values
 			: new Special({action, draw, reuse, randomEngine: randomEngine2});
 
-		if (draw === "direct" && reuse === "none" && !action.groupBy) {
-			return value2;
-		}
-		else {
-			console.log("SPECIAL!")
-
-			if (action.groupBy) {
-				printRows(rows);
-				const rowIndexeses = query_groupBy(rows, rowIndexes, action.groupBy);
-				console.log({rowIndexeses})
-				for (let i = 0; i < rowIndexeses.length; i++) {
-					const rowIndexes2 = rowIndexeses[i];
-					expandRowsByNamedValue(rows, rowIndexes2, name, value2, randomEngine2);
-				}
-				return undefined;
-			}
-			else {
-				return value2;
-			}
-		}
+		return assign(rows, rowIndexes, name, action, randomEngine2, value2);
 	},
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
-		function next(nestedRows, rowIndex) {
-			const row0 = nestedRows[rowIndex];
-			const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
-			// Build the scope for evaluating the math expression from the current data row
-			const scope = _.mapValues(row, x => {
-				// console.log({x})
-				try {
-					const result = math.eval(x);
-					// If evaluation succeeds, but it was just a unit name, then set value as string instead
-					if (result.type === "Unit" && result.value === null)
-						return x;
-					else {
-						return result;
-					}
-				}
-				catch (e) {}
-				return x;
-			});
-
-			const expr = action;
-			assert(!_.isUndefined(expr), "`expression` property must be specified");
-			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
-			let value = math.eval(expr, scope);
-			console.log({type: value.type, value})
-			if (_.isString(value) || _.isNumber(value)) {
-				return [0, value];
-			}
-
-			// Get units to use in the end, and the unitless value
-			const {units0, units, unitless} = (() => {
-				const result = {
-					units0: undefined,
-					units: action.units,
-					unitless: value
-				};
-				// If the result has units:
-				if (value.type === "Unit") {
-					result.units0 = value.formatUnits();
-					if (_.isUndefined(result.units))
-						result.units = result.units0;
-					const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
-					// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
-					if (_.isEmpty(conversionUnits)) {
-						// TODO: find a better way to get the unit-less quantity from `value`
-						// console.log({action})
-						// console.log({result, conversionUnits});
-						result.unitless = math.eval(value.format());
-					}
-					else {
-						result.unitless = value.toNumeric(conversionUnits);
-					}
-				}
-				return result;
-			})();
-			// console.log({unitless})
-
-			// Restrict decimal places
-			const unitlessText = (_.isNumber(action.decimals))
-				? unitless.toFixed(action.decimals)
-				: unitless.toNumber();
-
-			// Set units
-			const valueText = (!_.isEmpty(units))
-				? unitlessText + " " + units
-				: unitlessText;
-
-			return [0, valueText];
-		}
-
-		return new Special({action, draw: "direct", reuse: "none", randomEngine}, next);
+		return new Special({action, draw: "direct", reuse: "none", randomEngine}, assign_calculate_next(action, {}));
 	},
 	"range": (rows, rowIndexes, name, action, randomEngine) => {
 		let till = action.till;
@@ -605,6 +517,98 @@ const actionHandlers = {
 	"sample": {
 
 	}
+}
+
+function assign(rows, rowIndexes, name, action, randomEngine, value) {
+	const isSpecial = value instanceof Special;
+	if (!action.groupBy) {
+		return value;
+	}
+	else {
+		console.log("GROUP!")
+
+		if (action.groupBy) {
+			printRows(rows);
+			const rowIndexeses = query_groupBy(rows, rowIndexes, action.groupBy);
+			console.log({rowIndexeses})
+			for (let i = 0; i < rowIndexeses.length; i++) {
+				const rowIndexes2 = rowIndexeses[i];
+				expandRowsByNamedValue(rows, rowIndexes2, name, value, randomEngine);
+			}
+			return undefined;
+		}
+		else {
+			return value;
+		}
+	}
+}
+
+const assign_calculate_next = (expr, action) => (nestedRows, rowIndex) => {
+	const row0 = nestedRows[rowIndex];
+	const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+	// Build the scope for evaluating the math expression from the current data row
+	const scope = _.mapValues(row, x => {
+		// console.log({x})
+		try {
+			const result = math.eval(x);
+			// If evaluation succeeds, but it was just a unit name, then set value as string instead
+			if (result.type === "Unit" && result.value === null)
+				return x;
+			else {
+				return result;
+			}
+		}
+		catch (e) {}
+		return x;
+	});
+
+	assert(!_.isUndefined(expr), "`expression` property must be specified");
+	// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+	let value = math.eval(expr, scope);
+	console.log({type: value.type, value})
+	if (_.isString(value) || _.isNumber(value)) {
+		return [0, value];
+	}
+
+	// Get units to use in the end, and the unitless value
+	const {units0, units, unitless} = (() => {
+		const result = {
+			units0: undefined,
+			units: action.units,
+			unitless: value
+		};
+		// If the result has units:
+		if (value.type === "Unit") {
+			result.units0 = value.formatUnits();
+			if (_.isUndefined(result.units))
+				result.units = result.units0;
+			const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+			// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
+			if (_.isEmpty(conversionUnits)) {
+				// TODO: find a better way to get the unit-less quantity from `value`
+				// console.log({action})
+				// console.log({result, conversionUnits});
+				result.unitless = math.eval(value.format());
+			}
+			else {
+				result.unitless = value.toNumeric(conversionUnits);
+			}
+		}
+		return result;
+	})();
+	// console.log({unitless})
+
+	// Restrict decimal places
+	const unitlessText = (_.isNumber(action.decimals))
+		? unitless.toFixed(action.decimals)
+		: unitless.toNumber();
+
+	// Set units
+	const valueText = (!_.isEmpty(units))
+		? unitlessText + " " + units
+		: unitlessText;
+
+	return [0, valueText];
 }
 
 export function query_groupBy(rows, rowIndexes, groupBy) {

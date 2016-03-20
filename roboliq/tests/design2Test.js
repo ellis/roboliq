@@ -126,7 +126,7 @@ describe('design', () => {
 		});
 	});
 
-	describe("expandConditions", () => {
+	describe.only("expandConditions", () => {
 		it("should handle a simple value", () => {
 			should.deepEqual(
 				expandConditions({
@@ -503,7 +503,7 @@ describe('design', () => {
 					"boy*=range": {till: 4},
 					"left=": {values: ["A", "B"], sample: true},
 					"material*": ["A", "B"],
-					"foot=math": "(left == material) ? \"left\" : \"right\""
+					"foot=calculate": "(left == material) ? \"left\" : \"right\""
 				},
 				conditions: {
 					"boy*=range": {till: 4},
@@ -547,7 +547,7 @@ describe('design', () => {
 						shuffle: true
 					},
 					"material*": ["A", "B"],
-					"foot=math": "(left == material) ? \"left\" : \"right\""
+					"foot=calculate": "(left == material) ? \"left\" : \"right\""
 				},
 				consitions3: {
 					"materialA*": {
@@ -572,7 +572,7 @@ describe('design', () => {
 					"*": {
 						conditions: {
 							"material": "B",
-							"foot=math": '(foot == "L") ? "R" : "L"'
+							"foot=calculate": '(foot == "L") ? "R" : "L"'
 						}
 					}
 				},
@@ -641,11 +641,11 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support math() assignments", () => {
+		it("should support calculate() assignments", () => {
 			const design =
 				{ conditions:
 					{ volume1: "20ul",
-						"volume2=math": "30ul - volume1" } };
+						"volume2=calculate": "30ul - volume1" } };
 			const table = flattenDesign(design);
 			//printData(table);
 			should.deepEqual(table, [
@@ -653,14 +653,14 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support math() assignments with parameters", () => {
+		it("should support calculate() assignments with parameters", () => {
 			const design = {
 				conditions: {
 					source: 'saltwater',
 					acidPH: 3.75,
 					basePH: 5.75,
 					'acidVolume*=range': { count: 4, from: 0, till: 20, decimals: 1, units: 'ul' },
-					'baseVolume=math': {
+					'baseVolume=calculate': {
 						expression: '20ul - acidVolume',
 						decimals: 3,
 						units: "ml"
