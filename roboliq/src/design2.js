@@ -556,7 +556,7 @@ function handleAssign(rows, rowIndexes, name, action, randomEngine, value) {
 
 function assign(rows, rowIndexes, name, action, randomEngine, value) {
 	const isSpecial = value instanceof Special;
-	if (!action.groupBy) {
+	if (!action.groupBy && !action.sameBy) {
 		return value;
 	}
 	else {
@@ -567,16 +567,62 @@ function assign(rows, rowIndexes, name, action, randomEngine, value) {
 			if (isSpecial) {
 				value.reset();
 			}
-			const rowIndexeses = query_groupBy(rows, rowIndexes, action.groupBy);
-			console.log({rowIndexeses})
-			for (let i = 0; i < rowIndexeses.length; i++) {
-				const rowIndexes2 = rowIndexeses[i];
-				expandRowsByNamedValue(rows, rowIndexes2, name, value, randomEngine);
+			const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
+			console.log({rowIndexesGroups})
+			for (let i = 0; i < rowIndexesGroups.length; i++) {
+				const rowIndexes2 = rowIndexesGroups[i];
+				if (action.sameBy) {
+					assignSameBy(rows, rowIndexes2, name, action, randomEngine, value);
+				}
+				else {
+					expandRowsByNamedValue(rows, rowIndexes2, name, value, randomEngine);
+				}
 			}
 			return undefined;
 		}
+		else if (action.sameBy) {
+			assignSameBy(rows, rowIndexes, name, action, randomEngine, value);
+		}
 		else {
 			return value;
+		}
+	}
+}
+
+function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
+	console.log(`assignSameBy: ${rowIndexes}, ${name}, ${action.sameBy}, ${JSON.stringify(value)}`)
+	const isArray = _.isArray(value);
+	const isObject = _.isPlainObject(value);
+	const isSpecial = value instanceof Special;
+	const rowIndexesSame = query_groupBy(rows, rowIndexes, action.sameBy);
+	console.log({rowIndexesSame})
+
+	/*
+	for (let i = 0; i < rowIndexesSame.length; i++) {
+		const rowIndexes2 = rowIndexesSame[i];
+		const rowIndex = rowIndexes2[0];
+		const rows2 = rowIndexes2.map(i => rows[i]);
+		rows.splice(rowIndex, 1, ..rows2);
+		for (let j = 0; j < rowIndexesSame.length;)
+	}
+	*/
+
+	const keys = (isObject) ? _.keys(value) : 0;
+	const table2 = _.zip.apply(_, table2);
+	for (let i = 0; i < rowIndexesSame.length; i++) {
+		const rowIndexes3 = rowIndexesSame[i];
+		if (isSpecial) {
+			value.nextIndex = key;
+		}
+		const value2
+			= (isArray) ? value[i]
+			: (isObject) ? value[keys[i]]
+			: (isSpecial) ? value.next(rows, [rowIndexes3[0]])
+			: value;
+		console.log({i, rowIndexes3, value2})
+		for (let i = 0; i < rowIndexes3.length; i++) {
+			const rowIndex = rowIndexes3[i];
+			expandRowsByNamedValue(rows, [rowIndex], name, value2, randomEngine);
 		}
 	}
 }
@@ -661,6 +707,7 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
 	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
 	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
 }
+
 /*
 export function query(table, q) {
 	let table2 = _.clone(table);
