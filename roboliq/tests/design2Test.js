@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const should = require('should');
 import {printData} from '../src/design.js';
-import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, expandConditions} from '../src/design2.js';
+import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, query_groupBy, expandConditions} from '../src/design2.js';
 
 describe('design', () => {
 	// Configure mathjs to use bignumbers
@@ -101,6 +101,28 @@ describe('design', () => {
 			flattenArrayAndIndexes(rows, rowIndexes);
 			should.deepEqual(rows, l0);
 			should.deepEqual(rowIndexes, _.range(6));
+		});
+	});
+
+	describe("query_groupBy", () => {
+		it("should handle grouping of rowIndexes in flattened rows array", () => {
+			const rows = [{a: 1, b: 1, c: 1}, {a: 1, b: 1, c: 2}, {a: 1, b: 2, c: 3}];
+			should.deepEqual(
+				query_groupBy(rows, _.range(rows.length), "a"),
+				[[0, 1, 2]]
+			);
+			should.deepEqual(
+				query_groupBy(rows, _.range(rows.length), "b"),
+				[[0, 1], [2]]
+			);
+			should.deepEqual(
+				query_groupBy(rows, _.range(rows.length), "c"),
+				[[0], [1], [2]]
+			);
+			should.deepEqual(
+				query_groupBy(rows, _.range(rows.length), ["a", "b"]),
+				[[0, 1], [2]]
+			);
 		});
 	});
 
@@ -285,6 +307,23 @@ describe('design', () => {
 				[
 					{a: 1, b: 2}, {a: 2, b: 1}, {a: 3, b: 3},
 					{a: 4, b: 2}, {a: 5, b: 3}, {a: 6, b: 1}
+				]
+			);
+		});
+
+		it.only("should handle assign() with groupBy", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2],
+					"b*": [1,2,3],
+					"c=": {
+						groupBy: "a",
+						values: [4, 5, 6]
+					}
+				}),
+				[
+					{a: 1, b: 1, c: 4}, {a: 1, b: 2, c: 5}, {a: 1, b: 3, c: 6},
+					{a: 2, b: 1, c: 4}, {a: 2, b: 2, c: 5}, {a: 2, b: 3, c: 6}
 				]
 			);
 		});

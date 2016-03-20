@@ -439,8 +439,10 @@ function countRows(nestedRows, rowIndexes) {
 }
 
 const actionHandlers = {
-	"assign":  (nestedRows, rowIndexes, name, action, randomEngine) => {
+	"assign": (rows, rowIndexes, name, action, randomEngine) => {
 		assert(_.isArray(action.values), "should have 'values' array: "+JSON.stringify(action));
+
+		// Handle order in which to assign values
 		let draw = "direct";
 		let reuse = "none";
 		if (!_.isEmpty(action.order)) {
@@ -454,24 +456,42 @@ const actionHandlers = {
 				case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
 				case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
 				case "sample": draw = "sample"; break;
+				default: assert(false, "unrecognized 'order' value: "+action.order);
 			}
 		}
-		const randomSeed = action.randomSeed;
-		if (draw === "direct" && reuse === "none") {
-			return action.values;
+
+		const value2 = (draw === "direct" && reuse === "none")
+			? action.values
+			: new Special({action, draw, reuse, randomEngine: randomEngine2});
+
+		if (draw === "direct" && reuse === "none" && !action.groupBy) {
+			return value2;
 		}
 		else {
 			console.log("SPECIAL!")
-			const randomEngine2 = (_.isNumber(randomSeed))
-				? Random.engines.mt19937().seed(randomSeed)
+			const randomEngine2 = (_.isNumber(action.randomSeed))
+				? Random.engines.mt19937().seed(action.randomSeed)
 				: randomEngine;
-			return new Special({action, draw, reuse, randomEngine: randomEngine2});
+
+			if (action.groupBy) {
+				printRows(rows);
+				const rowIndexeses = query_groupBy(rows, rowIndexes, action.groupBy);
+				console.log({rowIndexeses})
+				for (let i = 0; i < rowIndexeses.length; i++) {
+					const rowIndexes2 = rowIndexeses[i];
+					expandRowsByNamedValue(rows, rowIndexes2, name, value2, randomEngine2);
+				}
+				return undefined;
+			}
+			else {
+				return value2;
+			}
 		}
 	},
-	"range": (nestedRows, rowIndexes, name, action, randomEngine) => {
+	"range": (rows, rowIndexes, name, action, randomEngine) => {
 		let till = action.till;
 		if (_.isUndefined(till)) {
-			till = countRows(nestedRows, rowIndexes);
+			till = countRows(rows, rowIndexes);
 		}
 		let range;
 		if (!_.isUndefined(till)) {
@@ -503,3 +523,65 @@ const actionHandlers = {
 
 	}
 }
+
+export function query_groupBy(rows, rowIndexes, groupBy) {
+	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
+	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
+}
+/*
+export function query(table, q) {
+	let table2 = _.clone(table);
+	if (q.select) {
+		table2 = _.map(table2, x => _.pick(x, q.select));
+	}
+
+	if (q.where) {
+		_.forEach(q.where, (value, key) => {
+			table2 = _.filter(table, row => _.isEqual(row[key], value));
+		});
+	}
+
+	if (q.shuffle) {
+		table2 = _.shuffle(table);
+	}
+
+	if (q.orderBy) {
+		table2 = _.orderBy(table2, q.orderBy);
+	}
+
+	if (q.distinctBy) {
+		const groupKeys = (_.isArray(q.distinctBy)) ? q.distinctBy : [q.distinctBy];
+		const groups = _.map(_.groupBy(table2, row => _.map(groupKeys, key => row[key])), _.identity);
+		//console.log({groupsLength: groups.length})
+		table2 = _.flatMap(groups, group => {
+			const first = group[0];
+			// Find the properties that are the same for all items in the group
+			const uniqueKeys = [];
+			_.forEach(first, (value, key) => {
+				const isUnique = _.every(group, row => _.isEqual(row[key], value));
+				if (isUnique) {
+					uniqueKeys.push(key);
+				}
+			});
+			return _.pick(first, uniqueKeys);
+		});
+	}
+	else if (q.unique) {
+		table2 = _.uniqWith(table2, _.isEqual);
+	}
+
+	if (q.groupBy) {
+		const groupKeys = (_.isArray(q.groupBy)) ? q.groupBy : [q.groupBy];
+		table2 = _.map(_.groupBy(table2, row => _.map(groupKeys, key => row[key])), _.identity);
+	}
+	else {
+		table2 = [table2];
+	}
+
+	if (q.transpose) {
+		table2 = _.zip.apply(_, table2);
+	}
+
+	return table2;
+}
+*/
