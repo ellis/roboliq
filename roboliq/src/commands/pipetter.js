@@ -142,7 +142,7 @@ function pipette(params, parsed, data) {
 			}
 			if (parsed.objectName.destinationLabware) {
 				items[i].destination = getLabwareWell(parsed.objectName.destinationLabware, items[i].destination);
-				console.log({item_destinations: items.map(x => x.destination)})
+				// console.log({item_destinations: items.map(x => x.destination)})
 			}
 
 			if (_.isUndefined(items[i].volume)) {
@@ -157,6 +157,9 @@ function pipette(params, parsed, data) {
 	//console.log(JSON.stringify(sourcesTop, null, '  '))
 	//console.log(JSON.stringify(items, null, '  '))
 
+	// Add index to all items, so that we can reference `parsed.objectName[items.$index.syringe]` later
+	_.forEach(items, (item, i) => {item.index = i;});
+
 	// Find all wells, both sources and destinations
 	var wellName_l = _(items).map(function (item) {
 		//console.log({item})
@@ -165,7 +168,7 @@ function pipette(params, parsed, data) {
 		return [item.source, item.destination]
 	}).flatten().compact().value();
 	wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
-	console.log("wellName_l", JSON.stringify(wellName_l))
+	// console.log("wellName_l", JSON.stringify(wellName_l))
 
 	// Find all labware
 	var labwareName_l = _(wellName_l).map(function (wellName) {
@@ -195,7 +198,7 @@ function pipette(params, parsed, data) {
 		}
 		query2_l.push(query);
 	});
-	console.log({query2_l})
+	// console.log({query2_l})
 
 	// Check whether the same agent and equipment can be used for all the pipetting steps
 	if (!_.isEmpty(query2_l)) {
@@ -392,12 +395,17 @@ function pipette(params, parsed, data) {
 		}
 	}
 
+	// Replace syringe objects with syringe names
+	_.forEach(items, item => {
+		item.syringe = _.get(parsed.objectName, `items.${item.index}.syringe`, item.syringe);
+	});
+
 	// Limit syringe choices based on params
 	var syringesAvailable = params.syringes || _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
 	var tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
 	var groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
-	//console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+	// console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Pick syringe for each item
 	// For each group assign syringes, starting with the first available one
@@ -406,7 +414,13 @@ function pipette(params, parsed, data) {
 		_.forEach(group, function(item) {
 			var tipModel = item.tipModel;
 			assert(tipModelToSyringesAvailable[tipModel].length >= 1);
-			item.syringe = tipModelToSyringesAvailable[tipModel].splice(0, 1)[0];
+			const syringeName = _.get(parsed.objectName, `items.${item.index}.syringe`, item.syringe);
+			if (_.isUndefined(syringeName)) {
+				item.syringe = tipModelToSyringesAvailable[tipModel].splice(0, 1)[0];
+			}
+			else {
+				item.syringe = syringeName;
+			}
 		});
 	});
 
@@ -688,7 +702,7 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries2x": function(params, parsed, data) {
-		console.log("pipetter.pipetteDilutionSeries2x: "+JSON.stringify(parsed))
+		// console.log("pipetter.pipetteDilutionSeries2x: "+JSON.stringify(parsed))
 		const destinationLabware = parsed.objectName.destinationLabware;
 
 		// Fill all destination wells with diluent
@@ -700,7 +714,7 @@ const commandHandlers = {
 			assert(_.isUndefined(item.source), "`source` property not implemented yet");
 			const destination0 = getLabwareWell(destinationLabware, item.destinations[0]);
 			const destinations2 = _.tail(item.destinations).map(s => getLabwareWell(destinationLabware, s));
-			console.log({destination0, destinations2})
+			// console.log({destination0, destinations2})
 			let dilutionFactorPrev = 1;
 
 			// get volume of destination0, and use half of it as the final volume
@@ -715,7 +729,7 @@ const commandHandlers = {
 			_.forEach(destinations2, (destinationWell, index) => {
 				diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: volume.format({precision: 4}), syringe: syringeName});
 			});
-			console.log({diluentItems})
+			// console.log({diluentItems})
 
 			// Pipette the dilutions
 			let source = destination0;
@@ -746,7 +760,7 @@ const commandHandlers = {
 		params2.items = items;
 		// params2.clean = "none"; // HACK
 		// params2.cleanEnd = "light"; // HACK
-		console.log({params1, params2})
+		// console.log({params1, params2})
 		return { expansion: { "1": params1, "2": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {

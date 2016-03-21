@@ -61,22 +61,30 @@ describe('pipetter', function() {
 								"source": "ourlab.mario.systemLiquidLabware(B01)",
 								"destination": "plate1(B02)",
 								"volume": "50 ul"
-							},
+							}
+						]
+					},
+					"2": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
 							{
-								"syringe": "ourlab.mario.liha.syringe.3",
-								"source": "ourlab.mario.systemLiquidLabware(C01)",
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "ourlab.mario.systemLiquidLabware(A01)",
 								"destination": "plate1(A03)",
 								"volume": "50 ul"
 							},
 							{
-								"syringe": "ourlab.mario.liha.syringe.4",
-								"source": "ourlab.mario.systemLiquidLabware(D01)",
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "ourlab.mario.systemLiquidLabware(B01)",
 								"destination": "plate1(B03)",
 								"volume": "50 ul"
 							}
 						]
 					},
-					"2": {
+					"3": {
 						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
@@ -92,6 +100,26 @@ describe('pipetter', function() {
 								"syringe": "ourlab.mario.liha.syringe.2",
 								"source": "ourlab.mario.systemLiquidLabware(B01)",
 								"destination": "plate1(B04)",
+								"volume": "50 ul"
+							}
+						]
+					},
+					"4": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "ourlab.mario.systemLiquidLabware(A01)",
+								"destination": "plate1(A05)",
+								"volume": "50 ul"
+							},
+							{
+								"syringe": "ourlab.mario.liha.syringe.2",
+								"source": "ourlab.mario.systemLiquidLabware(B01)",
+								"destination": "plate1(B05)",
 								"volume": "50 ul"
 							}
 						]
@@ -122,6 +150,13 @@ describe('pipetter', function() {
 							"syringe": "ourlab.mario.liha.syringe.1"
 						},
 						{
+							"layer": 4,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(A05)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.1"
+						},
+						{
 							"layer": 1,
 							"source": "ourlab.mario.systemLiquid",
 							"destination": "plate1(B02)",
@@ -139,6 +174,13 @@ describe('pipetter', function() {
 							"layer": 3,
 							"source": "ourlab.mario.systemLiquid",
 							"destination": "plate1(B04)",
+							"volume": "50 ul",
+							"syringe": "ourlab.mario.liha.syringe.2"
+						},
+						{
+							"layer": 4,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(B05)",
 							"volume": "50 ul",
 							"syringe": "ourlab.mario.liha.syringe.2"
 						}
@@ -209,7 +251,7 @@ describe('pipetter', function() {
 						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Dry_1000\"",
+						"program": "\"Roboliq_Water_Wet_1000\"",
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",

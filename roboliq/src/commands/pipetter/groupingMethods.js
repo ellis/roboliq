@@ -134,6 +134,11 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 		if (current.program !== item.program) return false;
 		// Make sure source was not previously a destination in this group
 		if (_.some(current.group, item2 => item.source === item2.destination)) return false;
+		// Make sure syringe was not already used (only relevant want syringe is manually specified)
+		if (item.syringe) {
+			if (current.syringesUsed.hasOwnProperty(item.syringe)) return false;
+			current.syringesUsed[item.syringe] = true;
+		}
 		//console.log("B");
 
 		assert(item.tipModel);
@@ -172,6 +177,7 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 			current = {
 				group: [],
 				syringesAvailable: _.clone(syringes),
+				syringesUsed: {},
 				program: item.program,
 				layer: item.layer
 			};
