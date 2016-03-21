@@ -24,3 +24,7 @@ export function _facts(params, parsed, data) {
 		return [{line}];
 	}
 }
+
+export function _raw(params, parsed, data) {
+	return _(parsed.value.commands).split(";").map(_.trim).compact().map(s => ({line: s+";"})).value();
+}

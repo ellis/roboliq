@@ -98,8 +98,17 @@ module.exports = {
 			},
 			required: ["factsEquipment", "factsVariable"]
 		},
+		"evoware._raw": {
+			description: "An Evoware direct command",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				commands: {type: "string"}
+			},
+			required: ["commands"]
+		},
 	}),
 	getCommandHandlers: () => ({
 		"evoware._facts": function(params, parsed, data) {},
+		"evoware._raw": function(params, parsed, data) {},
 	}),
 };

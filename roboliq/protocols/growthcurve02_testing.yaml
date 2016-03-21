@@ -2,7 +2,7 @@ roboliq: v1
 
 description: |
   * [ ] Initialize
-      * [ ] send raw command to select the correct system liquid
+      * [x] send raw command to select the correct system liquid
       * [x] initialize pipetting by flushing a whole lot of water through
       * [x] decontaminate tips
   * [ ] prompt user to:
@@ -14,12 +14,11 @@ description: |
   - [ ] DWP model now needs to change to the "sealed" variant, manage starting a new script!
   - [x] move DWP to shaker, start shaking with cover closed
   - [x] after 30s, take dilution plate out of hotel, take DWP out of shaker
-  - [ ] Q: how large should each sample volume be?
   - [ ] sample 2 wells, transfer to a dilution plate
     - [x] transfer samples
     - [ ] put DWP back in shaker, restart incubation
-    - [ ] create dilution series
-    - [ ] read dilution plate and put it back in hotel
+    - [x] create dilution series
+    - [x] read dilution plate and put it back in hotel
 
 
 config:

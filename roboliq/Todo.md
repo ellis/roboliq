@@ -52,7 +52,7 @@
 	- [x] PROBLEM: shouldn't wash at beginning of pipetting if already washed at end of previous pipetting
 	- [x] PROBLEM: when trying to transfer A01 to A02 for dilution, pipetting error occurred
 	- [x] Q: for diluting the cells, can we use water instead of medium?  Currently, I'm using water. A: if you use water, you need to calibrate the reader for the different concentrations of medium.
-	- [ ] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
+	- [x] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
 	- [ ] shaker.start: implement
 	- [ ] move DWP to shaker, start shaking with cover closed
 	- [ ] after 15 minutes, take out DWP
