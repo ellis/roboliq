@@ -82,6 +82,6 @@ steps:
     command: absorbanceReader.measurePlate
     object: plate1
     program:
-      excitationWavelength: 6000
+      excitationWavelength: "600 nm"
       wells: plate1(B1 right B6)
     outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"

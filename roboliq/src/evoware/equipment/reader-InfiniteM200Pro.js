@@ -173,7 +173,7 @@ module.exports = {
 					excitationWavelength: excitationWavelength * 10,
 					excitationBandwidth: excitationBandwidth * 10
 				};
-				// console.log({params});
+				// console.log({params, excitationWavelength0, excitationWavelength, excitationBandwidth0, excitationBandwidth});
 				return params;
 			}
 

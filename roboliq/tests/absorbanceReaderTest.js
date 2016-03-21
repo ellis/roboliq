@@ -29,7 +29,7 @@ describe('commands/absorbanceReader', function() {
 						command: "absorbanceReader.measurePlate",
 						object: "plate1",
 						program: {
-							excitationWavelength: 6000,
+							excitationWavelength: "600nm",
 							wells: "plate1(A1 right A12, B1, B3 right B12, C3)"
 						},
 						outputFile: "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
@@ -57,12 +57,12 @@ describe('commands/absorbanceReader', function() {
 						"equipment": "ourlab.mario.reader",
 						"measurementType": "absorbance",
 						"object": "plate1",
-						"program": {"excitationWavelength": 6000, wells: "plate1(A1 right A12, B1, B3 right B12, C3)"},
+						"program": {"excitationWavelength": "600nm", wells: "plate1(A1 right A12, B1, B3 right B12, C3)"},
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"command": "absorbanceReader.measurePlate",
 					"object": "plate1",
-					"program": {"excitationWavelength": 6000, wells: "plate1(A1 right A12, B1, B3 right B12, C3)"},
+					"program": {"excitationWavelength": "600nm", wells: "plate1(A1 right A12, B1, B3 right B12, C3)"},
 					"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 				}
 			);
@@ -75,7 +75,7 @@ describe('commands/absorbanceReader', function() {
 						command: "absorbanceReader.measurePlate",
 						object: "plate1",
 						program: {
-							excitationWavelength: 6000
+							excitationWavelength: "600 nm"
 						},
 						outputFile: "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					}
@@ -157,7 +157,7 @@ describe('commands/absorbanceReader', function() {
 						"equipment": "ourlab.mario.reader",
 						"measurementType": "absorbance",
 						"object": "plate1",
-						"program": {"excitationWavelength": 6000},
+						"program": {"excitationWavelength": "600 nm"},
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"3": {
@@ -217,7 +217,7 @@ describe('commands/absorbanceReader', function() {
 					},
 					"command": "absorbanceReader.measurePlate",
 					"object": "plate1",
-					"program": {"excitationWavelength": 6000},
+					"program": {"excitationWavelength": "600 nm"},
 					"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 				}
 			);
