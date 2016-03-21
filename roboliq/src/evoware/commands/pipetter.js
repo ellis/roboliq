@@ -32,7 +32,7 @@ export function _washTips(params, parsed, data) {
 	}
 
 	function handleWashProgram(program) {
-		const syringeRows = parsed.value.syringes.map(x => x.row);
+		const syringeRows = parsed.value.syringes.map(x => _.isNumber(x) ? x : x.row);
 		const syringeMask = encodeSyringesByRow(syringeRows);
 		const bUNKNOWN1 = false;
 		const lWash = [
@@ -54,7 +54,7 @@ export function _washTips(params, parsed, data) {
 		const lineWash = `Wash(${lWash.join(",")});`;
 
 		const labwareModel = {rows: 8, columns: 1};
-		const tuples = parsed.value.syringes.map(syringe => ({retract: {row: syringe.row, col: 1, labwareModel}}));
+		const tuples = parsed.value.syringes.map(syringe => ({retract: {row: _.isNumber(syringe) ? syringe : syringe.row, col: 1, labwareModel}}));
 		const retractWellMask = encodeWells(tuples, "retract");
 		// console.log({tuples: JSON.stringify(tuples), retractWellMask})
 		const lRetract = [
@@ -144,7 +144,9 @@ function groupItems(parsed, data) {
 	const tuples = [];
 	for (let i = 0; i < parsed.value.items.length; i++) {
 		const item = parsed.value.items[i];
-		const syringeName = parsed.objectName[`items.${i}.syringe`];
+		const [syringeName, syringeRow] = _.isInteger(item.syringe)
+			? [`${parsed.objectName.equipment}.syringe.${item.syringe}`, item.syringe]
+			: [parsed.objectName[`items.${i}.syringe`], item.syringe.row];
 		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
 		// const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
 		function getWellInfo(well) {
@@ -161,7 +163,7 @@ function groupItems(parsed, data) {
 		}
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
-		tuples.push({item, syringeName, source: getWellInfo(item.source), destination: getWellInfo(item.destination)});
+		tuples.push({item, syringeName, syringeRow, source: getWellInfo(item.source), destination: getWellInfo(item.destination)});
 	}
 	// console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
@@ -181,7 +183,7 @@ function groupItems(parsed, data) {
 			// Same column?
 			if (wellInfo.col === wellInfoRef.col) {
 				//console.log({tuple})
-				const dRow1 = tuple.item.syringe.row - ref.item.syringe.row
+				const dRow1 = tuple.syringeRow - ref.syringeRow
 				const dRow2 = wellInfo.row - wellInfoRef.row;
 				//console.log({tupleSyringe: tuple.item.syringe, refSyringe: ref.item.syringe})
 				if (_.isUndefined(group.syringeSpacing)) {
@@ -275,10 +277,11 @@ function handleGroup(parsed, data, group) {
 	// Calculate syringe mask
 	const tuple0 = tuples[0];
 	const syringeMask = encodeSyringes(tuples);
+	// console.log({syringeMask})
 	// Volumes for each syringe (in ul)
 	const volumes = _.fill(Array(12), "0");
 	_.forEach(tuples, tuple => {
-		const index = (tuple.item.syringe.row || 1) - 1;
+		const index = (tuple.syringeRow || 1) - 1;
 		const ul = tuple.item.volume.toNumber('ul');
 		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
 	});
@@ -347,7 +350,7 @@ function handleRetract(parsed, data, group) {
  * @return {integer} an bitmask encoding of the syringes
  */
 function encodeSyringes(tuples) {
-	return _.sum(_.map(tuples, tuple => 1 << (tuple.item.syringe.row - 1)));
+	return _.sum(_.map(tuples, tuple => 1 << (tuple.syringeRow - 1)));
 }
 
 /**

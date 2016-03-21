@@ -46,8 +46,7 @@ pipetter.CleaningIntensity:
 pipetter._PipetteItem:
   description: Parameters for low-level pipette items.
   properties:
-    # syringe: {description: Syringe identifier, type: [number, Syringe]}
-    syringe: {description: Syringe identifier, type: Syringe}
+    syringe: {description: Syringe identifier, type: [number, Syringe]}
     source: {description: Source specifier, type: Well}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}

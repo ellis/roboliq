@@ -277,6 +277,44 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
+		it("should compile pipetter._aspirate using syringe number instead of name", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
+						}
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter._aspirate",
+						agent: "robot1",
+						equipment: "pipetter1",
+						program: "\"Water free dispense\"",
+						items: [
+							{
+								syringe: 2,
+								source: "plate1(A01)",
+								volume: "10 ul"
+							}
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			should.deepEqual(results, [[
+				{line: "Aspirate(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "MoveLiha(2,1,0,1,\"0C0810000000000000\",0,4,0,10,0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
+		});
+
 		it("should compile pipetter._dispense for a single dispense", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
