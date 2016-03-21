@@ -115,7 +115,6 @@ steps:
     equipment: ourlab.luigi.culturebox
   3:
     command: experiment.forEachGroup
-    design: design1
     groupBy: culturePlate
     distinctBy: cultureWell
     steps:
@@ -169,7 +168,6 @@ steps:
       duration: 30s
   6:
     command: experiment.forEachGroup
-    design: design1
     groupBy: culturePlate
     steps:
       1:
