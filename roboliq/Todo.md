@@ -24,8 +24,8 @@
 - [ ] how can we automatically analyze the results of the fluorescence readout?
 - [ ] use schemas for directives too
 - [ ] evoware:
-    - [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
-    - [ ] try loading the `tania*` protocols in Tecan Evoware
+		- [ ] multiline comments (like in tania12) probably won't work -- test this in Tecan Evoware; maybe it will work to replace '\n' with '^L^G'
+		- [ ] try loading the `tania*` protocols in Tecan Evoware
 - [ ] find a better term for "Site", maybe "Position" or "Location" or "BenchPos" or something...
 - [ ] review FIXMEs
 - [ ] upload to a public repository
@@ -42,19 +42,27 @@
 
 # Todos for growth curve experiment
 
-- [ ] BUG: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
-- [ ] BUG: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their wierd random order
-- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
-- [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
-- [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
 - [ ] growthcurve02_testing:
 	- [x] DWP on P1, fill it with media, then add inoculum
 	- [x] BUG: why doesn't `sources: $$well` work?
-	- [ ] seal DWP twice
-	- [ ] DWP model now needs to change, manage starting a new script!
+	- [ ] BUG: growthcurve02_testing: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
+	- [ ] BUG: growthcurve02_testing: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their weird random order
+	- [ ] shaker.start: implement
 	- [ ] move DWP to shaker, start shaking with cover closed
 	- [ ] after 15 minutes, take out DWP
 	- [ ] sample 8 wells
+	- [ ] measure the 8 wells
+	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
+	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
+- [ ] growthcurve03_testing: now with sealing and change of labware type
+	- [ ] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed?
+	- [ ] fix vectors for moving to ROBOSEAL
+	- [ ] seal DWP twice
+	- [ ] DWP model now needs to change, manage starting a new script!
+	- [ ]
+	- [ ] run some measurements overnight
+- [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
+- [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
 - [ ] growthcurve01_testing:
 	- [x] initialize with custom wash steps
 	- [x] initialize with decontamination wash
@@ -73,11 +81,11 @@
 - [x] qc_mario_vectors_96nunc: output `description` values as evoware comments
 - [x] qc_mario_vectors_96nunc: Create evoware Groups for steps with `description` properties
 - [x] qc_mario_vectors_96nunc sites:
-    - [x] RoboPeel
-    - [x] hotels in back
-    - [x] P1-P3,P6-P8 with ROMA2
-    - [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
-    - [x] transfer hotels
+		- [x] RoboPeel
+		- [x] hotels in back
+		- [x] P1-P3,P6-P8 with ROMA2
+		- [x] make sure ROMA1 is used for putting plate in reader when `equipment: roma1` is specified
+		- [x] transfer hotels
 - [x] qc_mario_vectors_96nunc: test whether vector works on ROBOSEAL and ROBOPEEL after sealing/peeling
 - [ ] qc_mario_vectors_96nunc: adapt script so that no transfers between hotel sites are made
 - [ ] qc_mario_vectors_96nunc: configure to omit timing commands
@@ -95,14 +103,14 @@
 - [x] implement lookupPath
 - [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
 - [x] evoware compiler: add more commands
-    - [x] `evoware._facts`
-    - [x] `timer._start`
-    - [x] `timer._wait`
-    - [x] `pipetter._aspirate`
-    - [x] `pipetter._dispense`
-    - [x] `pipetter._pipette`
-    - [x] `pipetter._washTips`
-    - [x] delete scala files
+		- [x] `evoware._facts`
+		- [x] `timer._start`
+		- [x] `timer._wait`
+		- [x] `pipetter._aspirate`
+		- [x] `pipetter._dispense`
+		- [x] `pipetter._pipette`
+		- [x] `pipetter._washTips`
+		- [x] delete scala files
 - [x] implement lookupPaths
 - [x] evoware: rename `_cleanTips` instruction to `_washTips`
 - [x] test transporter.doThenRestoreLocation
@@ -132,6 +140,7 @@
 	- [x] range: make it reuse "assign" functionality
 	- [x] groupBy
 	- [x] sameBy
+- [x] figure out why longer Designs often don't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs)
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
@@ -148,20 +157,6 @@
 - [ ] consider opening a browser window for the runtime-client from Evoware
 - [ ] make the runtime programs' ports configurable
 - [ ] test pipetter.pipetteDilutionSeries2x
-- [ ] figure out why this Design doesn't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs):
-    ```
-    conditions:
-      waterSource: saltwater
-      waterVolume: 40ul
-      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
-      proteinVolume: 5ul
-      bufferSystem*:
-        acetate:
-          acidSource: acetate_375
-          baseSource: acetate_575
-          acidPH: 3.75
-          basePH: 5.75
-    ```
 - [ ] compile some simple protocols and try to run them on mario and luigi
 - [ ] check whether Evoware external n2 represents display order
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
@@ -181,178 +176,178 @@
 - [ ] design.js: when assigning a column array, produce an error if there are fewer array elements than rows
 - [ ] for JSON editor in web UI, take a look at http://arqex.com/991/json-editor-react-immutable-data
 - [ ] dm00_test3m.js:
-    - [ ] BUG: why are media and strain sources taken from different syringes?
-    - [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
-    - currently: after pipetting culture, 1m8s left to wait
-    - currently: after second culture preparation (and wait of 1m8s), probably more than 2 minutes left to wait (look at it around 1m18s)
-    - PROBLEM: dilution series failed because it didn't detect enough liquid (but 188ul!)
-    - PROBLEM: then there were only 11s left before next dilution (I manually told evoware to ignore the pipetting errors)
-    - 46s after measurement 1, second dilution
-    - 12s after measurement 2, second dilution
-    - [ ] `absorbanceReader.measurePlate`
+		- [ ] BUG: why are media and strain sources taken from different syringes?
+		- [ ] BUG: why is water dispensed for dilution using tips 3+4, and why does it wash between?
+		- currently: after pipetting culture, 1m8s left to wait
+		- currently: after second culture preparation (and wait of 1m8s), probably more than 2 minutes left to wait (look at it around 1m18s)
+		- PROBLEM: dilution series failed because it didn't detect enough liquid (but 188ul!)
+		- PROBLEM: then there were only 11s left before next dilution (I manually told evoware to ignore the pipetting errors)
+		- 46s after measurement 1, second dilution
+		- 12s after measurement 2, second dilution
+		- [ ] `absorbanceReader.measurePlate`
 - [ ] dm00_test3.js: create a protocol we can run on EITHER mario or luigi (just has to work, not be pretty -- I can prettify it later)
-    - something with absorbance OrangeG
-    - two "culture" plates
-    - two dilution plates
-    - should skip sealing so that we don't need to deal with the complications on Sunday
-    - [ ] mario: can't use tips 1-4 to puncture a seal
-    - [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
+		- something with absorbance OrangeG
+		- two "culture" plates
+		- two dilution plates
+		- should skip sealing so that we don't need to deal with the complications on Sunday
+		- [ ] mario: can't use tips 1-4 to puncture a seal
+		- [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
 - [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
 - [ ] generate a pretty HTML/SVG protocol for interleaved experiment steps
 - [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?
-    - [ ] `load` command
-        - [ ] `--config` for config protocols
-        - [ ] `--protocol` for the main protocol
-        - [ ] `--user` for the user settings
-    - [ ] `evoware` command
-        - [ ] set evoware robot, load carrier and table, flag that evoware compiler is being used
-    - [ ] `compile`
-        - [ ] compile the protocol
-        - [ ] only compile the protocol if there have been relevant changes
-        - [ ] compile evoware if configured
-        - [ ] only compile evoware if there have been relevant changes
-    - [ ] `show`
-        - [ ] show a step
-        - [ ] show an object
-        - [ ] show a table
-    - [ ] `dump`
-        - [ ] dump entire state
-        - [ ] dump part of state
+		- [ ] `load` command
+				- [ ] `--config` for config protocols
+				- [ ] `--protocol` for the main protocol
+				- [ ] `--user` for the user settings
+		- [ ] `evoware` command
+				- [ ] set evoware robot, load carrier and table, flag that evoware compiler is being used
+		- [ ] `compile`
+				- [ ] compile the protocol
+				- [ ] only compile the protocol if there have been relevant changes
+				- [ ] compile evoware if configured
+				- [ ] only compile evoware if there have been relevant changes
+		- [ ] `show`
+				- [ ] show a step
+				- [ ] show an object
+				- [ ] show a table
+		- [ ] `dump`
+				- [ ] dump entire state
+				- [ ] dump part of state
 - [ ] web ui?
 - [ ] reduce number of levels of steps generated by commands like `timer.doAndWait`
 
 # On-going todos with lots of sub-steps
 
 - [ ] complex protocol
-    - [ ] write script based on DM_Growthcurves
-    - [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
+		- [ ] write script based on DM_Growthcurves
+		- [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
-    - [x] Commands.md: Add general documentation to each command namespace
-    - [ ] Commands.md: add examples for each command
-    - [ ] document the properties of the types (i.e. add 'description' field)
-    - [ ] Developing_Roboliq.md
-    - [ ] Object_Types.md: Add general documentation to top of page
-    - [ ] Using_Roboliq.md
-        - [ ] add reference to WritingAProtocol.md
-    - [ ] WritingAProtocol.md
-    - [ ] Cookbook.md: explaining how to solve specific problems
-    - [ ] Configuring a lab (e.g. `config/ourlab.js`)
-    - [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
-    - [ ] convention for syringes being in 'syringe' property of pipetter
-    - [ ] pipetter.cleanTips: document the various allowed parameter combinations of equipment, items, syringes, intensity
-    - [ ] document the directives, such as "#createPipetteMixtureList"
+		- [x] Commands.md: Add general documentation to each command namespace
+		- [ ] Commands.md: add examples for each command
+		- [ ] document the properties of the types (i.e. add 'description' field)
+		- [ ] Developing_Roboliq.md
+		- [ ] Object_Types.md: Add general documentation to top of page
+		- [ ] Using_Roboliq.md
+				- [ ] add reference to WritingAProtocol.md
+		- [ ] WritingAProtocol.md
+		- [ ] Cookbook.md: explaining how to solve specific problems
+		- [ ] Configuring a lab (e.g. `config/ourlab.js`)
+		- [ ] for all commands, include documentation about required logic (e.g. transporter, equipment, pipetter)
+		- [ ] convention for syringes being in 'syringe' property of pipetter
+		- [ ] pipetter.cleanTips: document the various allowed parameter combinations of equipment, items, syringes, intensity
+		- [ ] document the directives, such as "#createPipetteMixtureList"
 - [ ] configuration documentation
-    - [ ] models
-    - [ ] agents
-    - [ ] ...
+		- [ ] models
+		- [ ] agents
+		- [ ] ...
 - [ ] code documentation
-    - [x] roboliq.js
-    - [x] WellContents.js
-    - [x] generateSchemaDocs.js
-    - [x] commandHelper.js
-    - [ ] figure out how to reference an anchor from a separate file (e.g. commands/centrifuge.js should reference 'centrifuge' in Commands.md)
-        - continue with centrifuge.js documentaiton header (currently have experiments in there)
-    - [ ] generateSchemaDocs.js: set anchors for command modules, so they can be referenced from the source code
-    - [ ] generateSchemaDocs.js: why aren't descriptions generated for "Object Types" properties?
-    - [ ] for parameter types, can they be links to the Type definition?
-    - [ ] check generated jsdoc, and make appropriate improvements (e.g. setting modules and indicating which methods are exported)
-    - [ ] generateSchemaDocs.js shouldn't be listed on the Home page of the jsdocs (probably need to remote `@file`)
-    - [ ] expectCore.js
-    - [ ] expect.js
-    - [ ] main.js
-    - [ ] misc.js
-    - [ ] commands...
-    - [ ] document roboliq's extensions to JSON Schema (types, 'module')
+		- [x] roboliq.js
+		- [x] WellContents.js
+		- [x] generateSchemaDocs.js
+		- [x] commandHelper.js
+		- [ ] figure out how to reference an anchor from a separate file (e.g. commands/centrifuge.js should reference 'centrifuge' in Commands.md)
+				- continue with centrifuge.js documentaiton header (currently have experiments in there)
+		- [ ] generateSchemaDocs.js: set anchors for command modules, so they can be referenced from the source code
+		- [ ] generateSchemaDocs.js: why aren't descriptions generated for "Object Types" properties?
+		- [ ] for parameter types, can they be links to the Type definition?
+		- [ ] check generated jsdoc, and make appropriate improvements (e.g. setting modules and indicating which methods are exported)
+		- [ ] generateSchemaDocs.js shouldn't be listed on the Home page of the jsdocs (probably need to remote `@file`)
+		- [ ] expectCore.js
+		- [ ] expect.js
+		- [ ] main.js
+		- [ ] misc.js
+		- [ ] commands...
+		- [ ] document roboliq's extensions to JSON Schema (types, 'module')
 - [ ] implement equivalents for BioCoder commands
-    - [ ] optional_step
-    - [ ] parallel_step
-    - [ ] to_do
-    - [ ] store_until
-    - [ ] use_or_store
-    - [ ] time_constraint
-    - [?] set_value
-    - [?] assign
-    - [ ] add
-    - [ ] divide
-    - [ ] subtract
-    - [ ] multiply
-    - [ ] discard
-    - [ ] drain
-    - [ ] new_solid
-    - [ ] new_container
-    - [ ] new_slide
-    - [ ] new_column
-    - [ ] measure_solid
-    - [ ] measure_prop
-    - [ ] add_to_column
-    - [ ] add_to_slide
-    - [ ] collect_tissue
-    - [ ] plate_out
-    - [?] transfer
-    - [ ] combine
-    - [ ] combine_and_mix
-    - [ ] dissolve
-    - [ ] invert
-    - [?] pipet
-    - [ ] resuspend
-    - [ ] tap
-    - [ ] vortex
-    - [ ] vortex_column
-    - [ ] incubate_and_mix
-    - [ ] mixing_table
-    - [ ] mixing_table_pcr
-    - [ ] immerse_slide
-    - [ ] remove_slide
-    - [ ] wash_slide
-    - [ ] homogenize_tissue
-    - [ ] wash_tissue
-    - [ ] incubate
-    - [ ] store_for
-    - [ ] set_temp
-    - [ ] store_plate
-    - [ ] thermocycler
-    - [ ] thermocycler_anneal
-    - [ ] pcr_init_denat
-    - [ ] pcr_final_ext
-    - [ ] inoculation
-    - [ ] incubate_plate
-    - [ ] invert_dry
-    - [ ] dry_pellet
-    - [ ] dry_slide
-    - [x] centrifuge
-    - [ ] centrifuge_pellet
-    - [ ] centrifuge_phases_top
-    - [ ] centrifuge_phases_bottom
-    - [ ] centrifuge_column
-    - [ ] centrifuge_flow_through()
-    - [ ] ce_detect
-    - [ ] electrophoresis
-    - [ ] facs
-    - [ ] measure_fluorescence
-    - [ ] mount_observe_slide
-    - [ ] sequencing
-    - [ ] electroporate
-    - [ ] weigh
-    - [ ] cell_culture
-    - [ ] transfection
+		- [ ] optional_step
+		- [ ] parallel_step
+		- [ ] to_do
+		- [ ] store_until
+		- [ ] use_or_store
+		- [ ] time_constraint
+		- [?] set_value
+		- [?] assign
+		- [ ] add
+		- [ ] divide
+		- [ ] subtract
+		- [ ] multiply
+		- [ ] discard
+		- [ ] drain
+		- [ ] new_solid
+		- [ ] new_container
+		- [ ] new_slide
+		- [ ] new_column
+		- [ ] measure_solid
+		- [ ] measure_prop
+		- [ ] add_to_column
+		- [ ] add_to_slide
+		- [ ] collect_tissue
+		- [ ] plate_out
+		- [?] transfer
+		- [ ] combine
+		- [ ] combine_and_mix
+		- [ ] dissolve
+		- [ ] invert
+		- [?] pipet
+		- [ ] resuspend
+		- [ ] tap
+		- [ ] vortex
+		- [ ] vortex_column
+		- [ ] incubate_and_mix
+		- [ ] mixing_table
+		- [ ] mixing_table_pcr
+		- [ ] immerse_slide
+		- [ ] remove_slide
+		- [ ] wash_slide
+		- [ ] homogenize_tissue
+		- [ ] wash_tissue
+		- [ ] incubate
+		- [ ] store_for
+		- [ ] set_temp
+		- [ ] store_plate
+		- [ ] thermocycler
+		- [ ] thermocycler_anneal
+		- [ ] pcr_init_denat
+		- [ ] pcr_final_ext
+		- [ ] inoculation
+		- [ ] incubate_plate
+		- [ ] invert_dry
+		- [ ] dry_pellet
+		- [ ] dry_slide
+		- [x] centrifuge
+		- [ ] centrifuge_pellet
+		- [ ] centrifuge_phases_top
+		- [ ] centrifuge_phases_bottom
+		- [ ] centrifuge_column
+		- [ ] centrifuge_flow_through()
+		- [ ] ce_detect
+		- [ ] electrophoresis
+		- [ ] facs
+		- [ ] measure_fluorescence
+		- [ ] mount_observe_slide
+		- [ ] sequencing
+		- [ ] electroporate
+		- [ ] weigh
+		- [ ] cell_culture
+		- [ ] transfection
 - [ ] implement equivalents for PR-PR commands
 
 # Todos for luigi
 
 - [x] configure sites and cliques for transporter.movePlate:
-    - [x] camera
-    - [x] P1-P3
-    - [x] lightbox
-    - [x] shaker
-    - [x] sealer
-    - [x] mario exchange hotel
-    - [x] hotels
-    - [x] regrip
-        - [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
-    - [x] reader
-    - [x] culturebox
-    - [x] add possibility to configure options in 'ourlab'
+		- [x] camera
+		- [x] P1-P3
+		- [x] lightbox
+		- [x] shaker
+		- [x] sealer
+		- [x] mario exchange hotel
+		- [x] hotels
+		- [x] regrip
+				- [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
+		- [x] reader
+		- [x] culturebox
+		- [x] add possibility to configure options in 'ourlab'
 - [x] perform initial pipetting test
 - [x] evoware: automatically retract tips after washing
 - [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
@@ -362,7 +357,7 @@
 - [x] shaker operation
 - [x] reader operation
 	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
-    - [x] create absorbanceReader instructions
+		- [x] create absorbanceReader instructions
 	- [x] luigi_protocol3: change to measure absorbance
 - [x] exclude access to HOTEL12_9, because of trough
 - [x] culturebox operation
@@ -374,11 +369,11 @@
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] suboptimal plate transport:
-    - [ ] ROMA1 P1 -> REGRIP_BELOW (catches on side before falling into place)
-    - [ ] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
+		- [ ] ROMA1 P1 -> REGRIP_BELOW (catches on side before falling into place)
+		- [ ] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
 - [ ] decide on wash programs with Daniel and Fabian
 - [ ] incubator sites:
-    - [ ] add the extra logic+code for opening a black incubator site
+		- [ ] add the extra logic+code for opening a black incubator site
 - [ ] incubators operation
 - [ ] camera operation
 
@@ -412,8 +407,8 @@
 - [ ] write back-end for PR-PR?
 - [ ] UI to display protocol
 - [ ] UI to interactively customize protocol
-    - see http://arqex.com/991/json-editor-react-immutable-data
-    - see https://github.com/jdorn/json-editor
+		- see http://arqex.com/991/json-editor-react-immutable-data
+		- see https://github.com/jdorn/json-editor
 - [ ] UI to create protocol
 - [ ] consider adding constraints to properties using 'property@' properties, e.g. `model@: {rows:8, columns:16}`
 - [ ] refactor commandHelper processValue functions, organize them in a more principled way to avoid duplication of various type checks.
@@ -430,16 +425,16 @@
 - [ ] change imports to require a version number?
 - [ ] change commandHandlers to return an object with both descriptive and 'handle' functions; the descriptive function should contain a description and information about the parameters
 - [ ] improvements to specification/realization splitting
-    - [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
-    - [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
+		- [ ] consider adding `extend` and `patch` keywords for `loadProtocol()`
+		- [ ] `patch` items can be handled by `jiff` or `_.set`, depending on their content
 - [ ] augment protocol design:
-     - [ ] specify factors
-    - [ ] choose combinations of factor levels (e.g. full-factorial)
-    - [ ] possibly partition blocks of the combinations
-    - [ ] construct mixtures, if relevant
-    - [ ] assign mixtures to wells (probably with randomization)
-    - [ ] specify pipetting details, such as order of sources, and parameters by source
-    - [ ] allow factor values to alter program flow (i.e., heating vs not heating)
+		 - [ ] specify factors
+		- [ ] choose combinations of factor levels (e.g. full-factorial)
+		- [ ] possibly partition blocks of the combinations
+		- [ ] construct mixtures, if relevant
+		- [ ] assign mixtures to wells (probably with randomization)
+		- [ ] specify pipetting details, such as order of sources, and parameters by source
+		- [ ] allow factor values to alter program flow (i.e., heating vs not heating)
 - [ ] refactor misc.js, expect.js, and commandHelper.js to remove duplication
 - [ ] protocols/protocol8.json: add all cleaning intensities for all tips
 - [ ] for 'ourlab' configuration, handle table selection, for different table configurations; consider setting a table filename that can be used by the evoware translator, rather than passing the filename on the command line
@@ -466,7 +461,7 @@
 - [ ] commandHandler args: also pass paramDefaults
 - [ ] commands/sealer.js: figure out more sophisticated way to deal with agents for the pre/post steps; consider 'agentPreferred' parameter
 - [ ] handle lids on plates and tracking their position
-- [ ] add a default storage site for plates?  How to handle when plates are shared between robots?
+- [ ] add a default storage site for plates?	How to handle when plates are shared between robots?
 - [ ] commands/pipetter.js: handle case of dispensing then later aspirating from a single well in a single pipetting command
 - [ ] consider allowing for scopes to commands, rather than just globals objects and command params; may need to make data.objects an array.
 - [ ] Use Immutablejs to protocol structure: should speed up handling of large protocols by avoiding the `_.cloneDeep` calls and unnecessary recalculations of logic for each step.
@@ -477,17 +472,17 @@
 
 When loading JSON/JavaScript files, we expect the following structure:
 
-    {
-      roboliq: string,
-      objects: {},
-      steps: {},
-      effects: {},
-      predicates: [],
-      taskPredicates: [],
-      objectToPredicateConverters: {function},
-      commandHandlers: {function},
-      planHandlers: {function}
-    }
+		{
+			roboliq: string,
+			objects: {},
+			steps: {},
+			effects: {},
+			predicates: [],
+			taskPredicates: [],
+			objectToPredicateConverters: {function},
+			commandHandlers: {function},
+			planHandlers: {function}
+		}
 
 # Misc
 
@@ -500,17 +495,17 @@ When loading JSON/JavaScript files, we expect the following structure:
 * Load the content of each filename and add to file cache
 * Construct a protocol list consisting of the default files to always load, protocol files passed in args, and protocol passed in arg
 * For each protocol:
-    * load its imports individually, merge the protocol into its imports
-    * pre-process directives and urls
-    * merge into previous protocol
+		* load its imports individually, merge the protocol into its imports
+		* pre-process directives and urls
+		* merge into previous protocol
 
 # Separation of protocol specification and realization
 
-The protocol specification and realization can be combined in a single for for convenience while developing the protocol.  In this case, properties can be suffixed with a '?' or '!' to allow for automatically separating the realization aspects from the specification later.
+The protocol specification and realization can be combined in a single for for convenience while developing the protocol.	In this case, properties can be suffixed with a '?' or '!' to allow for automatically separating the realization aspects from the specification later.
 
-A '!'-suffixed property indicates that the value is lab-specific and is not portable.  When compiled, such properties will automatically have the '!' removed from their name.  When Roboliq is told to split the file into specification+realization, it will remove such properties from the specification and add them to the realization file.
+A '!'-suffixed property indicates that the value is lab-specific and is not portable.	When compiled, such properties will automatically have the '!' removed from their name.	When Roboliq is told to split the file into specification+realization, it will remove such properties from the specification and add them to the realization file.
 
-A '?'-suffixed property indicates that the value need to be supplied by the realization.  Such a property should be a map.  It may contain a `description` field and a `value!` field.  If the `value!` field is present, a property without the '?'-suffix will be added to the containing object with the given value.
+A '?'-suffixed property indicates that the value need to be supplied by the realization.	Such a property should be a map.	It may contain a `description` field and a `value!` field.	If the `value!` field is present, a property without the '?'-suffix will be added to the containing object with the given value.
 
 # Variable references
 
@@ -532,7 +527,7 @@ Still need figure out how to reference parameter values, here are some ideas:
 
 For fixed tips:
 
-* Which tips to use?  Large or small?
+* Which tips to use?	Large or small?
 * Washing when necessary
 * Which program ("liquid class") to use?
 * How to group tip tips and wells?
@@ -540,22 +535,22 @@ For fixed tips:
 
 Assigning tips to sources:
 
-* Try to assign one tip model to each source.  If that doesn't work, assign the optimal tip model for each pipetting step from that source.
+* Try to assign one tip model to each source.	If that doesn't work, assign the optimal tip model for each pipetting step from that source.
 
 Tuple: (source, destination, volume, flags, tipModel, tip, program, pre-commands, post-commands)
 
 "#wells#plate1(A01 down 4)"
 
-    A01 down [take] 4
-    A01 down [to] D01
-    A01 down block [to] B02
-    A01 right [take] 4
-    A01 right [to] A04
-    A01 right block [to] B02
-    all random(seed)
-    all random(seed) take 1
-    all free take 4
-    all free random(seed) take 4
+		A01 down [take] 4
+		A01 down [to] D01
+		A01 down block [to] B02
+		A01 right [take] 4
+		A01 right [to] A04
+		A01 right block [to] B02
+		all random(seed)
+		all random(seed) take 1
+		all free take 4
+		all free random(seed) take 4
 
 Simplest methods/algorithms:
 
@@ -567,17 +562,17 @@ Simplest methods/algorithms:
 Modularize the methods more:
 
 - break the items into groups that should be handled simultaneously, possible methods include:
-    - each item is its own group
-    - groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)
-    - groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns
-    - have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips
+		- each item is its own group
+		- groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)
+		- groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns
+		- have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips
 - assign syringes by group for items without an assigned syringe
 - assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
-    - pick first one
-    - rotate through source wells in order
-    - rotate through source wells in order of max volume
-    - try a simple geometrical assignment considering whether there are more tips or wells; if that fails, use previous method
-    - same as above, but if wells > tips, try starting at first (wells - tips) wells and see which one produces the greatest minimum final volume
+		- pick first one
+		- rotate through source wells in order
+		- rotate through source wells in order of max volume
+		- try a simple geometrical assignment considering whether there are more tips or wells; if that fails, use previous method
+		- same as above, but if wells > tips, try starting at first (wells - tips) wells and see which one produces the greatest minimum final volume
 - add cleaning actions between each group, at the beginning, and at the end
 
 A completely different method that would sometimes useful to manage tip differences:
@@ -608,23 +603,23 @@ Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 * replicate
 
 ```
-    #factorialTemplate:
-        variables:
-        - a: [1, 2, 3]
-        - b: [3, 4, 5]
-        - c: {name: "bob"}
-        template:
-            hello: "'{{a}}'",
-            n: {{b}}
-            c: ${c}
+		#factorialTemplate:
+				variables:
+				- a: [1, 2, 3]
+				- b: [3, 4, 5]
+				- c: {name: "bob"}
+				template:
+						hello: "'{{a}}'",
+						n: {{b}}
+						c: ${c}
 ```
 
 somehow distinguish between control factors, nuisance factors, blocking factors, measurable factors, unknown factors
 
 - factor: [protein, volume]
-  values: [[gfp, 10], [gfp, 20], [gfp, 30], [yfp, 5]]
+	values: [[gfp, 10], [gfp, 20], [gfp, 30], [yfp, 5]]
 - factor: something else
-  values: [1, 2, 3, 4]
+	values: [1, 2, 3, 4]
 - "#tabfile#factor3.tab"
 - "#csvdata#protein,volume\ngfp,10\ngfp,20\ngfp,30\nyfp,5"
 
@@ -633,135 +628,135 @@ For comprehensions
 type: Eval.List
 type: Eval.Wells
 
-    "1": {
-        "command": "pipetter.pipette",
-        "items": {
-            "type": "Eval.List",
-            "variables": [{
-                "name": ["source", "volume"],
-                "values": [["water", "10ul"], ["reagent1", "20ul"]]
-            }, {
-                "name": "destination",
-                "values": "#wells#plate1(A02 down 8)"
-            }],
-            "order": ["-volume"],
-            "template": {
-                "source": "{{source}}",
-                "destination": "{{destination}}",
-                "volume": "{{volume}}"
-            }
-        }
-    }
+		"1": {
+				"command": "pipetter.pipette",
+				"items": {
+						"type": "Eval.List",
+						"variables": [{
+								"name": ["source", "volume"],
+								"values": [["water", "10ul"], ["reagent1", "20ul"]]
+						}, {
+								"name": "destination",
+								"values": "#wells#plate1(A02 down 8)"
+						}],
+						"order": ["-volume"],
+						"template": {
+								"source": "{{source}}",
+								"destination": "{{destination}}",
+								"volume": "{{volume}}"
+						}
+				}
+		}
 
-    name: [hepes_850, hepes_650]
-    values: [[30, 0], [22.5, 7.5], [15ul, 15ul], [7.5ul, 22.5ul], [0ul, 30ul]]
-    gradient: [hepes_850, hepes_650]
-    count: 5
+		name: [hepes_850, hepes_650]
+		values: [[30, 0], [22.5, 7.5], [15ul, 15ul], [7.5ul, 22.5ul], [0ul, 30ul]]
+		gradient: [hepes_850, hepes_650]
+		count: 5
 
-    [{source: sfGFP}, {source: tdGFP}]
-    [{volume: 5ul}, {volume: 10ul}]
-    vs
-    [{source: sfGFP, volume: 5ul}, {source; tdGFP, volume: 10ul}]
+		[{source: sfGFP}, {source: tdGFP}]
+		[{volume: 5ul}, {volume: 10ul}]
+		vs
+		[{source: sfGFP, volume: 5ul}, {source; tdGFP, volume: 10ul}]
 
-    list = {}
-    for (i = 0; i < variables.length; i++) {
-        for (j = 0; j < variables[i].elements.length; j++) {
-            variables[i].elements[j]
-        }
-    }
+		list = {}
+		for (i = 0; i < variables.length; i++) {
+				for (j = 0; j < variables[i].elements.length; j++) {
+						variables[i].elements[j]
+				}
+		}
 
 
-    {water: 40ul, hepes_850: 30ul, hepes_650: 0ul, sfGFP: 5ul}
-    {water: 40ul, hepes_850: 30ul, hepes_650: 0ul, Q204H_N149Y: 5ul}
-    {water: 40ul, hepes_850: 22.5ul, hepes_650: 7.5ul, sfGFP: 5ul}
+		{water: 40ul, hepes_850: 30ul, hepes_650: 0ul, sfGFP: 5ul}
+		{water: 40ul, hepes_850: 30ul, hepes_650: 0ul, Q204H_N149Y: 5ul}
+		{water: 40ul, hepes_850: 22.5ul, hepes_650: 7.5ul, sfGFP: 5ul}
 
-    for:
-    - [source, volume] in [[water, 10ul], [reagent1, 20ul]]
-    - destination in plate1(A02 down 8)
-    template:
-      source: {{source}}
-      destination: {{destination}}
-      volume: {{volume}}
+		for:
+		- [source, volume] in [[water, 10ul], [reagent1, 20ul]]
+		- destination in plate1(A02 down 8)
+		template:
+			source: {{source}}
+			destination: {{destination}}
+			volume: {{volume}}
 
-      - {source: water, destination: plate1(A02), volume: 10ul}
-      - {source: water, destination: plate1(B02), volume: 10ul}
+			- {source: water, destination: plate1(A02), volume: 10ul}
+			- {source: water, destination: plate1(B02), volume: 10ul}
 
 # Equipment command conversion
 
-    command: equipment.open
-    agent: ourlab.mario.evoware
-    equipment: ourlab.mario.reader
+		command: equipment.open
+		agent: ourlab.mario.evoware
+		equipment: ourlab.mario.reader
 
-    command: equipment.open
-    agent: ourlab.mario.evoware
-    equipment: ourlab.mario.reader
-    handler: function(params, data)
+		command: equipment.open
+		agent: ourlab.mario.evoware
+		equipment: ourlab.mario.reader
+		handler: function(params, data)
 
-    command: equipment.open|ourlab.mario.evoware|ourlab.mario.reader
-    handler: function(params, data)
+		command: equipment.open|ourlab.mario.evoware|ourlab.mario.reader
+		handler: function(params, data)
 
 # Reports
 
 ## Labware
 
-    reports:
-        labware:
-        - labware: plate1
-          type: Plate
-          model: ...
-          locationInitial: P3
-          locationFinal: P3
+		reports:
+				labware:
+				- labware: plate1
+					type: Plate
+					model: ...
+					locationInitial: P3
+					locationFinal: P3
 
 ## Wells
 
-    objects:
-        __WELLS__:
-            plate1(A01):
-                isSource: true
-                contentsInitial:
-                    water: 0ul
-                volumeAdded: XXX
-                volumeRemoved: 60ul
-                contentsFinal:
-                    water: -60ul
+		objects:
+				__WELLS__:
+						plate1(A01):
+								isSource: true
+								contentsInitial:
+										water: 0ul
+								volumeAdded: XXX
+								volumeRemoved: 60ul
+								contentsFinal:
+										water: -60ul
 
-    reports:
-        sources:
-        - source: water
-        sourceWells:
-        - source: water
-          well: plate1(A01)
-          volumeInitial: 0ul
-          volumeFinal: -60ul
-          volumeRemoved: 60ul
-        wellContentsInitial:
-        - well: plate1(A01)
-          volume: 0ul
-          water: 0ul
-        wellContentsFinal:
-        - well: plate1(A01)
-          volume: -60ul
-          water: -60ul
-        - well: plate1(A02)
-          volume: 60ul
-          water: 60ul
+		reports:
+				sources:
+				- source: water
+				sourceWells:
+				- source: water
+					well: plate1(A01)
+					volumeInitial: 0ul
+					volumeFinal: -60ul
+					volumeRemoved: 60ul
+				wellContentsInitial:
+				- well: plate1(A01)
+					volume: 0ul
+					water: 0ul
+				wellContentsFinal:
+				- well: plate1(A01)
+					volume: -60ul
+					water: -60ul
+				- well: plate1(A02)
+					volume: 60ul
+					water: 60ul
 
 ## Command Reports
 
 An example of a command report/table would be for the reader command.
-The reader will read a plate and produce an output file.  To analyze it,
+The reader will read a plate and produce an output file.	To analyze it,
 we need to know what the contents of the plate were.
 So the command should create a report of the well contents before readout.
 
-    reports:
-        step-2:
-            {}
+		reports:
+				step-2:
+						{}
 
 # Error reporting
 
-    1.1: parameter `sources`: value `systemLiquid`: undefined
-    1.2: parameters `items`, `sources`, `destinations`: must have equal lengths
-    1.3: value `plate1.model`: undefined, please set a value
+		1.1: parameter `sources`: value `systemLiquid`: undefined
+		1.2: parameters `items`, `sources`, `destinations`: must have equal lengths
+		1.3: value `plate1.model`: undefined, please set a value
 
 # Factorial designs
 
@@ -772,49 +767,49 @@ Here's an experiment description for the sample pH experiment:
 
 ```
 phConditions:
-  type: Conditions
-  description: |
-    my description...
-  factors:
-    saltwaterVolume: 40ul
-    gfpVolume: 5ul
-    gfpSource: sfGFP
-    bufferSystem:
-      acetate:
-        acidPH: 3.75
-        basePH: 5.75
-        acidSource: acetate_375
-        baseSource: acetate_575
-        count: 8
-      mes:
-        acidPH: 5.10
-        basePH: 7.10
-        acidSource: mes_510
-        baseSource: mes_710
-        count: 7
-      pipes:
-        acidPH: 5.75
-        basePH: 7.75
-        acidSource: pipes_575
-        baseSource: pipes_775
-        count: 5
-      hepes:
-        acidPH: 6.50
-        basePH: 8.50
-        acidSource: hepes_650
-        baseSource: hepes_850
-        count: 5
-    acidVolume: {range(): {start: 30ul, end: 0ul, count: count, decimals: 1}}
-    baseVolume: {calculate(): "30 - acidVolume"}
-    pH: {calculate(): "(acidPH * acidVolume + basePH * baseVolume) / 30ul)"}
-  replicates: 3
-  assignWells:
-    well: mixPlate(all)
-  assign:
-    syringe:
-      items: [1,2,3,4]
-      sequence: order
-  randomSeed: 123
+	type: Conditions
+	description: |
+		my description...
+	factors:
+		saltwaterVolume: 40ul
+		gfpVolume: 5ul
+		gfpSource: sfGFP
+		bufferSystem:
+			acetate:
+				acidPH: 3.75
+				basePH: 5.75
+				acidSource: acetate_375
+				baseSource: acetate_575
+				count: 8
+			mes:
+				acidPH: 5.10
+				basePH: 7.10
+				acidSource: mes_510
+				baseSource: mes_710
+				count: 7
+			pipes:
+				acidPH: 5.75
+				basePH: 7.75
+				acidSource: pipes_575
+				baseSource: pipes_775
+				count: 5
+			hepes:
+				acidPH: 6.50
+				basePH: 8.50
+				acidSource: hepes_650
+				baseSource: hepes_850
+				count: 5
+		acidVolume: {range(): {start: 30ul, end: 0ul, count: count, decimals: 1}}
+		baseVolume: {calculate(): "30 - acidVolume"}
+		pH: {calculate(): "(acidPH * acidVolume + basePH * baseVolume) / 30ul)"}
+	replicates: 3
+	assignWells:
+		well: mixPlate(all)
+	assign:
+		syringe:
+			items: [1,2,3,4]
+			sequence: order
+	randomSeed: 123
 ```
 
 It should produce output similar to this:
@@ -823,23 +818,23 @@ It should produce output similar to this:
 description: my description...
 items:
 - index: 1
-  order: 7
-  saltwaterVolume: 40ul
-  gfpVolume: 5ul
-  gfpSource: sfGFP
-  bufferSystem: acetate
-  acidPH: 3.75
-  basePH: 5.75
-  acidSource: acetate_375
-  baseSource: acetate_575
-  count: 8
-  acidVolume: 30ul
-  baseVolume: 0ul
-  pH: 3.75
-  well: mixPlate(H01)
-  syringe: 3
+	order: 7
+	saltwaterVolume: 40ul
+	gfpVolume: 5ul
+	gfpSource: sfGFP
+	bufferSystem: acetate
+	acidPH: 3.75
+	basePH: 5.75
+	acidSource: acetate_375
+	baseSource: acetate_575
+	count: 8
+	acidVolume: 30ul
+	baseVolume: 0ul
+	pH: 3.75
+	well: mixPlate(H01)
+	syringe: 3
 - index: 2
-  ...
+	...
 ```
 
 The protocol steps to run the experiment could be:
@@ -853,7 +848,7 @@ CONTINUE
 command: experiment.pipetteMixtures
 experiment: experiment1
 mixtures:
-  -
+	-
 destinations: mixtureWells
 clean: flush
 cleanBegin: thorough
@@ -865,42 +860,42 @@ cleanEnd: thorough
 
 This has the following structure:
 * for each GFP variant:
-    * denature a sample of GFP
-    * wait for 7 minutes
-    * extract three samples
-    * measure those three samples sequentially (with injected dilution)
+		* denature a sample of GFP
+		* wait for 7 minutes
+		* extract three samples
+		* measure those three samples sequentially (with injected dilution)
 
 The multi-level experiment description could look like this:
 
 ```{yaml}
 - index: 1
-  gfpSource: sfGFP
-  denaturantVolume: 85.5ul
-  gfpVolume: 4.5ul
-  unfoldingTime: 7 minutes
-  sampleVolume: 7ul
-  mixWell: mixPlate(A01)
-  sampleWells: mixPlate(B01,C01,D01)
+	gfpSource: sfGFP
+	denaturantVolume: 85.5ul
+	gfpVolume: 4.5ul
+	unfoldingTime: 7 minutes
+	sampleVolume: 7ul
+	mixWell: mixPlate(A01)
+	sampleWells: mixPlate(B01,C01,D01)
 ```
 
 The code to create that experiment description might look like this:
 
 ```{yaml}
 objects:
-  refoldingConditions:
-    type: Conditions
-    factors:
-      gfpSource: [sfGFP, ...]
-      denaturantVolume: 85.5ul
-      gfpVolume: 4.5ul
-      unfoldingTime: 7 minutes
-      sampleVolume: 7ul
-    assignWells:
-      mixWell: mixPlate(all)
-      sampleWells:
-        wells: mixPlate(all)
-        count: 3
-    randomSeed: 123
+	refoldingConditions:
+		type: Conditions
+		factors:
+			gfpSource: [sfGFP, ...]
+			denaturantVolume: 85.5ul
+			gfpVolume: 4.5ul
+			unfoldingTime: 7 minutes
+			sampleVolume: 7ul
+		assignWells:
+			mixWell: mixPlate(all)
+			sampleWells:
+				wells: mixPlate(all)
+				count: 3
+		randomSeed: 123
 ```
 
 The steps to perform the experiment might look like this:
@@ -909,27 +904,27 @@ The steps to perform the experiment might look like this:
 command: experiment.run
 conditions: refoldingConditions
 steps:
-  1:
-    command: pipetter.pipette
-    items:
-    - {source: denaturant, volume: $denaturantVolume}
-    - {source: $gfpSource, volume: $gfpVolume}
-    destinations: $mixWell
-  2:
-    command: timer.sleep
-    duration: $unfoldingTime
-  3:
-    command: pipetter.pipette
-    sources: $mixWell
-    volumes: $sampleVolume
-    destinations: $sampleWells
-  4:
-    command: fluorescenceReader.measurePlate
-    object: mixPlate
-    program:
-      wells: $sampleWells
-    programTemplate: ./refolding.mdfx.template
-    #outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania15_renaturation--<YYYMMDD_HHmmss>.xml'
+	1:
+		command: pipetter.pipette
+		items:
+		- {source: denaturant, volume: $denaturantVolume}
+		- {source: $gfpSource, volume: $gfpVolume}
+		destinations: $mixWell
+	2:
+		command: timer.sleep
+		duration: $unfoldingTime
+	3:
+		command: pipetter.pipette
+		sources: $mixWell
+		volumes: $sampleVolume
+		destinations: $sampleWells
+	4:
+		command: fluorescenceReader.measurePlate
+		object: mixPlate
+		program:
+			wells: $sampleWells
+		programTemplate: ./refolding.mdfx.template
+		#outputFile: 'C:\\Users\\localadmin\\Desktop\\Ellis\\tania15_renaturation--<YYYMMDD_HHmmss>.xml'
 ```
 
 Sometimes we need multi-level designs, such as when first one set of master
@@ -941,18 +936,18 @@ each of them. CONTINUE.
 ```
 # a data field with a 'forEach' leads to a step being repeated with the appropriate scope
 data: {
-    source: myExperiment,
-    distinctBy: "cultureWell",
-    forEach: "row"
+		source: myExperiment,
+		distinctBy: "cultureWell",
+		forEach: "row"
 }
 
 data(): {
-    distinctBy: "cultureWell",
-    actions: [{
-        action: "math",
-        value: "cultureVolume / 2"
-    }],
-    value: "$cultureWell",
-    join: ",",
+		distinctBy: "cultureWell",
+		actions: [{
+				action: "math",
+				value: "cultureVolume / 2"
+		}],
+		value: "$cultureWell",
+		join: ",",
 }
 ```

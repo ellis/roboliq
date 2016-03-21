@@ -122,6 +122,21 @@ function handlePipetterSpirate(parsed, data) {
 	return results.concat({tableEffects});
 }
 
+/**
+ * Returns an array of groupings of the pipette items.  Each group has these properties:
+ *
+ * - `groupType` -- either "source" or "destination", depending on whether this group is for aspiration or dispense
+ * - `tuples` -- an array with these properties:
+ *     - `item` -- the original pipette item
+ *     - `syringeName` -- roboliq name of the syringe to use
+ *     - `source` -- source properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
+ *     - `destination` -- destination properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
+ * - `syringeSpacing`
+ *
+ * @param  {[type]} parsed [description]
+ * @param  {[type]} data   [description]
+ * @return {[type]}        [description]
+ */
 function groupItems(parsed, data) {
 	if (_.isEmpty(parsed.value.items)) return [];
 
@@ -150,11 +165,11 @@ function groupItems(parsed, data) {
 	}
 	//console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
-	let ref = tuples[0];
 	//console.log({ref})
 	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
-	let syringeSpacing;
 	function canJoinGroup(group, tuple) {
+		const ref = group.tuples[0];
+
 		// Make sure the same syringe is not used twice in one group
 		const isUniqueSyringe = _.every(group, tuple2 => tuple2.syringeName != tuple.syringeName);
 		if (!isUniqueSyringe)
@@ -167,19 +182,20 @@ function groupItems(parsed, data) {
 				const dRow1 = tuple.item.syringe.row - ref.item.syringe.row
 				const dRow2 = wellInfo.row - wellInfoRef.row;
 				//console.log({tupleSyringe: tuple.item.syringe, refSyringe: ref.item.syringe})
-				if (_.isUndefined(syringeSpacing)) {
+				if (_.isUndefined(group.syringeSpacing)) {
 					if (dRow1 === 0 || dRow2 === 0) {
 						return false;
 					}
 					//console.log(1)
 					//console.log({dRow1, dRow2})
-					syringeSpacing = math.fraction(dRow2, dRow1);
+					const syringeSpacing = math.fraction(dRow2, dRow1);
 					// console.log(2)
 					// FIXME: need to check wether the syringe spacing is permissible!  Check how much the syringes need to spread physically (not just relative to the plate wells), and whether that's possible for the hardware.  Also, not all fractions will be permissible, probably.
 					if (syringeSpacing < 1) {
 						return false;
 					}
 					else {
+						group.syringeSpacing = syringeSpacing;
 						return true;
 					}
 				}
@@ -196,35 +212,42 @@ function groupItems(parsed, data) {
 		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName))
 			return false;
 		// Other things ok?
-		if (!_.isUndefined(tuple.source)) {
-			if (checkWellInfo(tuple.source, ref.source))
-				return true;
-		}
-		if (!_.isUndefined(tuple.destination)) {
-			if (checkWellInfo(tuple.destination, ref.destination))
+		if (!_.isUndefined(tuple[group.groupType])) {
+			if (checkWellInfo(tuple[group.groupType], ref[group.groupType]))
 				return true;
 		}
 
 		return false;
 	}
 
-	let group = {tuples: [ref]};
-	const groups = [group];
+	let groupSrc = {groupType: "source", tuples: [tuples[0]]};
+	let groupDst = {groupType: "destination", tuples: [tuples[0]]};
+	const groups = [groupSrc, groupDst];
 	for (let i = 1; i < tuples.length; i++) {
 		const tuple = tuples[i];
-		if (canJoinGroup(group, tuple)) {
-			group.tuples.push(tuple);
+		// Can the source can be added to the source group?
+		if (canJoinGroup(groupSrc, tuple)) {
+			groupSrc.tuples.push(tuple);
+			// Decide whether to add to the current destination group or to create new one
+			if (canJoinGroup(groupDst, tuple)) {
+				groupDst.tuples.push(tuple);
+			}
+			else {
+				groupDst = {groupType: "destination", tuples: [tuple]};
+				groupDst.push(groupDst);
+			}
 		}
+		// No, so start new src and dst groups
 		else {
-			group.syringeSpacing = syringeSpacing || 1;
 			// Start a new group`
-			ref = tuple;
-			group = {tuples: [ref]};
-			groups.push(group);
-			syringeSpacing = undefined;
+			groupSrc = {groupType: "source", tuples: [tuple]};
+			groupDst = {groupType: "destination", tuples: [tuple]};
+			groupSrc.push(groupSrc);
+			groupDst.push(groupDst);
 		}
 	}
-	group.syringeSpacing = syringeSpacing || 1;
+	groupSrc.syringeSpacing = groupSrc.syringeSpacing || 1;
+	groupDst.syringeSpacing = groupDst.syringeSpacing || 1;
 
 	return groups;
 }
@@ -255,11 +278,11 @@ function handleGroup(parsed, data, group) {
 	});
 
 	// Script command line
-	function makeLine(func, propertyName) {
+	function makeLines(func, propertyName) {
 		const wellInfo = tuple0[propertyName];
-		//console.log({func, propertyName, wellInfo})
+		// console.log({func, propertyName, wellInfo})
 		if (_.isUndefined(wellInfo))
-			return undefined;
+			return [];
 
 		const labwareModel = wellInfo.labwareModel;
 		const plateMask = encodeWells(tuples, propertyName);
@@ -274,11 +297,12 @@ function handleGroup(parsed, data, group) {
 			0
 		];
 		const line = `${func}(${l.join(",")});`;
-		return {line};
+		return [{line}];
 	}
 
+	const func = (group.groupType === "source") ? "Aspirate" : "Dispense";
 	//console.log({syringeMask, volumes})
-	return _.compact([makeLine("Aspirate", "source"), makeLine("Dispense", "destination")]);
+	return makeLines(func, group.groupType);
 }
 
 function handleRetract(parsed, data, group) {
