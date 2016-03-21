@@ -163,17 +163,19 @@ function groupItems(parsed, data) {
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
 		tuples.push({item, syringeName, source: getWellInfo(item.source), destination: getWellInfo(item.destination)});
 	}
-	//console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
+	// console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
 	//console.log({ref})
 	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
-	function canJoinGroup(group, tuple) {
+	function canJoinGroup(group, tuple, debug) {
 		const ref = group.tuples[0];
 
 		// Make sure the same syringe is not used twice in one group
-		const isUniqueSyringe = _.every(group, tuple2 => tuple2.syringeName != tuple.syringeName);
-		if (!isUniqueSyringe)
+		const isUniqueSyringe = _.every(group.tuples, tuple2 => tuple2.syringeName != tuple.syringeName);
+		if (!isUniqueSyringe) {
+			if (debug) console.log({group, tuple, isUniqueSyringe, syringes: group.tuples.map(x => x.syringeName)})
 			return false;
+		}
 
 		function checkWellInfo(wellInfo, wellInfoRef) {
 			// Same column?
@@ -184,6 +186,7 @@ function groupItems(parsed, data) {
 				//console.log({tupleSyringe: tuple.item.syringe, refSyringe: ref.item.syringe})
 				if (_.isUndefined(group.syringeSpacing)) {
 					if (dRow1 === 0 || dRow2 === 0) {
+						if (debug) console.log({group, tuple, dRow1, dRow2})
 						return false;
 					}
 					//console.log(1)
@@ -192,6 +195,7 @@ function groupItems(parsed, data) {
 					// console.log(2)
 					// FIXME: need to check wether the syringe spacing is permissible!  Check how much the syringes need to spread physically (not just relative to the plate wells), and whether that's possible for the hardware.  Also, not all fractions will be permissible, probably.
 					if (syringeSpacing < 1) {
+						if (debug) console.log({group, tuple, syringeSpacing})
 						return false;
 					}
 					else {
@@ -206,11 +210,14 @@ function groupItems(parsed, data) {
 					// console.log(4)
 				}
 			}
+			if (debug) console.log({group, tuple, col: wellInfo.col, colRef: wellInfoRef.col})
 			return false;
 		}
 		// Same labware?
-		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName))
+		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName)) {
+			if (debug) console.log({group, tuple, col: wellInfo.col, colRef: wellInfoRef.col})
 			return false;
+		}
 		// Other things ok?
 		if (!_.isUndefined(tuple[group.groupType])) {
 			if (checkWellInfo(tuple[group.groupType], ref[group.groupType]))
@@ -223,18 +230,19 @@ function groupItems(parsed, data) {
 	let groupSrc = {groupType: "source", tuples: [tuples[0]]};
 	let groupDst = {groupType: "destination", tuples: [tuples[0]]};
 	const groups = [groupSrc, groupDst];
+	const debug = false;
 	for (let i = 1; i < tuples.length; i++) {
 		const tuple = tuples[i];
 		// Can the source can be added to the source group?
-		if (canJoinGroup(groupSrc, tuple)) {
+		if (canJoinGroup(groupSrc, tuple, debug)) {
 			groupSrc.tuples.push(tuple);
 			// Decide whether to add to the current destination group or to create new one
-			if (canJoinGroup(groupDst, tuple)) {
+			if (canJoinGroup(groupDst, tuple, debug)) {
 				groupDst.tuples.push(tuple);
 			}
 			else {
 				groupDst = {groupType: "destination", tuples: [tuple]};
-				groupDst.push(groupDst);
+				groups.push(groupDst);
 			}
 		}
 		// No, so start new src and dst groups
@@ -242,12 +250,10 @@ function groupItems(parsed, data) {
 			// Start a new group`
 			groupSrc = {groupType: "source", tuples: [tuple]};
 			groupDst = {groupType: "destination", tuples: [tuple]};
-			groupSrc.push(groupSrc);
-			groupDst.push(groupDst);
+			groups.push(groupSrc);
+			groups.push(groupDst);
 		}
 	}
-	groupSrc.syringeSpacing = groupSrc.syringeSpacing || 1;
-	groupDst.syringeSpacing = groupDst.syringeSpacing || 1;
 
 	return groups;
 }
@@ -291,7 +297,7 @@ function handleGroup(parsed, data, group) {
 			`"${stripQuotes(parsed.value.program)}"`,
 			volumes.join(","),
 			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
-			group.syringeSpacing,
+			group.syringeSpacing || 1,
 			`"${plateMask}"`,
 			0,
 			0

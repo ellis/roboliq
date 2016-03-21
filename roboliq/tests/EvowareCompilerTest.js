@@ -4,41 +4,13 @@ import jsonfile from 'jsonfile';
 import * as EvowareCarrierFile from '../src/evoware/EvowareCarrierFile.js';
 import * as EvowareCompiler from '../src/evoware/EvowareCompiler.js';
 import * as EvowareTableFile from '../src/evoware/EvowareTableFile.js';
+import schemas from './schemas.js';
 
 const protocol0 = {
 	roboliq: "v1",
 	objects: {
 		robot1: {
 			type: "Agent",
-			"liha": {
-				"type": "Pipetter",
-				"syringe": {
-					"1": {
-						"type": "Syringe",
-						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-						"row": 1
-					},
-					"2": {
-						"type": "Syringe",
-						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-						"row": 2
-					},
-					"3": {
-						"type": "Syringe",
-						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-						"row": 3
-					},
-					"4": {
-						"type": "Syringe",
-						"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-						"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-						"row": 4
-					},
-				}
-			},
 			"washProgram": {
 				"type": "Namespace",
 				"light_1000": {
@@ -73,10 +45,30 @@ const protocol0 = {
 		pipetter1: {
 			type: "Pipetter",
 			syringe: {
-				1: {
-					type: "Syringe",
-					row: 1
-				}
+				"1": {
+					"type": "Syringe",
+					"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+					"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+					"row": 1
+				},
+				"2": {
+					"type": "Syringe",
+					"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+					"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+					"row": 2
+				},
+				"3": {
+					"type": "Syringe",
+					"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+					"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+					"row": 3
+				},
+				"4": {
+					"type": "Syringe",
+					"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+					"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+					"row": 4
+				},
 			}
 		},
 		plateModel1: {
@@ -107,7 +99,7 @@ const protocol0 = {
 		{"timer.canAgentEquipment": {agent: "robot1", equipment: "timer1"}},
 		{"timer.canAgentEquipment": {agent: "robot1", equipment: "timer2"}},
 	],
-	schemas: require(__dirname+'/schemas.json')
+	schemas
 };
 
 describe('EvowareCompilerTest', function() {
@@ -366,6 +358,54 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
+		it("should compile pipetter._pipette for a two items, resulting in a single aspirate and multiple dispenses", function() {
+			// console.log("schemas: "+JSON.stringify(schemas))
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
+						}
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter._pipette",
+						agent: "robot1",
+						equipment: "pipetter1",
+						program: "\"Water free dispense\"",
+						items: [
+							{
+								syringe: "pipetter1.syringe.1",
+								source: "plate1(A01)",
+								destination: "plate1(D01)",
+								volume: "10 ul"
+							},
+							{
+								syringe: "pipetter1.syringe.2",
+								source: "plate1(B01)",
+								destination: "plate1(F05)",
+								volume: "10 ul"
+							}
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			should.deepEqual(results, [[
+				{line: "Aspirate(3,\"Water free dispense\",\"10\",\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",0,0);"},
+				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",0,0);"},
+				{line: "Dispense(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0800000400000000\",0,0);"},
+				{line: "MoveLiha(2,1,0,1,\"0C0800000400000000\",0,4,0,10,0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
+		});
+
 		it("should compile pipetter._wash light", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
@@ -381,14 +421,14 @@ describe('EvowareCompilerTest', function() {
 					"1": {
 						"command": "pipetter._washTips",
 						"agent": "robot1",
-						"equipment": "robot1.liha",
+						"equipment": "pipetter1",
 						"program": "robot1.washProgram.light_1000",
 						"intensity": "light",
 						"syringes": [
-							"robot1.liha.syringe.1",
-							"robot1.liha.syringe.2",
-							"robot1.liha.syringe.3",
-							"robot1.liha.syringe.4"
+							"pipetter1.syringe.1",
+							"pipetter1.syringe.2",
+							"pipetter1.syringe.3",
+							"pipetter1.syringe.4"
 						]
 					}
 				}
