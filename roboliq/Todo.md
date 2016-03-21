@@ -42,7 +42,12 @@
 
 # Todos for growth curve experiment
 
-- [ ] growthcurve02_testing:
+- [x] growthcurve01_testing:
+	- [x] initialize with custom wash steps
+	- [x] initialize with decontamination wash
+	- [x] reader command needs to update tableEffects
+- [x] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
+- [x] growthcurve02_testing:
 	- [x] DWP on P1, fill it with media, then add inoculum
 	- [x] BUG: why doesn't `sources: $$well` work?
 	- [x] BUG: growthcurve02_testing: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
@@ -53,30 +58,29 @@
 	- [x] PROBLEM: when trying to transfer A01 to A02 for dilution, pipetting error occurred
 	- [x] Q: for diluting the cells, can we use water instead of medium?  Currently, I'm using water. A: if you use water, you need to calibrate the reader for the different concentrations of medium.
 	- [x] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
-	- [ ] shaker.start: implement
-	- [ ] move DWP to shaker, start shaking with cover closed
-	- [ ] after 15 minutes, take out DWP
-	- [ ] sample 8 wells
-	- [ ] measure the 8 wells
-	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
-	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
+	- [x] shaker.start: implement
+	- [x] move DWP to shaker, start shaking with cover closed
 - [ ] growthcurve03_testing: now with sealing and change of labware type
-	- [ ] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed? A: Not really, but we can try either always using the sealed or unsealed labware, and see whether it works.
+	- [x] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed? A: Not really, but we can try either always using the sealed or unsealed labware, and see whether it works.
+	- [ ] Q: Daniel, which plates did you use for dilution?  When I filled a well to 450ul, it overflowed.
+	- [ ] set culturePlate model to "sealed" variant, and try pipetting again
 	- [ ] fix vectors for moving to ROBOSEAL
 	- [ ] seal DWP twice
-	- [ ] DWP model now needs to change, manage starting a new script!
+	- [ ] run loop to sample from culturePlate twice
+- [ ] growthcurve04_singleSample.yaml:
+	- [ ] HACK: give reader a different output name with date/time in it, so that unique files are produced
+	- [ ] sample from
+	- [ ] design1: allocate plates and wells for dilution
+	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
+	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 	- [ ] run some measurements overnight
-- [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
-- [ ] growthcurve01_testing:
-	- [x] initialize with custom wash steps
-	- [x] initialize with decontamination wash
-	- [x] reader command needs to update tableEffects
-	- [ ] absorbance reader: the F200 Pro can apparently only read at 600nm
-	- [ ] initialize by switching system liquid to correct source
-	- [ ] notify user where to put labware
-	- [ ] pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes)
 - [ ] let wellsParser handle `destinations: A01 down H01`?
+- [ ] absorbance reader: the F200 Pro can only excite at wavelength 600nm, raise an error if user specifies another wavelength
+- [ ] maybe pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes), but we can only read OrangeG on mario's reader; could maybe try crystal violet dye.
+- [ ] EvowareCompiler: DWP model needs to change when sealed, manage starting a new script!
+- [ ] implement command to prompt the user
+- [ ] notify user where to put labware
 
 # Todos for ROMA qc
 
