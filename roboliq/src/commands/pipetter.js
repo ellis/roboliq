@@ -447,7 +447,11 @@ function pipette(params, parsed, data) {
 
 	// Create clean commands before pipetting this group
 	const createCleanActions = function(syringeToCleanValue) {
-		const items = _(syringeToCleanValue).toPairs().filter(([x, n]) => n > 0).map(([syringe, n]) => { return {syringe, intensity: valueToIntensity[n]} }).value();
+		const items = _(syringeToCleanValue).toPairs().filter(([x, n]) => n > 0).map(([syringe, n]) => {
+			const syringeNum = _.toNumber(syringe);
+			const syringe1 = _.isInteger(syringeNum) ? syringeNum : syringe;
+			return {syringe: syringe1, intensity: valueToIntensity[n]};
+		}).value();
 		if (_.isEmpty(items)) return [];
 		return [{
 			command: "pipetter.cleanTips",
@@ -645,13 +649,20 @@ const commandHandlers = {
 		//console.log(JSON.stringify(itemsToMerge, null, '\t'));
 		//console.log("items: "+JSON.stringify(items))
 
+		// Ensure fully qualified names for the syringes
+		_.forEach(items, item => {
+			if (_.isInteger(item.syringe)) {
+				item.syringe = `${parsed.objectName.equipment}.syringe.${item.syringe}`;
+			}
+		});
+
 		// Get list of valid agent/equipment/syringe combinations for all syringes
 		const nodes = _.flatten(items.map(item => {
 			const predicates = [
 				{"pipetter.canAgentEquipmentSyringe": {
 					"agent": parsed.objectName.agent,
 					"equipment": parsed.objectName.equipment,
-					"syringe": item.syringe
+					syringe: item.syringe
 				}}
 			];
 			//console.log(predicates)
@@ -665,7 +676,7 @@ const commandHandlers = {
 		//console.log(equipToNodes);
 		// Group by syringe
 		const syringeToNodes = _.groupBy(nodes, x => x.syringe);
-		//console.log(syringeToNodes);
+		// console.log({syringeToNodes});
 
 		// Desired intensity for each syringe
 		const syringeToItem = _.groupBy(items, item => item.syringe);
@@ -678,7 +689,7 @@ const commandHandlers = {
 		while (!_.isEmpty(syringesRemaining)) {
 			const syringe = syringesRemaining[0];
 			const nodes = syringeToNodes[syringe];
-			//console.log({syringe, nodes})
+			// console.log({syringe, nodes})
 			// Arbitrarily pick the first possible agent/equipment combination
 			const {agent, equipment} = nodes[0];
 			const equipNodes = equipToNodes[`${agent}|${equipment}`];
@@ -750,12 +761,11 @@ const commandHandlers = {
 
 		//const items = [];
 
-		const params1 = _.omit(parsed.orig, ['diluent', 'items']);
+		const params1 = _.omit(parsed.orig, ['description', 'diluent', 'items']);
 		params1.command = "pipetter.pipette";
 		params1.items = diluentItems;
-		// params1.program = "Roboliq_Water_Air_1000";
 		params1.clean = "none"; // HACK
-		const params2 = _.omit(parsed.orig, ['diluent', 'items']);
+		const params2 = _.omit(parsed.orig, ['description', 'diluent', 'items']);
 		params2.command = "pipetter.pipette";
 		params2.items = items;
 		// params2.clean = "none"; // HACK

@@ -156,6 +156,7 @@ function paramsRequired(params, names) {
 module.exports = {
 	RoboliqError,
 	context: _context,
+	getPrefix,
 	paramsRequired: paramsRequired,
 	rethrow,
 	throw: _throw,

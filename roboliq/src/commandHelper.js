@@ -297,7 +297,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			expect.truthy({paramName: name}, _.isNumber(value) && (value % 1) === 0, "expected integer: "+value);
 			return;
 		case "number":
-			expect.truthy({paramName: name}, _.isNumber(value), "expected number: "+value);
+			expect.truthy({paramName: name}, _.isNumber(value), "expected number: "+JSON.stringify(value));
 			return;
 		case "null":
 			expect.truthy({paramName: name}, _.isNull(value), "expected null: "+value);

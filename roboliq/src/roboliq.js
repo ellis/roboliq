@@ -974,8 +974,8 @@ function _run(opts, userProtocol) {
 			//console.log("result: "+JSON.stringify(result))
 		} catch (e) {
 			console.log("Error type = "+(typeof e).toString());
-			if (typeof e === "RoboliqError") {
-				const prefix = e.getPrefix();
+			if (e.isRoboliqError) {
+				const prefix = expect.getPrefix(e.context);
 				result = {errors: _.map(e.errors, s => prefix+s)};
 			}
 			else if (_.has(e, "errors")) {
