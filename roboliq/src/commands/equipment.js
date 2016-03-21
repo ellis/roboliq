@@ -33,36 +33,29 @@ function closeAll(params, data, effects) {
  * @static
  */
 var commandHandlers = {
-	/**
-	 * Run the given equipment.
-	 *
-	 * This is a generic command, and any addition parameters may be passed that
-	 * are required by the target equipment.
-	 *
-	 * @typedef _run
-	 * @memberof equipment
-	 * @property {string} command - "equipment._run"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 */
 	"equipment._run": function(params, parsed, data) {
 		return {};
 	},
-	/**
-	 * Open the given equipment.
-	 *
-	 * This is a generic command that expands to a sub-command named
-	 * `equipment.open|${agent}|${equipment}`.
-	 * That command should be defined in your configuration for your lab.
-	 *
-	 * The handler should return effects indicating that the equipment is open.
-	 *
-	 * @typedef open
-	 * @memberof equipment
-	 * @property {string} command - "equipment.open"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 */
+	"equipment.close": function(params, parsed, data) {
+		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+
+		var expansion = [{
+			command: "equipment.close|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
+			agent: parsed.objectName.agent,
+			equipment: parsed.objectName.equipment
+		}];
+
+		var effects = {};
+		// Close equipment
+		effects[parsed.objectName.equipment+".open"] = false;
+		// Indicate that the internal sites are closed
+		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = true; });
+
+		return {
+			expansion: expansion,
+			effects: effects
+		};
+	},
 	"equipment.open": function(params, parsed, data) {
 		var expansion = [{
 			command: "equipment.open|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
@@ -75,24 +68,6 @@ var commandHandlers = {
 			effects: {[parsed.objectName.equipment+".open"]: true}
 		};
 	},
-	/**
-	 * Open an equipment site.
-	 * This command assumes that only one equipment site can be open at a time.
-	 *
-	 * This is a generic command that expands to a sub-command named
-	 * `equipment.openSite|${agent}|${equipment}`.
-	 * That command should be defined in your configuration for your lab.
-	 *
-	 * The handler should return effects indicating that the equipment is open,
-	 * the given site is open, and all other equipment sites are closed.
-	 *
-	 * @typedef openSite
-	 * @memberof equipment
-	 * @property {string} command - "equipment.openSite"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 * @property {string} site - Site identifier
-	 */
 	"equipment.openSite": function(params, parsed, data) {
 		//console.log("equipment.openSite:")
 		//console.log(JSON.stringify(parsed, null, '\t'))
@@ -119,41 +94,27 @@ var commandHandlers = {
 			effects: effects
 		};
 	},
-	/**
-	 * Close the given equipment.
-	 *
-	 * This is a generic command that expands to a sub-command named
-	 * `equipment.close|${agent}|${equipment}`.
-	 * That command should be defined in your configuration for your lab.
-	 *
-	 * The handler should return effects indicating the the equipment is closed
-	 * and all of its sites are closed.
-	 *
-	 * @typedef close
-	 * @memberof equipment
-	 * @property {string} command - "equipment.close"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 */
-	"equipment.close": function(params, parsed, data) {
-		var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
-
-		var expansion = [{
-			command: "equipment.close|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
+	"equipment.start": function(params, parsed, data) {
+		var expansion = [_.defaults({
+			command: "equipment.start|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
 			agent: parsed.objectName.agent,
 			equipment: parsed.objectName.equipment
-		}];
+		}, parsed.orig)];
 
-		var effects = {};
-		// Close equipment
-		effects[parsed.objectName.equipment+".open"] = false;
-		// Indicate that the internal sites are closed
-		_.forEach(sitesInternal, function(site) { effects[site+".closed"] = true; });
+		var effects = { [parsed.objectName.equipment+".running"]: true };
 
-		return {
-			expansion: expansion,
-			effects: effects
-		};
+		return { expansion, effects };
+	},
+	"equipment.stop": function(params, parsed, data) {
+		var expansion = [_.defaults({
+			command: "equipment.stop|"+parsed.objectName.agent+"|"+parsed.objectName.equipment,
+			agent: parsed.objectName.agent,
+			equipment: parsed.objectName.equipment
+		}, parsed.orig)];
+
+		var effects = { [parsed.objectName.equipment+".running"]: false };
+
+		return { expansion, effects };
 	},
 };
 

@@ -522,6 +522,27 @@ module.exports = {
 				},
 				required: ["program"]
 			},
+			"equipment.start|ourlab.luigi.evoware|ourlab.luigi.culturebox": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+					program: {
+						description: "Program for shaking and incubating",
+						type: "object",
+						properties: {
+							rpm: {type: "number", default: 300},
+							temperature: {type: "Temperature"}
+						}
+					}
+				},
+				required: ["program"]
+			},
+			"equipment.stop|ourlab.luigi.evoware|ourlab.luigi.culturebox": {
+				properties: {
+					agent: {description: "Agent identifier", type: "Agent"},
+					equipment: {description: "Equipment identifier", type: "Equipment"},
+				}
+			},
 			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
@@ -597,6 +618,35 @@ module.exports = {
 				];
 
 				return {expansion, effects};
+			},
+			"equipment.start|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
+				// console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
+				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+				const parsedProgram = parsed.value.program;
+				//console.log({parsedProgram});
+				const expansion = [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_start",
+						factsValue: parsedProgram.rpm
+					},
+				];
+				return {expansion};
+			},
+			"equipment.stop|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
+				// console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
+				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+				const expansion = [
+					{
+						command: "evoware._facts",
+						agent: parsed.objectName.agent,
+						factsEquipment: equipmentId,
+						factsVariable: equipmentId+"_stop"
+					},
+				];
+				return {expansion};
 			},
 			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
 				// console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})

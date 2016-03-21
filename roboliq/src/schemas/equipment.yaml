@@ -56,3 +56,33 @@ equipment.close:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
   required: ["agent", "equipment"]
+
+equipment.start:
+  description: |
+    Start the given equipment.
+
+    This is a generic command that expands to a sub-command named
+    `equipment.start|${agent}|${equipment}`.
+    That command should be defined in your configuration for your lab.
+    Any addition parameters may be passed that are required by the target equipment.
+
+    The handler returns effects indicating that the equipment is running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]
+
+equipment.stop:
+  description: |
+    Stop the given equipment.
+
+    This is a generic command that expands to a sub-command named
+    `equipment.stop|${agent}|${equipment}`.
+    That command should be defined in your configuration for your lab.
+    Any addition parameters may be passed that are required by the target equipment.
+
+    The handler returns effects indicating that the equipment is not running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]
