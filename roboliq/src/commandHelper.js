@@ -233,6 +233,7 @@ function processValue0BySchema(result, path, value0, schema, data) {
 		else {
 			// Try each type alternative:
 			const types = _.flatten([schema.type]);
+			console.log({types})
 			let es = [];
 			for (const t of types) {
 				try {
@@ -277,7 +278,7 @@ function processValue0AsEnum(result, path, value0, schema, data) {
  * @param  {object} data - protocol data
  */
 function processValue0BySchemaType(result, path, value0, schema, type, data) {
-	//console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
+	console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
 	if (type === 'name') {
 		return 	_.set(result.value, path, value0);
 	}
@@ -341,9 +342,9 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 		default: {
 			if (data.schemas.hasOwnProperty(type)) {
 				const schema = data.schemas[type];
-				//console.log({type, schema})
+				console.log({type, schema})
 				processValue0BySchema(result, path, value, schema, data);
-				//console.log("result: "+JSON.stringify(result, null, '\t'))
+				console.log("result: "+JSON.stringify(result, null, '\t'))
 				return;
 			}
 			else {

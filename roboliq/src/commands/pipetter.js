@@ -728,8 +728,8 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.pipette": pipette,
-	"pipetter.pipetteDilutionSeries2x": function(params, parsed, data) {
-		// console.log("pipetter.pipetteDilutionSeries2x: "+JSON.stringify(parsed))
+	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
+		// console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed))
 		const destinationLabware = parsed.objectName.destinationLabware;
 
 		// Fill all destination wells with diluent

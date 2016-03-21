@@ -380,7 +380,7 @@ function test() {
 				destination: scope.get("incubatorLocation")
 			});
 			appendStep(step, {
-				command: "pipetter.pipetteDilutionSeries2x",
+				command: "pipetter.pipetteDilutionSeries",
 				diluent: "water",
 				destinationLabware: scope.get("dilutionPlate"),
 				items: mapConditionGroups(scope, data, {groupBy: "cultureWell"}, 0, (scope, data) => {

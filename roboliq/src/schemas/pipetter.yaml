@@ -146,7 +146,7 @@ pipetter.pipette:
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
   required: []
 
-pipetter.pipetteDilutionSeries2x:
+pipetter.pipetteDilutionSeries:
   description: Pipette a dilution series, whereby a source is serially diluted 2:1.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}

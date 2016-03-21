@@ -152,7 +152,7 @@ steps:
                 object: stillPlate
                 destination: ourlab.mario.site.P4
               '6':
-                command: pipetter.pipetteDilutionSeries2x
+                command: pipetter.pipetteDilutionSeries
                 diluent: water
                 destinationLabware: dilutionPlate1
                 items: [{destinations: [A01, A02, A03, A04, A05], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.2}]
@@ -194,7 +194,7 @@ steps:
                 object: shakePlate
                 destination: ourlab.mario.site.P5
               '6':
-                command: pipetter.pipetteDilutionSeries2x
+                command: pipetter.pipetteDilutionSeries
                 diluent: water
                 destinationLabware: dilutionPlate2
                 items: [{destinations: [A01, A02, A03, A04, A05], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B01, B02, B03, B04, B05], syringe: ourlab.mario.liha.syringe.2}]
@@ -242,7 +242,7 @@ steps:
                 object: stillPlate
                 destination: ourlab.mario.site.P4
               '6':
-                command: pipetter.pipetteDilutionSeries2x
+                command: pipetter.pipetteDilutionSeries
                 diluent: water
                 destinationLabware: dilutionPlate1
                 items: [{destinations: [A07, A08, A09, A10, A11], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.2}]
@@ -284,7 +284,7 @@ steps:
                 object: shakePlate
                 destination: ourlab.mario.site.P5
               '6':
-                command: pipetter.pipetteDilutionSeries2x
+                command: pipetter.pipetteDilutionSeries
                 diluent: water
                 destinationLabware: dilutionPlate2
                 items: [{destinations: [A07, A08, A09, A10, A11], syringe: ourlab.mario.liha.syringe.1}, {destinations: [B07, B08, B09, B10, B11], syringe: ourlab.mario.liha.syringe.2}]

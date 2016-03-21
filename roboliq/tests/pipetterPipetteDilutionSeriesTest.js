@@ -3,7 +3,7 @@ import should from 'should';
 import roboliq from '../src/roboliq.js';
 
 describe('pipetter', function() {
-	describe('pipetter.pipetteDilutionSeries2x', function() {
+	describe('pipetter.pipetteDilutionSeries', function() {
 		const protocolA = {
 			roboliq: "v1",
 			objects: {
@@ -27,7 +27,7 @@ describe('pipetter', function() {
 			},
 			steps: {
 				"1": {
-					command: "pipetter.pipetteDilutionSeries2x",
+					command: "pipetter.pipetteDilutionSeries",
 					clean: 'none',
 					diluent: "ourlab.mario.systemLiquid",
 					destinationLabware: "plate1",
@@ -329,7 +329,7 @@ describe('pipetter', function() {
 						}
 					]
 				},
-				"command": "pipetter.pipetteDilutionSeries2x",
+				"command": "pipetter.pipetteDilutionSeries",
 				"clean": "none",
 				"diluent": "ourlab.mario.systemLiquid",
 				"destinationLabware": "plate1",

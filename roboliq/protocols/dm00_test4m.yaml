@@ -142,7 +142,7 @@ steps:
               object: "$culturePlate"
               destination: "$incubatorLocation"
             6:
-              command: "pipetter.pipetteDilutionSeries2x"
+              command: "pipetter.pipetteDilutionSeries"
               diluent: "water"
               destinationLabware: "$dilutionPlate"
               items:

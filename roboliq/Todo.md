@@ -160,7 +160,7 @@
 - [ ] consider starting the runtime-server from Evoware, if its not already running
 - [ ] consider opening a browser window for the runtime-client from Evoware
 - [ ] make the runtime programs' ports configurable
-- [ ] test pipetter.pipetteDilutionSeries2x
+- [ ] test pipetter.pipetteDilutionSeries
 - [ ] compile some simple protocols and try to run them on mario and luigi
 - [ ] check whether Evoware external n2 represents display order
 - [ ] evoware compiler: add comments to beginning of script regarding how the script was generated
@@ -196,7 +196,7 @@
 		- should skip sealing so that we don't need to deal with the complications on Sunday
 		- [ ] mario: can't use tips 1-4 to puncture a seal
 		- [ ] luigi: need to change the evoware labware for a deep-well plate once its sealed
-- [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries2x
+- [ ] HACK: remove HACK for 'air' dispense of diluent in pipetter.pipetteDilutionSeries
 - [ ] generate a pretty HTML/SVG protocol for interleaved experiment steps
 - [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?
