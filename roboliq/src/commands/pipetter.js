@@ -94,6 +94,13 @@ function pipette(params, parsed, data) {
 	//console.log({sourcesTop})
 	const destinationsTop = getLabwareWellList(parsed.objectName.destinationLabware, parsed.value.destinations);
 	const volumesTop = parsed.value.volumes || [];
+	const syringesTop = (parsed.value.syringes || []).map((x, i) => {
+		const syringe = parsed.value.syringes[i];
+		if (_.isNumber(syringe))
+			return syringe;
+		else
+			return _.get(parsed.objectName, `syringes.${i}`, syringe);
+	})
 	//console.log({sourceLabware})
 
 	// Figure out number of items
@@ -122,43 +129,57 @@ function pipette(params, parsed, data) {
 		}
 
 		for (var i = 0; i < itemCount; i++) {
+			const item = items[i];
+
+			// Add index to all items, so that we can reference `parsed.objectName[items.$index.syringe]` later
+			item.index = i;
+
 			//console.log("i:", i)
-			if (_.isUndefined(items[i].source)) {
+			if (_.isUndefined(item.source)) {
 				if (sourcesTop.length == 1)
-					items[i].source = sourcesTop[0];
+					item.source = sourcesTop[0];
 				else if (sourcesTop.length > 1)
-					items[i].source = sourcesTop[i];
+					item.source = sourcesTop[i];
 			}
 			else if (parsed.objectName.sourceLabware) {
-				items[i].source = getLabwareWell(parsed.objectName.sourceLabware, items[i].source);
+				item.source = getLabwareWell(parsed.objectName.sourceLabware, item.source);
 			}
 
-			if (_.isUndefined(items[i].destination)) {
-				//console.log("step", items[i], destinationsTop, i, destinationsTop[i])
+			if (_.isUndefined(item.destination)) {
+				//console.log("step", item, destinationsTop, i, destinationsTop[i])
 				if (destinationsTop.length == 1)
-					items[i].destination = destinationsTop[0];
+					item.destination = destinationsTop[0];
 				else if (destinationsTop.length > 1)
-					items[i].destination = destinationsTop[i];
+					item.destination = destinationsTop[i];
 			}
 			if (parsed.objectName.destinationLabware) {
-				items[i].destination = getLabwareWell(parsed.objectName.destinationLabware, items[i].destination);
+				item.destination = getLabwareWell(parsed.objectName.destinationLabware, item.destination);
 				// console.log({item_destinations: items.map(x => x.destination)})
 			}
 
-			if (_.isUndefined(items[i].volume)) {
+			if (_.isUndefined(item.volume)) {
 				//console.log(`items[${i}].volume is undefined, volumesTop = ${volumesTop}`)
 				if (volumesTop.length == 1)
-					items[i].volume = volumesTop[0];
+					item.volume = volumesTop[0];
 				else if (volumesTop.length > 1)
-					items[i].volume = volumesTop[i];
+					item.volume = volumesTop[i];
+			}
+
+			if (_.isUndefined(item.syringe)) {
+				if (syringesTop.length == 1)
+					item.syringe = syringesTop[0];
+				else if (syringesTop.length > 1) {
+					item.syringe = syringesTop[i];
+				}
+			}
+			// Otherwise replace syringe objects with syringe names
+			else {
+				item.syringe = _.get(parsed.objectName, `items.${i}.syringe`, item.syringe);
 			}
 		}
 	}
 	//console.log(JSON.stringify(sourcesTop, null, '  '))
-	//console.log(JSON.stringify(items, null, '  '))
-
-	// Add index to all items, so that we can reference `parsed.objectName[items.$index.syringe]` later
-	_.forEach(items, (item, i) => {item.index = i;});
+	// console.log(JSON.stringify(items, null, '  '))
 
 	// Find all wells, both sources and destinations
 	var wellName_l = _(items).map(function (item) {
@@ -395,13 +416,8 @@ function pipette(params, parsed, data) {
 		}
 	}
 
-	// Replace syringe objects with syringe names
-	_.forEach(items, item => {
-		item.syringe = _.get(parsed.objectName, `items.${item.index}.syringe`, item.syringe);
-	});
-
-	// Limit syringe choices based on params
-	var syringesAvailable = params.syringes || _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
+	// TODO: Limit syringe choices based on params
+	var syringesAvailable = _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
 	var tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
 	var groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
@@ -731,14 +747,15 @@ const commandHandlers = {
 			// get volume of destination0, and use half of it as the final volume
 			const volume0 = WellContents.getWellVolume(destination0, data);
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "first well in dilution series shouldn't be empty");
-			const volume = math.divide(volume0, 2);
+			const sourceVolume = math.divide(volume0, parsed.value.dilutionFactor);
+			const diluentVolume = math.subtract(volume0, sourceVolume);
 
 			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`] || item.syringe;
 			//console.log({syringeName})
 
 			// Distribute diluent to all destination wells
 			_.forEach(destinations2, (destinationWell, index) => {
-				diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: volume.format({precision: 4}), syringe: syringeName});
+				diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: diluentVolume.format({precision: 4}), syringe: syringeName});
 			});
 			// console.log({diluentItems})
 
@@ -746,7 +763,7 @@ const commandHandlers = {
 			let source = destination0;
 			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
-				const item2 = _.merge({}, {layer: index+1, source, destination, volume: volume.format({precision: 4}), syringe: syringeName});
+				const item2 = _.merge({}, {layer: index+1, source, destination, volume: sourceVolume.format({precision: 4}), syringe: syringeName});
 				items.push(item2);
 				source = destination;
 			});

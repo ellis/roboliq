@@ -126,17 +126,17 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 	// If no item was added, create a new empty group
 	let current = undefined;
 
-	function tryAdd(item) {
+	function tryAdd(item, debug = false) {
 		//console.log("A "+JSON.stringify(item));
 		// Make sure we still have syringes available
-		if (current.syringesAvailable.length == 0) return false;
+		if (current.syringesAvailable.length == 0) { if (debug) console.log("syringesAvailable.length == 0"); return false; }
 		// Make sure all items in the group use the same program
-		if (current.program !== item.program) return false;
+		if (current.program !== item.program) { if (debug) console.log({currentProgram: current.program, itemProgram: item.program}); return false; }
 		// Make sure source was not previously a destination in this group
-		if (_.some(current.group, item2 => item.source === item2.destination)) return false;
+		if (_.some(current.group, item2 => item.source === item2.destination)) { if (debug) console.log({currentGroup: current.group, item}); return false; }
 		// Make sure syringe was not already used (only relevant want syringe is manually specified)
 		if (item.syringe) {
-			if (current.syringesUsed.hasOwnProperty(item.syringe)) return false;
+			if (current.syringesUsed.hasOwnProperty(item.syringe)) { if (debug) console.log({syringesUsed: current.syringesUsed, itemSyringe: item.syringe}); return false; }
 			current.syringesUsed[item.syringe] = true;
 		}
 		//console.log("B");
@@ -152,7 +152,7 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 			assert(!_.isEmpty(syringesPossible));
 			// Try to find a possible syringe that's still available
 			const l = _.intersection(syringesPossible, current.syringesAvailable);
-			if (_.isEmpty(l)) return false;
+			if (_.isEmpty(l)) { if (debug) console.log({syringesPossible, syringesAvailable: current.syringesAvailable}); return false; }
 			//console.log("D");
 			// Remove an arbitrary syringe from the list of available syringes
 			current.syringesAvailable = _.without(current.syringesAvailable, l[0]);
@@ -182,7 +182,7 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 				layer: item.layer
 			};
 			const added = tryAdd(item);
-			assert(added);
+			assert(added, `couldn't add item to empty group!: ${JSON.stringify(item)}`);
 			groups.push(current.group);
 		}
 		// Else, we will try to add an item to the current group

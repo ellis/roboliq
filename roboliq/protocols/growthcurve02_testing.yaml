@@ -12,11 +12,11 @@ description: |
   * [x] move DWP to pipetter location, fill it with media, then add inoculum
   - [ ] seal DWP twice
   - [ ] DWP model now needs to change to the "sealed" variant, manage starting a new script!
-  - [.] move DWP to shaker, start shaking with cover closed
-  - [.] after 15 minutes, take dilution plate out of hotel, take DWP out of shaker
+  - [x] move DWP to shaker, start shaking with cover closed
+  - [x] after 30s, take dilution plate out of hotel, take DWP out of shaker
   - [ ] Q: how large should each sample volume be?
-  - [ ] sample 8 wells, transfer to a dilution plate
-    - [.] transfer samples
+  - [ ] sample 2 wells, transfer to a dilution plate
+    - [x] transfer samples
     - [ ] put DWP back in shaker, restart incubation
     - [ ] create dilution series
     - [ ] read dilution plate and put it back in hotel
@@ -129,6 +129,7 @@ steps:
         destinationLabware: $culturePlate
         destinations: $$cultureWell
         volumes: 980ul
+        syringes: $$syringe
         cleanBetween: none
       3:
         command: pipetter.pipette
@@ -136,7 +137,10 @@ steps:
         destinationLabware: $culturePlate
         destinations: $$cultureWell
         volumes: 20ul
+        syringes: $$syringe
+        cleanBegin: none # TODO: this shouldn't be necessary
         cleanBetween: none
+        cleanEnd: decontaminate
       # 4:
       #   command: transporter.movePlate
       #   object: $culturePlate
@@ -168,6 +172,25 @@ steps:
     groupBy: culturePlate
     steps:
       1:
+        description: "`Prepare {{$dilutionPlate}} for extracting samples from {{$culturePlate}}`"
+        data:
+          where:
+            dilutionStep: 0
+        1:
+          command: transporter.movePlate
+          object: $dilutionPlate
+          destination: $dilutionSite
+        2:
+          command: pipetter.pipette
+          sourceLabware: $culturePlate
+          sources: $$cultureWell
+          destinationLabware: $dilutionPlate
+          destinations: $$dilutionWell
+          syringes: $$syringe
+          volumes: 200ul
+          cleanBegin: none
+          cleanBetweenSameSource: none
+      2:
         description: "`Extract samples from {{$culturePlate}}`"
         data:
           where:
@@ -178,21 +201,18 @@ steps:
           equipment: ourlab.luigi.culturebox
         2:
           command: transporter.movePlate
-          object: $dilutionPlate
-          destination: $dilutionSite
-        3:
-          command: transporter.movePlate
           object: $culturePlate
           destination: $aspirationSite
-        4:
+        3:
           command: pipetter.pipette
           sourceLabware: $culturePlate
           sources: $$cultureWell
           destinationLabware: $dilutionPlate
           destinations: $$dilutionWell
-          # destinations: dilutionPlate1(A01 down H01)
-          volumes: 50ul
-      2:
+          syringes: $$syringe
+          volumes: 200ul
+          clean: none
+      3:
         description: "`Put {{$culturePlate}} back in incubator`"
         1:
           command: transporter.movePlate
@@ -205,11 +225,12 @@ steps:
         3:
           command: shaker.start
           equipment: ourlab.luigi.culturebox
-      3:
+      4:
         description: "`Create dilutions from {{$culturePlate}} {{$$cultureWell}}`"
         command: pipetter.pipetteDilutionSeries2x
         diluent: ourlab.luigi.systemLiquid
         destinationLabware: $dilutionPlate
+        dilutionFactor: 8
         items:
           "#data":
             groupBy: cultureWell
@@ -218,7 +239,7 @@ steps:
               syringe: $syringe
         clean: none
         cleanEnd: decontaminate
-      4:
+      5:
         description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
         command: absorbanceReader.measurePlate
         object: $dilutionPlate

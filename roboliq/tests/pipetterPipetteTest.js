@@ -955,5 +955,63 @@ describe('pipetter', function() {
 			});
 		});
 
+		it("should allow for syringes to be specified in a parameter", () => {
+
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+							B01: ['100ul', 'source2']
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+					source2: {
+						type: 'Liquid',
+						wells: 'plate1(B01)'
+					},
+				},
+				steps: {
+					1: {
+						"command": "pipetter.pipette",
+						"sources": "ourlab.mario.systemLiquid",
+						"destinationLabware": "plate1",
+						"destinations": [ "B02", "B07" ],
+						"volumes": "50ul",
+						"syringes": [ 2, 4 ],
+						"clean": "none"
+					}
+				}
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			// console.log(JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps[1][1], {
+				"command": "pipetter._pipette",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Dry_1000\"",
+				"items": [
+					{
+						"syringe": 2,
+						"source": "ourlab.mario.systemLiquidLabware(A01)",
+						"destination": "plate1(B02)",
+						"volume": "50 ul"
+					},
+					{
+						"syringe": 4,
+						"source": "ourlab.mario.systemLiquidLabware(B01)",
+						"destination": "plate1(B07)",
+						"volume": "50 ul"
+					}
+				]
+			});
+		});
 	});
 });

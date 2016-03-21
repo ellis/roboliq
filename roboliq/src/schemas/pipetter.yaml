@@ -138,6 +138,7 @@ pipetter.pipette:
     sources: {description: "Specifier for source(s) to aspirate from, if missing from items", type: Sources}
     destinations: {description: "Specifier for destination(s) to despense to, if missing from items", type: Wells}
     volumes: {description: "Volume(s) to pipette, if missing from items", type: Volumes}
+    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, Syringe]}}
     clean: {description: "Intensity of cleaning", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
@@ -151,6 +152,7 @@ pipetter.pipetteDilutionSeries2x:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
+    dilutionFactor: {description: "Dilution factor by which each subsequent well is diluted", type: number, default: 2}
     items: {description: "Array of dilution items", "type": "array", items: {type: pipetter.DilutionItem}}
     diluent: {description: "Diluent to be used in dilution", type: Source}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}

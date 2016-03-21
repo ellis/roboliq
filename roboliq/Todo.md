@@ -45,8 +45,13 @@
 - [ ] growthcurve02_testing:
 	- [x] DWP on P1, fill it with media, then add inoculum
 	- [x] BUG: why doesn't `sources: $$well` work?
-	- [ ] BUG: growthcurve02_testing: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
-	- [ ] BUG: growthcurve02_testing: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their weird random order
+	- [x] BUG: growthcurve02_testing: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
+	- [x] BUG: growthcurve02_testing: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their weird random order
+	- [?] PROBLEM: why is dispense of inoculum from air?
+	- [?] PROBLEM: why is dispense of second sample also done with syringe 1, and no washing in-between?
+	- [?] PROBLEM: shouldn't wash at beginning of pipetting if already washed at end of previous pipetting
+	- [ ] PROBLEM: when trying to transfer A01 to A02 for dilution, pipetting error occurred
+	- [ ] Q: for diluting the cells, can we use water instead of medium?  Currently, I'm using water. A: if you use water, you need to calibrate the reader for the different concentrations of medium.
 	- [ ] shaker.start: implement
 	- [ ] move DWP to shaker, start shaking with cover closed
 	- [ ] after 15 minutes, take out DWP
@@ -55,14 +60,13 @@
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 - [ ] growthcurve03_testing: now with sealing and change of labware type
-	- [ ] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed?
+	- [ ] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed? A: Not really, but we can try either always using the sealed or unsealed labware, and see whether it works.
 	- [ ] fix vectors for moving to ROBOSEAL
 	- [ ] seal DWP twice
 	- [ ] DWP model now needs to change, manage starting a new script!
-	- [ ]
 	- [ ] run some measurements overnight
 - [ ] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
-- [ ] Q: Why inactivate with 2400ml sometimes and 1200ml other times?
+- [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
 - [ ] growthcurve01_testing:
 	- [x] initialize with custom wash steps
 	- [x] initialize with decontamination wash
