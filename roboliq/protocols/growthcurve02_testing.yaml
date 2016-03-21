@@ -237,6 +237,9 @@ steps:
               syringe: $syringe
         clean: none
         cleanEnd: decontaminate
+        diluentParams:
+          clean: none
+          cleanEnd: thorough
       5:
         description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
         command: absorbanceReader.measurePlate

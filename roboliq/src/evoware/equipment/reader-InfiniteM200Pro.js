@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import assert from 'assert';
+import math from 'mathjs';
 import Mustache from 'mustache';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
@@ -162,11 +163,15 @@ module.exports = {
 				}
 				// console.log({wells})
 
+				const excitationWavelength0 = math.eval(program.excitationWavelength);
+				const excitationWavelength = _.isNumber(excitationWavelength0) ? excitationWavelength0 : excitationWavelength0.toNumber("nm");
+				const excitationBandwidth0 = math.eval(program.excitationBandwidth || "9 nm");
+				const excitationBandwidth = _.isNumber(excitationBandwidth0) ? excitationBandwidth0 : excitationBandwidth0.toNumber("nm");
 				const params = {
 					plateFile,
 					wells,
-					excitationWavelength: program.excitationWavelength,
-					excitationBandwidth: program.excitationBandwidth || 90
+					excitationWavelength: excitationWavelength * 10,
+					excitationBandwidth: excitationBandwidth * 10
 				};
 				// console.log({params});
 				return params;

@@ -47,11 +47,12 @@
 	- [x] BUG: why doesn't `sources: $$well` work?
 	- [x] BUG: growthcurve02_testing: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
 	- [x] BUG: growthcurve02_testing: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their weird random order
-	- [?] PROBLEM: why is dispense of inoculum from air?
-	- [?] PROBLEM: why is dispense of second sample also done with syringe 1, and no washing in-between?
-	- [?] PROBLEM: shouldn't wash at beginning of pipetting if already washed at end of previous pipetting
-	- [ ] PROBLEM: when trying to transfer A01 to A02 for dilution, pipetting error occurred
-	- [ ] Q: for diluting the cells, can we use water instead of medium?  Currently, I'm using water. A: if you use water, you need to calibrate the reader for the different concentrations of medium.
+	- [x] PROBLEM: why is dispense of inoculum from air?
+	- [x] PROBLEM: why is dispense of second sample also done with syringe 1, and no washing in-between?
+	- [x] PROBLEM: shouldn't wash at beginning of pipetting if already washed at end of previous pipetting
+	- [x] PROBLEM: when trying to transfer A01 to A02 for dilution, pipetting error occurred
+	- [x] Q: for diluting the cells, can we use water instead of medium?  Currently, I'm using water. A: if you use water, you need to calibrate the reader for the different concentrations of medium.
+	- [ ] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
 	- [ ] shaker.start: implement
 	- [ ] move DWP to shaker, start shaking with cover closed
 	- [ ] after 15 minutes, take out DWP
@@ -70,9 +71,8 @@
 - [ ] growthcurve01_testing:
 	- [x] initialize with custom wash steps
 	- [x] initialize with decontamination wash
-	- [?] reader command needs to update tableEffects
+	- [x] reader command needs to update tableEffects
 	- [ ] absorbance reader: the F200 Pro can apparently only read at 600nm
-	- [ ] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
 	- [ ] initialize by switching system liquid to correct source
 	- [ ] notify user where to put labware
 	- [ ] pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes)

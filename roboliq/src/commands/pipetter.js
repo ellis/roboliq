@@ -778,16 +778,19 @@ const commandHandlers = {
 
 		//const items = [];
 
-		const params1 = _.omit(parsed.orig, ['description', 'diluent', 'items']);
+		const params1 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
 		params1.command = "pipetter.pipette";
 		params1.items = diluentItems;
-		params1.clean = "none"; // HACK
-		const params2 = _.omit(parsed.orig, ['description', 'diluent', 'items']);
+		params1.clean = "none";
+		_.merge(params1, parsed.orig.diluentParams);
+
+		const params2 = _.omit(parsed.orig, ['description', 'diluent', 'diluentParams', 'items']);
 		params2.command = "pipetter.pipette";
 		params2.items = items;
 		// params2.clean = "none"; // HACK
 		// params2.cleanEnd = "light"; // HACK
 		// console.log({params1, params2})
+
 		return { expansion: { "1": params1, "2": params2 } };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
