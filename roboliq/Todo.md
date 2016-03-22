@@ -65,6 +65,8 @@
 	- [ ] Q: Daniel, which plates did you use for dilution?  When I filled a well to 450ul, it overflowed.
 	- [ ] fix vectors for moving to ROBOSEAL
 	- [?] seal DWP twice
+	- [ ] allow direct transfer from P6 to READER?
+	- [ ] how to pierce seal? detect liquid command?
 	- [ ] run loop to sample from culturePlate twice
 	- [ ] experiment.run: try to also expand commands with 'data' properties
 	- [ ] set culturePlate model to "sealed" variant, and try pipetting again

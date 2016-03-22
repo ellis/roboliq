@@ -48,20 +48,24 @@ objects:
       incubatorSite: ourlab.luigi.site.BOX_2
       stage*: 2
       group*: 2
-      .groupMemberId*: 2
-      syringe=:
-        groupBy: groupId
-        values: [1,2,3,4,5,6,7,8]
-        order: shuffle
+      .sampling*:
+        - sampleCount: 1
+          sampleCycle*: [4]
+        - sampleCount: 2
+          sampleCycle*: [0, 4]
+      sample=range:
+        groupBy: [stage, group, sampleCount]
+      replicate*: 2
       cultureWell=allocateWells:
+        sameBy: [stage, group, sampleCount, replicate]
         rows: 8
         columns: 12
         order: shuffle
-      .sampling:
-        - sample*: [1]
-          sampleCycle: [4]
-        - sample*: [1, 2]
-          sampleCycle: [0, 4]
+      syringe=range:
+        till: 8
+        groupBy: [stage, group]
+        sameBy: [cultureWell]
+        order: shuffle
       dilutionStep*: [0,1]
       dilutionPlate: dilutionPlate1
       dilutionWell=allocateWells:
@@ -177,71 +181,91 @@ steps:
       duration: 30s
   6:
     command: experiment.forEachGroup
-    groupBy: [stage, sampleStep, group]
+    groupBy: [stage, sampleCycle, group]
+    timers: [ourlab.luigi.timer1, ourlab.luigi.timer2]
+    duration: 5 minutes
     steps:
-      description: "`Start stage {{$stage}}, group {{$group}}"
+      description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}"
       1:
-        description: "`Prepare {{$dilutionPlate}} for extracting samples from {{$culturePlate}}`"
+        description: "Extract and measure samples"
         data:
           where:
             dilutionStep: 0
         1:
-          command: transporter.movePlate
-          object: $dilutionPlate
-          destination: $dilutionSite
+          description: "`Prepare dilution plate {{$dilutionPlate}}`"
+          1:
+            command: transporter.movePlate
+            object: $dilutionPlate
+            destination: $dilutionSite
+          2:
+            command: pipetter.pipette
+            sources: medium
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 150ul
+            cleanBegin: none
+            cleanBetweenSameSource: none
         2:
+          description: "`Extract samples from {{$culturePlate}}`"
+          1:
+            command: equipment.open
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+          2:
+            command: transporter.movePlate
+            object: $culturePlate
+            destination: $aspirationSite
+          3:
+            command: pipetter.pipette
+            sourceLabware: $culturePlate
+            sources: $$cultureWell
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 50ul
+            clean: none
+        3:
+          description: "`Put {{$culturePlate}} back in incubator`"
+          1:
+            command: transporter.movePlate
+            object: $culturePlate
+            destination: $incubatorSite
+          2:
+            command: equipment.close
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+          3:
+            command: equipment.start
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+            program:
+              rpm: 300
+        4:
+          description: "`Measure OD600 of samples`"
+          command: absorbanceReader.measurePlate
+          object: $dilutionPlate
+          program:
+            excitationWavelength: 600nm
+            wells: $$dilutionWell
+          outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve03_testing_<YYYYMMDD_HHmmss>_samples.xml"
+        5:
+          description: "Add 50ul more to sample wells for subsequent dilution series"
           command: pipetter.pipette
+          program: Roboliq_Water_Air_1000
           sources: medium
           destinationLabware: $dilutionPlate
           destinations: $$dilutionWell
           syringes: $$syringe
-          volumes: 250ul
+          volumes: 50ul
           cleanBegin: none
           cleanBetweenSameSource: none
       2:
-        description: "`Extract samples from {{$culturePlate}}`"
-        data:
-          where:
-            dilutionStep: 0
-        1:
-          command: equipment.open
-          agent: ourlab.luigi.evoware
-          equipment: ourlab.luigi.culturebox
-        2:
-          command: transporter.movePlate
-          object: $culturePlate
-          destination: $aspirationSite
-        3:
-          command: pipetter.pipette
-          sourceLabware: $culturePlate
-          sources: $$cultureWell
-          destinationLabware: $dilutionPlate
-          destinations: $$dilutionWell
-          syringes: $$syringe
-          volumes: 50ul
-          clean: none
-      3:
-        description: "`Put {{$culturePlate}} back in incubator`"
-        1:
-          command: transporter.movePlate
-          object: $culturePlate
-          destination: $incubatorSite
-        2:
-          command: equipment.close
-          agent: ourlab.luigi.evoware
-          equipment: ourlab.luigi.culturebox
-        3:
-          command: equipment.start
-          agent: ourlab.luigi.evoware
-          equipment: ourlab.luigi.culturebox
-          program:
-            rpm: 300
-      4:
-        description: "`Create dilutions from {{$culturePlate}} {{$$cultureWell}}`"
+        description: "`Create dilutions of {{$culturePlate}} {{$$cultureWell}}`"
         command: pipetter.pipetteDilutionSeries
         diluent: medium
         destinationLabware: $dilutionPlate
-        dilutionFactor: 8
+        dilutionFactor: 5
         items:
           "#data":
             groupBy: cultureWell
@@ -253,14 +277,18 @@ steps:
         diluentParams:
           clean: none
           cleanEnd: thorough
-      5:
+      3:
         description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
+        data:
+          where:
+            dilutionStep: {gt: 0}
         command: absorbanceReader.measurePlate
         object: $dilutionPlate
         program:
           excitationWavelength: 600nm
           wells: $$dilutionWell
-        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
+        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve03_testing_<YYYYMMDD_HHmmss>_dilutions.xml"
+        # outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
   7:
     description: "wrap-up"
     1:

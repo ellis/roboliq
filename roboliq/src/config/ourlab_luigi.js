@@ -193,10 +193,15 @@ module.exports = {
 					"location": "ourlab.luigi.site.SYSTEM",
 					"contents": ["Infinity l", "systemLiquid"]
 				},
-				"timer1": {
-					"type": "Timer",
-					"evowareId": 1
-				},
+				"timer1": { "type": "Timer", "evowareId": 1 },
+				"timer2": { "type": "Timer", "evowareId": 2 },
+				"timer3": { "type": "Timer", "evowareId": 3 },
+				"timer4": { "type": "Timer", "evowareId": 4 },
+				"timer5": { "type": "Timer", "evowareId": 5 },
+				"timer6": { "type": "Timer", "evowareId": 6 },
+				"timer7": { "type": "Timer", "evowareId": 7 },
+				"timer8": { "type": "Timer", "evowareId": 8 },
+				"timer9": { "type": "Timer", "evowareId": 9 },
 				"washProgram": {
 					// FIXME: figure out proper wash programs
 					"type": "Namespace",

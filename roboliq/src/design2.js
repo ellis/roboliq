@@ -803,7 +803,26 @@ export function query(table, q) {
 
 	if (q.where) {
 		_.forEach(q.where, (value, key) => {
-			table2 = _.filter(table, row => _.isEqual(row[key], value));
+			if (_.isPlainObject(value)) {
+				const op = _.keys(value)[0];
+				const x = value[op];
+				switch (op) {
+					case "eq":
+						table2 = _.filter(table, row => _.isEqual(row[key], x));
+						break;
+					case "gt":
+						table2 = _.filter(table, row => _.gt(row[key], x));
+						break;
+					case "gte":
+						table2 = _.filter(table, row => _.gte(row[key], x));
+						break;
+					default:
+						assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
+				}
+			}
+			else {
+				table2 = _.filter(table, row => _.isEqual(row[key], value));
+			}
 		});
 	}
 

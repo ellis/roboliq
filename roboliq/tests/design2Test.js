@@ -494,6 +494,33 @@ describe('design', () => {
 			);
 		});
 
+		it("should support range() with groupBy and sameBy", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": 2,
+					"b*": 2,
+					".replicate*": 2,
+					"c=range": {
+						groupBy: "a"
+					},
+					"d=range": {
+						"groupBy": ["a"],
+						"sameBy": ["b"]
+					}
+				}),
+				[
+					{a: 1, b: 1, c: 1, d: 1},
+					{a: 1, b: 1, c: 2, d: 1},
+					{a: 1, b: 2, c: 3, d: 2},
+					{a: 1, b: 2, c: 4, d: 2},
+					{a: 2, b: 1, c: 1, d: 1},
+					{a: 2, b: 1, c: 2, d: 1},
+					{a: 2, b: 2, c: 3, d: 2},
+					{a: 2, b: 2, c: 4, d: 2},
+				]
+			);
+		});
+
 	});
 
 	describe("flattenDesign", () => {
