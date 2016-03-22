@@ -64,15 +64,15 @@
 	- [x] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed? A: Not really, but we can try either always using the sealed or unsealed labware, and see whether it works.
 	- [x] Q: Daniel, which plates did you use for dilution?  When I filled a well to 450ul, it overflowed. A: They were only filled to 250ul
 	- [x] fix vectors for moving to ROBOSEAL
-	- [?] seal DWP twice
+	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
+	- [x] seal DWP twice
+	- [x] run loop to sample from culturePlate twice
+	- [ ] BUG: two bad MoveLiha commands are issued; instead of positioning, just move Z position with faster speed
 	- [ ] allow direct transfer from P6 to READER?
-	- [ ] how to pierce seal? detect liquid command?
-	- [ ] run loop to sample from culturePlate twice
+	- [ ] how to pierce seal without pipetting? detect liquid command?
 	- [ ] experiment.run: try to also expand commands with 'data' properties
 	- [ ] set culturePlate model to "sealed" variant, and try pipetting again
-- [ ] growthcurve04_singleSample.yaml:
-	- [ ] HACK: give reader a different output name with date/time in it, so that unique files are produced
-	- [ ] sample from
+- [ ] growthcurve04_firstWithYeast.yaml:
 	- [ ] design1: allocate plates and wells for dilution
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
