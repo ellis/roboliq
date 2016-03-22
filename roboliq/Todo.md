@@ -71,6 +71,8 @@
 	- [ ] experiment.run: try to also expand commands with 'data' properties
 	- [ ] set culturePlate model to "sealed" variant, and try pipetting again
 - [ ] growthcurve04_singleSample.yaml:
+	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
+	- [ ] double-check for inactivation steps after sampling from well
 	- [ ] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [ ] sample from
 	- [ ] design1: allocate plates and wells for dilution
