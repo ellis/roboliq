@@ -638,7 +638,7 @@ function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
 		const value2
 			= (isArray) ? value[i]
 			: (isObject) ? value[keys[i]]
-			: (isSpecial) ? value.next(rows, [rowIndexes3[0]])
+			: (isSpecial) ? value.next(rows, [rowIndexes3[0]])[1]
 			: value;
 		// console.log({i, rowIndexes3, value2})
 		for (let i = 0; i < rowIndexes3.length; i++) {

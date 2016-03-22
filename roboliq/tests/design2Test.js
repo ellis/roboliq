@@ -473,6 +473,27 @@ describe('design', () => {
 			);
 		});
 
+		it("should support allocateWells() with sameBy and order=shuffle", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": 2,
+					"b*": 2,
+					"w=allocateWells": {
+						"rows": 8, "columns": 12,
+						"sameBy": ["a"],
+						"order": "shuffle",
+						"randomSeed": 100
+					}
+				}),
+				[
+					{a: 1, b: 1, w: "E03"},
+					{a: 1, b: 2, w: "E03"},
+					{a: 2, b: 1, w: "E12"},
+					{a: 2, b: 2, w: "E12"},
+				]
+			);
+		});
+
 	});
 
 	describe("flattenDesign", () => {

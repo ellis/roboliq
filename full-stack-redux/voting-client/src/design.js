@@ -509,7 +509,7 @@ const actionHandlers = {
 		const action2 = _.cloneDeep(action);
 		action2.values = values;
 		// console.log({values})
-		return assign(rows, rowIndexes, name, action2, randomEngine);
+		return assign(_rows, rowIndexes, name, action2, randomEngine);
 	},
 	"assign": assign,
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
@@ -791,6 +791,7 @@ const assign_range_next = (expr, action) => function(nestedRows, rowIndex) {
 
 export function query_groupBy(rows, rowIndexes, groupBy) {
 	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
+	// console.log({groupBy, groupKeys, rowIndexes, rows});
 	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
 }
 
