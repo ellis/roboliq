@@ -57,6 +57,11 @@ objects:
         rows: 8
         columns: 12
         order: shuffle
+      .sampling:
+        - sample*: [1]
+          sampleCycle: [4]
+        - sample*: [1, 2]
+          sampleCycle: [0, 4]
       dilutionStep*: [0,1]
       dilutionPlate: dilutionPlate1
       dilutionWell=allocateWells:

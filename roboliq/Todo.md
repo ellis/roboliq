@@ -93,7 +93,7 @@
 			rows: 8
 			columns: 12
 			order: shuffle
-		.sampling: DOESN'T WORK
+		.sampling:
 		- sample*: [1]
 			sampleCycle: [4]
 		- sample*: [1, 2]
