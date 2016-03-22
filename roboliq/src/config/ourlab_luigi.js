@@ -334,8 +334,7 @@ module.exports = {
 					[
 						"ourlab.luigi.site.REGRIP_ABOVE",
 						"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P3",
-						"ourlab.luigi.site.LIGHT",
-						"ourlab.luigi.site.ROBOSEAL",
+						"ourlab.luigi.site.LIGHT"
 					],
 					[
 						"ourlab.luigi.site.HOTEL12_1", "ourlab.luigi.site.HOTEL12_2", "ourlab.luigi.site.HOTEL12_3", "ourlab.luigi.site.HOTEL12_4",

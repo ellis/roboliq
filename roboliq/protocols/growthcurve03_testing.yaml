@@ -62,10 +62,10 @@ objects:
         columns: 12
         order: shuffle
       syringe=range:
-        till: 8
+        # till: 8
         groupBy: [stage, group]
         sameBy: [cultureWell]
-        order: shuffle
+        # order: shuffle
       dilutionStep*: [0,1]
       dilutionPlate: dilutionPlate1
       dilutionWell=allocateWells:
@@ -141,7 +141,7 @@ steps:
         destination: ourlab.luigi.site.LIGHT
       2:
         command: pipetter.pipette
-        sources: ourlab.luigi.systemLiquid
+        sources: medium
         destinationLabware: $culturePlate
         destinations: $$cultureWell
         volumes: 980ul
