@@ -43,25 +43,26 @@ const commandHandlers = {
 		const params2 = alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
-		const expansion = [
+		const expansion = _.flatten([
 			(params2.site === location0) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.objectName.object,
 				"destination": params2.site
 			},
-			{
+			// Make `count` copies of the equipment.run-command
+			_.range(parsed.value.count).map(() => _.clone({
 				command: "equipment.run|"+params2.agent+"|"+params2.equipment,
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: params2.program,
 				object: parsed.objectName.object
-			},
+			})),
 			(destinationAfter === null) ? null : {
 				"command": "transporter.movePlate",
 				"object": parsed.objectName.object,
 				"destination": location0
 			},
-		];
+		]);
 
 		return {
 			expansion: expansion,

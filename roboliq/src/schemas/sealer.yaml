@@ -18,5 +18,6 @@ sealer.sealPlate:
     program: {description: "Program identifier for sealing", type: "string"}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier of sealer", type: "Site"}
+    count: {description: "Number of times to seal (defaults to 1)", type: number, default: 1}
     destinationAfter: {description: "Site to move the plate to after this command", "type": "SiteOrStay"}
   required: ["object"]
