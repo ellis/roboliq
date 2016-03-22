@@ -161,10 +161,6 @@ steps:
         command: sealer.sealPlate
         object: $culturePlate
         count: 2
-      # 4:
-      #   command: transporter.movePlate
-      #   object: $culturePlate
-      #   destination: ourlab.luigi.site.ROBOSEAL
       5:
         command: transporter.movePlate
         object: $culturePlate
@@ -252,7 +248,7 @@ steps:
         5:
           description: "Add 50ul more to sample wells for subsequent dilution series"
           command: pipetter.pipette
-          program: Roboliq_Water_Air_1000
+          program: Roboliq_Water_Air_2500
           sources: medium
           destinationLabware: $dilutionPlate
           destinations: $$dilutionWell

@@ -207,7 +207,7 @@ function groupItems(parsed, data) {
 				}
 				else {
 					// console.log(3)
-					if (math.equal(math.fraction(dRow2, dRow1), syringeSpacing))
+					if (math.equal(math.fraction(dRow2, dRow1), group.syringeSpacing))
 						return true;
 					// console.log(4)
 				}

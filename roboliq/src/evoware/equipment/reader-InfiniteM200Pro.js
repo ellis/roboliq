@@ -126,7 +126,7 @@ module.exports = {
 
 				let wells;
 				if (program.wells) {
-					console.log({program})
+					// console.log({program})
 					// Get well list
 					const wells0 = commandHelper.asArray(program.wells);
 					const wells1 = _.flatMap(wells0, s => wellsParser.parse(s, data.objects));
