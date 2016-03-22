@@ -68,7 +68,12 @@ module.exports = {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
 				measurementType: {description: "Type of measurement, i.e fluorescence or absorbance", enum: ["fluorescence", "absorbance"]},
-				program: {description: "Program definition"},
+				program: {
+					description: "Program definition",
+					properties: {
+						wells: {description: "Array of wells to read", type: "Wells"}
+					}
+				},
 				programFile: {description: "Program filename", type: "File"},
 				programData: {description: "Program data"},
 				object: {description: "The labware being measured", type: "Plate"},
@@ -121,6 +126,7 @@ module.exports = {
 
 				let wells;
 				if (program.wells) {
+					console.log({program})
 					// Get well list
 					const wells0 = commandHelper.asArray(program.wells);
 					const wells1 = _.flatMap(wells0, s => wellsParser.parse(s, data.objects));

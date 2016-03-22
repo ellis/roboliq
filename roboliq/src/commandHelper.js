@@ -49,8 +49,8 @@ function substituteDeep(x, DATA, SCOPE) {
 			if (_.isArray(DATA)) {
 				const propertyName = x.substr(2);
 				x2 = _(DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
-				//console.log("DATA: "+JSON.stringify(DATA, null, '\t'));
-				//console.log({map: _(DATA).map(propertyName).value()});
+				console.log("DATA: "+JSON.stringify(DATA, null, '\t'));
+				console.log({map: _(DATA).map(propertyName).value()});
 			}
 		}
 		// SCOPE substitution

@@ -811,7 +811,9 @@ export function query(table, q) {
 						table2 = _.filter(table, row => _.isEqual(row[key], x));
 						break;
 					case "gt":
+						console.log("before:"); printRows(table2);
 						table2 = _.filter(table, row => _.gt(row[key], x));
+						console.log("after:"); printRows(table2);
 						break;
 					case "gte":
 						table2 = _.filter(table, row => _.gte(row[key], x));
