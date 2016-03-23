@@ -57,7 +57,15 @@ describe('commands/absorbanceReader', function() {
 						"equipment": "ourlab.mario.reader",
 						"measurementType": "absorbance",
 						"object": "plate1",
-						"program": {"excitationWavelength": "600nm", wells: "plate1(A1 right A12, B1, B3 right B12, C3)"},
+						"program": {
+							"excitationWavelength": "600nm",
+							wells: [
+								'plate1(A01)', 'plate1(A02)', 'plate1(A03)', 'plate1(A04)', 'plate1(A05)', 'plate1(A06)', 'plate1(A07)', 'plate1(A08)', 'plate1(A09)', 'plate1(A10)', 'plate1(A11)', 'plate1(A12)',
+								'plate1(B01)',
+								'plate1(B03)', 'plate1(B04)', 'plate1(B05)', 'plate1(B06)', 'plate1(B07)', 'plate1(B08)', 'plate1(B09)', 'plate1(B10)', 'plate1(B11)', 'plate1(B12)',
+								'plate1(C03)'
+							]
+						},
 						"outputFile": "C:\\Users\\localadmin\\Desktop\\Ellis\\tania13_ph--<YYYYMMDD_HHmmss>.xml"
 					},
 					"command": "absorbanceReader.measurePlate",
