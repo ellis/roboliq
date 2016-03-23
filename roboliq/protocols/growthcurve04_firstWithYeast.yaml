@@ -46,7 +46,7 @@ objects:
       dilutionSite: ourlab.luigi.site.P6
       culturePlate: culturePlate1
       incubatorSite: ourlab.luigi.site.BOX_2
-      stage*: 2
+      stage*: 3
       group*: 2
       .sampling*:
         - sampleCount: 1
@@ -174,12 +174,12 @@ steps:
     equipment: ourlab.luigi.culturebox
     program:
       rpm: 300
-      duration: 30s
+      duration: 20 minutes
   6:
     command: experiment.forEachGroup
     groupBy: [stage, sampleCycle, group]
     timers: [ourlab.luigi.timer1, ourlab.luigi.timer2]
-    duration: 5 minutes
+    duration: 20 minutes
     steps:
       description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}"
       1:
