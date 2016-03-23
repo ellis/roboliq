@@ -8,3 +8,6 @@ growthcurve02_testing:
 
 growthcurve03_testing:
 	npm start -- --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve03_testing.yaml && npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/Roboliq_Standard_20160311.ewt protocols/growthcurve03_testing.out.json ourlab.luigi.evoware
+
+growthcurve04_firstWithYeast:
+	npm start -- --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml && npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/Roboliq_Standard_20160311.ewt protocols/growthcurve04_firstWithYeast.out.json ourlab.luigi.evoware

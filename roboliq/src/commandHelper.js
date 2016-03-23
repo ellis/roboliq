@@ -74,18 +74,28 @@ function substituteDeep(x, DATA, SCOPE) {
 		x2 = _.map(x, y => substituteDeep(y, DATA, SCOPE));
 	}
 	else if (_.isPlainObject(x)) {
+		let DATA2 = DATA;
+		let SCOPE2 = SCOPE;
+		if (x.hasOwnProperty("@DATA"))
+			DATA2 = x["@DATA"];
+		if (x.hasOwnProperty("@SCOPE"))
+			SCOPE2 = _.merge({}, SCOPE, x["@SCOPE"]);
+		if (x.hasOwnProperty("data")) {
+			CONTINUE
+		}
+
 		// Skip objects with one of these properties:
-		if (x.hasOwnProperty("data") || x.hasOwnProperty("@DATA") || x.hasOwnProperty("@SCOPE")) {
+		if (x.hasOwnProperty("data")) {
 			// do nothing
 		}
 		else {
 			x2 = _.mapValues(x, (value, name) => {
-				// Skip over directives and 'steps' properties
-				if (_.startsWith(name, "#") || name === "steps") {
+				// Skip over @DATA, @SCOPE, directives and 'steps' properties
+				if (_.startsWith(name, "#") || name === "@DATA" || name === "@SCOPE" || name === "steps") {
 					return value;
 				}
 				else {
-					return substituteDeep(value, DATA, SCOPE);
+					return substituteDeep(value, DATA2, SCOPE2);
 				}
 			});
 		}

@@ -555,6 +555,36 @@ describe('commandHelper', function() {
 			);
 		});
 
+		it("should handle embedded @DATA and @SCOPE properties", () => {
+			const x = {
+				x1: "$a",
+				x2: "$$n",
+				x3: {
+					"@DATA": [{y: "a"}, {y: "b"}],
+					"@SCOPE": {b: "B"},
+					x31: "$a",
+					x32: "$b",
+					x33: "$$n",
+					x34: "$$y"
+				}
+			};
+			should.deepEqual(
+				commandHelper.substituteDeep(x, DATA, SCOPE),
+				{
+					x1: "A",
+					x2: [1, 2],
+					x3: {
+						"@DATA": [{y: "a"}, {y: "b"}],
+						"@SCOPE": {b: "B"},
+						x31: "A",
+						x32: "B",
+						x33: [],
+						x34: ["a", "b"]
+					}
+				}
+			);
+		});
+
 	});
 
 });
