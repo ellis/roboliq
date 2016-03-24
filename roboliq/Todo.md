@@ -67,11 +67,13 @@
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [x] seal DWP twice
 	- [x] run loop to sample from culturePlate twice
-	- [ ] BUG: two bad MoveLiha commands are issued; instead of positioning, just move Z position with faster speed! Find out what speed that is.
-	- [ ] allow direct transfer from P6 to READER?
+	- [x] experiment.run: try to also expand commands with 'data' properties
+	- [x] on P3, double-check that pipette tips have travel height set above the metal downholder; otherwise, set culturePlate model to "sealed" variant, and try pipetting again
+	- [x] MoveLiha: instead of positioning, just move Z position with faster speed! Find out what speed that is.
+	- [x] BUG: two bad MoveLiha commands are issued
+	- [x] allow direct transfer from P6 to READER
+	- [ ] 6.1: description still isn't expanded correctly
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
-	- [ ] on P3, double-check that pipette tips have travel height set above the metal downholder; otherwise, set culturePlate model to "sealed" variant, and try pipetting again
-	- [ ] experiment.run: try to also expand commands with 'data' properties
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate

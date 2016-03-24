@@ -345,7 +345,7 @@ module.exports = {
 						"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
 					],
 					["ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW"],
-					["ourlab.luigi.site.READER", "ourlab.luigi.site.REGRIP_BELOW"],
+					["ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6", "ourlab.luigi.site.READER", "ourlab.luigi.site.REGRIP_BELOW"],
 				],
 			},
 			"ourlab.luigi.roma2": {

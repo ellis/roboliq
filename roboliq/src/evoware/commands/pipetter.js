@@ -60,11 +60,13 @@ export function _washTips(params, parsed, data) {
 		const lRetract = [
 			syringeMask,
 			program.cleanerGrid, program.cleanerSite-1,
-			1,
+			1, // tip spacing
 			`"${retractWellMask}"`,
-			0, // 0=positioning with global z travel, 4=z-move
+			4, // 0=positioning with global z travel, 4=z-move
 			4, // 4=global z travel
-			0, 10, 0, 0
+			0,
+			400, // speed (mm/s), min 0.1, max 400
+			0, 0
 		];
 		const lineRetract = `MoveLiha(${lRetract.join(",")});`;
 
@@ -97,7 +99,7 @@ function handlePipetterSpirate(parsed, data) {
 	const results = _.flatMap(groups, group => handleGroup(parsed, data, group));
 	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
 	if (groups.length > 0) {
-		results.push(handleRetract(parsed, data, _.last(groups)))
+		results.push(handleRetract(parsed, data, groups))
 	}
 
 	// Get list of all accessed sites
@@ -129,6 +131,7 @@ function handlePipetterSpirate(parsed, data) {
  * - `tuples` -- an array with these properties:
  *     - `item` -- the original pipette item
  *     - `syringeName` -- roboliq name of the syringe to use
+ *     - `syringeRow` -- row of syringe on the LiHa
  *     - `source` -- source properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
  *     - `destination` -- destination properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
  * - `syringeSpacing`
@@ -314,15 +317,9 @@ function handleGroup(parsed, data, group) {
 	return makeLines(func, group.groupType);
 }
 
-function handleRetract(parsed, data, group) {
-	assert(group.tuples.length > 0);
-
-	const tuples = group.tuples;
-	// Calculate syringe mask
-	const tuple0 = _.last(tuples);
-	const syringeMask = encodeSyringes(tuples);
-
-	// Script command line
+function handleRetract(parsed, data, groups) {
+	const tuplesOrig = _.flatMap(groups, group => group.tuples);
+	const tuple0 = _.last(tuplesOrig);
 	const propertyName = (tuple0.destination) ? "destination" : "source";
 	const wellInfo = tuple0[propertyName];
 	// console.log({propertyName, wellInfo, tuple0})
@@ -330,17 +327,27 @@ function handleRetract(parsed, data, group) {
 		return undefined;
 
 	const labwareModel = wellInfo.labwareModel;
-	const plateMask = encodeWells(tuples, propertyName);
-	const l = [
+
+	const syringeRows = _.uniq(tuplesOrig.map(x => x.syringeRow)).sort();
+	const tuples = syringeRows.map(syringeRow => ({syringeRow, retract: {row: syringeRow, col: 1, labwareModel}}));
+	// Calculate syringe mask
+	const syringeMask = encodeSyringes(tuples);
+
+	const retractWellMask = encodeWells(tuples, "retract");
+	// console.log({tuples: JSON.stringify(tuples), retractWellMask})
+	const lRetract = [
 		syringeMask,
 		wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
-		1,
-		`"${plateMask}"`,
-		0, // 0=positioning with global z travel, 4=z-move
+		1, // tip spacing
+		`"${retractWellMask}"`,
+		4, // 0=positioning with global z travel, 4=z-move
 		4, // 4=global z travel
-		0, 10, 0, 0
+		0,
+		400, // speed (mm/s), min 0.1, max 400
+		0, 0
 	];
-	const line = `MoveLiha(${l.join(",")});`;
+	const line = `MoveLiha(${lRetract.join(",")});`;
+
 	return {line};
 }
 
