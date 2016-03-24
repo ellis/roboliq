@@ -2,7 +2,7 @@ const _ = require('lodash');
 const should = require('should');
 import {flattenDesign, printData} from '../src/design.js';
 
-describe('design', () => {
+describe.skip('design', () => {
 	// Configure mathjs to use bignumbers
 	require('mathjs').config({
 		number: 'bignumber', // Default type of number

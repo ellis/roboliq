@@ -74,6 +74,7 @@ function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], fi
  * @return {any} the value with possible substitutions
  */
 function substituteDeep(x, data, SCOPE, DATA) {
+	// console.log("substituteDeep: "); console.log({x, SCOPE, DATA, x})
 	let x2 = x;
 	if (_.isString(x)) {
 		// DATA substitution
@@ -102,14 +103,15 @@ function substituteDeep(x, data, SCOPE, DATA) {
 		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA));
 	}
 	else if (_.isPlainObject(x)) {
-		const {DATAs, SCOPE: SCOPE2, foreach} = updateSCOPEDATA(x, data, SCOPE, DATA);
+		const {DATAs, SCOPEs, foreach} = updateSCOPEDATA(x, data, SCOPE, DATA);
 
 		// Skip objects with one of these properties:
 		if (foreach) {
 			// TODO: handle this case?
 		}
 		else {
-			const DATA2 = _.flatten(DATAs);
+			const DATA2 = DATAs[0];
+			const SCOPE2 = SCOPEs[0];
 			x2 = _.mapValues(x, (value, name) => {
 				// Skip over @DATA, @SCOPE, directives and 'steps' properties
 				if (_.startsWith(name, "#") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
@@ -942,7 +944,7 @@ function stepify(steps) {
 
 /**
  * Process '@DATA', '@SCOPE', and 'data' properties for a step,
- * and return updated {DATAs, SCOPE, foreach}.
+ * and return updated {DATAs, SCOPEs, foreach}.
  */
 function updateSCOPEDATA(step, data, SCOPE, DATA) {
 	// console.log("data2: "+JSON.stringify(data));
@@ -1000,12 +1002,16 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 	// Add `@SCOPE` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
 	//console.log({_scope: params["@SCOPE"]})
 	if (!_.isEmpty(step["@SCOPE"])) {
-		SCOPE = _.clone(SCOPE);
-		_.forEach(step["@SCOPE"], (value, key) => SCOPE[key] = value);
+		SCOPE = _.defaults(step["@SCOPE"], SCOPE);
 		//console.log("SCOPE: "+JSON.stringify(SCOPE))
 	}
 
-	return {DATAs, SCOPE, foreach};
+	const SCOPEs = DATAs.map(DATA => {
+		const common = Design.getCommonValues(DATA);
+		return _.defaults(common, SCOPE);
+	});
+
+	return {DATAs, SCOPEs, foreach};
 }
 
 module.exports = {

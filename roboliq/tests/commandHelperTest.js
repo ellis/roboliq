@@ -576,7 +576,7 @@ describe('commandHelper', function() {
 					x2: [1, 2],
 					x3: {
 						"@DATA": [{y: "a"}, {y: "b"}],
-						"@SCOPE": {b: "B"},
+						"@SCOPE": {a: "A", b: "B"},
 						x31: "A",
 						x32: "B",
 						x33: [],
@@ -593,7 +593,8 @@ describe('commandHelper', function() {
 				x2: {
 					"@DATA": [{q: "Q", y: 1}, {q: "R", y: 2}],
 					data: {where: {y: 2}},
-					x21: "$q"
+					x21: "$q",
+					x22: "`Hello, {{$q}}`"
 				}
 			};
 			// console.log("data: "+JSON.stringify(data));
@@ -605,7 +606,8 @@ describe('commandHelper', function() {
 					x2: {
 						"@DATA": [{q: "Q", y: 1}, {q: "R", y: 2}],
 						data: {where: {y: 2}},
-						x21: "R"
+						x21: "R",
+						x22: "Hello, R"
 					}
 				}
 			);

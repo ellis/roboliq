@@ -799,8 +799,7 @@ function _run(opts, userProtocol) {
 
 		const accesses = [];
 		const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, filecache);
-		const {DATAs, SCOPE: SCOPE2, foreach} = commandHelper.updateSCOPEDATA(step, data0, SCOPE, DATA);
-		SCOPE = SCOPE2;
+		const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA(step, data0, SCOPE, DATA);
 
 		// Check for command and its handler
 		const commandName = step.command;
@@ -814,6 +813,7 @@ function _run(opts, userProtocol) {
 		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
 			const prefix2 = prefix.concat([groupIndex + 1]);
 			const DATA = DATAs[groupIndex];
+			const SCOPE = SCOPEs[groupIndex];
 			const data = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix2, filecache);
 			const SCOPE2 = data.objects.SCOPE;
 			const params = misc.handleDirectiveDeep(step0, data);
