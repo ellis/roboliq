@@ -3,23 +3,23 @@ experiment:
     The `experiment` module is for working with experimental designs.
     Currently there is only one command, `experiment.run`.
 
-experiment.run:
-  description: |
-    Run an experiment based on a Design or the currently available `DATA` object.
-    This command will performs its sub-steps for every item in the experiment array, placing the item's values in SCOPE."
-  properties:
-    agent: {description: "Agent identifier", type: "Agent"}
-    design: {description: "An experimental design to use", type: "Design"}
-    groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
-    distinctBy: {description: "The factor(s) to distinguish row by", type: [array, string], items: {type: string}}
-    orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
-    duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
-    interleave: {description: "The time offset for interleaving each group", type: Duration}
-    timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
-    startTimerAfterStep: {description: "The duration timer will be started after this step rather than from the beginning, if specified", type: integer}
-    steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}
-  required: [groupBy]
-
+# experiment.run:
+#   description: |
+#     Run an experiment based on a Design or the currently available `DATA` object.
+#     This command will performs its sub-steps for every item in the experiment array, placing the item's values in SCOPE."
+#   properties:
+#     agent: {description: "Agent identifier", type: "Agent"}
+#     design: {description: "An experimental design to use", type: "Design"}
+#     groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
+#     distinctBy: {description: "The factor(s) to distinguish row by", type: [array, string], items: {type: string}}
+#     orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
+#     duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
+#     interleave: {description: "The time offset for interleaving each group", type: Duration}
+#     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
+#     startTimerAfterStep: {description: "The duration timer will be started after this step rather than from the beginning, if specified", type: integer}
+#     steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}
+#   required: [groupBy]
+#
 experiment.forEachGroup:
   description: |
     Run an experiment based on a Design or the currently available `DATA` object.
@@ -30,7 +30,8 @@ experiment.forEachGroup:
     groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
     distinctBy: {description: "The factor(s) to distinguish row by", type: [array, string], items: {type: string}}
     orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
-    duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
+    durationTotal: {description: "The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
+    durationGroup: {description: "The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
     interleave: {description: "The time offset for interleaving each group", type: Duration}
     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
     startTimerAfterStep: {description: "The duration timer will be started after this step rather than from the beginning, if specified", type: integer}
@@ -46,7 +47,8 @@ experiment.forEachRow:
     design: {description: "An experimental design to use", type: "Design"}
     distinctBy: {description: "The factor(s) to distinguish row by", type: [array, string], items: {type: string}}
     orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
-    duration: {description: "The total duration of this step (all groups should execute within the allotted time)", type: Duration}
+    durationTotal: {description: "The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
+    durationRow: {description: "The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
     interleave: {description: "The time offset for interleaving each group", type: Duration}
     timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
     steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}

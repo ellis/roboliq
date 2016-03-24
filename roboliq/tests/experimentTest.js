@@ -30,13 +30,13 @@ const protocol0 = {
 };
 
 describe('experiment', function() {
-	describe("experiment.run", function() {
+	describe("experiment.forEachGroup", function() {
 		it("should manage without timing specifications", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
 					1: {
-						command: "experiment.run",
+						command: "experiment.forEachGroup",
 						design: "design1",
 						groupBy: "b",
 						steps: {
@@ -94,7 +94,7 @@ describe('experiment', function() {
 						},
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
-					"command": "experiment.run",
+					"command": "experiment.forEachGroup",
 					"design": "design1",
 					"groupBy": "b",
 					"steps": {
@@ -111,15 +111,15 @@ describe('experiment', function() {
 			});
 		});
 
-		it("should manage with duration", function() {
+		it("should manage with durationTotal", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
 					1: {
-						command: "experiment.run",
+						command: "experiment.forEachGroup",
 						design: "design1",
 						groupBy: "b",
-						duration: "1 minute",
+						durationTotal: "1 minute",
 						timers: ["timer1", "timer2"],
 						steps: {
 							1: {
@@ -174,10 +174,10 @@ describe('experiment', function() {
 						"till": "1 minute",
 						"stop": true
 					},
-					"command": "experiment.run",
+					"command": "experiment.forEachGroup",
 					"design": "design1",
 					"groupBy": "b",
-					"duration": "1 minute",
+					"durationTotal": "1 minute",
 					"timers": [
 						"timer1",
 						"timer2"
@@ -192,15 +192,15 @@ describe('experiment', function() {
 			});
 		});
 
-		it("should manage with interleave", function() {
+		it("should manage with durationGroup", function() {
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
 					1: {
-						command: "experiment.run",
+						command: "experiment.forEachGroup",
 						design: "design1",
 						groupBy: "b",
-						interleave: "1 minute",
+						durationGroup: "1 minute",
 						timers: ["timer1", "timer2"],
 						steps: {
 							1: {
@@ -276,10 +276,10 @@ describe('experiment', function() {
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					}
 				},
-				"command": "experiment.run",
+				"command": "experiment.forEachGroup",
 				"design": "design1",
 				"groupBy": "b",
-				"interleave": "1 minute",
+				"durationGroup": "1 minute",
 				"timers": [
 					"timer1",
 					"timer2"
@@ -297,58 +297,55 @@ describe('experiment', function() {
 
 		});
 
-	});
-
-	describe("experiment.forEachGroup", function() {
-		it("should manage without timing specifications", function() {
-			const protocol = _.merge({}, protocol0, {
-				roboliq: "v1",
-				steps: {
-					1: {
-						command: "experiment.forEachGroup",
-						design: "design1",
-						groupBy: "b",
-						steps: {
-							description: "`Group for B={{$b}}`",
-							1: {
-								command: "system._echo",
-								value: "$$a"
-							}
-						}
-					}
-				}
-			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
-			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
-			should.deepEqual(result.output.steps["1"], {
-				command: "experiment.forEachGroup",
-				design: "design1",
-				groupBy: "b",
-				steps: {
-					description: "`Group for B={{$b}}`",
-					1: {
-						command: "system._echo",
-						value: "$$a"
-					}
-				},
-				1: {
-					'@DATA': [ { a: 'A1', b: 'B1' }, { a: 'A2', b: 'B1' } ],
-					description: "Group for B=B1",
-					1: {
-						command: "system._echo",
-						value: ["A1", "A2"]
-					}
-				},
-				2: {
-					'@DATA': [ { a: 'A1', b: 'B2' }, { a: 'A2', b: 'B2' } ],
-					description: "Group for B=B2",
-					1: {
-						command: "system._echo",
-						value: ["A1", "A2"]
-					}
-				}
-			});
-		});
+		// it("should manage without timing specifications", function() {
+		// 	const protocol = _.merge({}, protocol0, {
+		// 		roboliq: "v1",
+		// 		steps: {
+		// 			1: {
+		// 				command: "experiment.forEachGroup",
+		// 				design: "design1",
+		// 				groupBy: "b",
+		// 				steps: {
+		// 					description: "`Group for B={{$b}}`",
+		// 					1: {
+		// 						command: "system._echo",
+		// 						value: "$$a"
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	});
+		// 	var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+		// 	//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
+		// 	should.deepEqual(result.output.steps["1"], {
+		// 		command: "experiment.forEachGroup",
+		// 		design: "design1",
+		// 		groupBy: "b",
+		// 		steps: {
+		// 			description: "`Group for B={{$b}}`",
+		// 			1: {
+		// 				command: "system._echo",
+		// 				value: "$$a"
+		// 			}
+		// 		},
+		// 		1: {
+		// 			'@DATA': [ { a: 'A1', b: 'B1' }, { a: 'A2', b: 'B1' } ],
+		// 			description: "Group for B=B1",
+		// 			1: {
+		// 				command: "system._echo",
+		// 				value: ["A1", "A2"]
+		// 			}
+		// 		},
+		// 		2: {
+		// 			'@DATA': [ { a: 'A1', b: 'B2' }, { a: 'A2', b: 'B2' } ],
+		// 			description: "Group for B=B2",
+		// 			1: {
+		// 				command: "system._echo",
+		// 				value: ["A1", "A2"]
+		// 			}
+		// 		}
+		// 	});
+		// });
 	});
 
 	describe("experiment.forEachRow", function() {
