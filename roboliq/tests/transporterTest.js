@@ -409,7 +409,7 @@ describe('transporter', function() {
 	});
 
 	describe('transporter.doThenRestoreLocation', function () {
-		it("should handle doThenRestoreLocation", function() {
+		it.only("should handle doThenRestoreLocation", function() {
 			var protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
