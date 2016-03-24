@@ -439,10 +439,10 @@ module.exports = {
 				}
 			}
 		}},
-		{"timer.canAgentEquipment": {
+		_.map(_.range(9), i => ({"timer.canAgentEquipment": {
 			"agent": "ourlab.luigi.evoware",
-			"equipment": "ourlab.luigi.timer1",
-		}},
+			"equipment": "ourlab.luigi.timer"+(i+1),
+		}})),
 		_.map([1,2,3,4,5,6,7,8], function(n) {
 			return {"method": {"description": "generic.closeSite-BOX_"+n,
 				"task": {"generic.closeSite": {"site": "?site"}},

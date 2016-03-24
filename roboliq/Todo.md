@@ -60,7 +60,7 @@
 	- [x] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
 	- [x] shaker.start: implement
 	- [x] move DWP to shaker, start shaking with cover closed
-- [ ] growthcurve03_testing: now with sealing and change of labware type
+- [x] growthcurve03_testing: now with sealing and change of labware type
 	- [x] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed? A: Not really, but we can try either always using the sealed or unsealed labware, and see whether it works.
 	- [x] Q: Daniel, which plates did you use for dilution?  When I filled a well to 450ul, it overflowed. A: They were only filled to 250ul
 	- [x] fix vectors for moving to ROBOSEAL
@@ -72,18 +72,21 @@
 	- [x] MoveLiha: instead of positioning, just move Z position with faster speed! Find out what speed that is.
 	- [x] BUG: two bad MoveLiha commands are issued
 	- [x] allow direct transfer from P6 to READER
-	- [ ] 6.1: description still isn't expanded correctly
-	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
-	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
+	- [x] 6.1: description isn't expanded correctly
+	- [?] BUG: why did the experiment only run for 1.5h?
+	- [ ] 6: make sure sample cycle 0 is handled before cycle 4
+	- [ ] do the serial dilution differently, dispose of last 50ul
 	- [ ] double-check for inactivation steps after sampling from well
+	- [ ] make sure we mix the dilution wells before proceeding to next dilution
+	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
+	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
 	- [ ] design1: allocate plates and wells for dilution
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 	- [ ] run some measurements overnight
 	- [ ] since we're pipetting cells, should we use a "Cells" liquid class instead of "Water"?
-	- [ ] BUG: why did the experiment only run for 1.5h?
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
 - [ ] pipetter.pipette: don't clean tips if they are already clean
 - [ ] let wellsParser handle `destinations: A01 down H01`?

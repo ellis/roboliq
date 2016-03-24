@@ -178,10 +178,11 @@ steps:
   6:
     command: experiment.forEachGroup
     groupBy: [stage, sampleCycle, group]
+    orderBy: [stage, sampleCycle, group]
     timers: [ourlab.luigi.timer5, ourlab.luigi.timer6]
     durationGroup: 20 minutes
     steps:
-      description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}"
+      description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}`"
       1:
         description: "Extract and measure samples"
         data:

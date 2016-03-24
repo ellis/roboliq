@@ -58,18 +58,12 @@ describe('experiment', function() {
 				"1": {
 					"1": {
 						"1": {
-							"1": {
-								"command": "system._echo",
-								"value": "B1"
-							},
+							"1": { "command": "system._echo", "value": "B1" },
 							"command": "system.echo",
 							"value": "B1"
 						},
 						"2": {
-							"1": {
-								"command": "system._echo",
-								"value": ["A1", "A2"]
-							},
+							"1": { "command": "system._echo", "value": ["A1", "A2"] },
 							"command": "system.echo",
 							"value": ["A1", "A2"]
 						},
@@ -77,18 +71,12 @@ describe('experiment', function() {
 					},
 					"2": {
 						"1": {
-							"1": {
-								"command": "system._echo",
-								"value": "B2"
-							},
+							"1": { "command": "system._echo", "value": "B2" },
 							"command": "system.echo",
 							"value": "B2"
 						},
 						"2": {
-							"1": {
-								"command": "system._echo",
-								"value": ["A1", "A2"]
-							},
+							"1": { "command": "system._echo", "value": ["A1", "A2"] },
 							"command": "system.echo",
 							"value": ["A1", "A2"]
 						},
@@ -98,14 +86,59 @@ describe('experiment', function() {
 					"design": "design1",
 					"groupBy": "b",
 					"steps": {
-						"1": {
-							"command": "system.echo",
-							"value": "$b"
-						},
-						"2": {
-							"command": "system.echo",
-							"value": "$$a"
+						"1": { "command": "system.echo", "value": "$b" },
+						"2": { "command": "system.echo", "value": "$$a" }
+					}
+				}
+			});
+		});
+
+		it("should handle a description template as an argument to steps", function() {
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "experiment.forEachGroup",
+						design: "design1",
+						groupBy: "b",
+						steps: {
+							description: "`Echo {{$b}}`",
+							1: {
+								command: "system.echo",
+								value: "$b"
+							}
 						}
+					}
+				}
+			});
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			//console.log(JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						description: "Echo B1",
+						"1": {
+							"1": { "command": "system._echo", "value": "B1" },
+							"command": "system.echo",
+							"value": "B1"
+						},
+						"@DATA": [ { "a": "A1", "b": "B1" }, { "a": "A2", "b": "B1" } ]
+					},
+					"2": {
+						description: "Echo B2",
+						"1": {
+							"1": { "command": "system._echo", "value": "B2" },
+							"command": "system.echo",
+							"value": "B2"
+						},
+						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
+					},
+					"command": "experiment.forEachGroup",
+					"design": "design1",
+					"groupBy": "b",
+					"steps": {
+						description: "`Echo {{$b}}`",
+						"1": { "command": "system.echo", "value": "$b" },
 					}
 				}
 			});
@@ -293,7 +326,7 @@ describe('experiment', function() {
 			});
 		});
 
-		it.skip("should handle timing with duration and startTimerAfterStep", function() {
+		it.skip("should handle timing with durationTotal and startTimerAfterStep", function() {
 
 		});
 
