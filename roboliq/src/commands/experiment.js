@@ -15,7 +15,7 @@ function run(parsed, data) {
 	}
 
 	const DATA = (parsed.value.design)
-	  ? Design.flattenDesign(parsed.value.design)
+		? Design.flattenDesign(parsed.value.design)
 		: data.objects.DATA;
 	// console.log("experiment.run DATA: "+JSON.stringify(DATA, null, '\t'));
 	// console.log("experiment.run DATA: ");
@@ -29,8 +29,9 @@ function run(parsed, data) {
 	//console.log("experiment.run DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
 	// Check how many timers are needed
-	const needTimer1 = !_.isUndefined(parsed.value.duration);
-	const needTimer2 = !_.isUndefined(parsed.value.interleave);
+	const interleave = (parsed.value.forEachRow) ? parsed.value.durationRow : parsed.value.durationGroup;
+	const needTimer1 = !_.isUndefined(parsed.value.durationTotal);
+	const needTimer2 = !_.isUndefined(interleave);
 	const needTimers = (needTimer1 ? 1 : 0) + (needTimer2 ? 1 : 0);
 
 	// Select the timers
@@ -83,7 +84,7 @@ function run(parsed, data) {
 				command: "timer.doAndWait",
 				agent: parsed.objectName.agent,
 				equipment: timer2,
-				duration: parsed.value.interleave.format()
+				duration: interleave.format()
 			});
 			timedStep.steps = step;
 			expansion[groupKey] = timedStep;
@@ -99,7 +100,7 @@ function run(parsed, data) {
 			command: "timer.wait",
 			agent: parsed.objectName.agent,
 			equipment: timer1,
-			till: parsed.value.duration.format(),
+			till: parsed.value.durationTotal.format(),
 			stop: true
 		});
 	}
@@ -116,9 +117,9 @@ const commandHandlers = {
 		parsed.value.forEachRow = true;
 		return run(parsed, data);
 	},
-	"experiment.run": function(params, parsed, data) {
-		return run(parsed, data);
-	},
+	// "experiment.run": function(params, parsed, data) {
+	// 	return run(parsed, data);
+	// },
 };
 
 module.exports = {
