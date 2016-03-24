@@ -75,13 +75,21 @@
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [x] 6.1: description isn't expanded correctly
-	- [?] BUG: why did the experiment only run for 1.5h?
-	- [ ] 6: make sure sample cycle 0 is handled before cycle 4
-	- [ ] do the serial dilution differently, dispose of last 50ul
-	- [ ] double-check for inactivation steps after sampling from well
-	- [ ] make sure we mix the dilution wells before proceeding to next dilution
+	- [x] BUG: why did the experiment only run for 1.5h?
+	- [x] 6: make sure sample cycle 0 is handled before cycle 4
+	- [ ] do the serial dilution differently (should perhaps do then dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
+	- [ ] MISSING: inactivation steps after sampling from well
+	- [ ] make sure we mix the dilution wells before proceeding to next dilution (either mix with pipette or use the shaker)
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
+		- MoveLiha: position with global z travel, global z-travel
+		- MoveLiha: position with local z travel, z-dispense
+		- MoveLiha: position with local z travel, global z-dispense
+		- Code example using tip 1 in P3(A01):
+			MoveLiha(1,12,0,1,"0C0810000000000000",0,4,0,400,0,0);
+			MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
+			MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
 	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
+		- Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but use whatever other program was selected for dispense
 	- [ ] design1: allocate plates and wells for dilution
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
@@ -95,6 +103,8 @@
 - [ ] EvowareCompiler: DWP model needs to change when sealed, manage starting a new script!
 - [ ] implement command to prompt the user
 - [ ] notify user where to put labware
+- [ ] improve performance of transporter.movePlate by refactoring `shop` to allow for adding predicates, rather than starting over each time
+- [ ] improve performance of llpl by only cloning objects upon modification?
 
 # Todos for ROMA qc
 
