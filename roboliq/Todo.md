@@ -69,44 +69,18 @@
 	- [x] run loop to sample from culturePlate twice
 	- [ ] BUG: two bad MoveLiha commands are issued; instead of positioning, just move Z position with faster speed
 	- [ ] allow direct transfer from P6 to READER?
-	- [ ] how to pierce seal without pipetting? detect liquid command?
+	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 	- [ ] experiment.run: try to also expand commands with 'data' properties
 	- [ ] set culturePlate model to "sealed" variant, and try pipetting again
 - [ ] growthcurve04_firstWithYeast.yaml:
+	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
+	- [ ] double-check for inactivation steps after sampling from well
+	- [ ] HACK: give reader a different output name with date/time in it, so that unique files are produced
+	- [ ] sample from
 	- [ ] design1: allocate plates and wells for dilution
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 	- [ ] run some measurements overnight
-	- [ ] fix:
-	randomSeed: 100
-	conditions:
-		aspirationSite: P3
-		dilutionSite: P6
-		culturePlate: culturePlate1
-		incubatorSite: BOX_2
-		stage*: 2
-		group*: 2
-		.groupMemberId*: 2
-		syringe=:
-			groupBy: groupId
-			values: [1,2,3,4,5,6,7,8]
-			order: shuffle
-		cultureWell=allocateWells:
-			rows: 8
-			columns: 12
-			order: shuffle
-		.sampling:
-		- sample*: [1]
-			sampleCycle: [4]
-		- sample*: [1, 2]
-			sampleCycle: [0, 4]
-		dilutionStep*: [0,1]
-		dilutionPlate: dilutionPlate1
-		dilutionWell=allocateWells:
-			rows: 8
-			columns: 12
-			order: shuffle
-
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
 - [ ] pipetter.pipette: don't clean tips if they are already clean
 - [ ] let wellsParser handle `destinations: A01 down H01`?
