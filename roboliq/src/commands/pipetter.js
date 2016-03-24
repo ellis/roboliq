@@ -755,7 +755,13 @@ const commandHandlers = {
 
 			// Distribute diluent to all destination wells
 			_.forEach(destinations2, (destinationWell, index) => {
-				diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: diluentVolume.format({precision: 4}), syringe: syringeName});
+				const wellContents = WellContents.getWellContents(destinationWell, data);
+				const wellVolume = WellContents.getVolume(wellContents);
+				if (math.smaller(wellVolume, diluentVolume)) {
+					assert(parsed.objectName.diluent, "missing 'diluent'");
+					const diluentVolume2 = math.subtract(diluentVolume, wellVolume);
+					diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: diluentVolume2.format({precision: 4}), syringe: syringeName});
+				}
 			});
 			// console.log({diluentItems})
 
@@ -764,9 +770,14 @@ const commandHandlers = {
 			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
 				const item2 = _.merge({}, {layer: index+1, source, destination, volume: sourceVolume.format({precision: 4}), syringe: syringeName});
+				PREMIX!
 				items.push(item2);
 				source = destination;
 			});
+
+			// If disposal wells are specified, transfer extra volume from last well to the disposal
+			TRASH!
+
 			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
 			_.forEach(series, dilution => {
 				// If the first item doesn't define a source, but it's dilutionFactor = 1, then treat the destination well as the source.
@@ -778,11 +789,13 @@ const commandHandlers = {
 
 		//const items = [];
 
-		const params1 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
-		params1.command = "pipetter.pipette";
-		params1.items = diluentItems;
-		params1.clean = "none";
-		_.merge(params1, parsed.orig.diluentParams);
+		if (diluentItems.length > 0) {
+			const params1 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
+			params1.command = "pipetter.pipette";
+			params1.items = diluentItems;
+			params1.clean = "none";
+			_.merge(params1, parsed.orig.diluentParams);
+		}
 
 		const params2 = _.omit(parsed.orig, ['description', 'diluent', 'diluentParams', 'items']);
 		params2.command = "pipetter.pipette";

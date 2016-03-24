@@ -77,12 +77,14 @@
 	- [x] 6.1: description isn't expanded correctly
 	- [x] BUG: why did the experiment only run for 1.5h?
 	- [x] 6: make sure sample cycle 0 is handled before cycle 4
-	- [ ] do the serial dilution differently (should perhaps do then dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
+	- [ ] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
+		- [?] handle dilution series where we don't add diluent, because it's already in the wells
+		- [ ] discard last aspirated volume
+		- [ ] make sure we mix the dilution wells before proceeding to next dilution (either mix with pipette or use the shaker)
 	- [ ] MISSING: inactivation steps after sampling from well
-	- [ ] make sure we mix the dilution wells before proceeding to next dilution (either mix with pipette or use the shaker)
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel
-		- MoveLiha: position with local z travel, z-dispense
+		- MoveLiha: position with local z travel, z-dispense (this isn't quite low enough, so the command needs an additional offset parameter)
 		- MoveLiha: position with local z travel, global z-dispense
 		- Code example using tip 1 in P3(A01):
 			MoveLiha(1,12,0,1,"0C0810000000000000",0,4,0,400,0,0);
@@ -95,14 +97,14 @@
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 	- [ ] run some measurements overnight
 	- [ ] since we're pipetting cells, should we use a "Cells" liquid class instead of "Water"?
+- [ ] implement command to prompt the user
+- [ ] notify user where to put labware
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
 - [ ] pipetter.pipette: don't clean tips if they are already clean
 - [ ] let wellsParser handle `destinations: A01 down H01`?
 - [ ] absorbance reader: the F200 Pro can only excite at wavelength 600nm, raise an error if user specifies another wavelength
 - [ ] maybe pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes), but we can only read OrangeG on mario's reader; could maybe try crystal violet dye.
 - [ ] EvowareCompiler: DWP model needs to change when sealed, manage starting a new script!
-- [ ] implement command to prompt the user
-- [ ] notify user where to put labware
 - [ ] improve performance of transporter.movePlate by refactoring `shop` to allow for adding predicates, rather than starting over each time
 - [ ] improve performance of llpl by only cloning objects upon modification?
 
