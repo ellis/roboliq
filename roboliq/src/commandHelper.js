@@ -10,6 +10,7 @@ var jmespath = require('jmespath');
 import math from 'mathjs';
 import naturalSort from 'javascript-natural-sort';
 import tv4 from 'tv4';
+const Design = require('./design2.js');
 import misc from './misc.js';
 import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';
@@ -30,6 +31,37 @@ function asArray(x) {
 }
 
 /**
+ * Create the 'data' object that gets passed into many commandHelper functions.
+ * @param  {Protocol} protocol
+ * @param  {object} objects  =             {} - current objects
+ * @param  {object} SCOPE    =             {} - current SCOPE
+ * @param  {array} DATA     =             [] - current DATA table
+ * @param  {array} path = [] - current processing path (usually a step ID, e.g. step 1.2 would be given by `[1, 2]`)
+ * @param  {object} files = {} - map of filename to loaded filedata
+ * @return {object} the 'data' object that gets passed into many commandHelper functions
+ */
+function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], files = {}) {
+	const common = Design.getCommonValues(DATA);
+	const SCOPE2 = _.defaults(common, SCOPE);
+
+	// Process any directives in this step
+	const objects2 = _.clone(objects);
+	// TODO: consider changing this so that DATA and SCOPE are not a part of `objects`,
+	// but are their own separate properties.
+	objects2.DATA = DATA;
+	objects2.SCOPE = SCOPE2;
+	const data = {
+		objects: objects2,
+		schemas: protocol.schemas,
+		accesses: [],
+		files,
+		protocol,
+		path
+	};
+	return data;
+}
+
+/**
  * Recursively replace $-SCOPE, $$-DATA, and template strings in `x`.
  *
  * The recursion has the following exceptions:
@@ -41,7 +73,7 @@ function asArray(x) {
  * @param  {object} data - protocol data
  * @return {any} the value with possible substitutions
  */
-function substituteDeep(x, DATA, SCOPE) {
+function substituteDeep(x, data, SCOPE, DATA) {
 	let x2 = x;
 	if (_.isString(x)) {
 		// DATA substitution
@@ -63,39 +95,28 @@ function substituteDeep(x, DATA, SCOPE) {
 			const template = x.substr(1, x.length - 2);
 			const scope = _.mapKeys(SCOPE, (value, name) => "$"+name);
 			//console.log({x, template, scope})
-			const data = {
-				accesses: [],
-				objects: {}
-			};
 			x2 = misc.renderTemplate(template, scope, data);
 		}
 	}
 	else if (_.isArray(x)) {
-		x2 = _.map(x, y => substituteDeep(y, DATA, SCOPE));
+		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA));
 	}
 	else if (_.isPlainObject(x)) {
-		let DATA2 = DATA;
-		let SCOPE2 = SCOPE;
-		if (x.hasOwnProperty("@DATA"))
-			DATA2 = x["@DATA"];
-		if (x.hasOwnProperty("@SCOPE"))
-			SCOPE2 = _.merge({}, SCOPE, x["@SCOPE"]);
-		if (x.hasOwnProperty("data")) {
-			CONTINUE
-		}
+		const {DATAs, SCOPE: SCOPE2, foreach} = updateSCOPEDATA(x, data, SCOPE, DATA);
 
 		// Skip objects with one of these properties:
-		if (x.hasOwnProperty("data")) {
-			// do nothing
+		if (foreach) {
+			// TODO: handle this case?
 		}
 		else {
+			const DATA2 = _.flatten(DATAs);
 			x2 = _.mapValues(x, (value, name) => {
 				// Skip over @DATA, @SCOPE, directives and 'steps' properties
-				if (_.startsWith(name, "#") || name === "@DATA" || name === "@SCOPE" || name === "steps") {
+				if (_.startsWith(name, "#") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
 					return value;
 				}
 				else {
-					return substituteDeep(value, DATA2, SCOPE2);
+					return substituteDeep(value, data, SCOPE2, DATA2);
 				}
 			});
 		}
@@ -919,8 +940,77 @@ function stepify(steps) {
 	}
 }
 
+/**
+ * Process '@DATA', '@SCOPE', and 'data' properties for a step,
+ * and return updated {DATAs, SCOPE, foreach}.
+ */
+function updateSCOPEDATA(step, data, SCOPE, DATA) {
+	// console.log("data2: "+JSON.stringify(data));
+	if (step.hasOwnProperty("@DATA")) {
+		DATA = step["@DATA"];
+		// console.log("DATA: "+JSON.stringify(DATA))
+	}
+
+	let DATAs = [DATA];
+	let foreach = false; // whether we need to replicate the step contents
+	// Handle `data` parameter by loading Design data SCOPE and possibly
+	// repeating the command for each group or each row
+	if (step["data"]) {
+		const dataInfo = misc.handleDirectiveDeep(step.data, data);
+		// console.log({dataInfo})
+		let table = DATA;
+		if (dataInfo.source) {
+			const source = _.get(data.objects, [dataInfo.source]);
+			assert(source);
+
+			if (_.isArray(source)) {
+				table = source;
+			}
+			else if (source.type === "Design") {
+				table = Design.flattenDesign(source);
+			}
+			else {
+				assert(false, "unrecognized data source: "+JSON.stringify(dataInfo.source)+" -> "+JSON.stringify(source));
+			}
+		}
+
+		// Replicate the command for each group
+		const groups = Design.query(table, dataInfo);
+		// console.log("groups: "+JSON.stringify(groups))
+
+		if (dataInfo.forEach === "row") {
+			// Turn each row into its own group
+			DATAs = _(groups).flatten().map(x => [x]).value();
+			//console.log("forEach row DATAs: "+JSON.stringify(DATAs, null, '\t'));
+			foreach = true;
+		}
+		else if (dataInfo.forEach === "group") {
+			DATAs = groups;
+			//console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
+			foreach = true;
+		}
+		else {
+			DATAs = [_.flatten(groups)];
+		}
+	}
+	//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));
+
+	//console.log({step, params})
+
+	// Add `@SCOPE` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
+	//console.log({_scope: params["@SCOPE"]})
+	if (!_.isEmpty(step["@SCOPE"])) {
+		SCOPE = _.clone(SCOPE);
+		_.forEach(step["@SCOPE"], (value, key) => SCOPE[key] = value);
+		//console.log("SCOPE: "+JSON.stringify(SCOPE))
+	}
+
+	return {DATAs, SCOPE, foreach};
+}
+
 module.exports = {
 	asArray,
+	createData,
 	_dereferenceVariable: dereferenceVariable,
 	getParsedValue,
 	getStepKeys,
@@ -929,5 +1019,6 @@ module.exports = {
 	parseParams,
 	queryLogic,
 	stepify,
-	substituteDeep
+	substituteDeep,
+	updateSCOPEDATA,
 }

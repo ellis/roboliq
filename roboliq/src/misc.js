@@ -99,7 +99,8 @@ function getObjectsOfType(objects, types, prefix) {
  * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
  */
 function handleDirective(spec, data) {
-	const directiveHandlers = data.directiveHandlers || data.protocol.directiveHandlers;
+	// console.log("data1: "+JSON.stringify(data));
+	const directiveHandlers = data.directiveHandlers || (data.protocol || {}).directiveHandlers;
 	if (_.isPlainObject(spec)) {
 		const keys = _.keys(spec);
 		if (keys.length === 1 && _.startsWith(keys[0], "#")) {

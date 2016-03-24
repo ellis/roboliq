@@ -797,64 +797,10 @@ function _run(opts, userProtocol) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
 
-		if (step.hasOwnProperty("@DATA")) {
-			DATA = step["@DATA"];
-			// console.log("DATA: "+JSON.stringify(DATA))
-		}
-
-		let DATAs = [DATA];
-		let foreach = false; // whether we need to replicate the step contents
-		// Handle `data` parameter by loading Design data SCOPE and possibly
-		// repeating the command for each group or each row
-		if (step["data"]) {
-			const dataInfo = misc.handleDirectiveDeep(step.data, protocol);
-			// console.log({dataInfo})
-			let table = DATA;
-			if (dataInfo.source) {
-				const source = _.get(objects, [dataInfo.source]);
-				assert(source);
-
-				if (_.isArray(source)) {
-					table = source;
-				}
-				else if (source.type === "Design") {
-					table = Design.flattenDesign(source);
-				}
-				else {
-					assert(false, "unrecognized data source: "+JSON.stringify(dataInfo.source)+" -> "+JSON.stringify(source));
-				}
-			}
-
-			// Replicate the command for each group
-			const groups = Design.query(table, dataInfo);
-			// console.log("groups: "+JSON.stringify(groups))
-
-			if (dataInfo.forEach === "row") {
-				// Turn each row into its own group
-				DATAs = _(groups).flatten().map(x => [x]).value();
-				//console.log("forEach row DATAs: "+JSON.stringify(DATAs, null, '\t'));
-				foreach = true;
-			}
-			else if (dataInfo.forEach === "group") {
-				DATAs = groups;
-				//console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
-				foreach = true;
-			}
-			else {
-				DATAs = [_.flatten(groups)];
-			}
-		}
-		//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));
-
-		//console.log({step, params})
-
-		// Add `@SCOPE` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
-		//console.log({_scope: params["@SCOPE"]})
-		if (!_.isEmpty(step["@SCOPE"])) {
-			SCOPE = _.clone(SCOPE);
-			_.forEach(step["@SCOPE"], (value, key) => SCOPE[key] = value);
-			//console.log("SCOPE: "+JSON.stringify(SCOPE))
-		}
+		const accesses = [];
+		const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, filecache);
+		const {DATAs, SCOPE: SCOPE2, foreach} = commandHelper.updateSCOPEDATA(step, data0, SCOPE, DATA);
+		SCOPE = SCOPE2;
 
 		// Check for command and its handler
 		const commandName = step.command;
@@ -866,25 +812,10 @@ function _run(opts, userProtocol) {
 
 		const step0 = _.omit(step, "data");
 		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
-			const DATA = DATAs[groupIndex];
-			//console.log("DATA1: "+JSON.stringify(DATA, null, '\t'));
 			const prefix2 = prefix.concat([groupIndex + 1]);
-			const common = Design.getCommonValues(DATA);
-			//console.log("DATA1b: "+JSON.stringify(DATA, null, '\t'));
-			const SCOPE2 = _.merge({}, SCOPE, common);
-
-			// Process any directives in this step
-			const objects2 = _.clone(objects);
-			objects2.DATA = DATA;
-			objects2.SCOPE = SCOPE2;
-			const data = {
-				objects: objects2,
-				schemas: protocol.schemas,
-				accesses: [],
-				files: filecache,
-				protocol,
-				path: prefix2
-			};
+			const DATA = DATAs[groupIndex];
+			const data = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix2, filecache);
+			const SCOPE2 = data.objects.SCOPE;
 			const params = misc.handleDirectiveDeep(step0, data);
 
 			if (foreach) {

@@ -68,7 +68,7 @@ function run(parsed, data) {
 		// Step starts out as a copy of the given steps
 		const step0 = commandHelper.stepify(_.cloneDeep(parsed.value.steps));
 		const step1 = (_.size(step0) === 1) ? _(step0).toPairs().head()[1] : step0;
-		const step = commandHelper.substituteDeep(step1, DATA, SCOPE);
+		const step = commandHelper.substituteDeep(step1, data, SCOPE, DATA);
 		// Set the current DATA group
 		step["@DATA"] = _.cloneDeep(DATA);
 		// Add postponed timer1, if necessary

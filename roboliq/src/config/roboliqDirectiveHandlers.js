@@ -45,14 +45,14 @@ function directive_data(spec, data) {
 		if (spec.templateGroup) {
 			result = _.map(result, DATA => {
 				const SCOPE = _.merge({}, data.objects.SCOPE, Design.getCommonValues(DATA));
-				return commandHelper.substituteDeep(spec.templateGroup, DATA, SCOPE);
+				return commandHelper.substituteDeep(spec.templateGroup, data, SCOPE, DATA);
 			});
 			// console.log("result1: "+JSON.stringify(result))
 		}
 		else if (spec.template) {
 			result = _.map(result, DATA => _.map(DATA, row => {
 				const SCOPE = _.merge({}, data.objects.SCOPE, row);
-				return commandHelper.substituteDeep(spec.template, DATA, SCOPE);
+				return commandHelper.substituteDeep(spec.template, data, SCOPE, DATA);
 			}));
 			// console.log("result1: "+JSON.stringify(result))
 		}

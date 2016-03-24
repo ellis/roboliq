@@ -502,6 +502,7 @@ describe('commandHelper', function() {
 		const DATA = [
 			{n: 1}, {n: 2}
 		];
+		const data = commandHelper.createData({}, {}, SCOPE, DATA);
 
 		it("should handle SCOPE, DATA, and template substitutions", () => {
 			const x = {
@@ -518,7 +519,7 @@ describe('commandHelper', function() {
 				x5: "`My {{$a}}`"
 			};
 			should.deepEqual(
-				commandHelper.substituteDeep(x, DATA, SCOPE),
+				commandHelper.substituteDeep(x, data, SCOPE, DATA),
 				{
 					x1: "A",
 					x2: [1, 2],
@@ -544,7 +545,7 @@ describe('commandHelper', function() {
 				}
 			};
 			should.deepEqual(
-				commandHelper.substituteDeep(x, DATA, SCOPE),
+				commandHelper.substituteDeep(x, data, SCOPE, DATA),
 				{
 					x1: "A",
 					"#x2": "$a",
@@ -569,7 +570,7 @@ describe('commandHelper', function() {
 				}
 			};
 			should.deepEqual(
-				commandHelper.substituteDeep(x, DATA, SCOPE),
+				commandHelper.substituteDeep(x, data, SCOPE, DATA),
 				{
 					x1: "A",
 					x2: [1, 2],
@@ -580,6 +581,31 @@ describe('commandHelper', function() {
 						x32: "B",
 						x33: [],
 						x34: ["a", "b"]
+					}
+				}
+			);
+		});
+
+		it("should handle 'data' properties", () => {
+			const x = {
+				data: {where: {n: {"gt": 1}}},
+				x1: "$$n",
+				x2: {
+					"@DATA": [{q: "Q", y: 1}, {q: "R", y: 2}],
+					data: {where: {y: 2}},
+					x21: "$q"
+				}
+			};
+			// console.log("data: "+JSON.stringify(data));
+			should.deepEqual(
+				commandHelper.substituteDeep(x, data, SCOPE, DATA),
+				{
+					data: {where: {n: {"gt": 1}}},
+					x1: [2],
+					x2: {
+						"@DATA": [{q: "Q", y: 1}, {q: "R", y: 2}],
+						data: {where: {y: 2}},
+						x21: "R"
 					}
 				}
 			);
