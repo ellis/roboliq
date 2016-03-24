@@ -159,28 +159,27 @@ function initializeDatabase(rsAndAs) {
  * Adds some more rules and assertions to the database.
  */
 function addToDatabase(rsAndAs) {
-	console.log("addToDatabase: "+rsAndAs.length)
+	// console.log("addToDatabase: "+rsAndAs.length)
 	let assertionsList = [];
 	for (let i = 0; i < rsAndAs.length; i++) {
 		const item = rsAndAs[i];
-		console.log({item})
+		// console.log({item})
 		if (isDRule(item)) {
-			console.log("DRule");
+			// console.log("DRule");
 			indexDRule(item);
 		}
 		else if (isPRule(item)) {
-			console.log("PRule");
+			// console.log("PRule");
 			indexPRule(item);
 		}
 		else if (utils.isAssertion(item)) {
-			console.log("Assertion");
+			// console.log("Assertion");
 			assertionsList.push(item);
 		}
 		else {
 			utils.ppToConsole("Unrecognized form in database: " + JSON.stringify(item));
 		}
 	}
-	console.log("length: "+assertionsList.length);
 	for (let i = 0; i < assertionsList.length; i++) {
 		indexAssertion(assertionsList[i]);
 	}
@@ -191,12 +190,12 @@ function addToDatabase(rsAndAs) {
 //
 function indexAssertion(p) {
 	var bindingsArray = findAssertions(p, {});
-	if (bindingsArray.length > 0) console.log({bindingsArray})
+	// if (bindingsArray.length > 0) console.log({bindingsArray})
 	// If nothing like this already exists in the database,
 	// then add it to the database and run the prules.
 	if (utils.isEmpty(bindingsArray)) {
 		var pred = utils.predicateName(p);
-		console.log({pred})
+		// console.log({pred})
 		if (database["assertions"][pred] !== undefined) {
 			database["assertions"][pred].push(p);
 		} else {

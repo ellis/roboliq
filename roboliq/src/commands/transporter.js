@@ -257,20 +257,11 @@ var commandHandlers = {
 			const key = keys[i];
 			const method = {method: makeMovePlateMethod(parsed, movePlateParams, i)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
-			// input0 = input0.concat([method]);
-			// llpl.initializeDatabase(input0);
-			llpl.addToDatabase([method]);
-			const fs = require('fs');
-			fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
-			// const a = _.cloneDeep(llpl.database);
 			input0 = input0.concat([method]);
-			// llpl.initializeDatabase(input0);
-			// fs.writeFileSync("b.json", JSON.stringify(llpl.database, null, '\t'));
-			// const b = _.cloneDeep(llpl.database);
-			// const x = require('jiff').diff(a, b);
-			// console.log("diff: "+JSON.stringify(x))
-			console.log("B")
-			// input0 = input0.concat([method]);
+			llpl.addToDatabase(transporterLogic[key]);
+			llpl.addToDatabase([method]);
+			// const fs = require('fs');
+			// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
 			const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
 			// If we didn't find a path for this method:
 			if (queryResultsAll.length === 0) {
