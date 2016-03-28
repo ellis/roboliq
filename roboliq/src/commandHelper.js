@@ -1031,6 +1031,7 @@ module.exports = {
 	asArray,
 	createData,
 	_dereferenceVariable: dereferenceVariable,
+	getCommonValues: Design.getCommonValues,
 	getParsedValue,
 	getStepKeys,
 	lookupPath,

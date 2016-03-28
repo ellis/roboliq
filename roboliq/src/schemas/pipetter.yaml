@@ -36,6 +36,16 @@ pipetter._DispenseItem:
     volume: {description: Volume, type: Volume}
   required: [syringe, destination, volume]
 
+pipetter._MixItem:
+  description: Parameters for mixing with pipetter.
+  properties:
+    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    well: {description: Well to mix, type: Well}
+    count: {description: "Number of times to aspirate and re-dispense", type: integer}
+    volume: {description: Volume, type: Volume}
+    program: {description: "Program identifier", type: "string"}
+  required: [syringe, well]
+
 pipetter.CleaningIntensity:
   description: |
     Intensity of cleaning.

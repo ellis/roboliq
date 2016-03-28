@@ -42,9 +42,11 @@
 
 # Todos for growth curve experiment
 
-- [ ] `pipetter.pipette()`: handle source=null and destination=null for just aspirating or dispensing
+- [x] `pipetter.pipette()`: handle source=null and destination=null for just aspirating or dispensing
+- [ ] `pipetter._mix`: implement with schema and command handler
+- [ ] evoware `pipetter._mix`: implement instruction handler
 - [ ] `pipetter.pipette()`: handle separate programs for source and destination
-- [ ] `pipetter.pipette()`: adapt to be used by bother `pipetter.pipette` and `pipetter.mix`
+- [ ] `pipetter.pipette()`: adapt to be used by both `pipetter.pipette` and `pipetter.mix`
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [x] 6.1: description isn't expanded correctly
