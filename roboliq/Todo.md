@@ -42,36 +42,9 @@
 
 # Todos for growth curve experiment
 
-- [x] growthcurve01_testing:
-	- [x] initialize with custom wash steps
-	- [x] initialize with decontamination wash
-	- [x] reader command needs to update tableEffects
-- [x] Q: What is "COMMAND O2SSO5,0" for at beginning of Daniel's script? A: sets the system liquid value correctly
-- [x] growthcurve02_testing:
-	- [x] DWP on P1, fill it with media, then add inoculum
-	- [x] BUG: why doesn't `sources: $$well` work?
-	- [x] BUG: growthcurve02_testing: the first dispense of medium to random wells should not all be in a single dispense command, because evoware can't actually dispense them simultaneously
-	- [x] BUG: growthcurve02_testing: after first dispense of medium to random wells, the `MoveLiha` command should not select the same wells, because of their weird random order
-	- [x] PROBLEM: why is dispense of inoculum from air?
-	- [x] PROBLEM: why is dispense of second sample also done with syringe 1, and no washing in-between?
-	- [x] PROBLEM: shouldn't wash at beginning of pipetting if already washed at end of previous pipetting
-	- [x] PROBLEM: when trying to transfer A01 to A02 for dilution, pipetting error occurred
-	- [x] Q: for diluting the cells, can we use water instead of medium?  Currently, I'm using water. A: if you use water, you need to calibrate the reader for the different concentrations of medium.
-	- [x] absorbance reader: in the Infinite template, multiply the excitationWavelength by 10 (and in the tests, change from "6000" => "600nm"); same for bandwidth
-	- [x] shaker.start: implement
-	- [x] move DWP to shaker, start shaking with cover closed
-- [x] growthcurve03_testing: now with sealing and change of labware type
-	- [x] Q: Daniel, is there any way to change the liquid class instead of the labware once a DWP is sealed? A: Not really, but we can try either always using the sealed or unsealed labware, and see whether it works.
-	- [x] Q: Daniel, which plates did you use for dilution?  When I filled a well to 450ul, it overflowed. A: They were only filled to 250ul
-	- [x] fix vectors for moving to ROBOSEAL
-	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
-	- [x] seal DWP twice
-	- [x] run loop to sample from culturePlate twice
-	- [x] experiment.run: try to also expand commands with 'data' properties
-	- [x] on P3, double-check that pipette tips have travel height set above the metal downholder; otherwise, set culturePlate model to "sealed" variant, and try pipetting again
-	- [x] MoveLiha: instead of positioning, just move Z position with faster speed! Find out what speed that is.
-	- [x] BUG: two bad MoveLiha commands are issued
-	- [x] allow direct transfer from P6 to READER
+- [ ] `pipetter.pipette()`: handle source=null and destination=null for just aspirating or dispensing
+- [ ] `pipetter.pipette()`: handle separate programs for source and destination
+- [ ] `pipetter.pipette()`: adapt to be used by bother `pipetter.pipette` and `pipetter.mix`
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [x] 6.1: description isn't expanded correctly
@@ -79,9 +52,24 @@
 	- [x] 6: make sure sample cycle 0 is handled before cycle 4
 	- [ ] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
 		- [?] handle dilution series where we don't add diluent, because it's already in the wells
-		- [ ] discard last aspirated volume
 		- [ ] make sure we mix the dilution wells before proceeding to next dilution (either mix with pipette or use the shaker)
+			- [x] hardcode mixing into the PipetteItems
+			- [ ] pipetter.mix: create command
+				- [x] create schema
+				- [ ] create command handler
+				- [ ] create evoware instruction handler
+			- [ ] adapt pipetter.pipette to generate mixing commands
+			- [ ] rather than hardcode mixing, take user specifications
+		- [ ] hardcode discarding of last aspirated volume
+			- [ ] decide whether to figure out how to let `pipetter.pipette` aspirate without dispensing, or how to dispense to the wash station without having to specify which well (i.e. figure out well like we do with multi-well sources) -- both would be good to have eventually
+			- [ ] discardDestination, discardLabware
+		- [ ] let user specify whether to aspirate from last well and discard the aliquot
 	- [ ] MISSING: inactivation steps after sampling from well
+	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
+		- [ ] pipetter.pipette: adapt to handle separate source and destination programs
+		- Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
+	- [ ] design1: allocate plates and wells for dilution
+	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel
 		- MoveLiha: position with local z travel, z-dispense (this isn't quite low enough, so the command needs an additional offset parameter)
@@ -90,13 +78,7 @@
 			MoveLiha(1,12,0,1,"0C0810000000000000",0,4,0,400,0,0);
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
-	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
-		- Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but use whatever other program was selected for dispense
-	- [ ] design1: allocate plates and wells for dilution
-	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
-	- [ ] run some measurements overnight
-	- [ ] since we're pipetting cells, should we use a "Cells" liquid class instead of "Water"?
 - [ ] implement command to prompt the user
 - [ ] notify user where to put labware
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
@@ -107,6 +89,9 @@
 - [ ] EvowareCompiler: DWP model needs to change when sealed, manage starting a new script!
 - [ ] improve performance of transporter.movePlate by refactoring `shop` to allow for adding predicates, rather than starting over each time
 - [ ] improve performance of llpl by only cloning objects upon modification?
+- [ ] pipetter.pipetteDilutionSeries: figure out more principled way to let user specify order of operations, e.g. source+diluent+dilutions or diluent+source+dilutions or source+dilutions+diluent
+- [ ] pipetter.pipetteDilutionSeries: let the user select between mixing with pipette vs shaking
+- [ ] since we're pipetting cells, should we use a "Cells" liquid class instead of "Water"?
 
 # Todos for ROMA qc
 
@@ -134,47 +119,6 @@
 
 # Todos for paper 2/3
 
-- [x] implement lookupPath
-- [x] REFACTOR: pass same set of arguments to roboliq and evoware command handlers, so that evoware commands also receive parsed params
-- [x] evoware compiler: add more commands
-		- [x] `evoware._facts`
-		- [x] `timer._start`
-		- [x] `timer._wait`
-		- [x] `pipetter._aspirate`
-		- [x] `pipetter._dispense`
-		- [x] `pipetter._pipette`
-		- [x] `pipetter._washTips`
-		- [x] delete scala files
-- [x] implement lookupPaths
-- [x] evoware: rename `_cleanTips` instruction to `_washTips`
-- [x] test transporter.doThenRestoreLocation
-- [x] commandHelper.getStepKeys: return array of step keys in order
-- [x] commandHelper.stepArrayToObject: take an array of steps and return an object of steps
-- [x] move scala project in ~/src/roboliq/evoware to ~/src/roboliq/old
-- [x] have a good command for expanding steps and parameters based on data (see 'data' property handling in roboliq.js and '#data' in roboliq directives)
-- [x] program a server that accepts data from the runtime client
-- [x] use `express` to serve up an HTML page from serverUi, automatically display changes in `state.timing`.
-- [x] program a prototype UI client that displays live data from the server as it's updated by the runtime client
-- [x] program a prototype little "runtime client" that sends data to a server when called by Evoware
-- [x] Add time logging to all evoware instructions
-- [x] Test runtime-client/runtime-server/roboliq-runtime-cli
-- [x] EvowareCompiler: make addition of run-time instructions an option
-- [x] roboliq-runtime-client: create a redux version, start with `fullstack-voting-client`
-- [x] see about using VB script to avoid the console popup when logging time of commands
-- [x] runtime-client/Log: duplicate from Runtime
-- [x] runtime-client/Log: nicer table format with padding between columns
-- [x] runtime-client/Log: separate bold row for changes in date
-- [x] runtime-client/Log: only display the time in time column instead of whole ISO date
-- [x] runtime-server: accept as input a `.out.json` file
-- [x] runtime-client/Runtime: display protocol
-- [x] runtime-client/Runtime: better display of from-till/duration time for each command
-- [x] design2:
-	- [x] various ways to draw from a list: direct, direct/restart, direct/reverse, shuffle, shuffle/restart, shuffle/reshuffle, sample (with replacement)
-	- [x] combine draw+reuse into "order" property
-	- [x] range: make it reuse "assign" functionality
-	- [x] groupBy
-	- [x] sameBy
-- [x] figure out why longer Designs often don't have the correct table column order in firefox (try OrderedMap instead of Map for immutablejs)
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
@@ -369,36 +313,6 @@
 
 # Todos for luigi
 
-- [x] configure sites and cliques for transporter.movePlate:
-		- [x] camera
-		- [x] P1-P3
-		- [x] lightbox
-		- [x] shaker
-		- [x] sealer
-		- [x] mario exchange hotel
-		- [x] hotels
-		- [x] regrip
-				- [x] the regrip site is represented by two evoware sites, depending on the orientation we want for the romas
-		- [x] reader
-		- [x] culturebox
-		- [x] add possibility to configure options in 'ourlab'
-- [x] perform initial pipetting test
-- [x] evoware: automatically retract tips after washing
-- [x] pipetter.cleanTips: check whether luigi_protocol3 runs as expected
-- [x] evoware: after pipetting is done, retract all the tips
-- [x] double-check pipetting on troughs
-- [x] sealer operation
-- [x] shaker operation
-- [x] reader operation
-	- [x] put reader functions in their own equipment JS to share between ourlab.js and ourlab_luigi.js
-		- [x] create absorbanceReader instructions
-	- [x] luigi_protocol3: change to measure absorbance
-- [x] exclude access to HOTEL12_9, because of trough
-- [x] culturebox operation
-	- [x] add to ourlab_luigi.objects
-	- [x] make sure it has internal sites
-	- [x] test moving plates into it
-	- [x] test running the shaker with open cover
 - [ ] culturebox: test running as an incubator
 - [ ] test with three labware types: 96 nunc, 96 DWP, 6-well culture
 - [ ] need to change evoware's labware model on DWP once its sealed

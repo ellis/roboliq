@@ -124,11 +124,11 @@ function pipette(params, parsed, data) {
 
 		if (items.length == 0) {
 			items = Array(itemCount);
-			for (var i = 0; i < itemCount; i++)
+			for (let i = 0; i < itemCount; i++)
 				items[i] = {};
 		}
 
-		for (var i = 0; i < itemCount; i++) {
+		for (let i = 0; i < itemCount; i++) {
 			const item = items[i];
 
 			// Add index to all items, so that we can reference `parsed.objectName[items.$index.syringe]` later
@@ -590,17 +590,12 @@ function pipette(params, parsed, data) {
 	//console.log({syringeToCleanEndValue})
 	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanEndValue));
 
-	var expansion = {};
-	_.forEach(expansionList, function(cmd, i) {
-		expansion[(i+1).toString()] = cmd;
-	});
-
 	// Create the effets object
 	// TODO: set final tip clean values
 	var effects = {};
 
 	return {
-		expansion: expansion,
+		expansion: expansionList,
 		effects: effects
 	};
 }
@@ -727,6 +722,9 @@ const commandHandlers = {
 
 		return {expansion};
 	},
+	"pipetter.mix": function(params, parsed, data) {
+		CONTINUE
+	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
 		// console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed))
@@ -760,7 +758,14 @@ const commandHandlers = {
 				if (math.smaller(wellVolume, diluentVolume)) {
 					assert(parsed.objectName.diluent, "missing 'diluent'");
 					const diluentVolume2 = math.subtract(diluentVolume, wellVolume);
-					diluentItems.push({layer: index+1, source: parsed.objectName.diluent, destination: getLabwareWell(destinationLabware, destinationWell), volume: diluentVolume2.format({precision: 4}), syringe: syringeName});
+					const item2 = {
+						layer: index+1,
+						source: parsed.objectName.diluent,
+						destination: getLabwareWell(destinationLabware, destinationWell),
+						volume: diluentVolume2.format({precision: 4}),
+						syringe: syringeName,
+					};
+					diluentItems.push(item2);
 				}
 			});
 			// console.log({diluentItems})
@@ -769,14 +774,21 @@ const commandHandlers = {
 			let source = destination0;
 			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
-				const item2 = _.merge({}, {layer: index+1, source, destination, volume: sourceVolume.format({precision: 4}), syringe: syringeName});
-				PREMIX!
+				const item2 = _.merge({}, {
+					layer: index+1,
+					source, destination,
+					volume: sourceVolume.format({precision: 4}),
+					syringe: syringeName,
+					// HACK: should allow the user to specify mixing parameters
+					// mixBefore: (index == 0) ? {count: 3, amount: 0.7} : undefined,
+					// mixAfter: {count: 3, amount: 0.7},
+				});
 				items.push(item2);
 				source = destination;
 			});
 
 			// If disposal wells are specified, transfer extra volume from last well to the disposal
-			TRASH!
+			// FIXME: implement sending last aspirate to TRASH!
 
 			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
 			_.forEach(series, dilution => {
@@ -789,12 +801,15 @@ const commandHandlers = {
 
 		//const items = [];
 
+		const expansion = [];
+
 		if (diluentItems.length > 0) {
 			const params1 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
 			params1.command = "pipetter.pipette";
 			params1.items = diluentItems;
 			params1.clean = "none";
 			_.merge(params1, parsed.orig.diluentParams);
+			expansion.push(params1);
 		}
 
 		const params2 = _.omit(parsed.orig, ['description', 'diluent', 'diluentParams', 'items']);
@@ -802,9 +817,10 @@ const commandHandlers = {
 		params2.items = items;
 		// params2.clean = "none"; // HACK
 		// params2.cleanEnd = "light"; // HACK
+		expansion.push(params2);
 		// console.log({params1, params2})
 
-		return { expansion: { "1": params1, "2": params2 } };
+		return { expansion };
 	},
 	"pipetter.pipetteMixtures": function(params, parsed, data) {
 		// console.log("pipetter.pipetteMixtures: "+JSON.stringify(parsed, null, '\t'));
