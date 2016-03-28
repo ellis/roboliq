@@ -1011,6 +1011,63 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 	return {DATAs, SCOPEs, foreach};
 }
 
+function copyItemsWithDefaults(items, defaults) {
+	if (_.isArray(items)) {
+		items = _.cloneDeep(items);
+	}
+	// Create a new array with the appropriate size
+	else {
+		const defaultCounts = _.mapValues(defaults, (value) => (_.isArray(value)) ? value.length : 1);
+		let counts = _.uniq(_.values(defaultCounts));
+		counts.sort();
+		let size;
+		if (counts.length === 1) {
+			size = counts[0];
+		}
+		else {
+			counts = _.filter(counts, n => n != 1);
+			assert(counts.length === 1, "unequal array sizes: "+JSON.stringify(items, defaults));
+			size = counts[0];
+		}
+		items = _.map(_.range(size), () => ({}));
+	}
+
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		_.forEach(defaults, (value, name) => {
+			if (_.isUndefined(item[name])) {
+				if (_.isArray(value)) {
+					assert(i < value.length, "value array not long enough for target: "+JSON.stringify({value, target: items}));
+					item[name] = value[i];
+				}
+				else {
+					item[name] = value;
+				}
+			}
+		});
+	}
+
+	return items;
+}
+
+function splitItemsAndDefaults(items, keysToSkip) {
+	let defaults = {};
+
+	if (_.size(items) > 1) {
+		defaults = Design.getCommonValues(items);
+		if (_.isArray(keysToSkip) && !_.isEmpty(keysToSkip)) {
+			defaults = _.difference(defaults, keysToSkip);
+		}
+
+		if (_.size(defaults) > 0) {
+			items = _.map(items, item => _.omit(item, defaults));
+		}
+	}
+
+	return {items, defaults};
+}
+
+/*
 function setDefaultInArrayOfObjects(name, value, l) {
 	assert(_.isArray(l), "expected and array: "+JSON.stringify(l));
 	for (let i = 0; i < l.length; i++) {
@@ -1026,19 +1083,22 @@ function setDefaultInArrayOfObjects(name, value, l) {
 		}
 	}
 }
+*/
 
 module.exports = {
 	asArray,
+	copyItemsWithDefaults,
 	createData,
 	_dereferenceVariable: dereferenceVariable,
-	getCommonValues: Design.getCommonValues,
+	// getCommonValues: Design.getCommonValues,
 	getParsedValue,
 	getStepKeys,
 	lookupPath,
 	lookupPaths,
 	parseParams,
 	queryLogic,
-	setDefaultInArrayOfObjects,
+	// setDefaultInArrayOfObjects,
+	splitItemsAndDefaults,
 	stepify,
 	substituteDeep,
 	updateSCOPEDATA,

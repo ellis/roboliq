@@ -727,17 +727,12 @@ const commandHandlers = {
 	"pipetter.mix": function(params, parsed, data) {
 		console.log("pipetter.mix: "+JSON.stringify(parsed))
 
-		const items = (!_.isUndefined(parsed.value.items))
-			? _.cloneDeep(parsed.value.items)
-			: _.map(_.range(commandHelper.asArray(parsed.value.wells).length), (i) => ({}));
-		console.log({items, f1: _.isUndefined(parsed.value.items), n0: parsed.value.wells.length, n1: commandHelper.asArray(parsed.value.wells).length})
-
-		if (!_.isEmpty(parsed.value.wells)) {
-			commandHelper.setDefaultInArrayOfObjects("well", parsed.value.wells, items);
-			console.log({items})
-		}
-		commandHelper.setDefaultInArrayOfObjects("count", parsed.value.counts || 0.7, items);
-		commandHelper.setDefaultInArrayOfObjects("amount", parsed.value.amounts || 0.7, items);
+		const items = commandHelper.copyItemsWithDefaults(parsed.value.items, {
+			well: parsed.value.wells,
+			count: parsed.value.counts,
+			amount: parsed.value.amounts
+		});
+		console.log("items: "+JSON.stringify(items))
 
 		const items2 = _.map(items, (item, i) => {
 			assert(item.well, `missing well for mix item ${i}: ${JSON.stringify(item)}`);
@@ -767,8 +762,12 @@ const commandHandlers = {
 			return item2;
 		});
 
+		const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(items2, ["syringe", "destination"]);
+		console.log({items3, defaults3})
+
 		const parsed2 = _.cloneDeep(parsed);
-		parsed2.value.items = items2;
+		_.merge(parsed2.value, defaults3);
+		parsed2.value.items = items3;
 
 		const result = pipette(params, parsed2, data);
 
