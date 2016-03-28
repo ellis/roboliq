@@ -773,8 +773,12 @@ const commandHandlers = {
 		const result = pipette(params, parsed2, data);
 
 		_.forEach(result.expansion, step => {
-			if (step.command === "pipetter._pipette")
+			if (step.command === "pipetter._pipette") {
 				step.command = "pipetter._mix";
+				_.forEach(step.items, item => {
+					delete item.source;
+				});
+			}
 		});
 
 		return result;
