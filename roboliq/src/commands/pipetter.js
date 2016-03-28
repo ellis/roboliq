@@ -79,7 +79,7 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	//console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	let items = (_.isUndefined(parsed.value.items))
 		? []
@@ -723,7 +723,26 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.mix": function(params, parsed, data) {
-		CONTINUE
+		if (parsed.value.wells) {
+			parsed.value.destinations = parsed.value.wells;
+			delete parsed.value.wells;
+		}
+
+		_.forEach(parsed.value.items, item => {
+			if (item.well) {
+				item.destination = item.well;
+				delete item.well;
+			}
+		});
+
+		const result = pipette(params, parsed, data);
+
+		_.forEach(result.expansion, step => {
+			if (step.command === "pipetter._pipette")
+				step.command = "pipetter._mix";
+		});
+
+		return result;
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
