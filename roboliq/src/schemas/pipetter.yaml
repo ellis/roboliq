@@ -155,6 +155,11 @@ pipetter.mix:
     counts: {description: "Number of times to aspirate, if missing from items", type: integer, default: 3}
     amounts: {description: "Amount to aspirate, either as a fraction or absolute volume, if missing from items", type: [Volume, number], default: 0.7}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, Syringe]}}
+    clean: {description: "Intensity of cleaning", type: string}
+    cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
+    cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
+    cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
+    cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
 
 pipetter.pipette:
   description: Pipette liquids from sources to destinations.
@@ -174,8 +179,8 @@ pipetter.pipette:
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
-    mixBefore: {description: "Mix with pipetter before aspirating", type: pipetter.MixSpec}
-    mixAfter: {description: "Mix with pipetter after dispensing", type: pipetter.MixSpec}
+    mixSource: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: pipetter.MixSpec}
+    mixDestination: {description: "Parameters for mixing the destination wells with pipetter after dispensing", type: pipetter.MixSpec}
   required: []
 
 pipetter.pipetteDilutionSeries:

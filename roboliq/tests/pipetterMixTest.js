@@ -55,10 +55,29 @@ describe('pipetter', function() {
 		it("should mix some wells", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
+			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1], {
 				command: "pipetter.mix",
 				clean: 'none',
-				wells: "plate1(A01 down B01)"
+				wells: "plate1(A01 down B01)",
+				"1": {
+					"command": "pipetter._mix",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Wet_1000\"",
+					"items": [
+						{
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"destination": "plate1(A01)",
+							"volume": "70 ul"
+						},
+						{
+							"syringe": "ourlab.mario.liha.syringe.2",
+							"destination": "plate1(B01)",
+							"volume": "70 ul"
+						}
+					]
+				},
 			});
 		});
 	});

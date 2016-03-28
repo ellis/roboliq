@@ -69,6 +69,7 @@
 		- [ ] pipetter.pipette: adapt to handle separate source and destination programs
 		- Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
 	- [ ] design1: allocate plates and wells for dilution
+
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel

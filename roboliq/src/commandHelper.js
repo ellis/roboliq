@@ -680,10 +680,7 @@ function processTemperature(result, path, x, data) {
  * @param {object} data - protocol data
  */
 function processVolume(result, path, x, data) {
-	if (_.isNumber(x)) {
-		x = math.unit(x, 'l');
-	}
-	else if (_.isString(x)) {
+	if (_.isString(x)) {
 		x = math.eval(x);
 	}
 	//console.log({function: "processVolume", path, x})
@@ -1014,6 +1011,22 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 	return {DATAs, SCOPEs, foreach};
 }
 
+function setDefaultInArrayOfObjects(name, value, l) {
+	assert(_.isArray(l), "expected and array: "+JSON.stringify(l));
+	for (let i = 0; i < l.length; i++) {
+		const item = l[i];
+		if (_.isUndefined(item[name])) {
+			if (_.isArray(value)) {
+				assert(i < value.length, "value array not long enough for target: "+JSON.stringify({value, target: l}));
+				item[name] = value[i];
+			}
+			else {
+				item[name] = value;
+			}
+		}
+	}
+}
+
 module.exports = {
 	asArray,
 	createData,
@@ -1024,6 +1037,7 @@ module.exports = {
 	lookupPaths,
 	parseParams,
 	queryLogic,
+	setDefaultInArrayOfObjects,
 	stepify,
 	substituteDeep,
 	updateSCOPEDATA,

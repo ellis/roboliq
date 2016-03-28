@@ -271,6 +271,7 @@ function pipette(params, parsed, data) {
 	function setTipModel(items) {
 		const parsed3 = { orig: { items } };
 		const tipModelName = findTipModel(null, parsed3, data);
+		console.log({tipModelName, items})
 		if (tipModelName) {
 			_.forEach(items, function(item) {
 				if (!item.tipModel) item.tipModel = tipModelName;
@@ -311,8 +312,9 @@ function pipette(params, parsed, data) {
 	var findPipettingClass = function(items) {
 		// Pick liquid properties by inspecting source contents
 		const pipettingClasses0 = items.map(item => {
-			const source = _.isArray(item.source) ? item.source : [item.source];
 			let pipettingClass = "Water";
+			const source0 = item.source || item.destination; // If no source is provided, then use destination
+			const source = commandHelper.asArray(source0);
 
 			// FIXME: for debug only
 			if (!source || _.isEmpty(source)) {
@@ -384,7 +386,7 @@ function pipette(params, parsed, data) {
 	}
 	else {
 		function assignProgram(items) {
-			// console.log("assignProgram: "+JSON.stringify(items))
+			console.log("assignProgram: "+JSON.stringify(items))
 			var pipettingClass = findPipettingClass(items);
 			if (!pipettingClass) return false;
 			var pipettingPosition = findPipettingPosition(items);
@@ -443,13 +445,13 @@ function pipette(params, parsed, data) {
 	// Pick source well for items, if the source has multiple wells
 	// Rotate through source wells in order of max volume
 	for (const group of groups) {
-		// FIXME: for debug only
+		/*// FIXME: for debug only
 		for (const x of group) {
 			if (!x.source) {
 				console.log({x})
 			}
 		}
-		// ENDFIX
+		// ENDFIX*/
 		sourceMethods.sourceMethod3(group, data, effects);
 	}
 
@@ -723,19 +725,52 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.mix": function(params, parsed, data) {
-		if (parsed.value.wells) {
-			parsed.value.destinations = parsed.value.wells;
-			delete parsed.value.wells;
-		}
+		console.log("pipetter.mix: "+JSON.stringify(parsed))
 
-		_.forEach(parsed.value.items, item => {
-			if (item.well) {
-				item.destination = item.well;
-				delete item.well;
+		const items = (!_.isUndefined(parsed.value.items))
+			? _.cloneDeep(parsed.value.items)
+			: _.map(_.range(commandHelper.asArray(parsed.value.wells).length), (i) => ({}));
+		console.log({items, f1: _.isUndefined(parsed.value.items), n0: parsed.value.wells.length, n1: commandHelper.asArray(parsed.value.wells).length})
+
+		if (!_.isEmpty(parsed.value.wells)) {
+			commandHelper.setDefaultInArrayOfObjects("well", parsed.value.wells, items);
+			console.log({items})
+		}
+		commandHelper.setDefaultInArrayOfObjects("count", parsed.value.counts || 0.7, items);
+		commandHelper.setDefaultInArrayOfObjects("amount", parsed.value.amounts || 0.7, items);
+
+		const items2 = _.map(items, (item, i) => {
+			assert(item.well, `missing well for mix item ${i}: ${JSON.stringify(item)}`);
+			const volume0 = WellContents.getWellVolume(item.well, data);
+			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "cannot mix empty wells");
+
+			const item2 = _.omit(item, ["amount", "well"]);
+			item2.destination = item.well;
+
+			const amount = math.eval(item.amount);
+			console.log("amount: "+JSON.stringify(amount))
+			console.log("type: "+math.typeof(amount))
+			switch (math.typeof(amount)) {
+				case "number":
+				case "BigNumber":
+				case "Fraction":
+					// assert(amount >= 0 && amount < 1, "amount must be between 0 and 1: "+JSON.stringify(item));
+					item2.volume = math.multiply(volume0, amount);
+					break;
+				case "Unit":
+					item2.volume = amount;
+					break;
+				default:
+					assert(false, "expected amount to be a volume or a number: "+JSON.amount);
 			}
+
+			return item2;
 		});
 
-		const result = pipette(params, parsed, data);
+		const parsed2 = _.cloneDeep(parsed);
+		parsed2.value.items = items2;
+
+		const result = pipette(params, parsed2, data);
 
 		_.forEach(result.expansion, step => {
 			if (step.command === "pipetter._pipette")

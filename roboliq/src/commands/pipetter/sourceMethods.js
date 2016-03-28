@@ -63,7 +63,7 @@ function sourceMethod3(group, data, effects) {
 	var effects = (effects) ? _.cloneDeep(effects) : {};
 
 	// Consider each source in the group separately
-	var sourceToItems = _.groupBy(group, 'source');
+	var sourceToItems = _.groupBy(_.filter(group, x => x.source), 'source');
 	//console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
 	for (const items of _.values(sourceToItems)) {
 		//console.log("sourceMethod3", items)
