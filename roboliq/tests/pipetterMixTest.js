@@ -28,7 +28,6 @@ describe('pipetter', function() {
 			steps: {
 				"1": {
 					command: "pipetter.mix",
-					clean: 'none',
 					wells: "plate1(A01 down B01)",
 				}
 			}
@@ -56,31 +55,91 @@ describe('pipetter', function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", "", "-T"], protocol);
 			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
-			should.deepEqual(result.output.steps[1], {
-				command: "pipetter.mix",
-				clean: 'none',
-				wells: "plate1(A01 down B01)",
-				"1": {
-					"command": "pipetter._mix",
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"program": "\"Roboliq_Water_Wet_1000\"",
-					"itemDefaults": {
-						"count": 3,
-						"volume": "70 ul"
-					},
-					"items": [
-						{
-							"syringe": "ourlab.mario.liha.syringe.1",
-							"well": "plate1(A01)"
-						},
-						{
-							"syringe": "ourlab.mario.liha.syringe.2",
-							"well": "plate1(B01)"
-						}
-					]
+			should.deepEqual(result.output.steps[1][1].items, [
+				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" },
+				{ "syringe": "ourlab.mario.liha.syringe.2", "intensity": "thorough" }
+			]);
+			should.deepEqual(result.output.steps[1][2], {
+				"command": "pipetter._mix",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Wet_1000\"",
+				"itemDefaults": {
+					"count": 3,
+					"volume": "70 ul"
 				},
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"well": "plate1(A01)"
+					},
+					{
+						"syringe": "ourlab.mario.liha.syringe.2",
+						"well": "plate1(B01)"
+					}
+				]
 			});
+			should.deepEqual(result.output.steps[1][3].items, [
+				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" },
+				{ "syringe": "ourlab.mario.liha.syringe.2", "intensity": "thorough" }
+			]);
 		});
+
+		it.only("should clean after mixing", function() {
+			const protocol = _.cloneDeep(protocolA);
+			protocol.steps = {
+				"1": {
+					command: "pipetter.pipette",
+					sources: "plate1(A01)",
+					destinations: "plate1(A02)",
+					volumes: "25ul"
+				},
+				"2": {
+					command: "pipetter.mix",
+					wells: "plate1(A02)",
+				}
+			};
+
+			const result = roboliq.run(["-o", "", "-T"], protocol);
+			console.log(JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.steps[1][1].items, [
+				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" }
+			]);
+			should.deepEqual(result.output.steps[1][2], {
+				"command": "pipetter._pipette",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Dry_1000\"",
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"source": "plate1(A01)",
+						"destination": "plate1(A02)",
+						"volume": "25 ul"
+					}
+				]
+			});
+			should.deepEqual(result.output.steps[1][3].items, [
+				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" }
+			]);
+			should.deepEqual(result.output.steps[2][1], {
+				"command": "pipetter._mix",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Wet_1000\"",
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"well": "plate1(A02)",
+						"count": 3,
+						"volume": "17.5 ul"
+					}
+				]
+			});
+			should.deepEqual(result.output.steps[2][2].items, [
+				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" }
+			]);
+		});
+
 	});
 });

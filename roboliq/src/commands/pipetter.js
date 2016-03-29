@@ -472,11 +472,17 @@ function pipette(params, parsed, data) {
 
 	// Create clean commands before pipetting this group
 	const createCleanActions = function(syringeToCleanValue) {
-		const items = _(syringeToCleanValue).toPairs().filter(([x, n]) => n > 0).map(([syringe, n]) => {
-			const syringeNum = _.toNumber(syringe);
-			const syringe1 = _.isInteger(syringeNum) ? syringeNum : syringe;
-			return {syringe: syringe1, intensity: valueToIntensity[n]};
-		}).value();
+		const items = _(syringeToCleanValue).toPairs().map(([syringeName0, n]) => {
+			if (n > 0) {
+				const syringeName = pipetterUtils.getSyringeName(syringeName0, equipmentName, data);
+				const syringe = commandHelper._g(data, syringeName);
+				const intensity = syringe.cleaned;
+				const syringeCleanedValue = intensityToValue[syringe.cleaned] || 0;
+				if (n > syringeCleanedValue)
+					return {syringe: syringeName, intensity: valueToIntensity[n]};
+			}
+		}).compact().value();
+		// console.log({cleanItems: items})
 		if (_.isEmpty(items)) return [];
 		return [{
 			command: "pipetter.cleanTips",
@@ -783,7 +789,8 @@ const commandHandlers = {
 				step.command = "pipetter._mix";
 				const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(step.items, ["syringe", "well"]);
 				console.log({items3, defaults3});
-				step.itemDefaults = defaults3;
+				if (!_.isEmpty(defaults3))
+					step.itemDefaults = defaults3;
 				step.items = items3;
 			}
 		});

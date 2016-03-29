@@ -57,24 +57,30 @@ export function _washTips(params, parsed, data) {
 		];
 		const lineWash = `Wash(${lWash.join(",")});`;
 
-		const labwareModel = {rows: 8, columns: 1};
-		const tuples = parsed.value.syringes.map(syringe => ({retract: {row: _.isNumber(syringe) ? syringe : syringe.row, col: 1, labwareModel}}));
-		const retractWellMask = encodeWells(tuples, "retract");
-		// console.log({tuples: JSON.stringify(tuples), retractWellMask})
-		const lRetract = [
-			syringeMask,
-			program.cleanerGrid, program.cleanerSite-1,
-			1, // tip spacing
-			`"${retractWellMask}"`,
-			4, // 0=positioning with global z travel, 4=z-move
-			4, // 4=global z travel
-			0,
-			400, // speed (mm/s), min 0.1, max 400
-			0, 0
-		];
-		const lineRetract = `MoveLiha(${lRetract.join(",")});`;
+		const doRetract = _.get(data, ["protocol", "config", "evowareCompiler", "retractTips"], true);
+		if (doRetract) {
+			const labwareModel = {rows: 8, columns: 1};
+			const tuples = parsed.value.syringes.map(syringe => ({retract: {row: _.isNumber(syringe) ? syringe : syringe.row, col: 1, labwareModel}}));
+			const retractWellMask = encodeWells(tuples, "retract");
+			// console.log({tuples: JSON.stringify(tuples), retractWellMask})
+			const lRetract = [
+				syringeMask,
+				program.cleanerGrid, program.cleanerSite-1,
+				1, // tip spacing
+				`"${retractWellMask}"`,
+				4, // 0=positioning with global z travel, 4=z-move
+				4, // 4=global z travel
+				0,
+				400, // speed (mm/s), min 0.1, max 400
+				0, 0
+			];
+			const lineRetract = `MoveLiha(${lRetract.join(",")});`;
 
-		return [lineWash, lineRetract];
+			return [lineWash, lineRetract];
+		}
+		else {
+			return [lineWash];
+		}
 	}
 
 	const program = (_.isString(parsed.value.program))
@@ -109,7 +115,8 @@ function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
 	// Create a script line for each group:
 	const results = _.flatMap(groups, group => handleGroup(parsed, data, group, groupTypeToFunc));
 	// console.log("results:\n"+JSON.stringify(results, null, '\t'))
-	if (groups.length > 0) {
+	const doRetract = _.get(data, ["protocol", "config", "evowareCompiler", "retractTips"], true);
+	if (groups.length > 0 && doRetract) {
 		results.push(handleRetract(parsed, data, groups))
 	}
 

@@ -44,8 +44,9 @@
 
 - [x] `pipetter.pipette()`: handle source=null and destination=null for just aspirating or dispensing
 - [x] `pipetter.pipette()`: adapt to be used by both `pipetter.pipette` and `pipetter.mix`
-- [ ] `pipetter._mix`: implement with schema and command handler
-- [ ] evoware `pipetter._mix`: implement instruction handler
+- [x] `pipetter._mix`: implement with schema and command handler
+- [x] evoware `pipetter._mix`: implement instruction handler
+- [ ] `pipetter.pipette()`: handle "mixSource" and "mixDestination"
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
 - [ ] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well

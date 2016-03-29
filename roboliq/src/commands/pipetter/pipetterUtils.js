@@ -12,6 +12,26 @@ var wellsParser = require('../../parsers/wellsParser.js');
 import * as WellContents from '../../WellContents.js';
 
 /**
+ * Get fully qualified syringe object name
+ * @param {string|integer} syringeName - name or number of syringe
+ * @param {object} data - The data object passed to command handlers.
+ * @return {string} fully qualified syringe object name, if found
+ */
+export function getSyringeName(syringeName, equipmentName, data) {
+	const syringeName2 = `${equipmentName}.syringe.${syringeName}`;
+	if (_.isInteger(syringeName)) {
+		return syringeName2;
+	}
+	else if (_.has(data.objects, syringeName)) {
+		return syringeName;
+	}
+	else if (_.has(data.objects, syringeName2)) {
+		return syringeName2;
+	}
+	return syringeName;
+}
+
+/**
  * Get an object representing the effects of pipetting, aspirating, or dispensing.
  * @param {object} params The parameters for the pipetter._aspirate command.
  * @param {object} data The data object passed to command handlers.
