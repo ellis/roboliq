@@ -29,19 +29,20 @@ export function getEffects_pipette(parsed, data, effects) {
 
 	//console.log("getEffects_aspirate:\n"+JSON.stringify(parsed, null, '\t'));
 	parsed.value.items.forEach((item, index) => {
-		//console.log(JSON.stringify(item, null, '\t'));
+		// console.log("item: "+JSON.stringify(item, null, '\t'));
 
 		// Get initial contents of the syringe
-		const syringeName = parsed.objectName[`items.${index}.syringe`];
+		const syringe = _.isString(item.syringe) ? _.get(data.objects, item.syringe) : item.syringe;
+		const syringeName = _.isString(item.syringe) ? item.syringe : parsed.objectName[`items.${index}.syringe`];
 		const syringeContentsName = `${syringeName}.contents`;
-		const syringeContents00 = effects2[syringeContentsName] || item.syringe.contents || [];
+		const syringeContents00 = effects2[syringeContentsName] || syringe.contents || [];
 		const syringeContaminantsName = `${syringeName}.contaminants`;
 
 		const volume = item.volume;
 
 		if (!_.isUndefined(item.source)) {
 			const syringeContents0 = syringeContents00;
-			const syringeContaminants0 = effects2[syringeContaminantsName] || item.syringe.contaminants || [];
+			const syringeContaminants0 = effects2[syringeContaminantsName] || syringe.contaminants || [];
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the source well
 			const [srcContents00, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
@@ -65,7 +66,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			addEffect(syringeContentsName, syringeContents1);
 			// Remove cleaned property
 			//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))
-			if (!_.isUndefined(item.syringe.cleaned))
+			if (!_.isUndefined(syringe.cleaned))
 				addEffect(`${syringeName}.cleaned`, null);
 
 			// Update __WELLS__ effects for source
@@ -90,8 +91,8 @@ export function getEffects_pipette(parsed, data, effects) {
 		}
 
 		if (!_.isUndefined(item.destination)) {
-			const syringeContents0 = effects2[syringeContentsName] || item.syringe.contents || [];
-			const syringeContaminants0 = effects2[syringeContaminantsName] || item.syringe.contaminants || [];
+			const syringeContents0 = effects2[syringeContentsName] || syringe.contents || [];
+			const syringeContaminants0 = effects2[syringeContaminantsName] || syringe.contaminants || [];
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the destination well
 			const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);

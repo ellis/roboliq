@@ -20,6 +20,10 @@ export function _dispense(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
 
+export function _mix(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data, {well: "Mix"});
+}
+
 export function _pipette(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
@@ -90,14 +94,21 @@ export function _washTips(params, parsed, data) {
 }
 
 
-function handlePipetterSpirate(parsed, data) {
+function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
+	if (!groupTypeToFunc) {
+		groupTypeToFunc = {
+			"source": "Aspirate",
+			"destination": "Dispense"
+		};
+	}
+
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
-	//console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+	console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Create a script line for each group:
-	const results = _.flatMap(groups, group => handleGroup(parsed, data, group));
-	//console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	const results = _.flatMap(groups, group => handleGroup(parsed, data, group, groupTypeToFunc));
+	console.log("results:\n"+JSON.stringify(results, null, '\t'))
 	if (groups.length > 0) {
 		results.push(handleRetract(parsed, data, groups))
 	}
@@ -141,12 +152,15 @@ function handlePipetterSpirate(parsed, data) {
  * @return {[type]}        [description]
  */
 function groupItems(parsed, data) {
-	if (_.isEmpty(parsed.value.items)) return [];
-
 	//console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
+
+	let items = commandHelper.copyItemsWithDefaults(parsed.value.items, parsed.value.itemDefaults);
+	console.log("groupItems items:"+JSON.stringify(items))
+	if (_.isEmpty(items)) return [];
+
 	const tuples = [];
-	for (let i = 0; i < parsed.value.items.length; i++) {
-		const item = parsed.value.items[i];
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
 		const [syringeName, syringeRow] = _.isInteger(item.syringe)
 			? [`${parsed.objectName.equipment}.syringe.${item.syringe}`, item.syringe]
 			: [parsed.objectName[`items.${i}.syringe`], item.syringe.row];
@@ -166,13 +180,14 @@ function groupItems(parsed, data) {
 		}
 		//labwareName <- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
 		//labwareInfo <- getLabwareInfo(objects, labwareName)
-		tuples.push({item, syringeName, syringeRow, source: getWellInfo(item.source), destination: getWellInfo(item.destination)});
+		tuples.push({item, syringeName, syringeRow, source: getWellInfo(item.source), destination: getWellInfo(item.destination), well: getWellInfo(item.well)});
 	}
 	// console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
 
 	//console.log({ref})
 	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
 	function canJoinGroup(group, tuple, debug) {
+		// console.log("canJoinGroup: "+JSON.stringify({group, tuple}, null, '\t'))
 		const ref = group.tuples[0];
 
 		// Make sure the same syringe is not used twice in one group
@@ -219,7 +234,7 @@ function groupItems(parsed, data) {
 			return false;
 		}
 		// Same labware?
-		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName)) {
+		if ((tuple.source && tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination && tuple.destination.labwareName !== ref.destination.labwareName) || (tuple.well && tuple.well.labwareName !== ref.well.labwareName)) {
 			if (debug) console.log({group, tuple, col: wellInfo.col, colRef: wellInfoRef.col})
 			return false;
 		}
@@ -232,48 +247,61 @@ function groupItems(parsed, data) {
 		return false;
 	}
 
-	let groupSrc = {groupType: "source", tuples: [tuples[0]]};
-	let groupDst = {groupType: "destination", tuples: [tuples[0]]};
-	const groups = [groupSrc, groupDst];
+	let groupSrc = {groupType: "source", tuples: []};
+	let groupDst = {groupType: "destination", tuples: []};
+	let groupWll = {groupType: "well", tuples: []};
+	const groups = [groupSrc, groupDst, groupWll];
 	const debug = false;
-	for (let i = 1; i < tuples.length; i++) {
+	for (let i = 0; i < tuples.length; i++) {
 		const tuple = tuples[i];
-		// Can the source can be added to the source group?
-		if (canJoinGroup(groupSrc, tuple, debug)) {
-			groupSrc.tuples.push(tuple);
-			// Decide whether to add to the current destination group or to create new one
-			if (canJoinGroup(groupDst, tuple, debug)) {
-				groupDst.tuples.push(tuple);
+
+		let needNew = false;
+		if (tuple.well) {
+			if (groupWll.tuples.length === 0 || canJoinGroup(groupWll, tuple, debug)) {
+				groupWll.tuples.push(tuple);
 			}
 			else {
-				groupDst = {groupType: "destination", tuples: [tuple]};
-				groups.push(groupDst);
+				needNew = true;
 			}
 		}
-		// No, so start new src and dst groups
 		else {
+			if (tuple.source) {
+				if (groupSrc.tuples.length === 0 || canJoinGroup(groupSrc, tuple, debug)) {
+					groupSrc.tuples.push(tuple);
+				}
+				else {
+					needNew = true;
+				}
+			}
+			if (!needNew && tuple.destination) {
+				if (groupDst.tuples.length === 0 || canJoinGroup(groupDst, tuple, debug)) {
+					groupDst.tuples.push(tuple);
+				}
+				else {
+					groupDst = {groupType: "destination", tuples: [tuple]};
+					groups.push(groupDst);
+				}
+			}
+		}
+
+		// No, so start new src and dst groups
+		if (needNew) {
 			// Start a new group`
-			groupSrc = {groupType: "source", tuples: [tuple]};
-			groupDst = {groupType: "destination", tuples: [tuple]};
+			groupSrc = {groupType: "source", tuples: []};
+			groupDst = {groupType: "destination", tuples: []};
+			groupWll = {groupType: "well", tuples: []};
 			groups.push(groupSrc);
 			groups.push(groupDst);
+			groups.push(groupWll);
+			i--;
 		}
 	}
 
-	return groups;
+	const groups2 = groups.filter(group => group.tuples.length > 0);
+	return groups2;
 }
 
-/**
- * [handlePipetterSpirateHandleGroup description]
- * @param  {object} objects - current object state
- * @param  {string} program - name of the evoware liquid class
- * @param  {string} func - "Aspirate" or "Dispense"
- * @param  {array} tuple_l - List[(PipetterItem, WellNameSingleParsed, Any)]
- * @param  {?} labwareInfo - LabwareInfo
- * @param  {integer} tipSpacing - how far apart the tips should be (the base value 1)
- * @return {array} array of line info
- */
-function handleGroup(parsed, data, group) {
+function handleGroup(parsed, data, group, groupTypeToFunc) {
 	assert(group.tuples.length > 0);
 
 	const tuples = group.tuples;
@@ -312,7 +340,7 @@ function handleGroup(parsed, data, group) {
 		return [{line}];
 	}
 
-	const func = (group.groupType === "source") ? "Aspirate" : "Dispense";
+	const func = groupTypeToFunc[group.groupType];
 	//console.log({syringeMask, volumes})
 	return makeLines(func, group.groupType);
 }

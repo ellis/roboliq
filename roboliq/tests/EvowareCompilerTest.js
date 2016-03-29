@@ -356,6 +356,54 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
+		it.only("should compile pipetter._mix", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["100 ul", "water"],
+							B01: ["100 ul", "water"],
+							C01: ["100 ul", "water"],
+							D01: ["100 ul", "water"],
+							// A02: ["100 ul", "water"],
+							// B02: ["100 ul", "water"],
+							// C02: ["100 ul", "water"],
+							// D02: ["100 ul", "water"],
+						}
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter._mix",
+						agent: "robot1",
+						equipment: "pipetter1",
+						program: "\"Water free dispense\"",
+						itemDefaults: {
+							volume: "50 ul",
+							count: 2
+						},
+						items: [
+							{ syringe: "pipetter1.syringe.1", well: "plate1(A01)" },
+							{ syringe: "pipetter1.syringe.2", well: "plate1(B01)" },
+							{ syringe: "pipetter1.syringe.3", well: "plate1(C01)" },
+							{ syringe: "pipetter1.syringe.4", well: "plate1(D01)" },
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			should.deepEqual(results, [[
+				{line: "Mix(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "MoveLiha(15,1,0,1,\"0C0810000000000000\",4,4,0,400,0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
+		});
+
 		it("should compile pipetter._pipette for a single pipette", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {

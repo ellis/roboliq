@@ -23,7 +23,7 @@ Syringe:
 pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
     source: {description: Source specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, source, volume]
@@ -31,7 +31,7 @@ pipetter._AspirateItem:
 pipetter._DispenseItem:
   description: Parameters for pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
   required: [syringe, destination, volume]
@@ -39,7 +39,7 @@ pipetter._DispenseItem:
 pipetter._MixItem:
   description: Parameters for mixing with pipetter.
   properties:
-    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
     well: {description: Well to mix, type: Well}
     count: {description: "Number of times to aspirate and re-dispense", type: integer}
     volume: {description: Volume, type: Volume}
@@ -56,7 +56,7 @@ pipetter.CleaningIntensity:
 pipetter._PipetteItem:
   description: Parameters for low-level pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
     source: {description: Source specifier, type: Well}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
@@ -84,7 +84,7 @@ pipetter.DilutionItem:
 pipetter.MixItem:
   description: Parameters for mixing with pipetter.
   properties:
-    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
     well: {description: Well to mix, type: Well}
     count: {description: "Number of times to aspirate and re-dispense", type: integer}
     amount: {description: "Amount to aspirate, either as a fraction or absolute volume", type: [Volume, number]}
@@ -120,7 +120,12 @@ pipetter._mix:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "string"}
+    itemDefaults:
+      description: "Default values for items"
+      properties:
+        program: {description: "Program identifier", type: "string"}
+        count: {description: "Number of times to aspirate and re-dispense", type: integer}
+        volume: {description: Volume, type: Volume}
     items: {description: "Data about mixing", "type": "array", items: {type: pipetter._MixItem}}
   required: [agent, equipment, program]
 
@@ -155,10 +160,10 @@ pipetter.cleanTips:
       items:
         type: object
         properties:
-          syringe: {description: Syringe identifier, type: [number, Syringe]}
+          syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
           intensity: {description: "Intensity of the cleaning", type: pipetter.CleaningIntensity}
         required: [syringe]
-    syringes: {description: "Optional list of syringes to serve as default for missing syringes in items list", type: array, items: {type: [number, Syringe]}}
+    syringes: {description: "Optional list of syringes to serve as default for missing syringes in items list", type: array, items: {type: [number, nameOf Syringe]}}
     intensity: {description: "Optional intensity to serve as default intensity for missing intensities in items list", type: pipetter.CleaningIntensity}
 
 pipetter.mix:
@@ -173,7 +178,7 @@ pipetter.mix:
     wells: {description: "Specifier for wells(s) to mix, if missing from items", type: Wells}
     counts: {description: "Number of times to aspirate, if missing from items", type: integer, default: 3}
     amounts: {description: "Amount to aspirate, either as a fraction or absolute volume, if missing from items", type: [Volume, number], default: 0.7}
-    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, Syringe]}}
+    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
     clean: {description: "Intensity of cleaning", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
@@ -192,7 +197,7 @@ pipetter.pipette:
     sources: {description: "Specifier for source(s) to aspirate from, if missing from items", type: Sources}
     destinations: {description: "Specifier for destination(s) to despense to, if missing from items", type: Wells}
     volumes: {description: "Volume(s) to pipette, if missing from items", type: Volumes}
-    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, Syringe]}}
+    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
     clean: {description: "Intensity of cleaning", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}

@@ -172,7 +172,7 @@ function parseParams(params, data, schema) {
  * @param {object} data - protocol data
  */
 function processParamsBySchema(result, path, params, schema, data) {
-	//console.log(`processParamsBySchema: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
+	// console.log(`processParamsBySchema: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
 	const required_l = schema.required || [];
 	const l0 = _.toPairs(schema.properties);
 	// If no properties are schemafied, return the original parameters
@@ -202,6 +202,13 @@ function processParamsBySchema(result, path, params, schema, data) {
 				//console.log({propertyName, type, info, params})
 				expect.truthy({paramName: propertyName}, !_.isUndefined(value1), "missing required value [CODE 95]");
 			}
+		}
+		else if (_.startsWith(type, "nameOf ")) {
+			const type1 = type.substr(7);
+			const value1 = lookupValue0(result, path1, value0, data);
+			expect.truthy({paramName: path1.join(".")}, value1.type === type1, `expect the name of an object of type ${type1}: ${JSON.stringify(value1)}`);
+			_.set(result.value, path1, result.objectName[path1.join(".")]);
+			// console.log("nameOf result: "+JSON.stringify(result));
 		}
 		else {
 			const value1 = _.clone(lookupValue0(result, path1, value0, data));
@@ -278,7 +285,8 @@ function processValue0BySchema(result, path, value0, schema, data) {
 			}
 
 			if (!_.isEmpty(es))
-				throw es[0];
+				// throw es[0];
+				throw es.join("; ");
 		}
 	}
 	/*if (!_.isEqual(value0, valuePre)) {
@@ -312,8 +320,18 @@ function processValue0AsEnum(result, path, value0, schema, data) {
  */
 function processValue0BySchemaType(result, path, value0, schema, type, data) {
 	// console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
-	if (type === 'name') {
-		return 	_.set(result.value, path, value0);
+	if (type === "name") {
+		_.set(result.value, path, value0);
+		return;
+	}
+	else if (_.startsWith(type, "nameOf ")) {
+		// REFACTOR: this duplicates code in processValue0BySchema()
+		const type1 = type.substr(7);
+		const value1 = lookupValue0(result, path, value0, data);
+		expect.truthy({paramName: path.join(".")}, value1.type === type1, `expect the name of an object of type ${type1}: ${JSON.stringify(value1)}`);
+		_.set(result.value, path, result.objectName[path.join(".")]);
+		// console.log("nameOf result : "+JSON.stringify(result));
+		return;
 	}
 
 	const value = _.cloneDeep(lookupValue0(result, path, value0, data));

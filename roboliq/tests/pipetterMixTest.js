@@ -65,8 +65,10 @@ describe('pipetter', function() {
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.liha",
 					"program": "\"Roboliq_Water_Wet_1000\"",
-					"count": 3,
-					"volume": "70 ul",
+					"itemDefaults": {
+						"count": 3,
+						"volume": "70 ul"
+					},
 					"items": [
 						{
 							"syringe": "ourlab.mario.liha.syringe.1",

@@ -376,6 +376,66 @@ describe('commandHelper', function() {
 			});
 		});
 
+		it("should work for a previous bug 2", () => {
+			const data = {
+				objects: {
+					ourlab: {
+						mario: {
+							liha: {
+								syringe: {
+									1: {
+										"type": "Syringe",
+										"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+										"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+										contaminants: undefined,
+										contents: undefined,
+										cleaned: "thorough"
+									}
+								}
+							}
+						}
+					}
+				},
+				schemas: {
+					Syringe: {
+						description: "Pipetting syringe.",
+						properties: {
+							type: {enum: ["Syringe"]},
+							description: {type: "string"},
+							label: {type: "string"},
+							tipModel: {type: "string"},
+							tipModelPermanent: {type: "string"}
+						},
+						required: ["type"]
+					}
+				},
+				accesses: []
+			};
+			const params = {
+				"syringe":"ourlab.mario.liha.syringe.1",
+				"intensity":"thorough"
+			};
+			const schema = {
+				"type":"object",
+				"properties":{
+					"syringe":{"description":"Syringe identifier","type":["number","nameOf Syringe"]},
+					"intensity":{"description":"Intensity of the cleaning","type":"string"}
+				},
+				"required":["syringe"]
+			};
+			const parsed = commandHelper.parseParams(params, data, schema);
+			should.deepEqual(parsed, {
+				orig: params,
+				objectName: {
+					syringe: "ourlab.mario.liha.syringe.1",
+				},
+				value: {
+					syringe: "ourlab.mario.liha.syringe.1",
+					intensity: "thorough"
+				}
+			});
+		});
+
 		it('should catch missing sources', () => {
 			const data = {
 				objects: {},
@@ -430,18 +490,21 @@ describe('commandHelper', function() {
 			};
 			const params = {
 				"syringe": "ourlab.mario.liha.syringe.1",
+				"syringeName": "ourlab.mario.liha.syringe.1"
 			};
 			const schema = {
 				properties: {
-					syringe: {type: "Syringe"}
+					syringe: {type: "Syringe"},
+					syringeName: {type: "nameOf Syringe"}
 				},
-				required: ['syringe']
+				required: ['syringe', "syringeName"]
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			should.deepEqual(parsed, {
 				orig: params,
 				objectName: {
-					syringe: "ourlab.mario.liha.syringe.1"
+					syringe: "ourlab.mario.liha.syringe.1",
+					syringeName: "ourlab.mario.liha.syringe.1",
 				},
 				value: {
 					syringe: {
@@ -451,7 +514,8 @@ describe('commandHelper', function() {
 						contaminants: undefined,
 						contents: undefined,
 						cleaned: "thorough"
-					}
+					},
+					syringeName: "ourlab.mario.liha.syringe.1",
 				}
 			});
 		});

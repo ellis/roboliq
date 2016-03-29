@@ -783,7 +783,7 @@ const commandHandlers = {
 				step.command = "pipetter._mix";
 				const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(step.items, ["syringe", "well"]);
 				console.log({items3, defaults3});
-				_.merge(step, defaults3);
+				step.itemDefaults = defaults3;
 				step.items = items3;
 			}
 		});

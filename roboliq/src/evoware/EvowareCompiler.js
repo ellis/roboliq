@@ -13,6 +13,7 @@ const commandHandlers = {
 	"evoware._raw": evoware._raw,
 	"pipetter._aspirate": pipetter._aspirate,
 	"pipetter._dispense": pipetter._dispense,
+	"pipetter._mix": pipetter._mix,
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,
 	"timer._sleep": timer._sleep,

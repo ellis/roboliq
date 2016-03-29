@@ -133,17 +133,27 @@ steps:
   #   destination: ourlab.luigi.site.P6
 
   # description: move plate into culturebox and shake it
+  # 1:
+  #   command: equipment.open
+  #   agent: ourlab.luigi.evoware
+  #   equipment: ourlab.luigi.culturebox
+  # 2:
+  #   command: transporter.movePlate
+  #   object: plate
+  #   destination: ourlab.luigi.site.BOX_2
+  # 3:
+  #   command: shaker.run
+  #   equipment: ourlab.luigi.culturebox
+  #   program:
+  #     rpm: 300
+  #     duration: 30s
+
+  # description: mix wells using pipetter.mix
   1:
-    command: equipment.open
-    agent: ourlab.luigi.evoware
-    equipment: ourlab.luigi.culturebox
+    command: pipetter.pipette
+    sources: ourlab.luigi.systemLiquid
+    destinations: plate(A01)
+    volumes: 1000ul
   2:
-    command: transporter.movePlate
-    object: plate
-    destination: ourlab.luigi.site.BOX_2
-  3:
-    command: shaker.run
-    equipment: ourlab.luigi.culturebox
-    program:
-      rpm: 300
-      duration: 30s
+    command: pipetter.mix
+    wells: plate(A01)
