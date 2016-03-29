@@ -447,7 +447,7 @@ function g(data, path, dflt) {
 	else
 		data.accesses = [name];
 
-	return _.get(data.objects, name, dflt);
+	return _.get(data.objects, path, dflt);
 }
 
 /**
@@ -1117,6 +1117,7 @@ module.exports = {
 	copyItemsWithDefaults,
 	createData,
 	_dereferenceVariable: dereferenceVariable,
+	_g: g,
 	// getCommonValues: Design.getCommonValues,
 	getParsedValue,
 	getStepKeys,

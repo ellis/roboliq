@@ -47,7 +47,7 @@
 - [ ] `pipetter._mix`: implement with schema and command handler
 - [ ] evoware `pipetter._mix`: implement instruction handler
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
-- [ ] `pipetter.pipetteDilutionSeries`: perform mixing before after dispense
+- [ ] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
 - [ ] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
 - [ ] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [ ] `pipetter.pipette()`: handle separate programs for source and destination

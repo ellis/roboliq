@@ -120,10 +120,10 @@ pipetter._mix:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
     itemDefaults:
       description: "Default values for items"
       properties:
-        program: {description: "Program identifier", type: "string"}
         count: {description: "Number of times to aspirate and re-dispense", type: integer}
         volume: {description: Volume, type: Volume}
     items: {description: "Data about mixing", "type": "array", items: {type: pipetter._MixItem}}

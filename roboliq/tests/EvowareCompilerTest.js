@@ -356,7 +356,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it.only("should compile pipetter._mix", function() {
+		it("should compile pipetter._mix", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
@@ -396,8 +396,8 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
 			should.deepEqual(results, [[
-				{line: "Mix(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
-				{line: "MoveLiha(15,1,0,1,\"0C0810000000000000\",4,4,0,400,0,0);"},
+				{line: "Mix(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,0,0,0,0,1,0,1,\"0C08?0000000000000\",2,0,0);"},
+				{line: "MoveLiha(15,1,0,1,\"0C08?0000000000000\",4,4,0,400,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
 				]}

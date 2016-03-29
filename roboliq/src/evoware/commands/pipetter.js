@@ -104,11 +104,11 @@ function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
 
 	// Create groups of items that can be pipetted simultaneously
 	const groups = groupItems(parsed, data);
-	console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+	// console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Create a script line for each group:
 	const results = _.flatMap(groups, group => handleGroup(parsed, data, group, groupTypeToFunc));
-	console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	// console.log("results:\n"+JSON.stringify(results, null, '\t'))
 	if (groups.length > 0) {
 		results.push(handleRetract(parsed, data, groups))
 	}
@@ -117,7 +117,7 @@ function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
 	//	token_l2 <- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
 	const siteToWellInfo = {};
 	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
-		for (let propertyName of ["source", "destination"]) {
+		for (let propertyName of ["source", "destination", "well"]) {
 			const wellInfo = tuple[propertyName];
 			if (wellInfo && !siteToWellInfo.hasOwnProperty(wellInfo.siteName))
 				siteToWellInfo[wellInfo.siteName] = wellInfo;
@@ -142,6 +142,7 @@ function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
  * - `tuples` -- an array with these properties:
  *     - `item` -- the original pipette item
  *     - `syringeName` -- roboliq name of the syringe to use
+ *     - `syringe` -- syringe object
  *     - `syringeRow` -- row of syringe on the LiHa
  *     - `source` -- source properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
  *     - `destination` -- destination properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
@@ -155,15 +156,19 @@ function groupItems(parsed, data) {
 	//console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
 
 	let items = commandHelper.copyItemsWithDefaults(parsed.value.items, parsed.value.itemDefaults);
-	console.log("groupItems items:"+JSON.stringify(items))
+	// console.log("groupItems items:"+JSON.stringify(items))
 	if (_.isEmpty(items)) return [];
 
 	const tuples = [];
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
-		const [syringeName, syringeRow] = _.isInteger(item.syringe)
-			? [`${parsed.objectName.equipment}.syringe.${item.syringe}`, item.syringe]
-			: [parsed.objectName[`items.${i}.syringe`], item.syringe.row];
+		const syringeName = _.isInteger(item.syringe)
+			? `${parsed.objectName.equipment}.syringe.${item.syringe}`
+			: parsed.objectName[`items.${i}.syringe`];
+		const syringe = commandHelper._g(data, syringeName);
+		const syringeRow = _.isInteger(item.syringe)
+			? item.syringe
+			: syringe.row;
 		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
 		// const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
 		function getWellInfo(well) {
@@ -340,15 +345,39 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 		return [{line}];
 	}
 
+	function makeLinesMix(func, propertyName) {
+		const wellInfo = tuple0[propertyName];
+		// console.log({func, propertyName, wellInfo})
+		if (_.isUndefined(wellInfo))
+			return [];
+
+		const labwareModel = wellInfo.labwareModel;
+		const plateMask = encodeWells(tuples, propertyName);
+		const l = [
+			syringeMask,
+			`"${stripQuotes(parsed.value.program)}"`,
+			volumes.join(","),
+			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
+			group.syringeSpacing || 1,
+			`"${plateMask}"`,
+			tuple0.item.count,
+			0,
+			0
+		];
+		const line = `${func}(${l.join(",")});`;
+		return [{line}];
+	}
+
+
 	const func = groupTypeToFunc[group.groupType];
 	//console.log({syringeMask, volumes})
-	return makeLines(func, group.groupType);
+	return (func === "Mix") ? makeLinesMix(func, group.groupType) : makeLines(func, group.groupType);
 }
 
 function handleRetract(parsed, data, groups) {
 	const tuplesOrig = _.flatMap(groups, group => group.tuples);
 	const tuple0 = _.last(tuplesOrig);
-	const propertyName = (tuple0.destination) ? "destination" : "source";
+	const propertyName = (tuple0.well) ? "well" : (tuple0.destination) ? "destination" : "source";
 	const wellInfo = tuple0[propertyName];
 	// console.log({propertyName, wellInfo, tuple0})
 	if (_.isUndefined(wellInfo))
