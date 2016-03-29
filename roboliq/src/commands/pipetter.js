@@ -81,32 +81,44 @@ function pipette(params, parsed, data) {
 
 	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
-	let items = (_.isUndefined(parsed.value.items))
-		? []
-		: _.flatten(parsed.value.items);
+	// let items = (_.isUndefined(parsed.value.items))
+	// 	? []
+	// 	: _.flatten(parsed.value.items);
 	//console.log("items: "+JSON.stringify(items));
 	let agent = parsed.objectName.agent || "?agent";
 	let equipmentName = parsed.objectName.equipment || "?equipment";
 	//var tipModels = params.tipModels;
 	//var syringes = params.syringes;
 
-	const sourcesTop = getLabwareWellList(parsed.objectName.sourceLabware, parsed.value.sources);
-	//console.log({sourcesTop})
-	const destinationsTop = getLabwareWellList(parsed.objectName.destinationLabware, parsed.value.destinations);
-	const volumesTop = parsed.value.volumes || [];
-	const syringesTop = (parsed.value.syringes || []).map((x, i) => {
-		const syringe = parsed.value.syringes[i];
-		if (_.isNumber(syringe))
-			return syringe;
-		else
-			return _.get(parsed.objectName, `syringes.${i}`, syringe);
-	})
+	// const sourcesTop = getLabwareWellList(parsed.objectName.sourceLabware, parsed.value.sources);
+	// //console.log({sourcesTop})
+	// const destinationsTop = getLabwareWellList(parsed.objectName.destinationLabware, parsed.value.destinations);
+	// const wellsTop = getLabwareWellList(parsed.objectName.wellsLabware, parsed.value.wells);
+	// const volumesTop = parsed.value.volumes || [];
+	// const syringesTop = (parsed.value.syringes || []).map((x, i) => {
+	// 	const syringe = parsed.value.syringes[i];
+	// 	if (_.isNumber(syringe))
+	// 		return syringe;
+	// 	else
+	// 		return _.get(parsed.objectName, `syringes.${i}`, syringe);
+	// });
 	//console.log({sourceLabware})
+	//
+	let items = commandHelper.copyItemsWithDefaults(_.flatten(parsed.value.items), {
+		source: parsed.value.sources,
+		destination: parsed.value.destinations,
+		well: parsed.value.wells,
+		volume: parsed.value.volumes,
+		syringe: parsed.value.syringes
+	});
 
+	if (items.length == 0) {
+		return {};
+	}
+
+	/*
 	// Figure out number of items
-	var itemCount = 0;
-	if (items.length > 0) itemCount = items.length;
-	else itemCount = Math.max(sourcesTop.length, destinationsTop.length, volumesTop.length);
+	const itemCount = items.length;
 
 	// Populate item properties from the top properties
 	if (itemCount > 0) {
@@ -114,6 +126,7 @@ function pipette(params, parsed, data) {
 		if (items.length > 0) {
 			if (sourcesTop.length > 1) assert(sourcesTop.length == itemCount, "`sources` length and `items` length must be equal")
 			if (destinationsTop.length > 1) assert(destinationsTop.length == itemCount, "`destinations` length and `items` length must be equal")
+			if (wellsTop.length > 1) assert(wellsTop.length == itemCount, "`wells` length and `items` length must be equal")
 			if (volumesTop.length > 1) assert(volumesTop.length == itemCount, "`volumes` length and `items` length must be equal")
 		}
 		else {
@@ -127,68 +140,40 @@ function pipette(params, parsed, data) {
 			for (let i = 0; i < itemCount; i++)
 				items[i] = {};
 		}
-
-		for (let i = 0; i < itemCount; i++) {
+*/
+		for (let i = 0; i < items.length; i++) {
 			const item = items[i];
 
 			// Add index to all items, so that we can reference `parsed.objectName[items.$index.syringe]` later
+			// TODO: above we run _.flattened(parsed.value.items) -- the indexing should be added BEFORE flattening.
 			item.index = i;
 
-			//console.log("i:", i)
-			if (_.isUndefined(item.source)) {
-				if (sourcesTop.length == 1)
-					item.source = sourcesTop[0];
-				else if (sourcesTop.length > 1)
-					item.source = sourcesTop[i];
-			}
-			else if (parsed.objectName.sourceLabware) {
+			// Add labware to well properties
+			if (item.source && parsed.objectName.sourceLabware) {
 				item.source = getLabwareWell(parsed.objectName.sourceLabware, item.source);
 			}
-
-			if (_.isUndefined(item.destination)) {
-				//console.log("step", item, destinationsTop, i, destinationsTop[i])
-				if (destinationsTop.length == 1)
-					item.destination = destinationsTop[0];
-				else if (destinationsTop.length > 1)
-					item.destination = destinationsTop[i];
-			}
-			if (parsed.objectName.destinationLabware) {
+			if (item.destination && parsed.objectName.destinationLabware) {
 				item.destination = getLabwareWell(parsed.objectName.destinationLabware, item.destination);
-				// console.log({item_destinations: items.map(x => x.destination)})
+			}
+			if (item.well && parsed.objectName.wellLabware) {
+				item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
 			}
 
-			if (_.isUndefined(item.volume)) {
-				//console.log(`items[${i}].volume is undefined, volumesTop = ${volumesTop}`)
-				if (volumesTop.length == 1)
-					item.volume = volumesTop[0];
-				else if (volumesTop.length > 1)
-					item.volume = volumesTop[i];
-			}
-
-			if (_.isUndefined(item.syringe)) {
-				if (syringesTop.length == 1)
-					item.syringe = syringesTop[0];
-				else if (syringesTop.length > 1) {
-					item.syringe = syringesTop[i];
-				}
-			}
 			// Otherwise replace syringe objects with syringe names
-			else {
-				item.syringe = _.get(parsed.objectName, `items.${i}.syringe`, item.syringe);
-			}
+			item.syringe = _.get(parsed.objectName, `items.${i}.syringe`, item.syringe);
 		}
-	}
+	// }
 	//console.log(JSON.stringify(sourcesTop, null, '  '))
 	// console.log(JSON.stringify(items, null, '  '))
 
 	// Find all wells, both sources and destinations
-	var wellName_l = _(items).map(function (item) {
+	const wellName_l = _(items).map(function (item) {
 		//console.log({item})
 		// TODO: allow source to refer to a set of wells, not just a single well
 		// TODO: create a function getSourceWells()
-		return [item.source, item.destination]
-	}).flatten().compact().value();
-	wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
+		return [item.source, item.destination, item.well]
+	}).flatten().compact().uniq().value();
+	// wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
 	// console.log("wellName_l", JSON.stringify(wellName_l))
 
 	// Find all labware
@@ -313,7 +298,7 @@ function pipette(params, parsed, data) {
 		// Pick liquid properties by inspecting source contents
 		const pipettingClasses0 = items.map(item => {
 			let pipettingClass = "Water";
-			const source0 = item.source || item.destination; // If no source is provided, then use destination
+			const source0 = item.source || item.well || item.destination; // If no source is provided, then use well or destination
 			const source = commandHelper.asArray(source0);
 
 			// FIXME: for debug only
@@ -358,9 +343,7 @@ function pipette(params, parsed, data) {
 
 	// Pick position (wet or dry) by whether there are already contents in the destination well
 	var findPipettingPosition = function(items) {
-		// Pick liquid properties by inspecting source contents
-		var sources = _.map(items, 'source');
-		var pipettingPositions = _(items).map('destination').map(function(well) {
+		var pipettingPositions = _(items).map(item => item.destination || item.well).map(function(well) {
 			var i = well.indexOf('(');
 			var labware = well.substr(0, i);
 			var wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
@@ -518,7 +501,7 @@ function pipette(params, parsed, data) {
 		var syringeToCleanBeforeValue = _.clone(syringeToCleanAfterValue);
 		//console.log({syringeToCleanBeforeValue, syringeToCleanAfterValue})
 		_.forEach(group, function(item) {
-			var source = item.source;
+			var source = item.source || item.well;
 			var syringe = item.syringe;
 			var isSameSource = (source === syringeToSource[syringe]);
 
@@ -559,7 +542,7 @@ function pipette(params, parsed, data) {
 		doCleanBefore = true;
 
 		var items2 = _.map(group, function(item) {
-			const item2 = _.pick(item, ["syringe", "source", "destination", "volume", "count"]);
+			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count"]);
 			item2.volume = item2.volume.format({precision: 14});
 			return item2;
 		});
@@ -743,8 +726,7 @@ const commandHandlers = {
 			const volume0 = WellContents.getWellVolume(item.well, data);
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "cannot mix empty wells");
 
-			const item2 = _.omit(item, ["amount", "well"]);
-			item2.destination = item.well;
+			const item2 = _.omit(item, ["amount"]);
 
 			const amount = math.eval(item.amount);
 			// console.log("amount: "+JSON.stringify(amount))
@@ -775,10 +757,7 @@ const commandHandlers = {
 		_.forEach(result.expansion, step => {
 			if (step.command === "pipetter._pipette") {
 				step.command = "pipetter._mix";
-				_.forEach(step.items, item => {
-					delete item.source;
-				});
-				const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(step.items, ["syringe", "destination"]);
+				const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(step.items, ["syringe", "well"]);
 				console.log({items3, defaults3});
 				_.merge(step, defaults3);
 				step.items = items3;

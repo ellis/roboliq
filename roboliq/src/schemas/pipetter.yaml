@@ -40,7 +40,7 @@ pipetter._MixItem:
   description: Parameters for mixing with pipetter.
   properties:
     syringe: {description: Syringe identifier, type: [number, Syringe]}
-    destination: {description: Well to mix, type: Well}
+    well: {description: Well to mix, type: Well}
     count: {description: "Number of times to aspirate and re-dispense", type: integer}
     volume: {description: Volume, type: Volume}
     program: {description: "Program identifier", type: "string"}

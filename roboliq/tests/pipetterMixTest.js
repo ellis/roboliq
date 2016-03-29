@@ -70,11 +70,11 @@ describe('pipetter', function() {
 					"items": [
 						{
 							"syringe": "ourlab.mario.liha.syringe.1",
-							"destination": "plate1(A01)"
+							"well": "plate1(A01)"
 						},
 						{
 							"syringe": "ourlab.mario.liha.syringe.2",
-							"destination": "plate1(B01)"
+							"well": "plate1(B01)"
 						}
 					]
 				},

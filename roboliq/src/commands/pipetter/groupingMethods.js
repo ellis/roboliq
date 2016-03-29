@@ -133,7 +133,9 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 		// Make sure all items in the group use the same program
 		if (current.program !== item.program) { if (debug) console.log({currentProgram: current.program, itemProgram: item.program}); return false; }
 		// Make sure source was not previously a destination in this group
-		if (_.some(current.group, item2 => item.source === item2.destination)) { if (debug) console.log({currentGroup: current.group, item}); return false; }
+		// const source = item.source || item.well;
+		// const destination = item.destination || item.well;
+		if (_.some(current.group, item2 => (item.source || item.well) === (item2.destination || item2.well))) { if (debug) console.log({currentGroup: current.group, item}); return false; }
 		// Make sure syringe was not already used (only relevant want syringe is manually specified)
 		if (item.syringe) {
 			if (current.syringesUsed.hasOwnProperty(item.syringe)) { if (debug) console.log({syringesUsed: current.syringesUsed, itemSyringe: item.syringe}); return false; }
