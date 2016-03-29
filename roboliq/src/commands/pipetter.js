@@ -471,15 +471,22 @@ function pipette(params, parsed, data) {
 	var expansionList = [];
 
 	// Create clean commands before pipetting this group
-	const createCleanActions = function(syringeToCleanValue) {
+	const createCleanActions = function(syringeToCleanValue, compareToOriginalState = false) {
+		console.log("createCleanActions: "+JSON.stringify(syringeToCleanValue))
 		const items = _(syringeToCleanValue).toPairs().map(([syringeName0, n]) => {
 			if (n > 0) {
 				const syringeName = pipetterUtils.getSyringeName(syringeName0, equipmentName, data);
 				const syringe = commandHelper._g(data, syringeName);
-				const intensity = syringe.cleaned;
-				const syringeCleanedValue = intensityToValue[syringe.cleaned] || 0;
-				if (n > syringeCleanedValue)
+				if (compareToOriginalState) {
+					const intensity = syringe.cleaned;
+					const syringeCleanedValue = intensityToValue[syringe.cleaned] || 0;
+					console.log({syringeName0, n, syringeName, intensity, syringeCleanedValue, syringe})
+					if (n > syringeCleanedValue)
+						return {syringe: syringeName, intensity: valueToIntensity[n]};
+				}
+				else {
 					return {syringe: syringeName, intensity: valueToIntensity[n]};
+				}
 			}
 		}).compact().value();
 		// console.log({cleanItems: items})
@@ -519,7 +526,7 @@ function pipette(params, parsed, data) {
 		});
 	});
 	// Add cleanBegin commands
-	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeginValue));
+	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeginValue, true));
 	//console.log("expansionList:")
 	//console.log(JSON.stringify(expansionList, null, '  '));
 
@@ -589,7 +596,7 @@ function pipette(params, parsed, data) {
 	// cleanEnd
 	// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 	var syringeToCleanEndValue = {};
-	//console.log({syringeToCleanValue})
+	console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
 		var intensity = parsed.value.cleanEnd || parsed.value.clean || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));
@@ -630,6 +637,8 @@ const commandHandlers = {
 		return {effects};
 	},
 	"pipetter._mix": function(params, parsed, data) {
+		// console.log("pipetter._mix: "+JSON.stringify(parsed, null, '\t'))
+		parsed.value.items = commandHelper.copyItemsWithDefaults(parsed.value.items, parsed.value.itemDefaults);
 		//console.log("params", JSON.stringify(params, null, '  '))
 		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
 		return {

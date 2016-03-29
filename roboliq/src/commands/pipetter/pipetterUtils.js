@@ -60,14 +60,15 @@ export function getEffects_pipette(parsed, data, effects) {
 
 		const volume = item.volume;
 
-		if (!_.isUndefined(item.source)) {
+		const source = item.source;
+		if (!_.isUndefined(source)) {
 			const syringeContents0 = syringeContents00;
 			const syringeContaminants0 = effects2[syringeContaminantsName] || syringe.contaminants || [];
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the source well
-			const [srcContents00, srcContentsName] = WellContents.getContentsAndName(item.source, data, effects2);
+			const [srcContents00, srcContentsName] = WellContents.getContentsAndName(source, data, effects2);
 			const srcContents0 = (_.isEmpty(srcContents00))
-				? ["Infinity l", item.source] : srcContents00;
+				? ["Infinity l", source] : srcContents00;
 			//console.log("srcContents0", srcContents0, srcContentsName);
 
 			// Contents of source well and syringe after aspiration
@@ -110,12 +111,13 @@ export function getEffects_pipette(parsed, data, effects) {
 			addEffect(nameWELL, well1);
 		}
 
-		if (!_.isUndefined(item.destination)) {
+		const destination = item.destination;
+		if (!_.isUndefined(destination)) {
 			const syringeContents0 = effects2[syringeContentsName] || syringe.contents || [];
 			const syringeContaminants0 = effects2[syringeContaminantsName] || syringe.contaminants || [];
 			//console.log({syringeName, syringeContents0});
 			// Get initial contents of the destination well
-			const [dstContents0, dstContentsName] = WellContents.getContentsAndName(item.destination, data, effects2);
+			const [dstContents0, dstContentsName] = WellContents.getContentsAndName(destination, data, effects2);
 			//console.log("dst contents", dstContents0, dstContentsName);
 
 			expect.truthy({paramName: `items[${index}].syringe`}, !WellContents.isEmpty(syringeContents0), "syringe contents should not be empty when dispensing");
@@ -147,7 +149,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			addEffect(dstContentsName, dstContents1);
 
 			// Update __WELLS__ effects for destination
-			// REFACTOR: lots of duplication with the same code in the item.source condition
+			// REFACTOR: lots of duplication with the same code in the source condition
 			const volume0 = WellContents.getVolume(dstContents0);
 			const volume1 = WellContents.getVolume(dstContents1);
 			const nameWELL = "__WELLS__."+dstContentsName;
@@ -168,6 +170,34 @@ export function getEffects_pipette(parsed, data, effects) {
 			});
 			//console.log("x:\n"+JSON.stringify(x, null, '  '));
 			addEffect(nameWELL, well1);
+		}
+
+		if (!_.isUndefined(item.well)) {
+			console.log({item})
+			const source = item.well;
+			const syringeContents0 = syringeContents00;
+			const syringeContaminants0 = effects2[syringeContaminantsName] || syringe.contaminants || [];
+			//console.log({syringeName, syringeContents0});
+			// Get initial contents of the source well
+			const [srcContents00, srcContentsName] = WellContents.getContentsAndName(source, data, effects2);
+			const srcContents0 = (_.isEmpty(srcContents00))
+				? ["Infinity l", source] : srcContents00;
+			//console.log("srcContents0", srcContents0, srcContentsName);
+
+			// Contents of source well and syringe after aspiration
+			const [srcContents1, syringeContents1] = WellContents.transferContents(srcContents0, syringeContents0, item.volume);
+			//console.log({srcContents1, syringeContents1});
+
+			// Get list of syringe contaminants
+			const contaminants1 = _.keys(WellContents.flattenContents(syringeContents1));
+			//console.log({syringeContaminantsName, syringeContaminants0, contaminants1});
+			// Update contaminant effects
+			if (!_.isEqual(syringeContaminants0, contaminants1))
+				addEffect(syringeContaminantsName, contaminants1);
+			// Remove cleaned property
+			//console.log(`syringe ${syringeName}: `+JSON.stringify(item.syringe))
+			if (!_.isUndefined(syringe.cleaned))
+				addEffect(`${syringeName}.cleaned`, null);
 		}
 
 		// Prevent superfluous 'nulling' of syringe contents
