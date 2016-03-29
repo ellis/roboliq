@@ -85,7 +85,7 @@ describe('pipetter', function() {
 			]);
 		});
 
-		it.only("should clean after mixing", function() {
+		it("should clean after mixing", function() {
 			const protocol = _.cloneDeep(protocolA);
 			protocol.steps = {
 				"1": {
@@ -101,8 +101,8 @@ describe('pipetter', function() {
 			};
 
 			const result = roboliq.run(["-o", "", "-T"], protocol);
-			console.log(JSON.stringify(result.output.steps, null, '\t'))
-			console.log(JSON.stringify(result.output.effects, null, '\t'))
+			// console.log(JSON.stringify(result.output.steps, null, '\t'))
+			// console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.steps[1][1].items, [
 				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" }
 			]);
