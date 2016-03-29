@@ -147,7 +147,7 @@ describe('commandHelper', function() {
 				string2: '"hello"',
 				time1: 23,
 				time2: "23 minutes",
-				volume1: 10,
+				// volume1: 10,
 				volume2: "10 ul",
 				volumes1: "10 ul",
 				volumes2: ["10 ul", "20 ul"],
@@ -167,7 +167,7 @@ describe('commandHelper', function() {
 					string2: {type: 'string'},
 					time1: {type: 'Duration'},
 					time2: {type: 'Duration'},
-					volume1: {type: 'Volume'},
+					// volume1: {type: 'Volume'},
 					volume2: {type: 'Volume'},
 					volumes1: {type: 'Volumes'},
 					volumes2: {type: 'Volumes'},
@@ -177,7 +177,7 @@ describe('commandHelper', function() {
 					sources1: {type: 'Sources'},
 					sources2: {type: 'Sources'},
 				},
-				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', 'volume1', 'volume2', 'volumes1', 'volumes2', 'well1', 'wells1', 'source1', 'sources1']
+				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', /*'volume1',*/ 'volume2', 'volumes1', 'volumes2', 'well1', 'wells1', 'source1', 'sources1']
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
 			//console.log(JSON.stringify(parsed, null, '\t'))
@@ -192,7 +192,7 @@ describe('commandHelper', function() {
 					string2: '"hello"',
 					time1: math.unit(23, 's'),
 					time2: math.unit(math.bignumber(23), 'minutes'),
-					volume1: math.unit(10, 'l'),
+					// volume1: math.unit(10, 'l'),
 					volume2: math.unit(math.bignumber(10), 'ul'),
 					volumes1: [math.unit(math.bignumber(10), 'ul')],
 					volumes2: [math.unit(math.bignumber(10), 'ul'), math.unit(math.bignumber(20), 'ul')],
@@ -437,6 +437,40 @@ describe('commandHelper', function() {
 						cleaned: "thorough"
 					}
 				}
+			});
+		});
+	});
+
+	describe('splitItemsAndDefaults', function () {
+		it('should split a list of items into a list of items with common values moved to an object of defaults', () => {
+			const items = [
+				{a: 1, b: 1, c: 1, d: 1},
+				{a: 1, b: 2, c: 1, d: 2},
+				{a: 1, b: 3, c: 1, d: 3},
+				{a: 1, b: 4, c: 1, d: 4}
+			];
+			should.deepEqual(commandHelper.splitItemsAndDefaults(items), {
+				items: [
+					{b: 1, d: 1},
+					{b: 2, d: 2},
+					{b: 3, d: 3},
+					{b: 4, d: 4},
+				],
+				defaults: {a: 1, c: 1}
+			});
+		});
+
+		it.only('should split a list of items into a list of items with common values moved to an object of defaults', () => {
+			const items = [
+				{"count":3,"destination":"plate1(A01)","volume":{"mathjs":"Unit","value":{"mathjs":"BigNumber","value":"70"},"unit":"ul","fixPrefix":false}},
+				{"count":3,"destination":"plate1(B01)","volume":{"mathjs":"Unit","value":{"mathjs":"BigNumber","value":"70"},"unit":"ul","fixPrefix":false}}
+			];
+			should.deepEqual(commandHelper.splitItemsAndDefaults(items, ["syringe","destination"]), {
+				items: [
+					{"destination":"plate1(A01)"},
+					{"destination":"plate1(B01)"}
+				],
+				defaults: {count: 3, volume: {"mathjs":"Unit","value":{"mathjs":"BigNumber","value":"70"},"unit":"ul","fixPrefix":false}}
 			});
 		});
 	});

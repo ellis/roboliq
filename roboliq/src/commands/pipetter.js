@@ -559,12 +559,9 @@ function pipette(params, parsed, data) {
 		doCleanBefore = true;
 
 		var items2 = _.map(group, function(item) {
-			return {
-				syringe: item.syringe,
-				source: item.source,
-				destination: item.destination,
-				volume: item.volume.format({precision: 14})
-			};
+			const item2 = _.pick(item, ["syringe", "source", "destination", "volume", "count"]);
+			item2.volume = item2.volume.format({precision: 14});
+			return item2;
 		});
 		// Pipette
 		expansionList.push({
@@ -762,12 +759,9 @@ const commandHandlers = {
 			return item2;
 		});
 
-		const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(items2, ["syringe", "destination"]);
-		console.log({items3, defaults3})
-
 		const parsed2 = _.cloneDeep(parsed);
-		_.merge(parsed2.value, defaults3);
-		parsed2.value.items = items3;
+		// _.merge(parsed2.value, defaults3);
+		parsed2.value.items = items2;
 
 		const result = pipette(params, parsed2, data);
 
@@ -777,6 +771,10 @@ const commandHandlers = {
 				_.forEach(step.items, item => {
 					delete item.source;
 				});
+				const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(step.items, ["syringe", "destination"]);
+				console.log({items3, defaults3});
+				_.merge(step, defaults3);
+				step.items = items3;
 			}
 		});
 

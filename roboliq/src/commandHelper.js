@@ -1012,6 +1012,7 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 }
 
 function copyItemsWithDefaults(items, defaults) {
+	console.log("copyItemsWithDefaults: "+JSON.stringify(items)+", "+JSON.stringify(defaults))
 	if (_.isArray(items)) {
 		items = _.cloneDeep(items);
 	}
@@ -1051,16 +1052,19 @@ function copyItemsWithDefaults(items, defaults) {
 }
 
 function splitItemsAndDefaults(items, keysToSkip) {
+	console.log("splitItemsAndDefaults: "+JSON.stringify(items)+", "+JSON.stringify(keysToSkip))
 	let defaults = {};
 
 	if (_.size(items) > 1) {
 		defaults = Design.getCommonValues(items);
 		if (_.isArray(keysToSkip) && !_.isEmpty(keysToSkip)) {
-			defaults = _.difference(defaults, keysToSkip);
+			defaults = _.omit(defaults, keysToSkip);
 		}
+		// console.log({defaults})
 
 		if (_.size(defaults) > 0) {
-			items = _.map(items, item => _.omit(item, defaults));
+			const keysToOmit = _.keys(defaults);
+			items = _.map(items, item => _.omit(item, keysToOmit));
 		}
 	}
 
