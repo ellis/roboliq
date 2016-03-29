@@ -56,6 +56,22 @@ describe('commandHelper', function() {
 		});
 	});
 
+	describe("copyItemsWithDefaults", () => {
+		it("should handle undefined items but with defined defaults", () => {
+			const defaults = {
+				a: [1,2,3],
+				b: 4,
+				c: undefined
+			};
+			should.deepEqual(commandHelper.copyItemsWithDefaults(undefined, defaults), [
+				{a: 1, b: 4},
+				{a: 2, b: 4},
+				{a: 3, b: 4}
+			]);
+		});
+
+	});
+
 	describe('getStepKeys', function () {
 		const steps = {
 			description: "hi",
@@ -473,6 +489,7 @@ describe('commandHelper', function() {
 				defaults: {count: 3, volume: {"mathjs":"Unit","value":{"mathjs":"BigNumber","value":"70"},"unit":"ul","fixPrefix":false}}
 			});
 		});
+
 	});
 
 	describe('stepify', function () {

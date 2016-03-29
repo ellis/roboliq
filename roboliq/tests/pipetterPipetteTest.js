@@ -990,7 +990,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["-o", ""], protocol);
+			const result = roboliq.run(["-o", "", "-T"], protocol);
 			// console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps[1][1], {
 				"command": "pipetter._pipette",

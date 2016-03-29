@@ -1036,10 +1036,15 @@ function copyItemsWithDefaults(items, defaults) {
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
 		_.forEach(defaults, (value, name) => {
-			if (_.isUndefined(item[name])) {
+			if (_.isUndefined(item[name]) && !_.isUndefined(value)) {
 				if (_.isArray(value)) {
-					assert(i < value.length, "value array not long enough for target: "+JSON.stringify({value, target: items}));
-					item[name] = value[i];
+					if (value.length === 1) {
+						item[name] = value[0];
+					}
+					else {
+						assert(i < value.length, "value array not long enough for target: "+JSON.stringify({name, i, value, target: items}));
+						item[name] = value[i];
+					}
 				}
 				else {
 					item[name] = value;

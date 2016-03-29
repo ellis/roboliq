@@ -79,7 +79,7 @@ function pipette(params, parsed, data) {
 	var llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	// let items = (_.isUndefined(parsed.value.items))
 	// 	? []
@@ -103,15 +103,42 @@ function pipette(params, parsed, data) {
 	// 		return _.get(parsed.objectName, `syringes.${i}`, syringe);
 	// });
 	//console.log({sourceLabware})
-	//
-	let items = commandHelper.copyItemsWithDefaults(_.flatten(parsed.value.items), {
+
+	// Replace syringe objects with syringe names
+	function replaceSyringeObjectWithName(items, prefix = []) {
+		for (let i = 0; i < items.length; i++) {
+			const item = items[i];
+			const path = prefix.concat(i);
+			if (_.isArray(item)) {
+				replaceSyringeObjectWithName(item, path);
+			}
+			else if (_.isPlainObject(item.syringe)) {
+				item.syringe = _.get(parsed.objectName, `items.${path.join(".")}.syringe`, item.syringe);
+			}
+		}
+	}
+	if (parsed.value.items) {
+		replaceSyringeObjectWithName(parsed.value.items);
+	}
+
+	// Replace syringe objects with syringe names, for top syringes param
+	let syringesTop;
+	if (parsed.value.syringes) {
+		syringesTop = _.map(parsed.value.syringes, (syringe, i) => {
+			return _.get(parsed.objectName, `syringes.${i}`, syringe);
+		});
+	}
+
+	const items0 = (parsed.value.items) ? _.flatten(parsed.value.items) : undefined;
+
+	let items = commandHelper.copyItemsWithDefaults(items0, {
 		source: parsed.value.sources,
 		destination: parsed.value.destinations,
 		well: parsed.value.wells,
 		volume: parsed.value.volumes,
-		syringe: parsed.value.syringes
+		syringe: syringesTop
 	});
-
+	// console.log("items: "+JSON.stringify(items))
 	if (items.length == 0) {
 		return {};
 	}
@@ -158,9 +185,6 @@ function pipette(params, parsed, data) {
 			if (item.well && parsed.objectName.wellLabware) {
 				item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
 			}
-
-			// Otherwise replace syringe objects with syringe names
-			item.syringe = _.get(parsed.objectName, `items.${i}.syringe`, item.syringe);
 		}
 	// }
 	//console.log(JSON.stringify(sourcesTop, null, '  '))
@@ -172,7 +196,7 @@ function pipette(params, parsed, data) {
 		// TODO: allow source to refer to a set of wells, not just a single well
 		// TODO: create a function getSourceWells()
 		return [item.source, item.destination, item.well]
-	}).flatten().compact().uniq().value();
+	}).flattenDeep().compact().uniq().value();
 	// wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
 	// console.log("wellName_l", JSON.stringify(wellName_l))
 
@@ -256,7 +280,7 @@ function pipette(params, parsed, data) {
 	function setTipModel(items) {
 		const parsed3 = { orig: { items } };
 		const tipModelName = findTipModel(null, parsed3, data);
-		console.log({tipModelName, items})
+		// console.log({tipModelName, items})
 		if (tipModelName) {
 			_.forEach(items, function(item) {
 				if (!item.tipModel) item.tipModel = tipModelName;
