@@ -1012,7 +1012,7 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 }
 
 function copyItemsWithDefaults(items, defaults) {
-	console.log("copyItemsWithDefaults: "+JSON.stringify(items)+", "+JSON.stringify(defaults))
+	// console.log("copyItemsWithDefaults: "+JSON.stringify(items)+", "+JSON.stringify(defaults))
 	if (_.isArray(items)) {
 		items = _.cloneDeep(items);
 	}
@@ -1052,7 +1052,7 @@ function copyItemsWithDefaults(items, defaults) {
 }
 
 function splitItemsAndDefaults(items, keysToSkip) {
-	console.log("splitItemsAndDefaults: "+JSON.stringify(items)+", "+JSON.stringify(keysToSkip))
+	// console.log("splitItemsAndDefaults: "+JSON.stringify(items)+", "+JSON.stringify(keysToSkip))
 	let defaults = {};
 
 	if (_.size(items) > 1) {

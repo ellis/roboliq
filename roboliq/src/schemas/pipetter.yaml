@@ -40,7 +40,7 @@ pipetter._MixItem:
   description: Parameters for mixing with pipetter.
   properties:
     syringe: {description: Syringe identifier, type: [number, Syringe]}
-    well: {description: Well to mix, type: Well}
+    destination: {description: Well to mix, type: Well}
     count: {description: "Number of times to aspirate and re-dispense", type: integer}
     volume: {description: Volume, type: Volume}
     program: {description: "Program identifier", type: "string"}
@@ -113,6 +113,15 @@ pipetter._dispense:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
     items: {description: "Data about what should be dispensed where", "type": "array", items: {type: pipetter._DispenseItem}}
+  required: [agent, equipment, program]
+
+pipetter._mix:
+  description: Mix liquids by aspirating and re-dispensing.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "Data about mixing", "type": "array", items: {type: pipetter._MixItem}}
   required: [agent, equipment, program]
 
 pipetter._pipette:

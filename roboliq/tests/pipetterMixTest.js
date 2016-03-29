@@ -54,7 +54,7 @@ describe('pipetter', function() {
 		};*/
 		it("should mix some wells", function() {
 			const protocol = protocolA;
-			const result = roboliq.run(["-o", ""], protocol);
+			const result = roboliq.run(["-o", "", "-T"], protocol);
 			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1], {
 				command: "pipetter.mix",

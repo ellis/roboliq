@@ -386,7 +386,7 @@ function pipette(params, parsed, data) {
 	}
 	else {
 		function assignProgram(items) {
-			console.log("assignProgram: "+JSON.stringify(items))
+			// console.log("assignProgram: "+JSON.stringify(items))
 			var pipettingClass = findPipettingClass(items);
 			if (!pipettingClass) return false;
 			var pipettingPosition = findPipettingPosition(items);
@@ -616,6 +616,13 @@ const commandHandlers = {
 		//console.log("effects:", JSON.stringify(effects, null, '  '))
 		return {effects};
 	},
+	"pipetter._mix": function(params, parsed, data) {
+		//console.log("params", JSON.stringify(params, null, '  '))
+		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
+		return {
+			effects: pipetterUtils.getEffects_pipette(parsed, data)
+		};
+	},
 	"pipetter._pipette": function(params, parsed, data) {
 		//console.log("params", JSON.stringify(params, null, '  '))
 		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
@@ -729,7 +736,7 @@ const commandHandlers = {
 			count: parsed.value.counts,
 			amount: parsed.value.amounts
 		});
-		console.log("items: "+JSON.stringify(items))
+		// console.log("items: "+JSON.stringify(items))
 
 		const items2 = _.map(items, (item, i) => {
 			assert(item.well, `missing well for mix item ${i}: ${JSON.stringify(item)}`);
@@ -740,8 +747,8 @@ const commandHandlers = {
 			item2.destination = item.well;
 
 			const amount = math.eval(item.amount);
-			console.log("amount: "+JSON.stringify(amount))
-			console.log("type: "+math.typeof(amount))
+			// console.log("amount: "+JSON.stringify(amount))
+			// console.log("type: "+math.typeof(amount))
 			switch (math.typeof(amount)) {
 				case "number":
 				case "BigNumber":

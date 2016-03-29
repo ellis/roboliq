@@ -460,7 +460,7 @@ describe('commandHelper', function() {
 			});
 		});
 
-		it.only('should split a list of items into a list of items with common values moved to an object of defaults', () => {
+		it('should split a list of items into a list of items with common values moved to an object of defaults #2', () => {
 			const items = [
 				{"count":3,"destination":"plate1(A01)","volume":{"mathjs":"Unit","value":{"mathjs":"BigNumber","value":"70"},"unit":"ul","fixPrefix":false}},
 				{"count":3,"destination":"plate1(B01)","volume":{"mathjs":"Unit","value":{"mathjs":"BigNumber","value":"70"},"unit":"ul","fixPrefix":false}}

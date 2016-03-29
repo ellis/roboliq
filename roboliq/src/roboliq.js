@@ -893,7 +893,7 @@ function _run(opts, userProtocol) {
 			//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
 			// If a schema is given for the command, parse its parameters
 			const schema = protocol.schemas[commandName];
-			//console.log("params: "+JSON.stringify(params))
+			console.log("params: "+JSON.stringify(params))
 			const parsed = (schema)
 				? commandHelper.parseParams(params, data, schema)
 				: undefined;
