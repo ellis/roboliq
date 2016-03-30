@@ -278,35 +278,6 @@ function pipette(params, parsed, data) {
 	const syringeToCleanValue = _.fromPairs(_.map(syringesAvailable, s => [s, 5]));
 	const expansionList = [];
 
-	// Create clean commands before pipetting this group
-	const createCleanActions = function(syringeToCleanValue, compareToOriginalState = false) {
-		// console.log("createCleanActions: "+JSON.stringify(syringeToCleanValue))
-		const items = _(syringeToCleanValue).toPairs().map(([syringeName0, n]) => {
-			if (n > 0) {
-				const syringeName = pipetterUtils.getSyringeName(syringeName0, equipmentName, data);
-				const syringe = commandHelper._g(data, syringeName);
-				if (compareToOriginalState) {
-					const intensity = syringe.cleaned;
-					const syringeCleanedValue = intensityToValue[syringe.cleaned] || 0;
-					// console.log({syringeName0, n, syringeName, intensity, syringeCleanedValue, syringe})
-					if (n > syringeCleanedValue)
-						return {syringe: syringeName, intensity: valueToIntensity[n]};
-				}
-				else {
-					return {syringe: syringeName, intensity: valueToIntensity[n]};
-				}
-			}
-		}).compact().value();
-		// console.log({cleanItems: items})
-		if (_.isEmpty(items)) return [];
-		return [{
-			command: "pipetter.cleanTips",
-			agent: agent,
-			equipment: equipmentName,
-			items
-		}];
-	}
-
 	/*
 	cleanBegin: intensity of first cleaning at beginning of pipetting, before first aspiration.
 	Priority: item.cleanBefore || params.cleanBegin || params.clean || source.cleanBefore || "thorough"
@@ -334,7 +305,7 @@ function pipette(params, parsed, data) {
 		});
 	});
 	// Add cleanBegin commands
-	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeginValue, true));
+	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeginValue, agent, equipmentName, data, true));
 	//console.log("expansionList:")
 	//console.log(JSON.stringify(expansionList, null, '  '));
 
@@ -382,7 +353,7 @@ function pipette(params, parsed, data) {
 
 		// Add cleanBefore commands for this group (but not for the first group, because of the cleanBegin section above)
 		if (doCleanBefore) {
-			expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeforeValue));
+			expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeforeValue, agent, equipmentName, data));
 		}
 		doCleanBefore = true;
 
@@ -445,7 +416,7 @@ function pipette(params, parsed, data) {
 			syringeToCleanEndValue[syringe] = intensityValue;
 	});
 	//console.log({syringeToCleanEndValue})
-	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanEndValue));
+	expansionList.push.apply(expansionList, createCleanActions(syringeToCleanEndValue, agent, equipmentName, data));
 
 	// Create the effets object
 	// TODO: set final tip clean values
@@ -592,6 +563,35 @@ function assignProgram(items, data) {
 	const program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
 	_.forEach(items, function(item) { item.program = program; });
 	return true;
+}
+
+// Create clean commands before pipetting this group
+function createCleanActions(syringeToCleanValue, agent, equipmentName, data, compareToOriginalState = false) {
+	// console.log("createCleanActions: "+JSON.stringify(syringeToCleanValue))
+	const items = _(syringeToCleanValue).toPairs().map(([syringeName0, n]) => {
+		if (n > 0) {
+			const syringeName = pipetterUtils.getSyringeName(syringeName0, equipmentName, data);
+			const syringe = commandHelper._g(data, syringeName);
+			if (compareToOriginalState) {
+				const intensity = syringe.cleaned;
+				const syringeCleanedValue = intensityToValue[syringe.cleaned] || 0;
+				// console.log({syringeName0, n, syringeName, intensity, syringeCleanedValue, syringe})
+				if (n > syringeCleanedValue)
+					return {syringe: syringeName, intensity: valueToIntensity[n]};
+			}
+			else {
+				return {syringe: syringeName, intensity: valueToIntensity[n]};
+			}
+		}
+	}).compact().value();
+	// console.log({cleanItems: items})
+	if (_.isEmpty(items)) return [];
+	return [{
+		command: "pipetter.cleanTips",
+		agent: agent,
+		equipment: equipmentName,
+		items
+	}];
 }
 
 /**
