@@ -575,7 +575,7 @@ function createCleanActions(syringeToCleanValue, agent, equipmentName, data, com
 function addMixing(parsed, agent, equipmentName, group, mixPropertyName, wellPropertyName, volumePropertyName) {
 	let mixItems = [];
 	_.forEach(group, function(item) {
-		const doMixing = item.hasOwnProperty(mixPropertyName) || parsed.value.hasOwnProperty(mixPropertyName);
+		const doMixing = _.get(item, mixPropertyName, _.get(parsed.value, mixPropertyName, false));
 		if (doMixing) {
 			const mixing = _.defaults({count: 3, amount: 0.7}, item[mixPropertyName], parsed.value[mixPropertyName]);
 			const volume0 = item[volumePropertyName];

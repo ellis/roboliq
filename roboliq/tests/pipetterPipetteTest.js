@@ -1013,7 +1013,7 @@ describe('pipetter', function() {
 			});
 		});
 
-		it.only("should handle destinationMixing", () => {
+		it("should handle destinationMixing={} and =true and =false", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -1046,9 +1046,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["-o", "", "-T"], protocol);
-			console.log(JSON.stringify(result.output.steps, null, '\t'));
-			should.deepEqual(_.pick(result.output.steps[1], [1, 2, 3]), {
+			const expected = {
 				"1": {
 					"command": "pipetter._pipette",
 					"agent": "ourlab.mario.evoware",
@@ -1069,7 +1067,20 @@ describe('pipetter', function() {
 						{ "syringe": "ourlab.mario.liha.syringe.2", "well": "plate1(B02)", "count": 3, "volume": "35 ul" }
 					]
 				}
-			});
+			};
+			const result1 = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result1.output.steps, null, '\t'));
+			should.deepEqual(_.pick(result1.output.steps[1], [1, 2, 3]), expected);
+
+			protocol.steps[1].destinationMixing = true;
+			const result2 = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result2.output.steps, null, '\t'));
+			should.deepEqual(_.pick(result2.output.steps[1], [1, 2, 3]), expected);
+
+			protocol.steps[1].destinationMixing = false;
+			const result3 = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result3.output.steps, null, '\t'));
+			should.deepEqual(_.pick(result3.output.steps[1], [1, 2, 3]), _.pick(expected, ["1"]));
 		});
 
 	});
