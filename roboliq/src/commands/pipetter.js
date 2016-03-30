@@ -118,51 +118,19 @@ function pipette(params, parsed, data) {
 		return {};
 	}
 
-	/*
-	// Figure out number of items
-	const itemCount = items.length;
-
-	// Populate item properties from the top properties
-	if (itemCount > 0) {
-		// Check for compatible lengths
-		if (items.length > 0) {
-			if (sourcesTop.length > 1) assert(sourcesTop.length == itemCount, "`sources` length and `items` length must be equal")
-			if (destinationsTop.length > 1) assert(destinationsTop.length == itemCount, "`destinations` length and `items` length must be equal")
-			if (wellsTop.length > 1) assert(wellsTop.length == itemCount, "`wells` length and `items` length must be equal")
-			if (volumesTop.length > 1) assert(volumesTop.length == itemCount, "`volumes` length and `items` length must be equal")
+	// Add labware to well properties
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		if (item.source && parsed.objectName.sourceLabware) {
+			item.source = getLabwareWell(parsed.objectName.sourceLabware, item.source);
 		}
-		else {
-			if (sourcesTop.length > 1 && destinationsTop.length > 1) assert(sourcesTop.length == destinationsTop.length, "`sources` length and `destinations` length must be equal")
-			if (sourcesTop.length > 1 && volumesTop.length > 1) assert(sourcesTop.length == volumesTop.length, "`sources` length and `volumes` length must be equal")
-			if (destinationsTop.length > 1 && volumesTop.length > 1) assert(destinationsTop.length == volumesTop.length, "`destinations` length and `volumes` length must be equal")
+		if (item.destination && parsed.objectName.destinationLabware) {
+			item.destination = getLabwareWell(parsed.objectName.destinationLabware, item.destination);
 		}
-
-		if (items.length == 0) {
-			items = Array(itemCount);
-			for (let i = 0; i < itemCount; i++)
-				items[i] = {};
+		if (item.well && parsed.objectName.wellLabware) {
+			item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
 		}
-*/
-		for (let i = 0; i < items.length; i++) {
-			const item = items[i];
-
-			// Add index to all items, so that we can reference `parsed.objectName[items.$index.syringe]` later
-			// TODO: above we run _.flattened(parsed.value.items) -- the indexing should be added BEFORE flattening.
-			item.index = i;
-
-			// Add labware to well properties
-			if (item.source && parsed.objectName.sourceLabware) {
-				item.source = getLabwareWell(parsed.objectName.sourceLabware, item.source);
-			}
-			if (item.destination && parsed.objectName.destinationLabware) {
-				item.destination = getLabwareWell(parsed.objectName.destinationLabware, item.destination);
-			}
-			if (item.well && parsed.objectName.wellLabware) {
-				item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
-			}
-		}
-	// }
-	//console.log(JSON.stringify(sourcesTop, null, '  '))
+	}
 	// console.log(JSON.stringify(items, null, '  '))
 
 	// Find all wells, both sources and destinations
@@ -176,15 +144,15 @@ function pipette(params, parsed, data) {
 	// console.log("wellName_l", JSON.stringify(wellName_l))
 
 	// Find all labware
-	var labwareName_l = _(wellName_l).map(function (wellName) {
+	const labwareName_l = _(wellName_l).map(function (wellName) {
 		//console.log({wellName})
 		var i = wellName.indexOf('(');
 		return (i >= 0) ? wellName.substr(0, i) : wellName;
 	}).uniq().value();
-	var labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
+	const labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
 
 	// Check whether labwares are on sites that can be pipetted
-	var query2_l = [];
+	const query2_l = [];
 	_.forEach(labware_l, function(labware) {
 		if (!labware.location) {
 			return {errors: [labware.name+".location must be set"]};
@@ -223,6 +191,7 @@ function pipette(params, parsed, data) {
 		}
 	}
 
+	// Load equipment object
 	const parsed2 = commandHelper.parseParams({equipment: equipmentName}, data, {
 		properties: {
 			equipment: {type: "Equipment"}
@@ -231,8 +200,6 @@ function pipette(params, parsed, data) {
 	});
 	//console.log({equipment: parsed2.equipment.value})
 	const equipment = parsed2.value.equipment;
-
-	// TODO: if labwares are not on sites that can be pipetted, try to move them to appropriate sites
 
 	// Try to find a tipModel for the given items
 	function findTipModel(items) {
@@ -414,13 +381,10 @@ function pipette(params, parsed, data) {
 		_.forEach(group, function(item) {
 			var tipModel = item.tipModel;
 			assert(tipModelToSyringesAvailable[tipModel].length >= 1);
-			const syringeName = _.get(parsed.objectName, `items.${item.index}.syringe`, item.syringe);
-			if (_.isUndefined(syringeName)) {
+			if (_.isUndefined(item.syringe)) {
 				item.syringe = tipModelToSyringesAvailable[tipModel].splice(0, 1)[0];
 			}
-			else {
-				item.syringe = syringeName;
-			}
+			// TODO: do we need to remove item.syringe from tipModelToSyringesAvailable, it item.syringe was already provided? -- ellis, 2016-03-30
 		});
 	});
 
