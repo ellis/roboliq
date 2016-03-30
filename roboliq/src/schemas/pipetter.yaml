@@ -69,7 +69,9 @@ pipetter.PipetteItem:
     source: {description: Source specifier, type: Source}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
-    layer: {description: "A layer identifier for trying to group items together in the same layer, even if they aren't in adjacent in the items list."}
+    layer: {description: "A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list."}
+    sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter.MixSpec}
+    destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter.MixSpec}
 
 pipetter.DilutionItem:
   description: Parameters for a dilution series.
@@ -184,6 +186,8 @@ pipetter.mix:
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
+    sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter.MixSpec}
+    destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter.MixSpec}
 
 pipetter.pipette:
   description: Pipette liquids from sources to destinations.

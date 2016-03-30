@@ -47,11 +47,15 @@
 - [x] `pipetter._mix`: implement with schema and command handler
 - [x] evoware `pipetter._mix`: implement instruction handler
 - [ ] `pipetter.pipette()`: handle "mixSource" and "mixDestination"
+	- [ ] ensure tips no longer clean
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
 - [ ] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
 - [ ] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [ ] `pipetter.pipette()`: handle separate programs for source and destination
+
+- [ ] `pipetter.pipette()`: when destinationMixing is used, then ensure that the syringe gets contaminated with destination liquid and that a wet or bot liquid class is used
+
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [x] 6.1: description isn't expanded correctly

@@ -583,6 +583,7 @@ function pipette(params, parsed, data) {
 			item2.volume = item2.volume.format({precision: 14});
 			return item2;
 		});
+		// Mix source before aspirating?
 		// Pipette
 		expansionList.push({
 			"command": "pipetter._pipette",
@@ -591,6 +592,33 @@ function pipette(params, parsed, data) {
 			"program": group[0].program,
 			"items": items2
 		});
+
+		// Mix destination after dispensing?
+		function addMixing(mixPropertyName, wellPropertyName) {
+			let mixItems = [];
+			_.forEach(group, function(item) {
+				const doMixing = item.hasOwnProperty(propertyName) || parsed.value.hasOwnProperty(propertyName);
+				if (doMixing) {
+					const mixing = _.defaults({count: 3, amount: 0.7}, item[propertyName], parsed.value[propertyName]);
+					const mixItem = _.merge({}, mixing, {
+						syringe: item.syringe,
+						well: item[wellPropertyName]
+					});
+					mixItems.push(mixItem);
+				}
+			});
+			if (mixItems.length > 0) {
+				const mixCommand = {
+					command: "pipetter._mix",
+					agent,
+					equipment: equipmentName,
+					program: group[0].program, // FIXME: even if we used Air dispense for the dispense, we need to use Wet or Bot here
+					itemDefaults: {
+						count:
+					items: items2
+				};
+			}
+		}
 	});
 
 	// cleanEnd
