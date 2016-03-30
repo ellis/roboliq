@@ -372,34 +372,11 @@ function pipette(params, parsed, data) {
 			"items": items2
 		});
 
-		/*
-		// Mix destination after dispensing?
-		function addMixing(mixPropertyName, wellPropertyName) {
-			let mixItems = [];
-			_.forEach(group, function(item) {
-				const doMixing = item.hasOwnProperty(propertyName) || parsed.value.hasOwnProperty(propertyName);
-				if (doMixing) {
-					const mixing = _.defaults({count: 3, amount: 0.7}, item[propertyName], parsed.value[propertyName]);
-					const mixItem = _.merge({}, mixing, {
-						syringe: item.syringe,
-						well: item[wellPropertyName]
-					});
-					mixItems.push(mixItem);
-				}
-			});
-			if (mixItems.length > 0) {
-				const mixCommand = {
-					command: "pipetter._mix",
-					agent,
-					equipment: equipmentName,
-					program: group[0].program, // FIXME: even if we used Air dispense for the dispense, we need to use Wet or Bot here
-					itemDefaults: {
-						count:
-					items: items2
-				};
-			}
+		// Mix the destination wells
+		const destinationMixCommand = addMixing(parsed, agent, equipmentName, group, "destinationMixing", "destination", "volumeAfter");
+		if (destinationMixCommand) {
+			expansionList.push(destinationMixCommand);
 		}
-		*/
 	});
 
 	// cleanEnd
@@ -594,6 +571,53 @@ function createCleanActions(syringeToCleanValue, agent, equipmentName, data, com
 	}];
 }
 
+// Mix destination after dispensing?
+function addMixing(parsed, agent, equipmentName, group, mixPropertyName, wellPropertyName, volumePropertyName) {
+	let mixItems = [];
+	_.forEach(group, function(item) {
+		const doMixing = item.hasOwnProperty(mixPropertyName) || parsed.value.hasOwnProperty(mixPropertyName);
+		if (doMixing) {
+			const mixing = _.defaults({count: 3, amount: 0.7}, item[mixPropertyName], parsed.value[mixPropertyName]);
+			const volume0 = item[volumePropertyName];
+			const volume = calculateMixingVolume(volume0, mixing.amount);
+			const mixItem = _.merge({}, {
+				syringe: item.syringe,
+				well: item[wellPropertyName],
+				count: mixing.count,
+				volume: volume.format({precision: 14})
+			});
+			mixItems.push(mixItem);
+		}
+	});
+	if (mixItems.length > 0) {
+		const mixCommand = {
+			command: "pipetter._mix",
+			agent,
+			equipment: equipmentName,
+			program: group[0].program, // FIXME: even if we used Air dispense for the dispense, we need to use Wet or Bot here
+			items: items2
+		};
+		return mixCommand;
+	}
+	return undefined;
+}
+
+function calculateMixingVolume(volume0, amount) {
+	amount = _.isString(amount) ? math.eval(amount) : amount;
+	// console.log("amount: "+JSON.stringify(amount))
+	// console.log("type: "+math.typeof(amount))
+	switch (math.typeof(amount)) {
+		case "number":
+		case "BigNumber":
+		case "Fraction":
+			// assert(amount >= 0 && amount < 1, "amount must be between 0 and 1: "+JSON.stringify(item));
+			return math.multiply(volume0, amount);
+		case "Unit":
+			return amount;
+	}
+	assert(false, "expected amount to be a volume or a number: "+JSON.amount);
+}
+
 /**
  * Handlers for {@link pipetter} commands.
  * @static
@@ -741,23 +765,7 @@ const commandHandlers = {
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "cannot mix empty wells");
 
 			const item2 = _.omit(item, ["amount"]);
-
-			const amount = math.eval(item.amount);
-			// console.log("amount: "+JSON.stringify(amount))
-			// console.log("type: "+math.typeof(amount))
-			switch (math.typeof(amount)) {
-				case "number":
-				case "BigNumber":
-				case "Fraction":
-					// assert(amount >= 0 && amount < 1, "amount must be between 0 and 1: "+JSON.stringify(item));
-					item2.volume = math.multiply(volume0, amount);
-					break;
-				case "Unit":
-					item2.volume = amount;
-					break;
-				default:
-					assert(false, "expected amount to be a volume or a number: "+JSON.amount);
-			}
+			item2.volume = calculateMixingVolume(volume0, item.amount);
 
 			return item2;
 		});
