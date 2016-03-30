@@ -186,7 +186,6 @@ pipetter.mix:
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
-    sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter.MixSpec}
 
 pipetter.pipette:
   description: Pipette liquids from sources to destinations.

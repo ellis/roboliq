@@ -46,8 +46,7 @@
 - [x] `pipetter.pipette()`: adapt to be used by both `pipetter.pipette` and `pipetter.mix`
 - [x] `pipetter._mix`: implement with schema and command handler
 - [x] evoware `pipetter._mix`: implement instruction handler
-- [ ] `pipetter.pipette()`: handle "mixSource" and "mixDestination"
-	- [ ] ensure tips no longer clean
+- [x] `pipetter.pipette()`: handle "mixSource" and "mixDestination"
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
 - [ ] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
 - [ ] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
@@ -133,6 +132,7 @@
 
 # Todos for paper 2/3
 
+- [ ] `pipetter.pipette()`: after destinationMixing, make sure that tips are marked as unclean and contaminated with destination liquid (even if air dispense was previously used)
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix

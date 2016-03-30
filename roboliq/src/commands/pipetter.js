@@ -861,6 +861,10 @@ const commandHandlers = {
 					// mixBefore: (index == 0) ? {count: 3, amount: 0.7} : undefined,
 					// mixAfter: {count: 3, amount: 0.7},
 				});
+				// Mix before aspirating from first dilution well
+				if (index === 0) {
+					item2.sourceMixing = _.get(parsed.value, "sourceMixing", true);
+				}
 				items.push(item2);
 				source = destination;
 			});
@@ -885,18 +889,20 @@ const commandHandlers = {
 			const params1 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
 			params1.command = "pipetter.pipette";
 			params1.items = diluentItems;
-			params1.clean = "none";
+			params1.cleanBetweenSameSource = "none";
+			params1.cleanEnd = "none";
 			_.merge(params1, parsed.orig.diluentParams);
 			expansion.push(params1);
 		}
 
-		const params2 = _.omit(parsed.orig, ['description', 'diluent', 'diluentParams', 'items']);
-		params2.command = "pipetter.pipette";
-		params2.items = items;
-		// params2.clean = "none"; // HACK
-		// params2.cleanEnd = "light"; // HACK
-		expansion.push(params2);
-		// console.log({params1, params2})
+		if (items.length > 0) {
+			const params2 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
+			params2.command = "pipetter.pipette";
+			params2.items = items;
+			_.defaults(params2, parsed.value.dilutionParams, {cleanBetween: "none", destinationMixing: true});
+			expansion.push(params2);
+			// console.log({params1, params2})
+		}
 
 		return { expansion };
 	},
