@@ -55,6 +55,7 @@
 - [ ] `pipetter.pipette()`: handle separate programs for source and destination
 
 - [ ] `pipetter.pipette()`: when destinationMixing is used, then ensure that the syringe gets contaminated with destination liquid and that a wet or bot liquid class is used
+- [ ] `pipetter.punctureSeal`: create command
 
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced

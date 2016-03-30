@@ -593,6 +593,7 @@ function pipette(params, parsed, data) {
 			"items": items2
 		});
 
+		/*
 		// Mix destination after dispensing?
 		function addMixing(mixPropertyName, wellPropertyName) {
 			let mixItems = [];
@@ -619,6 +620,7 @@ function pipette(params, parsed, data) {
 				};
 			}
 		}
+		*/
 	});
 
 	// cleanEnd
