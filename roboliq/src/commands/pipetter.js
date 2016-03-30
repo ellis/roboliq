@@ -192,18 +192,14 @@ function pipette(params, parsed, data) {
 	}
 
 	// Load equipment object
-	const parsed2 = commandHelper.parseParams({equipment: equipmentName}, data, {
-		properties: {
-			equipment: {type: "Equipment"}
-		},
-		required: ["equipment"]
-	});
-	//console.log({equipment: parsed2.equipment.value})
-	const equipment = parsed2.value.equipment;
+	const equipment = _.get(data.objects, equipmentName);
+	assert(equipment, "could not find equipment: "+equipmentName);
+
+	// Add properties `volumeBefore` and `volumeAfter` to the items.
+	calculateWellVolumes(items, data);
 
 	var sourceToItems = _.groupBy(items, 'source');
 
-	const itemsAll = items;
 	//console.log({itemVolumes: items.map(x => x.volume)})
 	//console.log(_.filter(items, item => item.volume));
 	items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);
@@ -587,6 +583,24 @@ function setTipModel(items, equipment, equipmentName) {
 	}
 }
 
+// Calculate volume for each well or destination,
+// adding properties `volumeBefore` and `volumeAfter` to the items.
+function calculateWellVolumes(items, data) {
+	const wellVolumes = {};
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		const well = item.well || item.destination;
+		if (well) {
+			const volume0 = (wellVolumes.hasOwnProperty(well)) ? wellVolumes[well] : WellContents.getWellVolume(well, data)
+			const volume1 = (item.destination && item.volume)
+				? math.add(volume0, item.volume)
+				: volume0;
+			item.volumeBefore = volume0;
+			item.volumeAfter = volume1;
+			wellVolumes[well] = volume1;
+		}
+	}
+}
 
 /**
  * Handlers for {@link pipetter} commands.
