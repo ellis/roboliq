@@ -173,7 +173,7 @@ export function getEffects_pipette(parsed, data, effects) {
 		}
 
 		if (!_.isUndefined(item.well)) {
-			console.log({item})
+			// console.log({item})
 			const source = item.well;
 			const syringeContents0 = syringeContents00;
 			const syringeContaminants0 = effects2[syringeContaminantsName] || syringe.contaminants || [];

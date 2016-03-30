@@ -104,14 +104,6 @@ function pipette(params, parsed, data) {
 	// });
 	//console.log({sourceLabware})
 
-	// Replace syringe objects with syringe names, for top syringes param
-	let syringesTop;
-	if (parsed.value.syringes) {
-		syringesTop = _.map(parsed.value.syringes, (syringe, i) => {
-			return _.get(parsed.objectName, `syringes.${i}`, syringe);
-		});
-	}
-
 	const items0 = (parsed.value.items) ? _.flatten(parsed.value.items) : undefined;
 
 	let items = commandHelper.copyItemsWithDefaults(items0, {
@@ -119,7 +111,7 @@ function pipette(params, parsed, data) {
 		destination: parsed.value.destinations,
 		well: parsed.value.wells,
 		volume: parsed.value.volumes,
-		syringe: syringesTop
+		syringe: parsed.value.syringes
 	});
 	// console.log("items: "+JSON.stringify(items))
 	if (items.length == 0) {
@@ -764,7 +756,7 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.mix": function(params, parsed, data) {
-		console.log("pipetter.mix: "+JSON.stringify(parsed))
+		// console.log("pipetter.mix: "+JSON.stringify(parsed))
 
 		const items = commandHelper.copyItemsWithDefaults(parsed.value.items, {
 			well: parsed.value.wells,
@@ -810,7 +802,7 @@ const commandHandlers = {
 			if (step.command === "pipetter._pipette") {
 				step.command = "pipetter._mix";
 				const {items: items3, defaults: defaults3} = commandHelper.splitItemsAndDefaults(step.items, ["syringe", "well"]);
-				console.log({items3, defaults3});
+				// console.log({items3, defaults3});
 				if (!_.isEmpty(defaults3))
 					step.itemDefaults = defaults3;
 				step.items = items3;
