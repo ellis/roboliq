@@ -522,7 +522,7 @@ function findPipettingClass(items, data) {
 
 // Pick position (wet or dry) by whether there are already contents in the destination well
 function findPipettingPosition(items, data) {
-	const pipettingPositions = _(items).map(item => item.destination || item.well).map(function(well) {
+	const pipettingPositions = _(items).map(item => item.destination || item.well).compact().map(function(well) {
 		const i = well.indexOf('(');
 		const labware = well.substr(0, i);
 		const wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
@@ -589,14 +589,15 @@ function createCleanActions(syringeToCleanValue, agent, equipmentName, data, com
 function addMixing(parsed, agent, equipmentName, group, mixPropertyName, wellPropertyName, volumePropertyName) {
 	let mixItems = [];
 	_.forEach(group, function(item) {
-		const doMixing = _.get(item, mixPropertyName, _.get(parsed.value, mixPropertyName, false));
+		const well = item[wellPropertyName];
+		const doMixing = !_.isUndefined(well) && _.get(item, mixPropertyName, _.get(parsed.value, mixPropertyName, false));
 		if (doMixing) {
 			const mixing = _.defaults({count: 3, amount: 0.7}, item[mixPropertyName], parsed.value[mixPropertyName]);
 			const volume0 = item[volumePropertyName];
 			const volume = calculateMixingVolume(volume0, mixing.amount);
 			const mixItem = _.merge({}, {
 				syringe: item.syringe,
-				well: item[wellPropertyName],
+				well,
 				count: mixing.count,
 				volume: volume.format({precision: 14})
 			});
@@ -852,15 +853,12 @@ const commandHandlers = {
 			let source = destination0;
 			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
-				const item2 = _.merge({}, {
+				const item2 = {
 					layer: index+1,
 					source, destination,
 					volume: sourceVolume.format({precision: 4}),
-					syringe: syringeName,
-					// HACK: should allow the user to specify mixing parameters
-					// mixBefore: (index == 0) ? {count: 3, amount: 0.7} : undefined,
-					// mixAfter: {count: 3, amount: 0.7},
-				});
+					syringe: syringeName
+				};
 				// Mix before aspirating from first dilution well
 				if (index === 0) {
 					item2.sourceMixing = _.get(parsed.value, "sourceMixing", true);
@@ -871,6 +869,13 @@ const commandHandlers = {
 
 			// If disposal wells are specified, transfer extra volume from last well to the disposal
 			// FIXME: implement sending last aspirate to TRASH!
+			// Create final aspiration
+			items.push({
+				layer: destinations2.length + 1,
+				source: getLabwareWell(destinationLabware, _.last(destinations2)),
+				volume: sourceVolume.format({precision: 4}),
+				syringe: syringeName
+			});
 
 			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
 			_.forEach(series, dilution => {
@@ -886,11 +891,15 @@ const commandHandlers = {
 		const expansion = [];
 
 		if (diluentItems.length > 0) {
+			// Cleaning:
+			// if 'items' is empty,
 			const params1 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
 			params1.command = "pipetter.pipette";
 			params1.items = diluentItems;
+			if (parsed.value.cleanBegin) params1.cleanBegin = parsed.value.cleanBegin;
 			params1.cleanBetweenSameSource = "none";
-			params1.cleanEnd = "none";
+			if (items.length > 0) params1.cleanEnd = "none";
+			else if (parsed.value.cleanEnd) params1.cleanEnd = parsed.value.cleanEnd;
 			_.merge(params1, parsed.orig.diluentParams);
 			expansion.push(params1);
 		}
@@ -899,6 +908,10 @@ const commandHandlers = {
 			const params2 = _.pick(parsed.orig, ["destinationLabware", "sourceLabware", "syringes"]);
 			params2.command = "pipetter.pipette";
 			params2.items = items;
+			if (diluentItems.length > 0) params2.cleanBegin = "none";
+			else if (parsed.value.cleanBegin) params2.cleanBegin = parsed.value.cleanBegin;
+			params2.cleanBetweenSameSource = "none";
+			if (parsed.value.cleanEnd) params2.cleanEnd = parsed.value.cleanEnd;
 			_.defaults(params2, parsed.value.dilutionParams, {cleanBetween: "none", destinationMixing: true});
 			expansion.push(params2);
 			// console.log({params1, params2})

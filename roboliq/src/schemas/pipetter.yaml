@@ -60,7 +60,8 @@ pipetter._PipetteItem:
     source: {description: Source specifier, type: Well}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
-  required: [syringe, source, destination, volume]
+  # required: [syringe, source, destination, volume]
+  required: [syringe, volume]
 
 pipetter.PipetteItem:
   description: Parameters for pipette items.
@@ -70,6 +71,7 @@ pipetter.PipetteItem:
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
     layer: {description: "A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list."}
+    cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter.MixSpec}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter.MixSpec}
 
