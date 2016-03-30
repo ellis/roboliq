@@ -220,73 +220,6 @@ function pipette(params, parsed, data) {
 		});
 	}
 
-	// Try to find a pipettingClass for the given items
-	const findPipettingClass = function(items) {
-		// Pick liquid properties by inspecting source contents
-		const pipettingClasses0 = items.map(item => {
-			let pipettingClass = "Water";
-			const source0 = item.source || item.well || item.destination; // If no source is provided, then use well or destination
-			const source = commandHelper.asArray(source0);
-
-			// FIXME: for debug only
-			if (!source || _.isEmpty(source)) {
-				console.log({item});
-			}
-			// ENDFIX
-
-			//console.log({source})
-			if (source.length > 0) {
-				//console.log({source})
-				const contents = WellContents.getWellContents(source[0], data);
-				if (contents) {
-					const liquids = extractLiquidNamesFromContents(contents);
-					const pipettingClasses = _(liquids).map(function(name) {
-						return misc.findObjectsValue(name+".pipettingClass", data.objects, null, "Water");
-					}).uniq().value();
-					// FIXME: should pick "Water" if water-like liquids have high enough concentration
-					// Use "Water" if present
-					if (!_.includes(pipettingClasses, "Water")) {
-						if (pipettingClasses.length === 1) {
-							pipettingClass = pipettingClasses[0];
-						}
-						else if (pipettingClasses.length > 1) {
-							pipettingClass = null;
-						}
-					}
-				}
-			}
-
-			return pipettingClass;
-		});
-		const pipettingClasses = _.uniq(pipettingClasses0);
-
-		if (pipettingClasses.length === 1) {
-			return pipettingClasses[0];
-		}
-		else {
-			return null;
-		}
-	}
-
-	// Pick position (wet or dry) by whether there are already contents in the destination well
-	const findPipettingPosition = function(items) {
-		const pipettingPositions = _(items).map(item => item.destination || item.well).map(function(well) {
-			const i = well.indexOf('(');
-			const labware = well.substr(0, i);
-			const wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-			const contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
-			const liquids = extractLiquidNamesFromContents(contents);
-			return _.isEmpty(liquids) ? "Dry" : "Wet";
-		}).uniq().value();
-
-		if (pipettingPositions.length === 1) {
-			return pipettingPositions[0];
-		}
-		else {
-			return null;
-		}
-	}
-
 	// Assign programs to items
 	if (parsed.value.program) {
 		_.forEach(items, function(item) {
@@ -297,9 +230,9 @@ function pipette(params, parsed, data) {
 	else {
 		function assignProgram(items) {
 			// console.log("assignProgram: "+JSON.stringify(items))
-			const pipettingClass = findPipettingClass(items);
+			const pipettingClass = findPipettingClass(items, data);
 			if (!pipettingClass) return false;
-			const pipettingPosition = findPipettingPosition(items);
+			const pipettingPosition = findPipettingPosition(items, data);
 			if (!pipettingPosition) return false;
 			const tipModels = _(items).map('tipModel').uniq().value();
 			if (tipModels.length !== 1) return false;
@@ -599,6 +532,73 @@ function calculateWellVolumes(items, data) {
 			item.volumeAfter = volume1;
 			wellVolumes[well] = volume1;
 		}
+	}
+}
+
+// Try to find a pipettingClass for the given items
+function findPipettingClass(items, data) {
+	// Pick liquid properties by inspecting source contents
+	const pipettingClasses0 = items.map(item => {
+		let pipettingClass = "Water";
+		const source0 = item.source || item.well || item.destination; // If no source is provided, then use well or destination
+		const source = commandHelper.asArray(source0);
+
+		// FIXME: for debug only
+		if (!source || _.isEmpty(source)) {
+			console.log({item});
+		}
+		// ENDFIX
+
+		//console.log({source})
+		if (source.length > 0) {
+			//console.log({source})
+			const contents = WellContents.getWellContents(source[0], data);
+			if (contents) {
+				const liquids = extractLiquidNamesFromContents(contents);
+				const pipettingClasses = _(liquids).map(function(name) {
+					return misc.findObjectsValue(name+".pipettingClass", data.objects, null, "Water");
+				}).uniq().value();
+				// FIXME: should pick "Water" if water-like liquids have high enough concentration
+				// Use "Water" if present
+				if (!_.includes(pipettingClasses, "Water")) {
+					if (pipettingClasses.length === 1) {
+						pipettingClass = pipettingClasses[0];
+					}
+					else if (pipettingClasses.length > 1) {
+						pipettingClass = null;
+					}
+				}
+			}
+		}
+
+		return pipettingClass;
+	});
+	const pipettingClasses = _.uniq(pipettingClasses0);
+
+	if (pipettingClasses.length === 1) {
+		return pipettingClasses[0];
+	}
+	else {
+		return null;
+	}
+}
+
+// Pick position (wet or dry) by whether there are already contents in the destination well
+function findPipettingPosition(items, data) {
+	const pipettingPositions = _(items).map(item => item.destination || item.well).map(function(well) {
+		const i = well.indexOf('(');
+		const labware = well.substr(0, i);
+		const wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
+		const contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
+		const liquids = extractLiquidNamesFromContents(contents);
+		return _.isEmpty(liquids) ? "Dry" : "Wet";
+	}).uniq().value();
+
+	if (pipettingPositions.length === 1) {
+		return pipettingPositions[0];
+	}
+	else {
+		return null;
 	}
 }
 
