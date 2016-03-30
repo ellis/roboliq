@@ -200,8 +200,7 @@ function pipette(params, parsed, data) {
 
 	const sourceToItems = _.groupBy(items, 'source');
 
-	//console.log({itemVolumes: items.map(x => x.volume)})
-	//console.log(_.filter(items, item => item.volume));
+	// Only keep items that have a positive volume (will need to adapt this for pipetter.punctureSeal)
 	items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items
@@ -228,31 +227,14 @@ function pipette(params, parsed, data) {
 		});
 	}
 	else {
-		function assignProgram(items) {
-			// console.log("assignProgram: "+JSON.stringify(items))
-			const pipettingClass = findPipettingClass(items, data);
-			if (!pipettingClass) return false;
-			const pipettingPosition = findPipettingPosition(items, data);
-			if (!pipettingPosition) return false;
-			const tipModels = _(items).map('tipModel').uniq().value();
-			if (tipModels.length !== 1) return false;
-			const tipModelName = tipModels[0];
-			const tipModelCode = misc.getObjectsValue(tipModelName+".programCode", data.objects);
-			//console.log({equipment})
-			assert(tipModelCode, `missing value for ${tipModelName}.programCode`);
-			const program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
-			_.forEach(items, function(item) { item.program = program; });
-			return true;
-		}
-
 		// Try to find program, first for all items
-		if (!assignProgram(items)) {
+		if (!assignProgram(items, data)) {
 			// Try to find program for each source
 			_.forEach(sourceToItems, function(items) {
-				if (!assignProgram(items)) {
+				if (!assignProgram(items, data)) {
 					// Try to find program for each item for this source
 					_.forEach(items, function(item) {
-						if (!assignProgram([item])) {
+						if (!assignProgram([item], data)) {
 							throw {name: "ProcessingError", message: "could not automatically choose a program for item: "+JSON.stringify(item)};
 						}
 					});
@@ -285,13 +267,6 @@ function pipette(params, parsed, data) {
 	// Pick source well for items, if the source has multiple wells
 	// Rotate through source wells in order of max volume
 	for (const group of groups) {
-		/*// FIXME: for debug only
-		for (const x of group) {
-			if (!x.source) {
-				console.log({x})
-			}
-		}
-		// ENDFIX*/
 		sourceMethods.sourceMethod3(group, data, effects);
 	}
 
@@ -600,6 +575,23 @@ function findPipettingPosition(items, data) {
 	else {
 		return null;
 	}
+}
+
+function assignProgram(items, data) {
+	// console.log("assignProgram: "+JSON.stringify(items))
+	const pipettingClass = findPipettingClass(items, data);
+	if (!pipettingClass) return false;
+	const pipettingPosition = findPipettingPosition(items, data);
+	if (!pipettingPosition) return false;
+	const tipModels = _(items).map('tipModel').uniq().value();
+	if (tipModels.length !== 1) return false;
+	const tipModelName = tipModels[0];
+	const tipModelCode = misc.getObjectsValue(tipModelName+".programCode", data.objects);
+	//console.log({equipment})
+	assert(tipModelCode, `missing value for ${tipModelName}.programCode`);
+	const program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
+	_.forEach(items, function(item) { item.program = program; });
+	return true;
 }
 
 /**
