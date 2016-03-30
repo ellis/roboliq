@@ -201,41 +201,6 @@ function pipette(params, parsed, data) {
 	//console.log({equipment: parsed2.equipment.value})
 	const equipment = parsed2.value.equipment;
 
-	// Try to find a tipModel for the given items
-	function findTipModel(items) {
-		const tipModelName = _.findKey(equipment.tipModel, (tipModel) => {
-			return _.every(items, item => {
-				const volume = item.volume;
-				assert(math.unit('l').equalBase(volume), "expected units to be in liters");
-				if (math.compare(volume, math.eval(tipModel.min)) < 0 || math.compare(volume, math.eval(tipModel.max)) > 0) {
-					return false;
-				}
-				// TODO: check whether the labware is sealed
-				// TODO: check whether the well has cells
-				return true;
-			});
-		});
-		return (!_.isEmpty(tipModelName))
-			? `${equipmentName}.tipModel.${tipModelName}`
-			: undefined;
-	}
-	function setTipModel(items) {
-		const parsed3 = { orig: { items } };
-		const tipModelName = findTipModel(null, parsed3, data);
-		// console.log({tipModelName, items})
-		if (tipModelName) {
-			_.forEach(items, function(item) {
-				if (!item.tipModel) item.tipModel = tipModelName;
-			});
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	// FIXME: allow for overriding tipModel via params
-
 	var sourceToItems = _.groupBy(items, 'source');
 
 	const itemsAll = items;
@@ -244,14 +209,14 @@ function pipette(params, parsed, data) {
 	items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);
 
 	// Try to find tipModel, first for all items
-	if (!setTipModel(items)) {
+	if (!setTipModel(items, equipment, equipmentName)) {
 		// TODO: Try to find tipModel for each layer
 		// Try to find tipModel for each source
 		_.forEach(sourceToItems, function(items) {
-			if (!setTipModel(items)) {
+			if (!setTipModel(items, equipment, equipmentName)) {
 				// Try to find tipModel for each item for this source
 				_.forEach(items, function(item) {
-					if (!setTipModel([item])) {
+					if (!setTipModel([item], equipment, equipmentName)) {
 						throw {name: "ProcessingError", message: "no tip model available for item: "+JSON.stringify(item)};
 					}
 				});
@@ -587,6 +552,41 @@ function pipette(params, parsed, data) {
 		effects: effects
 	};
 }
+
+// Try to find a tipModel for the given items
+function findTipModel(items, equipment, equipmentName) {
+	const tipModelName = _.findKey(equipment.tipModel, (tipModel) => {
+		return _.every(items, item => {
+			const volume = item.volume;
+			assert(math.unit('l').equalBase(volume), "expected units to be in liters");
+			if (math.compare(volume, math.eval(tipModel.min)) < 0 || math.compare(volume, math.eval(tipModel.max)) > 0) {
+				return false;
+			}
+			// TODO: check whether the labware is sealed
+			// TODO: check whether the well has cells
+			return true;
+		});
+	});
+	return (!_.isEmpty(tipModelName))
+		? `${equipmentName}.tipModel.${tipModelName}`
+		: undefined;
+}
+
+function setTipModel(items, equipment, equipmentName) {
+	// FIXME: allow for overriding tipModel via top pipetter params
+	const tipModelName = findTipModel(items, equipment, equipmentName);
+	// console.log({tipModelName, items})
+	if (tipModelName) {
+		_.forEach(items, function(item) {
+			if (!item.tipModel) item.tipModel = tipModelName;
+		});
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 
 /**
  * Handlers for {@link pipetter} commands.
