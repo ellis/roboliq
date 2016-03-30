@@ -51,7 +51,7 @@
 - [x] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
 - [x] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
 - [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
-- [ ] `pipetter.pipette()`: handle separate programs for source and destination
+- [x] `pipetter.pipette()`: handle separate programs for source and destination
 
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
@@ -63,10 +63,9 @@
 	- [x] 6: make sure sample cycle 0 is handled before cycle 4
 	- [x] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
 		- [x] handle dilution series where we don't add diluent, because it's already in the wells
+	- [x] shouldn't use liquid level detection when aspirating from sealed culture plate: Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
+	- [ ] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
 	- [ ] MISSING: inactivation steps after sampling from well
-	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
-		- [ ] pipetter.pipette: adapt to handle separate source and destination programs
-		- Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
 	- [ ] design1: allocate plates and wells for dilution
 
 	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
@@ -92,6 +91,16 @@
 - [ ] pipetter.pipetteDilutionSeries: figure out more principled way to let user specify order of operations, e.g. source+diluent+dilutions or diluent+source+dilutions or source+dilutions+diluent
 - [ ] pipetter.pipetteDilutionSeries: let the user select between mixing with pipette vs shaking
 - [ ] since we're pipetting cells, should we use a "Cells" liquid class instead of "Water"?
+- [ ] BUG: this is ignoring cleanBetweenSameSource and cleaning anyway:
+		command: pipetter.pipette
+		sources: medium
+		destinationLabware: $dilutionPlate
+		destinations: $$dilutionWell
+		syringes: $$syringe
+		volumes: 200ul
+		cleanBegin: none
+		cleanBetweenSameSource: none
+
 
 # Todos for ROMA qc
 

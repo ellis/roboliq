@@ -196,8 +196,10 @@ steps:
           destinations: $$dilutionWell
           syringes: $$syringe
           volumes: 200ul
-          cleanBegin: none
-          cleanBetweenSameSource: none
+          # cleanBegin: none
+          # cleanBetweenSameSource: none
+          cleanBetween: none
+          cleanEnd: decontaminate
       2:
         description: "`Extract samples from {{$culturePlate}}`"
         1:
@@ -210,6 +212,7 @@ steps:
           destination: $aspirationSite
         3:
           command: pipetter.pipette
+          sourceProgram: Roboliq_Water_Bot_2500
           sourceLabware: $culturePlate
           sources: $$cultureWell
           destinationLabware: $dilutionPlate

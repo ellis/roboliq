@@ -338,9 +338,10 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 
 		const labwareModel = wellInfo.labwareModel;
 		const plateMask = encodeWells(tuples, propertyName);
+		const program = (func === "Aspirate" && parsed.value.sourceProgram) ? parsed.value.sourceProgram : parsed.value.program;
 		const l = [
 			syringeMask,
-			`"${stripQuotes(parsed.value.program)}"`,
+			`"${stripQuotes(program)}"`,
 			volumes.join(","),
 			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
 			group.syringeSpacing || 1,

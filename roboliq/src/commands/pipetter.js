@@ -368,15 +368,15 @@ function pipette(params, parsed, data) {
 			item2.volume = item2.volume.format({precision: 14});
 			return item2;
 		});
-		// Mix source before aspirating?
 		// Pipette
-		expansionList.push({
+		expansionList.push(_.merge({}, {
 			"command": "pipetter._pipette",
 			"agent": agent,
 			"equipment": equipmentName,
 			"program": group[0].program,
+			"sourceProgram": parsed.value.sourceProgram,
 			"items": items2
-		});
+		}));
 
 		// Mix the destination wells
 		const destinationMixCommand = addMixing(parsed, agent, equipmentName, group, "destinationMixing", "destination", "volumeAfter");
