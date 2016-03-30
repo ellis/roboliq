@@ -1083,5 +1083,75 @@ describe('pipetter', function() {
 			should.deepEqual(_.pick(result3.output.steps[1], [1, 2, 3]), _.pick(expected, ["1"]));
 		});
 
+		it("should handle sourceMixing={} and =true and =false", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+							B01: ['100ul', 'source2']
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+					source2: {
+						type: 'Liquid',
+						wells: 'plate1(B01)'
+					},
+				},
+				steps: {
+					1: {
+						"command": "pipetter.pipette",
+						"sources": "plate1(A01,B01)",
+						"destinations": "plate1(A02,B02)",
+						"volumes": "50ul",
+						"sourceMixing": {},
+						"clean": "none"
+					}
+				}
+			};
+			const expected = {
+				"1": {
+					"command": "pipetter._mix",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Dry_1000\"",
+					"items": [
+						{ "syringe": "ourlab.mario.liha.syringe.1", "well": "plate1(A01)", "count": 3, "volume": "70 ul" },
+						{ "syringe": "ourlab.mario.liha.syringe.2", "well": "plate1(B01)", "count": 3, "volume": "70 ul" }
+					]
+				},
+				"2": {
+					"command": "pipetter._pipette",
+					"agent": "ourlab.mario.evoware",
+					"equipment": "ourlab.mario.liha",
+					"program": "\"Roboliq_Water_Dry_1000\"",
+					"items": [
+						{ "syringe": "ourlab.mario.liha.syringe.1", "source": "plate1(A01)", "destination": "plate1(A02)", "volume": "50 ul" },
+						{ "syringe": "ourlab.mario.liha.syringe.2", "source": "plate1(B01)", "destination": "plate1(B02)", "volume": "50 ul" }
+					]
+				},
+			};
+			const result1 = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result1.output.steps, null, '\t'));
+			should.deepEqual(_.pick(result1.output.steps[1], [1, 2, 3]), expected);
+
+			protocol.steps[1].sourceMixing = true;
+			const result2 = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result2.output.steps, null, '\t'));
+			should.deepEqual(_.pick(result2.output.steps[1], [1, 2, 3]), expected);
+
+			protocol.steps[1].sourceMixing = false;
+			const result3 = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result3.output.steps, null, '\t'));
+			should.deepEqual(result3.output.steps[1][1], expected["2"]);
+		});
+
 	});
 });

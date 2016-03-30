@@ -195,9 +195,6 @@ function pipette(params, parsed, data) {
 	const equipment = _.get(data.objects, equipmentName);
 	assert(equipment, "could not find equipment: "+equipmentName);
 
-	// Add properties `volumeBefore` and `volumeAfter` to the items.
-	calculateWellVolumes(items, data);
-
 	const sourceToItems = _.groupBy(items, 'source');
 
 	// Only keep items that have a positive volume (will need to adapt this for pipetter.punctureSeal)
@@ -269,6 +266,9 @@ function pipette(params, parsed, data) {
 	for (const group of groups) {
 		sourceMethods.sourceMethod3(group, data, effects);
 	}
+
+	// Add properties `volumeBefore` and `volumeAfter` to the items.
+	calculateWellVolumes(items, data);
 
 	// Calculate when tips need to be washed
 	// Create pipetting commands
@@ -356,6 +356,12 @@ function pipette(params, parsed, data) {
 			expansionList.push.apply(expansionList, createCleanActions(syringeToCleanBeforeValue, agent, equipmentName, data));
 		}
 		doCleanBefore = true;
+
+		// Mix the source wells
+		const sourceMixCommand = addMixing(parsed, agent, equipmentName, group, "sourceMixing", "source", "sourceVolumeBefore");
+		if (sourceMixCommand) {
+			expansionList.push(sourceMixCommand);
+		}
 
 		const items2 = _.map(group, function(item) {
 			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count"]);
@@ -445,6 +451,14 @@ function calculateWellVolumes(items, data) {
 	const wellVolumes = {};
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
+		if (item.source) {
+			const well = item.source;
+			const volume0 = (wellVolumes.hasOwnProperty(well)) ? wellVolumes[well] : WellContents.getWellVolume(well, data)
+			const volume1 = math.subtract(volume0, item.volume);
+			item.sourceVolumeBefore = volume0;
+			item.sourceVolumeAfter = volume1;
+			wellVolumes[well] = volume1;
+		}
 		const well = item.well || item.destination;
 		if (well) {
 			const volume0 = (wellVolumes.hasOwnProperty(well)) ? wellVolumes[well] : WellContents.getWellVolume(well, data)
