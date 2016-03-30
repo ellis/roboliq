@@ -146,6 +146,7 @@ steps:
         volumes: 980ul
         syringes: $$syringe
         cleanBetween: none
+        cleanEnd: none
       3:
         command: pipetter.pipette
         sources: inoculum
@@ -153,7 +154,7 @@ steps:
         destinations: $$cultureWell
         volumes: 20ul
         syringes: $$syringe
-        cleanBegin: none # TODO: this shouldn't be necessary
+        cleanBegin: none
         cleanBetween: none
         cleanEnd: decontaminate
       4:
@@ -244,7 +245,7 @@ steps:
             templateGroup:
               destinations: $$dilutionWell
               syringe: $syringe
-        clean: none
+        cleanBegin: none
         cleanEnd: decontaminate
         diluentParams:
           clean: none

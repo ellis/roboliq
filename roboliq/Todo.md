@@ -47,13 +47,12 @@
 - [x] `pipetter._mix`: implement with schema and command handler
 - [x] evoware `pipetter._mix`: implement instruction handler
 - [x] `pipetter.pipette()`: handle "mixSource" and "mixDestination"
-- [ ] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
-- [ ] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
-- [ ] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
-- [ ] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
+- [x] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
+- [x] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
+- [x] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
+- [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [ ] `pipetter.pipette()`: handle separate programs for source and destination
 
-- [ ] `pipetter.pipette()`: when destinationMixing is used, then ensure that the syringe gets contaminated with destination liquid and that a wet or bot liquid class is used
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
 
@@ -62,20 +61,8 @@
 	- [x] 6.1: description isn't expanded correctly
 	- [x] BUG: why did the experiment only run for 1.5h?
 	- [x] 6: make sure sample cycle 0 is handled before cycle 4
-	- [ ] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
-		- [?] handle dilution series where we don't add diluent, because it's already in the wells
-		- [ ] make sure we mix the dilution wells before proceeding to next dilution (either mix with pipette or use the shaker)
-			- [x] hardcode mixing into the PipetteItems
-			- [ ] pipetter.mix: create command
-				- [x] create schema
-				- [ ] create command handler
-				- [ ] create evoware instruction handler
-			- [ ] adapt pipetter.pipette to generate mixing commands
-			- [ ] rather than hardcode mixing, take user specifications
-		- [ ] hardcode discarding of last aspirated volume
-			- [ ] decide whether to figure out how to let `pipetter.pipette` aspirate without dispensing, or how to dispense to the wash station without having to specify which well (i.e. figure out well like we do with multi-well sources) -- both would be good to have eventually
-			- [ ] discardDestination, discardLabware
-		- [ ] let user specify whether to aspirate from last well and discard the aliquot
+	- [x] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
+		- [x] handle dilution series where we don't add diluent, because it's already in the wells
 	- [ ] MISSING: inactivation steps after sampling from well
 	- [ ] shouldn't use liquid level detection when aspirating from sealed culture plate
 		- [ ] pipetter.pipette: adapt to handle separate source and destination programs
@@ -133,6 +120,8 @@
 # Todos for paper 2/3
 
 - [ ] `pipetter.pipette()`: after destinationMixing, make sure that tips are marked as unclean and contaminated with destination liquid (even if air dispense was previously used)
+- [ ] `pipetter.pipetteDilutionSeries`: let user specify handling of last dilution well, e.g. no-diluent, reduced-diluent, discard-extra (default), keep-extra
+- [ ] `pipetter.pipette()`: when destinationMixing is used, then ensure that the syringe gets contaminated with destination liquid and that a wet or bot liquid class is used
 - [ ] Figure out how to automatically convert reader data to measurement JSON data
 	- [ ] roboliq-runtime-cli: should send XML to runtime-server
 	- [ ] roboliq-runtime-cli: should rename XML file to include end-time suffix
