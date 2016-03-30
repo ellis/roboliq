@@ -104,23 +104,6 @@ function pipette(params, parsed, data) {
 	// });
 	//console.log({sourceLabware})
 
-	// Replace syringe objects with syringe names
-	function replaceSyringeObjectWithName(items, prefix = []) {
-		for (let i = 0; i < items.length; i++) {
-			const item = items[i];
-			const path = prefix.concat(i);
-			if (_.isArray(item)) {
-				replaceSyringeObjectWithName(item, path);
-			}
-			else if (_.isPlainObject(item.syringe)) {
-				item.syringe = _.get(parsed.objectName, `items.${path.join(".")}.syringe`, item.syringe);
-			}
-		}
-	}
-	if (parsed.value.items) {
-		replaceSyringeObjectWithName(parsed.value.items);
-	}
-
 	// Replace syringe objects with syringe names, for top syringes param
 	let syringesTop;
 	if (parsed.value.syringes) {
@@ -472,7 +455,7 @@ function pipette(params, parsed, data) {
 
 	// Create clean commands before pipetting this group
 	const createCleanActions = function(syringeToCleanValue, compareToOriginalState = false) {
-		console.log("createCleanActions: "+JSON.stringify(syringeToCleanValue))
+		// console.log("createCleanActions: "+JSON.stringify(syringeToCleanValue))
 		const items = _(syringeToCleanValue).toPairs().map(([syringeName0, n]) => {
 			if (n > 0) {
 				const syringeName = pipetterUtils.getSyringeName(syringeName0, equipmentName, data);
@@ -480,7 +463,7 @@ function pipette(params, parsed, data) {
 				if (compareToOriginalState) {
 					const intensity = syringe.cleaned;
 					const syringeCleanedValue = intensityToValue[syringe.cleaned] || 0;
-					console.log({syringeName0, n, syringeName, intensity, syringeCleanedValue, syringe})
+					// console.log({syringeName0, n, syringeName, intensity, syringeCleanedValue, syringe})
 					if (n > syringeCleanedValue)
 						return {syringe: syringeName, intensity: valueToIntensity[n]};
 				}
@@ -626,7 +609,7 @@ function pipette(params, parsed, data) {
 	// cleanEnd
 	// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
 	var syringeToCleanEndValue = {};
-	console.log({syringeToCleanValue})
+	// console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
 		var intensity = parsed.value.cleanEnd || parsed.value.clean || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));

@@ -65,7 +65,7 @@ pipetter._PipetteItem:
 pipetter.PipetteItem:
   description: Parameters for pipette items.
   properties:
-    syringe: {description: Syringe identifier, type: [number, Syringe]}
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
     source: {description: Source specifier, type: Source}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
