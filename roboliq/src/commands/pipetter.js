@@ -595,7 +595,7 @@ function addMixing(parsed, agent, equipmentName, group, mixPropertyName, wellPro
 			agent,
 			equipment: equipmentName,
 			program: group[0].program, // FIXME: even if we used Air dispense for the dispense, we need to use Wet or Bot here
-			items: items2
+			items: mixItems
 		};
 		return mixCommand;
 	}

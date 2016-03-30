@@ -187,7 +187,6 @@ pipetter.mix:
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter.MixSpec}
-    destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter.MixSpec}
 
 pipetter.pipette:
   description: Pipette liquids from sources to destinations.
@@ -207,8 +206,8 @@ pipetter.pipette:
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
-    mixSource: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: pipetter.MixSpec}
-    mixDestination: {description: "Parameters for mixing the destination wells with pipetter after dispensing", type: pipetter.MixSpec}
+    sourceMixing: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: pipetter.MixSpec}
+    destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
   required: []
 
 pipetter.pipetteDilutionSeries:
