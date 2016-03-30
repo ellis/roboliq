@@ -11,20 +11,20 @@
  * @version v1
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var math = require('mathjs');
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
 import yaml from 'yamljs';
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-var misc = require('../misc.js');
-var groupingMethods = require('./pipetter/groupingMethods.js');
-var pipetterUtils = require('./pipetter/pipetterUtils.js');
-var sourceMethods = require('./pipetter/sourceMethods.js');
-var wellsParser = require('../parsers/wellsParser.js');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const misc = require('../misc.js');
+const groupingMethods = require('./pipetter/groupingMethods.js');
+const pipetterUtils = require('./pipetter/pipetterUtils.js');
+const sourceMethods = require('./pipetter/sourceMethods.js');
+const wellsParser = require('../parsers/wellsParser.js');
 import * as WellContents from '../WellContents.js';
 
-var intensityToValue = {
+const intensityToValue = {
 	"none": 0,
 	"flush": 1,
 	"light": 2,
@@ -32,7 +32,7 @@ var intensityToValue = {
 	"decontaminate": 4
 };
 
-var valueToIntensity = ["none", "flush", "light", "thorough", "decontaminate"];
+const valueToIntensity = ["none", "flush", "light", "thorough", "decontaminate"];
 
 function extractLiquidNamesFromContents(contents) {
 	if (_.isEmpty(contents) || contents.length < 2) return [];
@@ -76,7 +76,7 @@ function getLabwareWellList(labwareName, wells) {
 }
 
 function pipette(params, parsed, data) {
-	var llpl = require('../HTN/llpl.js').create();
+	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
 	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
@@ -87,8 +87,8 @@ function pipette(params, parsed, data) {
 	//console.log("items: "+JSON.stringify(items));
 	let agent = parsed.objectName.agent || "?agent";
 	let equipmentName = parsed.objectName.equipment || "?equipment";
-	//var tipModels = params.tipModels;
-	//var syringes = params.syringes;
+	//const tipModels = params.tipModels;
+	//const syringes = params.syringes;
 
 	// const sourcesTop = getLabwareWellList(parsed.objectName.sourceLabware, parsed.value.sources);
 	// //console.log({sourcesTop})
@@ -146,7 +146,7 @@ function pipette(params, parsed, data) {
 	// Find all labware
 	const labwareName_l = _(wellName_l).map(function (wellName) {
 		//console.log({wellName})
-		var i = wellName.indexOf('(');
+		const i = wellName.indexOf('(');
 		return (i >= 0) ? wellName.substr(0, i) : wellName;
 	}).uniq().value();
 	const labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
@@ -157,14 +157,14 @@ function pipette(params, parsed, data) {
 		if (!labware.location) {
 			return {errors: [labware.name+".location must be set"]};
 		}
-		var query = {
+		const query = {
 			"pipetter.canAgentEquipmentSite": {
 				"agent": agent,
 				"equipment": equipmentName,
 				"site": labware.location
 			}
 		};
-		var queryResults = llpl.query(query);
+		const queryResults = llpl.query(query);
 		//console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
 		if (_.isEmpty(queryResults)) {
 			throw {name: "ProcessingError", errors: [labware.name+" is at site "+labware.location+", which hasn't been configured for pipetting; please move it to a pipetting site."]};
@@ -175,9 +175,9 @@ function pipette(params, parsed, data) {
 
 	// Check whether the same agent and equipment can be used for all the pipetting steps
 	if (!_.isEmpty(query2_l)) {
-		var query2 = {"and": query2_l};
+		const query2 = {"and": query2_l};
 		//console.log("query2: "+JSON.stringify(query2, null, '\t'));
-		var queryResults2 = llpl.query(query2);
+		const queryResults2 = llpl.query(query2);
 		//console.log("query2: "+JSON.stringify(query2, null, '\t'));
 		//console.log("queryResults2: "+JSON.stringify(queryResults2, null, '\t'));
 		if (_.isEmpty(queryResults2)) {
@@ -185,7 +185,7 @@ function pipette(params, parsed, data) {
 		}
 		// Arbitrarily pick first listed agent/equipment combination
 		else {
-			var x = queryResults2[0]["and"][0]["pipetter.canAgentEquipmentSite"];
+			const x = queryResults2[0]["and"][0]["pipetter.canAgentEquipmentSite"];
 			agent = x.agent;
 			equipmentName = x.equipment;
 		}
@@ -198,7 +198,7 @@ function pipette(params, parsed, data) {
 	// Add properties `volumeBefore` and `volumeAfter` to the items.
 	calculateWellVolumes(items, data);
 
-	var sourceToItems = _.groupBy(items, 'source');
+	const sourceToItems = _.groupBy(items, 'source');
 
 	//console.log({itemVolumes: items.map(x => x.volume)})
 	//console.log(_.filter(items, item => item.volume));
@@ -221,7 +221,7 @@ function pipette(params, parsed, data) {
 	}
 
 	// Try to find a pipettingClass for the given items
-	var findPipettingClass = function(items) {
+	const findPipettingClass = function(items) {
 		// Pick liquid properties by inspecting source contents
 		const pipettingClasses0 = items.map(item => {
 			let pipettingClass = "Water";
@@ -239,8 +239,8 @@ function pipette(params, parsed, data) {
 				//console.log({source})
 				const contents = WellContents.getWellContents(source[0], data);
 				if (contents) {
-					var liquids = extractLiquidNamesFromContents(contents);
-					var pipettingClasses = _(liquids).map(function(name) {
+					const liquids = extractLiquidNamesFromContents(contents);
+					const pipettingClasses = _(liquids).map(function(name) {
 						return misc.findObjectsValue(name+".pipettingClass", data.objects, null, "Water");
 					}).uniq().value();
 					// FIXME: should pick "Water" if water-like liquids have high enough concentration
@@ -269,13 +269,13 @@ function pipette(params, parsed, data) {
 	}
 
 	// Pick position (wet or dry) by whether there are already contents in the destination well
-	var findPipettingPosition = function(items) {
-		var pipettingPositions = _(items).map(item => item.destination || item.well).map(function(well) {
-			var i = well.indexOf('(');
-			var labware = well.substr(0, i);
-			var wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
-			var contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
-			var liquids = extractLiquidNamesFromContents(contents);
+	const findPipettingPosition = function(items) {
+		const pipettingPositions = _(items).map(item => item.destination || item.well).map(function(well) {
+			const i = well.indexOf('(');
+			const labware = well.substr(0, i);
+			const wellId = well.substr(i + 1, 3); // FIXME: parse this instead, allow for A1 as well as A01
+			const contents = misc.findObjectsValue(labware+".contents."+wellId, data.objects);
+			const liquids = extractLiquidNamesFromContents(contents);
 			return _.isEmpty(liquids) ? "Dry" : "Wet";
 		}).uniq().value();
 
@@ -297,17 +297,17 @@ function pipette(params, parsed, data) {
 	else {
 		function assignProgram(items) {
 			// console.log("assignProgram: "+JSON.stringify(items))
-			var pipettingClass = findPipettingClass(items);
+			const pipettingClass = findPipettingClass(items);
 			if (!pipettingClass) return false;
-			var pipettingPosition = findPipettingPosition(items);
+			const pipettingPosition = findPipettingPosition(items);
 			if (!pipettingPosition) return false;
-			var tipModels = _(items).map('tipModel').uniq().value();
+			const tipModels = _(items).map('tipModel').uniq().value();
 			if (tipModels.length !== 1) return false;
 			const tipModelName = tipModels[0];
 			const tipModelCode = misc.getObjectsValue(tipModelName+".programCode", data.objects);
 			//console.log({equipment})
 			assert(tipModelCode, `missing value for ${tipModelName}.programCode`);
-			var program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
+			const program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
 			_.forEach(items, function(item) { item.program = program; });
 			return true;
 		}
@@ -329,18 +329,18 @@ function pipette(params, parsed, data) {
 	}
 
 	// TODO: Limit syringe choices based on params
-	var syringesAvailable = _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
-	var tipModelToSyringes = equipment.tipModelToSyringes;
+	const syringesAvailable = _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
+	const tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
-	var groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
+	const groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
 	// console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Pick syringe for each item
 	// For each group assign syringes, starting with the first available one
 	_.forEach(groups, function(group) {
-		var tipModelToSyringesAvailable = _.cloneDeep(tipModelToSyringes);
+		const tipModelToSyringesAvailable = _.cloneDeep(tipModelToSyringes);
 		_.forEach(group, function(item) {
-			var tipModel = item.tipModel;
+			const tipModel = item.tipModel;
 			assert(tipModelToSyringesAvailable[tipModel].length >= 1);
 			if (_.isUndefined(item.syringe)) {
 				item.syringe = tipModelToSyringesAvailable[tipModel].splice(0, 1)[0];
@@ -365,10 +365,10 @@ function pipette(params, parsed, data) {
 	// Calculate when tips need to be washed
 	// Create pipetting commands
 
-	var syringeToSource = {};
+	const syringeToSource = {};
 	// How clean is the syringe/tip currently?
-	var syringeToCleanValue = _.fromPairs(_.map(syringesAvailable, s => [s, 5]));
-	var expansionList = [];
+	const syringeToCleanValue = _.fromPairs(_.map(syringesAvailable, s => [s, 5]));
+	const expansionList = [];
 
 	// Create clean commands before pipetting this group
 	const createCleanActions = function(syringeToCleanValue, compareToOriginalState = false) {
@@ -413,14 +413,14 @@ function pipette(params, parsed, data) {
 	*/
 
 	// Find the cleaning intensity required before the first aspiration
-	var syringeToCleanBeginValue = {};
+	const syringeToCleanBeginValue = {};
 	_.forEach(groups, function(group) {
 		_.forEach(group, function(item) {
-			var syringe = item.syringe;
+			const syringe = item.syringe;
 			if (!syringeToCleanBeginValue.hasOwnProperty(syringe)) {
 				// TODO: handle source's cleanBefore
-				var intensity = item.cleanBefore || parsed.value.cleanBegin || parsed.value.clean || "thorough";
-				var intensityValue = intensityToValue[intensity];
+				const intensity = item.cleanBefore || parsed.value.cleanBegin || parsed.value.clean || "thorough";
+				const intensityValue = intensityToValue[intensity];
 				syringeToCleanBeginValue[syringe] = intensityValue;
 			}
 		});
@@ -430,27 +430,27 @@ function pipette(params, parsed, data) {
 	//console.log("expansionList:")
 	//console.log(JSON.stringify(expansionList, null, '  '));
 
-	var syringeToCleanAfterValue = {};
-	var doCleanBefore = false
+	const syringeToCleanAfterValue = {};
+	let doCleanBefore = false
 	_.forEach(groups, function(group) {
 		assert(group.length > 0);
 		// What cleaning intensity is required for the tip before aspirating?
-		var syringeToCleanBeforeValue = _.clone(syringeToCleanAfterValue);
+		const syringeToCleanBeforeValue = _.clone(syringeToCleanAfterValue);
 		//console.log({syringeToCleanBeforeValue, syringeToCleanAfterValue})
 		_.forEach(group, function(item) {
-			var source = item.source || item.well;
-			var syringe = item.syringe;
-			var isSameSource = (source === syringeToSource[syringe]);
+			const source = item.source || item.well;
+			const syringe = item.syringe;
+			const isSameSource = (source === syringeToSource[syringe]);
 
 			// Find required clean intensity
 			// Priority: max(previousCleanAfter, (item.cleanBefore || params.cleanBetween || params.clean || source.cleanBefore || "thorough"))
 			// FIXME: ignore isSameSource if tip has been contaminated by 'Wet' pipetting position
 			// FIXME: also take the source's and destination's "cleanBefore" into account
-			var intensity = (!isSameSource)
+			const intensity = (!isSameSource)
 				? item.cleanBefore || parsed.value.cleanBetween || parsed.value.clean || "thorough"
 				: item.cleanBefore || parsed.value.cleanBetweenSameSource || parsed.value.cleanBetween || parsed.value.clean || "thorough";
 			assert(intensityToValue.hasOwnProperty(intensity));
-			var intensityValue = intensityToValue[intensity];
+			let intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 				intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);
 			//console.log({source, syringe, isSameSource, intensityValue})
@@ -478,7 +478,7 @@ function pipette(params, parsed, data) {
 		}
 		doCleanBefore = true;
 
-		var items2 = _.map(group, function(item) {
+		const items2 = _.map(group, function(item) {
 			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count"]);
 			item2.volume = item2.volume.format({precision: 14});
 			return item2;
@@ -525,12 +525,12 @@ function pipette(params, parsed, data) {
 
 	// cleanEnd
 	// Priority: max(previousCleanAfter, params.cleanEnd || params.clean || "thorough")
-	var syringeToCleanEndValue = {};
+	const syringeToCleanEndValue = {};
 	// console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
-		var intensity = parsed.value.cleanEnd || parsed.value.clean || "thorough";
+		const intensity = parsed.value.cleanEnd || parsed.value.clean || "thorough";
 		assert(intensityToValue.hasOwnProperty(intensity));
-		var intensityValue = intensityToValue[intensity];
+		let intensityValue = intensityToValue[intensity];
 		if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 			intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);
 		if (value < intensityValue)
@@ -541,7 +541,7 @@ function pipette(params, parsed, data) {
 
 	// Create the effets object
 	// TODO: set final tip clean values
-	var effects = {};
+	const effects = {};
 
 	return {
 		expansion: expansionList,
