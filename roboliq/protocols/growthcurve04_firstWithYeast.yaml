@@ -23,7 +23,7 @@ description: |
 
 config:
   evowareCompiler:
-    timing: false
+    # timing: false
 
 objects:
   mediumLabware: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1, contents: ["1000 ml", "medium"]}

@@ -53,12 +53,19 @@
 - [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [x] `pipetter.pipette()`: handle separate programs for source and destination
 - [x] start running experiment with water
-- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
-- [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
-- [ ] test whether dispense of 20ul is reliable without flushing between steps
-
+- [x] runtime-server: need to save logs to disk so that we have accurate time data for analysis
+- [ ] regenerate script with timing instructions
+- [ ] design1: allocate plates and wells for dilution
+- [ ] add more dilution steps to the protocol (and more plates)
+- [ ] empty waste bottle, fill water bottle
+- [ ] run script overnight
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
+
+- [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
+- [ ] test whether dispense of 20ul is reliable without flushing between steps
+- [ ] runtimer-server cli: rewrite argument handling to use the 'commander' package, or something like that
+- [ ] runtimer-server cli: accept path for where to write log to
 
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced

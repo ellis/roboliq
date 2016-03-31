@@ -1,3 +1,4 @@
+var fs = require('fs');
 var socket = require('socket.io-client')('http://localhost:12346');
 
 function formatLocalDate() {
@@ -33,8 +34,11 @@ for (var i = 2; i < process.argv.length; i++) {
   }
 }
 
+const packet = {type: "setStepTime", time: formatLocalDate(), begins, ends};
+fs.appendFile(__dirname+"/roboliq.log", JSON.stringify(packet)+"\n");
+
 socket.on('connect', function() {
-	socket.emit("actionThenDisconnect", {type: "setStepTime", time: formatLocalDate(), begins, ends});
+	socket.emit("actionThenDisconnect", packet);
 });
 
 socket.on('state', function(data) {
