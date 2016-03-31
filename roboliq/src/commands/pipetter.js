@@ -666,6 +666,12 @@ const commandHandlers = {
 			effects: pipetterUtils.getEffects_pipette(parsed, data)
 		};
 	},
+	"pipetter._punctureSeal": function(params, parsed, data) {
+		// console.log("pipetter._punctureSeal: "+JSON.stringify(parsed, null, '\t'))
+		return {
+			effects: pipetterUtils.getEffects_pipette(parsed, data)
+		};
+	},
 	"pipetter._washTips": function(params, parsed, data) {
 		//console.log("_washTips:");
 		//console.log(JSON.stringify(parsed, null, '\t'))

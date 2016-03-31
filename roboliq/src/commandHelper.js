@@ -366,6 +366,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			// TODO: need to check a list of which types are Equipment types
 			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
 			return;
+		case "Length": return processLength(result, path, value, data);
 		case "Plate": return processObjectOfType(result, path, value, data, type);
 		case "Site": return processObjectOfType(result, path, value, data, type);
 		case "SiteOrStay": return processSiteOrStay(result, path, value, data);
@@ -552,6 +553,23 @@ function processOneOrArray(result, path, value0, fn) {
 
 	expect.truthy({paramName: path.join('.')}, _.isArray(value0), "expected an array: "+JSON.stringify(value0));
 	value0.forEach((x, i) => fn(result, path.concat(i), x));
+}
+
+/**
+ * Try to process a value as a length.
+ *
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {object} x - the value to process
+ * @param {object} data - protocol data
+ */
+function processLength(result, path, x, data) {
+	if (_.isString(x)) {
+		x = math.eval(x);
+	}
+	//console.log({function: "processLength", path, x})
+	expect.truthy({paramName: path.join('.')}, math.unit('m').equalBase(x), "expected a volume with meter units (m, mm, nm, etc.): "+JSON.stringify(x));
+	_.set(result.value, path, x);
 }
 
 /**

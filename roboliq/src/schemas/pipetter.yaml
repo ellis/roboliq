@@ -75,6 +75,22 @@ pipetter.PipetteItem:
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter.MixSpec}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter.MixSpec}
 
+pipetter._PunctureItem:
+  description: Parameters for low-level pipette items.
+  properties:
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
+    well: {description: Source specifier, type: Well}
+    distance: {description: "Distance for puncturing", type: Length}
+  required: [syringe, well, distance]
+
+pipetter.PunctureItem:
+  description: Parameters for low-level pipette items.
+  properties:
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
+    well: {description: Source specifier, type: Well}
+    distance: {description: "Distance for puncturing", type: Length}
+    cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
+
 pipetter.DilutionItem:
   description: Parameters for a dilution series.
   properties:
@@ -139,9 +155,18 @@ pipetter._pipette:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
-    sourceProgram: {description: "Program identifier for aspriating from source, if it should differ from 'program'", type: "string"}
+    sourceProgram: {description: "Program identifier for aspirating from source, if it should differ from 'program'", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter._PipetteItem}}
   required: [agent, equipment, program]
+
+pipetter._punctureSeal:
+  description: Puncture the seal on a plate using pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter._PunctureItem}}
+  required: [agent, equipment, items]
 
 pipetter._washTips:
   description: Clean the pipetter tips.
@@ -180,7 +205,7 @@ pipetter.mix:
     items: {description: "Data about which wells to mix and how to mix them", "type": "array", items: {type: pipetter.MixItem}}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}
     destinationLabware: {description: "Labware for source wells", "type": "Plate"}
-    wells: {description: "Specifier for wells(s) to mix, if missing from items", type: Wells}
+    wells: {description: "Specifier for well(s) to mix, if missing from items", type: Wells}
     counts: {description: "Number of times to aspirate, if missing from items", type: integer, default: 3}
     amounts: {description: "Amount to aspirate, either as a fraction or absolute volume, if missing from items", type: [Volume, number], default: 0.7}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
@@ -196,7 +221,7 @@ pipetter.pipette:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
-    sourceProgram: {description: "Program identifier for aspriating from source, if it should differ from 'program'", type: "string"}
+    sourceProgram: {description: "Program identifier for aspirating from source, if it should differ from 'program'", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter.PipetteItem}}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}
     destinationLabware: {description: "Labware for source wells", "type": "Plate"}
@@ -212,6 +237,21 @@ pipetter.pipette:
     sourceMixing: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: pipetter.MixSpec}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
   required: []
+
+pipetter.punctureSeal:
+  description: Puncture the seal on a plate using pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter.PunctureItem}}
+    wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
+    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
+    distances: {description: "Distance for puncturing", type: [Length, array], items: {type: Length}}
+    clean: {description: "Intensity of cleaning", type: string}
+    cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
+    cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
+    cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
 
 pipetter.pipetteDilutionSeries:
   description: |
