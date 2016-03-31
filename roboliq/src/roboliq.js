@@ -113,6 +113,11 @@ const nomnom = require('nomnom').options({
 		flag: true,
 		help: 'print combined protocol'
 	},
+	printDesigns: {
+		full: 'print-designs',
+		flag: true,
+		help: 'print design tables'
+	},
 	progress: {
 		flag: true,
 		help: 'print progress indicator while processing the protocol'
@@ -974,6 +979,16 @@ function _run(opts, userProtocol) {
 		*/
 	}
 
+	if (opts.debug || opts.printDesigns) {
+		const designs = misc.getObjectsOfType(protocol.objects, "Design");
+		_.forEach(designs, (design, name) => {
+			console.log();
+			console.log(`Design "${name}":`);
+			const rows = Design.flattenDesign(design);
+			Design.printRows(rows);
+		});
+	}
+
 	// If there were errors,
 	if (!_.isEmpty(protocol.errors)) {
 		//return {protocol: protocol, output: _.pick(protocol, 'errors', 'warnings')};
@@ -1057,6 +1072,12 @@ function _run(opts, userProtocol) {
 				tabulateWellContents(labware.contents, name);
 			}
 		});
+
+		// Get tables for all designs
+		const designs = misc.getObjectsOfType(protocol.objects, "Design");
+		const designTables = _.mapValues(designs, Design.flattenDesign);
+		if (!_.isEmpty(designTables))
+			tables.designs = designTables;
 
 		output.tables = tables;
 

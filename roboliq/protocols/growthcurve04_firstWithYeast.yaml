@@ -202,6 +202,8 @@ steps:
           cleanEnd: decontaminate
       2:
         description: "`Extract samples from {{$culturePlate}}`"
+        data:
+          where: {dilutionStep: 0}
         1:
           command: equipment.open
           agent: ourlab.luigi.evoware

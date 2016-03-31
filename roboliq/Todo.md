@@ -64,7 +64,7 @@
 	- [x] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
 		- [x] handle dilution series where we don't add diluent, because it's already in the wells
 	- [x] shouldn't use liquid level detection when aspirating from sealed culture plate: Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
-	- [ ] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
+	- [x] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
 	- [ ] MISSING: inactivation steps after sampling from well
 	- [ ] design1: allocate plates and wells for dilution
 

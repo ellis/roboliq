@@ -7,3 +7,4 @@ protocols/*.prot
 npm-debug.log
 commandSpecs.html
 commandSpecs.pdf
+dist

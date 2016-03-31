@@ -1045,7 +1045,7 @@ function copyItemsWithDefaults(items, defaults) {
 		}
 		else {
 			counts = _.filter(counts, n => n != 1);
-			assert(counts.length === 1, "unequal array sizes: "+JSON.stringify(items, defaults));
+			assert(counts.length === 1, "unequal array sizes: "+JSON.stringify({items, defaults}));
 			size = counts[0];
 		}
 		items = _.map(_.range(size), () => ({}));
