@@ -53,12 +53,11 @@
 - [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [x] `pipetter.pipette()`: handle separate programs for source and destination
 - [x] start running experiment with water
-- [x] runtime-server: need to save logs to disk so that we have accurate time data for analysis
+- [x] runtime-server: save logs to disk
 - [ ] regenerate script with timing instructions
-- [ ] design1: allocate plates and wells for dilution
+- [x] design2: allocatePlates
 - [ ] add more dilution steps to the protocol (and more plates)
 - [ ] empty waste bottle, fill water bottle
-- [ ] run script overnight
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
 
@@ -88,6 +87,7 @@
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
+- [ ] runtime-server: need to save time logs to disk in such a way that we can easily use the time data for analysis
 - [ ] implement command to prompt the user
 - [ ] notify user where to put labware
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.

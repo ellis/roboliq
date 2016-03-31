@@ -6,6 +6,7 @@ export function startServerRuntime(store) {
 	io.on('connection', (socket) => {
 		console.log({id: socket.id})
 		socket.on("actionThenDisconnect", action => {
+			fs.appendFile(__dirname+"/roboliq-runtime-server.log", JSON.stringify(action)+"\n");
 			store.dispatch(action);
 			socket.disconnect();
 		});

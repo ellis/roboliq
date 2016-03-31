@@ -35,7 +35,7 @@ for (var i = 2; i < process.argv.length; i++) {
 }
 
 const packet = {type: "setStepTime", time: formatLocalDate(), begins, ends};
-fs.appendFile(__dirname+"/roboliq.log", JSON.stringify(packet)+"\n");
+fs.appendFile(__dirname+"/roboliq-runtime-cli.log", JSON.stringify(packet)+"\n");
 
 socket.on('connect', function() {
 	socket.emit("actionThenDisconnect", packet);
