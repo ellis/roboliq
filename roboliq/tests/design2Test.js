@@ -561,9 +561,6 @@ describe('design', () => {
 			]);
 		});
 
-	});
-
-	describe('flattenDesign 1', () => {
 		it('should handle two simple branching factors', () => {
 			const design = {
 				conditions: {
@@ -843,6 +840,31 @@ describe('design', () => {
 				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"6.7 ul","baseVolume":"0.013 ml"},
 				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"13.3 ul","baseVolume":"0.007 ml"},
 				{"source":"saltwater","acidPH":3.75,"basePH":5.75,"acidVolume":"20 ul","baseVolume":"0.000 ml"}
+			]);
+		});
+
+		it("should support allocatePlates() assignments", () => {
+			const design1 = {
+				conditions: {
+					"condition*": [1, 2, 3],
+					"replicate*": [1, 2],
+					"plate=allocatePlates": {
+						groupBy: "condition",
+						wellsPerPlate: 5,
+						plates: ["p1", "p2", "p3"],
+					}
+				}
+			};
+			const table1 = flattenDesign(design1);
+			// console.log(JSON.stringify(table1))
+			// printRows(table1);
+			should.deepEqual(table1, [
+				{condition:1,replicate:1,plate:"p1"},
+				{condition:1,replicate:2,plate:"p1"},
+				{condition:2,replicate:1,plate:"p1"},
+				{condition:2,replicate:2,plate:"p1"},
+				{condition:3,replicate:1,plate:"p2"},
+				{condition:3,replicate:2,plate:"p2"},
 			]);
 		});
 

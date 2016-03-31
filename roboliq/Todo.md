@@ -52,9 +52,19 @@
 - [x] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
 - [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [x] `pipetter.pipette()`: handle separate programs for source and destination
-
+- [x] start running experiment with water
+- [x] runtime-server: save logs to disk
+- [ ] regenerate script with timing instructions
+- [x] design2: allocatePlates
+- [ ] add more dilution steps to the protocol (and more plates)
+- [ ] empty waste bottle, fill water bottle
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
+
+- [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
+- [ ] test whether dispense of 20ul is reliable without flushing between steps
+- [ ] runtimer-server cli: rewrite argument handling to use the 'commander' package, or something like that
+- [ ] runtimer-server cli: accept path for where to write log to
 
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
@@ -64,11 +74,10 @@
 	- [x] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
 		- [x] handle dilution series where we don't add diluent, because it's already in the wells
 	- [x] shouldn't use liquid level detection when aspirating from sealed culture plate: Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
-	- [ ] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
-	- [ ] MISSING: inactivation steps after sampling from well
+	- [x] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
+	- [x] MISSING: inactivation steps after sampling from well
 	- [ ] design1: allocate plates and wells for dilution
 
-	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel
 		- MoveLiha: position with local z travel, z-dispense (this isn't quite low enough, so the command needs an additional offset parameter)
@@ -78,6 +87,7 @@
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
+- [ ] runtime-server: need to save time logs to disk in such a way that we can easily use the time data for analysis
 - [ ] implement command to prompt the user
 - [ ] notify user where to put labware
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.

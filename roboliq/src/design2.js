@@ -408,7 +408,6 @@ class Special {
 		this.randomEngine = randomEngine;
 		this.next = (next || this.defaultNext);
 		this.initGroup = (initGroup || this.defaultInitGroup);
-
 	}
 
 	defaultInitGroup(nestedRows, rowIndexes) {
@@ -494,6 +493,10 @@ function countRows(nestedRows, rowIndexes) {
 }*/
 
 const actionHandlers = {
+	"allocatePlates": (rows, rowIndexes, name, action, randomEngine) => {
+		const action2 = _.cloneDeep(action);
+		return assign(rows, rowIndexes, name, action2, randomEngine, undefined, assign_allocatePlates_initGroup);
+	},
 	"allocateWells": (_rows, rowIndexes, name, action, randomEngine) => {
 		const rows = action.rows;
 		const cols = action.columns;
@@ -646,6 +649,32 @@ function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
 			expandRowsByNamedValue(rows, [rowIndex], name, value2, randomEngine);
 		}
 	}
+}
+
+function assign_allocatePlates_initGroup(rows, rowIndexes) {
+	const action = this.action;
+	if (_.isUndefined(this.plateIndex))
+		this.plateIndex = 0;
+	if (_.isUndefined(this.wellsUsed))
+		this.wellsUsed = 0;
+
+	assert(rowIndexes.length <= action.wellsPerPlate, "too many positions in group for plate to accomodate");
+
+	if (this.wellsUsed + rowIndexes.length <= action.wellsPerPlate) {
+		this.wellsUsed += rowIndexes.length;
+	}
+	else {
+		this.plateIndex++;
+		assert(this.plateIndex < action.plates.length, `require more plates than the ${action.plates.length} supplied: ${action.plates.join(", ")}`);
+		this.wellsUsed = rowIndexes.length;
+	}
+
+	// TODO: allow for rotating plates for each group rather than assigning each plate until its full
+
+	this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
+	// console.log({this_action_values: this.action.values});
+
+	this.defaultInitGroup(rows, rowIndexes);
 }
 
 function assign_calculate_next(expr, action) {
