@@ -154,7 +154,7 @@ steps:
         destinations: $$cultureWell
         volumes: 20ul
         syringes: $$syringe
-        cleanBegin: none
+        cleanBegin: flush
         cleanBetween: none
         cleanEnd: decontaminate
       4:

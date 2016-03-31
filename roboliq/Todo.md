@@ -52,6 +52,10 @@
 - [x] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
 - [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
 - [x] `pipetter.pipette()`: handle separate programs for source and destination
+- [x] start running experiment with water
+- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
+- [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
+- [ ] test whether dispense of 20ul is reliable without flushing between steps
 
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
@@ -65,10 +69,9 @@
 		- [x] handle dilution series where we don't add diluent, because it's already in the wells
 	- [x] shouldn't use liquid level detection when aspirating from sealed culture plate: Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
 	- [x] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
-	- [ ] MISSING: inactivation steps after sampling from well
+	- [x] MISSING: inactivation steps after sampling from well
 	- [ ] design1: allocate plates and wells for dilution
 
-	- [ ] runtime-server: need to save logs to disk so that we have accurate time data for analysis
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel
 		- MoveLiha: position with local z travel, z-dispense (this isn't quite low enough, so the command needs an additional offset parameter)
