@@ -55,8 +55,7 @@
 - [x] start running experiment with water
 - [x] runtime-server: save logs to disk
 - [x] design2: allocatePlates
-- [ ] `pipetter.punctureSeal`: create command
-	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
+- [x] `pipetter.punctureSeal`: create command
 - [ ] regenerate script with timing instructions
 - [ ] add more dilution steps to the protocol (and more plates)
 - [ ] empty waste bottle, fill water bottle
