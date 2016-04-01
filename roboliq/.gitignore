@@ -8,3 +8,4 @@ npm-debug.log
 commandSpecs.html
 commandSpecs.pdf
 dist
+*_BC.dat

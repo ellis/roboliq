@@ -57,7 +57,9 @@
 - [x] design2: allocatePlates
 - [x] `pipetter.punctureSeal`: create command
 - [ ] regenerate script with timing instructions
+- [ ] start the runtime server & client
 - [ ] add more dilution steps to the protocol (and more plates)
+- [ ] try to remove glue from tips
 - [ ] empty waste bottle, fill water bottle
 
 - [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
@@ -75,7 +77,9 @@
 	- [x] shouldn't use liquid level detection when aspirating from sealed culture plate: Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
 	- [x] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
 	- [x] MISSING: inactivation steps after sampling from well
-	- [ ] design1: allocate plates and wells for dilution
+	- [x] design1: allocate plates and wells for dilution
+	- [ ] select random syringes, but then in the end, order by syringe?  Otherwise syringes 1 and 2 are always assigned to the well that is only sampled in the last cycle
+	- [ ] BUG: most description parameters aren't being expanded
 
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel

@@ -1,3 +1,4 @@
+import fs from 'fs';
 import Server from 'socket.io';
 
 export function startServerRuntime(store) {

@@ -69,7 +69,12 @@ export function flattenDesign(design) {
 	else {
 		randomEngine.autoSeed();
 	}
-	return expandConditions(design.conditions, randomEngine);
+
+	let rows = expandConditions(design.conditions, randomEngine);
+	if (design.orderBy) {
+		rows = _.orderBy(rows, design.orderBy);
+	}
+	return rows;
 }
 
 export function getCommonValues(table) {
