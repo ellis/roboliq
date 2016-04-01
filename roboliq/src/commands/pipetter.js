@@ -75,7 +75,7 @@ function getLabwareWellList(labwareName, wells) {
 	return wells2;
 }
 
-function pipette(params, parsed, data) {
+function pipette(params, parsed, data, options={}) {
 	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
@@ -111,7 +111,10 @@ function pipette(params, parsed, data) {
 		destination: parsed.value.destinations,
 		well: parsed.value.wells,
 		volume: parsed.value.volumes,
-		syringe: parsed.value.syringes
+		syringe: parsed.value.syringes,
+		program: parsed.value.program,
+		tipModel: parsed.value.tipModel, // TODO: Create a TipModel schema, and then set the tipModel properties in schemas to the "TipModel" type instead of "string"
+		distance: parsed.value.distances
 	});
 	// console.log("items: "+JSON.stringify(items))
 	if (items.length == 0) {
@@ -198,39 +201,59 @@ function pipette(params, parsed, data) {
 	const sourceToItems = _.groupBy(items, 'source');
 
 	// Only keep items that have a positive volume (will need to adapt this for pipetter.punctureSeal)
-	items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);
-
-	// Try to find tipModel, first for all items
-	if (!setTipModel(items, equipment, equipmentName)) {
-		// TODO: Try to find tipModel for each layer
-		// Try to find tipModel for each source
-		_.forEach(sourceToItems, function(items) {
-			if (!setTipModel(items, equipment, equipmentName)) {
-				// Try to find tipModel for each item for this source
-				_.forEach(items, function(item) {
-					if (!setTipModel([item], equipment, equipmentName)) {
-						throw {name: "ProcessingError", message: "no tip model available for item: "+JSON.stringify(item)};
-					}
-				});
-			}
-		});
+	if (options.keepVolumelessItems !== true) {
+		items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);
+		// console.log({items})
+	}
+	if (items.length === 0) {
+		return {expansion: []};
 	}
 
-	// Assign programs to items
-	if (parsed.value.program) {
-		_.forEach(items, function(item) {
-			if (!item.program)
-				item.program = parsed.value.program;
-		});
+	// Any items which have a syringe assigned, if they have a permanent tip model, then set item's tipModel
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		if (!_.isUndefined(item.syringe)) {
+			const syringeName = pipetterUtils.getSyringeName(item.syringe, equipmentName, data);
+			const syringe = _.get(data.objects, syringeName);
+			if (syringe && syringe.tipModelPermanent)
+				item.tipModel = syringe.tipModelPermanent;
+		}
 	}
-	else {
+
+	// Make sure all items have a 'tipModel' property
+	{
+		// Try to find tipModel, first for all items
+		// Restrict settings to items without tipModel properties
+		const items2 = items.filter(x => _.isUndefined(x.tipModel));
+		// console.log({items2})
+		if (items2.length > 0 && !setTipModel(items2, equipment, equipmentName)) {
+			// TODO: Try to find tipModel for each layer
+			// Try to find tipModel for each source
+			_.forEach(sourceToItems, function(items) {
+				const items2 = items.filter(x => _.isUndefined(x.tipModel));
+				if (items2.length > 0 && !setTipModel(items2, equipment, equipmentName)) {
+					// Try to find tipModel for each item for this source
+					_.forEach(items2, function(item) {
+						if (!setTipModel([item], equipment, equipmentName)) {
+							throw {name: "ProcessingError", message: "no tip model available for item: "+JSON.stringify(item)};
+						}
+					});
+				}
+			});
+		}
+	}
+
+	// Make sure all items have a 'program' property
+	{
 		// Try to find program, first for all items
-		if (!assignProgram(items, data)) {
+		const items2 = items.filter(x => _.isUndefined(x.program));
+		if (items2.length > 0 && !assignProgram(items2, data)) {
 			// Try to find program for each source
 			_.forEach(sourceToItems, function(items) {
-				if (!assignProgram(items, data)) {
+				const items2 = items.filter(x => _.isUndefined(x.program));
+				if (items2.length > 0 && !assignProgram(items, data)) {
 					// Try to find program for each item for this source
-					_.forEach(items, function(item) {
+					_.forEach(items2, function(item) {
 						if (!assignProgram([item], data)) {
 							throw {name: "ProcessingError", message: "could not automatically choose a program for item: "+JSON.stringify(item)};
 						}
@@ -364,8 +387,9 @@ function pipette(params, parsed, data) {
 		}
 
 		const items2 = _.map(group, function(item) {
-			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count"]);
-			item2.volume = item2.volume.format({precision: 14});
+			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count", "distance"]);
+			if (!_.isUndefined(item2.volume)) { item2.volume = item2.volume.format({precision: 14}); }
+			if (!_.isUndefined(item2.distance)) { item2.distance = item2.distance.format({precision: 14}); }
 			return item2;
 		});
 		// Pipette
@@ -413,24 +437,33 @@ function pipette(params, parsed, data) {
 
 // Try to find a tipModel for the given items
 function findTipModel(items, equipment, equipmentName) {
-	const tipModelName = _.findKey(equipment.tipModel, (tipModel) => {
-		return _.every(items, item => {
-			const volume = item.volume;
-			assert(math.unit('l').equalBase(volume), "expected units to be in liters");
-			if (math.compare(volume, math.eval(tipModel.min)) < 0 || math.compare(volume, math.eval(tipModel.max)) > 0) {
-				return false;
-			}
-			// TODO: check whether the labware is sealed
-			// TODO: check whether the well has cells
-			return true;
+	/*if (_.size(equipment.tipModel) === 1) {
+		const tipModelName = _.keys(equipment.tipModel)[0];
+		return `${equipmentName}.tipModel.${tipModelName}`;
+	}
+	else {*/
+		const tipModelName = _.findKey(equipment.tipModel, (tipModel) => {
+			return _.every(items, item => {
+				if (!_.isUndefined(item.volume)) {
+					const volume = item.volume;
+					assert(math.unit('l').equalBase(volume), "expected units to be in liters");
+					if (math.compare(volume, math.eval(tipModel.min)) < 0 || math.compare(volume, math.eval(tipModel.max)) > 0) {
+						return false;
+					}
+					// TODO: check whether the labware is sealed
+					// TODO: check whether the well has cells
+				}
+				return true;
+			});
 		});
-	});
-	return (!_.isEmpty(tipModelName))
-		? `${equipmentName}.tipModel.${tipModelName}`
-		: undefined;
+		return (!_.isEmpty(tipModelName))
+			? `${equipmentName}.tipModel.${tipModelName}`
+			: undefined;
+	// }
 }
 
 function setTipModel(items, equipment, equipmentName) {
+	assert(!_.isEmpty(items));
 	// FIXME: allow for overriding tipModel via top pipetter params
 	const tipModelName = findTipModel(items, equipment, equipmentName);
 	// console.log({tipModelName, items})
@@ -983,6 +1016,18 @@ const commandHandlers = {
 				"1": params2
 			}
 		};
+	},
+	"pipetter.punctureSeal": function(params, parsed, data) {
+		const result = pipette(params, parsed, data, {keepVolumelessItems: true});
+
+		_.forEach(result.expansion, step => {
+			if (step.command === "pipetter._pipette") {
+				step.command = "pipetter._punctureSeal";
+			}
+			delete step.program;
+		});
+
+		return result;
 	},
 };
 

@@ -16,7 +16,7 @@ Syringe:
     type: {enum: [Syringe]}
     description: {type: string}
     label: {type: string}
-    tipModel: {type: string}
+    tipModel: {description: Tip model identifier, type: string}
     tipModelPermanent: {type: string}
   required: [type]
 
@@ -164,7 +164,7 @@ pipetter._punctureSeal:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "string"}
+    # program: {description: "Program identifier", type: "string"}
     items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter._PunctureItem}}
   required: [agent, equipment, items]
 
@@ -236,6 +236,7 @@ pipetter.pipette:
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
     sourceMixing: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: pipetter.MixSpec}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
+    tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
   required: []
 
 pipetter.punctureSeal:
@@ -243,7 +244,7 @@ pipetter.punctureSeal:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "string"}
+    # program: {description: "Program identifier", type: "string"}
     items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter.PunctureItem}}
     wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
@@ -252,6 +253,7 @@ pipetter.punctureSeal:
     cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
     cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
+    tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
 
 pipetter.pipetteDilutionSeries:
   description: |
