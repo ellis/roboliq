@@ -185,7 +185,7 @@ export function getEffects_pipette(parsed, data, effects) {
 			//console.log("srcContents0", srcContents0, srcContentsName);
 
 			// Contents of source well and syringe after aspiration
-			const [srcContents1, syringeContents1] = WellContents.transferContents(srcContents0, syringeContents0, item.volume);
+			const [srcContents1, syringeContents1] = WellContents.transferContents(srcContents0, syringeContents0, item.volume || WellContents.emptyVolume);
 			//console.log({srcContents1, syringeContents1});
 
 			// Get list of syringe contaminants

@@ -668,9 +668,17 @@ const commandHandlers = {
 	},
 	"pipetter._punctureSeal": function(params, parsed, data) {
 		// console.log("pipetter._punctureSeal: "+JSON.stringify(parsed, null, '\t'))
-		return {
-			effects: pipetterUtils.getEffects_pipette(parsed, data)
-		};
+		const effects = pipetterUtils.getEffects_pipette(parsed, data);
+		// Add effects for seal punctures
+		_.forEach(parsed.value.items, item => {
+			const wellInfo = wellsParser.parseOne(item.well);
+			const labwareName = wellInfo.source || wellInfo.labware;
+			const id = `${labwareName}.sealPunctures.${wellInfo.wellId}`;
+			if (_.get(data.objects, id) !== true) {
+				effects[id] = true;
+			}
+		});
+		return { effects };
 	},
 	"pipetter._washTips": function(params, parsed, data) {
 		//console.log("_washTips:");

@@ -64,11 +64,18 @@ const commandHandlers = {
 			},
 		]);
 
-		return {
-			expansion: expansion,
-			effects: _.fromPairs([[parsed.objectName.object + ".sealed", true]]),
-			alternatives: alternatives
-		};
+		// Update 'sealed' and 'sealPunctures' effects
+		const effects = {};
+		const sealedId = parsed.objectName.object + ".sealed";
+		const sealPuncturesId = parsed.objectName.object + ".sealPunctures";
+		if (_.get(data.objects, sealedId) !== true) {
+			effects[sealedId] = true;
+		}
+		if (_.has(data.objects, sealPuncturesId)) {
+			effects[sealPuncturesId] = null;
+		}
+
+		return { expansion, effects, alternatives };
 	}
 };
 
