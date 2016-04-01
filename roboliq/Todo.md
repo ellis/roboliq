@@ -54,12 +54,12 @@
 - [x] `pipetter.pipette()`: handle separate programs for source and destination
 - [x] start running experiment with water
 - [x] runtime-server: save logs to disk
-- [ ] regenerate script with timing instructions
 - [x] design2: allocatePlates
-- [ ] add more dilution steps to the protocol (and more plates)
-- [ ] empty waste bottle, fill water bottle
 - [ ] `pipetter.punctureSeal`: create command
 	- [ ] will need to adapt `items = _.filter(items, item => item.volume && item.volume.toNumber('l') > 0);`
+- [ ] regenerate script with timing instructions
+- [ ] add more dilution steps to the protocol (and more plates)
+- [ ] empty waste bottle, fill water bottle
 
 - [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
 - [ ] test whether dispense of 20ul is reliable without flushing between steps

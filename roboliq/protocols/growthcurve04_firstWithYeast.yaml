@@ -23,7 +23,7 @@ description: |
 
 config:
   evowareCompiler:
-    # timing: false
+    timing: false
 
 objects:
   mediumLabware: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1, contents: ["1000 ml", "medium"]}
@@ -36,6 +36,9 @@ objects:
 
   culturePlate1: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
   dilutionPlate1: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_1}
+  dilutionPlate2: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_2}
+  dilutionPlate3: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_3}
+  dilutionPlate4: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_4}
 
   design1:
     type: Design
@@ -66,8 +69,12 @@ objects:
         sameBy: [cultureWell]
         # order: shuffle
       dilutionStep*: [0,1]
-      dilutionPlate: dilutionPlate1
+      dilutionPlate=allocatePlates:
+        plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4]
+        groupBy: [stage, sampleCycle, group]
+        wellsPerPlate: 48
       dilutionWell=allocateWells:
+        groupBy: dilutionPlate
         rows: 8
         columns: 12
         order: shuffle
@@ -183,87 +190,90 @@ steps:
     durationGroup: 20 minutes
     steps:
       description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}`"
-      1:
-        description: "`Add medium to dilution wells {{$dilutionPlate}}`"
+      command: transporter.doThenRestoreLocation
+      objects: [$dilutionPlate]
+      steps:
         1:
-          command: transporter.movePlate
-          object: $dilutionPlate
-          destination: $dilutionSite
+          description: "`Add medium to dilution wells {{$dilutionPlate}}`"
+          1:
+            command: transporter.movePlate
+            object: $dilutionPlate
+            destination: $dilutionSite
+          2:
+            command: pipetter.pipette
+            sources: medium
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 200ul
+            # cleanBegin: none
+            # cleanBetweenSameSource: none
+            cleanBetween: none
+            cleanEnd: decontaminate
         2:
-          command: pipetter.pipette
-          sources: medium
+          description: "`Extract samples from {{$culturePlate}}`"
+          data:
+            where: {dilutionStep: 0}
+          1:
+            command: equipment.open
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+          2:
+            command: transporter.movePlate
+            object: $culturePlate
+            destination: $aspirationSite
+          3:
+            command: pipetter.pipette
+            sourceProgram: Roboliq_Water_Bot_2500
+            sourceLabware: $culturePlate
+            sources: $$cultureWell
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 50ul
+            clean: none
+        3:
+          description: "`Put {{$culturePlate}} back in incubator`"
+          1:
+            command: transporter.movePlate
+            object: $culturePlate
+            destination: $incubatorSite
+          2:
+            command: equipment.close
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+          3:
+            command: equipment.start
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+            program:
+              rpm: 300
+        5:
+          description: "`Create dilution series from sample wells`"
+          command: pipetter.pipetteDilutionSeries
+          diluent: medium
           destinationLabware: $dilutionPlate
-          destinations: $$dilutionWell
-          syringes: $$syringe
-          volumes: 200ul
-          # cleanBegin: none
-          # cleanBetweenSameSource: none
-          cleanBetween: none
+          dilutionFactor: 5
+          items:
+            "#data":
+              groupBy: cultureWell
+              templateGroup:
+                destinations: $$dilutionWell
+                syringe: $syringe
+          cleanBegin: none
           cleanEnd: decontaminate
-      2:
-        description: "`Extract samples from {{$culturePlate}}`"
-        data:
-          where: {dilutionStep: 0}
-        1:
-          command: equipment.open
-          agent: ourlab.luigi.evoware
-          equipment: ourlab.luigi.culturebox
-        2:
-          command: transporter.movePlate
-          object: $culturePlate
-          destination: $aspirationSite
-        3:
-          command: pipetter.pipette
-          sourceProgram: Roboliq_Water_Bot_2500
-          sourceLabware: $culturePlate
-          sources: $$cultureWell
-          destinationLabware: $dilutionPlate
-          destinations: $$dilutionWell
-          syringes: $$syringe
-          volumes: 50ul
-          clean: none
-      3:
-        description: "`Put {{$culturePlate}} back in incubator`"
-        1:
-          command: transporter.movePlate
-          object: $culturePlate
-          destination: $incubatorSite
-        2:
-          command: equipment.close
-          agent: ourlab.luigi.evoware
-          equipment: ourlab.luigi.culturebox
-        3:
-          command: equipment.start
-          agent: ourlab.luigi.evoware
-          equipment: ourlab.luigi.culturebox
+          diluentParams:
+            clean: none
+            cleanEnd: thorough
+        6:
+          description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
+          command: absorbanceReader.measurePlate
+          object: $dilutionPlate
           program:
-            rpm: 300
-      5:
-        description: "`Create dilution series from sample wells`"
-        command: pipetter.pipetteDilutionSeries
-        diluent: medium
-        destinationLabware: $dilutionPlate
-        dilutionFactor: 5
-        items:
-          "#data":
-            groupBy: cultureWell
-            templateGroup:
-              destinations: $$dilutionWell
-              syringe: $syringe
-        cleanBegin: none
-        cleanEnd: decontaminate
-        diluentParams:
-          clean: none
-          cleanEnd: thorough
-      6:
-        description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
-        command: absorbanceReader.measurePlate
-        object: $dilutionPlate
-        program:
-          excitationWavelength: 600nm
-          wells: $$dilutionWell
-        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"
-        # outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
+            excitationWavelength: 600nm
+            wells: $$dilutionWell
+          outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"
+          # outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
   7:
     description: "wrap-up"
     1:
