@@ -51,21 +51,24 @@
 - [x] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
 - [x] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
 - [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
+- [x] pipetter.pipette: don't clean tips if they are already clean
 - [x] `pipetter.pipette()`: handle separate programs for source and destination
 - [x] start running experiment with water
 - [x] runtime-server: save logs to disk
 - [x] design2: allocatePlates
 - [x] `pipetter.punctureSeal`: create command
-- [ ] regenerate script with timing instructions
-- [ ] start the runtime server & client
-- [ ] add more dilution steps to the protocol (and more plates)
+- [x] regenerate script with timing instructions
+- [x] add more dilution steps to the protocol (and more plates)
+- [x] empty waste bottle, fill water bottle
 - [ ] try to remove glue from tips
-- [ ] empty waste bottle, fill water bottle
 
 - [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
+- [ ] pipetter: when aspirating from same multi-well source but with syringes that are out of order, put syringes in order so that we can aspirate in a single step
 - [ ] test whether dispense of 20ul is reliable without flushing between steps
+- [ ] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded, should probably do this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values?
 - [ ] runtimer-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [ ] runtimer-server cli: accept path for where to write log to
+- [ ] runtimer-client: why did it stop updating after a few minutes?
 
 - [ ] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
@@ -79,7 +82,6 @@
 	- [x] MISSING: inactivation steps after sampling from well
 	- [x] design1: allocate plates and wells for dilution
 	- [ ] select random syringes, but then in the end, order by syringe?  Otherwise syringes 1 and 2 are always assigned to the well that is only sampled in the last cycle
-	- [ ] BUG: most description parameters aren't being expanded
 
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel
@@ -94,11 +96,9 @@
 - [ ] implement command to prompt the user
 - [ ] notify user where to put labware
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
-- [ ] pipetter.pipette: don't clean tips if they are already clean
 - [ ] let wellsParser handle `destinations: A01 down H01`?
 - [ ] absorbance reader: the F200 Pro can only excite at wavelength 600nm, raise an error if user specifies another wavelength
-- [ ] maybe pipette a dilution series using OrangeG to see which volumes we can use (diluting 0.8G by 32 times gives us about 0.7, if I didn't make any pipetting mistakes), but we can only read OrangeG on mario's reader; could maybe try crystal violet dye.
-- [ ] EvowareCompiler: DWP model needs to change when sealed, manage starting a new script!
+- [ ] pipette a dilution series using dye to see which volumes we can use
 - [ ] improve performance of transporter.movePlate by refactoring `shop` to allow for adding predicates, rather than starting over each time
 - [ ] improve performance of llpl by only cloning objects upon modification?
 - [ ] pipetter.pipetteDilutionSeries: figure out more principled way to let user specify order of operations, e.g. source+diluent+dilutions or diluent+source+dilutions or source+dilutions+diluent
