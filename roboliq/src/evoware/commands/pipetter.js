@@ -349,11 +349,32 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 			0,
 			0
 		];
-		const line = `${func}(${l.join(",")});`;
-		return [{line}];
+		let lines = [{line: `${func}(${l.join(",")});`}];
+
+		// sourceMixing
+		let lPre = [];
+		if (func === "Aspirate") {
+			const mixTuples = tuples.filter(tuple => !_.isUndefined(tuple.item.sourceMixing));
+			if (!_.isEmpty(mixTuples)) {
+				lPre = makeLinesMix(mixTuples, propertyName);
+				lines = _.concat(lPre, lines);
+			}
+		}
+
+		// sourceMixing
+		let lPost = [];
+		if (func === "Dispense") {
+			const mixTuples = tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
+			if (!_.isEmpty(mixTuples)) {
+				lPost = makeLinesMix(mixTuples, propertyName);
+				lines = _.concat(lines, lPost)
+			}
+		}
+
+		return lines;
 	}
 
-	function makeLinesMix(func, propertyName) {
+	function makeLinesMix(tuples, propertyName) {
 		const wellInfo = tuple0[propertyName];
 		// console.log({func, propertyName, wellInfo})
 		if (_.isUndefined(wellInfo))
@@ -379,7 +400,7 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 
 	const func = groupTypeToFunc[group.groupType];
 	//console.log({syringeMask, volumes})
-	return (func === "Mix") ? makeLinesMix(func, group.groupType) : makeLines(func, group.groupType);
+	return (func === "Mix") ? makeLinesMix(tuples, group.groupType) : makeLines(func, group.groupType);
 }
 
 function handleRetract(parsed, data, groups) {

@@ -20,6 +20,12 @@ Syringe:
     tipModelPermanent: {type: string}
   required: [type]
 
+pipetter._MixSpec:
+  description: Parameters for mixing in higher-level commands like pipetter._PipetteItem).
+  properties:
+    count: {description: "Number of times to aspirate and re-dispense", type: integer}
+    volume: {description: "Amount to aspirate, either as a fraction or absolute volume", type: Volume}
+
 pipetter._AspirateItem:
   description: Parameters for pipette items.
   properties:
@@ -60,6 +66,8 @@ pipetter._PipetteItem:
     source: {description: Source specifier, type: Well}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
+    sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter._MixSpec}
+    destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter._MixSpec}
   # required: [syringe, source, destination, volume]
   required: [syringe, volume]
 
