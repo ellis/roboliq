@@ -165,6 +165,8 @@ pipetter._pipette:
     program: {description: "Program identifier", type: "string"}
     sourceProgram: {description: "Program identifier for aspirating from source, if it should differ from 'program'", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter._PipetteItem}}
+    sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter._MixSpec}
+    destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter._MixSpec}
   required: [agent, equipment, program]
 
 pipetter._punctureSeal:
