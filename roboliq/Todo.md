@@ -60,7 +60,7 @@
 - [x] regenerate script with timing instructions
 - [x] add more dilution steps to the protocol (and more plates)
 - [x] empty waste bottle, fill water bottle
-- [ ] try to remove glue from tips
+- [x] try to remove glue from tips
 
 - [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
 - [ ] pipetter: when aspirating from same multi-well source but with syringes that are out of order, put syringes in order so that we can aspirate in a single step

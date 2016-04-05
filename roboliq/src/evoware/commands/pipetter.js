@@ -413,7 +413,7 @@ function makeLines_Mix(tuples, propertyName, mixingDefault, volumePropertyName, 
 		program,
 		volumes,
 		evowareGrid: wellInfo.site.evowareGrid,
-		evowareSite: wellInfo.site.evowareSite - 1,
+		evowareSite: wellInfo.site.evowareSite,
 		syringeSpacing,
 		plateMask,
 		count
