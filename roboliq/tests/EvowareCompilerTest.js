@@ -444,7 +444,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it("should compile pipetter._pipette for a two items, resulting in a single aspirate and multiple dispenses", function() {
+		it("should compile pipetter._pipette for two items, resulting in a single aspirate and multiple dispenses", function() {
 			// console.log("schemas: "+JSON.stringify(schemas))
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
@@ -485,6 +485,61 @@ describe('EvowareCompilerTest', function() {
 				{line: "Aspirate(3,\"Water free dispense\",\"10\",\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",0,0);"},
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",0,0);"},
 				{line: "Dispense(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0800000400000000\",0,0);"},
+				{line: "MoveLiha(3,1,0,1,\"0C0830000000000000\",4,4,0,400,0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
+		});
+
+		it.only("should compile pipetter._pipette for two items with mixing", function() {
+			// console.log("schemas: "+JSON.stringify(schemas))
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
+						}
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter._pipette",
+						agent: "robot1",
+						equipment: "pipetter1",
+						program: "\"Water free dispense\"",
+						items: [
+							{
+								syringe: "pipetter1.syringe.1",
+								source: "plate1(A01)",
+								destination: "plate1(D01)",
+								volume: "10 ul",
+								sourceMixing: {count: 3, volume: "7 ul"},
+								destinationMixing: {count: 3, volume: "7 ul"}
+							},
+							{
+								syringe: "pipetter1.syringe.2",
+								source: "plate1(B01)",
+								destination: "plate1(F05)",
+								volume: "10 ul",
+								sourceMixing: {count: 3, volume: "7 ul"},
+								destinationMixing: {count: 3, volume: "7 ul"}
+							}
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			should.deepEqual(results, [[
+				{line: "Mix(3,\"Water free dispense\",\"7\",\"7\",0,0,0,0,0,0,0,0,0,0,1,-1,1,\"0C0830000000000000\",,0,0);"},
+				{line: "Aspirate(3,\"Water free dispense\",\"10\",\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",0,0);"},
+				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",0,0);"},
+				{line: "Mix(1,\"Water free dispense\",\"7\",0,0,0,0,0,0,0,0,0,0,0,1,-1,1,\"0C0880000000000000\",,0,0);"},
+				{line: "Dispense(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0800000400000000\",0,0);"},
+				{line: "Mix(2,\"Water free dispense\",0,\"7\",0,0,0,0,0,0,0,0,0,0,1,-1,1,\"0C0800000400000000\",,0,0);"},
 				{line: "MoveLiha(3,1,0,1,\"0C0830000000000000\",4,4,0,400,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]

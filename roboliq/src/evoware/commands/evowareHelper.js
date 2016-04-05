@@ -11,6 +11,13 @@ function createFactsLine(equipment, variableName, value = "") {
 	return `FACTS(${l.join(",")});`;
 }
 
+function stripQuotes(s) {
+	return (_.startsWith(s, '"') && _.endsWith(s, '"'))
+		? s.substring(1, s.length - 1) : s;
+}
+
+
 module.exports = {
-	createFactsLine
+	createFactsLine,
+	stripQuotes
 };

@@ -5,12 +5,8 @@ import {sprintf} from 'sprintf-js';
 import commandHelper from '../../commandHelper.js';
 import evowareHelper from './evowareHelper.js';
 import EvowareUtils from '../EvowareUtils.js';
+import * as Tokens from './tokens.js';
 import wellsParser from '../../parsers/wellsParser.js';
-
-function stripQuotes(s) {
-	return (_.startsWith(s, '"') && _.endsWith(s, '"'))
-		? s.substring(1, s.length - 1) : s;
-}
 
 export function _aspirate(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
@@ -341,7 +337,7 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 		const program = (func === "Aspirate" && parsed.value.sourceProgram) ? parsed.value.sourceProgram : parsed.value.program;
 		const l = [
 			syringeMask,
-			`"${stripQuotes(program)}"`,
+			`"${evowareHelper.stripQuotes(program)}"`,
 			volumes.join(","),
 			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
 			group.syringeSpacing || 1,
@@ -352,55 +348,77 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 		let lines = [{line: `${func}(${l.join(",")});`}];
 
 		// sourceMixing
-		let lPre = [];
 		if (func === "Aspirate") {
-			const mixTuples = tuples.filter(tuple => !_.isUndefined(tuple.item.sourceMixing));
+			const mixTuples = (parsed.value.sourceMixing)
+				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.sourceMixing));
 			if (!_.isEmpty(mixTuples)) {
-				lPre = makeLinesMix(mixTuples, propertyName);
-				lines = _.concat(lPre, lines);
+				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.sourceMixing, "sourceMixing.volume", parsed.value.program, group.syringeSpacing || 1, tuple0.item.count);
+				lines = lines2.concat(lines);
 			}
 		}
 
-		// sourceMixing
-		let lPost = [];
+		// destinationMixing
 		if (func === "Dispense") {
-			const mixTuples = tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
+			const mixTuples = (parsed.value.destinationMixing)
+				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
 			if (!_.isEmpty(mixTuples)) {
-				lPost = makeLinesMix(mixTuples, propertyName);
-				lines = _.concat(lines, lPost)
+				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.destinationMixing, "destinationMixing.volume", parsed.value.program, group.syringeSpacing || 1, tuple0.item.count);
+				lines = lines.concat(lines2);
 			}
 		}
 
 		return lines;
 	}
-
-	function makeLinesMix(tuples, propertyName) {
-		const wellInfo = tuple0[propertyName];
-		// console.log({func, propertyName, wellInfo})
-		if (_.isUndefined(wellInfo))
-			return [];
-
-		const labwareModel = wellInfo.labwareModel;
-		const plateMask = encodeWells(tuples, propertyName);
-		const l = [
-			syringeMask,
-			`"${stripQuotes(parsed.value.program)}"`,
-			volumes.join(","),
-			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
-			group.syringeSpacing || 1,
-			`"${plateMask}"`,
-			tuple0.item.count,
-			0,
-			0
-		];
-		const line = `${func}(${l.join(",")});`;
-		return [{line}];
+	function makeLinesMix(propertyName) {
+		return makeLines_Mix(tuples, propertyName, undefined, "volume", parsed.value.program, group.syringeSpacing || 1, tuple0.item.count);
 	}
-
 
 	const func = groupTypeToFunc[group.groupType];
 	//console.log({syringeMask, volumes})
-	return (func === "Mix") ? makeLinesMix(tuples, group.groupType) : makeLines(func, group.groupType);
+	return (func === "Mix") ? makeLinesMix(group.groupType) : makeLines(func, group.groupType);
+}
+
+//
+/**
+ * Return Array of size 12 with volumes for each syringe (in ul), taking the
+ * values from the 'tuples' items.  For each item, the volume is queried
+ * using the volumePropertyName.  If the volume is missing, volumeDefault should
+ * be provided.
+ *
+ * @param  {array} tuples
+ * @param  {string} volumePropertyName
+ * @param  {mathjs.Unit} volumeDefault
+ * @return {array} An array of volumes (in ul)
+ */
+function makeVolumes(tuples, volumePropertyName, volumeDefault) {
+	const volumes = _.fill(Array(12), "0");
+	_.forEach(tuples, tuple => {
+		const index = (tuple.syringeRow || 1) - 1;
+		const ul = _.get(tuple.item, volumePropertyName, volumeDefault).toNumber('ul');
+		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
+	});
+	return volumes;
+}
+
+function makeLines_Mix(tuples, propertyName, mixingDefault, volumePropertyName, program, syringeSpacing, count) {
+	const syringeMask = encodeSyringes(tuples);
+	// console.log({syringeMask})
+	const plateMask = encodeWells(tuples, propertyName);
+	const volumes = makeVolumes(tuples, volumePropertyName, _.get(mixingDefault, "volume"));
+	const wellInfo = tuples[0][propertyName];
+	if (_.isUndefined(wellInfo))
+		return [];
+	const line = new Tokens.Mix({
+		syringeMask,
+		program,
+		volumes,
+		evowareGrid: wellInfo.site.evowareGrid,
+		evowareSite: wellInfo.site.evowareSite - 1,
+		syringeSpacing,
+		plateMask,
+		count
+	}).toLine();
+	return [{line}];
 }
 
 function handleRetract(parsed, data, groups) {
