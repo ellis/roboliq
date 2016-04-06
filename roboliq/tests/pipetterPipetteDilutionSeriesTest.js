@@ -232,22 +232,38 @@ describe('pipetter', function() {
 				},
 				"2": {
 					"1": {
-						"command": "pipetter._mix",
+						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
 						"program": "\"Roboliq_Water_Wet_1000\"",
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",
-								"well": "plate1(A01)",
-								"count": 3,
-								"volume": "70 ul"
+								"source": "plate1(A01)",
+								"destination": "plate1(A02)",
+								"volume": "50 ul",
+								"sourceMixing": {
+									"count": 3,
+									"amount": 0.7
+								},
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							},
 							{
 								"syringe": "ourlab.mario.liha.syringe.2",
-								"well": "plate1(B01)",
-								"count": 3,
-								"volume": "70 ul"
+								"source": "plate1(B01)",
+								"destination": "plate1(B02)",
+								"volume": "50 ul",
+								"sourceMixing": {
+									"count": 3,
+									"amount": 0.7
+								},
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							}
 						]
 					},
@@ -259,35 +275,51 @@ describe('pipetter', function() {
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",
-								"source": "plate1(A01)",
-								"destination": "plate1(A02)",
-								"volume": "50 ul"
+								"source": "plate1(A02)",
+								"destination": "plate1(A03)",
+								"volume": "50 ul",
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							},
 							{
 								"syringe": "ourlab.mario.liha.syringe.2",
-								"source": "plate1(B01)",
-								"destination": "plate1(B02)",
-								"volume": "50 ul"
+								"source": "plate1(B02)",
+								"destination": "plate1(B03)",
+								"volume": "50 ul",
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							}
 						]
 					},
 					"3": {
-						"command": "pipetter._mix",
+						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
 						"program": "\"Roboliq_Water_Wet_1000\"",
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",
-								"well": "plate1(A02)",
-								"count": 3,
-								"volume": "70 ul"
+								"source": "plate1(A03)",
+								"destination": "plate1(A04)",
+								"volume": "50 ul",
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							},
 							{
 								"syringe": "ourlab.mario.liha.syringe.2",
-								"well": "plate1(B02)",
-								"count": 3,
-								"volume": "70 ul"
+								"source": "plate1(B03)",
+								"destination": "plate1(B04)",
+								"volume": "50 ul",
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							}
 						]
 					},
@@ -299,119 +331,27 @@ describe('pipetter', function() {
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",
-								"source": "plate1(A02)",
-								"destination": "plate1(A03)",
-								"volume": "50 ul"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"source": "plate1(B02)",
-								"destination": "plate1(B03)",
-								"volume": "50 ul"
-							}
-						]
-					},
-					"5": {
-						"command": "pipetter._mix",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Wet_1000\"",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"well": "plate1(A03)",
-								"count": 3,
-								"volume": "70 ul"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"well": "plate1(B03)",
-								"count": 3,
-								"volume": "70 ul"
-							}
-						]
-					},
-					"6": {
-						"command": "pipetter._pipette",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Wet_1000\"",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"source": "plate1(A03)",
-								"destination": "plate1(A04)",
-								"volume": "50 ul"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"source": "plate1(B03)",
-								"destination": "plate1(B04)",
-								"volume": "50 ul"
-							}
-						]
-					},
-					"7": {
-						"command": "pipetter._mix",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Wet_1000\"",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"well": "plate1(A04)",
-								"count": 3,
-								"volume": "70 ul"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"well": "plate1(B04)",
-								"count": 3,
-								"volume": "70 ul"
-							}
-						]
-					},
-					"8": {
-						"command": "pipetter._pipette",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Wet_1000\"",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
 								"source": "plate1(A04)",
 								"destination": "plate1(A05)",
-								"volume": "50 ul"
+								"volume": "50 ul",
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							},
 							{
 								"syringe": "ourlab.mario.liha.syringe.2",
 								"source": "plate1(B04)",
 								"destination": "plate1(B05)",
-								"volume": "50 ul"
+								"volume": "50 ul",
+								"destinationMixing": {
+									"count": 3,
+									"amount": 0.7
+								}
 							}
 						]
 					},
-					"9": {
-						"command": "pipetter._mix",
-						"agent": "ourlab.mario.evoware",
-						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Wet_1000\"",
-						"items": [
-							{
-								"syringe": "ourlab.mario.liha.syringe.1",
-								"well": "plate1(A05)",
-								"count": 3,
-								"volume": "70 ul"
-							},
-							{
-								"syringe": "ourlab.mario.liha.syringe.2",
-								"well": "plate1(B05)",
-								"count": 3,
-								"volume": "70 ul"
-							}
-						]
-					},
-					"10": {
+					"5": {
 						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
@@ -429,7 +369,7 @@ describe('pipetter', function() {
 							}
 						]
 					},
-					"11": {
+					"6": {
 						"1": {
 							"1": {
 								"command": "pipetter._washTips",

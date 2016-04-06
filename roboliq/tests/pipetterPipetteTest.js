@@ -1083,7 +1083,7 @@ describe('pipetter', function() {
 			should.deepEqual(_.pick(result3.output.steps[1], [1, 2, 3]), _.pick(expected, ["1"]));
 		});
 
-		it("should handle sourceMixing={} and =true and =false", () => {
+		it.only("should handle sourceMixing={} and =true and =false", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {

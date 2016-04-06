@@ -380,33 +380,38 @@ function pipette(params, parsed, data, options={}) {
 		}
 		doCleanBefore = true;
 
-		// Mix the source wells
-		const sourceMixCommand = addMixing(parsed, agent, equipmentName, group, "sourceMixing", "source", "sourceVolumeBefore");
-		if (sourceMixCommand) {
-			expansionList.push(sourceMixCommand);
-		}
-
+		// _PipetteItems
 		const items2 = _.map(group, function(item) {
 			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count", "distance"]);
 			if (!_.isUndefined(item2.volume)) { item2.volume = item2.volume.format({precision: 14}); }
 			if (!_.isUndefined(item2.distance)) { item2.distance = item2.distance.format({precision: 14}); }
+			// Mix the source well
+			if (item.sourceVolumeBefore && (item.sourceMixing || parsed.value.sourceMixing)) {
+				const mixing = _.merge({count: 3, amount: 0.7}, item.sourceMixing, parsed.value.sourceMixing);
+				const volume0 = item.sourceVolumeBefore;
+				const volume = calculateMixingVolume(volume0, mixing.amount);
+				item2.sourceMixing = mixing;
+			}
+			// Mix the destination well
+			if (item.volumeAfter && (item.destinationMixing || parsed.value.destinationMixing)) {
+				const mixing = _.merge({count: 3, amount: 0.7}, item.destinationMixing, parsed.value.destinationMixing);
+				const volume0 = item.volumeAfter;
+				// console.log({mixing, volume0: (volume0) ? volume0 : item})
+				const volume = calculateMixingVolume(volume0, mixing.amount);
+				item2.destinationMixing = mixing;
+			}
 			return item2;
 		});
-		// Pipette
+
+		// _pipette instruction
 		expansionList.push(_.merge({}, {
 			"command": "pipetter._pipette",
 			"agent": agent,
 			"equipment": equipmentName,
 			"program": group[0].program,
 			"sourceProgram": parsed.value.sourceProgram,
-			"items": items2
+			"items": items2,
 		}));
-
-		// Mix the destination wells
-		const destinationMixCommand = addMixing(parsed, agent, equipmentName, group, "destinationMixing", "destination", "volumeAfter");
-		if (destinationMixCommand) {
-			expansionList.push(destinationMixCommand);
-		}
 	});
 
 	// cleanEnd
@@ -618,6 +623,7 @@ function createCleanActions(syringeToCleanValue, agent, equipmentName, data, com
 	}];
 }
 
+/*
 // Mix destination after dispensing?
 function addMixing(parsed, agent, equipmentName, group, mixPropertyName, wellPropertyName, volumePropertyName) {
 	let mixItems = [];
@@ -649,6 +655,7 @@ function addMixing(parsed, agent, equipmentName, group, mixPropertyName, wellPro
 	}
 	return undefined;
 }
+*/
 
 function calculateMixingVolume(volume0, amount) {
 	amount = _.isString(amount) ? math.eval(amount) : amount;
