@@ -1,5 +1,14 @@
 var fs = require('fs');
+var opts = require('commander');
+var path = require('path');
 var socket = require('socket.io-client')('http://localhost:12346');
+
+opts
+	.version("1.0")
+	.option("--begin [step]", "indicate the beginning of the given step")
+	.option("--end [step]", "indicate the end of the given step")
+	.option("--logdir [dir]", "directory where log file should be written")
+	.parse(process.argv);
 
 function formatLocalDate() {
 	var now = new Date(),
@@ -12,39 +21,24 @@ function formatLocalDate() {
 	return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()) + 'T' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + dif + pad(tzo / 60) + ':' + pad(tzo % 60);
 }
 
-var action;
-var begins = [];
-var ends = [];
+if (opts.hasOwnProperty("begin") || opts.hasOwnProperty("end")) {
+	var begins = (opts.begin || "").split(",");
+	var ends = (opts.end || "").split(",");
+	var logdir = opts.logdir || __dirname;
+	var logfile = path.join(logdir, "roboliq-runtime-cli.log");
 
-for (var i = 2; i < process.argv.length; i++) {
-  var step = process.argv[i];
-  if (step === "begin" || step === "end") {
-    action = step;
-  }
-  else {
-    if (action === "begin") {
-      begins.push(step);
-    }
-    else if (action === "end") {
-      ends.push(step);
-    }
-    else {
-      console.log("ERROR: step given without 'begin' or 'end' command")
-    }
-  }
+	var packet = {type: "setStepTime", time: formatLocalDate(), begins: begins, ends: ends};
+	fs.appendFile(logfile, JSON.stringify(packet)+"\n");
+
+	socket.on('connect', function() {
+		socket.emit("actionThenDisconnect", packet);
+	});
+
+	socket.on('state', function(data) {
+		console.log(data)
+	});
+
+	socket.on('disconnect', function() {
+		process.exit(0);
+	});
 }
-
-const packet = {type: "setStepTime", time: formatLocalDate(), begins, ends};
-fs.appendFile(__dirname+"/roboliq-runtime-cli.log", JSON.stringify(packet)+"\n");
-
-socket.on('connect', function() {
-	socket.emit("actionThenDisconnect", packet);
-});
-
-socket.on('state', function(data) {
-	console.log(data)
-});
-
-socket.on('disconnect', function() {
-	process.exit(0);
-});

@@ -61,13 +61,7 @@
 - [x] add more dilution steps to the protocol (and more plates)
 - [x] empty waste bottle, fill water bottle
 - [x] try to remove glue from tips
-- [x] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
-- [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
-- [ ] runtimer-server cli: rewrite argument handling to use the 'commander' package, or something like that
-- [ ] runtimer-server cli: accept path for where to write log to
-- [ ] runtimer-client: why did it stop updating after a few minutes?
-
-- [ ] growthcurve04_firstWithYeast.yaml:
+- [x] growthcurve04_firstWithYeast.yaml:
 	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
 	- [x] 6.1: description isn't expanded correctly
 	- [x] BUG: why did the experiment only run for 1.5h?
@@ -78,7 +72,22 @@
 	- [x] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
 	- [x] MISSING: inactivation steps after sampling from well
 	- [x] design1: allocate plates and wells for dilution
-	- [ ] select random syringes, but then in the end, order by syringe?  Otherwise syringes 1 and 2 are always assigned to the well that is only sampled in the last cycle
+- [x] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
+- [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
+- [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that
+- [?] runtime-server cli: accept path for where to write log to
+- [ ] runtime-client: why did it stop updating after a few minutes?
+- [ ] EvowareCompiler: pass --begin and --end to timing script
+- [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
+- [ ] EvowareCompiler: add a SRCDIR variable for where the scripts and protocol data is
+- [ ] EvowareCompiler: add a OUTDIR variable for where to write measurements to (by default `${SRCDIR}\\run-${RUN}`)
+- [ ] EvowareCompiler: pass --logpath to timing script (need the directory, and add the RUN variable to it)
+
+- [ ] growthcurve06_yeast3.yaml:
+	- [ ] select random syringes, but then in the end, order by syringe.  Otherwise syringes 1 and 2 are always assigned to the well that is only sampled in the last cycle
+	- [ ] at beginning of experiment, measure OD600 of a dilution series without cells
+	- [ ] add in negative controls for OD600 of wells without cells?
+	- [ ] dilute with system liquid instead of medium
 
 	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 		- MoveLiha: position with global z travel, global z-travel
@@ -111,7 +120,8 @@
 		volumes: 200ul
 		cleanBegin: none
 		cleanBetweenSameSource: none
-
+- [ ] runtime-server: serverRuntime.js: in `store.subscribe` callback, only pass a diff of changes to the client, because the state may be too large
+- [ ] runtime-server: use same port for serveRuntime.js and serverUi.js
 
 # Todos for ROMA qc
 
@@ -197,6 +207,7 @@
 - [ ] generate a pretty HTML/SVG protocol for interleaved experiment steps
 - [ ] web UI just for showing interactive experiment design
 - [ ] cli ui?
+	- [ ] core.js: `addProtocol()`: implement a pure function to merge protocols, will require a modified version of roboliq.loadProtocol that returns a new filecache
 		- [ ] `load` command
 				- [ ] `--config` for config protocols
 				- [ ] `--protocol` for the main protocol

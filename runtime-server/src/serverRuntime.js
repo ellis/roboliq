@@ -11,5 +11,10 @@ export function startServerRuntime(store) {
 			store.dispatch(action);
 			socket.disconnect();
 		});
+		// socket.on("load", action => {
+		// 	fs.appendFile(__dirname+"/roboliq-runtime-server.log", JSON.stringify(action)+"\n");
+		// 	store.dispatch(action);
+		// 	socket.disconnect();
+		// });
 	});
 }

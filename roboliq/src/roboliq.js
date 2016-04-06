@@ -251,7 +251,7 @@ function loadProtocol(a, b, url, filecache) {
 
 	var data = {
 		objects: _.merge({}, a.objects, imported.objects, c.objects),
-		directiveHandlers: _.merge({}, a.directiveHandlers, imported.directiveHandlers, b.directiveHandlers)
+		directiveHandlers: _.defaults({}, b.directiveHandlers, imported.directiveHandlers, a.directiveHandlers)
 	};
 	// Handle directives for predicates
 	var l = [
