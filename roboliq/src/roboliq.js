@@ -881,20 +881,20 @@ function _run(opts, userProtocol) {
 		// rather than regenerating predicates for all objects.
 		const predicates = protocol.predicates.concat(createStateItems(objects));
 		let result = {};
+		const objects2 = _.merge({}, objects, {SCOPE});
+		if (!_.isUndefined(DATA))
+			objects2.DATA = DATA;
+		const data = {
+			objects: objects2,
+			predicates,
+			planHandlers: protocol.planHandlers,
+			schemas: protocol.schemas,
+			accesses: [],
+			files: filecache,
+			protocol,
+			path: prefix
+		};
 		try {
-			const objects2 = _.merge({}, objects, {SCOPE});
-			if (!_.isUndefined(DATA))
-				objects2.DATA = DATA;
-			const data = {
-				objects: objects2,
-				predicates,
-				planHandlers: protocol.planHandlers,
-				schemas: protocol.schemas,
-				accesses: [],
-				files: filecache,
-				protocol,
-				path: prefix
-			};
 			//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
 			// If a schema is given for the command, parse its parameters
 			const schema = protocol.schemas[commandName];
@@ -945,6 +945,7 @@ function _run(opts, userProtocol) {
 			// If an array was returned rather than an object, put it in the proper form
 			//console.log({expansion: result.expansion, stepified: commandHelper.stepify(result.expansion)})
 			result.expansion = commandHelper.stepify(result.expansion);
+			result.expansion = commandHelper.substituteDeep(result.expansion, data, data.objects.SCOPE, data.objects.DATA);
 			//console.log({expansion: result.expansion})
 			_.merge(step, result.expansion);
 		}

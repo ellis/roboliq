@@ -61,11 +61,8 @@
 - [x] add more dilution steps to the protocol (and more plates)
 - [x] empty waste bottle, fill water bottle
 - [x] try to remove glue from tips
-
 - [x] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
-- [ ] pipetter: when aspirating from same multi-well source but with syringes that are out of order, put syringes in order so that we can aspirate in a single step
-- [ ] test whether dispense of 20ul is reliable without flushing between steps
-- [ ] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded, should probably do this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values?
+- [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
 - [ ] runtimer-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [ ] runtimer-server cli: accept path for where to write log to
 - [ ] runtimer-client: why did it stop updating after a few minutes?
@@ -92,6 +89,7 @@
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
 			MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
 	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
+- [ ] test whether dispense of 20ul is reliable without flushing between steps
 - [ ] runtime-server: need to save time logs to disk in such a way that we can easily use the time data for analysis
 - [ ] implement command to prompt the user
 - [ ] notify user where to put labware
@@ -352,6 +350,7 @@
 
 # After submission
 
+- [ ] pipetter: when aspirating from same multi-well source but with syringes that are out of order, put syringes in order so that we can aspirate in a single step
 - [ ] roboliq.js: need to handle a complication with final instructions: if their parameters contain references to DATA, SCOPE, or string substitutions, we need to either substitute the values into the command or create a sub-command with the concrete values.
 - [ ] test equipment.run|ourlab.mario.evoware|ourlab.mario.shaker
 - [ ] replace tests/schema.json with a JS file that loads the files in schemas/?

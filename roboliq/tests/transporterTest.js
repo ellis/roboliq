@@ -417,6 +417,7 @@ describe('transporter', function() {
 						"objects": ["plate1"],
 						steps: {
 							1: {
+								description: "`A simple description`",
 								"command": "transporter.movePlate",
 								"object": "plate1",
 								"destination": "ourlab.mario.site.P4"
@@ -433,12 +434,14 @@ describe('transporter', function() {
 				"objects": ["plate1"],
 				steps: {
 					1: {
+						description: "`A simple description`",
 						"command": "transporter.movePlate",
 						"object": "plate1",
 						"destination": "ourlab.mario.site.P4"
 					}
 				},
 				1: {
+					description: "A simple description",
 					"command": "transporter.movePlate",
 					"object": "plate1",
 					"destination": "ourlab.mario.site.P4",
