@@ -62,7 +62,7 @@
 - [x] empty waste bottle, fill water bottle
 - [x] try to remove glue from tips
 
-- [ ] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
+- [x] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
 - [ ] pipetter: when aspirating from same multi-well source but with syringes that are out of order, put syringes in order so that we can aspirate in a single step
 - [ ] test whether dispense of 20ul is reliable without flushing between steps
 - [ ] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded, should probably do this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values?

@@ -1053,18 +1053,8 @@ describe('pipetter', function() {
 					"equipment": "ourlab.mario.liha",
 					"program": "\"Roboliq_Water_Dry_1000\"",
 					"items": [
-						{ "syringe": "ourlab.mario.liha.syringe.1", "source": "plate1(A01)", "destination": "plate1(A02)", "volume": "50 ul" },
-						{ "syringe": "ourlab.mario.liha.syringe.2", "source": "plate1(B01)", "destination": "plate1(B02)", "volume": "50 ul" }
-					]
-				},
-				"2": {
-					"command": "pipetter._mix",
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"program": "\"Roboliq_Water_Dry_1000\"",
-					"items": [
-						{ "syringe": "ourlab.mario.liha.syringe.1", "well": "plate1(A02)", "count": 3, "volume": "35 ul" },
-						{ "syringe": "ourlab.mario.liha.syringe.2", "well": "plate1(B02)", "count": 3, "volume": "35 ul" }
+						{ "syringe": "ourlab.mario.liha.syringe.1", "source": "plate1(A01)", "destination": "plate1(A02)", "volume": "50 ul", destinationMixing: {amount: 0.7, count: 3} },
+						{ "syringe": "ourlab.mario.liha.syringe.2", "source": "plate1(B01)", "destination": "plate1(B02)", "volume": "50 ul", destinationMixing: {amount: 0.7, count: 3} }
 					]
 				}
 			};
@@ -1080,10 +1070,10 @@ describe('pipetter', function() {
 			protocol.steps[1].destinationMixing = false;
 			const result3 = roboliq.run(["-o", "", "-T"], protocol);
 			// console.log(JSON.stringify(result3.output.steps, null, '\t'));
-			should.deepEqual(_.pick(result3.output.steps[1], [1, 2, 3]), _.pick(expected, ["1"]));
+			should.deepEqual(result3.output.steps[1][1].items, expected[1].items.map(x => _.omit(x, "destinationMixing")));
 		});
 
-		it.only("should handle sourceMixing={} and =true and =false", () => {
+		it("should handle sourceMixing={} and =true and =false", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -1118,23 +1108,13 @@ describe('pipetter', function() {
 			};
 			const expected = {
 				"1": {
-					"command": "pipetter._mix",
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"program": "\"Roboliq_Water_Dry_1000\"",
-					"items": [
-						{ "syringe": "ourlab.mario.liha.syringe.1", "well": "plate1(A01)", "count": 3, "volume": "70 ul" },
-						{ "syringe": "ourlab.mario.liha.syringe.2", "well": "plate1(B01)", "count": 3, "volume": "70 ul" }
-					]
-				},
-				"2": {
 					"command": "pipetter._pipette",
 					"agent": "ourlab.mario.evoware",
 					"equipment": "ourlab.mario.liha",
 					"program": "\"Roboliq_Water_Dry_1000\"",
 					"items": [
-						{ "syringe": "ourlab.mario.liha.syringe.1", "source": "plate1(A01)", "destination": "plate1(A02)", "volume": "50 ul" },
-						{ "syringe": "ourlab.mario.liha.syringe.2", "source": "plate1(B01)", "destination": "plate1(B02)", "volume": "50 ul" }
+						{ "syringe": "ourlab.mario.liha.syringe.1", "source": "plate1(A01)", "destination": "plate1(A02)", "volume": "50 ul", sourceMixing: {amount: 0.7, count: 3} },
+						{ "syringe": "ourlab.mario.liha.syringe.2", "source": "plate1(B01)", "destination": "plate1(B02)", "volume": "50 ul", sourceMixing: {amount: 0.7, count: 3} }
 					]
 				},
 			};
@@ -1150,7 +1130,7 @@ describe('pipetter', function() {
 			protocol.steps[1].sourceMixing = false;
 			const result3 = roboliq.run(["-o", "", "-T"], protocol);
 			// console.log(JSON.stringify(result3.output.steps, null, '\t'));
-			should.deepEqual(result3.output.steps[1][1], expected["2"]);
+			should.deepEqual(result3.output.steps[1][1].items, expected[1].items.map(x => _.omit(x, "sourceMixing")));
 		});
 
 	});
