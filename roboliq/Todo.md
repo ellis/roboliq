@@ -42,45 +42,16 @@
 
 # Todos for growth curve experiment
 
-- [x] `pipetter.pipette()`: handle source=null and destination=null for just aspirating or dispensing
-- [x] `pipetter.pipette()`: adapt to be used by both `pipetter.pipette` and `pipetter.mix`
-- [x] `pipetter._mix`: implement with schema and command handler
-- [x] evoware `pipetter._mix`: implement instruction handler
-- [x] `pipetter.pipette()`: handle "mixSource" and "mixDestination"
-- [x] `pipetter.pipetteDilutionSeries`: perform mixing before first aspiration
-- [x] `pipetter.pipetteDilutionSeries`: perform mixing after each dispense
-- [x] `pipetter.pipetteDilutionSeries`: extract aliquot from last dispense well
-- [x] `pipetter.pipetteDilutionSeries`: decontaminate tips after dilutions
-- [x] pipetter.pipette: don't clean tips if they are already clean
-- [x] `pipetter.pipette()`: handle separate programs for source and destination
-- [x] start running experiment with water
-- [x] runtime-server: save logs to disk
-- [x] design2: allocatePlates
-- [x] `pipetter.punctureSeal`: create command
-- [x] regenerate script with timing instructions
-- [x] add more dilution steps to the protocol (and more plates)
-- [x] empty waste bottle, fill water bottle
-- [x] try to remove glue from tips
-- [x] growthcurve04_firstWithYeast.yaml:
-	- [x] HACK: give reader a different output name with date/time in it, so that unique files are produced
-	- [x] 6.1: description isn't expanded correctly
-	- [x] BUG: why did the experiment only run for 1.5h?
-	- [x] 6: make sure sample cycle 0 is handled before cycle 4
-	- [x] do the serial dilution differently (should perhaps do the dilutions all together instead of having two separate reads; maybe dispense medium to all wells before taking out the culture plate), dispose of last 50ul
-		- [x] handle dilution series where we don't add diluent, because it's already in the wells
-	- [x] shouldn't use liquid level detection when aspirating from sealed culture plate: Use Roboliq_Water_Bot_2500 when aspirating from a sealed plate, but then still use whatever other program was selected for dispense
-	- [x] BUG: in step 6.11.2.2, the wrong syringes are being used for extracting samples
-	- [x] MISSING: inactivation steps after sampling from well
-	- [x] design1: allocate plates and wells for dilution
-- [x] `pipetter.pipette()`: pass sourceMixing and destinationMixing to `_PipetteItem`s in order to improve sequence of mix/aspirate/dispense/mix when pipetting the dilution series
 - [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
 - [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [?] runtime-server cli: accept path for where to write log to
 - [?] EvowareCompiler: pass --begin and --end to timing script
 - [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
 - [ ] EvowareCompiler: add a SRCDIR variable for where the scripts and protocol data is
+	- [ ] make this configurable; normally the script should be written to this directory, but that is optional, since we sometimes need to generate scripts on a different computer
 - [ ] EvowareCompiler: add a OUTDIR variable for where to write measurements to (by default `${SRCDIR}\\run-${RUN}`)
 - [ ] EvowareCompiler: pass --logpath to timing script (need the directory, and add the RUN variable to it)
+- [ ] EvowareMain: automatically create a directory where the script files will go, giving the directory the script name plus the date
 
 - [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 	- MoveLiha: position with global z travel, global z-travel
@@ -97,7 +68,7 @@
 	- [ ] at beginning of experiment, measure OD600 of a dilution series without cells
 	- [ ] add in negative controls for OD600 of wells without cells?
 	- [ ] dilute with system liquid instead of medium
-	- [ ] implement command to prompt the user
+	- [ ] implement command to prompt the user: `UserPrompt("TEXT",0,-1);`
 	- [ ] notify user where to put labware
 
 - [ ] test whether dispense of 20ul is reliable without flushing between steps
