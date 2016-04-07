@@ -76,32 +76,32 @@
 - [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
 - [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [?] runtime-server cli: accept path for where to write log to
-- [ ] runtime-client: why did it stop updating after a few minutes?
-- [ ] EvowareCompiler: pass --begin and --end to timing script
+- [?] EvowareCompiler: pass --begin and --end to timing script
 - [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
 - [ ] EvowareCompiler: add a SRCDIR variable for where the scripts and protocol data is
 - [ ] EvowareCompiler: add a OUTDIR variable for where to write measurements to (by default `${SRCDIR}\\run-${RUN}`)
 - [ ] EvowareCompiler: pass --logpath to timing script (need the directory, and add the RUN variable to it)
+
+- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
+	- MoveLiha: position with global z travel, global z-travel
+	- MoveLiha: position with local z travel, z-dispense (this isn't quite low enough, so the command needs an additional offset parameter)
+	- MoveLiha: position with local z travel, global z-dispense
+	- Code example using tip 1 in P3(A01):
+		MoveLiha(1,12,0,1,"0C0810000000000000",0,4,0,400,0,0);
+		MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
+		MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
+- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 
 - [ ] growthcurve06_yeast3.yaml:
 	- [ ] select random syringes, but then in the end, order by syringe.  Otherwise syringes 1 and 2 are always assigned to the well that is only sampled in the last cycle
 	- [ ] at beginning of experiment, measure OD600 of a dilution series without cells
 	- [ ] add in negative controls for OD600 of wells without cells?
 	- [ ] dilute with system liquid instead of medium
+	- [ ] implement command to prompt the user
+	- [ ] notify user where to put labware
 
-	- [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
-		- MoveLiha: position with global z travel, global z-travel
-		- MoveLiha: position with local z travel, z-dispense (this isn't quite low enough, so the command needs an additional offset parameter)
-		- MoveLiha: position with local z travel, global z-dispense
-		- Code example using tip 1 in P3(A01):
-			MoveLiha(1,12,0,1,"0C0810000000000000",0,4,0,400,0,0);
-			MoveLiha(1,12,0,1,"0C0810000000000000",1,1,0,400,0,0);
-			MoveLiha(1,12,0,1,"0C0810000000000000",1,4,0,400,0,0);
-	- [ ] call a script to handle the measurement file (for now, just give it a unique name)
 - [ ] test whether dispense of 20ul is reliable without flushing between steps
 - [ ] runtime-server: need to save time logs to disk in such a way that we can easily use the time data for analysis
-- [ ] implement command to prompt the user
-- [ ] notify user where to put labware
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.
 - [ ] let wellsParser handle `destinations: A01 down H01`?
 - [ ] absorbance reader: the F200 Pro can only excite at wavelength 600nm, raise an error if user specifies another wavelength
@@ -122,6 +122,7 @@
 		cleanBetweenSameSource: none
 - [ ] runtime-server: serverRuntime.js: in `store.subscribe` callback, only pass a diff of changes to the client, because the state may be too large
 - [ ] runtime-server: use same port for serveRuntime.js and serverUi.js
+- [ ] runtime-client: why did it stop updating after a few minutes?
 
 # Todos for ROMA qc
 
