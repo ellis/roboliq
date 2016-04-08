@@ -46,12 +46,24 @@
 - [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [?] runtime-server cli: accept path for where to write log to
 - [?] EvowareCompiler: pass --begin and --end to timing script
-- [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
-- [ ] EvowareCompiler: add a SRCDIR variable for where the scripts and protocol data is
-	- [ ] make this configurable; normally the script should be written to this directory, but that is optional, since we sometimes need to generate scripts on a different computer
-- [ ] EvowareCompiler: add a OUTDIR variable for where to write measurements to (by default `${SRCDIR}\\run-${RUN}`)
-- [ ] EvowareCompiler: pass --logpath to timing script (need the directory, and add the RUN variable to it)
 - [ ] EvowareMain: automatically create a directory where the script files will go, giving the directory the script name plus the date
+	- directory to save the script is either:
+		- same as .out.json path
+		- user-specified
+	- filename to save the script is either:
+		- same as .out.json input file, but with .esc extension
+	- SCRIPTDIR variable is either:
+		- same as save dir
+		- user-specified (this is necessary if the script file will be copied elsewhere for execution)
+	- RUNDIR variable is either:
+		- `~SCRIPTDIR~\run~RUN~`
+		- user-specified
+- [ ] EvowareCompiler: add a BASEDIR variable for where the scripts and protocol data is
+	- [ ] make this configurable; normally the script should be written to this directory, but that is optional, since we sometimes need to generate scripts on a different computer
+	- [ ] only include the variables in the script output if they are needed
+- [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
+- [ ] EvowareCompiler: add a RUNDIR variable for where to write measurements to (by default `${BASEDIR}\\run-${RUN}`)
+- [ ] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
 
 - [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 	- MoveLiha: position with global z travel, global z-travel
@@ -94,6 +106,48 @@
 - [ ] runtime-server: serverRuntime.js: in `store.subscribe` callback, only pass a diff of changes to the client, because the state may be too large
 - [ ] runtime-server: use same port for serveRuntime.js and serverUi.js
 - [ ] runtime-client: why did it stop updating after a few minutes?
+
+## Notes
+
+want:
+
+* min v (sample volume)
+* max dt (duration between measurements)
+* max e (usuable evaporation time)
+* max n (measurements per well)
+
+where dt * (n - 1) < e_max and v * n < V_0 - 100ul, where V_0 is the initial volume in culture well (e.g. 1000ul).
+
+Maximum number of conditions that can be tested in a single experiment:
+
+* max group size = 8
+* max groups = dt / 15min
+* max conditions = max group size * max groups / replicates
+
+Wells required:
+
+* duration per well = n * dt
+* wells for curve = 48h / duration per well
+* wells for condition = wells for curve * replicates
+* wells total = wells for condition * conditions
+
+Example:
+
+* dt = 60min (60 minutes between well measurements)
+* n = 12 (12 measurements per well)
+* duration per well = 12h
+* stages = 48h / duration per well = 4
+* group size = 8
+* replicates = 4
+* groups = dt / 15min = 4
+* conditions = group size * groups / replicates = 8 * 4 / 4 = 8
+* wells for condition = 48h / 12h * replicates = 16
+* wells total = wells for condition * conditions = 96
+
+If we need more conditions, we could maybe increase dt to 2h and decrease
+replicates to 1, giving us `8 * 8 / 1 = 64` conditions.  (Note, this could
+make it difficult to accurately estimate dynamics with timescales less than
+2h).
 
 # Todos for ROMA qc
 

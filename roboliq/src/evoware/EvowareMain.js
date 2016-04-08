@@ -10,37 +10,30 @@ import * as EvowareTableFile from './EvowareTableFile.js';
 
 const version = "v1";
 
-const nomnom = require('nomnom').options({
-	carrier: {
-		position: 0,
-		help: 'path to Carrier.cfg',
-	},
-	table: {
-		position: 1,
-		help: "path to table file (.ewt or .esc)"
-	},
-	protocol: {
-		position: 2,
-		help: "path to protocol (.json)"
-	},
-	agents: {
-		position: 3,
-		help: "list of agents to compile for (comma-separated)"
-	},
-	version: {
-		flag: true,
-		help: 'print version and exit',
-		callback: function() {
-			return "version "+version;
-		}
-	},
-});
+const commander = require('commander')
+	.version("1.0")
+	.option("-d, --debug", "enable debugging output")
+	.arguments("[carrier] [table] [protocol] [agents]")
+	.description(
+		"Arguments:\n"+
+		"    carrier   path to Carrier.cfg\n"+
+		"    table     path to table file (.ewt or .esc)\n"+
+		"    protocol  path to compiled protocol (.out.json)\n"+
+		"    agents    list of agents to compile for (comma-separated)\n"
+	);
 
 export function run(argv) {
-	var opts = nomnom.parse(argv);
+	var opts = commander.parse(argv);
+	if (opts.args.length === 0 || opts.rawArgs.indexOf("--help") >= 0 || opts.rawArgs.indexOf("-h") >= 0) {
+		opts.outputHelp();
+		return;
+	}
+	
 	if (opts.debug) {
 		console.log(opts);
 	}
+
+	opts.carrier
 
 	if (_.isEmpty(opts.carrier)) {
 		console.log(nomnom.getUsage());

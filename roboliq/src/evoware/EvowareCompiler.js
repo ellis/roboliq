@@ -23,7 +23,10 @@ const commandHandlers = {
 };
 
 /**
- * Compile a protocol for a given evoware setup
+ * Compile a protocol for a given evoware setup.
+ *
+ * Might mutate the 'options' value by setting `options.variables.RUNDIR = true`.
+ *
  * @param  {EvowareCarrierData} carrierData
  * @param  {object} table - table object (see EvowareTableFile.load)
  * @param  {roboliq:Protocol} protocol
@@ -131,6 +134,7 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 				// This wont wait: `Execute("wscript ${pathToRoboliqRuntimeCli} begin ${path.join(".")}",0,"",2);`
 				results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} --begin ${path.join(".")}",0,"",2);`})
 				results.push({line: `Execute("wscript ${pathToRoboliqRuntimeCli} --end ${path.join(".")}",0,"",2);`})
+				_.set(options, ["variables", "RUNDIR"], true);
 				generatedTimingLogs = true;
 			}
 		}
@@ -166,6 +170,8 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 }
 
 function headerLines(table, protocol, agents, path, objects, options = {}) {
+	const withRUNDIR = objects.variables.RUNDIR;
+	const withRUN = withRUNDIR;
 	return [
 		'Variable(RUN,"1",0,"An identifier for this run of the protocol",0,1.000000,10.000000,1,2,0,0);',
 		'Variable(BASEDIR,"C:\ProgramData\Tecan\EVOware\database\scripts\Ellis",0,"Directory containing files required for this script",0,1.000000,10.000000,1,2,0,0);',

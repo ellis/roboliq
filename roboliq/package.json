@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Roboliq JavaScript library",
   "dependencies": {
+    "commander": "^2.9.0",
     "iconv-lite": "^0.4.13",
     "immutable": "^3.7.6",
     "javascript-natural-sort": "~0.7.1",
