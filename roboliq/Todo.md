@@ -52,6 +52,7 @@
 		- user-specified
 	- filename to save the script is either:
 		- same as .out.json input file, but with .esc extension
+		- user-specified
 	- SCRIPTDIR variable is either:
 		- same as save dir
 		- user-specified (this is necessary if the script file will be copied elsewhere for execution)

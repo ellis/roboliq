@@ -13,6 +13,12 @@ const version = "v1";
 const commander = require('commander')
 	.version("1.0")
 	.option("-d, --debug", "enable debugging output")
+	.option("-o, --output", "full path (directory and filename) to save the script to")
+	.option("-O, --outputDir", "directory to save the script to (defaults to the same directory as the input protocol)")
+	.option("-b, --outputBasename", "filename for the script (without directory) (defaults to basename of the input protocol)")
+	.option("--SCRIPTDIR", "value of SCRIPTDIR variable (default to directory where script is saved)")
+	.option("--RUNDIR", "value of RUNDIR variable (defaults to ~SCRIPTDIR~\\run~RUN~)")
+	.option("--progress", "display progress while compiling the script")
 	.arguments("[carrier] [table] [protocol] [agents]")
 	.description(
 		"Arguments:\n"+
@@ -28,12 +34,15 @@ export function run(argv) {
 		opts.outputHelp();
 		return;
 	}
-	
+
 	if (opts.debug) {
 		console.log(opts);
 	}
 
-	opts.carrier
+	opts.carrier = _.get(opts.args, 0);
+	opts.table = _.get(opts.args, 1);
+	opts.protocol = _.get(opts.args, 2);
+	opts.agents = _.get(opts.args, 3);
 
 	if (_.isEmpty(opts.carrier)) {
 		console.log(nomnom.getUsage());
@@ -72,4 +81,4 @@ export function run(argv) {
 	}
 }
 
-run();
+run(process.argv);

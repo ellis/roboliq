@@ -1,0 +1,381 @@
+roboliq: v1
+
+description: |
+  Test the following factors:
+
+  * initial volume: 1000ul, 1500ul
+  * sample volume: 20ul, 50ul, 200ul
+  * plate position: A1, A2, B1, B2, C1, C2, D1, D2, E1, E2
+  * replicate: 1, 2
+
+  Steps are:
+
+  * [x] Initialize
+      * [x] send raw command to select the correct system liquid
+      * [x] initialize pipetting by flushing a whole lot of water through
+      * [x] decontaminate tips
+  * [ ] prompt user to:
+      * [ ] turn on heater
+      * [ ] place all the plates
+      * [ ] fill the throughs
+  * [x] move DWP to pipetter location, fill it with media, then add inoculum
+  * [x] seal DWP twice
+  * [x] move DWP to shaker, start shaking with cover closed
+  * [x] after 30s, take dilution plate out of hotel, take DWP out of shaker
+  * [x] sample 2 wells, transfer to a dilution plate
+    * [x] transfer samples
+    * [x] put DWP back in shaker, restart incubation
+    * [x] create dilution series
+    * [x] read dilution plate and put it back in hotel
+  * [x] perform sampling loop
+
+
+config:
+  evowareCompiler:
+    # timing: false
+
+objects:
+  mediumLabware: {type: Plate, model: ourlab.model.troughModel_1500ml, location: ourlab.luigi.site.R1, contents: ["1000 ml", "medium"]}
+  inactivationLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R3, contents: ["100 ml", "inactivator"]}
+  inoculumLabware: {type: Plate, model: ourlab.model.troughModel_100ml, location: ourlab.luigi.site.R4, contents: ["100 ml", "inoculum"]}
+
+  medium: {type: Liquid, wells: mediumLabware(A1 down H1)}
+  inactivator: {type: Liquid, wells: inactivationLabware(A1 down H1)}
+  inoculum: {type: Liquid, wells: inoculumLabware(A1 down H1)}
+
+  culturePlate1: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
+  dilutionPlate1: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_1}
+  dilutionPlate2: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_2}
+  dilutionPlate3: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_3}
+  dilutionPlate4: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_4}
+  dilutionPlate5: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_5}
+  dilutionPlate6: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_6}
+  dilutionPlate7: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_7}
+  dilutionPlate8: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_8}
+
+  design1:
+    type: Design
+randomSeed: 444
+conditions:
+  # aspirationSite: ourlab.luigi.site.P3
+  # dilutionSite: ourlab.luigi.site.P6
+  # culturePlate: culturePlate1
+  # incubatorSite: ourlab.luigi.site.BOX_2
+  position*:
+    top:
+      replicate*:
+        - {group: A1, wells*: [A01, A02, A03, A04, A05, A06]}
+        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
+    bottom:
+      replicate*:
+        - {group: B1, wells*: [H01, H02, H03, H04, H05, H06]}
+        - {group: B2, wells*: [H07, H08, H09, H10, H11, H12]}
+    left:
+      replicate*:
+        - {group: C1, wells*: [B01, C01, D01, E01, F01, G01]}
+        - {group: C2, wells*: [B02, C02, D02, E02, F02, G02]}
+    right:
+      replicate*:
+        - {group: D1, wells*: [B12, C12, D12, E12, F12, G12]}
+        - {group: D2, wells*: [B11, C11, D11, E11, F11, G11]}
+    center:
+      replicate*:
+        - {group: E1, wells*: [D04, D05, D06, D07, D08, D09]}
+        - {group: E2, wells*: [E04, E05, E06, E07, E08, E09]}
+  V0=:
+    values: [1000ul, 1500ul]
+    order: "restart"
+  v=:
+    values: [20ul, 50ul, 200ul]
+    order: "restart"
+  sampleStep=calculate: (V0-100ul) / v
+
+  design2:
+    type: Design
+randomSeed: 444
+conditions:
+  # aspirationSite: ourlab.luigi.site.P3
+  # dilutionSite: ourlab.luigi.site.P6
+  # culturePlate: culturePlate1
+  # incubatorSite: ourlab.luigi.site.BOX_2
+  V0*: [1000ul, 1500ul]
+  v*: [20ul, 50ul, 200ul]
+  position*:
+    top:
+      replicate*:
+        - {group: A1, wells: [A01, A02, A03, A04, A05, A06]}
+        - {group: A2, wells: [A07, A08, A09, A10, A11, A12]}
+    bottom:
+      replicate*:
+        - {group: B1, wells: [H01, H02, H03, H04, H05, H06]}
+        - {group: B2, wells: [H07, H08, H09, H10, H11, H12]}
+    left:
+      replicate*:
+        - {group: C1, wells: [B01, C01, D01, E01, F01, G01]}
+        - {group: C2, wells: [B02, C02, D02, E02, F02, G02]}
+    right:
+      replicate*:
+        - {group: D1, wells: [B12, C12, D12, E12, F12, G12]}
+        - {group: D2, wells: [B11, C11, D11, E11, F11, G11]}
+    center:
+      replicate*:
+        - {group: E1, wells: [D04, D05, D06, D07, D08, D09]}
+        - {group: E2, wells: [E04, E05, E06, E07, E08, E09]}
+  V0=:
+    values: [1000ul, 1500ul]
+    order: "restart"
+  sampleVolume=:
+    values: [20ul, 50ul, 200ul]
+    order: "restart"
+  sampleStep=calculate: (V0-100ul) / v
+
+      .sampling*:
+        - sampleCount: 1
+          sampleCycle*: [5]
+        - sampleCount: 2
+          sampleCycle*: [1, 5]
+        - sampleCount: 3
+          sampleCycle*: [1, 3, 5]
+        - sampleCount: 5
+          sampleCycle*: [1, 2, 3, 4, 5]
+      sample=range:
+        groupBy: [stage, group, sampleCount]
+      replicate*: 2
+      cultureWell=allocateWells:
+        sameBy: [stage, group, sampleCount, replicate]
+        rows: 8
+        columns: 12
+        order: shuffle
+      syringe=range:
+        groupBy: [stage, group]
+        orderBy: [stage, group, sampleCycle]
+        sameBy: [cultureWell]
+      dilutionStep*: [0,1,2,3]
+      dilutionPlate=allocatePlates:
+        plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8]
+        groupBy: [stage, sampleCycle, group]
+        orderBy: [stage, sampleCycle, group]
+        wellsPerPlate: 96
+      dilutionWell=allocateWells:
+        groupBy: dilutionPlate
+        rows: 8
+        columns: 12
+        order: shuffle
+    orderBy: [stage, group, sampleCycle]
+
+steps:
+  data:
+    source: design1
+  1:
+    description: Initialize
+    1:
+      command: evoware._raw
+      agent: ourlab.luigi.evoware
+      commands: |
+        Command("O2SSO5,0",1,1,,,2,2,0);
+    2:
+      command: pipetter._washTips
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.liha
+      program:
+        "wasteGrid": 42
+        "wasteSite": 2
+        "cleanerGrid": 42
+        "cleanerSite": 3
+        "wasteVolume": 20
+        "wasteDelay": 500
+        "cleanerVolume": 15
+        "cleanerDelay": 500
+        "airgapVolume": 10
+        "airgapSpeed": 70
+        "retractSpeed": 30
+        "fastWash": true
+      syringes: [ourlab.luigi.liha.syringe.1, ourlab.luigi.liha.syringe.2, ourlab.luigi.liha.syringe.3, ourlab.luigi.liha.syringe.4, ourlab.luigi.liha.syringe.5, ourlab.luigi.liha.syringe.6, ourlab.luigi.liha.syringe.7, ourlab.luigi.liha.syringe.8]
+      intensity: thorough
+    3:
+      command: pipetter._washTips
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.liha
+      program:
+        "wasteGrid": 42
+        "wasteSite": 2
+        "cleanerGrid": 42
+        "cleanerSite": 3
+        "wasteVolume": 15
+        "wasteDelay": 500
+        "cleanerVolume": 10
+        "cleanerDelay": 500
+        "airgapVolume": 10
+        "airgapSpeed": 70
+        "retractSpeed": 30
+        "fastWash": false
+      syringes: [ourlab.luigi.liha.syringe.1, ourlab.luigi.liha.syringe.2, ourlab.luigi.liha.syringe.3, ourlab.luigi.liha.syringe.4, ourlab.luigi.liha.syringe.5, ourlab.luigi.liha.syringe.6, ourlab.luigi.liha.syringe.7, ourlab.luigi.liha.syringe.8]
+      intensity: thorough
+    4:
+      command: pipetter.cleanTips
+      equipment: ourlab.luigi.liha
+      intensity: decontaminate
+  2:
+    command: equipment.open
+    agent: ourlab.luigi.evoware
+    equipment: ourlab.luigi.culturebox
+  3:
+    command: experiment.forEachGroup
+    groupBy: culturePlate
+    distinctBy: cultureWell
+    steps:
+      description: "`Fill {{$culturePlate}} and seal it twice`"
+      1:
+        command: transporter.movePlate
+        object: $culturePlate
+        destination: ourlab.luigi.site.LIGHT
+      2:
+        command: pipetter.pipette
+        sources: medium
+        destinationLabware: $culturePlate
+        destinations: $$cultureWell
+        volumes: 980ul
+        syringes: $$syringe
+        cleanBetween: none
+        cleanEnd: none
+      3:
+        command: pipetter.pipette
+        sources: inoculum
+        destinationLabware: $culturePlate
+        destinations: $$cultureWell
+        volumes: 20ul
+        syringes: $$syringe
+        cleanBegin: flush
+        cleanBetween: none
+        cleanEnd: decontaminate
+      4:
+        command: sealer.sealPlate
+        object: $culturePlate
+        count: 2
+      5:
+        command: transporter.movePlate
+        object: $culturePlate
+        destination: $incubatorSite
+  4:
+    command: equipment.close
+    agent: ourlab.luigi.evoware
+    equipment: ourlab.luigi.culturebox
+  5:
+    command: shaker.run
+    equipment: ourlab.luigi.culturebox
+    program:
+      rpm: 300
+      duration: 30 minutes
+  6:
+    command: experiment.forEachGroup
+    groupBy: [stage, sampleCycle, group]
+    orderBy: [stage, sampleCycle, group]
+    timers: [ourlab.luigi.timer5, ourlab.luigi.timer6]
+    durationGroup: 30 minutes
+    steps:
+      description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}`"
+      command: transporter.doThenRestoreLocation
+      objects: [$dilutionPlate]
+      steps:
+        1:
+          description: "`Add medium to dilution wells {{$dilutionPlate}}`"
+          1:
+            command: transporter.movePlate
+            object: $dilutionPlate
+            destination: $dilutionSite
+          2:
+            command: pipetter.pipette
+            sources: medium
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 200ul
+            # cleanBegin: none
+            # cleanBetweenSameSource: none
+            cleanBetween: none
+            cleanEnd: decontaminate
+        2:
+          description: "`Extract samples from {{$culturePlate}}`"
+          data:
+            where: {dilutionStep: 0}
+          1:
+            command: equipment.open
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+          2:
+            command: transporter.movePlate
+            object: $culturePlate
+            destination: $aspirationSite
+          # 3:
+          #   command: system.if
+          #   test: "$sampleCycle == 1"
+          #   then:
+          #     description: "`Puncture seal of wells that are only sampled on the last cycle`"
+          #     data:
+          #       source: design1
+          #       where: {stage: $stage, group: $group, sampleCount: 1}
+          #     command: pipetter.punctureSeal
+          #     wells: $$cultureWell
+          #     distance: 3mm
+          4:
+            command: pipetter.pipette
+            sourceProgram: Roboliq_Water_Bot_2500
+            sourceLabware: $culturePlate
+            sources: $$cultureWell
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 50ul
+            clean: none
+        3:
+          description: "`Put {{$culturePlate}} back in incubator`"
+          1:
+            command: transporter.movePlate
+            object: $culturePlate
+            destination: $incubatorSite
+          2:
+            command: equipment.close
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+          3:
+            command: equipment.start
+            agent: ourlab.luigi.evoware
+            equipment: ourlab.luigi.culturebox
+            program:
+              rpm: 300
+        5:
+          description: "`Create dilution series from sample wells`"
+          command: pipetter.pipetteDilutionSeries
+          diluent: medium
+          destinationLabware: $dilutionPlate
+          dilutionFactor: 5
+          items:
+            "#data":
+              groupBy: cultureWell
+              templateGroup:
+                destinations: $$dilutionWell
+                syringe: $syringe
+          cleanBegin: none
+          cleanEnd: decontaminate
+          diluentParams:
+            clean: none
+            cleanEnd: thorough
+        6:
+          description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
+          command: absorbanceReader.measurePlate
+          object: $dilutionPlate
+          program:
+            excitationWavelength: 600nm
+            wells: $$dilutionWell
+          outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"
+          # outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\measurement_last.xml"
+  7:
+    description: "wrap-up"
+    1:
+      command: equipment.stop
+      agent: ourlab.luigi.evoware
+      equipment: ourlab.luigi.culturebox
+    # 2:
+    #   command: equipment.open
+    #   agent: ourlab.luigi.evoware
+    #   equipment: ourlab.luigi.culturebox

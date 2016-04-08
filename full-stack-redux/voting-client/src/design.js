@@ -69,7 +69,12 @@ export function flattenDesign(design) {
 	else {
 		randomEngine.autoSeed();
 	}
-	return expandConditions(design.conditions, randomEngine);
+
+	let rows = expandConditions(design.conditions, randomEngine);
+	if (design.orderBy) {
+		rows = _.orderBy(rows, design.orderBy);
+	}
+	return rows;
 }
 
 export function getCommonValues(table) {
@@ -408,7 +413,6 @@ class Special {
 		this.randomEngine = randomEngine;
 		this.next = (next || this.defaultNext);
 		this.initGroup = (initGroup || this.defaultInitGroup);
-
 	}
 
 	defaultInitGroup(nestedRows, rowIndexes) {
@@ -494,6 +498,10 @@ function countRows(nestedRows, rowIndexes) {
 }*/
 
 const actionHandlers = {
+	"allocatePlates": (rows, rowIndexes, name, action, randomEngine) => {
+		const action2 = _.cloneDeep(action);
+		return assign(rows, rowIndexes, name, action2, randomEngine, undefined, assign_allocatePlates_initGroup);
+	},
 	"allocateWells": (_rows, rowIndexes, name, action, randomEngine) => {
 		const rows = action.rows;
 		const cols = action.columns;
@@ -646,6 +654,32 @@ function assignSameBy(rows, rowIndexes, name, action, randomEngine, value) {
 			expandRowsByNamedValue(rows, [rowIndex], name, value2, randomEngine);
 		}
 	}
+}
+
+function assign_allocatePlates_initGroup(rows, rowIndexes) {
+	const action = this.action;
+	if (_.isUndefined(this.plateIndex))
+		this.plateIndex = 0;
+	if (_.isUndefined(this.wellsUsed))
+		this.wellsUsed = 0;
+
+	assert(rowIndexes.length <= action.wellsPerPlate, "too many positions in group for plate to accomodate");
+
+	if (this.wellsUsed + rowIndexes.length <= action.wellsPerPlate) {
+		this.wellsUsed += rowIndexes.length;
+	}
+	else {
+		this.plateIndex++;
+		assert(this.plateIndex < action.plates.length, `require more plates than the ${action.plates.length} supplied: ${action.plates.join(", ")}`);
+		this.wellsUsed = rowIndexes.length;
+	}
+
+	// TODO: allow for rotating plates for each group rather than assigning each plate until its full
+
+	this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
+	// console.log({this_action_values: this.action.values});
+
+	this.defaultInitGroup(rows, rowIndexes);
 }
 
 function assign_calculate_next(expr, action) {
@@ -803,7 +837,28 @@ export function query(table, q) {
 
 	if (q.where) {
 		_.forEach(q.where, (value, key) => {
-			table2 = _.filter(table, row => _.isEqual(row[key], value));
+			if (_.isPlainObject(value)) {
+				const op = _.keys(value)[0];
+				const x = value[op];
+				switch (op) {
+					case "eq":
+						table2 = _.filter(table, row => _.isEqual(row[key], x));
+						break;
+					case "gt":
+						// console.log("before:"); printRows(table2);
+						table2 = _.filter(table, row => _.gt(row[key], x));
+						// console.log("after:"); printRows(table2);
+						break;
+					case "gte":
+						table2 = _.filter(table, row => _.gte(row[key], x));
+						break;
+					default:
+						assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
+				}
+			}
+			else {
+				table2 = _.filter(table, row => _.isEqual(row[key], value));
+			}
 		});
 	}
 
