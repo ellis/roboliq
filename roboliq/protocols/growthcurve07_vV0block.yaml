@@ -91,32 +91,13 @@ conditions:
   sampleStep=calculate: (V0-100ul) / v
 
 
-  position*:
-    top:
-      replicate*:
-        - {group: A1, V0*: [1000ul, 1500ul], v*: [20ul, 50ul, 200ul], wells: [A01, A02, A03, A04, A05, A06]}
-        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
-conditions:
-  position*:
-    top:
-      replicate*:
-        - {group: A1, wells*: [A01, A02, A03, A04, A05, A06]}
-        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
-  V0=:
-    order: restart
-    values: [1000ul, 1500ul]
-  v=:
-    order: restart
-    values: [20ul, 50ul, 200ul]
-    groupBy: [group, V0]
-orderBy: [group, V0]
-
+randomSeed: 44
 conditions:
   position*:
     top:
       replicate*:
         - {group: A1, wells*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}}
-        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
+        - {group: A2, wells*=: {values: [A07, A08, A09, A10, A11, A12], order: shuffle}}
   V0=:
     order: restart
     values: [1000ul, 1500ul]
@@ -124,80 +105,18 @@ conditions:
     order: restart
     values: [20ul, 50ul, 200ul]
     groupBy: [group, V0]
-orderBy: [group, V0]
-
-  design2:
-    type: Design
-randomSeed: 444
-conditions:
-  # aspirationSite: ourlab.luigi.site.P3
-  # dilutionSite: ourlab.luigi.site.P6
-  # culturePlate: culturePlate1
-  # incubatorSite: ourlab.luigi.site.BOX_2
-  V0*: [1000ul, 1500ul]
-  v*: [20ul, 50ul, 200ul]
-  position*:
-    top:
-      replicate*:
-        - {group: A1, wells: [A01, A02, A03, A04, A05, A06]}
-        - {group: A2, wells: [A07, A08, A09, A10, A11, A12]}
-    bottom:
-      replicate*:
-        - {group: B1, wells: [H01, H02, H03, H04, H05, H06]}
-        - {group: B2, wells: [H07, H08, H09, H10, H11, H12]}
-    left:
-      replicate*:
-        - {group: C1, wells: [B01, C01, D01, E01, F01, G01]}
-        - {group: C2, wells: [B02, C02, D02, E02, F02, G02]}
-    right:
-      replicate*:
-        - {group: D1, wells: [B12, C12, D12, E12, F12, G12]}
-        - {group: D2, wells: [B11, C11, D11, E11, F11, G11]}
-    center:
-      replicate*:
-        - {group: E1, wells: [D04, D05, D06, D07, D08, D09]}
-        - {group: E2, wells: [E04, E05, E06, E07, E08, E09]}
-  V0=:
-    values: [1000ul, 1500ul]
-    order: "restart"
-  sampleVolume=:
-    values: [20ul, 50ul, 200ul]
-    order: "restart"
-  sampleStep=calculate: (V0-100ul) / v
-
-      .sampling*:
-        - sampleCount: 1
-          sampleCycle*: [5]
-        - sampleCount: 2
-          sampleCycle*: [1, 5]
-        - sampleCount: 3
-          sampleCycle*: [1, 3, 5]
-        - sampleCount: 5
-          sampleCycle*: [1, 2, 3, 4, 5]
-      sample=range:
-        groupBy: [stage, group, sampleCount]
-      replicate*: 2
-      cultureWell=allocateWells:
-        sameBy: [stage, group, sampleCount, replicate]
-        rows: 8
-        columns: 12
-        order: shuffle
-      syringe=range:
-        groupBy: [stage, group]
-        orderBy: [stage, group, sampleCycle]
-        sameBy: [cultureWell]
-      dilutionStep*: [0,1,2,3]
-      dilutionPlate=allocatePlates:
-        plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8]
-        groupBy: [stage, sampleCycle, group]
-        orderBy: [stage, sampleCycle, group]
-        wellsPerPlate: 96
-      dilutionWell=allocateWells:
-        groupBy: dilutionPlate
-        rows: 8
-        columns: 12
-        order: shuffle
-    orderBy: [stage, group, sampleCycle]
+  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
+  sampleCount=calculate: min(floor(sampleCount), 24)
+  sample*=range: {groupBy: sampleCount, till: sampleCount}
+  groupOrder=range:
+    sameBy: group
+    order: shuffle
+  cycle=calculate: "(sample - 1) * 2 + groupOrder"
+  syringe=range:
+    till: 8
+    groupBy: group
+    order: shuffle
+orderBy: [cycle, group, syringe]
 
 steps:
   data:

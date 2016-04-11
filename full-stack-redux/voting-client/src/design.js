@@ -87,7 +87,32 @@ export function getCommonValues(table) {
 			if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
 				delete common[name];
 			}
-		})
+		});
+	}
+
+	return common;
+}
+
+export function getCommonValuesNested(nestedRows, rowIndexes, common) {
+	if (_.isEmpty(rowIndexes)) return {};
+
+	for (let i = 0; i < rowIndexes.length; i++) {
+		const rowIndex = rowIndexes[i];
+		const row = nestedRows[rowIndex];
+		if (_.isArray(row)) {
+			getCommonValuesNested(row, _.range(row.length), common);
+		}
+		else if (_.isUndefined(common)) {
+			common = _.clone(row);
+		}
+		else {
+			// Remove any value from common which aren't shared with this row.
+			_.forEach(row, (value, name) => {
+				if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
+					delete common[name];
+				}
+			});
+		}
 	}
 
 	return common;
@@ -176,9 +201,7 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
  *   else call assignRowsByNamedValue
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
-	// console.log({rowIndexes})
-	// console.log(nestedRows)
+	// console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log({rowIndexes}); console.log(nestedRows)
 	// If an action is specified using the "=" symbol:
 	const iEquals = name.indexOf("=");
 	if (iEquals >= 0) {
@@ -339,7 +362,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
  *   nestedRows[rowIndex] = _.flattenDeep(rows2);
  */
 function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	// console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log(JSON.stringify(nestedRows))
+	// console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}, ${rowIndexes}`); console.log(JSON.stringify(nestedRows))
 	const isSpecial = (value instanceof Special);
 	const size
 		= (_.isArray(value)) ? value.length
@@ -529,8 +552,6 @@ const actionHandlers = {
 	"range": (rows, rowIndexes, name, action, randomEngine) => {
 		const action2 = _.cloneDeep(action);
 		_.defaults(action2, {from: 1, step: 1});
-		const end = (_.isNumber(action2.till))
-		 	? action2.till + 1 : rowIndexes.length + 1;
 		return assign(rows, rowIndexes, name, action2, randomEngine, undefined, assign_range_initGroup);
 	},
 	"sample": {
@@ -576,6 +597,7 @@ function handleAssignmentWithQueries(rows, rowIndexes, name, action, randomEngin
 	const isSpecial = value instanceof Special;
 	if (!action.groupBy && !action.sameBy) {
 		if (isSpecial) {
+			// console.log({name})
 			value.initGroup(rows, rowIndexes);
 		}
 		return value;
@@ -595,6 +617,7 @@ function handleAssignmentWithQueries(rows, rowIndexes, name, action, randomEngin
 				}
 				else {
 					if (isSpecial) {
+						// console.log({rows, rowIndexes2})
 						value.initGroup(rows, rowIndexes2);
 					}
 					expandRowsByNamedValue(rows, rowIndexes2, name, value, randomEngine);
@@ -785,8 +808,10 @@ function assign_calculateWell_next(action) {
 }
 
 function assign_range_initGroup(rows, rowIndexes) {
-	const from = this.action.from;
-	const till = (_.isNumber(this.action.till)) ? this.action.till : rowIndexes.length;
+	// console.log(`assign_range_initGroup:`, {rows, rowIndexes})
+	const commonHolder = []; // cache for common values, if needed
+	const from = getOrCalculateNumber(this.action, "from", rowIndexes.length, rows, rowIndexes, commonHolder);
+	const till = getOrCalculateNumber(this.action, "till", rowIndexes.length, rows, rowIndexes, commonHolder);
 	const end = till + 1;
 
 	let values;
@@ -812,6 +837,60 @@ function assign_range_initGroup(rows, rowIndexes) {
 	// console.log({this_action_values: this.action.values});
 
 	this.defaultInitGroup(rows, rowIndexes);
+}
+/*
+function assign_range_next(nestedRows, rowIndex) {
+	const commonHolder = []; // cache for common values, if needed
+	const from = getOrCalculateNumber(this.action, "from", rowIndexes.length, nestedRows, [rowIndex], commonHolder);
+	const till = getOrCalculateNumber(this.action, "till", rowIndexes.length, nestedRows, [rowIndex], commonHolder);
+	const end = till + 1;
+
+	let values;
+	if (_.isNumber(this.action.count)) {
+		const diff = till - from;
+		values = _.range(this.action.count).map(i => {
+			const d = diff * i / (this.action.count - 1);
+			return from + d;
+		});
+	}
+	else {
+		values = _.range(from, end, this.action.step);
+	}
+	if (values) {
+		if (_.isNumber(this.action.decimals)) {
+			values = values.map(n => Number(n.toFixed(this.action.decimals)));
+		}
+		if (_.isString(this.action.units)) {
+			values = values.map(n => `${n} ${this.action.units}`);
+		}
+	}
+	console.log({values});
+
+	this.nextIndex++;
+	return [this.nextIndex, values];
+}
+*/
+function getOrCalculateNumber(action, propertyName, dflt, nestedRows, rowIndexes, commonHolder) {
+	const value = _.get(action, propertyName);
+	if (_.isUndefined(value)) {
+		return dflt;
+	}
+	else if (_.isNumber(value)) {
+		return value;
+	}
+	else if (_.isString(value)) {
+		const options = {};
+		const next = assign_calculate_next(value, options);
+		const fakethis = {nextIndex: 0};
+		if (commonHolder.length === 0) {
+			// console.log({nestedRows, rowIndexes})
+			commonHolder.push(commonHolder.push(getCommonValuesNested(nestedRows, rowIndexes)));
+		}
+		const common = commonHolder[0];
+		// console.log({common})
+		const [dummyIndex, result] = next.bind(fakethis)([common], [0]);
+		return result;
+	}
 }
 
 /*
