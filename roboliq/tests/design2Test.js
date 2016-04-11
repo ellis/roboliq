@@ -291,7 +291,7 @@ describe('design', () => {
 			);
 		});
 
-		it.only("should handle 'range' action with expressions for property values", () => {
+		it("should handle 'range' action with expressions for property values", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {till: 3},
@@ -310,7 +310,7 @@ describe('design', () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {till: 3},
-					"b*=range": {till: "a"}
+					"b*=range": {till: "a", groupBy: "a"}
 				}),
 				[
 					{a: 1, b: 1},
