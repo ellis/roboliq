@@ -95,9 +95,9 @@ randomSeed: 44
 conditions:
   position*:
     top:
-      replicate*:
-        - {group: A1, wells*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}}
-        - {group: A2, wells*=: {values: [A07, A08, A09, A10, A11, A12], order: shuffle}}
+      .replicate*:
+        - {group: A1, well*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}}
+        - {group: A2, well*=: {values: [A07, A08, A09, A10, A11, A12], order: shuffle}}
   V0=:
     order: restart
     values: [1000ul, 1500ul]
@@ -112,11 +112,71 @@ conditions:
     sameBy: group
     order: shuffle
   cycle=calculate: "(sample - 1) * 2 + groupOrder"
-  syringe=range:
-    till: 8
-    groupBy: group
+  syringe=range: {groupBy: group, sameBy: well, order: shuffle}
+  dilutionStep*: [0,1,2,3]
+  dilutionPlate=allocatePlates:
+    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8]
+    groupBy: [cycle]
+    orderBy: [cycle]
+    wellsPerPlate: 96
+  dilutionWell=allocateWells:
+    groupBy: dilutionPlate
+    rows: 8
+    columns: 12
     order: shuffle
-orderBy: [cycle, group, syringe]
+orderBy: [cycle, syringe]
+
+
+randomSeed: 44
+conditions:
+  group*:
+    A:
+      position: top
+      well*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}
+    B:
+      position: bottom
+      well*=: {values: [H01, H02, H03, H04, H05, H06], order: shuffle}
+    C:
+      position: left
+      well*=: {values: [B01, C01, D01, E01, F01, G01], order: shuffle}
+    D:
+      position: right
+      well*=: {values: [B12, C12, D12, E12, F12, G12], order: shuffle}
+    E:
+      position: center
+      well*=: {values: [D04, D05, D06, D07, D08, D09], order: shuffle}
+    center:
+      replicate*:
+        - {group: E1, wells*: []}
+        - {group: E2, wells*: [E04, E05, E06, E07, E08, E09]}
+  V0=:
+    order: restart
+    values: [1000ul, 1500ul]
+  v=:
+    order: restart
+    values: [20ul, 50ul, 200ul]
+    groupBy: [group, V0]
+  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
+  sampleCount=calculate: min(floor(sampleCount), 24)
+  sample*=range: {groupBy: sampleCount, till: sampleCount}
+  groupOrder=range:
+    sameBy: group
+    order: shuffle
+  cycle=calculate: "(sample - 1) * 2 + groupOrder"
+  syringe=range: {groupBy: group, sameBy: well, order: shuffle}
+  dilutionStep*: [0,1,2]
+  dilutionPlate=allocatePlates:
+    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10]
+    groupBy: [cycle]
+    orderBy: [cycle]
+    wellsPerPlate: 96
+  dilutionWell=allocateWells:
+    groupBy: dilutionPlate
+    rows: 8
+    columns: 12
+    order: shuffle
+orderBy: [cycle, syringe]
+
 
 steps:
   data:
