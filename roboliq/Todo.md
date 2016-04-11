@@ -84,6 +84,12 @@
 	- [ ] implement command to prompt the user: `UserPrompt("TEXT",0,-1);`
 	- [ ] notify user where to put labware
 
+- [ ] growthcurve07_vV0block.yaml:
+	- [ ] check whether mathjs can handle "(10ul / 2ul) + 1": it can't
+	- [ ] check whether mathjs can handle "floor(10ul / 3ul)": it can't
+	- [ ] design: add 'select' and 'arrange' directives
+	- [ ] figure out how to generate an appropriate number of 'sampleStep' items
+
 - [ ] test whether dispense of 20ul is reliable without flushing between steps
 - [ ] runtime-server: need to save time logs to disk in such a way that we can easily use the time data for analysis
 - [ ] Q: Why inactivate with 2400ul sometimes and 1200ul other times? A: you only need to inactivate for whatever volume you aspirated, and 1200 goes faster than 2400.

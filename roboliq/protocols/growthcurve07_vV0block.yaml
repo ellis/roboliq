@@ -90,6 +90,42 @@ conditions:
     order: "restart"
   sampleStep=calculate: (V0-100ul) / v
 
+
+  position*:
+    top:
+      replicate*:
+        - {group: A1, V0*: [1000ul, 1500ul], v*: [20ul, 50ul, 200ul], wells: [A01, A02, A03, A04, A05, A06]}
+        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
+conditions:
+  position*:
+    top:
+      replicate*:
+        - {group: A1, wells*: [A01, A02, A03, A04, A05, A06]}
+        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
+  V0=:
+    order: restart
+    values: [1000ul, 1500ul]
+  v=:
+    order: restart
+    values: [20ul, 50ul, 200ul]
+    groupBy: [group, V0]
+orderBy: [group, V0]
+
+conditions:
+  position*:
+    top:
+      replicate*:
+        - {group: A1, wells*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}}
+        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
+  V0=:
+    order: restart
+    values: [1000ul, 1500ul]
+  v=:
+    order: restart
+    values: [20ul, 50ul, 200ul]
+    groupBy: [group, V0]
+orderBy: [group, V0]
+
   design2:
     type: Design
 randomSeed: 444
