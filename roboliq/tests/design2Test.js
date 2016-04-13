@@ -1049,7 +1049,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should handle previous bug #1", () => {
+		it("should handle previous bug #1", () => {
 			const design = {
 				conditions: {
 					"x*": {
