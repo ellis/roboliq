@@ -1049,6 +1049,34 @@ describe('design', () => {
 			]);
 		});
 
+		it.only("should handle previous bug #1", () => {
+			const design = {
+				conditions: {
+					"x*": {
+						A: {
+							"b*": [1, 2],
+							"c=": {
+								values: ["C", "D"]
+							}
+						},
+						B: {
+							"c*": {
+								E: {}
+							}
+						}
+					}
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printRows(table);
+			should.deepEqual(table, [
+				{x: "A", b: 1, c: "C"},
+				{x: "A", b: 1, c: "C"},
+				{x: "B", c: "E"},
+			]);
+		});
+
 		it.skip("should support sampling assignment of a nested array of objects, implicitly resulting in branching", () => {
 			const design = {
 				conditions: {

@@ -5,8 +5,7 @@ description: |
 
   * initial volume: 1000ul, 1500ul
   * sample volume: 20ul, 50ul, 200ul
-  * plate position: A1, A2, B1, B2, C1, C2, D1, D2, E1, E2
-  * replicate: 1, 2
+  * plate position: A, B, C, D, E
 
   Steps are:
 
@@ -22,12 +21,12 @@ description: |
   * [x] seal DWP twice
   * [x] move DWP to shaker, start shaking with cover closed
   * [x] after 30s, take dilution plate out of hotel, take DWP out of shaker
-  * [x] sample 2 wells, transfer to a dilution plate
+  * [x] sample 6 wells from A+B, C+D, or E, transfer to a dilution plate
     * [x] transfer samples
     * [x] put DWP back in shaker, restart incubation
-    * [x] create dilution series
+    * [x] create dilution series using 1:8 dilutions in 3 wells
     * [x] read dilution plate and put it back in hotel
-  * [x] perform sampling loop
+  * [x] repeat sampling loop at 12minute interval
 
 
 config:
@@ -127,6 +126,7 @@ conditions:
 orderBy: [cycle, syringe]
 
 
+# This is a 6-wells per block design
 randomSeed: 44
 conditions:
   group*:
@@ -156,6 +156,50 @@ conditions:
     order: restart
     values: [20ul, 50ul, 200ul]
     groupBy: [group, V0]
+  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
+  sampleCount=calculate: min(floor(sampleCount), 24)
+  sample*=range: {groupBy: sampleCount, till: sampleCount}
+  groupOrder=range:
+    sameBy: group
+    order: shuffle
+  cycle=calculate: "(sample - 1) * 2 + groupOrder"
+  syringe=range: {groupBy: group, sameBy: well, order: shuffle}
+  dilutionStep*: [0,1,2]
+  dilutionPlate=allocatePlates:
+    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10]
+    groupBy: [cycle]
+    orderBy: [cycle]
+    wellsPerPlate: 96
+  dilutionWell=allocateWells:
+    groupBy: dilutionPlate
+    rows: 8
+    columns: 12
+    order: shuffle
+orderBy: [cycle, syringe]
+
+
+# This is a half-block design
+randomSeed: 44
+conditions:
+  x*:
+    split:
+      V0*: [1000ul, 1500ul]
+      v*: [20ul, 50ul, 200ul]
+      group=:
+        values: [A, C]
+        order: reshuffle
+    together:
+      group*:
+        E1:
+          position: center
+          V0*: [1000ul, 1500ul]
+          v*: [20ul, 50ul, 200ul]
+          well=: {values: [D04, D05, D06, D07, D08, D09], order: shuffle}
+        E2:
+          position: center
+          V0*: [1000ul, 1500ul]
+          v*: [20ul, 50ul, 200ul]
+          well=: {values: [E04, E05, E06, E07, E08, E09], order: shuffle}
   .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
   sampleCount=calculate: min(floor(sampleCount), 24)
   sample*=range: {groupBy: sampleCount, till: sampleCount}
