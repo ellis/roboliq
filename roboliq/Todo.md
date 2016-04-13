@@ -42,6 +42,13 @@
 
 # Todos for growth curve experiment
 
+- [x] make sure we have a sterile deep well plate
+- [x] make sure we have enough dilution plates
+- [ ] randomize the wells in each group
+	- [ ] troubleshoot design2Test
+- [ ] autoclave the metal trough
+- [ ] start a file where I write down my plate usage for Daniel
+
 - [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
 - [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [?] runtime-server cli: accept path for where to write log to
