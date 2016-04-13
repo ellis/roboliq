@@ -15,6 +15,9 @@ growthcurve04_firstWithYeast:
 growthcurve05_secondWithYeast:
 	npm start -- --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve05_secondWithYeast.yaml --print-designs && npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/Roboliq_Standard_20160311.ewt protocols/growthcurve05_secondWithYeast.out.json ourlab.luigi.evoware
 
+growthcurve07_vV0block.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve07_vV0block.yaml --print-designs && npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/Roboliq_Standard_20160311.ewt protocols/growthcurve07_vV0block.out.json ourlab.luigi.evoware
+
 prof:
 	node --prof dist/main.js -- --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml
 	node --prof-process `ls -tr isolate-0000000000* | tail --lines=1` > prof.txt
