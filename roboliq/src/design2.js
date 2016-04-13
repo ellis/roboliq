@@ -623,6 +623,7 @@ function assign(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, n
 
 function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value) {
 	console.log(`handleAssignmentWithQueries: ${JSON.stringify({name, action, value})}`);
+	console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`)
 	console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
 	const isSpecial = value instanceof Special;
 	if (!action.groupBy && !action.sameBy) {
@@ -642,21 +643,23 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 			for (let i = 0; i < rowIndexesGroups.length; i++) {
 				const rowIndexes2 = rowIndexesGroups[i];
 
+				const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
+				console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
 				if (action.sameBy) {
-					assignSameBy(rows, rowIndexes2, otherRowIndexes.concat([rowIndexesGroups]), name, action, randomEngine, value);
+					assignSameBy(rows, rowIndexes2, otherRowIndexes2, name, action, randomEngine, value);
 				}
 				else {
 					if (isSpecial) {
 						// console.log({rows, rowIndexes2})
 						value.initGroup(rows, rowIndexes2);
 					}
-					expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes.concat([rowIndexesGroups]), rowIndexes, name, value, randomEngine);
+					expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
 				}
 			}
 			return undefined;
 		}
 		else if (action.sameBy) {
-			assignSameBy(rows, rowIndexes, otherRowIndexes.concat([rowIndexesGroups]), name, action, randomEngine, value);
+			assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value);
 		}
 		else {
 			if (isSpecial) {

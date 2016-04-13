@@ -306,7 +306,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle branching 'range' action with expressions for property values", () => {
+		it.only("should handle branching 'range' action with expressions for property values", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {till: 3},
