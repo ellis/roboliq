@@ -5,6 +5,8 @@ import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
+const DEBUG = true;
+
 //import {locationRowColToText} from './parsers/wellsParser.js';
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
 function locationRowColToText(row, col) {
@@ -187,7 +189,7 @@ export function expandConditions(conditions, randomEngine) {
  *   for each key/value pair, call expandRowsByNamedValue
  */
 function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
-	console.log("expandRowsByObject: "+JSON.stringify(conditions));
+	if (DEBUG) console.log("expandRowsByObject: "+JSON.stringify(conditions));
 	for (let name in conditions) {
 		expandRowsByNamedValue(nestedRows, rowIndexes, name, conditions[name], randomEngine);
 	}
@@ -201,7 +203,7 @@ function expandRowsByObject(nestedRows, rowIndexes, conditions, randomEngine) {
  *   else call assignRowsByNamedValue
  */
 function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log({rowIndexes}); console.log(nestedRows)
+	if (DEBUG) { console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); console.log({rowIndexes}); console.log(nestedRows); }
 	// If an action is specified using the "=" symbol:
 	const iEquals = name.indexOf("=");
 	if (iEquals >= 0) {
@@ -261,9 +263,7 @@ function expandRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
  *       setColumnValue(row, name, value)
  */
 function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
-	printRows(nestedRows)
-	console.log({rowIndexes})
+	if (DEBUG) {console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`); printRows(nestedRows); console.log({rowIndexes}); }
 	if (value instanceof Special || _.isArray(value)) {
 		let valueIndex = 0;
 		for (let i = 0; i < rowIndexes.length; i++) {
@@ -301,8 +301,11 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
  *     setColumnValue(row, name, item)
  */
 function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyIndex, valueKeys, randomEngine) {
-	console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`);
-	console.log(JSON.stringify({rowIndex, name, valueKeyIndex, valueKeys}))
+	if (DEBUG) { console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`); console.log(JSON.stringify({rowIndex, name, valueKeyIndex, valueKeys})); }
+	// FIXME: for debug only
+	if (name === "t")
+		CONTINUE
+	// ENDFIX
 	const row = nestedRows[rowIndex];
 	let n = 0;
 	if (_.isArray(row)) {
@@ -362,7 +365,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
  *   nestedRows[rowIndex] = _.flattenDeep(rows2);
  */
 function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngine) {
-	console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}, ${rowIndexes}`); console.log(JSON.stringify(nestedRows))
+	if (DEBUG) { console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}, ${rowIndexes}`); console.log(JSON.stringify(nestedRows)); }
 	const isSpecial = (value instanceof Special);
 	const size
 		= (_.isArray(value)) ? value.length
@@ -394,7 +397,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 }
 
 function branchRowByArray(nestedRows, rowIndex, values, randomEngine) {
-	console.log(`branchRowByArray: ${JSON.stringify(values)}`);
+	if (DEBUG) console.log(`branchRowByArray: ${JSON.stringify(values)}`);
 	const size = values.length;
 	// Make replicates of row
 	const row0 = nestedRows[rowIndex];
@@ -410,8 +413,7 @@ function branchRowByArray(nestedRows, rowIndex, values, randomEngine) {
 
 // Set the given value, but only if the name doesn't start with a period
 function setColumnValue(row, name, value) {
-	console.log(`setColumnValue: ${name}, ${JSON.stringify(value)}`);
-	console.log("row: "+JSON.stringify(row))
+	if (DEBUG) { console.log(`setColumnValue: ${name}, ${JSON.stringify(value)}`); console.log("row: "+JSON.stringify(row)); }
 	if (name.length >= 1 && name[0] != ".") {
 		// Recurse into sub-rows
 		if (_.isArray(row)) {
@@ -544,7 +546,9 @@ const actionHandlers = {
 	},
 	"assign": assign,
 	"calculate": (rows, rowIndexes, name, action, randomEngine) => {
-		return assign(rows, rowIndexes, name, {}, randomEngine, assign_calculate_next(action, {}));
+		const expr = _.isString(action) ? action : action.expression;
+		const action2 = _.isString(action) ? {} : action;
+		return assign(rows, rowIndexes, name, {}, randomEngine, assign_calculate_next(expr, action2));
 	},
 	"calculateWell": (rows, rowIndexes, name, action, randomEngine) => {
 		return assign(rows, rowIndexes, name, {}, randomEngine, assign_calculateWell_next(action, {}));
@@ -759,12 +763,12 @@ function assign_calculate_next(expr, action) {
 			}
 			return result;
 		})();
-		// console.log({unitless})
+		// console.log(`unitless: ${JSON.stringify(unitless)}`)
 
 		// Restrict decimal places
 		const unitlessText = (_.isNumber(action.decimals))
 			? unitless.toFixed(action.decimals)
-			: unitless.toNumber();
+			: _.isNumber(unitless) ? unitless : unitless.toNumber();
 
 		// Set units
 		const valueText = (!_.isEmpty(units))

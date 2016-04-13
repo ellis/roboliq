@@ -88,9 +88,13 @@ objects:
       sample*=range: {groupBy: sampleCount, till: sampleCount}
       cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
       t=calculate: .5*cycle
-      dilution0Volume=calculate: "240ul - v"
+      dilution0Volume=calculate:
+        expression: "240ul - v"
+        decimals: 0
       dilutionStep*: [0,1,2]
-      dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
+      dilutionFactor=calculate:
+        expression: "240ul / v * 8^dilutionStep"
+        decimals: 1
       dilutionPlate=allocatePlates:
         plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
         groupBy: [cycle]
