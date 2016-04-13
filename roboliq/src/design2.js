@@ -429,11 +429,11 @@ function branchRowByArray(nestedRows, rowIndex, otherRowIndexes, values, randomE
 	for (let rowIndex2 = 0; rowIndex2 < size; rowIndex2++) {
 		const value = values[rowIndex2];
 		rows2[rowIndex2] = _.cloneDeep(row0);
-		expandRowsByObject(rows2, [rowIndex2], []. values[rowIndex2], randomEngine);
+		expandRowsByObject(rows2, [rowIndex2], [], values[rowIndex2], randomEngine);
 	}
 
 	nestedRows[rowIndex] = _.flattenDeep(rows2);
-	flattenArrayAndIndexes(nestedRows, rowIndexes, otherRowIndexes);
+	flattenArrayAndIndexes(nestedRows, [rowIndex], otherRowIndexes);
 }
 
 // Set the given value, but only if the name doesn't start with a period
