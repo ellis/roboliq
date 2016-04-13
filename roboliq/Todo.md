@@ -46,6 +46,7 @@
 - [x] make sure we have enough dilution plates
 - [ ] randomize the wells in each group
 	- [ ] troubleshoot design2Test
+- [ ] use water for dilutions instead of medium
 - [ ] autoclave the metal trough
 - [ ] start a file where I write down my plate usage for Daniel
 

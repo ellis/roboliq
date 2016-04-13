@@ -1072,7 +1072,7 @@ describe('design', () => {
 			// printRows(table);
 			should.deepEqual(table, [
 				{x: "A", b: 1, c: "C"},
-				{x: "A", b: 1, c: "C"},
+				{x: "A", b: 2, c: "D"},
 				{x: "B", c: "E"},
 			]);
 		});
