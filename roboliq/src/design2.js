@@ -5,7 +5,7 @@ import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
-const DEBUG = true;
+const DEBUG = false;
 
 //import {locationRowColToText} from './parsers/wellsParser.js';
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
@@ -303,8 +303,8 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, name, value, randomEngin
 function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyIndex, valueKeys, randomEngine) {
 	if (DEBUG) { console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}`); console.log(JSON.stringify({rowIndex, name, valueKeyIndex, valueKeys})); }
 	// FIXME: for debug only
-	if (name === "t")
-		CONTINUE
+	// if (name === "t")
+	// 	console.log({values, nestedRows})
 	// ENDFIX
 	const row = nestedRows[rowIndex];
 	let n = 0;
@@ -317,11 +317,18 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, name, values, valueKeyI
 		}
 	}
 	else {
+		Error.stackTraceLimit = Infinity;
+
 		// console.log("A")
 		let item, key;
 		if (values instanceof Special) {
 			// console.log("B: "+rowIndex)
-			[key, item] = values.next(nestedRows, rowIndex);
+			// console.log(nestedRows[rowIndex])
+			const result = values.next(nestedRows, rowIndex);
+			// console.log({result})
+			key = result[0];
+			item = result[1];
+			// [key, item] = result;
 		}
 		else {
 			// console.log("C")
@@ -730,6 +737,7 @@ function assign_calculate_next(expr, action) {
 		});
 
 		assert(!_.isUndefined(expr), "`expression` property must be specified");
+		// console.log({expr, scope})
 		// console.log("scope:"+JSON.stringify(scope, null, '\t'))
 		let value = math.eval(expr, scope);
 		// console.log({type: value.type, value})
