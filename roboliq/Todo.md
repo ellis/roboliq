@@ -47,10 +47,14 @@
 - [x] use water for dilutions instead of medium
 - [?] autoclave the metal trough
 - [ ] randomize the wells in each group
-	- [ ] troubleshoot design2Test
+	- [x] troubleshoot design2Test
+	- [ ] design2: action for shuffleRows by columns (with groupBy)
 - [ ] use the slow labware for the culturePlate
 - [ ] pre-puncture wells, if possible
 - [ ] start a file where I write down my plate usage for Daniel
+
+- [ ] design2: action for pasting two tables together (left and right)
+- [ ] design2: consider allowing for: `{"a*": 3, "b*": [{c: [1,2,3]}, {c: [4,5,6]}]}`, where c values fill their b rows
 
 - [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values
 - [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that

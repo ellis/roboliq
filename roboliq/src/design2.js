@@ -64,6 +64,10 @@ export function printRows(rows, hideRedundancies = false) {
 }
 
 export function flattenDesign(design) {
+	if (_.isEmpty(design)) {
+		return [];
+	}
+	
 	const randomEngine = Random.engines.mt19937();
 	if (_.isNumber(design.randomSeed)) {
 		randomEngine.seed(design.randomSeed);

@@ -71,41 +71,24 @@ objects:
     type: Design
     conditions:
       style: split
-      V0*: [1000ul, 1500ul]
-      v*: [20ul, 50ul, 200ul]
-      syringeGroup: [2, 4, 2, 4, 2, 4]
-      group: [A, C, A, C, A, C]
-      replicate*: 2
-      position: [L,R,T,B,L,R,T,B,L,R,T,B]
-      cultureWell: [A06, H06, D01, D12, A07, H07, E01, E12, A08, H08, F01, F12]
-
-  design00:
-    type: Design
-    conditions:
-      style: split
       group*:
         A:
+          V0*: [1000ul, 1500ul, 1500ul]
+          v: [50ul, 20ul, 200ul]
           syringeGroup: 2
           replicate*:
             - position: T
-              cultureWell*: [A06, A07, A08]
             - position: B
-              cultureWell*: [H06, H07, H08]
-          V0=:
-            values: [1000ul, 1000ul, 1500ul]
-            order: repeat
-          v=:
-            values: [20ul, 200ul, 50ul]
-            order: repeat
+          cultureWell: [A06, H06, A07, H07, A08, H08]
         C:
           V0*: [1000ul, 1500ul, 1500ul]
           v: [50ul, 20ul, 200ul]
           syringeGroup: 4
           replicate*:
             - position: L
-              cultureWell*: [D01, E01, F01]
             - position: R
-              cultureWell*: [D12, E12, F12]
+          cultureWell: [D01, D12, E01, E12, F01, F12]
+    orderBy: [syringeGroup, replicate]
 
   design1:
     type: Design
@@ -117,13 +100,23 @@ objects:
       incubatorSite: ourlab.luigi.site.BOX_2
       .style*:
         split:
-          V0*: [1000ul, 1500ul]
-          v*: [20ul, 50ul, 200ul]
-          syringeGroup: [2, 4, 2, 4, 2, 4]
-          group: [A, C, A, C, A, C]
-          replicate*: 2
-          position: [L,R,T,B,L,R,T,B,L,R,T,B]
-          cultureWell: [A06, H06, D01, D12, A07, H07, E01, E12, A08, H08, F01, F12]
+          group*:
+            A:
+              V0*: [1000ul, 1500ul, 1500ul]
+              v: [50ul, 20ul, 200ul]
+              syringeGroup: 2
+              replicate*:
+                - position: T
+                - position: B
+              cultureWell: [A06, H06, A07, H07, A08, H08]
+            C:
+              V0*: [1000ul, 1500ul, 1500ul]
+              v: [50ul, 20ul, 200ul]
+              syringeGroup: 4
+              replicate*:
+                - position: L
+                - position: R
+              cultureWell: [D01, D12, E01, E12, F01, F12]
         together:
           group: E
           position: M

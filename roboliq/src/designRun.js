@@ -16,9 +16,7 @@ const commander = require('commander')
 	);
 
 function handleDesign(design, opts) {
-	console.log({opts})
 	if (opts.path) {
-		console.log({path, data: _.get(design, opts.path)})
 		design = _.get(design, opts.path);
 	}
 	const table = Design.flattenDesign(design);
