@@ -70,8 +70,11 @@ objects:
   design0:
     type: Design
     conditions:
-      syringe*: 6
-      cycle=calculate: "syringe"
+      #V0*: [1000ul, 1500ul, 1500ul]
+      #v: [50ul, 20ul, 200ul]
+      n: 2
+      i*=range: {groupBy: n, till: n}
+      j=calculate: "i" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
 
   design1:
     type: Design
@@ -121,8 +124,8 @@ objects:
       .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
       sampleCount=calculate: min(floor(sampleCount), 24)
       sample*=range: {groupBy: sampleCount, till: sampleCount}
-      # cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
-      # t=calculate: 0.5 * cycle
+      cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
+      t=calculate: 0.5 * cycle
       # dilution0Volume=calculate: "240ul - v"
       # dilutionStep*: [0,1,2]
       # dilutionFactor=calculate: "240ul / v * 8^dilutionStep"

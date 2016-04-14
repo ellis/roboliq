@@ -1077,6 +1077,23 @@ describe('design', () => {
 			]);
 		});
 
+		it.only("should handle previous bug #2", () => {
+			const design = {
+				conditions: {
+					n: 2,
+					"i*=range": {groupBy: "n", till: "n"},
+					"j=calculate": "i"
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table))
+			// printRows(table);
+			should.deepEqual(table, [
+				{n: 2, i: 1, j: 1},
+				{n: 2, i: 2, j: 2},
+			]);
+		});
+
 		it.skip("should support sampling assignment of a nested array of objects, implicitly resulting in branching", () => {
 			const design = {
 				conditions: {
