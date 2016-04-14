@@ -265,7 +265,7 @@ function loadProtocol(a, b, url, filecache) {
 	misc.mutateDeep(c, function(x) {
 		//console.log("x: "+x)
 		// Return filename relative to current directory
-		if (_.isString(x) && _.startsWith(x, ".")) {
+		if (_.isString(x) && (_.startsWith(x, "./") || _.startsWith(x, "../"))) {
 			var filename = "./" + path.posix.join(path.dirname(url), x);
 			// If the file hasn't been loaded yet:
 			if (!filecache.hasOwnProperty(filename)) {
@@ -985,6 +985,7 @@ function _run(opts, userProtocol) {
 		_.forEach(designs, (design, name) => {
 			console.log();
 			console.log(`Design "${name}":`);
+			console.log(JSON.stringify(design, null, '\t'))
 			const rows = Design.flattenDesign(design);
 			Design.printRows(rows);
 		});

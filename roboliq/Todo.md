@@ -44,10 +44,12 @@
 
 - [x] make sure we have a sterile deep well plate
 - [x] make sure we have enough dilution plates
+- [x] use water for dilutions instead of medium
+- [?] autoclave the metal trough
 - [ ] randomize the wells in each group
 	- [ ] troubleshoot design2Test
-- [ ] use water for dilutions instead of medium
-- [ ] autoclave the metal trough
+- [ ] use the slow labware for the culturePlate
+- [ ] pre-puncture wells, if possible
 - [ ] start a file where I write down my plate usage for Daniel
 
 - [?] transporter.doThenRestoreLocation: need to expand the steps so that description parameters are expanded; did this in roboliq.js, so that expansion parameters are automatically replaced when using SCOPE or DATA values

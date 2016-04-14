@@ -5,9 +5,18 @@ description: |
 
   * initial volume: 1000ul, 1500ul
   * sample volume: 20ul, 50ul, 200ul
-  * plate position: A, B, C, D, E
+  * well position: top, bottom, left, right, center
 
-  Steps are:
+  The well positions are grouped into several blocks: top, bottom, left, right,
+  and center.  Here we use 3 wells from each of the edge positions, and 12
+  wells in the center, for a total of 24 wells.  The block of 12 wells in the
+  center is split into two sub-sets of 6.  The 6 combinations of
+  initial and sample volumes are split as follows: half of the combinations are
+  assigned to the top block and duplicated in the bottom block; the other half
+  is assigned to the left block and duplicated in the right block; each of the
+  center sub-blocks has all six combinations.
+
+  The protocol steps are:
 
   * [x] Initialize
       * [x] send raw command to select the correct system liquid
@@ -19,14 +28,15 @@ description: |
       * [ ] fill the throughs
   * [x] move DWP to pipetter location, fill it with media, then add inoculum
   * [x] seal DWP twice
+  * [ ] puncture all wells
   * [x] move DWP to shaker, start shaking with cover closed
-  * [x] after 30s, take dilution plate out of hotel, take DWP out of shaker
-  * [x] sample 6 wells from A+B, C+D, or E, transfer to a dilution plate
+  * [x] after 30 minutes, take dilution plate out of hotel, take DWP out of shaker
+  * [x] sample 6 wells from center1, top/bottom, center2, left/right, and transfer to a dilution plate
     * [x] transfer samples
     * [x] put DWP back in shaker, restart incubation
     * [x] create dilution series using 1:8 dilutions in 3 wells
     * [x] read dilution plate and put it back in hotel
-  * [x] repeat sampling loop at 12minute interval
+  * [x] repeat sampling loop at 30 minute interval for 48 hours
 
 
 config:
@@ -51,178 +61,62 @@ objects:
   dilutionPlate6: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_6}
   dilutionPlate7: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_7}
   dilutionPlate8: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_8}
+  dilutionPlate9: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_9}
+  dilutionPlate10: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_10}
+  dilutionPlate11: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_11}
+  dilutionPlate12: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.P4}
+  dilutionPlate13: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.P5}
 
   design1:
     type: Design
-randomSeed: 444
-conditions:
-  # aspirationSite: ourlab.luigi.site.P3
-  # dilutionSite: ourlab.luigi.site.P6
-  # culturePlate: culturePlate1
-  # incubatorSite: ourlab.luigi.site.BOX_2
-  position*:
-    top:
-      replicate*:
-        - {group: A1, wells*: [A01, A02, A03, A04, A05, A06]}
-        - {group: A2, wells*: [A07, A08, A09, A10, A11, A12]}
-    bottom:
-      replicate*:
-        - {group: B1, wells*: [H01, H02, H03, H04, H05, H06]}
-        - {group: B2, wells*: [H07, H08, H09, H10, H11, H12]}
-    left:
-      replicate*:
-        - {group: C1, wells*: [B01, C01, D01, E01, F01, G01]}
-        - {group: C2, wells*: [B02, C02, D02, E02, F02, G02]}
-    right:
-      replicate*:
-        - {group: D1, wells*: [B12, C12, D12, E12, F12, G12]}
-        - {group: D2, wells*: [B11, C11, D11, E11, F11, G11]}
-    center:
-      replicate*:
-        - {group: E1, wells*: [D04, D05, D06, D07, D08, D09]}
-        - {group: E2, wells*: [E04, E05, E06, E07, E08, E09]}
-  V0=:
-    values: [1000ul, 1500ul]
-    order: "restart"
-  v=:
-    values: [20ul, 50ul, 200ul]
-    order: "restart"
-  sampleStep=calculate: (V0-100ul) / v
-
-
-randomSeed: 44
-conditions:
-  position*:
-    top:
-      .replicate*:
-        - {group: A1, well*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}}
-        - {group: A2, well*=: {values: [A07, A08, A09, A10, A11, A12], order: shuffle}}
-  V0=:
-    order: restart
-    values: [1000ul, 1500ul]
-  v=:
-    order: restart
-    values: [20ul, 50ul, 200ul]
-    groupBy: [group, V0]
-  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
-  sampleCount=calculate: min(floor(sampleCount), 24)
-  sample*=range: {groupBy: sampleCount, till: sampleCount}
-  groupOrder=range:
-    sameBy: group
-    order: shuffle
-  cycle=calculate: "(sample - 1) * 2 + groupOrder"
-  syringe=range: {groupBy: group, sameBy: well, order: shuffle}
-  dilutionStep*: [0,1,2,3]
-  dilutionPlate=allocatePlates:
-    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8]
-    groupBy: [cycle]
-    orderBy: [cycle]
-    wellsPerPlate: 96
-  dilutionWell=allocateWells:
-    groupBy: dilutionPlate
-    rows: 8
-    columns: 12
-    order: shuffle
-orderBy: [cycle, syringe]
-
-
-# This is a 6-wells per block design
-randomSeed: 44
-conditions:
-  group*:
-    A:
-      position: top
-      well*=: {values: [A01, A02, A03, A04, A05, A06], order: shuffle}
-    B:
-      position: bottom
-      well*=: {values: [H01, H02, H03, H04, H05, H06], order: shuffle}
-    C:
-      position: left
-      well*=: {values: [B01, C01, D01, E01, F01, G01], order: shuffle}
-    D:
-      position: right
-      well*=: {values: [B12, C12, D12, E12, F12, G12], order: shuffle}
-    E:
-      position: center
-      well*=: {values: [D04, D05, D06, D07, D08, D09], order: shuffle}
-    center:
-      replicate*:
-        - {group: E1, wells*: []}
-        - {group: E2, wells*: [E04, E05, E06, E07, E08, E09]}
-  V0=:
-    order: restart
-    values: [1000ul, 1500ul]
-  v=:
-    order: restart
-    values: [20ul, 50ul, 200ul]
-    groupBy: [group, V0]
-  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
-  sampleCount=calculate: min(floor(sampleCount), 24)
-  sample*=range: {groupBy: sampleCount, till: sampleCount}
-  groupOrder=range:
-    sameBy: group
-    order: shuffle
-  cycle=calculate: "(sample - 1) * 2 + groupOrder"
-  syringe=range: {groupBy: group, sameBy: well, order: shuffle}
-  dilutionStep*: [0,1,2]
-  dilutionPlate=allocatePlates:
-    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10]
-    groupBy: [cycle]
-    orderBy: [cycle]
-    wellsPerPlate: 96
-  dilutionWell=allocateWells:
-    groupBy: dilutionPlate
-    rows: 8
-    columns: 12
-    order: shuffle
-orderBy: [cycle, syringe]
-
-
-# This is a half-block design
-randomSeed: 44
-conditions:
-  .style*:
-    split:
-      V0*: [1000ul, 1500ul]
-      v*: [20ul, 50ul, 200ul]
-      syringeGroup: [2, 4, 2, 4, 2, 4]
-      group: [A, C, A, C, A, C]
-      replicate*: 2
-      position: [L,R,T,B,L,R,T,B,L,R,T,B]
-      well: [A06, H06, D01, D12, A07, H07, E01, E12, A08, H08, F01, F12]
-    together:
-      group: E
-      position: M
-      replicate*:
-        - V0*: [1000ul, 1500ul]
+    randomSeed: 44
+    conditions:
+      aspirationSite: ourlab.luigi.site.P3
+      dilutionSite: ourlab.luigi.site.P6
+      culturePlate: culturePlate1
+      incubatorSite: ourlab.luigi.site.BOX_2
+      .style*:
+        split:
+          V0*: [1000ul, 1500ul]
           v*: [20ul, 50ul, 200ul]
-          syringeGroup: 1
-          well: [D04, D05, D06, D07, D08, D09]
-        - V0*: [1000ul, 1500ul]
-          v*: [20ul, 50ul, 200ul]
-          syringeGroup: 3
-          well: [E04, E05, E06, E07, E08, E09]
-  syringe=range:
-    groupBy: syringeGroup
-  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
-  sampleCount=calculate: min(floor(sampleCount), 24)
-  sample*=range: {groupBy: sampleCount, till: sampleCount}
-  cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
-  t=calculate: .5*cycle
-  dilutionStep*: [0,1,2]
-  dilutionFactor=calculate: "250ul / v * 8^dilutionStep"
-  dilutionPlate=allocatePlates:
-    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
-    groupBy: [cycle]
-    orderBy: [cycle]
-    wellsPerPlate: 96
-  dilutionWell=allocateWells:
-    groupBy: dilutionPlate
-    rows: 8
-    columns: 12
-    order: shuffle
-orderBy: [cycle, syringe]
-
+          syringeGroup: [2, 4, 2, 4, 2, 4]
+          group: [A, C, A, C, A, C]
+          replicate*: 2
+          position: [L,R,T,B,L,R,T,B,L,R,T,B]
+          cultureWell: [A06, H06, D01, D12, A07, H07, E01, E12, A08, H08, F01, F12]
+        together:
+          group: E
+          position: M
+          replicate*:
+            - V0*: [1000ul, 1500ul]
+              v*: [20ul, 50ul, 200ul]
+              syringeGroup: 1
+              cultureWell: [D04, D05, D06, D07, D08, D09]
+            - V0*: [1000ul, 1500ul]
+              v*: [20ul, 50ul, 200ul]
+              syringeGroup: 3
+              cultureWell: [E04, E05, E06, E07, E08, E09]
+      syringe=range:
+        groupBy: syringeGroup
+      .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
+      sampleCount=calculate: min(floor(sampleCount), 24)
+      sample*=range: {groupBy: sampleCount, till: sampleCount}
+      cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
+      t=calculate: 0.5 * cycle
+      dilution0Volume=calculate: "240ul - v"
+      dilutionStep*: [0,1,2]
+      dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
+      dilutionPlate=allocatePlates:
+        plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
+        groupBy: [cycle]
+        orderBy: [cycle]
+        wellsPerPlate: 96
+      dilutionWell=allocateWells:
+        groupBy: dilutionPlate
+        rows: 8
+        columns: 12
+        order: shuffle
+    orderBy: [cycle, syringe]
 
 steps:
   data:
@@ -329,30 +223,27 @@ steps:
       duration: 30 minutes
   6:
     command: experiment.forEachGroup
-    groupBy: [stage, sampleCycle, group]
-    orderBy: [stage, sampleCycle, group]
+    groupBy: [cycle]
     timers: [ourlab.luigi.timer5, ourlab.luigi.timer6]
     durationGroup: 30 minutes
     steps:
-      description: "`Start stage {{$stage}}, sampleCycle {{$sampleCycle}}, group {{$group}}`"
+      description: "`Cycle {{$cycle}}, group {{$group}}`"
       command: transporter.doThenRestoreLocation
       objects: [$dilutionPlate]
       steps:
         1:
-          description: "`Add medium to dilution wells {{$dilutionPlate}}`"
+          description: "`Add water to dilution wells {{$dilutionPlate}}`"
           1:
             command: transporter.movePlate
             object: $dilutionPlate
             destination: $dilutionSite
           2:
             command: pipetter.pipette
-            sources: medium
+            sources: ourlab.luigi.systemLiquid
             destinationLabware: $dilutionPlate
             destinations: $$dilutionWell
             syringes: $$syringe
-            volumes: 200ul
-            # cleanBegin: none
-            # cleanBetweenSameSource: none
+            volumes: $$dilution0Volume
             cleanBetween: none
             cleanEnd: decontaminate
         2:
@@ -367,17 +258,6 @@ steps:
             command: transporter.movePlate
             object: $culturePlate
             destination: $aspirationSite
-          # 3:
-          #   command: system.if
-          #   test: "$sampleCycle == 1"
-          #   then:
-          #     description: "`Puncture seal of wells that are only sampled on the last cycle`"
-          #     data:
-          #       source: design1
-          #       where: {stage: $stage, group: $group, sampleCount: 1}
-          #     command: pipetter.punctureSeal
-          #     wells: $$cultureWell
-          #     distance: 3mm
           4:
             command: pipetter.pipette
             sourceProgram: Roboliq_Water_Bot_2500
@@ -386,7 +266,7 @@ steps:
             destinationLabware: $dilutionPlate
             destinations: $$dilutionWell
             syringes: $$syringe
-            volumes: 50ul
+            volumes: $$v
             clean: none
         3:
           description: "`Put {{$culturePlate}} back in incubator`"
@@ -409,7 +289,7 @@ steps:
           command: pipetter.pipetteDilutionSeries
           diluent: medium
           destinationLabware: $dilutionPlate
-          dilutionFactor: 5
+          dilutionFactor: 8
           items:
             "#data":
               groupBy: cultureWell

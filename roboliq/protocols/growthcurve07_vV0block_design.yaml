@@ -1,0 +1,49 @@
+type: Design
+randomSeed: 44
+conditions:
+  aspirationSite: ourlab.luigi.site.P3
+  dilutionSite: ourlab.luigi.site.P6
+  culturePlate: culturePlate1
+  incubatorSite: ourlab.luigi.site.BOX_2
+  .style*:
+    split:
+      V0*: [1000ul, 1500ul]
+      v*: [20ul, 50ul, 200ul]
+      syringeGroup: [2, 4, 2, 4, 2, 4]
+      group: [A, C, A, C, A, C]
+      replicate*: 2
+      position: [L,R,T,B,L,R,T,B,L,R,T,B]
+      cultureWell: [A06, H06, D01, D12, A07, H07, E01, E12, A08, H08, F01, F12]
+    together:
+      group: E
+      position: M
+      replicate*:
+        - V0*: [1000ul, 1500ul]
+          v*: [20ul, 50ul, 200ul]
+          syringeGroup: 1
+          cultureWell: [D04, D05, D06, D07, D08, D09]
+        - V0*: [1000ul, 1500ul]
+          v*: [20ul, 50ul, 200ul]
+          syringeGroup: 3
+          cultureWell: [E04, E05, E06, E07, E08, E09]
+  syringe=range:
+    groupBy: syringeGroup
+  .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
+  sampleCount=calculate: min(floor(sampleCount), 24)
+  sample*=range: {groupBy: sampleCount, till: sampleCount}
+  cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
+  t=calculate: .5*cycle
+  dilution0Volume=calculate: "240ul - v"
+  dilutionStep*: [0,1,2]
+  dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
+  dilutionPlate=allocatePlates:
+    plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
+    groupBy: [cycle]
+    orderBy: [cycle]
+    wellsPerPlate: 96
+  dilutionWell=allocateWells:
+    groupBy: dilutionPlate
+    rows: 8
+    columns: 12
+    order: shuffle
+orderBy: [cycle, syringe]
