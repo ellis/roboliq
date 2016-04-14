@@ -80,10 +80,10 @@ objects:
     type: Design
     randomSeed: 44
     conditions:
-#      aspirationSite: ourlab.luigi.site.P3
-#      dilutionSite: ourlab.luigi.site.P6
-#      culturePlate: culturePlate1
-#      incubatorSite: ourlab.luigi.site.BOX_2
+      aspirationSite: ourlab.luigi.site.P3
+      dilutionSite: ourlab.luigi.site.P6
+      culturePlate: culturePlate1
+      incubatorSite: ourlab.luigi.site.BOX_2
       .style*:
         split:
           group*:
@@ -126,20 +126,20 @@ objects:
       sample*=range: {groupBy: sampleCount, till: sampleCount}
       cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
       t=calculate: 0.5 * cycle
-      # dilution0Volume=calculate: "240ul - v"
-      # dilutionStep*: [0,1,2]
-      # dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
-      # dilutionPlate=allocatePlates:
-      #   plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
-      #   groupBy: [cycle]
-      #   orderBy: [cycle]
-      #   wellsPerPlate: 96
-      # dilutionWell=allocateWells:
-      #   groupBy: dilutionPlate
-      #   rows: 8
-      #   columns: 12
-      #   order: shuffle
-    # orderBy: [cycle, syringe]
+      dilution0Volume=calculate: "240ul - v"
+      dilutionStep*: [0,1,2]
+      dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
+      dilutionPlate=allocatePlates:
+        plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
+        groupBy: [cycle]
+        orderBy: [cycle]
+        wellsPerPlate: 96
+      dilutionWell=allocateWells:
+        groupBy: dilutionPlate
+        rows: 8
+        columns: 12
+        order: shuffle
+    orderBy: [cycle, syringe]
 
 steps:
   data:
