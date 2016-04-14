@@ -67,7 +67,7 @@ export function flattenDesign(design) {
 	if (_.isEmpty(design)) {
 		return [];
 	}
-	
+
 	const randomEngine = Random.engines.mt19937();
 	if (_.isNumber(design.randomSeed)) {
 		randomEngine.seed(design.randomSeed);
@@ -985,23 +985,31 @@ export function query(table, q) {
 	if (q.where) {
 		_.forEach(q.where, (value, key) => {
 			if (_.isPlainObject(value)) {
-				const op = _.keys(value)[0];
-				const x = value[op];
-				switch (op) {
-					case "eq":
-						table2 = _.filter(table, row => _.isEqual(row[key], x));
-						break;
-					case "gt":
-						// console.log("before:"); printRows(table2);
-						table2 = _.filter(table, row => _.gt(row[key], x));
-						// console.log("after:"); printRows(table2);
-						break;
-					case "gte":
-						table2 = _.filter(table, row => _.gte(row[key], x));
-						break;
-					default:
-						assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
-				}
+				_.forEach(value, (op, x) => {
+					switch (op) {
+						case "eq":
+							table2 = _.filter(table, row => _.isEqual(row[key], x));
+							break;
+						case "gt":
+							// console.log("before:"); printRows(table2);
+							table2 = _.filter(table, row => _.gt(row[key], x));
+							// console.log("after:"); printRows(table2);
+							break;
+						case "gte":
+							table2 = _.filter(table, row => _.gte(row[key], x));
+							break;
+						case "lt":
+							// console.log("before:"); printRows(table2);
+							table2 = _.filter(table, row => _.lt(row[key], x));
+							// console.log("after:"); printRows(table2);
+							break;
+						case "lte":
+							table2 = _.filter(table, row => _.lte(row[key], x));
+							break;
+						default:
+							assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
+					}
+				});
 			}
 			else {
 				table2 = _.filter(table, row => _.isEqual(row[key], value));

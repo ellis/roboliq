@@ -52,7 +52,7 @@ objects:
   inactivator: {type: Liquid, wells: inactivationLabware(A1 down H1)}
   inoculum: {type: Liquid, wells: inoculumLabware(A1 down H1)}
 
-  culturePlate1: {type: Plate, model: ourlab.model.plateModel_96_dwp, location: ourlab.luigi.site.P1}
+  culturePlate1: {type: Plate, model: ourlab.model.plateModel_96_dwp_sealed, location: ourlab.luigi.site.P1}
   dilutionPlate1: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_1}
   dilutionPlate2: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_2}
   dilutionPlate3: {type: Plate, model: ourlab.model.plateModel_96_round_transparent_nunc, location: ourlab.luigi.site.HOTEL12_3}
@@ -70,34 +70,17 @@ objects:
   design0:
     type: Design
     conditions:
-      style: split
-      group*:
-        A:
-          V0*: [1000ul, 1500ul, 1500ul]
-          v: [50ul, 20ul, 200ul]
-          syringeGroup: 2
-          replicate*:
-            - position: T
-            - position: B
-          cultureWell: [A06, H06, A07, H07, A08, H08]
-        C:
-          V0*: [1000ul, 1500ul, 1500ul]
-          v: [50ul, 20ul, 200ul]
-          syringeGroup: 4
-          replicate*:
-            - position: L
-            - position: R
-          cultureWell: [D01, D12, E01, E12, F01, F12]
-    orderBy: [syringeGroup, replicate]
+      syringe*: 6
+      cycle=calculate: "syringe"
 
   design1:
     type: Design
     randomSeed: 44
     conditions:
-      aspirationSite: ourlab.luigi.site.P3
-      dilutionSite: ourlab.luigi.site.P6
-      culturePlate: culturePlate1
-      incubatorSite: ourlab.luigi.site.BOX_2
+#      aspirationSite: ourlab.luigi.site.P3
+#      dilutionSite: ourlab.luigi.site.P6
+#      culturePlate: culturePlate1
+#      incubatorSite: ourlab.luigi.site.BOX_2
       .style*:
         split:
           group*:
@@ -138,22 +121,22 @@ objects:
       .fake*: [{sampleCount=calculate: (V0-200ul) / v}]
       sampleCount=calculate: min(floor(sampleCount), 24)
       sample*=range: {groupBy: sampleCount, till: sampleCount}
-      cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
-      t=calculate: 0.5 * cycle
-      dilution0Volume=calculate: "240ul - v"
-      dilutionStep*: [0,1,2]
-      dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
-      dilutionPlate=allocatePlates:
-        plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
-        groupBy: [cycle]
-        orderBy: [cycle]
-        wellsPerPlate: 96
-      dilutionWell=allocateWells:
-        groupBy: dilutionPlate
-        rows: 8
-        columns: 12
-        order: shuffle
-    orderBy: [cycle, syringe]
+      # cycle=calculate: "(sample - 1) * 4 + syringeGroup + ((v == 200ul) ? 4 * 3 : 0)" # delay start of 200ul samples by 6h (4 groups, 3 samples, .5h pause)
+      # t=calculate: 0.5 * cycle
+      # dilution0Volume=calculate: "240ul - v"
+      # dilutionStep*: [0,1,2]
+      # dilutionFactor=calculate: "240ul / v * 8^dilutionStep"
+      # dilutionPlate=allocatePlates:
+      #   plates: [dilutionPlate1, dilutionPlate2, dilutionPlate3, dilutionPlate4, dilutionPlate5, dilutionPlate6, dilutionPlate7, dilutionPlate8, dilutionPlate9, dilutionPlate10, dilutionPlate11, dilutionPlate12, dilutionPlate13]
+      #   groupBy: [cycle]
+      #   orderBy: [cycle]
+      #   wellsPerPlate: 96
+      # dilutionWell=allocateWells:
+      #   groupBy: dilutionPlate
+      #   rows: 8
+      #   columns: 12
+      #   order: shuffle
+    # orderBy: [cycle, syringe]
 
 steps:
   data:

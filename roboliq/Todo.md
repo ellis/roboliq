@@ -45,11 +45,11 @@
 - [x] make sure we have a sterile deep well plate
 - [x] make sure we have enough dilution plates
 - [x] use water for dilutions instead of medium
-- [?] autoclave the metal trough
+- [x] autoclave the metal trough
+- [?] use the slow labware for the culturePlate
 - [ ] randomize the wells in each group
 	- [x] troubleshoot design2Test
 	- [ ] design2: action for shuffleRows by columns (with groupBy)
-- [ ] use the slow labware for the culturePlate
 - [ ] pre-puncture wells, if possible
 - [ ] start a file where I write down my plate usage for Daniel
 

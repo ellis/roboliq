@@ -123,18 +123,18 @@ module.exports = {
 					BOX_6: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 12, closed: true },
 					BOX_7: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 14, closed: true },
 					BOX_8: { type: "Site", evowareCarrier: "Kuhner Shaker ES-X  2x4x2Pos", evowareGrid: 50, evowareSite: 16, closed: true },
-					HOTEL12_1: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 4 },
-					HOTEL12_2: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 3 },
-					HOTEL12_3: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 2 },
-					HOTEL12_4: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 1 },
-					HOTEL12_5: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 8 },
-					HOTEL12_6: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 7 },
-					HOTEL12_7: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 6 },
-					HOTEL12_8: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 5 },
-					//HOTEL12_9: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 12 },
-					HOTEL12_10: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 11 },
-					HOTEL12_11: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 10 },
-					HOTEL12_12: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 9 },
+					HOTEL12_1: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 1 },
+					HOTEL12_2: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 2 },
+					HOTEL12_3: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 3 },
+					HOTEL12_4: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 4 },
+					HOTEL12_5: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 5 },
+					HOTEL12_6: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 6 },
+					HOTEL12_7: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 7 },
+					HOTEL12_8: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 8 },
+					HOTEL12_9: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 9 },
+					HOTEL12_10: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 10 },
+					HOTEL12_11: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 11 },
+					//HOTEL12_12: { type: "Site", evowareCarrier: "Hotel 3x4Pos Grid25to39", evowareGrid: 25, evowareSite: 12 },
 					INCUBATOR1_1: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 4, closed: true },
 					INCUBATOR1_2: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 3, closed: true },
 					INCUBATOR1_3: { type: "Site", evowareCarrier: "Incubator1", evowareGrid: 1, evowareSite: 2, closed: true },
@@ -266,6 +266,13 @@ module.exports = {
 					"evowareName": "DM 96-DWB GripUp",
 					"evowareName_sealed": "DM 96-DWB GripUp sealed"
 				},
+				"plateModel_96_dwp_sealed": {
+					"type": "PlateModel",
+					"label": "96 well deep-well plate (sealed)",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "DM 96-DWB GripUp sealed"
+				},
 				"plateModel_96_round_transparent_nunc": {
 					"type": "PlateModel",
 					"label": "96 round-well transparent Nunc plate",
@@ -303,13 +310,13 @@ module.exports = {
 				"ourlab.luigi.site.P3",
 				"ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8",
 			],
-			labwareModels: ["ourlab.model.plateModel_96_dwp"]
+			labwareModels: ["ourlab.model.plateModel_96_dwp", "ourlab.model.plateModel_96_dwp_sealed"]
 		}),
 		// Shallow plates only
 		makeSiteModelPredicates({
 			siteModel: "ourlab.luigi.siteModel_shallow",
 			sites: [
-				"ourlab.luigi.site.HOTEL12_4", "ourlab.luigi.site.HOTEL12_8", "ourlab.luigi.site.HOTEL12_12",
+				"ourlab.luigi.site.HOTEL12_1", "ourlab.luigi.site.HOTEL12_5", "ourlab.luigi.site.HOTEL12_9",
 				"ourlab.luigi.site.READER"
 			],
 			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc"]
@@ -318,7 +325,7 @@ module.exports = {
 		makeSiteModelPredicates({
 			siteModel: "ourlab.luigi.siteModel1",
 			sites: [
-				"ourlab.luigi.site.HOTEL12_1", "ourlab.luigi.site.HOTEL12_2", "ourlab.luigi.site.HOTEL12_3", "ourlab.luigi.site.HOTEL12_5", "ourlab.luigi.site.HOTEL12_6", "ourlab.luigi.site.HOTEL12_7", /*"ourlab.luigi.site.HOTEL12_9",*/ "ourlab.luigi.site.HOTEL12_10", "ourlab.luigi.site.HOTEL12_11",
+				"ourlab.luigi.site.HOTEL12_2", "ourlab.luigi.site.HOTEL12_3", "ourlab.luigi.site.HOTEL12_4", "ourlab.luigi.site.HOTEL12_6", "ourlab.luigi.site.HOTEL12_7", "ourlab.luigi.site.HOTEL12_8", "ourlab.luigi.site.HOTEL12_9", "ourlab.luigi.site.HOTEL12_10", "ourlab.luigi.site.HOTEL12_11",
 				"ourlab.luigi.site.P1", "ourlab.luigi.site.P2", "ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
 				"ourlab.luigi.site.LIGHT",
 				"ourlab.luigi.site.REGRIP_ABOVE", "ourlab.luigi.site.REGRIP_BELOW",
@@ -326,7 +333,7 @@ module.exports = {
 				"ourlab.luigi.site.SHAKER",
 				"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
 			],
-			labwareModels: ["ourlab.model.plateModel_96_dwp", "ourlab.model.plateModel_96_round_transparent_nunc"]
+			labwareModels: ["ourlab.model.plateModel_96_dwp", "ourlab.model.plateModel_96_dwp_sealed", "ourlab.model.plateModel_96_round_transparent_nunc"]
 		}),
 		makeTransporterPredicates("ourlab.luigi", "ourlab.luigi.evoware", {
 			"ourlab.luigi.roma1": {
@@ -339,7 +346,7 @@ module.exports = {
 					[
 						"ourlab.luigi.site.HOTEL12_1", "ourlab.luigi.site.HOTEL12_2", "ourlab.luigi.site.HOTEL12_3", "ourlab.luigi.site.HOTEL12_4",
 						"ourlab.luigi.site.HOTEL12_5", "ourlab.luigi.site.HOTEL12_6", "ourlab.luigi.site.HOTEL12_7", "ourlab.luigi.site.HOTEL12_8",
-						/*"ourlab.luigi.site.HOTEL12_9",*/ "ourlab.luigi.site.HOTEL12_10", "ourlab.luigi.site.HOTEL12_11", "ourlab.luigi.site.HOTEL12_12",
+						"ourlab.luigi.site.HOTEL12_9", "ourlab.luigi.site.HOTEL12_10", "ourlab.luigi.site.HOTEL12_11", /*"ourlab.luigi.site.HOTEL12_12"*/,
 						"ourlab.luigi.site.P4", "ourlab.luigi.site.P5", "ourlab.luigi.site.P6",
 						"ourlab.luigi.site.REGRIP_BELOW",
 						"ourlab.luigi.site.TRANSFER_1", "ourlab.luigi.site.TRANSFER_2", "ourlab.luigi.site.TRANSFER_3", "ourlab.luigi.site.TRANSFER_4",
@@ -391,6 +398,15 @@ module.exports = {
 				"equipment": "ourlab.luigi.sealer",
 				"program": "C:\\INSTALLFOLDER_NOVEMBER2014_30096901_CH_ETHBS\\PLATTENPROGRAMM FUER ROBOSEAL\\MTP Riplate SW 2ml.bcf",
 				"model": "ourlab.model.plateModel_96_dwp",
+				"site": "ourlab.luigi.site.ROBOSEAL"
+			}
+		},
+		{
+			"sealer.canAgentEquipmentProgramModelSite": {
+				"agent": "ourlab.luigi.evoware",
+				"equipment": "ourlab.luigi.sealer",
+				"program": "C:\\INSTALLFOLDER_NOVEMBER2014_30096901_CH_ETHBS\\PLATTENPROGRAMM FUER ROBOSEAL\\MTP Riplate SW 2ml.bcf",
+				"model": "ourlab.model.plateModel_96_dwp_sealed",
 				"site": "ourlab.luigi.site.ROBOSEAL"
 			}
 		},

@@ -81,8 +81,5 @@
 				{"generic.closeSite": {"site": "?destination"}}
 			]}
 		}}
-	},
-
-	"two": {
 	}
 }

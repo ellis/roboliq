@@ -258,7 +258,9 @@ var commandHandlers = {
 			const method = {method: makeMovePlateMethod(parsed, movePlateParams, i)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
 			input0 = input0.concat([method]);
-			llpl.addToDatabase(transporterLogic[key]);
+			if (transporterLogic.hasOwnProperty(key)) {
+				llpl.addToDatabase(transporterLogic[key]);
+			}
 			llpl.addToDatabase([method]);
 			// const fs = require('fs');
 			// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
