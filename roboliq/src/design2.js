@@ -168,12 +168,16 @@ export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
 
 			for (let m = 0; m < otherRowIndexes.length; m++) {
 				const rowIndex2 = otherRowIndexes[m];
-				const k = rowIndex2.indexOf(rowIndex);
-				if (k >= 0) {
-					// Update rowIndexes
-					for (let j = k + 1; j < rowIndex2.length; j++) {
+				let k = -1;
+				for (let j = 0; j < rowIndex2.length; j++) {
+					if (rowIndex[j] === rowIndex) {
+						k = j;
+					}
+					if (rowIndex2[j] >= rowIndex) {
 						rowIndex2[j] += item.length - 1;
 					}
+				}
+				if (k >= 0) {
 					const x = _.range(rowIndex, rowIndex + item.length);
 					// console.log({x})
 					rowIndex2.splice(k, 1, ...x);
@@ -333,10 +337,11 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes, name, 
 	if (_.isArray(row)) {
 		// console.log("0")
 		for (let i = 0; i < row.length; i++) {
-			const n2 = assignRowByNamedValuesKey(row, i, otherRowIndexes, name, values, valueKeyIndex, valueKeys, randomEngine);
+			const n2 = assignRowByNamedValuesKey(row, i, [], name, values, valueKeyIndex, valueKeys, randomEngine);
 			n += n2;
 			valueKeyIndex += n2;
 		}
+		flattenArrayAndIndexes(nestedRows, [rowIndex], otherRowIndexes);
 	}
 	else {
 		// console.log("A")
