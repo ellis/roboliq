@@ -245,6 +245,8 @@ steps:
       rpm: 300
       duration: 30 minutes
   6:
+    data:
+      where: {cycle: 1}
     command: experiment.forEachGroup
     groupBy: [cycle]
     timers: [ourlab.luigi.timer5, ourlab.luigi.timer6]

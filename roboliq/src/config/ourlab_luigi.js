@@ -264,14 +264,14 @@ module.exports = {
 					"rows": 8,
 					"columns": 12,
 					"evowareName": "DM 96-DWB GripUp",
-					"evowareName_sealed": "DM 96-DWB GripUp sealed"
+					"evowareName_sealed": "DM 96 DWB GripUp sealed"
 				},
 				"plateModel_96_dwp_sealed": {
 					"type": "PlateModel",
 					"label": "96 well deep-well plate (sealed)",
 					"rows": 8,
 					"columns": 12,
-					"evowareName": "DM 96-DWB GripUp sealed"
+					"evowareName": "DM 96 DWB GripUp sealed"
 				},
 				"plateModel_96_round_transparent_nunc": {
 					"type": "PlateModel",
