@@ -25,6 +25,7 @@ pipetter._MixSpec:
   properties:
     count: {description: "Number of times to aspirate and re-dispense", type: integer}
     volume: {description: "Amount to aspirate, either as a fraction or absolute volume", type: Volume}
+  required: [count, volume]
 
 pipetter._AspirateItem:
   description: Parameters for pipette items.

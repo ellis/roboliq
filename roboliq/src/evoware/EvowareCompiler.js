@@ -47,6 +47,19 @@ export function compile(carrierData, table, protocol, agents, options = {}) {
 }
 
 export function compileStep(table, protocol, agents, path, objects, options = {}) {
+	try {
+		const results = compileStepSub(table, protocol, agents, path, objects, options);
+		return results;
+	} catch (e) {
+		console.log("ERROR: "+path.join("."));
+		console.log(JSON.stringify(_.get(protocol.steps, path)))
+		console.log(e)
+		console.log(e.stack)
+	}
+	return [];
+}
+
+function compileStepSub(table, protocol, agents, path, objects, options) {
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}

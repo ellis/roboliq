@@ -390,7 +390,11 @@ function pipette(params, parsed, data, options={}) {
 				const mixing = _.merge({count: 3, amount: 0.7}, item.sourceMixing, parsed.value.sourceMixing);
 				const volume0 = item.sourceVolumeBefore;
 				const volume = calculateMixingVolume(volume0, mixing.amount);
-				item2.sourceMixing = mixing;
+				const mixing2 = {
+					count: mixing.count,
+					volume: volume.format({precision: 14})
+				};
+				item2.sourceMixing = mixing2;
 			}
 			// Mix the destination well
 			if (item.volumeAfter && (item.destinationMixing || parsed.value.destinationMixing)) {
@@ -398,7 +402,11 @@ function pipette(params, parsed, data, options={}) {
 				const volume0 = item.volumeAfter;
 				// console.log({mixing, volume0: (volume0) ? volume0 : item})
 				const volume = calculateMixingVolume(volume0, mixing.amount);
-				item2.destinationMixing = mixing;
+				const mixing2 = {
+					count: mixing.count,
+					volume: volume.format({precision: 14})
+				};
+				item2.destinationMixing = mixing2;
 			}
 			return item2;
 		});
