@@ -352,7 +352,8 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 			const mixTuples = (parsed.value.sourceMixing)
 				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.sourceMixing));
 			if (!_.isEmpty(mixTuples)) {
-				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.sourceMixing, "sourceMixing.volume", parsed.value.program, group.syringeSpacing || 1, tuple0.item.count);
+				const count = (mixTuples[0].item.sourceMixing || parsed.value.sourceMixing).count;
+				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.sourceMixing, "sourceMixing.volume", parsed.value.program, group.syringeSpacing || 1, count);
 				lines = lines2.concat(lines);
 			}
 		}
@@ -362,7 +363,10 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 			const mixTuples = (parsed.value.destinationMixing)
 				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
 			if (!_.isEmpty(mixTuples)) {
-				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.destinationMixing, "destinationMixing.volume", parsed.value.program, group.syringeSpacing || 1, tuple0.item.count);
+				// console.log(parsed.value.destinationMixing)
+				// CONTINUE
+				const count = (mixTuples[0].item.destinationMixing || parsed.value.destinationMixing).count;
+				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.destinationMixing, "destinationMixing.volume", parsed.value.program, group.syringeSpacing || 1, count);
 				lines = lines.concat(lines2);
 			}
 		}

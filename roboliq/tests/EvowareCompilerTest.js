@@ -532,12 +532,12 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const expected = [[
-				{line: "Mix(3,\"Water free dispense\",\"7\",\"7\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",,0,0);"},
+				{line: "Mix(3,\"Water free dispense\",\"7\",\"7\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",3,0,0);"},
 				{line: "Aspirate(3,\"Water free dispense\",\"10\",\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",0,0);"},
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",0,0);"},
-				{line: "Mix(1,\"Water free dispense\",\"7\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",,0,0);"},
+				{line: "Mix(1,\"Water free dispense\",\"7\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",3,0,0);"},
 				{line: "Dispense(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0800000400000000\",0,0);"},
-				{line: "Mix(2,\"Water free dispense\",0,\"7\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0800000400000000\",,0,0);"},
+				{line: "Mix(2,\"Water free dispense\",0,\"7\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0800000400000000\",3,0,0);"},
 				{line: "MoveLiha(3,1,0,1,\"0C0830000000000000\",4,4,0,400,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]

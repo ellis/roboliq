@@ -14,6 +14,7 @@ export class Mix {
 	 * @param {integer} params.count - number of times to mix
 	 */
 	constructor(params) {
+		// console.log(params)
 		this.params = params;
 	}
 

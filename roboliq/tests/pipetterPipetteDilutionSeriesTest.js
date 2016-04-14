@@ -38,7 +38,7 @@ describe('pipetter', function() {
 				}
 			}
 		};
-		it("should pipette 2D mixture array to destination wells", function() {
+		it("should pipette a dilution series", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
 			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
@@ -244,11 +244,11 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"sourceMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								},
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							},
 							{
@@ -258,11 +258,11 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"sourceMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								},
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							}
 						]
@@ -280,7 +280,7 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							},
 							{
@@ -290,7 +290,7 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							}
 						]
@@ -308,7 +308,7 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							},
 							{
@@ -318,7 +318,7 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							}
 						]
@@ -336,7 +336,7 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							},
 							{
@@ -346,7 +346,7 @@ describe('pipetter', function() {
 								"volume": "50 ul",
 								"destinationMixing": {
 									"count": 3,
-									"amount": 0.7
+									"volume": "70 ul"
 								}
 							}
 						]
