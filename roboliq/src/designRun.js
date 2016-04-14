@@ -1,19 +1,26 @@
-import * as Design from './design2.js';
+import _ from 'lodash';
 import jsonfile from 'jsonfile';
 import path from 'path';
 import yaml from 'yamljs';
+import * as Design from './design2.js';
 
 const commander = require('commander')
 	.version("1.0")
 	.option("-d, --debug", "enable debugging output")
 	.option("-t, --type [type]", "specify input type (yaml, json)")
+	.option("-p, --path [path]", "path to design within an YAML or JSON object")
 	.arguments("<input>")
 	.description(
 		"Arguments:\n"+
 		"    file   path input file, or - to read from stdin\n"
 	);
 
-function handleDesign(design) {
+function handleDesign(design, opts) {
+	console.log({opts})
+	if (opts.path) {
+		console.log({path, data: _.get(design, opts.path)})
+		design = _.get(design, opts.path);
+	}
 	const table = Design.flattenDesign(design);
 	Design.printRows(table);
 }
@@ -50,11 +57,12 @@ function run(argv) {
 		stdin.on('end', function() {
 			const inputJSON = inputChunks.join();
 			const parsed = JSON.parse(inputJSON);
+			handleDesign(design, opts)
 		});
 	}
 	else if (isYaml) {
 		const design = yaml.load(filename);
-		handleDesign(design);
+		handleDesign(design, opts);
 	}
 }
 
