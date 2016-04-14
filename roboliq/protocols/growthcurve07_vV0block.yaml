@@ -208,6 +208,10 @@ steps:
         object: $culturePlate
         destination: ourlab.luigi.site.LIGHT
       2:
+        data:
+          orderBy: syringe
+          groupBy: syringe
+          transpose: true
         command: pipetter.pipette
         sources: medium
         destinationLabware: $culturePlate
@@ -217,6 +221,10 @@ steps:
         cleanBetween: none
         cleanEnd: none
       3:
+        data:
+          orderBy: syringe
+          groupBy: syringe
+          transpose: true
         command: pipetter.pipette
         sources: inoculum
         destinationLabware: $culturePlate
@@ -245,8 +253,8 @@ steps:
       rpm: 300
       duration: 30 minutes
   6:
-    data:
-      where: {cycle: 1}
+    # data:
+    #   where: {cycle: 1}
     command: experiment.forEachGroup
     groupBy: [cycle]
     timers: [ourlab.luigi.timer5, ourlab.luigi.timer6]
@@ -263,12 +271,25 @@ steps:
             object: $dilutionPlate
             destination: $dilutionSite
           2:
+            data:
+              where: {dilutionStep: 0}
             command: pipetter.pipette
             sources: ourlab.luigi.systemLiquid
             destinationLabware: $dilutionPlate
             destinations: $$dilutionWell
             syringes: $$syringe
             volumes: $$dilution0Volume
+            cleanBetween: none
+            cleanEnd: none
+          3:
+            data:
+              where: {dilutionStep: {gt: 0}}
+            command: pipetter.pipette
+            sources: ourlab.luigi.systemLiquid
+            destinationLabware: $dilutionPlate
+            destinations: $$dilutionWell
+            syringes: $$syringe
+            volumes: 210ul
             cleanBetween: none
             cleanEnd: decontaminate
         2:
@@ -309,15 +330,16 @@ steps:
             equipment: ourlab.luigi.culturebox
             program:
               rpm: 300
-        5:
+        4:
           description: "`Create dilution series from sample wells`"
           command: pipetter.pipetteDilutionSeries
-          diluent: medium
+          diluent: ourlab.luigi.systemLiquid
           destinationLabware: $dilutionPlate
           dilutionFactor: 8
           items:
             "#data":
               groupBy: cultureWell
+              orderBy: syringe
               templateGroup:
                 destinations: $$dilutionWell
                 syringe: $syringe
@@ -326,7 +348,7 @@ steps:
           diluentParams:
             clean: none
             cleanEnd: thorough
-        6:
+        5:
           description: "`Measure absorbance for dilutions of {{$culturePlate}} {{$$cultureWell}} on {{$dilutionPlate}} {{$$dilutionWell}}`"
           command: absorbanceReader.measurePlate
           object: $dilutionPlate

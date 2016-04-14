@@ -888,6 +888,7 @@ const commandHandlers = {
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "first well in dilution series shouldn't be empty");
 			const sourceVolume = math.divide(volume0, parsed.value.dilutionFactor);
 			const diluentVolume = math.subtract(volume0, sourceVolume);
+			console.log({volume0: volume0.format(), sourceVolume: sourceVolume.format(), diluentVolume: diluentVolume.format()})
 
 			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`] || item.syringe;
 			//console.log({syringeName})

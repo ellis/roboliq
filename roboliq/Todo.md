@@ -99,6 +99,8 @@
 	- [ ] notify user where to put labware
 
 - [ ] growthcurve07_vV0block.yaml:
+	- [ ] why is the syringe order strange sometimes?
+	- [x] why was medium transfered to the dilution plate after the culture plate was put back in the shaker?
 	- [ ] check whether mathjs can handle "(10ul / 2ul) + 1": it can't
 	- [ ] check whether mathjs can handle "floor(10ul / 3ul)": it can't
 	- [ ] design: add 'select' and 'arrange' directives
