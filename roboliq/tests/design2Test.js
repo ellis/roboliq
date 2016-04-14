@@ -323,13 +323,13 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with order=restart", () => {
+		it("should handle assign() with order=repeat", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1, 2, 3, 4],
 					"b=": {
 						values: [1, 2],
-						order: "restart"
+						order: "repeat"
 					}
 				}),
 				[

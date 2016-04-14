@@ -511,7 +511,7 @@ class Special {
 		// console.log({this});
 		if (this.nextIndex >= this.valueCount) {
 			switch (this.reuse) {
-				case "restart":
+				case "repeat":
 					this.nextIndex = 0;
 					break;
 				case "reverse":
@@ -620,12 +620,12 @@ function assign(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, n
 	if (!_.isEmpty(action.order)) {
 		switch (action.order) {
 			case "direct": case "direct/none": break;
-			case "direct/restart": case "restart": draw = "direct"; reuse = "restart"; break;
+			case "direct/repeat": case "repeat": draw = "direct"; reuse = "repeat"; break;
 			case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
 			case "shuffle": draw = "shuffle"; reuse = "none"; break;
 			case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
 			case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
-			case "shuffle/restart": draw = "shuffle"; reuse = "restart"; break;
+			case "shuffle/repeat": draw = "shuffle"; reuse = "repeat"; break;
 			case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
 			case "sample": draw = "sample"; break;
 			default: assert(false, "unrecognized 'order' value: "+action.order);
