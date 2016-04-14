@@ -153,7 +153,7 @@ export function flattenArrayM(rows) {
  * @param {integer} rowIndexesOffset - index in rowIndexes to start at
  */
 export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
-	// console.log({otherRowIndexes})
+	// console.log("A otherRowIndexes: "+JSON.stringify(otherRowIndexes))
 	let i = 0;
 	while (i < rowIndexes.length) {
 		const rowIndex = rowIndexes[i];
@@ -173,20 +173,20 @@ export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
 			rowIndexes.splice(i, 1, ...x);
 
 			for (let m = 0; m < otherRowIndexes.length; m++) {
-				const rowIndex2 = otherRowIndexes[m];
+				const rowIndexes2 = otherRowIndexes[m];
 				let k = -1;
-				for (let j = 0; j < rowIndex2.length; j++) {
-					if (rowIndex[j] === rowIndex) {
+				for (let j = 0; j < rowIndexes2.length; j++) {
+					if (rowIndexes2[j] === rowIndex) {
 						k = j;
 					}
-					if (rowIndex2[j] >= rowIndex) {
-						rowIndex2[j] += item.length - 1;
+					else if (rowIndexes2[j] > rowIndex) {
+						rowIndexes2[j] += item.length - 1;
 					}
 				}
 				if (k >= 0) {
 					const x = _.range(rowIndex, rowIndex + item.length);
 					// console.log({x})
-					rowIndex2.splice(k, 1, ...x);
+					rowIndexes2.splice(k, 1, ...x);
 				}
 			}
 
@@ -196,6 +196,7 @@ export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
 			i++;
 		}
 	}
+	// console.log("B otherRowIndexes: "+JSON.stringify(otherRowIndexes))
 }
 
 /**
@@ -985,7 +986,7 @@ export function query(table, q) {
 	if (q.where) {
 		_.forEach(q.where, (value, key) => {
 			if (_.isPlainObject(value)) {
-				_.forEach(value, (op, x) => {
+				_.forEach(value, (x, op) => {
 					switch (op) {
 						case "eq":
 							table2 = _.filter(table, row => _.isEqual(row[key], x));

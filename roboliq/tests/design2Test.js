@@ -1077,7 +1077,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should handle previous bug #2", () => {
+		it("should handle previous bug #2", () => {
 			const design = {
 				conditions: {
 					n: 2,
