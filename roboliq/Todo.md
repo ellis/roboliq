@@ -99,10 +99,10 @@
 	- [ ] notify user where to put labware
 
 - [ ] growthcurve07_vV0block.yaml:
+	- [x] figure out how to generate an appropriate number of 'sampleStep' items
 	- [ ] check whether mathjs can handle "(10ul / 2ul) + 1": it can't
 	- [ ] check whether mathjs can handle "floor(10ul / 3ul)": it can't
 	- [ ] design: add 'select' and 'arrange' directives
-	- [ ] figure out how to generate an appropriate number of 'sampleStep' items
 
 - [ ] test whether dispense of 20ul is reliable without flushing between steps
 - [ ] runtime-server: need to save time logs to disk in such a way that we can easily use the time data for analysis
@@ -196,6 +196,7 @@ make it difficult to accurately estimate dynamics with timescales less than
 
 # Todos for paper 2/3
 
+- [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
 - [ ] `pipetter.pipette()`: after destinationMixing, make sure that tips are marked as unclean and contaminated with destination liquid (even if air dispense was previously used)
 - [ ] `pipetter.pipetteDilutionSeries`: let user specify handling of last dilution well, e.g. no-diluent, reduced-diluent, discard-extra (default), keep-extra
 - [ ] `pipetter.pipette()`: when destinationMixing is used, then ensure that the syringe gets contaminated with destination liquid and that a wet or bot liquid class is used
@@ -278,9 +279,6 @@ make it difficult to accurately estimate dynamics with timescales less than
 
 # On-going todos with lots of sub-steps
 
-- [ ] complex protocol
-		- [ ] write script based on DM_Growthcurves
-		- [ ] allow "#calculate" to accept a string to be evaluated by mathjs, and somehow handle scope too so that other numeric variables can be used in the expression
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 		- [x] Commands.md: Add general documentation to each command namespace
 		- [ ] Commands.md: add examples for each command
@@ -399,7 +397,7 @@ make it difficult to accurately estimate dynamics with timescales less than
 - [ ] need to change evoware's labware model on DWP once its sealed
 - [ ] suboptimal plate transport:
 		- [ ] ROMA1 P1 -> REGRIP_BELOW (catches on side before falling into place)
-		- [ ] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
+		- [?] ROMA1 P1 -> ROBOSEAL, misplaced on top of pins!
 - [ ] decide on wash programs with Daniel and Fabian
 - [ ] incubator sites:
 		- [ ] add the extra logic+code for opening a black incubator site

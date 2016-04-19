@@ -1112,5 +1112,45 @@ describe('design', () => {
 			]);
 		});
 
+		it("should handle 'select' property", () => {
+			const design = {
+				conditions: {
+					"a*": 2,
+					"b*": 2,
+					"c*": 2
+				},
+				select: ["c", "b"]
+			};
+			const table = flattenDesign(design);
+			console.log(JSON.stringify(table))
+			printRows(table);
+			CONTINUE
+			should.deepEqual(table, [
+				{"a":1,"b":1,"c":1}, {"a":1,"b":1,"c":2},
+				{"a":2,"b":2,"c":1}, {"a":2,"b":2,"c":2},
+				{"a":3,"b":1,"c":1}, {"a":3,"b":1,"c":2},
+			]);
+		});
+
+		it("should handle 'orderBy' property", () => {
+			const design = {
+				conditions: {
+					"a*": 2,
+					"b*": 2,
+					"c*": 2
+				},
+				orderBy: "c"
+			};
+			const table = flattenDesign(design);
+			console.log(JSON.stringify(table))
+			printRows(table);
+			CONTINUE
+			should.deepEqual(table, [
+				{"a":1,"b":1,"c":1}, {"a":1,"b":1,"c":2},
+				{"a":2,"b":2,"c":1}, {"a":2,"b":2,"c":2},
+				{"a":3,"b":1,"c":1}, {"a":3,"b":1,"c":2},
+			]);
+		});
+
 	});
 });

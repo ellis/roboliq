@@ -80,6 +80,9 @@ export function flattenDesign(design) {
 	if (design.orderBy) {
 		rows = _.orderBy(rows, design.orderBy);
 	}
+	if (design.select) {
+		rows = rows.map(row => _.pick(row, design.select));
+	}
 	return rows;
 }
 
@@ -979,9 +982,6 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
 
 export function query(table, q) {
 	let table2 = _.clone(table);
-	if (q.select) {
-		table2 = _.map(table2, x => _.pick(x, q.select));
-	}
 
 	if (q.where) {
 		_.forEach(q.where, (value, key) => {
@@ -1053,6 +1053,10 @@ export function query(table, q) {
 	}
 	else {
 		table2 = [table2];
+	}
+
+	if (q.select) {
+		table2 = table2.map(rows => rows.map(row => _.pick(row, q.select)));
 	}
 
 	if (q.transpose) {
