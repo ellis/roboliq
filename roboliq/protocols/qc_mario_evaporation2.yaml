@@ -1,0 +1,71 @@
+roboliq: v1
+
+description: |
+  Experiment for estimating evaporation rate
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P4
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P5
+  plate3:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P6
+  plate4:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P7
+  plate5:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P8
+
+  design:
+    type: Design
+    conditions:
+      plate*: [plate1, plate2, plate3, plate4]
+      treatment:
+        75:
+          volume*: [75ul, 75ul, 150ul, 200ul, 250ul, 300ul]
+        150:
+          volume*: [75ul, 150ul, 150ul, 200ul, 250ul, 300ul]
+        200:
+          volume*: [75ul, 150ul, 200ul, 200ul, 250ul, 300ul]
+        250:
+          volume*: [75ul, 150ul, 200ul, 250ul, 250ul, 300ul]
+        300:
+          volume*: [75ul, 150ul, 200ul, 250ul, 300ul, 300ul]
+      .replicate*: 16
+      well=allocateWells:
+        groupBy: plate
+        rows: 8
+        columns: 12
+        order: shuffle
+    orderBy: [plate, well]
+
+steps:
+  date:
+    source: design
+  1:
+    command: experiment.forEachRow
+    design: design
+    steps:
+      description: "`Fill {{$plate}}`"
+      1:
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationPlate: $plate
+        destinations: "`{{$plate}}(A1 down H12)`"
+        volumes: $volume
+        cleanBetween: none
+        cleanEnd: flush

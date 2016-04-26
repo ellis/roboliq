@@ -42,6 +42,8 @@
 
 # Todos for growth curve experiment
 
+- [ ] make experiment for 75, 150, 200, 250, 300 evaporation
+
 - [x] make sure we have a sterile deep well plate
 - [x] make sure we have enough dilution plates
 - [x] use water for dilutions instead of medium
