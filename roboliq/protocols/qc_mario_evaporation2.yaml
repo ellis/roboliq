@@ -33,7 +33,7 @@ objects:
   design:
     type: Design
     conditions:
-      plate*: [plate1, plate2, plate3, plate4]
+      plate*: [plate1, plate2, plate3, plate4, plate5]
       treatment:
         75:
           volume*: [75ul, 75ul, 150ul, 200ul, 250ul, 300ul]
@@ -57,15 +57,15 @@ steps:
   date:
     source: design
   1:
-    command: experiment.forEachRow
-    design: design
+    command: experiment.forEachGroup
+    groupBy: plate
     steps:
       description: "`Fill {{$plate}}`"
       1:
         command: pipetter.pipette
         sources: ourlab.mario.systemLiquid
         destinationPlate: $plate
-        destinations: "`{{$plate}}(A1 down H12)`"
-        volumes: $volume
+        destinations: $$well
+        volumes: $$volume
         cleanBetween: none
         cleanEnd: flush
