@@ -18,6 +18,10 @@ growthcurve05_secondWithYeast:
 growthcurve07_vV0block.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve07_vV0block.yaml --print-designs && npm run evoware -- ../testdata/bsse-luigi/Carrier.cfg ../testdata/bsse-luigi/Roboliq_Standard_20160311.ewt protocols/growthcurve07_vV0block.out.json ourlab.luigi.evoware
 
+qc_mario_evaporation.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_evaporation.yaml --print-designs && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/qc_mario_evaporation.out.json ourlab.mario.evoware && cp protocols/qc_mario_evaporation.out.esc 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis'
+
+
 prof:
 	node --prof dist/main.js --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml
 	node --prof-process `ls -tr isolate-0000000000* | tail --lines=1` > prof.txt

@@ -1,0 +1,51 @@
+roboliq: v1
+
+description: |
+  Experiment for estimating evaporation rate
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate300:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P6
+  plate150:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P7
+  plate75:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P8
+
+  design:
+    type: Design
+    conditions:
+      .num*:
+        - plate: plate300
+          volume: 300ul
+        - plate: plate150
+          volume: 150ul
+        - plate: plate75
+          volume: 75ul
+
+steps:
+  date:
+    source: design
+  1:
+    command: experiment.forEachRow
+    design: design
+    steps:
+      description: "`Fill {{$plate}}`"
+      1:
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationPlate: $plate
+        destinations: "`{{$plate}}(A1 down H12)`"
+        volumes: $volume
+        cleanBetween: none
+        cleanEnd: flush

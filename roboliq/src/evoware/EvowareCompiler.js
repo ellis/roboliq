@@ -187,7 +187,7 @@ function headerLines(table, protocol, agents, path, objects, options = {}) {
 	const withRUN = withRUNDIR;
 	return [
 		'Variable(RUN,"1",0,"An identifier for this run of the protocol",0,1.000000,10.000000,1,2,0,0);',
-		'Variable(BASEDIR,"C:\ProgramData\Tecan\EVOware\database\scripts\Ellis",0,"Directory containing files required for this script",0,1.000000,10.000000,1,2,0,0);',
+		'Variable(BASEDIR,"C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis",0,"Directory containing files required for this script",0,1.000000,10.000000,1,2,0,0);',
 		'Variable(RUNDIR,"~BASEDIR~/run-~RUN~",0,"Directory where log and measurement files should be stored for this run",0,1.000000,10.000000,1,2,0,0);'
 	];
 }
