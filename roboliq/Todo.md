@@ -45,8 +45,15 @@
 - [x] make experiment for 75, 150, 200, 250, 300 evaporation
 - [ ] for impact of measurements: dispense, weight, [z-level, weight, absorbance, weight] * n
 	- [ ] implement z-level detection
+		- [x] in pipetter.js
+		- [ ] in evoware command
 	- [ ] log z-level values
+		- [ ] evoware compiler should call runtime logger
+		- [ ] runtime cli VBS should extract VisualBasic variables for volumes
+		- [?] runtime cli should pass an appropriate packet to the server
+		- [ ] runtime server should save the values in a streaming JSON file (can used 'jsonlite' in R to read it in)
 	- [ ] somehow parse the z-level values so that they can be easily displayed or used in R
+		- time, step, well, zlevel, syringe, tipModel
 	- [ ] write the full script for mario
 - [ ] for long-term volume and concentration changes: dispense, weight, [z-level, absorbance, weight, sleep] * n
 	- [ ] implement functionality to parse the absorbance measurements
