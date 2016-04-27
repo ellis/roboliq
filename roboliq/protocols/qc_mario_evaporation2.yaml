@@ -54,17 +54,16 @@ objects:
     orderBy: [plate, well]
 
 steps:
-  date:
-    source: design
   1:
     command: experiment.forEachGroup
+    design: design
     groupBy: plate
     steps:
       description: "`Fill {{$plate}}`"
       1:
         command: pipetter.pipette
         sources: ourlab.mario.systemLiquid
-        destinationPlate: $plate
+        destinationLabware: $plate
         destinations: $$well
         volumes: $$volume
         cleanBetween: none

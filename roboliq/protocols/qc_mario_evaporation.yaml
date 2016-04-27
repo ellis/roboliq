@@ -34,8 +34,6 @@ objects:
           volume: 75ul
 
 steps:
-  date:
-    source: design
   1:
     command: experiment.forEachRow
     design: design
@@ -44,7 +42,6 @@ steps:
       1:
         command: pipetter.pipette
         sources: ourlab.mario.systemLiquid
-        destinationPlate: $plate
         destinations: "`{{$plate}}(A1 down H12)`"
         volumes: $volume
         cleanBetween: none

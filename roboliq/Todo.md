@@ -40,9 +40,11 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
-# Todos for growth curve experiment
+# Todos for QC evaporation:
 
-- [ ] make experiment for 75, 150, 200, 250, 300 evaporation
+- [x] make experiment for 75, 150, 200, 250, 300 evaporation
+
+# Todos for growth curve experiment
 
 - [x] make sure we have a sterile deep well plate
 - [x] make sure we have enough dilution plates
