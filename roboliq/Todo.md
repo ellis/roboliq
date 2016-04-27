@@ -43,6 +43,26 @@
 # Todos for QC evaporation:
 
 - [x] make experiment for 75, 150, 200, 250, 300 evaporation
+- [ ] for impact of measurements: dispense, weight, [z-level, weight, absorbance, weight] * n
+	- [ ] implement z-level detection
+	- [ ] log z-level values
+	- [ ] somehow parse the z-level values so that they can be easily displayed or used in R
+	- [ ] write the full script for mario
+- [ ] for long-term volume and concentration changes: dispense, weight, [z-level, absorbance, weight, sleep] * n
+	- [ ] implement functionality to parse the absorbance measurements
+	- [ ] write the full script for mario
+	- [ ] write the full script for luigi
+- [ ] move my config and protocols from roboliq repo to bsse-lab repo
+- [ ] factors: centricity, plate, site, volume, z-level measured?, absorbance measured?
+
+Questions:
+- [ ] What is the evaporation rate in the middle wells, edge wells, and corner wells?
+- [ ] What is the evaporation rate at different volumes?
+- [ ] When a dye solution evaporates, what happens to the concentration?  Does all the dye stay in the well?
+- [ ] Does liquid detection impact well volume?
+- [ ] Does absorbance measurement impact well volume?
+- [ ] How often do water droplets stick to the tips after washing? (liquid detection might then dispense that drop into the well)
+- [ ] Is the rate of evaporation consistent over time, or are there time of day, day of week, or seasonal effects?
 
 # Todos for growth curve experiment
 

@@ -55,6 +55,10 @@ objects:
 
 steps:
   1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
     command: experiment.forEachGroup
     design: design
     groupBy: plate
@@ -66,5 +70,5 @@ steps:
         destinationLabware: $plate
         destinations: $$well
         volumes: $$volume
-        cleanBetween: none
+        clean: none
         cleanEnd: flush
