@@ -1,3 +1,5 @@
+Dim level
+
 ReDim args(WScript.Arguments.Count-1)
 For i = 0 To WScript.Arguments.Count-1
   args(i) = WScript.Arguments(i)
@@ -8,13 +10,10 @@ Next
 'Next
 
 Set objShell = CreateObject("WScript.Shell")
-'Return = objShell.Run("node C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100", 0, true)
-'Return = objShell.Run("node C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js begin 100", 0, true)
-Return = objShell.Run("node C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js " & Join(args, " "), 0, true)
 
-
-
-'CSCRIPT MyScript.vbs
-
-'WScript.Arguments.Item(0)
-'WScript.Arguments.Item(1)
+If args(0) = "zlevel" Then
+  level = Evoware.GetDoubleVariable("DETECTED_VOLUME_" & args(1))
+  Return = objShell.Run("node C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js zlevel -- --well A01 --syringe 1 --zlevel " & level, 0, true)
+Else
+  Return = objShell.Run("node C:\\Users\\localadmin\\Documents\\Ellis\\roboliq\\runtime-server\\roboliq-runtime-cli.js -- " & Join(args, " "), 0, true)
+End If
