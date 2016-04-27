@@ -164,6 +164,7 @@ pipetter._measureVolume:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier", type: "string"}
     items: {description: "List of parameters for individual wells", "type": "array", items: {type: pipetter._MeasureVolumeItem}}
   required: [agent, equipment, items]
 

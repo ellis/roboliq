@@ -17,7 +17,7 @@ export function _dispense(params, parsed, data) {
 }
 
 export function _measureVolume(params, parsed, data) {
-	
+	return handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
 }
 
 export function _mix(params, parsed, data) {

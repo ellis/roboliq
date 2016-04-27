@@ -49,7 +49,7 @@
 		- [ ] in evoware command
 	- [ ] log z-level values
 		- [ ] evoware compiler should call runtime logger
-		- [ ] runtime cli VBS should extract VisualBasic variables for volumes
+		- [ ] runtime cli VBS should extract VisualBasic variables for volumes (e.g. `DETECTED_VOLUME_8`)
 		- [?] runtime cli should pass an appropriate packet to the server
 		- [ ] runtime server should save the values in a streaming JSON file (can used 'jsonlite' in R to read it in)
 	- [ ] somehow parse the z-level values so that they can be easily displayed or used in R
