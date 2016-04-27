@@ -698,6 +698,11 @@ const commandHandlers = {
 		//console.log("effects:", JSON.stringify(effects, null, '  '))
 		return {effects};
 	},
+	"pipetter._measureVolume": function(params, parsed, data) {
+		// console.log("pipetter._punctureSeal: "+JSON.stringify(parsed, null, '\t'))
+		const effects = pipetterUtils.getEffects_pipette(parsed, data);
+		return { effects };
+	},
 	"pipetter._mix": function(params, parsed, data) {
 		// console.log("pipetter._mix: "+JSON.stringify(parsed, null, '\t'))
 		parsed.value.items = commandHelper.copyItemsWithDefaults(parsed.value.items, parsed.value.itemDefaults);
@@ -825,6 +830,18 @@ const commandHandlers = {
 		//console.log(expansion);
 
 		return {expansion};
+	},
+	"pipetter.measureVolume": function(params, parsed, data) {
+		const result = pipette(params, parsed, data, {keepVolumelessItems: true});
+
+		_.forEach(result.expansion, step => {
+			if (step.command === "pipetter._pipette") {
+				step.command = "pipetter._measureVolume";
+			}
+			delete step.program;
+		});
+
+		return result;
 	},
 	"pipetter.mix": function(params, parsed, data) {
 		// console.log("pipetter.mix: "+JSON.stringify(parsed))

@@ -43,6 +43,21 @@ pipetter._DispenseItem:
     volume: {description: Volume, type: Volume}
   required: [syringe, destination, volume]
 
+pipetter._MeasureVolumeItem:
+  description: Parameters for low-level pipetter._measureVolume items.
+  properties:
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
+    well: {description: Well specifier, type: Well}
+  required: [syringe, well, distance]
+
+pipetter.MeasureItem:
+  description: Parameters for pipetter.measureVolume items.
+  properties:
+    syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
+    well: {description: Well specifier, type: Well}
+    cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
+
+
 pipetter._MixItem:
   description: Parameters for mixing with pipetter.
   properties:
@@ -85,18 +100,18 @@ pipetter.PipetteItem:
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter.MixSpec}
 
 pipetter._PunctureItem:
-  description: Parameters for low-level pipette items.
+  description: Parameters for low-level puncture items.
   properties:
     syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
-    well: {description: Source specifier, type: Well}
+    well: {description: Well specifier, type: Well}
     distance: {description: "Distance for puncturing", type: Length}
   required: [syringe, well, distance]
 
 pipetter.PunctureItem:
-  description: Parameters for low-level pipette items.
+  description: Parameters for puncture items.
   properties:
     syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
-    well: {description: Source specifier, type: Well}
+    well: {description: Well specifier, type: Well}
     distance: {description: "Distance for puncturing", type: Length}
     cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
 
@@ -143,6 +158,14 @@ pipetter._dispense:
     program: {description: "Program identifier", type: "string"}
     items: {description: "Data about what should be dispensed where", "type": "array", items: {type: pipetter._DispenseItem}}
   required: [agent, equipment, program]
+
+pipetter._measureVolume:
+  description: Measure well volume using pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    items: {description: "List of parameters for individual wells", "type": "array", items: {type: pipetter._MeasureVolumeItem}}
+  required: [agent, equipment, items]
 
 pipetter._mix:
   description: Mix liquids by aspirating and re-dispensing.
@@ -206,6 +229,20 @@ pipetter.cleanTips:
         required: [syringe]
     syringes: {description: "Optional list of syringes to serve as default for missing syringes in items list", type: array, items: {type: [number, nameOf Syringe]}}
     intensity: {description: "Optional intensity to serve as default intensity for missing intensities in items list", type: pipetter.CleaningIntensity}
+
+pipetter.measureVolume:
+  description: Measure well volume using pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    items: {description: "List of parameters for individual wells to measure", "type": "array", items: {type: pipetter.PunctureItem}}
+    wells: {description: "Specifier for well(s) to measure, if missing from items", type: Wells}
+    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
+    clean: {description: "Intensity of cleaning", type: string}
+    cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
+    cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
+    cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
+    tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
 
 pipetter.mix:
   description: Mix well contents by aspirating and re-dispensing.
