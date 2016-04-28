@@ -45,11 +45,12 @@ objects:
           volume*: [75ul, 150ul, 200ul, 250ul, 250ul, 300ul]
         300:
           volume*: [75ul, 150ul, 200ul, 250ul, 300ul, 300ul]
-      .replicate*: 16
+      .replicate*: 10
       well=allocateWells:
         groupBy: plate
         rows: 8
         columns: 12
+        wells: "B02 down block G11"
         order: shuffle
     orderBy: [plate, well]
 
