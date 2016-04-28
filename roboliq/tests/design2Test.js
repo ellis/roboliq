@@ -936,6 +936,25 @@ describe('design', () => {
 			]);
 		});
 
+		it("should support allocateWells() assignments on a subset of plate", () => {
+			const design1 = {
+				conditions: {
+					"replicate*=range": {till: 5},
+					"well=allocateWells": {rows: 8, columns: 12, wells: "A01 down B03"}
+				}
+			};
+			const table1 = flattenDesign(design1);
+			// console.log(JSON.stringify(table1))
+			// printRows(table1);
+			should.deepEqual(table1, [
+				{"replicate":1,"well":"A01"},
+				{"replicate":2,"well":"B01"},
+				{"replicate":3,"well":"A02"},
+				{"replicate":4,"well":"B02"},
+				{"replicate":5,"well":"A03"}
+			]);
+		});
+
 		it("should support range() with groupBy", () => {
 			const design = {
 				conditions: {
