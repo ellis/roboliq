@@ -940,7 +940,7 @@ describe('design', () => {
 			const design1 = {
 				conditions: {
 					"replicate*=range": {till: 5},
-					"well=allocateWells": {rows: 8, columns: 12, wells: "A01 down B03"}
+					"well=allocateWells": {rows: 8, columns: 12, wells: "A01 down block B03"}
 				}
 			};
 			const table1 = flattenDesign(design1);
