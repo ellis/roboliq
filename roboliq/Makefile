@@ -24,6 +24,9 @@ qc_mario_evaporation.yaml:
 qc_mario_evaporation2.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_evaporation2.yaml --print-designs && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/qc_mario_evaporation2.out.json ourlab.mario.evoware #&& cp protocols/qc_mario_evaporation2.out.esc 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis'
 
+qc_mario_evaporation3.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_evaporation3.yaml --print-designs && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/qc_mario_evaporation3.out.json ourlab.mario.evoware && cp protocols/qc_mario_evaporation3.out.esc 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis'
+
 
 prof:
 	node --prof dist/main.js --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml
