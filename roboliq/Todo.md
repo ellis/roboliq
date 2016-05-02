@@ -64,6 +64,9 @@
 
 Questions:
 - [ ] What is the evaporation rate in the middle wells, edge wells, and corner wells?
+	- with which measurements? z-level, weight, absorbance, fluorescence
+	- e ~ v + l + l:x + l:y + neighbors
+- [ ] What is the evaporation rate of a well without filled neighbors vs with filled neighbors?
 - [ ] What is the evaporation rate at different volumes?
 - [ ] When a dye solution evaporates, what happens to the concentration?  Does all the dye stay in the well?
 - [ ] Does liquid detection impact well volume?
