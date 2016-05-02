@@ -18,7 +18,10 @@ function locationRowColToText(row, col) {
 	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
 }
 
-function parse(text, objects) {
+/**
+ * @param {object} config - optional object that contains properties for 'rows' and 'columns', in case we want to expand something like 'A1 down C3' without having specified a plate
+ */
+function parse(text, objects, config) {
 	assert(_.isString(text), "wellsParser.parse() expected a string, received: "+text)
 	var result;
 	try {
@@ -29,10 +32,10 @@ function parse(text, objects) {
 	if (!objects)
 		return result;
 
-	return processParserResult(result, objects, text);
+	return processParserResult(result, objects, text, config);
 }
 
-function processParserResult(result, objects, text) {
+function processParserResult(result, objects, text, config = {}) {
 	var commandHelper = require('../commandHelper.js');
 	//console.log("text", text)
 	//console.log("result", result)
@@ -61,18 +64,30 @@ function processParserResult(result, objects, text) {
 				expect.throw({}, "unrecognized source specifier: "+parsed.value.source);
 			}
 		}
-		else if (parsed.value.labware) {
-			const labware = parsed.value.labware;
-			const labwareName = parsed.objectName.labware;
-			var modelName = labware.model;
-			assert(modelName, "`"+labwareName+".model` missing");
-			var model = misc.getObjectsValue(modelName, objects);
-			assert(model.rows, "`"+modelName+".rows` missing");
-			assert(model.columns, "`"+modelName+".columns` missing");
+		else if (parsed.value.labware || (config.rows && config.columns)) {
+			// Get number of rows and columns
+			let rows, columns;
+			let labwareName;
+			if (parsed.value.labware) {
+				const labware = parsed.value.labware;
+				labwareName = parsed.objectName.labware;
+				var modelName = labware.model;
+				assert(modelName, "`"+labwareName+".model` missing");
+				var model = misc.getObjectsValue(modelName, objects);
+				assert(model.rows, "`"+modelName+".rows` missing");
+				assert(model.columns, "`"+modelName+".columns` missing");
+				rows = model.rows;
+				columns = model.columns;
+			}
+			else {
+				rows = config.rows;
+				columns = config.columns;
+			}
+
 			var l = [];
 			if (clause.subject === 'all') {
-				for (var col = 1; col <= model.columns; col++) {
-					for (var row = 1; row <= model.rows; row++) {
+				for (var col = 1; col <= columns; col++) {
+					for (var row = 1; row <= rows; row++) {
 						l.push([row, col]);
 					}
 				}
@@ -92,10 +107,10 @@ function processParserResult(result, objects, text) {
 							var col = rc0[1];
 							for (var i = 1; i < n; i++) {
 								row++;
-								if (row > model.rows) {
+								if (row > rows) {
 									row = 1;
 									col++;
-									if (col > model.columns) {
+									if (col > columns) {
 										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
@@ -112,10 +127,10 @@ function processParserResult(result, objects, text) {
 							var col = rc0[1];
 							while (row !== rc1[0] || col != rc1[1]) {
 								row++;
-								if (row > model.rows) {
+								if (row > rows) {
 									row = 1;
 									col++;
-									if (col > model.columns) {
+									if (col > columns) {
 										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
@@ -148,10 +163,10 @@ function processParserResult(result, objects, text) {
 							var col = rc0[1];
 							for (var i = 1; i < n; i++) {
 								col++;
-								if (col > model.columns) {
+								if (col > columns) {
 									row++;
 									col = 1;
-									if (row > model.rows) {
+									if (row > rows) {
 										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
@@ -168,10 +183,10 @@ function processParserResult(result, objects, text) {
 							var col = rc0[1];
 							while (row !== rc1[0] || col != rc1[1]) {
 								col++;
-								if (col > model.columns) {
+								if (col > columns) {
 									col = 1;
 									row++;
-									if (row > model.rows) {
+									if (row > rows) {
 										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
 									}
 								}
@@ -266,7 +281,7 @@ function processParserResult(result, objects, text) {
 			// Convert the list of row/col back to text
 			return _.map(l, function(rc) {
 				var location = locationRowColToText(rc[0], rc[1]);
-				return labwareName+'('+location+')';
+				return (labwareName) ? labwareName+'('+location+')' : location;
 			});
 		}
 		else if (clause.subject) {

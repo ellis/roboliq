@@ -49,9 +49,9 @@ describe('wellsParser', function() {
 		const test1 = function(text, wells) {
 			should.deepEqual(wellsParser.parse(text, objects), wells);
 		}
-		const test2 = function(text, result, wells) {
+		const test2 = function(text, result, wells, config) {
 			should.deepEqual(wellsParser.parse(text), result);
-			should.deepEqual(wellsParser.parse(text, objects), wells);
+			should.deepEqual(wellsParser.parse(text, objects, config), wells);
 		}
 		it('should parse sources', function() {
 			test2("q",
@@ -295,6 +295,13 @@ describe('wellsParser', function() {
 			test2("A01+B01",
 				[{subject: "A01", phrases: []}, {subject: "B01", phrases: []}],
 				["A01", "B01"]
+			);
+		});
+		it('should parse "A01 right B01"', function() {
+			test2("A01 right B01",
+				[{subject: "A01", phrases: [["right-to", "B01"]]}],
+				["A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08", "A09", "A10", "A11", "A12", "B01"],
+				{rows: 8, columns: 12}
 			);
 		});
 	});
