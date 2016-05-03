@@ -68,11 +68,18 @@ Questions:
 	- e ~ v + l + l:x + l:y + neighbors
 - [ ] What is the evaporation rate of a well without filled neighbors vs with filled neighbors?
 - [ ] What is the evaporation rate at different volumes?
+	- dz ~ dv
 - [ ] When a dye solution evaporates, what happens to the concentration?  Does all the dye stay in the well?
 - [ ] Does liquid detection impact well volume?
 - [ ] Does absorbance measurement impact well volume?
 - [ ] How often do water droplets stick to the tips after washing? (liquid detection might then dispense that drop into the well)
 - [ ] Is the rate of evaporation consistent over time, or are there time of day, day of week, or seasonal effects?
+- [ ] What are the evaporation rates in labware that can't be put in the reader (e.g. tubes)?
+
+A couple experiments:
+
+* dispense a minimal volume of dye, read, dispense 10ul water, read, loop until we reach the maximum level
+* let liquid contents evaporate, measure absorbance, extract a sample, measure aborbance
 
 # Todos for growth curve experiment
 
