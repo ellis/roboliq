@@ -897,21 +897,39 @@ const commandHandlers = {
 			assert(_.isUndefined(item.source), "`source` property not implemented yet");
 			const destination0 = getLabwareWell(destinationLabware, item.destinations[0]);
 			const destinations2 = _.tail(item.destinations).map(s => getLabwareWell(destinationLabware, s));
-			// console.log({destination0, destinations2})
+			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`] || item.syringe;
+			// console.log({destination0, destinations2, syringeName})
 			let dilutionFactorPrev = 1;
 
-			// get volume of destination0, and use half of it as the final volume
+			// get volume of destination0
 			const volume0 = WellContents.getWellVolume(destination0, data);
 			assert(math.compare(volume0, math.unit(0, 'l')) > 0, "first well in dilution series shouldn't be empty");
-			const sourceVolume = math.divide(volume0, parsed.value.dilutionFactor);
-			const diluentVolume = math.subtract(volume0, sourceVolume);
-			console.log({volume0: volume0.format(), sourceVolume: sourceVolume.format(), diluentVolume: diluentVolume.format()})
 
-			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`] || item.syringe;
-			//console.log({syringeName})
+			// The target volume of the dilution wells (or take the volume of the first 'destination')
+			const volumeFinal = parsed.value.volume || volume0;
+
+			// Dilute the destination0, if necessary
+			if (math.smaller(volume0, volumeFinal)) {
+				assert(parsed.objectName.diluent, "missing 'diluent'");
+				const diluentVolume2 = math.subtract(volumeFinal, volume0);
+				const item2 = {
+					source: parsed.objectName.diluent,
+					destination: getLabwareWell(destinationLabware, destination0),
+					volume: diluentVolume2.format({precision: 4}),
+					syringe: syringeName,
+				};
+				diluentItems.push(item2);
+			}
+
+			// Calculate volume to transfer from one well to the next, and the diluent volume
+			const sourceVolume = math.divide(volumeFinal, parsed.value.dilutionFactor);
+			const diluentVolume = math.subtract(volumeFinal, sourceVolume);
+			// console.log({volume0: volume0.format(), sourceVolume: sourceVolume.format(), diluentVolume: diluentVolume.format()})
 
 			// Distribute diluent to all destination wells
-			_.forEach(destinations2, (destinationWell, index) => {
+			// If 'lastWellHandling == none', don't dilute the last well
+			const destinations3 = (parsed.value.lastWellHandling !== "none") ? destinations2 : _.initial(destinations2);
+			_.forEach(destinations3, (destinationWell, index) => {
 				const wellContents = WellContents.getWellContents(destinationWell, data);
 				const wellVolume = WellContents.getVolume(wellContents);
 				if (math.smaller(wellVolume, diluentVolume)) {

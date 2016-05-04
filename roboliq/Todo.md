@@ -42,7 +42,9 @@
 
 # Todos for QC finding measurable absorbance ranges
 
-- [ ] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
+- [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
+  - [x] let user indicate final volume
+  - [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
 - [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
 
 - [ ] absorbanceReader.measurePlate: set outfile name automatically

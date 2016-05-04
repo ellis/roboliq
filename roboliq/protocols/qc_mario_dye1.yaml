@@ -72,9 +72,23 @@ steps:
     steps:
       description: "`Step {{$step}} dilution`"
       1:
-
-        CONTINUE: consider adapting pipetter.pipetteDilutionSeries to work in this context\
-
+        command: pipetter.pipetteDilutionSeries
+        diluent: ourlab.mario.systemLiquid
+        dilutionFactor: 2
+        diluteLastWell: false
+        destinationLabware: plate1
+        items:
+          "#data":
+            groupBy: syringe
+            orderBy: syringe
+            templateGroup:
+              destinations: $$well
+              syringe: $syringe
+        clean: none
+        cleanEnd: flush
+        diluentParams:
+          clean: none
+      1:
         description: "Dilute source wells"
         data:
           where: {type: source}
