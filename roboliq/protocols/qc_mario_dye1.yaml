@@ -24,17 +24,27 @@ objects:
     type: Liquid
     wells: dyeLabware(C01 down F01)
 
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
   design:
     type: Design
+    randomSeed: 1
     conditions:
       volume: 150ul
-      syringe*: 4
-      step*: 12
-      dilutionFactor1=calculate: "2^(step-1)"
-      dyeVolume1=calculate: "volume / dilutionFactor1"
-      dilutionFactor2=calculate: "2^(step)"
-      dyeVolume2=calculate: "volume / dilutionFactor2"
-      well=allocateWells: {rows: 8, columns: 12, order: shuffle}
+      syringe*: 2
+      step*: 4
+      dilutionFactor=calculate: "2^(step-1)"
+      dyeVolume=calculate: "volume / dilutionFactor"
+      well=allocateWells: {rows: 8, columns: 12}
+      type*:
+        destination: {}
+        source:
+          step=calculate: "step + 1"
+          dilutionFactor=calculate: "dilutionFactor * 2"
+          dyeVolume=calculate: "dyeVolume / 2"
+    orderBy: [step]
 
 steps:
   data:
@@ -62,13 +72,31 @@ steps:
     steps:
       description: "`Step {{$step}} dilution`"
       1:
+
+        CONTINUE: consider adapting pipetter.pipetteDilutionSeries to work in this context\
+
+        description: "Dilute source wells"
         data:
-          source: design
-          #where: {step: "`step`"
+          where: {type: source}
         command: pipetter.pipette
         sources: ourlab.mario.systemLiquid
-        destinationLabware: $plate
+        destinationLabware: plate1
         destinations: $$well
-        volumes: $$volume
-        clean: none
+        volumes: $volume
         cleanEnd: flush
+      2:
+        description: "Transfer half of source contents to destinations"
+        command: pipetter.pipette
+        sources: {"#data": {where: {type: "source"}, value: "well"}}
+        destinationLabware: plate1
+        destinations: {"#data": {where: {type: "destination"}, value: "well"}}
+        volumes: $volume
+        cleanEnd: flush
+      3:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 600nm
+          wells: $$well
+        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"

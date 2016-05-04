@@ -40,6 +40,22 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
+# Todos for QC finding measurable absorbance ranges
+
+- [ ] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
+- [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
+
+- [ ] absorbanceReader.measurePlate: set outfile name automatically
+- [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
+- [ ] absorbanceReader.measurePlate: the script should parse the output XML and produce JSON that it sends to the server
+- [ ] server/client: display measurements on-screen as table
+- [ ] server/client: display measurements on-screen as plots
+- [ ] find peak of spectrum
+- [ ] calculate out whether to abort measurements, and then exit the loop
+- [ ] experiment.forEachGroup: allow for exiting the loop early
+
+- [ ] consider how to support `object.SCOPE` or `scope` property, or whether to merge `Variable` object values into object.SCOPE; need to be able to document and set metadata on scope variables
+
 # Todos for QC evaporation:
 
 - [x] make experiment for 75, 150, 200, 250, 300 evaporation
