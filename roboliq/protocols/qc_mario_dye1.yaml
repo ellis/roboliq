@@ -1,19 +1,8 @@
 roboliq: v1
 
 description: |
-  Find a
-
-  Use three volumes (75, 150, 300) and 6 plates.
-  Each plate is split into two regions: 34 border wells, and 60 inner wells.
-  The inner wells are further split into 4 groups, one for each of the
-  three volumes, and the forth to duplicate one of the volumes.
-
-  * plate075: border 150ul, inner duplicates 75ul
-  * plate150: border 150ul, inner duplicates 300ul
-  * plate300: border 150ul, inner duplicates 300ul
-  * plateBord: border 150ul, inner border of 28 wells has 75ul
-  * plate150b: duplicates of plate150
-  * plate150c: all wells filled to 150ul
+  Take a concentrated dye stock and dilute it to the find the optimal wavelength
+  for absorbance readouts.
 
 config:
   evowareCompiler:
@@ -23,6 +12,7 @@ config:
 objects:
   plate1:
     type: Plate
+    description: Dilution plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P2
   dyeLabware:
@@ -37,7 +27,14 @@ objects:
   design:
     type: Design
     conditions:
-    orderBy: [plate, order]
+      volume: 150ul
+      syringe*: 4
+      step*: 12
+      dilutionFactor1=calculate: "2^(step-1)"
+      dyeVolume1=calculate: "volume / dilutionFactor1"
+      dilutionFactor2=calculate: "2^(step)"
+      dyeVolume2=calculate: "volume / dilutionFactor2"
+      well=allocateWells: {rows: 8, columns: 12, order: shuffle}
 
 steps:
   data:
@@ -47,11 +44,27 @@ steps:
     equipment: ourlab.mario.liha
     intensity: thorough
   2:
-    command: system.repeat
-    groupBy: plate
+    data:
+      where: {step: 1}
+    description: "Step 1: Transfer dye to to dilution plate"
+    command: pipetter.pipette
+    sources: dye
+    destinationLabware: plate1
+    destinations: $$well
+    volumes: $volume
+    clean: flush
+  3:
+    description: Begin dilutions
+    data:
+      where: {step: {ge: 2}}
+    command: experiment.forEachGroup
+    groupBy: step
     steps:
-      description: "`Fill {{$plate}}`"
+      description: "`Step {{$step}} dilution`"
       1:
+        data:
+          source: design
+          #where: {step: "`step`"
         command: pipetter.pipette
         sources: ourlab.mario.systemLiquid
         destinationLabware: $plate
