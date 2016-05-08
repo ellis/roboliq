@@ -23,9 +23,11 @@
     "express": "^4.10.2",
     "immutable": "3.7.6",
     "lodash": "^4.6.1",
+    "moment": "^2.13.0",
     "redux": "3.3.1",
     "socket.io": "1.4.5",
-    "socket.io-client": "^1.4.5"
+    "socket.io-client": "^1.4.5",
+    "xmldoc": "^0.5.0"
   },
   "babel": {
     "presets": [

@@ -13,6 +13,7 @@
 # Todos for Paper 1
 
 - [ ] reader-InfiniteM200Pro.js: add support for generating fluorescence programs, see `(true || measurementType === "absorbance")` around line 177
+	- see "/Users/ellisw/repo/bsse-lab/tania.201411/inst/extdata/20141108--tania13_ph/excitation485/tania13_ph--20141111_112409.xml" and line 88, tag MeasurementFluoInt
 - [ ] create incubator command for tania13_ph, and accommodate "methods" for expanding commands
 - [ ] centrifuge.startIncubation: create
 - [ ] create portable reader.measureFluorescence command that uses parameters instead of a file
@@ -50,6 +51,8 @@
 - [ ] absorbanceReader.measurePlate: set outfile name automatically
 - [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
 - [ ] absorbanceReader.measurePlate: the script should parse the output XML and produce JSON that it sends to the server
+	- [ ] columns: step, factors in DATA at that step
+	- [ ] rows: somehow we need to get the factors for the measured well from DATA
 - [ ] server/client: display measurements on-screen as table
 - [ ] server/client: display measurements on-screen as plots
 - [ ] find peak of spectrum

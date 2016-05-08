@@ -1,3 +1,5 @@
+' This script is used to avoid showing a visible terminal window when calling the CLI program from Evoware
+
 Dim level
 
 ReDim args(WScript.Arguments.Count-1)
