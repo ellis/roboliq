@@ -69,7 +69,7 @@ Questions:
 - [ ] Does liquid detection impact well volume?
 - [ ] Does absorbance measurement impact well volume?
 - [ ] How often do water droplets stick to the tips after washing? (liquid detection might then dispense that drop into the well)
-- [ ] Is the rate of evaporation consistent over time, or are there time of day, day of week, or seasonal effects?
+- [ ] Is the rate of evaporation consistent over time, or are there effects for time of day, day of week, or season?
 
 # Todos for growth curve experiment
 
