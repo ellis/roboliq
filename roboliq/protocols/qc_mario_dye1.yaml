@@ -1,0 +1,116 @@
+roboliq: v1
+
+description: |
+  Take a concentrated dye stock and dilute it to the find the optimal wavelength
+  for absorbance readouts.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
+  design:
+    type: Design
+    randomSeed: 1
+    conditions:
+      volume: 150ul
+      syringe*: 2
+      step*: 4
+      dilutionFactor=calculate: "2^(step-1)"
+      dyeVolume=calculate: "volume / dilutionFactor"
+      well=allocateWells: {rows: 8, columns: 12}
+      type*:
+        destination: {}
+        source:
+          step=calculate: "step + 1"
+          dilutionFactor=calculate: "dilutionFactor * 2"
+          dyeVolume=calculate: "dyeVolume / 2"
+    orderBy: [step]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    data:
+      where: {step: 1}
+    description: "Step 1: Transfer dye to to dilution plate"
+    command: pipetter.pipette
+    sources: dye
+    destinationLabware: plate1
+    destinations: $$well
+    volumes: $volume
+    clean: flush
+  3:
+    description: Begin dilutions
+    data:
+      where: {step: {ge: 2}}
+    command: experiment.forEachGroup
+    groupBy: step
+    steps:
+      description: "`Step {{$step}} dilution`"
+      1:
+        command: pipetter.pipetteDilutionSeries
+        diluent: ourlab.mario.systemLiquid
+        dilutionFactor: 2
+        diluteLastWell: false
+        destinationLabware: plate1
+        items:
+          "#data":
+            groupBy: syringe
+            orderBy: syringe
+            templateGroup:
+              destinations: $$well
+              syringe: $syringe
+        clean: none
+        cleanEnd: flush
+        diluentParams:
+          clean: none
+      1:
+        description: "Dilute source wells"
+        data:
+          where: {type: source}
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationLabware: plate1
+        destinations: $$well
+        volumes: $volume
+        cleanEnd: flush
+      2:
+        description: "Transfer half of source contents to destinations"
+        command: pipetter.pipette
+        sources: {"#data": {where: {type: "source"}, value: "well"}}
+        destinationLabware: plate1
+        destinations: {"#data": {where: {type: "destination"}, value: "well"}}
+        volumes: $volume
+        cleanEnd: flush
+      3:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 600nm
+          wells: $$well
+        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"

@@ -1,0 +1,152 @@
+roboliq: v1
+
+description: |
+  Experiment for estimating evaporation rate.
+
+  Use three volumes (75, 150, 300) and 6 plates.
+  Each plate is split into two regions: 34 border wells, and 60 inner wells.
+  The inner wells are further split into 4 groups, one for each of the
+  three volumes, and the forth to duplicate one of the volumes.
+
+  * plate075: border 150ul, inner duplicates 75ul
+  * plate150: border 150ul, inner duplicates 300ul
+  * plate300: border 150ul, inner duplicates 300ul
+  * plateBord: border 150ul, inner border of 28 wells has 75ul
+  * plate150b: duplicates of plate150
+  * plate150c: all wells filled to 150ul
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate075:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  plate150:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  plate150b:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P4
+  plate150c:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P6
+  plate300:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P7
+  plateBord:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P8
+
+  design0:
+    type: Design
+    conditions:
+      plate*:
+        plate075: {}
+  design:
+    type: Design
+    conditions:
+      plate*:
+        plate075:
+          treatment: v075
+          region*:
+            border:
+              order*: [1,2,3,4,5,6,7,8, 9,17,25,33,41,49,57,65,73,81, 16,24,32,40,48,56,64,72,80,88, 89,90,91,92,93,94,95,96]
+              well=allocateWells: {rows: 8, columns: 12, wells: "A01 down H01 + A02 right A11 + H02 right H11 + A12 down H12"}
+              volume: 150ul
+            inner:
+              order*: [10,11,12,13,14,15, 18,19,20,21,22,23, 26,27,28,29,30,31, 34,35,36,37,38,39,  42,43,44,45,46,47, 50,51,52,53,54,55, 58,59,60,61,62,63, 66,67,68,69,70,71, 74,75,76,77,78,79, 82,83,84,85,86,87]
+              well=allocateWells: {rows: 8, columns: 12, wells: "B02 down block G11"}
+              volume=:
+                values: [75ul, 75ul, 150ul, 300ul]
+                order: reshuffle
+        plate150:
+          treatment: v150
+          region*:
+            border:
+              order*: [1,2,3,4,5,6,7,8, 9,17,25,33,41,49,57,65,73,81, 16,24,32,40,48,56,64,72,80,88, 89,90,91,92,93,94,95,96]
+              well=allocateWells: {rows: 8, columns: 12, wells: "A01 down H01 + A02 right A11 + H02 right H11 + A12 down H12"}
+              volume: 150ul
+            inner:
+              order*: [10,11,12,13,14,15, 18,19,20,21,22,23, 26,27,28,29,30,31, 34,35,36,37,38,39,  42,43,44,45,46,47, 50,51,52,53,54,55, 58,59,60,61,62,63, 66,67,68,69,70,71, 74,75,76,77,78,79, 82,83,84,85,86,87]
+              well=allocateWells: {rows: 8, columns: 12, wells: "B02 down block G11"}
+              volume=:
+                values: [75ul, 150ul, 150ul, 300ul]
+                order: reshuffle
+        plate150b:
+          treatment: v150
+          region*:
+            border:
+              order*: [1,2,3,4,5,6,7,8, 9,17,25,33,41,49,57,65,73,81, 16,24,32,40,48,56,64,72,80,88, 89,90,91,92,93,94,95,96]
+              well=allocateWells: {rows: 8, columns: 12, wells: "A01 down H01 + A02 right A11 + H02 right H11 + A12 down H12"}
+              volume: 150ul
+            inner:
+              order*: [10,11,12,13,14,15, 18,19,20,21,22,23, 26,27,28,29,30,31, 34,35,36,37,38,39,  42,43,44,45,46,47, 50,51,52,53,54,55, 58,59,60,61,62,63, 66,67,68,69,70,71, 74,75,76,77,78,79, 82,83,84,85,86,87]
+              well=allocateWells: {rows: 8, columns: 12, wells: "B02 down block G11"}
+              volume=:
+                values: [75ul, 150ul, 150ul, 300ul]
+                order: reshuffle
+        plate150c:
+          treatment: a150
+          region*:
+            border:
+              order*: [1,2,3,4,5,6,7,8, 9,17,25,33,41,49,57,65,73,81, 16,24,32,40,48,56,64,72,80,88, 89,90,91,92,93,94,95,96]
+              well=allocateWells: {rows: 8, columns: 12, wells: "A01 down H01 + A02 right A11 + H02 right H11 + A12 down H12"}
+              volume: 150ul
+            inner:
+              order*: [10,11,12,13,14,15, 18,19,20,21,22,23, 26,27,28,29,30,31, 34,35,36,37,38,39,  42,43,44,45,46,47, 50,51,52,53,54,55, 58,59,60,61,62,63, 66,67,68,69,70,71, 74,75,76,77,78,79, 82,83,84,85,86,87]
+              well=allocateWells: {rows: 8, columns: 12, wells: "B02 down block G11"}
+              volume: 150ul
+        plate300:
+          treatment: v300
+          region*:
+            border:
+              order*: [1,2,3,4,5,6,7,8, 9,17,25,33,41,49,57,65,73,81, 16,24,32,40,48,56,64,72,80,88, 89,90,91,92,93,94,95,96]
+              well=allocateWells: {rows: 8, columns: 12, wells: "A01 down H01 + A02 right A11 + H02 right H11 + A12 down H12"}
+              volume: 150ul
+            inner:
+              order*: [10,11,12,13,14,15, 18,19,20,21,22,23, 26,27,28,29,30,31, 34,35,36,37,38,39,  42,43,44,45,46,47, 50,51,52,53,54,55, 58,59,60,61,62,63, 66,67,68,69,70,71, 74,75,76,77,78,79, 82,83,84,85,86,87]
+              well=allocateWells: {rows: 8, columns: 12, wells: "B02 down block G11"}
+              volume=:
+                values: [75ul, 150ul, 300ul, 300ul]
+                order: reshuffle
+        plateBord:
+          treatment: border
+          region*:
+            border:
+              order*: [1,2,3,4,5,6,7,8, 9,17,25,33,41,49,57,65,73,81, 16,24,32,40,48,56,64,72,80,88, 89,90,91,92,93,94,95,96]
+              well=allocateWells: {rows: 8, columns: 12, wells: "A01 down H01 + A02 right A11 + H02 right H11 + A12 down H12"}
+              volume: 150ul
+            inner:
+              order*: [10,11,12,13,14,15, 18,26,34,42,50,58,66,74, 23,31,39,47,55,63,71,79, 82,83,84,85,86,87]
+              well=allocateWells: {rows: 8, columns: 12, wells: "B02 down G02 + B03 right B10 + G03 right G10 + B11 down G11"}
+              volume: 150ul
+    orderBy: [plate, order]
+
+steps:
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    command: experiment.forEachGroup
+    design: design
+    groupBy: plate
+    steps:
+      description: "`Fill {{$plate}}`"
+      1:
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $$volume
+        clean: none
+        cleanEnd: flush

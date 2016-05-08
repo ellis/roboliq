@@ -5,6 +5,9 @@ import math from 'mathjs';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
+import wellsParser from './parsers/wellsParser.js';
+
+
 const DEBUG = false;
 
 //import {locationRowColToText} from './parsers/wellsParser.js';
@@ -590,12 +593,15 @@ const actionHandlers = {
 		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
 		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
 		const byColumns = _.get(action, "byColumns", true);
-		const values = _.range(rows * cols).map(i => {
-			const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
-			const s = locationRowColToText(row + 1, col + 1);
-			// console.log({row, col, s});
-			return s;
-		});
+		const values = (action.wells)
+			? wellsParser.parse(action.wells, {}, {rows, columns: cols})
+			: _.range(rows * cols).map(i => {
+					const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+					const s = locationRowColToText(row + 1, col + 1);
+					// console.log({row, col, s});
+					return s;
+				});
+		// console.log({values})
 		const action2 = _.cloneDeep(action);
 		action2.values = values;
 		// console.log({values})

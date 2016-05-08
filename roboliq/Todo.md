@@ -40,6 +40,24 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
+# Todos for QC finding measurable absorbance ranges
+
+- [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
+  - [x] let user indicate final volume
+  - [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
+- [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
+
+- [ ] absorbanceReader.measurePlate: set outfile name automatically
+- [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
+- [ ] absorbanceReader.measurePlate: the script should parse the output XML and produce JSON that it sends to the server
+- [ ] server/client: display measurements on-screen as table
+- [ ] server/client: display measurements on-screen as plots
+- [ ] find peak of spectrum
+- [ ] calculate out whether to abort measurements, and then exit the loop
+- [ ] experiment.forEachGroup: allow for exiting the loop early
+
+- [ ] consider how to support `object.SCOPE` or `scope` property, or whether to merge `Variable` object values into object.SCOPE; need to be able to document and set metadata on scope variables
+
 # Todos for QC evaporation:
 
 - [x] make experiment for 75, 150, 200, 250, 300 evaporation
@@ -64,12 +82,23 @@
 
 Questions:
 - [ ] What is the evaporation rate in the middle wells, edge wells, and corner wells?
+	- with which measurements? z-level, weight, absorbance, fluorescence
+	- e ~ v + l + l:x + l:y + neighbors
+- [ ] What is the evaporation rate of a well without filled neighbors vs with filled neighbors?
 - [ ] What is the evaporation rate at different volumes?
+	- dz ~ dv
 - [ ] When a dye solution evaporates, what happens to the concentration?  Does all the dye stay in the well?
 - [ ] Does liquid detection impact well volume?
 - [ ] Does absorbance measurement impact well volume?
 - [ ] How often do water droplets stick to the tips after washing? (liquid detection might then dispense that drop into the well)
 - [ ] Is the rate of evaporation consistent over time, or are there effects for time of day, day of week, or season?
+- [ ] Is the rate of evaporation consistent over time, or are there time of day, day of week, or seasonal effects?
+- [ ] What are the evaporation rates in labware that can't be put in the reader (e.g. tubes)?
+
+A couple experiments:
+
+* dispense a minimal volume of dye, read, dispense 10ul water, read, loop until we reach the maximum level
+* let liquid contents evaporate, measure absorbance, extract a sample, measure aborbance
 
 # Todos for growth curve experiment
 
