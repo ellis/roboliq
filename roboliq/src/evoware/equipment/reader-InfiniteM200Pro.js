@@ -9,33 +9,33 @@ import wellsParser from '../../parsers/wellsParser.js';
 import {makeEvowareFacts} from './evoware.js';
 
 const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
-    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2015-08-20T07:22:39.4678927Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
-    <TecanMeasurement id="1" class="Measurement">
-        <MeasurementManualCycle id="2" number="1" type="Standard">
-            <CyclePlate id="3" file="{{plateFile}}" plateWithCover="False">
-                <PlateRange id="4" range="{{wells}}" auto="false">
-                    <MeasurementAbsorbance id="5" mode="Normal" type="" name="ABS" longname="" description="">
-                        <Well id="6" auto="true">
-                            <MeasurementReading id="7" name="" beamDiameter="500" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
-                                <ReadingLabel id="8" name="Label1" scanType="ScanFixed" refID="0">
-                                    <ReadingSettings number="25" rate="25000" />
-                                    <ReadingTime integrationTime="0" lagTime="0" readDelay="10000" flash="0" dark="0" excitationTime="0" />
-                                    <ReadingFilter id="0" type="Ex" wavelength="{{excitationWavelength}}" bandwidth="{{excitationBandwidth}}" attenuation="0" usage="ABS" />
-                                </ReadingLabel>
-                            </MeasurementReading>
-                        </Well>
-                        <CustomData id="9" />
-                    </MeasurementAbsorbance>
-                </PlateRange>
-            </CyclePlate>
-        </MeasurementManualCycle>
-        <MeasurementInfo id="0" description="">
-            <ScriptTemplateSettings id="0">
-                <ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
-                <ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
-            </ScriptTemplateSettings>
-        </MeasurementInfo>
-    </TecanMeasurement>
+		<FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="{{createdAt}}" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+		<TecanMeasurement id="1" class="Measurement">
+				<MeasurementManualCycle id="2" number="1" type="Standard">
+						<CyclePlate id="3" file="{{plateFile}}" plateWithCover="{{plateWithCover}}">
+								<PlateRange id="4" range="{{wells}}" auto="false">
+										<MeasurementAbsorbance id="5" mode="Normal" type="" name="ABS" longname="" description="">
+												<Well id="6" auto="true">
+														<MeasurementReading id="7" name="" beamDiameter="{{beamDiameter}}" beamGridType="{{beamGridType}}" beamGridSize="{{beamGridSize}}" beamEdgeDistance="{{beamEdgeDistance}}">
+																<ReadingLabel id="8" name="Label1" scanType="{{scanType}}" refID="0">
+																		<ReadingSettings number="25" rate="25000" />
+																		<ReadingTime integrationTime="0" lagTime="0" readDelay="{{readDelay}}" flash="0" dark="0" excitationTime="0" />
+																		<ReadingFilter id="0" type="Ex" wavelength="{{excitationWavelength}}" bandwidth="{{excitationBandwidth}}" attenuation="0" usage="ABS" />
+																</ReadingLabel>
+														</MeasurementReading>
+												</Well>
+												<CustomData id="9" />
+										</MeasurementAbsorbance>
+								</PlateRange>
+						</CyclePlate>
+				</MeasurementManualCycle>
+				<MeasurementInfo id="0" description="">
+						<ScriptTemplateSettings id="0">
+								<ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+								<ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+						</ScriptTemplateSettings>
+				</MeasurementInfo>
+		</TecanMeasurement>
 </TecanFile>`;
 
 module.exports = {
@@ -169,15 +169,37 @@ module.exports = {
 				}
 				// console.log({wells})
 
-				const excitationWavelength0 = math.eval(program.excitationWavelength);
-				const excitationWavelength = _.isNumber(excitationWavelength0) ? excitationWavelength0 : excitationWavelength0.toNumber("nm");
+				let excitationWavelength;
+				const isScan = (program.excitationWavelengthMin && program.excitationWavelengthMax);
+				if (isScan) {
+					isScan = true;
+					const excitationWavelengthMin0 = math.eval(program.excitationWavelengthMin);
+					const excitationWavelengthMin = _.isNumber(excitationWavelengthMin0) ? excitationWavelengthMin0 : excitationWavelengthMin0.toNumber("nm");
+					const excitationWavelengthMax0 = math.eval(program.excitationWavelengthMax);
+					const excitationWavelengthMax = _.isNumber(excitationWavelengthMax0) ? excitationWavelengthMax0 : excitationWavelengthMax0.toNumber("nm");
+					const excitationWavelengthStep0 = math.eval(program.excitationWavelengthStep || "2 nm");
+					const excitationWavelengthStep = _.isNumber(excitationWavelengthStep0) ? excitationWavelengthStep0 : excitationWavelengthStep0.toNumber("nm");
+					excitationWavelength = `${excitationWavelengthMin*10}~${excitationWavelengthMax*10}:${excitationWavelengthStep*10}`;
+				}
+				else {
+					const excitationWavelength0 = math.eval(program.excitationWavelength);
+					excitationWavelength = (_.isNumber(excitationWavelength0) ? excitationWavelength0 : excitationWavelength0.toNumber("nm")) * 10;
+				}
 				const excitationBandwidth0 = math.eval(program.excitationBandwidth || "9 nm");
-				const excitationBandwidth = _.isNumber(excitationBandwidth0) ? excitationBandwidth0 : excitationBandwidth0.toNumber("nm");
+				const excitationBandwidth = (_.isNumber(excitationBandwidth0) ? excitationBandwidth0 : excitationBandwidth0.toNumber("nm")) * 10;
 				const params = {
+					createdAt: "2015-08-20T07:22:39.4678927Z",
 					plateFile,
+					plateWithCover: "False",
 					wells,
-					excitationWavelength: excitationWavelength * 10,
-					excitationBandwidth: excitationBandwidth * 10
+					beamDiameter: (isScan) ? 0 : 500,
+					beamGridType: "Single",
+					beamGridSize: (isScan) ? 0 : 1,
+					beamEdgeDistance: (isScan) ? "" : "auto",
+					scanType: (isScan) ? "ScanEX" : "ScanFixed",
+					readDelay: (isScan) ? 0 : 10000,
+					excitationWavelength: excitationWavelength,
+					excitationBandwidth: excitationBandwidth,
 				};
 				// console.log({params, excitationWavelength0, excitationWavelength, excitationBandwidth0, excitationBandwidth});
 				return params;
