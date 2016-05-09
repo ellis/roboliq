@@ -53,6 +53,9 @@
 - [ ] absorbanceReader.measurePlate: the script should parse the output XML and produce JSON that it sends to the server
 	- [ ] columns: step, factors in DATA at that step
 	- [ ] rows: somehow we need to get the factors for the measured well from DATA
+		- maybe the `absorbanceReader.measurePlate` command could create a report, which we'd somehow scan for based on the stepID for the `absorbanceReader._measurePlate` command.
+		- or the `absorbanceReader._measurePlate` could create a report which contains the current DATA (and what about SCOPE?)
+		- or even better, we should have some way to get the DATA for any given step.  The simplest approach would be to save the DATA for every step, but that could be very space intensive; also storing it whenever it changes would be space intensive; better but more complicated would be to store 1) references to defined tables or the full table for generated tables, and 2) the subset of rows which are currently available.
 - [ ] server/client: display measurements on-screen as table
 - [ ] server/client: display measurements on-screen as plots
 - [ ] find peak of spectrum
