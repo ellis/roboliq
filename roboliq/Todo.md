@@ -47,6 +47,9 @@
   - [x] let user indicate final volume
   - [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
 - [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
+	- [-] insert proper date
+	- [x] select between Single and Spectrum scans
+	- [x] insert proper `plateWithCover` value
 
 - [ ] absorbanceReader.measurePlate: set outfile name automatically
 - [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
