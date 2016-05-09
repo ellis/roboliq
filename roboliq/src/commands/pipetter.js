@@ -79,7 +79,7 @@ function pipette(params, parsed, data, options={}) {
 	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	// let items = (_.isUndefined(parsed.value.items))
 	// 	? []
@@ -121,7 +121,8 @@ function pipette(params, parsed, data, options={}) {
 		return {};
 	}
 
-	// Add labware to well properties
+	// 1) Add labware to well properties
+	// 2) Fixup mixing specs
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
 		if (item.source && parsed.objectName.sourceLabware) {
@@ -133,6 +134,7 @@ function pipette(params, parsed, data, options={}) {
 		if (item.well && parsed.objectName.wellLabware) {
 			item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
 		}
+		// TODO: fixup mixing specs
 	}
 	// console.log(JSON.stringify(items, null, '  '))
 
@@ -269,7 +271,7 @@ function pipette(params, parsed, data, options={}) {
 	const tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
 	const groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
-	// console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+	console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Pick syringe for each item
 	// For each group assign syringes, starting with the first available one
@@ -292,11 +294,13 @@ function pipette(params, parsed, data, options={}) {
 	}
 
 	// Add properties `volumeBefore` and `volumeAfter` to the items.
+	console.log("A")
 	calculateWellVolumes(items, data);
 
 	// Calculate when tips need to be washed
 	// Create pipetting commands
 
+	console.log("B")
 	const syringeToSource = {};
 	// How clean is the syringe/tip currently?
 	const syringeToCleanValue = _.fromPairs(_.map(syringesAvailable, s => [s, 5]));
@@ -382,6 +386,7 @@ function pipette(params, parsed, data, options={}) {
 		doCleanBefore = true;
 
 		// _PipetteItems
+		console.log("-------------------")
 		const items2 = _.map(group, function(item) {
 			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count", "distance"]);
 			if (!_.isUndefined(item2.volume)) { item2.volume = item2.volume.format({precision: 14}); }
@@ -1010,7 +1015,7 @@ const commandHandlers = {
 			// FIXME: implement sending last aspirate to TRASH!
 			// Create final aspiration
 			items.push({
-				layer: destinations2.length + 1,
+				layer: (parsed.value.diluteBeforeTransfer) ? (destinations2.length + 1) * 2 - 1 : destinations2.length + 1,
 				source: getLabwareWell(destinationLabware, _.last(destinations2)),
 				volume: sourceVolume.format({precision: 4}),
 				syringe: syringeName

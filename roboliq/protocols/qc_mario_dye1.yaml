@@ -85,7 +85,7 @@ steps:
     steps:
       description: "`Step {{$step}}`"
       1:
-        description: "`Dilute`"
+        description: "Dilute"
         command: pipetter.pipetteDilutionSeries
         diluent: ourlab.mario.systemLiquid
         dilutionFactor: 2

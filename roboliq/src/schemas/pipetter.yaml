@@ -21,7 +21,7 @@ Syringe:
   required: [type]
 
 pipetter._MixSpec:
-  description: Parameters for mixing in higher-level commands like pipetter._PipetteItem).
+  description: "Parameters for mixing in higher-level commands like pipetter._PipetteItem."
   properties:
     count: {description: "Number of times to aspirate and re-dispense", type: integer}
     volume: {description: "Amount to aspirate, either as a fraction or absolute volume", type: Volume}
@@ -283,7 +283,7 @@ pipetter.pipette:
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
-    sourceMixing: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: pipetter.MixSpec}
+    sourceMixing: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: [boolean, pipetter.MixSpec]}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
     tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
   required: []
