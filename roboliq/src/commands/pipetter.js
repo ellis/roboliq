@@ -79,7 +79,7 @@ function pipette(params, parsed, data, options={}) {
 	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	// let items = (_.isUndefined(parsed.value.items))
 	// 	? []
@@ -144,7 +144,7 @@ function pipette(params, parsed, data, options={}) {
 		return [item.source, item.destination, item.well]
 	}).flattenDeep().compact().uniq().value();
 	// wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
-	console.log("wellName_l", JSON.stringify(wellName_l))
+	// console.log("wellName_l", JSON.stringify(wellName_l))
 
 	// Find all labware
 	const labwareName_l = _(wellName_l).map(function (wellName) {
@@ -153,7 +153,7 @@ function pipette(params, parsed, data, options={}) {
 		return (i >= 0) ? wellName.substr(0, i) : wellName;
 	}).uniq().value();
 	const labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
-	console.log({labwareName_l, labware_l})
+	// console.log({labwareName_l, labware_l})
 
 	// Check whether labwares are on sites that can be pipetted
 	const query2_l = [];
@@ -169,13 +169,13 @@ function pipette(params, parsed, data, options={}) {
 			}
 		};
 		const queryResults = llpl.query(query);
-		console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
+		// console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
 		if (_.isEmpty(queryResults)) {
 			throw {name: "ProcessingError", errors: [labware.name+" is at site "+labware.location+", which hasn't been configured for pipetting; please move it to a pipetting site."]};
 		}
 		query2_l.push(query);
 	});
-	console.log({query2_l})
+	// console.log({query2_l})
 
 	// Check whether the same agent and equipment can be used for all the pipetting steps
 	if (!_.isEmpty(query2_l)) {
@@ -387,8 +387,9 @@ function pipette(params, parsed, data, options={}) {
 			if (!_.isUndefined(item2.volume)) { item2.volume = item2.volume.format({precision: 14}); }
 			if (!_.isUndefined(item2.distance)) { item2.distance = item2.distance.format({precision: 14}); }
 			// Mix the source well
-			if (item.sourceVolumeBefore && (item.sourceMixing || parsed.value.sourceMixing)) {
-				const mixing = _.merge({count: 3, amount: 0.7}, item.sourceMixing, parsed.value.sourceMixing);
+			const sourceMixing = processMixingSpecs([parsed.value.sourceMixing, item.sourceMixing]);
+			if (item.sourceVolumeBefore && sourceMixing) {
+				const mixing = sourceMixing;
 				const volume0 = item.sourceVolumeBefore;
 				const volume = calculateMixingVolume(volume0, mixing.amount);
 				const mixing2 = {
@@ -398,8 +399,9 @@ function pipette(params, parsed, data, options={}) {
 				item2.sourceMixing = mixing2;
 			}
 			// Mix the destination well
-			if (item.volumeAfter && (item.destinationMixing || parsed.value.destinationMixing)) {
-				const mixing = _.merge({count: 3, amount: 0.7}, item.destinationMixing, parsed.value.destinationMixing);
+			const destinationMixing = processMixingSpecs([parsed.value.destinationMixing, item.destinationMixing]);
+			if (item.volumeAfter && destinationMixing) {
+				const mixing = destinationMixing;
 				const volume0 = item.volumeAfter;
 				// console.log({mixing, volume0: (volume0) ? volume0 : item})
 				const volume = calculateMixingVolume(volume0, mixing.amount);
@@ -447,6 +449,23 @@ function pipette(params, parsed, data, options={}) {
 		expansion: expansionList,
 		effects: effects
 	};
+}
+
+// const NOMIXING = {count: 0, amount: 0};
+const MIXINGDEFAULT = {count: 3, amount: 0.7};
+function processMixingSpecs(l) {
+	const mixing = _.reduce(
+		l,
+		(acc, mixing) => {
+			if (_.isUndefined(mixing) || mixing === false) return undefined;
+			else if (mixing === true) return {};
+			else if (_.isPlainObject(mixing)) return _.merge(acc || {}, mixing);
+			return undefined;
+		},
+		undefined
+	);
+	_.defaults(mixing, MIXINGDEFAULT);
+	return mixing;
 }
 
 // Try to find a tipModel for the given items
@@ -886,7 +905,7 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
-		console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed))
+		// console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed, null, '\t'))
 		const destinationLabware = parsed.objectName.destinationLabware;
 
 		// Fill all destination wells with diluent
@@ -927,42 +946,63 @@ const commandHandlers = {
 			const diluentVolume = math.subtract(volumeFinal, sourceVolume);
 			// console.log({volume0: volume0.format(), sourceVolume: sourceVolume.format(), diluentVolume: diluentVolume.format()})
 
-			// Distribute diluent to all destination wells
-			// If 'lastWellHandling == none', don't dilute the last well
-			const destinations3 = (parsed.value.lastWellHandling !== "none") ? destinations2 : _.initial(destinations2);
-			_.forEach(destinations3, (destinationWell, index) => {
-				const wellContents = WellContents.getWellContents(destinationWell, data);
-				const wellVolume = WellContents.getVolume(wellContents);
-				if (math.smaller(wellVolume, diluentVolume)) {
-					assert(parsed.objectName.diluent, "missing 'diluent'");
-					const diluentVolume2 = math.subtract(diluentVolume, wellVolume);
-					const item2 = {
-						layer: index+1,
-						source: parsed.objectName.diluent,
-						destination: getLabwareWell(destinationLabware, destinationWell),
-						volume: diluentVolume2.format({precision: 4}),
-						syringe: syringeName,
-					};
-					diluentItems.push(item2);
-				}
-			});
+			// If we want to pre-dispense the diluent:
+			if (!parsed.value.diluteBeforeTransfer) {
+				// Distribute diluent to all destination wells
+				// If 'lastWellHandling == none', don't dilute the last well
+				const destinations3 = (parsed.value.lastWellHandling !== "none") ? destinations2 : _.initial(destinations2);
+				_.forEach(destinations3, (destinationWell, index) => {
+					const wellContents = WellContents.getWellContents(destinationWell, data);
+					const wellVolume = WellContents.getVolume(wellContents);
+					if (math.smaller(wellVolume, diluentVolume)) {
+						assert(parsed.objectName.diluent, "missing 'diluent'");
+						const diluentVolume2 = math.subtract(diluentVolume, wellVolume);
+						const item2 = {
+							layer: index+1,
+							source: parsed.objectName.diluent,
+							destination: getLabwareWell(destinationLabware, destinationWell),
+							volume: diluentVolume2.format({precision: 4}),
+							syringe: syringeName,
+						};
+						diluentItems.push(item2);
+					}
+				});
+			}
 			// console.log({diluentItems})
 
 			// Pipette the dilutions
 			let source = destination0;
 			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
-				const item2 = {
-					layer: index+1,
-					source, destination,
-					volume: sourceVolume.format({precision: 4}),
-					syringe: syringeName
-				};
-				// Mix before aspirating from first dilution well
-				if (index === 0) {
-					item2.sourceMixing = _.get(parsed.value, "sourceMixing", true);
+				// Dilute the source first?
+				if (parsed.value.diluteBeforeTransfer) {
+					const layer = (index + 1) * 2 - 1;
+					const volume = math.subtract(math.multiply(volumeFinal, parsed.value.dilutionFactor), volumeFinal);
+					const item2 = {
+						layer,
+						source: parsed.objectName.diluent,
+						destination,
+						volume: volume.format({precision: 4}),
+						syringe: syringeName,
+						sourceMixing: false,
+						destinationMixing: false
+					};
+					items.push(item2);
 				}
-				items.push(item2);
+				// Transfer to destination
+				{
+					const layer = (parsed.value.diluteBeforeTransfer) ? (index + 1) * 2 : index + 1;
+					const item2 = {
+						layer, source, destination,
+						volume: sourceVolume.format({precision: 4}),
+						syringe: syringeName
+					};
+					// Mix before aspirating from first dilution well
+					if (index === 0 || parsed.value.diluteBeforeTransfer) {
+						item2.sourceMixing = _.get(parsed.value, "sourceMixing", true);
+					}
+					items.push(item2);
+				}
 				source = destination;
 			});
 
@@ -1011,6 +1051,7 @@ const commandHandlers = {
 			else if (parsed.value.cleanBegin) params2.cleanBegin = parsed.value.cleanBegin;
 			params2.cleanBetweenSameSource = "none";
 			if (parsed.value.cleanEnd) params2.cleanEnd = parsed.value.cleanEnd;
+			const destinationMixing = (parsed.value.diluteBeforeTransfer) ? false : true;
 			_.defaults(params2, parsed.value.dilutionParams, {cleanBetween: "none", destinationMixing: true});
 			expansion.push(params2);
 			// console.log({params1, params2})
