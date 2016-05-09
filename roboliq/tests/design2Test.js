@@ -1173,5 +1173,19 @@ describe('design', () => {
 			]);
 		});
 
+		it("should handle 'where' property", () => {
+			const design = {
+				conditions: {
+					"a*": 3
+				},
+				where: {a: {lte: 2}}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table)); printRows(table);
+			should.deepEqual(table, [
+				{a: 1}, {a: 2}
+			]);
+		});
+
 	});
 });

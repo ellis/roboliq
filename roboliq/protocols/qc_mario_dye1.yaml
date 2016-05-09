@@ -45,6 +45,7 @@ objects:
           dilutionFactor=calculate: "dilutionFactor * 2"
           dyeVolume=calculate: "dyeVolume / 2"
     orderBy: [step]
+    where: {step: {lte: 4}}
 
 steps:
   data:
@@ -66,7 +67,7 @@ steps:
   3:
     description: Begin dilutions
     data:
-      where: {step: {ge: 2}}
+      where: {step: {gte: 2}}
     command: experiment.forEachGroup
     groupBy: step
     steps:
@@ -75,7 +76,7 @@ steps:
         command: pipetter.pipetteDilutionSeries
         diluent: ourlab.mario.systemLiquid
         dilutionFactor: 2
-        diluteLastWell: false
+        lastWellHandling: none
         destinationLabware: plate1
         items:
           "#data":
@@ -88,29 +89,13 @@ steps:
         cleanEnd: flush
         diluentParams:
           clean: none
-      1:
-        description: "Dilute source wells"
-        data:
-          where: {type: source}
-        command: pipetter.pipette
-        sources: ourlab.mario.systemLiquid
-        destinationLabware: plate1
-        destinations: $$well
-        volumes: $volume
-        cleanEnd: flush
       2:
-        description: "Transfer half of source contents to destinations"
-        command: pipetter.pipette
-        sources: {"#data": {where: {type: "source"}, value: "well"}}
-        destinationLabware: plate1
-        destinations: {"#data": {where: {type: "destination"}, value: "well"}}
-        volumes: $volume
-        cleanEnd: flush
-      3:
         description: "Measure absorbance"
         command: absorbanceReader.measurePlate
         object: plate1
         program:
-          excitationWavelength: 600nm
+          excitationWavelengthMin: 230nm
+          excitationWavelengthMin: 1000nm
+          excitationWavelengthStep: 10nm
           wells: $$well
         outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"

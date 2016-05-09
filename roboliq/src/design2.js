@@ -80,6 +80,9 @@ export function flattenDesign(design) {
 	}
 
 	let rows = expandConditions(design.conditions, randomEngine);
+	if (design.where) {
+		rows = filterOnWhere(rows, design.where);
+	}
 	if (design.orderBy) {
 		rows = _.orderBy(rows, design.orderBy);
 	}
@@ -990,38 +993,7 @@ export function query(table, q) {
 	let table2 = _.clone(table);
 
 	if (q.where) {
-		_.forEach(q.where, (value, key) => {
-			if (_.isPlainObject(value)) {
-				_.forEach(value, (x, op) => {
-					switch (op) {
-						case "eq":
-							table2 = _.filter(table, row => _.isEqual(row[key], x));
-							break;
-						case "gt":
-							// console.log("before:"); printRows(table2);
-							table2 = _.filter(table, row => _.gt(row[key], x));
-							// console.log("after:"); printRows(table2);
-							break;
-						case "gte":
-							table2 = _.filter(table, row => _.gte(row[key], x));
-							break;
-						case "lt":
-							// console.log("before:"); printRows(table2);
-							table2 = _.filter(table, row => _.lt(row[key], x));
-							// console.log("after:"); printRows(table2);
-							break;
-						case "lte":
-							table2 = _.filter(table, row => _.lte(row[key], x));
-							break;
-						default:
-							assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
-					}
-				});
-			}
-			else {
-				table2 = _.filter(table, row => _.isEqual(row[key], value));
-			}
-		});
+		table2 = filterOnWhere(table2, q.where);
 	}
 
 	if (q.shuffle) {
@@ -1069,5 +1041,42 @@ export function query(table, q) {
 		table2 = _.zip.apply(_, table2);
 	}
 
+	return table2;
+}
+
+function filterOnWhere(table, where) {
+	let table2 = table;
+	_.forEach(where, (value, key) => {
+		if (_.isPlainObject(value)) {
+			_.forEach(value, (x, op) => {
+				switch (op) {
+					case "eq":
+						table2 = _.filter(table, row => _.isEqual(row[key], x));
+						break;
+					case "gt":
+						// console.log("before:"); printRows(table2);
+						table2 = _.filter(table, row => _.gt(row[key], x));
+						// console.log("after:"); printRows(table2);
+						break;
+					case "gte":
+						table2 = _.filter(table, row => _.gte(row[key], x));
+						break;
+					case "lt":
+						// console.log("before:"); printRows(table2);
+						table2 = _.filter(table, row => _.lt(row[key], x));
+						// console.log("after:"); printRows(table2);
+						break;
+					case "lte":
+						table2 = _.filter(table, row => _.lte(row[key], x));
+						break;
+					default:
+						assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
+				}
+			});
+		}
+		else {
+			table2 = _.filter(table, row => _.isEqual(row[key], value));
+		}
+	});
 	return table2;
 }

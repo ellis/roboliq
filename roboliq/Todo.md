@@ -43,6 +43,12 @@
 
 # Todos for QC finding measurable absorbance ranges
 
+Goal 1: run qc_mario_dye1 and get data for manual analysis
+Goal 2: run qc_mario_dye1 and extract JSON with factors
+Goal 3: implement loop breaking and calling external script to evaluate the break
+Goal 4: run qc_mario_dye1 and automatically stop when range has been found
+Goal 5: run qc_mario_dye1 and display analysis in real-time
+
 - [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
   - [x] let user indicate final volume
   - [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
@@ -50,7 +56,6 @@
 	- [-] insert proper date
 	- [x] select between Single and Spectrum scans
 	- [x] insert proper `plateWithCover` value
-
 - [ ] absorbanceReader.measurePlate: set outfile name automatically
 - [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
 - [ ] absorbanceReader.measurePlate: the script should parse the output XML and produce JSON that it sends to the server

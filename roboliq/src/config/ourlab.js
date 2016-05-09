@@ -440,7 +440,7 @@ module.exports = {
 				]
 			}
 		}),
-		_.map(["ourlab.model.plateModel_384_square"], function(model) {
+		_.map(["ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"], function(model) {
 			return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.centrifuge",
@@ -450,7 +450,7 @@ module.exports = {
 			}};
 		}),
 		{"#for": {
-			factors: {model: ["plateModel_384_square"]},
+			factors: {model: ["plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"]},
 			output: {
 				"absorbanceReader.canAgentEquipmentModelSite": {
 					"agent": "ourlab.mario.evoware",
@@ -461,7 +461,7 @@ module.exports = {
 			}
 		}},
 		{"#for": {
-			factors: {model: ["plateModel_384_square"]},
+			factors: {model: ["plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"]},
 			output: {
 				"fluorescenceReader.canAgentEquipmentModelSite": {
 					"agent": "ourlab.mario.evoware",
