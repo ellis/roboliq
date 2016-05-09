@@ -172,10 +172,6 @@ module.exports = {
 				let excitationWavelength;
 				const isScan = (program.excitationWavelengthMin && program.excitationWavelengthMax);
 				if (isScan) {
-<<<<<<< HEAD
-=======
-					isScan = true;
->>>>>>> bd3815d876c72891e4f7ebc3263f8880c198c6a6
 					const excitationWavelengthMin0 = math.eval(program.excitationWavelengthMin);
 					const excitationWavelengthMin = _.isNumber(excitationWavelengthMin0) ? excitationWavelengthMin0 : excitationWavelengthMin0.toNumber("nm");
 					const excitationWavelengthMax0 = math.eval(program.excitationWavelengthMax);
@@ -191,16 +187,10 @@ module.exports = {
 				const excitationBandwidth0 = math.eval(program.excitationBandwidth || "9 nm");
 				const excitationBandwidth = (_.isNumber(excitationBandwidth0) ? excitationBandwidth0 : excitationBandwidth0.toNumber("nm")) * 10;
 				const params = {
-<<<<<<< HEAD
 					//createdAt:  moment().format("YYYY-MM-DDTHH:mm:ss.SSSSSSS")+"Z",
 					createdAt: "2016-01-01T00:00:00.0000000Z",
 					plateFile,
 					plateWithCover: (parsed.value.object.isSealed || parsed.value.object.isCovered) ? "True" : "False",
-=======
-					createdAt: "2015-08-20T07:22:39.4678927Z",
-					plateFile,
-					plateWithCover: "False",
->>>>>>> bd3815d876c72891e4f7ebc3263f8880c198c6a6
 					wells,
 					beamDiameter: (isScan) ? 0 : 500,
 					beamGridType: "Single",
