@@ -35,6 +35,7 @@ module.exports = {
 					"sitesInternal": ["ourlab.mario.site.READER"],
 					"evowareId": "ReaderNETwork",
 					"modelToPlateFile": {
+						"ourlab.model.plateModel_96_round_transparent_nunc": "NUN96ft",
 						"ourlab.model.plateModel_384_square": "Which One?"
 					}
 				},
@@ -396,19 +397,19 @@ module.exports = {
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_CENTRIFUGE",
 			sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
 		}),
 		// short-format plate sites (non-tall labware, not for deep well plates)
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_short",
 			sites: ["HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "READER", "ROBOPEEL", "ROBOSEAL"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
 		}),
 		// Bench sites that don't have any obstructions, so deep well plates can fit on them too
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_open",
 			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
 		}),
 		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
 			"ourlab.mario.roma1": {
@@ -450,7 +451,7 @@ module.exports = {
 			}};
 		}),
 		{"#for": {
-			factors: {model: ["plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"]},
+			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc"]},
 			output: {
 				"absorbanceReader.canAgentEquipmentModelSite": {
 					"agent": "ourlab.mario.evoware",
@@ -461,7 +462,7 @@ module.exports = {
 			}
 		}},
 		{"#for": {
-			factors: {model: ["plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"]},
+			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc"]},
 			output: {
 				"fluorescenceReader.canAgentEquipmentModelSite": {
 					"agent": "ourlab.mario.evoware",

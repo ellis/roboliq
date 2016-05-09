@@ -33,8 +33,8 @@ objects:
     randomSeed: 1
     conditions:
       volume: 150ul
-      syringe*: 2
-      step*: 4
+      syringe*: 1
+      step*: 2
       dilutionFactor=calculate: "2^(step-1)"
       dyeVolume=calculate: "volume / dilutionFactor"
       well=allocateWells: {rows: 8, columns: 12}
@@ -76,6 +76,7 @@ steps:
         command: pipetter.pipetteDilutionSeries
         diluent: ourlab.mario.systemLiquid
         dilutionFactor: 2
+        volume: 150ul
         lastWellHandling: none
         destinationLabware: plate1
         items:
@@ -89,13 +90,14 @@ steps:
         cleanEnd: flush
         diluentParams:
           clean: none
+        diluteBeforeTransfer: true
       2:
         description: "Measure absorbance"
         command: absorbanceReader.measurePlate
         object: plate1
         program:
           excitationWavelengthMin: 230nm
-          excitationWavelengthMin: 1000nm
+          excitationWavelengthMax: 1000nm
           excitationWavelengthStep: 10nm
           wells: $$well
         outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\growthcurve04_firstWithYeast_<YYYYMMDD_HHmmss>.xml"

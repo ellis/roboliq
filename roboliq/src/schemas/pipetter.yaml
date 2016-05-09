@@ -320,14 +320,15 @@ pipetter.pipetteDilutionSeries:
     lastWellHandling: {description: "How to handle the last well in a series", type: string, enum: [none, diluteOnly, diluteAndExtract], default: "diluteAndExtract"}
     items: {description: "Array of dilution items", "type": "array", items: {type: pipetter.DilutionItem}}
     diluent: {description: "Diluent to be used in dilution", type: Source}
-    sourceParams: {description: "Extra parameters for pipetting the source"}
-    diluentParams: {description: "Extra parameters for pipetting the diluent"}
-    dilutionParams: {description: "Extra parameters for pipetting the diluted aliquots"}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}
     destinationLabware: {description: "Labware for source wells", "type": "Plate"}
     volume: {description: "Final volume of dilution wells (with the possible exception of the last well, see parameter `lastWellHandling`)", type: Volume}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
+    sourceParams: {description: "Extra parameters for pipetting the source"}
+    diluentParams: {description: "Extra parameters for pipetting the diluent"}
+    dilutionParams: {description: "Extra parameters for pipetting the diluted aliquots"}
+    diluteBeforeTransfer: {description: "If true, dilutions are first created in the wells they'll be extracted from; otherwise, the diluent is placed in the target well and an aliquot is taken from the extraction well", type: boolean, default: false}
   required: [items]
 
 pipetter.pipetteMixtures:

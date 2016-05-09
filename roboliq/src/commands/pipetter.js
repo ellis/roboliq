@@ -79,7 +79,7 @@ function pipette(params, parsed, data, options={}) {
 	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	// let items = (_.isUndefined(parsed.value.items))
 	// 	? []
@@ -144,7 +144,7 @@ function pipette(params, parsed, data, options={}) {
 		return [item.source, item.destination, item.well]
 	}).flattenDeep().compact().uniq().value();
 	// wellName_l = _.uniq(_.compact(_.flattenDeep([wellName_l, sourcesTop, destinationsTop])));
-	// console.log("wellName_l", JSON.stringify(wellName_l))
+	console.log("wellName_l", JSON.stringify(wellName_l))
 
 	// Find all labware
 	const labwareName_l = _(wellName_l).map(function (wellName) {
@@ -153,6 +153,7 @@ function pipette(params, parsed, data, options={}) {
 		return (i >= 0) ? wellName.substr(0, i) : wellName;
 	}).uniq().value();
 	const labware_l = _.map(labwareName_l, function (name) { return _.merge({name: name}, expect.objectsValue({}, name, data.objects)); });
+	console.log({labwareName_l, labware_l})
 
 	// Check whether labwares are on sites that can be pipetted
 	const query2_l = [];
@@ -168,13 +169,13 @@ function pipette(params, parsed, data, options={}) {
 			}
 		};
 		const queryResults = llpl.query(query);
-		//console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
+		console.log("queryResults: "+JSON.stringify(queryResults, null, '\t'));
 		if (_.isEmpty(queryResults)) {
 			throw {name: "ProcessingError", errors: [labware.name+" is at site "+labware.location+", which hasn't been configured for pipetting; please move it to a pipetting site."]};
 		}
 		query2_l.push(query);
 	});
-	// console.log({query2_l})
+	console.log({query2_l})
 
 	// Check whether the same agent and equipment can be used for all the pipetting steps
 	if (!_.isEmpty(query2_l)) {
@@ -885,7 +886,7 @@ const commandHandlers = {
 	},
 	"pipetter.pipette": pipette,
 	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
-		// console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed))
+		console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed))
 		const destinationLabware = parsed.objectName.destinationLabware;
 
 		// Fill all destination wells with diluent
