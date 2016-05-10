@@ -58,7 +58,7 @@ Goal 5: run qc_mario_dye1 and display analysis in real-time
 		- [x] with 'dilutionMethod=source', handle last well properly
 - [x] fixup mixing specs, see pipetter.js:137
 - [x] design: assign: implement 'orderBy' property
-- [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
+- [x] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
 	- [-] insert proper date
 	- [x] select between Single and Spectrum scans
 	- [x] insert proper `plateWithCover` value
