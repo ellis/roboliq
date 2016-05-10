@@ -43,11 +43,11 @@
 
 # Todos for QC finding measurable absorbance ranges
 
-Goal 1: run qc_mario_dye1 and get data for manual analysis
-Goal 2: run qc_mario_dye1 and extract JSON with factors
-Goal 3: implement loop breaking and calling external script to evaluate the break
-Goal 4: run qc_mario_dye1 and automatically stop when range has been found
-Goal 5: run qc_mario_dye1 and display analysis in real-time
+* Goal 1: run qc_mario_dye1 and get data for manual analysis
+* Goal 2: run qc_mario_dye1 and extract JSON with factors
+* Goal 3: implement loop breaking and calling external script to evaluate the break
+* Goal 4: run qc_mario_dye1 and automatically stop when range has been found
+* Goal 5: run qc_mario_dye1 and display analysis in real-time
 
 - [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
 	- [x] let user indicate final volume
@@ -62,20 +62,22 @@ Goal 5: run qc_mario_dye1 and display analysis in real-time
 	- [-] insert proper date
 	- [x] select between Single and Spectrum scans
 	- [x] insert proper `plateWithCover` value
-- [ ] absorbanceReader.measurePlate: set outfile name automatically
+- [ ] absorbanceReader.measurePlate: set outfile name automatically (e.g. `${measurementDir}/1.3.2.1-absorbance.xml`)
+	- [ ] `absorbanceReader.measurePlate`: set the outfile name
+	- [ ] EvowareCompiler: handle `absorbanceReader.measurePlate` even though its not a low-level instruction
+	- [ ] EvowareCompiler: at end of `absorbanceReader.measurePlate` command, call script to rename the XML file and send it to the server
 - [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
-- [ ] absorbanceReader.measurePlate: the script should parse the output XML and produce JSON that it sends to the server
+- [ ] server: parse absorbance XML to produce JSON dataframe that can be analyzed in R
 	- [ ] columns: step, factors in DATA at that step
-	- [ ] rows: somehow we need to get the factors for the measured well from DATA
-		- maybe the `absorbanceReader.measurePlate` command could create a report, which we'd somehow scan for based on the stepID for the `absorbanceReader._measurePlate` command.
-		- or the `absorbanceReader._measurePlate` could create a report which contains the current DATA (and what about SCOPE?)
-		- or even better, we should have some way to get the DATA for any given step.  The simplest approach would be to save the DATA for every step, but that could be very space intensive; also storing it whenever it changes would be space intensive; better but more complicated would be to store 1) references to defined tables or the full table for generated tables, and 2) the subset of rows which are currently available.
+	- [ ] get factor rows from `reports.{stepID}.measurementFactors` in protocol
+	- [ ] pick out the rows whose wells have measurements and add the measurement values to the rows (add columns `_measurementType`, `_measurementCycle`, and `_measurementValue`)
 - [ ] server/client: display measurements on-screen as table
 - [ ] server/client: display measurements on-screen as plots
 - [ ] find peak of spectrum
 - [ ] calculate out whether to abort measurements, and then exit the loop
 - [ ] experiment.forEachGroup: allow for exiting the loop early
 
+- [ ] consider how to get the DATA for any given step.  The simplest approach would be to save the DATA for every step, but that could be very space intensive; also storing it whenever it changes would be space intensive; better but more complicated would be to store 1) references to defined tables or the full table for generated tables, and 2) the subset of rows which are currently available.
 - [ ] consider how to support `object.SCOPE` or `scope` property, or whether to merge `Variable` object values into object.SCOPE; need to be able to document and set metadata on scope variables
 
 - [ ] `pipetter.pipetteDilutionSeries`: implement and test 'before' and 'after `dilutionMethod` methods
