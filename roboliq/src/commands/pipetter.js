@@ -950,8 +950,10 @@ const commandHandlers = {
 			}
 
 			// Calculate volume to transfer from one well to the next, and the diluent volume
-			const sourceVolume = math.divide(volumeFinal, parsed.value.dilutionFactor);
-			const diluentVolume = math.subtract(volumeFinal, sourceVolume);
+			const sourceVolume = (dilutionMethod === "source")
+				? volumeFinal : math.divide(volumeFinal, parsed.value.dilutionFactor);
+			const diluentVolume = (dilutionMethod === "source")
+			 	? volumeFinal : math.subtract(volumeFinal, sourceVolume);
 			// console.log({volume0: volume0.format(), sourceVolume: sourceVolume.format(), diluentVolume: diluentVolume.format()})
 
 			// If we want to pre-dispense the diluent:

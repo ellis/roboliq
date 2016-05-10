@@ -54,8 +54,8 @@ Goal 5: run qc_mario_dye1 and display analysis in real-time
 	- [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
 	- [x] implement `dilutionMethod` property to replace `diluteBeforeTransfer`
 	- [ ] test `dilutionMethod: source` property
-		- [ ] allow for disabling cleaning
-		- [ ] with 'dilutionMethod=source', we need to transfer volumeFinal from the extraction well
+		- [x] with 'dilutionMethod=source', we need to transfer volumeFinal from the extraction well
+		- [ ] with 'dilutionMethod=source', handle last well properly
 - [ ] fixup mixing specs, see pipetter.js:137
 - [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
 	- [-] insert proper date
