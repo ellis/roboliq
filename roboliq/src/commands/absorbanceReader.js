@@ -86,7 +86,7 @@ var commandHandlers = {
 		];
 		return {
 			expansion: expansion,
-			report: {
+			reports: (_.isEmpty(data.objects.DATA)) ? undefined : {
 				measurementFactors: data.objects.DATA
 			}
 		};

@@ -152,6 +152,7 @@ const protocolEmpty = {
 	planHandlers: {},
 	files: {},
 	fillIns: {},
+	reports: {},
 	errors: {},
 	warnings: {},
 };
@@ -959,6 +960,10 @@ function _run(opts, userProtocol) {
 			_.forEach(result.effects, (value, key) => _.set(objects, key, value));
 			//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
 		}
+		// If the command has reports
+		if (!_.isEmpty(result.reports)) {
+			_.set(protocol, ["reports", id], result.reports);
+		}
 	}
 
 	// If initial processing didn't result in any errors,
@@ -1000,7 +1005,7 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "warnings", "errors")
+			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "warnings", "errors")
 		);
 
 		const tables = {
