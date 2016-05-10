@@ -672,7 +672,7 @@ describe('pipetter', function() {
 			});
 		});
 
-		it.only("should pipette a dilution series by diluting a single well and keeping the discarded extra", () => {
+		it("should pipette a dilution series by diluting a single well and keeping the discarded extra", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -707,7 +707,7 @@ describe('pipetter', function() {
 				}
 			};
 			const result = roboliq.run(["-o", ""], protocol);
-			console.log(JSON.stringify(result.output.steps[1], null, '\t'))
+			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1], {
 				"1": {
 					"1": {

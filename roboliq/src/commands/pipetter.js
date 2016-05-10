@@ -1017,15 +1017,19 @@ const commandHandlers = {
 				source = destination;
 			});
 
-			// If disposal wells are specified, transfer extra volume from last well to the disposal
-			// FIXME: implement sending last aspirate to TRASH!
-			// Create final aspiration
-			items.push({
-				layer: (dilutionMethod === "begin") ? destinations2.length + 1 : (destinations2.length + 1) * 2 - 1,
-				source: getLabwareWell(destinationLabware, _.last(destinations2)),
-				volume: sourceVolume.format({precision: 4}),
-				syringe: syringeName
-			});
+			// May need to extract aliquot from the final destination well in order to
+			// get it to the proper volume
+			if (dilutionMethod !== "source") {
+				// If disposal wells are specified, transfer extra volume from last well to the disposal
+				// FIXME: implement sending last aspirate to TRASH!
+				// Create final aspiration
+				items.push({
+					layer: (dilutionMethod === "begin") ? destinations2.length + 1 : (destinations2.length + 1) * 2 - 1,
+					source: getLabwareWell(destinationLabware, _.last(destinations2)),
+					volume: sourceVolume.format({precision: 4}),
+					syringe: syringeName
+				});
+			}
 
 			/*const source = (firstItemIsSource) ? dilution0.destination : dilution0.source;
 			_.forEach(series, dilution => {
