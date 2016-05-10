@@ -324,7 +324,7 @@ pipetter.pipetteDilutionSeries:
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}
     destinationLabware: {description: "Labware for source wells", "type": "Plate"}
     volume: {description: "Final volume of dilution wells (with the possible exception of the last well, see parameter `lastWellHandling`)", type: Volume}
-    cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
+    cleanBegin: {description: "Intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
     sourceParams: {description: "Extra parameters for pipetting the source"}
     diluentParams: {description: "Extra parameters for pipetting the diluent"}

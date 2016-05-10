@@ -6,39 +6,39 @@ describe('pipetter', function() {
 	describe('pipetter.pipetteDilutionSeries', function() {
 		it("should pipette a dilution series", function() {
 			const protocol = {
-  			roboliq: "v1",
-  			objects: {
-  				plate1: {
-  					type: "Plate",
-  					model: "ourlab.model.plateModel_96_square_transparent_nunc",
-  					location: "ourlab.mario.site.P2",
-  					contents: {
-  						A01: ['100ul', 'source1'],
-  						B01: ['100ul', 'source2']
-  					}
-  				},
-  				source1: {
-  					type: 'Liquid',
-  					wells: 'plate1(A01)'
-  				},
-  				source2: {
-  					type: 'Liquid',
-  					wells: 'plate1(B01)'
-  				},
-  			},
-  			steps: {
-  				"1": {
-  					command: "pipetter.pipetteDilutionSeries",
-  					clean: 'none',
-  					diluent: "ourlab.mario.systemLiquid",
-  					destinationLabware: "plate1",
-  					items: [
-  						{destinations: ["A01", "A02", "A03", "A04", "A05"], syringe: "ourlab.mario.liha.syringe.1"},
-  						{destinations: ["B01", "B02", "B03", "B04", "B05"], syringe: "ourlab.mario.liha.syringe.2"}
-  					]
-  				}
-  			}
-  		};
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+							B01: ['100ul', 'source2']
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+					source2: {
+						type: 'Liquid',
+						wells: 'plate1(B01)'
+					},
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipetteDilutionSeries",
+						clean: 'none',
+						diluent: "ourlab.mario.systemLiquid",
+						destinationLabware: "plate1",
+						items: [
+							{destinations: ["A01", "A02", "A03", "A04", "A05"], syringe: "ourlab.mario.liha.syringe.1"},
+							{destinations: ["B01", "B02", "B03", "B04", "B05"], syringe: "ourlab.mario.liha.syringe.2"}
+						]
+					}
+				}
+			};
 			const result = roboliq.run(["-o", ""], protocol);
 			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(_.pick(result.output.steps[1], [1, 2, 3]), {
@@ -493,38 +493,38 @@ describe('pipetter', function() {
 			});
 		});
 
-    it("should pipette a dilution series by diluting a single well and keeping the discarded extra", () => {
-      const protocol = {
-        roboliq: "v1",
-        objects: {
-          plate1: {
-            type: "Plate",
-            model: "ourlab.model.plateModel_96_square_transparent_nunc",
-            location: "ourlab.mario.site.P2",
-            contents: {
-              A01: ['100ul', 'source1'],
-            }
-          },
-          source1: {
-            type: 'Liquid',
-            wells: 'plate1(A01)'
-          },
-        },
-        steps: {
-          "1": {
-            command: "pipetter.pipetteDilutionSeries",
-            clean: 'none',
-            diluent: "ourlab.mario.systemLiquid",
+		it("should pipette a dilution series by diluting a single well and keeping the discarded extra", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipetteDilutionSeries",
+						clean: 'none',
+						diluent: "ourlab.mario.systemLiquid",
 						diluentParams: {clean: "none"},
-            destinationLabware: "plate1",
+						destinationLabware: "plate1",
 						volume: "200ul",
 						lastWellHandling: "none",
-            items: [
-              {destinations: ["A01", "A02"], syringe: "ourlab.mario.liha.syringe.1"},
-            ]
-          }
-        }
-      };
+						items: [
+							{destinations: ["A01", "A02"], syringe: "ourlab.mario.liha.syringe.1"},
+						]
+					}
+				}
+			};
 			const result = roboliq.run(["-o", ""], protocol);
 			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1], {
@@ -670,6 +670,127 @@ describe('pipetter', function() {
 					}
 				]
 			});
-    });
+		});
+
+		it.only("should pipette a dilution series by diluting a single well and keeping the discarded extra", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipetteDilutionSeries",
+						clean: 'none',
+						diluent: "ourlab.mario.systemLiquid",
+						dilutionFactor: 2,
+						dilutionMethod: "source",
+						diluentParams: {clean: "none"},
+						dilutionParams: {clean: "none"},
+						destinationLabware: "plate1",
+						lastWellHandling: "none",
+						items: [
+							{destinations: ["A01", "A02"], syringe: "ourlab.mario.liha.syringe.1"},
+						]
+					}
+				}
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			console.log(JSON.stringify(result.output.steps[1], null, '\t'))
+			should.deepEqual(result.output.steps[1], {
+				"1": {
+					"1": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "ourlab.mario.systemLiquidLabware(A01)",
+								"destination": "plate1(A02)",
+								"volume": "100 ul"
+							}
+						]
+					},
+					"2": {
+						"command": "pipetter._pipette",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.liha",
+						"program": "\"Roboliq_Water_Dry_1000\"",
+						"items": [
+							{
+								"syringe": "ourlab.mario.liha.syringe.1",
+								"source": "plate1(A01)",
+								"destination": "plate1(A02)",
+								"volume": "100 ul",
+								"sourceMixing": {
+									"count": 3,
+									"volume": "70 ul"
+								}
+							}
+						]
+					},
+					"destinationLabware": "plate1",
+					"command": "pipetter.pipette",
+					"items": [
+						{
+							"layer": 1,
+							"source": "ourlab.mario.systemLiquid",
+							"destination": "plate1(A02)",
+							"volume": "100 ul",
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"sourceMixing": false,
+							"destinationMixing": false
+						},
+						{
+							"layer": 2,
+							"source": "plate1(A01)",
+							"destination": "plate1(A02)",
+							"volume": "100 ul",
+							"syringe": "ourlab.mario.liha.syringe.1",
+							"sourceMixing": true
+						}
+					],
+					"cleanBetweenSameSource": "none",
+					"clean": "none",
+					"cleanBetween": "none",
+					"destinationMixing": false
+				},
+				"command": "pipetter.pipetteDilutionSeries",
+				"clean": "none",
+				"diluent": "ourlab.mario.systemLiquid",
+				"dilutionFactor": 2,
+				"dilutionMethod": "source",
+				"diluentParams": {
+					"clean": "none"
+				},
+				"dilutionParams": {
+					"clean": "none"
+				},
+				"destinationLabware": "plate1",
+				"lastWellHandling": "none",
+				"items": [
+					{
+						"destinations": [
+							"A01",
+							"A02"
+						],
+						"syringe": "ourlab.mario.liha.syringe.1"
+					}
+				]
+			});
+		});
 	});
 });

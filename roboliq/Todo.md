@@ -53,7 +53,9 @@ Goal 5: run qc_mario_dye1 and display analysis in real-time
 	- [x] let user indicate final volume
 	- [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
 	- [x] implement `dilutionMethod` property to replace `diluteBeforeTransfer`
-	- [ ] test `dilutionMethod` property
+	- [ ] test `dilutionMethod: source` property
+		- [ ] allow for disabling cleaning
+		- [ ] with 'dilutionMethod=source', we need to transfer volumeFinal from the extraction well
 - [ ] fixup mixing specs, see pipetter.js:137
 - [ ] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
 	- [-] insert proper date
@@ -74,6 +76,8 @@ Goal 5: run qc_mario_dye1 and display analysis in real-time
 - [ ] experiment.forEachGroup: allow for exiting the loop early
 
 - [ ] consider how to support `object.SCOPE` or `scope` property, or whether to merge `Variable` object values into object.SCOPE; need to be able to document and set metadata on scope variables
+
+- [ ] `pipetter.pipetteDilutionSeries`: implement and test 'before' and 'after `dilutionMethod` methods
 
 # Todos for QC evaporation:
 
