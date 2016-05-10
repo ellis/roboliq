@@ -914,6 +914,7 @@ const commandHandlers = {
 	"pipetter.pipetteDilutionSeries": function(params, parsed, data) {
 		// console.log("pipetter.pipetteDilutionSeries: "+JSON.stringify(parsed, null, '\t'))
 		const destinationLabware = parsed.objectName.destinationLabware;
+		const dilutionMethod = parsed.value.dilutionMethod;
 
 		// Fill all destination wells with diluent
 		const diluentItems = [];
@@ -954,7 +955,7 @@ const commandHandlers = {
 			// console.log({volume0: volume0.format(), sourceVolume: sourceVolume.format(), diluentVolume: diluentVolume.format()})
 
 			// If we want to pre-dispense the diluent:
-			if (!parsed.value.diluteBeforeTransfer) {
+			if (dilutionMethod === "begin") {
 				// Distribute diluent to all destination wells
 				// If 'lastWellHandling == none', don't dilute the last well
 				const destinations3 = (parsed.value.lastWellHandling !== "none") ? destinations2 : _.initial(destinations2);
@@ -982,7 +983,7 @@ const commandHandlers = {
 			_.forEach(destinations2, (destinationWell, index) => {
 				const destination = getLabwareWell(destinationLabware, destinationWell);
 				// Dilute the source first?
-				if (parsed.value.diluteBeforeTransfer) {
+				if (dilutionMethod === "source") {
 					const layer = (index + 1) * 2 - 1;
 					const volume = math.subtract(math.multiply(volumeFinal, parsed.value.dilutionFactor), volumeFinal);
 					const item2 = {
@@ -998,14 +999,15 @@ const commandHandlers = {
 				}
 				// Transfer to destination
 				{
-					const layer = (parsed.value.diluteBeforeTransfer) ? (index + 1) * 2 : index + 1;
+					const layer = (dilutionMethod !== "begin") ? (index + 1) * 2 : index + 1;
+					// console.log({dilutionMethod, index, layer})
 					const item2 = {
 						layer, source, destination,
 						volume: sourceVolume.format({precision: 4}),
 						syringe: syringeName
 					};
 					// Mix before aspirating from first dilution well
-					if (index === 0 || parsed.value.diluteBeforeTransfer) {
+					if (index === 0 || dilutionMethod === "source") {
 						item2.sourceMixing = _.get(parsed.value, "sourceMixing", true);
 					}
 					items.push(item2);
@@ -1017,7 +1019,7 @@ const commandHandlers = {
 			// FIXME: implement sending last aspirate to TRASH!
 			// Create final aspiration
 			items.push({
-				layer: (parsed.value.diluteBeforeTransfer) ? (destinations2.length + 1) * 2 - 1 : destinations2.length + 1,
+				layer: (dilutionMethod === "begin") ? destinations2.length + 1 : (destinations2.length + 1) * 2 - 1,
 				source: getLabwareWell(destinationLabware, _.last(destinations2)),
 				volume: sourceVolume.format({precision: 4}),
 				syringe: syringeName
@@ -1058,8 +1060,8 @@ const commandHandlers = {
 			else if (parsed.value.cleanBegin) params2.cleanBegin = parsed.value.cleanBegin;
 			params2.cleanBetweenSameSource = "none";
 			if (parsed.value.cleanEnd) params2.cleanEnd = parsed.value.cleanEnd;
-			const destinationMixing = (parsed.value.diluteBeforeTransfer) ? false : true;
-			_.defaults(params2, parsed.value.dilutionParams, {cleanBetween: "none", destinationMixing: true});
+			const destinationMixing = (dilutionMethod === "begin") ? true : false;
+			_.defaults(params2, parsed.value.dilutionParams, {cleanBetween: "none", destinationMixing});
 			expansion.push(params2);
 			// console.log({params1, params2})
 		}

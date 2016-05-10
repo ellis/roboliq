@@ -89,6 +89,7 @@ steps:
         command: pipetter.pipetteDilutionSeries
         diluent: ourlab.mario.systemLiquid
         dilutionFactor: 2
+        dilutionMethod: source
         volume: 150ul
         lastWellHandling: none
         destinationLabware: plate1
@@ -103,7 +104,6 @@ steps:
         cleanEnd: flush
         diluentParams:
           clean: none
-        diluteBeforeTransfer: true
       2:
         description: "Measure absorbance"
         command: absorbanceReader.measurePlate
