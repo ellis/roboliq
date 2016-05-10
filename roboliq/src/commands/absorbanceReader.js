@@ -85,7 +85,10 @@ var commandHandlers = {
 			}
 		];
 		return {
-			expansion: expansion
+			expansion: expansion,
+			report: {
+				measurementFactors: data.objects.DATA
+			}
 		};
 	},
 };
