@@ -172,7 +172,7 @@ function parseParams(params, data, schema) {
  * @param {object} data - protocol data
  */
 function processParamsBySchema(result, path, params, schema, data) {
-	console.log(`processParamsBySchema: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
+	// console.log(`processParamsBySchema: ${JSON.stringify(params)} ${JSON.stringify(schema)}`)
 	const required_l = schema.required || [];
 	const l0 = _.toPairs(schema.properties);
 	// If no properties are schemafied, return the original parameters
@@ -217,7 +217,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 			}
 			// If not optional, require the variable's presence:
 			else if (required) {
-				console.log({propertyName, type, result, path, params, schema})
+				// console.log({propertyName, type, result, path, params, schema})
 				expect.truthy({paramName: path1.join(".")}, false, "missing required value [CODE 106]");
 			}
 		}
@@ -246,7 +246,7 @@ function processParamsBySchema(result, path, params, schema, data) {
  * @param {object} data - protocol data
  */
 function processValue0BySchema(result, path, value0, schema, data) {
-	console.log(`processValue0BySchema(${path.join('.')}, ${JSON.stringify(value0)})`)
+	// console.log(`processValue0BySchema(${path.join('.')}, ${JSON.stringify(value0)})`)
 	//const valuePre = _.cloneDeep(value0);
 	if (_.isUndefined(schema)) {
 		_.set(result.value, path, value0);
@@ -273,11 +273,11 @@ function processValue0BySchema(result, path, value0, schema, data) {
 		else {
 			// Try each type alternative:
 			const types = _.flatten([schema.type]);
-			console.log({types})
+			// console.log({types})
 			let es = [];
 			for (const t of types) {
 				try {
-					console.log({t, path, value0})
+					// console.log({t, path, value0})
 					return processValue0BySchemaType(result, path, value0, schema, t, data);
 				}
 				catch (e) {
@@ -320,7 +320,7 @@ function processValue0AsEnum(result, path, value0, schema, data) {
  * @param  {object} data - protocol data
  */
 function processValue0BySchemaType(result, path, value0, schema, type, data) {
-	console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
+	// console.log(`processValue0BySchemaType(${path.join('.')}, ${value0}, ${type})`)
 	if (type === "name") {
 		_.set(result.value, path, value0);
 		return;

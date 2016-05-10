@@ -66,7 +66,7 @@ function sourceMethod3(group, data, effects) {
 	var sourceToItems = _.groupBy(_.filter(group, x => x.source), 'source');
 	//console.log("sourceToItems:\n"+JSON.stringify(sourceToItems, null, '  '));
 	for (const items of _.values(sourceToItems)) {
-		console.log("sourceMethod3", items)
+		// console.log("sourceMethod3", items)
 		assert(items[0].source);
 		var wells = _.clone(items[0].source);
 		assert(!_.isEmpty(wells));

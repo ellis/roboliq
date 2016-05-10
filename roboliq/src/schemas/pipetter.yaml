@@ -317,6 +317,7 @@ pipetter.pipetteDilutionSeries:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
     dilutionFactor: {description: "Dilution factor by which each subsequent well is diluted", type: number, default: 2}
+    #dilutionMethod: {description: "How to dilution -- `begin`: distribute diluent to destination wells first (default); `before`: add diluent right before transfering aliquot; `after`: add diluent right after transfering aliquot; `source`: dilute the well that the aliquot will be extracted from.", enum: [begin, before, afterDispense, ]}
     lastWellHandling: {description: "How to handle the last well in a series", type: string, enum: [none, diluteOnly, diluteAndExtract], default: "diluteAndExtract"}
     items: {description: "Array of dilution items", "type": "array", items: {type: pipetter.DilutionItem}}
     diluent: {description: "Diluent to be used in dilution", type: Source}

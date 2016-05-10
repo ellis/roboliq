@@ -79,7 +79,7 @@ function pipette(params, parsed, data, options={}) {
 	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	// let items = (_.isUndefined(parsed.value.items))
 	// 	? []
@@ -114,7 +114,9 @@ function pipette(params, parsed, data, options={}) {
 		syringe: parsed.value.syringes,
 		program: parsed.value.program,
 		tipModel: parsed.value.tipModel, // TODO: Create a TipModel schema, and then set the tipModel properties in schemas to the "TipModel" type instead of "string"
-		distance: parsed.value.distances
+		distance: parsed.value.distances,
+		sourceMixing: parsed.value.sourceMixing,
+		destinationMixing: parsed.value.destinationMixing
 	});
 	// console.log("items: "+JSON.stringify(items))
 	if (items.length == 0) {
@@ -134,7 +136,12 @@ function pipette(params, parsed, data, options={}) {
 		if (item.well && parsed.objectName.wellLabware) {
 			item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
 		}
-		// TODO: fixup mixing specs
+		if (item.hasOwnProperty("sourceMixing")) {
+			item.sourceMixing = processMixingSpecs([item.sourceMixing]);
+		}
+		if (item.hasOwnProperty("destinationMixing")) {
+			item.destinationMixing = processMixingSpecs([item.destinationMixing]);
+		}
 	}
 	// console.log(JSON.stringify(items, null, '  '))
 
@@ -271,7 +278,7 @@ function pipette(params, parsed, data, options={}) {
 	const tipModelToSyringes = equipment.tipModelToSyringes;
 	// Group the items
 	const groups = groupingMethods.groupingMethod3(items, syringesAvailable, tipModelToSyringes);
-	console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+	// console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
 
 	// Pick syringe for each item
 	// For each group assign syringes, starting with the first available one
@@ -294,13 +301,11 @@ function pipette(params, parsed, data, options={}) {
 	}
 
 	// Add properties `volumeBefore` and `volumeAfter` to the items.
-	console.log("A")
 	calculateWellVolumes(items, data);
 
 	// Calculate when tips need to be washed
 	// Create pipetting commands
 
-	console.log("B")
 	const syringeToSource = {};
 	// How clean is the syringe/tip currently?
 	const syringeToCleanValue = _.fromPairs(_.map(syringesAvailable, s => [s, 5]));
@@ -386,15 +391,13 @@ function pipette(params, parsed, data, options={}) {
 		doCleanBefore = true;
 
 		// _PipetteItems
-		console.log("-------------------")
 		const items2 = _.map(group, function(item) {
 			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count", "distance"]);
 			if (!_.isUndefined(item2.volume)) { item2.volume = item2.volume.format({precision: 14}); }
 			if (!_.isUndefined(item2.distance)) { item2.distance = item2.distance.format({precision: 14}); }
 			// Mix the source well
-			const sourceMixing = processMixingSpecs([parsed.value.sourceMixing, item.sourceMixing]);
-			if (item.sourceVolumeBefore && sourceMixing) {
-				const mixing = sourceMixing;
+			if (item.sourceVolumeBefore && item.sourceMixing) {
+				const mixing = item.sourceMixing;
 				const volume0 = item.sourceVolumeBefore;
 				const volume = calculateMixingVolume(volume0, mixing.amount);
 				const mixing2 = {
@@ -404,9 +407,8 @@ function pipette(params, parsed, data, options={}) {
 				item2.sourceMixing = mixing2;
 			}
 			// Mix the destination well
-			const destinationMixing = processMixingSpecs([parsed.value.destinationMixing, item.destinationMixing]);
-			if (item.volumeAfter && destinationMixing) {
-				const mixing = destinationMixing;
+			if (item.volumeAfter && item.destinationMixing) {
+				const mixing = item.destinationMixing;
 				const volume0 = item.volumeAfter;
 				// console.log({mixing, volume0: (volume0) ? volume0 : item})
 				const volume = calculateMixingVolume(volume0, mixing.amount);
