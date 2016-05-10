@@ -33,11 +33,15 @@ objects:
     randomSeed: 1
     conditions:
       volume: 150ul
-      syringe*: 1
-      step*: 2
+      syringe*: 4
+      step*: 8
       dilutionFactor=calculate: "2^(step-1)"
       dyeVolume=calculate: "volume / dilutionFactor"
-      well=allocateWells: {rows: 8, columns: 12}
+      well=allocateWells:
+        orderBy: step
+        rows: 8
+        columns: 12
+        wells: "A01 down block D12 + E01 down block H12"
       type*:
         destination: {}
         source:
@@ -45,7 +49,7 @@ objects:
           dilutionFactor=calculate: "dilutionFactor * 2"
           dyeVolume=calculate: "dyeVolume / 2"
     orderBy: [step]
-    where: {step: {lte: 2}}
+    where: {step: {lte: 8}}
 
 steps:
   data:
@@ -91,7 +95,6 @@ steps:
         dilutionFactor: 2
         dilutionMethod: source
         volume: 150ul
-        lastWellHandling: none
         destinationLabware: plate1
         items:
           "#data":

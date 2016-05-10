@@ -389,6 +389,24 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle assign() with orderBy", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [3, 1, 2, 4],
+					"c=": {
+						orderBy: "a",
+						values: [10, 20, 30, 40]
+					}
+				}),
+				[
+					{a: 3, c: 30},
+					{a: 1, c: 10},
+					{a: 2, c: 20},
+					{a: 4, c: 40}
+				]
+			);
+		});
+
 		it("should handle calculate()", () => {
 			should.deepEqual(
 				expandConditions({

@@ -670,6 +670,31 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
 	}
 	const isSpecial = value instanceof Special;
+	const hasGroupOrSame = action.groupBy || action.sameBy;
+
+	// If 'orderBy' is set, we should either re-order the rowIndexes or the values
+	if (action.orderBy) {
+		if (hasGroupOrSame) {
+			// console.log({orderBy: action.orderBy, rowIndexes})
+			rowIndexes = query_orderBy(rows, rowIndexes, action.orderBy);
+			// console.log({rowIndexes})
+		}
+		else if (_.isArray(value)) {
+			// Get an array of indexes that indicates the new desired order of rowIndexes
+			const is0 = _.range(rowIndexes.length);
+			const is1 = _.sortBy(is0, i => _.values(_.pick(rows[rowIndexes[i]], action.orderBy)));
+			// Allocate a new value array
+			const value1 = new Array(rowIndexes.length);
+			// Insert values into the new array according to the new desired order
+			for (let i = 0; i < is1.length; i++) {
+				const j = is1[i];
+				value1[j] = value[i];
+			}
+			// console.log({is0, is1, rowIndexes, rows, value, value1});
+			value = value1;
+		}
+	}
+
 	if (!action.groupBy && !action.sameBy) {
 		if (isSpecial) {
 			// console.log({name})
@@ -987,6 +1012,19 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
 	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
 	// console.log({groupBy, groupKeys, rowIndexes, rows});
 	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
+}
+
+/**
+ * Return an array of rowIndexes which are ordered by the `orderBy` criteria.
+ * @param  {array} rows - a flat array of row objects
+ * @param  {array} rowIndexes - array of row indexes to consider
+ * @param  {string|array} orderBy - the column(s) to order by
+ * @return {array} a sorted ordering of rowIndexes
+ */
+export function query_orderBy(rows, rowIndexes, orderBy) {
+	// console.log({rows, rowIndexes, orderBy})
+	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
+	return _.sortBy(rowIndexes, i => _.values(_.pick(rows[i], orderBy)));
 }
 
 export function query(table, q) {
