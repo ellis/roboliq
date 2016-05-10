@@ -76,7 +76,7 @@ var commandHandlers = {
 				programFile: parsed.value.programFile,
 				programData: parsed.value.programData,
 				object: parsed.objectName.object,
-				outputFile: parsed.value.outputFile
+				outputFile: parsed.value.outputFile || data.path.join(".")+"-absorbance.xml"
 			}),
 			(destinationAfter === null || destinationAfter === params2.site) ? null : {
 				command: "transporter.movePlate",

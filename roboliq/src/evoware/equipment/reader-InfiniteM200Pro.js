@@ -2,6 +2,7 @@ import _ from 'lodash';
 import assert from 'assert';
 import math from 'mathjs';
 import Mustache from 'mustache';
+import path from 'path';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
 import wellsParser from '../../parsers/wellsParser.js';
@@ -79,7 +80,7 @@ module.exports = {
 				object: {description: "The labware being measured", type: "Plate"},
 				outputFile: {description: "Filename for measured output", type: "string"}
 			},
-			required: ["measurementType", "outputFile"]
+			required: ["measurementType"]
 		},
 	}),
 	getCommandHandlers: (agentName, equipmentName) => ({
@@ -221,7 +222,18 @@ module.exports = {
 				replace(/~/, "&tilde;").
 				replace(/>[ \t]+</g, "><");
 			// Token
-			var value = parsed.value.outputFile + "|" + programData;
+			const getTempDir = () => {
+				const propertyPath = `${agentName}.config.dirTemp`;
+				console.log({agentName, propertyPath})
+				assert(_.has(data.objects, propertyPath), `Missing value for '${propertyPath}'`);
+				const dir = _.get(data.objects, propertyPath);
+				return dir;
+			}
+			const outputFile0 = parsed.value.outputFile || "absorbance.xml";
+			const outputFile = (path.win32.isAbsolute(outputFile0))
+				? outputFile0
+				: path.win32.join(getTempDir(), outputFile0);
+			var value = outputFile + "|" + programData;
 			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object)]};
 		}
 	}),

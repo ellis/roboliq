@@ -62,6 +62,29 @@
 	- [-] insert proper date
 	- [x] select between Single and Spectrum scans
 	- [x] insert proper `plateWithCover` value
+- [?] reader-InfiniteM200Pro: if no outputFile is specified, need to know which directory to save measurements to initially
+	- this should probably be set in the evoware config (e.g. ourlab.js)
+	- the path to this file needs to later be passed to an external script for renaming
+- [ ] EvowareMain: automatically create a directory where the script files will go
+	- directory to save the script is either:
+		- same as .out.json path (default)
+		- user-specified
+	- filename to save the script is either:
+		- same as .out.json input file, but with .esc extension (default)
+		- user-specified
+	- SCRIPTDIR variable is either:
+		- same as save dir (default)
+		- user-specified (this is necessary if the script file will be copied elsewhere for execution)
+	- RUNDIR variable is either:
+		- `~SCRIPTDIR~\run~RUN~`
+		- user-specified
+	- TEMPDIR: set in the agent config
+- [ ] EvowareCompiler: add a BASEDIR variable for where the scripts and protocol data is
+	- [ ] make this configurable; normally the script should be written to this directory, but that is optional, since we sometimes need to generate scripts on a different computer
+	- [ ] only include the variables in the script output if they are needed
+- [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
+- [ ] EvowareCompiler: add a RUNDIR variable for where to write measurements to (by default `${BASEDIR}\\run-${RUN}`)
+- [ ] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
 - [ ] absorbanceReader.measurePlate: set outfile name automatically (e.g. `${measurementDir}/1.3.2.1-absorbance.xml`)
 	- [ ] `absorbanceReader.measurePlate`: set the outfile name
 	- [ ] EvowareCompiler: handle `absorbanceReader.measurePlate` even though its not a low-level instruction
@@ -144,25 +167,6 @@ A couple experiments:
 - [?] runtime-server cli: rewrite argument handling to use the 'commander' package, or something like that
 - [?] runtime-server cli: accept path for where to write log to
 - [?] EvowareCompiler: pass --begin and --end to timing script
-- [ ] EvowareMain: automatically create a directory where the script files will go, giving the directory the script name plus the date
-	- directory to save the script is either:
-		- same as .out.json path
-		- user-specified
-	- filename to save the script is either:
-		- same as .out.json input file, but with .esc extension
-		- user-specified
-	- SCRIPTDIR variable is either:
-		- same as save dir
-		- user-specified (this is necessary if the script file will be copied elsewhere for execution)
-	- RUNDIR variable is either:
-		- `~SCRIPTDIR~\run~RUN~`
-		- user-specified
-- [ ] EvowareCompiler: add a BASEDIR variable for where the scripts and protocol data is
-	- [ ] make this configurable; normally the script should be written to this directory, but that is optional, since we sometimes need to generate scripts on a different computer
-	- [ ] only include the variables in the script output if they are needed
-- [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
-- [ ] EvowareCompiler: add a RUNDIR variable for where to write measurements to (by default `${BASEDIR}\\run-${RUN}`)
-- [ ] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
 
 - [ ] how to pierce seal without pipetting? detect liquid command? probably best to use MoveLiha commands and tell it to move a few mm below the dispense level; be sure to wash after piercing
 	- MoveLiha: position with global z travel, global z-travel
