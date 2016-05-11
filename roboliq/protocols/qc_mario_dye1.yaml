@@ -79,7 +79,6 @@ steps:
       excitationWavelengthMax: 1000nm
       excitationWavelengthStep: 10nm
       wells: $$well
-    outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\qc_mario_dye1_<YYYYMMDD_HHmmss>.xml"
   4:
     description: Begin dilutions
     data:
@@ -116,4 +115,3 @@ steps:
           excitationWavelengthMax: 1000nm
           excitationWavelengthStep: 10nm
           wells: $$well
-        outputFile: "C:\\Users\\localadmin\\Documents\\Ellis\\qc_mario_dye1_<YYYYMMDD_HHmmss>.xml"

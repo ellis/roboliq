@@ -16,7 +16,7 @@ const commander = require('commander')
 	.option("-o, --output", "full path (directory and filename) to save the script to")
 	.option("-O, --outputDir", "directory to save the script to (defaults to the same directory as the input protocol)")
 	.option("-b, --outputBasename", "filename for the script (without directory) (defaults to basename of the input protocol)")
-	.option("--SCRIPTDIR", "value of SCRIPTDIR variable (default to directory where script is saved)")
+	.option("--SCRIPTDIR [dir]", "value of SCRIPTDIR variable (default to directory where script is saved)")
 	.option("--progress", "display progress while compiling the script")
 	.arguments("[carrier] [table] [protocol] [agents]")
 	.description(
@@ -62,7 +62,7 @@ export function run(argv) {
 				const agents = opts.agents.split(",");
 				const options = {
 					variables: {
-						ROBOLIQ: _.get(protocol.objects, agents[0].split(".").concat(["config", "ROBOLIQ"]))
+						ROBOLIQ: _.get(protocol.objects, agents[0].split(".").concat(["config", "ROBOLIQ"])),
 						SCRIPTDIR: opts.SCRIPTDIR || path.dirname(opts.protocol),
 						RUNDIR: opts.RUNDIR || "~SCRIPTDIR~\\run~RUN~",
 						RUN: "1"
@@ -78,7 +78,7 @@ export function run(argv) {
 					const output = tableLines.concat(result.lines).join("\r\n") + "\r\n";
 					const inpath = opts.protocol;
 					const dir = path.dirname(inpath);
-					const outpath = path.join(dir, path.basename(inpath, "out.json")+".esc");
+					const outpath = path.join(dir, path.basename(inpath, ".out.json")+".esc");
 					const encoded = iconv.encode(output, "ISO-8859-1");
 					fs.writeFileSync(outpath, encoded);
 					console.log("output written to "+outpath);

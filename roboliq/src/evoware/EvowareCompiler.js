@@ -41,9 +41,8 @@ export function compile(carrierData, table, protocol, agents, options = {}) {
 	const results = compileStep(table, protocol, agents, [], objects, options);
 	results.push(transporter.moveLastRomaHome({objects}));
 	const lines1 = _(results).flattenDeep().map(x => x.line).compact().value();
-	console.log("HI!!")
 	const lines0 = headerLines(protocol, options, lines1);
-	const lines = lines0.concat(lines);
+	const lines = lines0.concat(lines1);
 	return [{table, lines}];
 }
 
@@ -141,8 +140,8 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 		if (generatedCommandLines && _.get(options, "timing", true) === true) {
 			const agent = _.get(objects, step.agent);
 			// console.log({agent})
-			results.unshift({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["begin", "--step", path.join(".")], false)});
-			results.push({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["end", "--step", path.join(".")], false)});
+			results.unshift({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["begin", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
+			results.push({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["end", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
 			generatedTimingLogs = true;
 		}
 
@@ -179,24 +178,23 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 export function headerLines(protocol, options, linesOfSteps) {
 	// console.log({options, linesOfSteps})
 	// Check which variables were used in a line
-	const checkList = ["ROBOLIQ", "SCRIPTDIR", "RUNDIR", "RUN"];
+	const checkList = ["RUN", "ROBOLIQ", "SCRIPTDIR", "RUNDIR"];
 	const use = {};
+	let useChanged = false;
 	function check(line) {
 		for (let i = 0; i < checkList.length; i++) {
 			const name = checkList[i];
 			// console.log({name, use: use[name], line, index: line.indexOf("~"+name+"~")})
 			if (!use[name] && line.indexOf("~"+name+"~") >= 0) {
 				use[name] = true;
+				useChanged = true;
 			}
 		}
 	}
 
-	// Add a variable line
-	const lines = [];
-	function addString(name, value, description) {
-		const line =`Variable(${name},"${value}",0,"${description}",0,1.000000,10.000000,1,2,0,0);`;
-		lines.push(line);
-		check(line);
+	// Create variable line
+	function getString(name, value, description) {
+		return `Variable(${name},"${value}",0,"${description}",0,1.000000,10.000000,1,2,0,0);`;
 	}
 
 	// Check which variables were used in the script
@@ -210,15 +208,24 @@ export function headerLines(protocol, options, linesOfSteps) {
 		RUNDIR: "Directory where run-time files should be saved (e.g. logfiles and measurement data)",
 		RUN: "Identifier for the current run of this script"
 	};
+	const variableLines = {};
+	while (useChanged) {
+		useChanged = false;
+		_.forEach(checkList, name => {
+			if (use[name] && !variableLines[name]) {
+				const line = getString(name, options.variables[name], descriptions[name]);
+				variableLines[name] = line;
+				check(line);
+			}
+		});
+	}
+
+	const lines = [];
 	_.forEach(checkList, name => {
-		if (use[name]) {
-			addString(
-				name,
-				options.variables[name],
-				descriptions[name]
-			);
+		if (variableLines[name]) {
+			lines.push(variableLines[name]);
 		}
-	})
+	});
 
 	return lines;
 }

@@ -67,17 +67,20 @@
 	- [x] add a 'dirTemp' property to the EvowareAgent 'config' property in (e.g. ourlab.js)
 - [x] reader-InfiniteM200Pro: figure out dir to move the measurement file to
 - [x] reader-InfiniteM200Pro: execute a script to handle the measured file
-- [?] ourlab.js: consider renaming 'dirTemp' to 'TEMPDIR', and 'pathTo..' to 'ROBOLIQ'
-- [?] EvowareMain/EvowareCompile: automatically generate Variable lines for some runtime variables
-	- [?] only include the variables in the script output if they are needed
-	- [?] SCRIPTDIR variable is either:
+- [x] ourlab.js: consider renaming 'dirTemp' to 'TEMPDIR', and 'pathTo..' to 'ROBOLIQ'
+- [ ] EvowareMain/EvowareCompile: automatically generate Variable lines for some runtime variables
+	- [x] only include the variables in the script output if they are needed
+	- [ ] SCRIPTDIR variable is either:
 		- same as save dir (default)
 		- user-specified (this is necessary if the script file will be copied elsewhere for execution)
-	- [?] RUNDIR variable is either:
+	- [x] RUNDIR variable is either:
 		- `~SCRIPTDIR~\\run~RUN~`
 		- user-specified
-	- [?] ROBOLIQ: command to execute `roboliq-server-cli`, set in the agent config
-	- [ ] make sure we `mkdir ~RUNDIR~`
+	- [x] ROBOLIQ: command to execute `roboliq-server-cli`, set in the agent config
+- [x] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
+- [x] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
+- [ ] EvowareCompile: make sure we `mkdir ~RUNDIR~`
+- [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 - [ ] EvowareMain: automatically create a directory where the script files will go
 	- directory to save the script is either:
 		- same as .out.json path (default)
@@ -85,9 +88,6 @@
 	- filename to save the script is either:
 		- same as .out.json input file, but with .esc extension (default)
 		- user-specified
-- [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
-- [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
-- [ ] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
 - [ ] server: parse absorbance XML to produce JSON dataframe that can be analyzed in R
 	- [ ] columns: step, factors in DATA at that step
 	- [ ] get factor rows from `reports.{stepID}.measurementFactors` in protocol
