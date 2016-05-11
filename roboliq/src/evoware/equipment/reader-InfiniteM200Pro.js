@@ -223,13 +223,13 @@ module.exports = {
 				replace(/>[ \t]+</g, "><");
 			// Token
 			const getTempDir = () => {
-				const propertyPath = `${agentName}.config.dirTemp`;
+				const propertyPath = `${agentName}.config.TEMPDIR`;
 				// console.log({agentName, propertyPath})
 				assert(_.has(data.objects, propertyPath), `Missing value for '${propertyPath}'`);
 				const dir = _.get(data.objects, propertyPath);
 				return dir;
 			}
-			// Save the file to the agent-configured dirTemp, if no absolute path is given
+			// Save the file to the agent-configured TEMPDIR, if no absolute path is given
 			const outputFile0 = parsed.value.outputFile || "absorbance.xml";
 			const outputFile = (path.win32.isAbsolute(outputFile0))
 				? outputFile0

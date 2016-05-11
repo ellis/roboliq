@@ -17,7 +17,6 @@ const commander = require('commander')
 	.option("-O, --outputDir", "directory to save the script to (defaults to the same directory as the input protocol)")
 	.option("-b, --outputBasename", "filename for the script (without directory) (defaults to basename of the input protocol)")
 	.option("--SCRIPTDIR", "value of SCRIPTDIR variable (default to directory where script is saved)")
-	.option("--RUNDIR", "value of RUNDIR variable (defaults to ~SCRIPTDIR~\\run~RUN~)")
 	.option("--progress", "display progress while compiling the script")
 	.arguments("[carrier] [table] [protocol] [agents]")
 	.description(
@@ -61,7 +60,16 @@ export function run(argv) {
 			else {
 				const protocol = jsonfile.readFileSync(opts.protocol);
 				const agents = opts.agents.split(",");
-				const results = EvowareCompiler.compile(carrierData, table, protocol, agents);
+				const options = {
+					variables: {
+						ROBOLIQ: _.get(protocol.objects, agents[0].split(".").concat(["config", "ROBOLIQ"]))
+						SCRIPTDIR: opts.SCRIPTDIR || path.dirname(opts.protocol),
+						RUNDIR: opts.RUNDIR || "~SCRIPTDIR~\\run~RUN~",
+						RUN: "1"
+					},
+				};
+
+				const results = EvowareCompiler.compile(carrierData, table, protocol, agents, options);
 				//console.log()
 				//console.log(JSON.stringify(results, null, '\t'))
 				//console.log()
@@ -70,7 +78,7 @@ export function run(argv) {
 					const output = tableLines.concat(result.lines).join("\r\n") + "\r\n";
 					const inpath = opts.protocol;
 					const dir = path.dirname(inpath);
-					const outpath = path.join(dir, path.basename(inpath, path.extname(inpath))+".esc");
+					const outpath = path.join(dir, path.basename(inpath, "out.json")+".esc");
 					const encoded = iconv.encode(output, "ISO-8859-1");
 					fs.writeFileSync(outpath, encoded);
 					console.log("output written to "+outpath);

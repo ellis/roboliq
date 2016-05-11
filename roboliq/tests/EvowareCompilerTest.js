@@ -148,7 +148,7 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
 			should.deepEqual(results, [
-				[{ line: "Execute(\"wscript wscript some.vbs\",0,\"\",2);" }]
+				[{ line: "Execute(\"wscript some.vbs\",0,\"\",2);" }]
 			]);
 		});
 
@@ -642,5 +642,61 @@ describe('EvowareCompilerTest', function() {
 				{line: "MoveLiha(15,1,0,1,\"0108?0\",4,4,0,400,0,0);"}
 			]]);
 		});
+
+		it.only("should handling timing", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._execute",
+						"agent": "robot1",
+						"path": "wscript",
+						"args": ["some.vbs"],
+						"wait": false
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const options = {timing: true};
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, options);
+			// console.log(JSON.stringify(results, null, '\t'));
+			should.deepEqual(results, [[
+				{ "line": "Group(\"Step 1\");" },
+				{ "line": "Execute(\"~ROBOLIQ~ begin --step 1\",0,\"\",2);" },
+				{ "line": "Execute(\"wscript some.vbs\",0,\"\",2);" },
+				{ "line": "Execute(\"~ROBOLIQ~ end --step 1\",0,\"\",2);" },
+				{ "line": "GroupEnd();" }
+			]]);
+		});
+	});
+
+	describe('headerLines', function () {
+		it.only("should automatically add variables", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._execute",
+						"agent": "robot1",
+						"path": "wscript",
+						"args": ["some.vbs"],
+						"wait": false
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const options = {timing: true, variables: {ROBOLIQ: "AAA", SCRIPTDIR: "C:\\Here", RUNDIR: "~SCRIPTDIR~\\run~RUN~", RUN: "1"}};
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, options);
+			const lines = _.flattenDeep(results).map(x => x.line);
+			// console.log(JSON.stringify(lines, null, '\t'));
+			const headerLines = EvowareCompiler.headerLines(protocol, options, lines);
+			console.log(JSON.stringify(headerLines, null, '\t'));
+			should.deepEqual(headerLines, [
+				"Variable(ROBOLIQ,\"AAA\",0,\"Path to Roboliq executable program\",0,1.000000,10.000000,1,2,0,0);"
+			]);
+		});
+
 	});
 });

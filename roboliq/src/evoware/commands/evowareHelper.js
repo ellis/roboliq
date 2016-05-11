@@ -9,7 +9,7 @@ import _ from 'lodash';
  */
 function createExecuteLine(path, args, wait) {
 	const flag1 = (wait) ? 2 : 0;
-	return `Execute("wscript ${path} ${args.join(" ")}",${flag1},"",2);`;
+	return `Execute("${path} ${args.join(" ")}",${flag1},"",2);`;
 }
 
 function createFactsLine(equipment, variableName, value = "") {

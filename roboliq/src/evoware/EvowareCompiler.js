@@ -27,8 +27,6 @@ const commandHandlers = {
 /**
  * Compile a protocol for a given evoware setup.
  *
- * Might mutate the 'options' value by setting `options.variables.RUNDIR = true`.
- *
  * @param  {EvowareCarrierData} carrierData
  * @param  {object} table - table object (see EvowareTableFile.load)
  * @param  {roboliq:Protocol} protocol
@@ -42,9 +40,10 @@ export function compile(carrierData, table, protocol, agents, options = {}) {
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects, options);
 	results.push(transporter.moveLastRomaHome({objects}));
-	const flat = _.flattenDeep(results);
-	//flat.forEach(x => console.log(x));
-	const lines = _(flat).map(x => x.line).compact().value();
+	const lines1 = _(results).flattenDeep().map(x => x.line).compact().value();
+	console.log("HI!!")
+	const lines0 = headerLines(protocol, options, lines1);
+	const lines = lines0.concat(lines);
 	return [{table, lines}];
 }
 
@@ -142,13 +141,9 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 		if (generatedCommandLines && _.get(options, "timing", true) === true) {
 			const agent = _.get(objects, step.agent);
 			// console.log({agent})
-			if (_.has(agent, ["config", "pathToRoboliqRuntimeCli"])) {
-				const pathToRoboliqRuntimeCli = agent.config.pathToRoboliqRuntimeCli;
-				results.unshift({line: evowareHelper.createExecuteLine(pathToRoboliqRuntimeCli, ["begin", "--step", path.join(".")], false)});
-				results.push({line: evowareHelper.createExecuteLine(pathToRoboliqRuntimeCli, ["end", "--step", path.join(".")], false)});
-				_.set(options, ["variables", "RUNDIR"], true);
-				generatedTimingLogs = true;
-			}
+			results.unshift({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["begin", "--step", path.join(".")], false)});
+			results.push({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["end", "--step", path.join(".")], false)});
+			generatedTimingLogs = true;
 		}
 
 	}
@@ -181,12 +176,49 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 	return results;
 }
 
-function headerLines(table, protocol, agents, path, objects, options = {}) {
-	const withRUNDIR = objects.variables.RUNDIR;
-	const withRUN = withRUNDIR;
-	return [
-		'Variable(RUN,"1",0,"An identifier for this run of the protocol",0,1.000000,10.000000,1,2,0,0);',
-		'Variable(BASEDIR,"C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\Ellis",0,"Directory containing files required for this script",0,1.000000,10.000000,1,2,0,0);',
-		'Variable(RUNDIR,"~BASEDIR~/run-~RUN~",0,"Directory where log and measurement files should be stored for this run",0,1.000000,10.000000,1,2,0,0);'
-	];
+export function headerLines(protocol, options, linesOfSteps) {
+	// console.log({options, linesOfSteps})
+	// Check which variables were used in a line
+	const checkList = ["ROBOLIQ", "SCRIPTDIR", "RUNDIR", "RUN"];
+	const use = {};
+	function check(line) {
+		for (let i = 0; i < checkList.length; i++) {
+			const name = checkList[i];
+			// console.log({name, use: use[name], line, index: line.indexOf("~"+name+"~")})
+			if (!use[name] && line.indexOf("~"+name+"~") >= 0) {
+				use[name] = true;
+			}
+		}
+	}
+
+	// Add a variable line
+	const lines = [];
+	function addString(name, value, description) {
+		const line =`Variable(${name},"${value}",0,"${description}",0,1.000000,10.000000,1,2,0,0);`;
+		lines.push(line);
+		check(line);
+	}
+
+	// Check which variables were used in the script
+	_.forEach(linesOfSteps, check);
+	// console.log(use)
+
+	// Create the necessary variable lines
+	const descriptions = {
+		ROBOLIQ: "Path to Roboliq executable program",
+		SCRIPTDIR: "Directory of this script and related files",
+		RUNDIR: "Directory where run-time files should be saved (e.g. logfiles and measurement data)",
+		RUN: "Identifier for the current run of this script"
+	};
+	_.forEach(checkList, name => {
+		if (use[name]) {
+			addString(
+				name,
+				options.variables[name],
+				descriptions[name]
+			);
+		}
+	})
+
+	return lines;
 }
