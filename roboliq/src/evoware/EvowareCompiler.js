@@ -9,6 +9,7 @@ import * as timer from './commands/timer.js';
 import * as transporter from './commands/transporter.js';
 
 const commandHandlers = {
+	"evoware._execute": evoware._execute,
 	"evoware._facts": evoware._facts,
 	"evoware._raw": evoware._raw,
 	"pipetter._aspirate": pipetter._aspirate,

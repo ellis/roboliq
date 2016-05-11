@@ -234,7 +234,11 @@ module.exports = {
 				? outputFile0
 				: path.win32.join(getTempDir(), outputFile0);
 			var value = outputFile + "|" + programData;
-			return {expansion: [makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object)]};
+			const expansion = [
+				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
+				
+			];
+			return {expansion};
 		}
 	}),
 	getPredicates: (agentName, equipmentName, siteName) => [

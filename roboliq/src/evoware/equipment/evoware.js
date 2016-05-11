@@ -17,6 +17,26 @@ function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 }
 
 /**
+ * Have Evoware execute an external command.
+ * @param  {string} path - path to command to execute
+ * @param  {array} args - array of arguments to pass
+ * @param  {object} opts - additional options to control execution
+ * @param  {boolean} opts.doWait - true if evoware should wait for the command to complete execution
+ * @return {object} an object representing an Evoware 'Execute' instruction.
+ */
+function makeEvowareExecute(parsed, data, path, args, opts = {}) {
+	const flag1 = (opts.doWait) ? 2 : 0;
+	results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin --step ${path.join(".")}",${doWait},"",2);`})
+	return {
+		command: "evoware._execute",
+		agent: parsed.objectName.agent,
+		path,
+		args,
+		doWait
+	}
+}
+
+/**
  * Expect spec of this form:
  * ``{siteModel: string, sites: [string], labwareModels: [string]}``
  */
@@ -86,6 +106,16 @@ module.exports = {
 				type: {enum: ["EvowareWashProgram"]}
 			},
 			required: ["type"]
+		},
+		"evoware._execute": {
+			description: "An Evoware Execute command",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				path: {description: "Path to program to execute", type: "string"},
+				args: {description: "Arguments to pass to the exeternal program", type: "array", items: {type: "string"}},
+				wait: {description: "True, if Evoware should wait until the program finishes execution", type: "boolean"}
+			},
+			required: ["path", "args", "wait"]
 		},
 		"evoware._facts": {
 			description: "An Evoware FACTS command",

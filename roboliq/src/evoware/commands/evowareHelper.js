@@ -1,5 +1,17 @@
 import _ from 'lodash';
 
+/**
+ * Create the Evoware token to execute an external command.
+ * @param  {string} path - path to command to execute
+ * @param  {array} args - array of arguments to pass
+ * @param  {boolean} wait - true if evoware should wait for the command to complete execution
+ * @return {string} a string representing an Evoware 'Execute' token.
+ */
+function createExecuteLine(path, args, wait) {
+	const flag1 = (wait) ? 2 : 0;
+	return `Execute("wscript ${path} ${args.join(" ")}",${flag1},"",2);`;
+}
+
 function createFactsLine(equipment, variableName, value = "") {
 	const l = [
 		`"${equipment}"`,
@@ -21,6 +33,7 @@ function stripQuotes(s) {
 }
 
 module.exports = {
+	createExecuteLine,
 	createFactsLine,
 	quote,
 	stripQuotes

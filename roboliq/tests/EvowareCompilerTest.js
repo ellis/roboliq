@@ -131,6 +131,27 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
+		it("should compile evoware._execute", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._execute",
+						"agent": "robot1",
+						"path": "wscript",
+						"args": ["some.vbs"],
+						"wait": false
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			should.deepEqual(results, [
+				[{ line: "Execute(\"wscript wscript some.vbs\",0,\"\",2);" }]
+			]);
+		});
+
 		it("should compile evoware._facts", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
