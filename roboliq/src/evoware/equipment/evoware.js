@@ -4,23 +4,18 @@ import expect from '../../expect.js';
 
 /**
  * Have Evoware execute an external command.
+ * @param  {string} agentName - Agent identifier
  * @param  {string} path - path to command to execute
  * @param  {array} args - array of arguments to pass
- * @param  {object} opts - additional options to control execution
- * @param  {boolean} opts.doWait - true if evoware should wait for the command to complete execution
+ * @param  {boolean} wait - true if evoware should wait for the command to complete execution
  * @return {object} an object representing an Evoware 'Execute' instruction.
  */
-function makeEvowareExecute(parsed, data, path, args, opts = {}) {
-	CONTINUE
-	const flag1 = (opts.doWait) ? 2 : 0;
-	results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin --step ${path.join(".")}",${doWait},"",2);`})
+function makeEvowareExecute(agentName, path, args, wait) {
 	return {
 		command: "evoware._execute",
-		agent: parsed.objectName.agent,
-		path,
-		args,
-		doWait
-	}
+		agent: agentName,
+		path, args, wait
+	};
 }
 
 function makeEvowareFacts(parsed, data, variable, value, labwareName) {
@@ -140,6 +135,7 @@ module.exports = {
 		},
 	}),
 	getCommandHandlers: () => ({
+		"evoware._execute": function(params, parsed, data) {},
 		"evoware._facts": function(params, parsed, data) {},
 		"evoware._raw": function(params, parsed, data) {},
 	}),

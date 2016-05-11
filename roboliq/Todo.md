@@ -65,7 +65,10 @@
 - [x] absorbanceReader.measurePlate: set `outputFile` automatically if its not specified (e.g. `1.3.2.1-absorbance.xml`)
 - [x] reader-InfiniteM200Pro: if no outputFile is specified, need to know which directory to save measurements to initially
 	- [x] add a 'dirTemp' property to the EvowareAgent 'config' property in (e.g. ourlab.js)
-- [ ] reader-InfiniteM200Pro: execute a script to handle the measured file
+- [?] reader-InfiniteM200Pro: figure out dir to move the measurement file to
+- [?] reader-InfiniteM200Pro: execute a script to handle the measured file
+- [ ] ourlab.js: consider renaming 'dirTemp' to 'TEMPDIR', and 'pathTo..' to 'ROBOLIQ'
+- [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 - [ ] EvowareMain: automatically create a directory where the script files will go
 	- directory to save the script is either:
 		- same as .out.json path (default)
@@ -80,6 +83,7 @@
 		- `~SCRIPTDIR~\run~RUN~`
 		- user-specified
 	- TEMPDIR: set in the agent config
+	- ROBOLIQ: command to execute `roboliq-server-cli`, set in the agent config
 - [ ] EvowareCompiler: add a BASEDIR variable for where the scripts and protocol data is
 	- [ ] make this configurable; normally the script should be written to this directory, but that is optional, since we sometimes need to generate scripts on a different computer
 	- [ ] only include the variables in the script output if they are needed

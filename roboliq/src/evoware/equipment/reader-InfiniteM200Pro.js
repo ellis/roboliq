@@ -7,7 +7,7 @@ import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
 import wellsParser from '../../parsers/wellsParser.js';
 
-import {makeEvowareFacts} from './evoware.js';
+import {makeEvowareExecute, makeEvowareFacts} from './evoware.js';
 
 const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
 		<FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="{{createdAt}}" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
@@ -224,19 +224,24 @@ module.exports = {
 			// Token
 			const getTempDir = () => {
 				const propertyPath = `${agentName}.config.dirTemp`;
-				console.log({agentName, propertyPath})
+				// console.log({agentName, propertyPath})
 				assert(_.has(data.objects, propertyPath), `Missing value for '${propertyPath}'`);
 				const dir = _.get(data.objects, propertyPath);
 				return dir;
 			}
+			// Save the file to the agent-configured dirTemp, if no absolute path is given
 			const outputFile0 = parsed.value.outputFile || "absorbance.xml";
 			const outputFile = (path.win32.isAbsolute(outputFile0))
 				? outputFile0
-				: path.win32.join(getTempDir(), outputFile0);
-			var value = outputFile + "|" + programData;
+				: path.win32.join(getTempDir(), path.win32.basename(outputFile0));
+			// Move it to ~RUNDIR~, if no absolute path is given.
+			const moveDir = (path.win32.isAbsolute(outputFile0))
+				? path.win32.dirname(outputFile0)
+				: path.win32.join("~RUNDIR~", path.win32.dirname(outputFile0));
+			const value = outputFile + "|" + programData;
 			const expansion = [
 				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
-				makeEvowareExecute()
+				makeEvowareExecute(parsed.objectName.agent, "~ROBOLIQ~", ["TecanInfinite", outputFile, moveDir], true)
 			];
 			return {expansion};
 		}
