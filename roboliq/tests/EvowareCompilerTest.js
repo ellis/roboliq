@@ -694,10 +694,10 @@ describe('EvowareCompilerTest', function() {
 			const headerLines = EvowareCompiler.headerLines(protocol, options, lines);
 			// console.log(JSON.stringify(headerLines, null, '\t'));
 			should.deepEqual(headerLines, [
-				"Variable(ROBOLIQ,\"AAA\",0,\"Path to Roboliq executable program\",0,1.000000,10.000000,1,2,0,0);",
+				'Variable(RUN,"1",0,"Identifier for the current run of this script",0,1.000000,10.000000,1,2,0,0);',
+				// "Variable(ROBOLIQ,\"AAA\",0,\"Path to Roboliq executable program\",0,1.000000,10.000000,1,2,0,0);",
 				"Variable(SCRIPTDIR,\"C:\\Here\",0,\"Directory of this script and related files\",0,1.000000,10.000000,1,2,0,0);",
-				'Variable(RUNDIR,"~SCRIPTDIR~\\run~RUN~",0,"Directory where run-time files should be saved (e.g. logfiles and measurement data)",0,1.000000,10.000000,1,2,0,0);',
-				'Variable(RUN,"1",0,"Identifier for the current run of this script",0,1.000000,10.000000,1,2,0,0);'
+				'Variable(RUNDIR,"~SCRIPTDIR~\\run~RUN~",0,"Directory where run-time files should be saved (e.g. logfiles and measurement data)",0,1.000000,10.000000,1,2,0,0);'
 			]);
 		});
 

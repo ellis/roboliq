@@ -923,8 +923,9 @@ const commandHandlers = {
 			if (_.isEmpty(item.destinations)) return;
 			// FIXME: handle `source`
 			assert(_.isUndefined(item.source), "`source` property not implemented yet");
-			const destination0 = getLabwareWell(destinationLabware, item.destinations[0]);
-			const destinations2 = _.tail(item.destinations).map(s => getLabwareWell(destinationLabware, s));
+			const destinations1 = item.destinations.map(s => getLabwareWell(destinationLabware, s));
+			const destination0 = destinations1[0];
+			const destinations2 = _.tail(destinations1);
 			const syringeName = parsed.objectName[`items.${itemIndex}.syringe`] || item.syringe;
 			// console.log({destination0, destinations2, syringeName})
 			let dilutionFactorPrev = 1;
@@ -991,7 +992,7 @@ const commandHandlers = {
 					const item2 = {
 						layer,
 						source: parsed.objectName.diluent,
-						destination,
+						destination: source,
 						volume: volume.format({precision: 4}),
 						syringe: syringeName,
 						sourceMixing: false,

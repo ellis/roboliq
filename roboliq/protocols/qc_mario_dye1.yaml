@@ -113,5 +113,5 @@ steps:
         program:
           excitationWavelengthMin: 230nm
           excitationWavelengthMax: 1000nm
-          excitationWavelengthStep: 10nm
+          excitationWavelengthStep: 50nm
           wells: $$well

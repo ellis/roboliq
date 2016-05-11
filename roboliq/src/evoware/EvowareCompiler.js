@@ -139,9 +139,10 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 		// console.log({options, timing: _.get(options, "timing", true)})
 		if (generatedCommandLines && _.get(options, "timing", true) === true) {
 			const agent = _.get(objects, step.agent);
+			const exePath = "~ROBOLIQ~";//options.variables.ROBOLIQ;
 			// console.log({agent})
-			results.unshift({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["begin", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
-			results.push({line: evowareHelper.createExecuteLine("~ROBOLIQ~", ["end", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
+			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
+			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
 			generatedTimingLogs = true;
 		}
 

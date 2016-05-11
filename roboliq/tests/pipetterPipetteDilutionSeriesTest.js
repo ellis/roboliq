@@ -714,12 +714,12 @@ describe('pipetter', function() {
 						"command": "pipetter._pipette",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.liha",
-						"program": "\"Roboliq_Water_Dry_1000\"",
+						"program": "\"Roboliq_Water_Wet_1000\"",
 						"items": [
 							{
 								"syringe": "ourlab.mario.liha.syringe.1",
 								"source": "ourlab.mario.systemLiquidLabware(A01)",
-								"destination": "plate1(A02)",
+								"destination": "plate1(A01)",
 								"volume": "100 ul"
 							}
 						]
@@ -737,7 +737,7 @@ describe('pipetter', function() {
 								"volume": "100 ul",
 								"sourceMixing": {
 									"count": 3,
-									"volume": "70 ul"
+									"volume": "140 ul"
 								}
 							}
 						]
@@ -748,7 +748,7 @@ describe('pipetter', function() {
 						{
 							"layer": 1,
 							"source": "ourlab.mario.systemLiquid",
-							"destination": "plate1(A02)",
+							"destination": "plate1(A01)",
 							"volume": "100 ul",
 							"syringe": "ourlab.mario.liha.syringe.1",
 							"sourceMixing": false,
