@@ -236,7 +236,7 @@ module.exports = {
 			var value = outputFile + "|" + programData;
 			const expansion = [
 				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
-				
+				makeEvowareExecute()
 			];
 			return {expansion};
 		}

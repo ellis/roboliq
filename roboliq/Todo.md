@@ -62,9 +62,10 @@
 	- [-] insert proper date
 	- [x] select between Single and Spectrum scans
 	- [x] insert proper `plateWithCover` value
-- [?] reader-InfiniteM200Pro: if no outputFile is specified, need to know which directory to save measurements to initially
-	- this should probably be set in the evoware config (e.g. ourlab.js)
-	- the path to this file needs to later be passed to an external script for renaming
+- [x] absorbanceReader.measurePlate: set `outputFile` automatically if its not specified (e.g. `1.3.2.1-absorbance.xml`)
+- [x] reader-InfiniteM200Pro: if no outputFile is specified, need to know which directory to save measurements to initially
+	- [x] add a 'dirTemp' property to the EvowareAgent 'config' property in (e.g. ourlab.js)
+- [ ] reader-InfiniteM200Pro: execute a script to handle the measured file
 - [ ] EvowareMain: automatically create a directory where the script files will go
 	- directory to save the script is either:
 		- same as .out.json path (default)
@@ -85,10 +86,6 @@
 - [ ] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
 - [ ] EvowareCompiler: add a RUNDIR variable for where to write measurements to (by default `${BASEDIR}\\run-${RUN}`)
 - [ ] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
-- [ ] absorbanceReader.measurePlate: set outfile name automatically (e.g. `${measurementDir}/1.3.2.1-absorbance.xml`)
-	- [ ] `absorbanceReader.measurePlate`: set the outfile name
-	- [ ] EvowareCompiler: handle `absorbanceReader.measurePlate` even though its not a low-level instruction
-	- [ ] EvowareCompiler: at end of `absorbanceReader.measurePlate` command, call script to rename the XML file and send it to the server
 - [ ] absorbanceReader.measurePlate: the script should send the output XML to the server
 - [ ] server: parse absorbance XML to produce JSON dataframe that can be analyzed in R
 	- [ ] columns: step, factors in DATA at that step

@@ -2,6 +2,27 @@ import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
 
+/**
+ * Have Evoware execute an external command.
+ * @param  {string} path - path to command to execute
+ * @param  {array} args - array of arguments to pass
+ * @param  {object} opts - additional options to control execution
+ * @param  {boolean} opts.doWait - true if evoware should wait for the command to complete execution
+ * @return {object} an object representing an Evoware 'Execute' instruction.
+ */
+function makeEvowareExecute(parsed, data, path, args, opts = {}) {
+	CONTINUE
+	const flag1 = (opts.doWait) ? 2 : 0;
+	results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin --step ${path.join(".")}",${doWait},"",2);`})
+	return {
+		command: "evoware._execute",
+		agent: parsed.objectName.agent,
+		path,
+		args,
+		doWait
+	}
+}
+
 function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	const result2 = {
@@ -14,26 +35,6 @@ function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 		? value(parsed, data)
 		: value;
 	return _.merge(result2, {factsValue: value2, labware: labwareName});
-}
-
-/**
- * Have Evoware execute an external command.
- * @param  {string} path - path to command to execute
- * @param  {array} args - array of arguments to pass
- * @param  {object} opts - additional options to control execution
- * @param  {boolean} opts.doWait - true if evoware should wait for the command to complete execution
- * @return {object} an object representing an Evoware 'Execute' instruction.
- */
-function makeEvowareExecute(parsed, data, path, args, opts = {}) {
-	const flag1 = (opts.doWait) ? 2 : 0;
-	results.unshift({line: `Execute("wscript ${pathToRoboliqRuntimeCli} begin --step ${path.join(".")}",${doWait},"",2);`})
-	return {
-		command: "evoware._execute",
-		agent: parsed.objectName.agent,
-		path,
-		args,
-		doWait
-	}
 }
 
 /**
@@ -78,6 +79,7 @@ function makeTransporterPredicates(namespaceName, agentName, specs) {
 }
 
 module.exports = {
+	makeEvowareExecute,
 	makeEvowareFacts,
 	makeSiteModelPredicates,
 	makeTransporterPredicates,
