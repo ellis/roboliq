@@ -25,7 +25,6 @@ const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSche
 																</ReadingLabel>
 														</MeasurementReading>
 												</Well>
-												<CustomData id="9" />
 										</MeasurementAbsorbance>
 								</PlateRange>
 						</CyclePlate>
@@ -175,10 +174,12 @@ module.exports = {
 				if (isScan) {
 					const excitationWavelengthMin0 = math.eval(program.excitationWavelengthMin);
 					const excitationWavelengthMin = _.isNumber(excitationWavelengthMin0) ? excitationWavelengthMin0 : excitationWavelengthMin0.toNumber("nm");
-					const excitationWavelengthMax0 = math.eval(program.excitationWavelengthMax);
-					const excitationWavelengthMax = _.isNumber(excitationWavelengthMax0) ? excitationWavelengthMax0 : excitationWavelengthMax0.toNumber("nm");
 					const excitationWavelengthStep0 = math.eval(program.excitationWavelengthStep || "2 nm");
 					const excitationWavelengthStep = _.isNumber(excitationWavelengthStep0) ? excitationWavelengthStep0 : excitationWavelengthStep0.toNumber("nm");
+					const excitationWavelengthMax0 = math.eval(program.excitationWavelengthMax);
+					const excitationWavelengthMax1 = _.isNumber(excitationWavelengthMax0) ? excitationWavelengthMax0 : excitationWavelengthMax0.toNumber("nm");
+					const stepCount = Math.floor((excitationWavelengthMax1 - excitationWavelengthMin) / excitationWavelengthStep);
+					const excitationWavelengthMax = excitationWavelengthMin + excitationWavelengthStep * stepCount;
 					excitationWavelength = `${excitationWavelengthMin*10}~${excitationWavelengthMax*10}:${excitationWavelengthStep*10}`;
 				}
 				else {

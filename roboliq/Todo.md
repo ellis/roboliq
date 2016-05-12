@@ -79,15 +79,23 @@
 	- [x] ROBOLIQ: command to execute `roboliq-server-cli`, set in the agent config
 - [x] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
 - [x] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
-- [ ] open the second reader command from within evoware, save it, save file, diff it to the file that roboliq produced (trying to find why the reader is crashing)
+- [x] open the second reader command from within evoware, save it, save file, diff it to the file that roboliq produced (trying to find why the reader is crashing)
+	- didn't see any difference that seemed like it would be important...
 - [x] EvowareMain/EvowareCompile: substitute variable values (SCRIPTDIR, ROBOLIQ) rather than use variables
 	- using variables turns out to be really inconvenient, because then you need to manually enter in their values if you resume script execution rather than start from the beginning.
 - [ ] need to properly escape double-quotes in `Execute` token
-- [ ] rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
-- [ ] rather than using `RUNDIR`, read the value in from the runtime-cli script
-- [ ] EvowareCompile: make sure we `mkdir ~TEMPDIR~`
+- [ ] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
+- [ ] `roboliq-runtime-cli-startRun`:
+	- [ ] create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
+	- [ ] EvowareCompile: make sure we `mkdir ~TEMPDIR~`
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
-- [ ] EvowareMain: automatically create a directory where the script files will go
+	- [ ] read RUNDIR from script's runId file
+	- [ ] ensure that the runDir exists
+	- [ ] move the XML file to the runDir
+	- [ ] parse the XML and save a JSON file
+- [ ] Evoware: can we call a "subroutine" using a variable for the filename?
+- [ ] why are tips washed again before diluting first destination wells?
+- [ ] roboliqMain: automatically create a directory where the script files will go
 	- directory to save the script is either:
 		- same as .out.json path (default)
 		- user-specified
