@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import fs from 'fs';
 import moment from 'moment';
-//import XML from 'node-xml-lite';
 import {XmlDocument} from 'xmldoc';
 
 /**
@@ -17,18 +16,20 @@ export default function processXml(filename) {
 	const timeOfMeasurement = moment(doc.attr.Date);
 	const datas = doc.childNamed("Section").childrenNamed("Data");
 	// console.log({timeOfMeasurement, datas});
-	_.flatMap(datas, data => {
+	const table = _.flatMap(datas, data => {
 		const wells = data.childrenNamed("Well");
 		const cycle = parseInt(data.attr.Cycle);
 		return wells.map(well => {
 			const pos = well.attr.Pos;
-			const row = pos.substr(0, 1);
-			const col = parseInt(pos.substr(1));
+			const [row, col] = locationTextToRowCol(pos);
+			const wellName = locationRowColToText(row, col);
 			//const well = pos; // FIXME: getWellName(row, col, plateName)
 			const type = well.attr.Type;
 			if (type === "Single") {
 				const value = Number(well.lastChild.val);
-				console.log({row, col, cycle, value})
+				const entry = {well: wellName, cycle, value};
+				// console.log(entry);
+				return entry;
 			}
 /*        data.frame(time=timeOfMeasurement, row=row, col=col, well=well, cycle=cycle, value=value, ...)
       }
@@ -44,9 +45,25 @@ export default function processXml(filename) {
       }*/
 		});
 	});
+
+	console.log(table);
+	return {date: timeOfMeasurement, table};
 }
 
-processXml("/Users/ellisw/repo/bsse-lab/tania.201411/inst/extdata/20141108--tania13_ph/excitation485/tania13_ph--20141111_112409.xml")
+// FIXME: these are copied from wellsParser.js
+function locationTextToRowCol(location) {
+	var row = location.charCodeAt(0) - "A".charCodeAt(0) + 1;
+	var col = parseInt(location.substr(1));
+	return [row, col];
+}
+function locationRowColToText(row, col) {
+	var colText = col.toString();
+	if (colText.length == 1) colText = "0"+colText;
+	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
+}
+
+
+// processXml("/Users/ellisw/repo/bsse-lab/tania.201411/inst/extdata/20141108--tania13_ph/excitation485/tania13_ph--20141111_112409.xml")
 
 /*
 loadInfiniteM200Xml = function(filename, plateName = "", ...) {

@@ -90,6 +90,7 @@
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 	- [?] read RUNDIR from script's runId file
 	- [?] ensure that the runDir exists
+	- [ ] try to get it to run with babel-node
 	- [ ] extract datetime from XML file
 	- [ ] parse the XML
 	- [ ] move the XML file to the runDir
