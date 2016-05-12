@@ -43,11 +43,11 @@
 
 # Todos for QC finding measurable absorbance ranges
 
-* Goal 1: run qc_mario_dye1 and get data for manual analysis
-* Goal 2: run qc_mario_dye1 and extract JSON with factors
-* Goal 3: implement loop breaking and calling external script to evaluate the break
-* Goal 4: run qc_mario_dye1 and automatically stop when range has been found
-* Goal 5: run qc_mario_dye1 and display analysis in real-time
+* [x] Goal 1: run qc_mario_dye1 and get data for manual analysis
+* [ ] Goal 2: run qc_mario_dye1 and extract JSON with factors
+* [ ] Goal 3: run qc_mario_dye1 and display analysis in real-time
+* [ ] Goal 4: implement loop breaking and calling external script to evaluate the break
+* [ ] Goal 5: run qc_mario_dye1 and automatically stop when range has been found
 
 - [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
 	- [x] let user indicate final volume
@@ -83,7 +83,6 @@
 	- didn't see any difference that seemed like it would be important...
 - [x] EvowareMain/EvowareCompile: substitute variable values (SCRIPTDIR, ROBOLIQ) rather than use variables
 	- using variables turns out to be really inconvenient, because then you need to manually enter in their values if you resume script execution rather than start from the beginning.
-- [ ] need to properly escape double-quotes in `Execute` token
 - [ ] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
 - [ ] `roboliq-runtime-cli-startRun`:
 	- [ ] create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
@@ -102,6 +101,7 @@
 	- filename to save the script is either:
 		- same as .out.json input file, but with .esc extension (default)
 		- user-specified
+- [ ] roboliqRun: add an mdf5 hash property to the output, also save an `.id` file along with the output
 - [ ] server: parse absorbance XML to produce JSON dataframe that can be analyzed in R
 	- [ ] columns: step, factors in DATA at that step
 	- [ ] get factor rows from `reports.{stepID}.measurementFactors` in protocol
@@ -111,6 +111,8 @@
 - [ ] find peak of spectrum
 - [ ] calculate out whether to abort measurements, and then exit the loop
 - [ ] experiment.forEachGroup: allow for exiting the loop early
+- [ ] need to properly escape double-quotes in `Execute` token:
+	- can't have quotes in the string, so use "%20" (?) to encode spaces
 
 - [ ] consider how to get the DATA for any given step.  The simplest approach would be to save the DATA for every step, but that could be very space intensive; also storing it whenever it changes would be space intensive; better but more complicated would be to store 1) references to defined tables or the full table for generated tables, and 2) the subset of rows which are currently available.
 - [ ] consider how to support `object.SCOPE` or `scope` property, or whether to merge `Variable` object values into object.SCOPE; need to be able to document and set metadata on scope variables
