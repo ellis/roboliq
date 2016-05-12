@@ -29,6 +29,7 @@
     "redux": "3.3.1",
     "socket.io": "1.4.5",
     "socket.io-client": "^1.4.5",
+    "vega": "^2.5.2",
     "xmldoc": "^0.5.0"
   },
   "babel": {

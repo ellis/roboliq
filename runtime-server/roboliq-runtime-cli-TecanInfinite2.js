@@ -37,6 +37,20 @@ const baseFile = path.join(runDir, prefix+path.basename(xmlFile, ".xml"));
 const jsonFile = baseFile+".json";
 console.log(result.table); console.log({prefix, baseFile, jsonFile});
 
+const protocol = require(scriptFile);
+const factors = protocol.reports[stepId].measurementFactors;
+console.log(factors);
+const wellToFactors = {};
+_.forEach(factors, row => {wellToFactors[row.well] = row});
+console.log(wellToFactors);
+
+const table = result.table.map(row => {
+	return (wellToFactors[row.well])
+		? _.merge({}, wellToFactors[row.well], row)
+		: row;
+});
+console.log(table);
+
 // Rename the measurement file
 // fs.renameSync(xmlFile, baseFile+".xml");
 //

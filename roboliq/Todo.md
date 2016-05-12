@@ -95,8 +95,10 @@
 	- [x] parse the XML
 	- [x] TecanInfinite.js: extract absorbance spectrum values
 	- [?] move the XML file to the runDir
-	- [ ] extract factors from protocol
+	- [x] extract factors from protocol
 	- [ ] join measurement data and factor data
+		- [x] join on hardcoded factorname 'wells', just to test
+		- [ ] need to pass something like 'wellFactor' to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
 	- [ ] save a JSON file
 - [ ] Evoware: can we call a "subroutine" using a variable for the filename?  And change the variable name in a loop?
 - [ ] why are tips washed again before diluting first destination wells?
