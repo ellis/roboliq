@@ -34,16 +34,23 @@ const commandHandlers = {
  * @param  {object} options - an optional map of options; set timing=false to avoid outputting time-logging instructions
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
-export function compile(carrierData, table, protocol, agents, options = {}) {
+export function compile(table, protocol, agents, options = {}) {
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects, options);
+
+	// Prepend token to call 'initRun'
+	results.unshift({line: evowareHelper.createExecuteLine(options.variables.ROBOLIQ, ["initRun", options.variables.SCRIPTFILE], true)});
+	// Append token to reset the last moved ROMA
 	results.push(transporter.moveLastRomaHome({objects}));
+
 	const lines = _(results).flattenDeep().map(x => x.line).compact().value();
+	// Prepend token to create the TEMPDIR
 	if (_.some(lines, line => line.indexOf(options.variables.TEMPDIR) >= 0)) {
-		results.unshift(evowareHelper.createExecuteLine("mkdir", [options.variables.TEMPDIR], true));
+		lines.unshift(evowareHelper.createExecuteLine("mkdir", [options.variables.TEMPDIR], true));
 	}
+
 	return [{table, lines}];
 }
 

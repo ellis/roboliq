@@ -71,7 +71,7 @@ export function run(argv) {
 					},
 				};
 
-				const results = EvowareCompiler.compile(carrierData, table, protocol, agents, options);
+				const results = EvowareCompiler.compile(table, protocol, agents, options);
 				//console.log()
 				//console.log(JSON.stringify(results, null, '\t'))
 				//console.log()

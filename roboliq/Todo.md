@@ -83,17 +83,18 @@
 	- didn't see any difference that seemed like it would be important...
 - [x] EvowareMain/EvowareCompile: substitute variable values (SCRIPTDIR, ROBOLIQ) rather than use variables
 	- using variables turns out to be really inconvenient, because then you need to manually enter in their values if you resume script execution rather than start from the beginning.
-- [ ] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
-- [?] `roboliq-runtime-cli-initRun`:
-	- [?] create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
+- [?] `roboliq-runtime-cli-initRun`: create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
 - [?] EvowareCompiler: make sure we `mkdir ~TEMPDIR~`
-- [ ] EvowareCompiler: compile: remove first function argument
+- [x] EvowareCompiler: compile: remove first function argument
+- [x] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
-	- [ ] read RUNDIR from script's runId file
-	- [ ] ensure that the runDir exists
+	- [?] read RUNDIR from script's runId file
+	- [?] ensure that the runDir exists
+	- [ ] extract datetime from XML file
+	- [ ] parse the XML
 	- [ ] move the XML file to the runDir
-	- [ ] parse the XML and save a JSON file
-- [ ] Evoware: can we call a "subroutine" using a variable for the filename?
+	- [ ] save a JSON file
+- [ ] Evoware: can we call a "subroutine" using a variable for the filename?  And change the variable name in a loop?
 - [ ] why are tips washed again before diluting first destination wells?
 - [ ] roboliqMain: automatically create a directory where the script files will go
 	- directory to save the script is either:

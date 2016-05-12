@@ -7,9 +7,11 @@ opts
 	.option("--logdir [dir]", "directory where log file should be written");
 
 opts
-	.command('begin', "log beginning of step")
-	.command('end', "log ending of step")
-	.command("zlevel", "log z-levels");
+	.command("begin", "log beginning of step")
+	.command("end", "log ending of step")
+	.command("initRun", "initialize a new protocol run (should be called at the beginning of a protocol)")
+	.command("zlevel", "log z-levels")
+	.command("TecanInfinite", "process Tecan Infinite measurements");
 
 opts
 	.parse(process.argv);

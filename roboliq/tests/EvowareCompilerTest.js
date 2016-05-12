@@ -671,4 +671,47 @@ describe('EvowareCompilerTest', function() {
 		});
 
 	});
+
+	describe("compile", () => {
+		it("should call `initRun` script", () => {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "timer._start",
+						agent: "robot1",
+						equipment: "timer1"
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const options = {timing: true, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json", TEMPDIR: "C:\\Temp"}};
+			const [{lines}] = EvowareCompiler.compile(table, protocol, agents, options);
+			// console.log({lines});
+			should(lines[0]).equal('Execute("AAA initRun C:\\Here\\myscript.out.json",2,"",2);');
+		});
+
+		it("should automatically insert token to create TEMPDIR, if used", () => {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._execute",
+						"agent": "robot1",
+						"path": "wscript",
+						"args": ["${TEMPDIR}"],
+						"wait": false
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const options = {timing: true, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json", TEMPDIR: "C:\\Temp"}};
+			const [{lines}] = EvowareCompiler.compile(table, protocol, agents, options);
+			// console.log({lines});
+			should(lines).containEql('Execute("mkdir C:\\Temp",2,"",2);');
+		});
+
+	});
 });
