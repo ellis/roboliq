@@ -62,9 +62,11 @@ export function run(argv) {
 				const agents = opts.agents.split(",");
 				const scriptDir = path.win32.normalize(opts.SCRIPTDIR || path.resolve(path.dirname(opts.protocol)));
 				const scriptFile = path.win32.join(scriptDir, path.basename(opts.protocol));
+				const agentConfig = _.get(protocol.objects, agents[0].split(".").concat(["config"]), {});
 				const options = {
 					variables: {
-						ROBOLIQ: _.get(protocol.objects, agents[0].split(".").concat(["config", "ROBOLIQ"])),
+						ROBOLIQ: agentConfig.ROBOLIQ,
+						TEMPDIR: agentConfig.TEMPDIR,
 						SCRIPTFILE: scriptFile
 					},
 				};

@@ -41,6 +41,9 @@ export function compile(carrierData, table, protocol, agents, options = {}) {
 	const results = compileStep(table, protocol, agents, [], objects, options);
 	results.push(transporter.moveLastRomaHome({objects}));
 	const lines = _(results).flattenDeep().map(x => x.line).compact().value();
+	if (_.some(lines, line => line.indexOf(options.variables.TEMPDIR) >= 0)) {
+		results.unshift(evowareHelper.createExecuteLine("mkdir", [options.variables.TEMPDIR], true));
+	}
 	return [{table, lines}];
 }
 
@@ -191,6 +194,7 @@ function substitutePathVariables(results, options) {
 			if (line) {
 				line = line.replace("${ROBOLIQ}", options.variables.ROBOLIQ);
 				line = line.replace("${SCRIPTFILE}", options.variables.SCRIPTFILE);
+				line = line.replace("${TEMPDIR}", options.variables.TEMPDIR);
 				results[i].line = line;
 			}
 		}

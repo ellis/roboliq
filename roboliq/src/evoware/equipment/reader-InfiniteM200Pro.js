@@ -222,25 +222,31 @@ module.exports = {
 				replace(/"/g, "&quote;").
 				replace(/~/, "&tilde;").
 				replace(/>[ \t]+</g, "><");
-			// Token
-			const getTempDir = () => {
+
+
+			/*const getTempDir = () => {
 				const propertyPath = `${agentName}.config.TEMPDIR`;
 				// console.log({agentName, propertyPath})
 				assert(_.has(data.objects, propertyPath), `Missing value for '${propertyPath}'`);
 				const dir = _.get(data.objects, propertyPath);
 				return dir;
-			}
+			}*/
 			// Save the file to the agent-configured TEMPDIR, if no absolute path is given
-			const outputFile0 = parsed.value.outputFile || "absorbance.xml";
+			const outputFile0 = parsed.value.outputFile || parsed.value.measurementType+".xml";
 			const outputFile = (path.win32.isAbsolute(outputFile0))
 				? outputFile0
-				: path.win32.join(getTempDir(), path.win32.basename(outputFile0));
+				: "${TEMPDIR}\\" + path.win32.basename(outputFile0);
 			const value = outputFile + "|" + programData;
 			const expansion = [
 				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
-				makeEvowareExecute(parsed.objectName.agent, "${ROBOLIQ}", ["TecanInfinite", outputFile, "--script", "${SCRIPTFILE}"], true)
+				makeEvowareExecute(parsed.objectName.agent, "${ROBOLIQ}", ["TecanInfinite", "${SCRIPTFILE}", data.path.join("."), outputFile], true)
 			];
-			return {expansion};
+			return {
+				expansion,
+				reports: (_.isEmpty(data.objects.DATA)) ? undefined : {
+					measurementFactors: data.objects.DATA
+				}
+			};
 		}
 	}),
 	getPredicates: (agentName, equipmentName, siteName) => [
