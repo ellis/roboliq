@@ -93,6 +93,7 @@
 	- [x] try to get it to run with babel-node
 	- [x] extract datetime from XML file
 	- [x] parse the XML
+	- [x] TecanInfinite.js: extract absorbance spectrum values
 	- [?] move the XML file to the runDir
 	- [ ] extract factors from protocol
 	- [ ] join measurement data and factor data

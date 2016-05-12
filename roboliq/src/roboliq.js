@@ -52,6 +52,7 @@ var assert = require('assert');
 var fs = require('fs');
 var jiff = require('jiff');
 var jsonfile = require('jsonfile');
+import mkdirp from 'mkdirp';
 import naturalSort from 'javascript-natural-sort';
 var path = require('path');
 var yaml = require('yamljs');
@@ -640,6 +641,7 @@ function run(argv, userProtocol) {
 			if (!opts.quiet) {
 				console.log("output written to: "+outpath);
 			}
+			mkdirp.sync(path.dirname(outpath));
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 		}
 	}

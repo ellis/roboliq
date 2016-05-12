@@ -28,6 +28,7 @@ qc_mario_evaporation3.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_evaporation3.yaml --print-designs && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/qc_mario_evaporation3.out.json ourlab.mario.evoware && cp protocols/qc_mario_evaporation3.out.esc 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis'
 
 qc_mario_dye1.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dye1.yaml --print-designs -O 'C:\Users\localadmin\Desktop\Ellis\bsse-lab\EvowareScripts\qc_mario_dye1' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\Users\localadmin\Desktop\Ellis\bsse-lab\EvowareScripts\qc_mario_dye1\qc_mario_dye1.out.json' ourlab.mario.evoware
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dye1.yaml --print-designs && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/qc_mario_dye1.out.json ourlab.mario.evoware --SCRIPTDIR 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis' && cp protocols/qc_mario_dye1.esc 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis'
 
 

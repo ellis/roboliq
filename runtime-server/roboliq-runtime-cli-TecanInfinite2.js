@@ -1,3 +1,4 @@
+console.log("C")
 import _ from 'lodash';
 var fs = require('fs');
 var opts = require('commander');
@@ -5,7 +6,9 @@ import mkdirp from 'mkdirp';
 var moment = require('moment');
 var path = require('path');
 // var sendPacket = require('./roboliq-runtime-sendPacket.js');
+console.log("D")
 import processXml from './src/formats/TecanInfinite.js';
+console.log("E")
 
 opts
 	.version("1.0")

@@ -19,7 +19,7 @@ export default function processXml(filename) {
 	const table = _.flatMap(datas, data => {
 		const wells = data.childrenNamed("Well");
 		const cycle = parseInt(data.attr.Cycle);
-		return wells.map(well => {
+		return _.flatMap(wells, well => {
 			const pos = well.attr.Pos;
 			const [row, col] = locationTextToRowCol(pos);
 			const wellName = locationRowColToText(row, col);
@@ -31,18 +31,16 @@ export default function processXml(filename) {
 				// console.log(entry);
 				return entry;
 			}
-/*        data.frame(time=timeOfMeasurement, row=row, col=col, well=well, cycle=cycle, value=value, ...)
-      }
-      else if (type == "Scan") {
-        scan_l = wellNode["Scan", all=T]
-        dfScan = do.call(rbind, lapply(scan_l, function(scanNode) {
-          wavelength = xmlGetAttr(scanNode, "WL")
-          value = as.numeric(xmlValue(scanNode))
-          data.frame(time=timeOfMeasurement, row=row, col=col, well=well, wavelength=wavelength, value=value, ...)
-        }))
-        rownames(dfScan) = NULL
-        dfScan
-      }*/
+			else if (type === "Scan") {
+				const scans = well.childrenNamed("Scan");
+				return scans.map(scan => {
+					const wavelength = scan.attr.WL;
+					const value0 = scan.val;
+					const value = (value0 === "OVER") ? null : Number(value0);
+					const entry = {well: wellName, cycle, wavelength, value};
+					return entry;
+				});
+			}
 		});
 	});
 
