@@ -68,9 +68,9 @@
 - [x] reader-InfiniteM200Pro: figure out dir to move the measurement file to
 - [x] reader-InfiniteM200Pro: execute a script to handle the measured file
 - [x] ourlab.js: consider renaming 'dirTemp' to 'TEMPDIR', and 'pathTo..' to 'ROBOLIQ'
-- [ ] EvowareMain/EvowareCompile: automatically generate Variable lines for some runtime variables
+- [x] EvowareMain/EvowareCompile: automatically generate Variable lines for some runtime variables
 	- [x] only include the variables in the script output if they are needed
-	- [ ] SCRIPTDIR variable is either:
+	- [x] SCRIPTDIR variable is either:
 		- same as save dir (default)
 		- user-specified (this is necessary if the script file will be copied elsewhere for execution)
 	- [x] RUNDIR variable is either:
@@ -79,7 +79,13 @@
 	- [x] ROBOLIQ: command to execute `roboliq-server-cli`, set in the agent config
 - [x] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
 - [x] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
-- [ ] EvowareCompile: make sure we `mkdir ~RUNDIR~`
+- [ ] open the second reader command from within evoware, save it, save file, diff it to the file that roboliq produced (trying to find why the reader is crashing)
+- [x] EvowareMain/EvowareCompile: substitute variable values (SCRIPTDIR, ROBOLIQ) rather than use variables
+	- using variables turns out to be really inconvenient, because then you need to manually enter in their values if you resume script execution rather than start from the beginning.
+- [ ] need to properly escape double-quotes in `Execute` token
+- [ ] rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
+- [ ] rather than using `RUNDIR`, read the value in from the runtime-cli script
+- [ ] EvowareCompile: make sure we `mkdir ~TEMPDIR~`
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 - [ ] EvowareMain: automatically create a directory where the script files will go
 	- directory to save the script is either:

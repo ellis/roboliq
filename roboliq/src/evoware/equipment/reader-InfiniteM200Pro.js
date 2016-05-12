@@ -234,14 +234,10 @@ module.exports = {
 			const outputFile = (path.win32.isAbsolute(outputFile0))
 				? outputFile0
 				: path.win32.join(getTempDir(), path.win32.basename(outputFile0));
-			// Move it to ~RUNDIR~, if no absolute path is given.
-			const moveDir = (path.win32.isAbsolute(outputFile0))
-				? path.win32.dirname(outputFile0)
-				: path.win32.join("~RUNDIR~", path.win32.dirname(outputFile0));
 			const value = outputFile + "|" + programData;
 			const expansion = [
 				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
-				makeEvowareExecute(parsed.objectName.agent, "~ROBOLIQ~", ["TecanInfinite", outputFile, moveDir], true)
+				makeEvowareExecute(parsed.objectName.agent, "${ROBOLIQ}", ["TecanInfinite", outputFile, "--script", "${SCRIPTFILE}"], true)
 			];
 			return {expansion};
 		}

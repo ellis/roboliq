@@ -60,12 +60,12 @@ export function run(argv) {
 			else {
 				const protocol = jsonfile.readFileSync(opts.protocol);
 				const agents = opts.agents.split(",");
+				const scriptDir = path.win32.normalize(opts.SCRIPTDIR || path.resolve(path.dirname(opts.protocol)));
+				const scriptFile = path.win32.join(scriptDir, path.basename(opts.protocol));
 				const options = {
 					variables: {
 						ROBOLIQ: _.get(protocol.objects, agents[0].split(".").concat(["config", "ROBOLIQ"])),
-						SCRIPTDIR: opts.SCRIPTDIR || path.dirname(opts.protocol),
-						RUNDIR: opts.RUNDIR || "~SCRIPTDIR~\\run~RUN~",
-						RUN: "1"
+						SCRIPTFILE: scriptFile
 					},
 				};
 

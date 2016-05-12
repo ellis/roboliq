@@ -40,9 +40,7 @@ export function compile(carrierData, table, protocol, agents, options = {}) {
 	const objects = _.cloneDeep(protocol.objects);
 	const results = compileStep(table, protocol, agents, [], objects, options);
 	results.push(transporter.moveLastRomaHome({objects}));
-	const lines1 = _(results).flattenDeep().map(x => x.line).compact().value();
-	const lines0 = headerLines(protocol, options, lines1);
-	const lines = lines0.concat(lines1);
+	const lines = _(results).flattenDeep().map(x => x.line).compact().value();
 	return [{table, lines}];
 }
 
@@ -139,10 +137,10 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 		// console.log({options, timing: _.get(options, "timing", true)})
 		if (generatedCommandLines && _.get(options, "timing", true) === true) {
 			const agent = _.get(objects, step.agent);
-			const exePath = "~ROBOLIQ~";//options.variables.ROBOLIQ;
+			const exePath = "${ROBOLIQ}";//options.variables.ROBOLIQ;
 			// console.log({agent})
-			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
-			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", path.join("."), "--logpath", "~RUNDIR~"], false)});
+			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", path.join("."), "--script", "${SCRIPTFILE}"], false)});
+			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", path.join("."), "--script", "${SCRIPTFILE}"], false)});
 			generatedTimingLogs = true;
 		}
 
@@ -173,9 +171,33 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 		results.push({line: `GroupEnd();`});
 	}
 
+	substitutePathVariables(results, options);
+
 	return results;
 }
 
+function substitutePathVariables(results, options) {
+	// console.log({results, options})
+	if (!options.variables)
+		return;
+
+	for (let i = 0; i < results.length; i++) {
+		const result = results[i];
+		if (_.isArray(result)) {
+			substitutePathVariables(result, options);
+		}
+		else {
+			let line = results[i].line;
+			if (line) {
+				line = line.replace("${ROBOLIQ}", options.variables.ROBOLIQ);
+				line = line.replace("${SCRIPTFILE}", options.variables.SCRIPTFILE);
+				results[i].line = line;
+			}
+		}
+	}
+}
+
+/*
 export function headerLines(protocol, options, linesOfSteps) {
 	// console.log({options, linesOfSteps})
 	// Check which variables were used in a line
@@ -230,3 +252,4 @@ export function headerLines(protocol, options, linesOfSteps) {
 
 	return lines;
 }
+*/
