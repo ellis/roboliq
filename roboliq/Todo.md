@@ -88,12 +88,14 @@
 - [x] EvowareCompiler: compile: remove first function argument
 - [x] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
-	- [?] read RUNDIR from script's runId file
-	- [?] ensure that the runDir exists
-	- [ ] try to get it to run with babel-node
-	- [ ] extract datetime from XML file
-	- [ ] parse the XML
-	- [ ] move the XML file to the runDir
+	- [x] read RUNDIR from script's runId file
+	- [x] ensure that the runDir exists
+	- [x] try to get it to run with babel-node
+	- [x] extract datetime from XML file
+	- [x] parse the XML
+	- [?] move the XML file to the runDir
+	- [ ] extract factors from protocol
+	- [ ] join measurement data and factor data
 	- [ ] save a JSON file
 - [ ] Evoware: can we call a "subroutine" using a variable for the filename?  And change the variable name in a loop?
 - [ ] why are tips washed again before diluting first destination wells?
