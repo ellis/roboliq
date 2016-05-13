@@ -41,7 +41,7 @@ export default function processXml(filename) {
 			else if (type === "Scan") {
 				const scans = well.childrenNamed("Scan");
 				return scans.map(scan => {
-					const wavelength = scan.attr.WL;
+					const wavelength = Number(scan.attr.WL);
 					const value0 = scan.val;
 					const value = (value0 === "OVER") ? null : Number(value0);
 					const entry = {time, well: wellName, cycle, wavelength, value};
