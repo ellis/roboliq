@@ -14,12 +14,19 @@ export default function processXml(filename) {
 	//const o = XML.parseFileSync(filename);
 
 	const timeOfMeasurement = moment(doc.attr.Date);
-	const datas = doc.childNamed("Section").childrenNamed("Data");
+	const section = doc.childNamed("Section");
+	const timeStart = moment(section.attr.Time_Start);
+	const timeEnd = moment(section.attr.Time_End);
+	const datas = section.childrenNamed("Data");
+	// Find the average delta-time between measurements
+	const duration = timeEnd.diff(timeStart); // Different between start and end in milliseconds
+	const dt = (datas.length > 1) ? duration / (datas.length - 1) : 0;
 	// console.log({timeOfMeasurement, datas});
-	const table = _.flatMap(datas, data => {
+	const table = _.flatMap(datas, (data, index) => {
 		const wells = data.childrenNamed("Well");
 		const cycle = parseInt(data.attr.Cycle);
 		return _.flatMap(wells, well => {
+			const time = timeStart.add(dt * index, "milliseconds").toISOString();
 			const pos = well.attr.Pos;
 			const [row, col] = locationTextToRowCol(pos);
 			const wellName = locationRowColToText(row, col);
@@ -27,7 +34,7 @@ export default function processXml(filename) {
 			const type = well.attr.Type;
 			if (type === "Single") {
 				const value = Number(well.lastChild.val);
-				const entry = {well: wellName, cycle, value};
+				const entry = {time, well: wellName, cycle, value};
 				// console.log(entry);
 				return entry;
 			}
@@ -37,7 +44,7 @@ export default function processXml(filename) {
 					const wavelength = scan.attr.WL;
 					const value0 = scan.val;
 					const value = (value0 === "OVER") ? null : Number(value0);
-					const entry = {well: wellName, cycle, wavelength, value};
+					const entry = {time, well: wellName, cycle, wavelength, value};
 					return entry;
 				});
 			}

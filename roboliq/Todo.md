@@ -84,8 +84,8 @@
 	- didn't see any difference that seemed like it would be important...
 - [x] EvowareMain/EvowareCompile: substitute variable values (SCRIPTDIR, ROBOLIQ) rather than use variables
 	- using variables turns out to be really inconvenient, because then you need to manually enter in their values if you resume script execution rather than start from the beginning.
-- [?] `roboliq-runtime-cli-initRun`: create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
-- [?] EvowareCompiler: make sure we `mkdir ~TEMPDIR~`
+- [x] `roboliq-runtime-cli-initRun`: create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
+- [x] EvowareCompiler: make sure we `mkdir ~TEMPDIR~`
 - [x] EvowareCompiler: compile: remove first function argument
 - [x] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
@@ -95,15 +95,16 @@
 	- [x] extract datetime from XML file
 	- [x] parse the XML
 	- [x] TecanInfinite.js: extract absorbance spectrum values
-	- [?] move the XML file to the runDir
+	- [x] move the XML file to the runDir
 	- [x] extract factors from protocol
 	- [?] join measurement data and factor data
 		- [x] join on hardcoded factorname 'wells', just to test
 		- [?] need to pass a 'wellDesignFactor' property to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
-	- [?] save a JSON file
+	- [x] save a JSON file
 	- [?] append to JSON file for a given dataset
 		- [?] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
 		- [?] append JSON to the dataset file
+	- [ ] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
 - [ ] Evoware: can we call a "subroutine" using a variable for the filename?  And change the variable name in a loop?
 - [ ] why are tips washed again before diluting first destination wells?
 - [ ] roboliqMain: automatically create a directory where the script files will go

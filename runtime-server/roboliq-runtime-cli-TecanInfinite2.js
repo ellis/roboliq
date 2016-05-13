@@ -1,4 +1,4 @@
-console.log("C")
+// console.log("C")
 import _ from 'lodash';
 var fs = require('fs');
 var opts = require('commander');
@@ -6,9 +6,9 @@ import mkdirp from 'mkdirp';
 var moment = require('moment');
 var path = require('path');
 // var sendPacket = require('./roboliq-runtime-sendPacket.js');
-console.log("D")
+// console.log("D")
 import processXml from './src/formats/TecanInfinite.js';
-console.log("E")
+// console.log("E")
 
 opts
 	.version("1.0")
@@ -18,7 +18,7 @@ opts
 // console.log(opts);
 
 const [scriptFile, stepId, xmlFile, wellDesignFactor, dataset] = opts.args;
-console.log({scriptFile, stepId, xmlFile, wellDesignFactor, dataset})
+// console.log({scriptFile, stepId, xmlFile, wellDesignFactor, dataset})
 
 const scriptDir = path.dirname(scriptFile);
 const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".run");
@@ -56,14 +56,13 @@ if (wellDesignFactor !== "_") {
 	const table = result.table.map(measurementRow0 => {
 		const well = measurementRow0.well;
 		// Omit the "well" column from the measurement row, unless the wellDesignFactor = "well"
-		const measurementRow = (wellDesignFactor === "well") ? measurementRow : _.omit(measurementRow, "well");
+		const measurementRow = (wellDesignFactor === "well") ? measurementRow0 : _.omit(measurementRow0, "well");
+		// console.log(measurementRow)
 		// Try to get the factors for this well
 		const factorRow = wellToFactors[well];
-		return (factorRow)
-			? _.merge({}, measurementRow, factorRow)
-			: measurementRow;
+		return _.merge({}, factorRow, measurementRow);
 	});
-	console.log(table);
+	// console.log(table);
 
 	// Save the JSON file
 	fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));

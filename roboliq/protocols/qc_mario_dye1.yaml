@@ -77,8 +77,9 @@ steps:
     program:
       excitationWavelengthMin: 230nm
       excitationWavelengthMax: 1000nm
-      excitationWavelengthStep: 10nm
-      wells: $$well
+      excitationWavelengthStep: 50nm
+      wellDesignFactor: well
+    outputDataset: "absorbance"
   4:
     description: Begin dilutions
     data:
@@ -114,4 +115,5 @@ steps:
           excitationWavelengthMin: 230nm
           excitationWavelengthMax: 1000nm
           excitationWavelengthStep: 50nm
-          wells: $$well
+          wellDesignFactor: well
+        outputDataset: "absorbance"
