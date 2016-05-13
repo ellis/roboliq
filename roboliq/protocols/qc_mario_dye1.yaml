@@ -14,7 +14,7 @@ objects:
     type: Plate
     description: Dilution plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P2
+    location: ourlab.mario.site.P3
   dyeLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml

@@ -48,7 +48,7 @@ export function compile(table, protocol, agents, options = {}) {
 	const lines = _(results).flattenDeep().map(x => x.line).compact().value();
 	// Prepend token to create the TEMPDIR
 	if (_.some(lines, line => line.indexOf(options.variables.TEMPDIR) >= 0)) {
-		lines.unshift(evowareHelper.createExecuteLine("mkdir", [options.variables.TEMPDIR], true));
+		lines.unshift(evowareHelper.createExecuteLine("cmd", ["/c", "mkdir", options.variables.TEMPDIR], true));
 	}
 
 	return [{table, lines}];

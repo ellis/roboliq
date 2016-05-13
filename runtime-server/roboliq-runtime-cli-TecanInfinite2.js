@@ -18,6 +18,7 @@ opts
 // console.log(opts);
 
 const [scriptFile, stepId, xmlFile, wellDesignFactor, dataset] = opts.args;
+console.log({scriptFile, stepId, xmlFile, wellDesignFactor, dataset})
 
 const scriptDir = path.dirname(scriptFile);
 const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".run");
@@ -37,7 +38,7 @@ const jsonFile = baseFile+".json";
 // console.log({prefix, baseFile, jsonFile});
 
 // Rename the measurement file
-// fs.renameSync(xmlFile, baseFile+".xml");
+fs.renameSync(xmlFile, baseFile+".xml");
 
 if (wellDesignFactor !== "_") {
 	const protocol = require(scriptFile);
@@ -45,22 +46,31 @@ if (wellDesignFactor !== "_") {
 	// console.log(factors);
 
 	const wellToFactors = {};
-	_.forEach(factors, row => {wellToFactors[row[wellDesignFactor]] = row});
+	_.forEach(factors, factorRow => {
+		const well = factorRow[wellDesignFactor];
+		wellToFactors[well] = factorRow;
+	});
 	// console.log(wellToFactors);
 
-	const table = result.table.map(row => {
-		return (wellToFactors[row[wellDesignFactor]])
-			? _.merge({}, wellToFactors[row[wellDesignFactor]], row)
-			: row;
+	// For each row in the measurement table, try to add the factor columns
+	const table = result.table.map(measurementRow0 => {
+		const well = measurementRow0.well;
+		// Omit the "well" column from the measurement row, unless the wellDesignFactor = "well"
+		const measurementRow = (wellDesignFactor === "well") ? measurementRow : _.omit(measurementRow, "well");
+		// Try to get the factors for this well
+		const factorRow = wellToFactors[well];
+		return (factorRow)
+			? _.merge({}, measurementRow, factorRow)
+			: measurementRow;
 	});
-	// console.log(table);
+	console.log(table);
 
 	// Save the JSON file
 	fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));
 
-	if (dataset !== "_") {
+	if (dataset !== "_" && table.length > 0) {
 		const datasetFile = path.join(runDir, dataset+".json");
-		const contents = table.map(s => JSON.stringify(s)).join("\n");
+		const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
 		fs.appendFileSync(datasetFile, contents);
 	}
 }

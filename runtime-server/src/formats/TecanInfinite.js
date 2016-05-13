@@ -44,7 +44,7 @@ export default function processXml(filename) {
 		});
 	});
 
-	console.log(table);
+	// console.log(table);
 	return {date: timeOfMeasurement, table};
 }
 

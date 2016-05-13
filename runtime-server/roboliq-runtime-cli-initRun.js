@@ -9,7 +9,7 @@ opts
 	.arguments("<script>")
 	.parse(process.argv);
 
-// console.log(opts);
+console.log(opts);
 
 const scriptFile = opts.args[0];
 const scriptDir = path.dirname(scriptFile);
