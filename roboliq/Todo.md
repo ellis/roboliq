@@ -48,6 +48,7 @@
 * [ ] Goal 3: run qc_mario_dye1 and display analysis in real-time
 * [ ] Goal 4: implement loop breaking and calling external script to evaluate the break
 * [ ] Goal 5: run qc_mario_dye1 and automatically stop when range has been found
+* [ ] Goal 6: adapt the scan range automatically
 
 - [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
 	- [x] let user indicate final volume
