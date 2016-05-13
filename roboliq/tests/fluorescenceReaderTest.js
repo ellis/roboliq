@@ -100,7 +100,7 @@ describe('commands/fluorescenceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.2", "${TEMPDIR}\\1-fluorescence.xml"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.2", "${TEMPDIR}\\1-fluorescence.xml", "_", "_"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",

@@ -12,14 +12,12 @@ console.log("E")
 
 opts
 	.version("1.0")
-	.arguments("<script> <step> <datafile>")
+	.arguments("<script> <step> <xmlfile> <factor> <dataset>")
 	.parse(process.argv);
 
 // console.log(opts);
 
-const scriptFile = opts.args[0];
-const stepId = opts.args[1];
-const xmlFile = opts.args[2];
+const [scriptFile, stepId, xmlFile, wellDesignFactor, dataset] = opts.args;
 
 const scriptDir = path.dirname(scriptFile);
 const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".run");
@@ -35,24 +33,41 @@ const date = moment(result.date);
 const prefix = date.format("YYYYMMDD_HHmmss")+"-"+stepId+"-"; // TODO: might need to change this to local time/date
 const baseFile = path.join(runDir, prefix+path.basename(xmlFile, ".xml"));
 const jsonFile = baseFile+".json";
-console.log(result.table); console.log({prefix, baseFile, jsonFile});
-
-const protocol = require(scriptFile);
-const factors = protocol.reports[stepId].measurementFactors;
-console.log(factors);
-const wellToFactors = {};
-_.forEach(factors, row => {wellToFactors[row.well] = row});
-console.log(wellToFactors);
-
-const table = result.table.map(row => {
-	return (wellToFactors[row.well])
-		? _.merge({}, wellToFactors[row.well], row)
-		: row;
-});
-console.log(table);
+// console.log(result.table);
+// console.log({prefix, baseFile, jsonFile});
 
 // Rename the measurement file
 // fs.renameSync(xmlFile, baseFile+".xml");
+
+if (wellDesignFactor !== "_") {
+	const protocol = require(scriptFile);
+	const factors = protocol.reports[stepId].measurementFactors;
+	// console.log(factors);
+
+	const wellToFactors = {};
+	_.forEach(factors, row => {wellToFactors[row[wellDesignFactor]] = row});
+	// console.log(wellToFactors);
+
+	const table = result.table.map(row => {
+		return (wellToFactors[row[wellDesignFactor]])
+			? _.merge({}, wellToFactors[row[wellDesignFactor]], row)
+			: row;
+	});
+	// console.log(table);
+
+	// Save the JSON file
+	fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));
+
+	if (dataset !== "_") {
+		const datasetFile = path.join(runDir, dataset+".json");
+		const contents = table.map(s => JSON.stringify(s)).join("\n");
+		fs.appendFileSync(datasetFile, contents);
+	}
+}
+else {
+	fs.writeFileSync(jsonFile, JSON.stringify(result.table, null, '\t'));
+}
+
 //
 // var packet = {type: "TecanInfinite", protocolHash: "0", runId: runId, xml: xml};
 // sendPacket(packet, opts);

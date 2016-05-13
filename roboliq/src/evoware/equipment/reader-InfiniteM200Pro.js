@@ -71,13 +71,15 @@ module.exports = {
 				program: {
 					description: "Program definition",
 					properties: {
+						wellDesignFactor: {description: "Name of design column that indicates which wells to measure", type: "string"},
 						wells: {description: "Array of wells to read", type: "Wells"}
 					}
 				},
 				programFile: {description: "Program filename", type: "File"},
 				programData: {description: "Program data"},
 				object: {description: "The labware being measured", type: "Plate"},
-				outputFile: {description: "Filename for measured output", type: "string"}
+				outputFile: {description: "Filename for measured output", type: "string"},
+				outputDataset: {description: "Name of dataset to which the measurements values will be appended.", type: "string"}
 			},
 			required: ["measurementType"]
 		},
@@ -125,10 +127,14 @@ module.exports = {
 				assert(plateFile, `please define ${parsed.objectName.equipment}.plateFile."${labwareModelName}"`);
 
 				let wells;
-				if (program.wells) {
+				const wells0 = (program.wells)
+					? commandHelper.asArray(program.wells)
+					: (program.wellDesignFactor)
+						? commandHelper.getDesignFactor(program.wellDesignFactor, data.objects.DATA)
+						: undefined;
+				if (wells0) {
 					// console.log({program})
 					// Get well list
-					const wells0 = commandHelper.asArray(program.wells);
 					const wells1 = _.flatMap(wells0, s => wellsParser.parse(s, data.objects));
 					// console.log({wells0})
 					const rx = /\(([^)]*)\)/;
@@ -237,9 +243,10 @@ module.exports = {
 				? outputFile0
 				: "${TEMPDIR}\\" + path.win32.basename(outputFile0);
 			const value = outputFile + "|" + programData;
+			const args = ["TecanInfinite", "${SCRIPTFILE}", data.path.join("."), outputFile, _.get(parsed.value, "program.wellDesignFactor", "_"), parsed.value.outputDataset || '_'];
 			const expansion = [
 				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
-				makeEvowareExecute(parsed.objectName.agent, "${ROBOLIQ}", ["TecanInfinite", "${SCRIPTFILE}", data.path.join("."), outputFile], true)
+				makeEvowareExecute(parsed.objectName.agent, "${ROBOLIQ}", args, true)
 			];
 			return {
 				expansion,

@@ -96,10 +96,13 @@
 	- [x] TecanInfinite.js: extract absorbance spectrum values
 	- [?] move the XML file to the runDir
 	- [x] extract factors from protocol
-	- [ ] join measurement data and factor data
+	- [?] join measurement data and factor data
 		- [x] join on hardcoded factorname 'wells', just to test
-		- [ ] need to pass something like 'wellFactor' to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
-	- [ ] save a JSON file
+		- [?] need to pass a 'wellDesignFactor' property to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
+	- [?] save a JSON file
+	- [?] append to JSON file for a given dataset
+		- [?] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
+		- [?] append JSON to the dataset file
 - [ ] Evoware: can we call a "subroutine" using a variable for the filename?  And change the variable name in a loop?
 - [ ] why are tips washed again before diluting first destination wells?
 - [ ] roboliqMain: automatically create a directory where the script files will go
@@ -122,6 +125,7 @@
 - [ ] need to properly escape double-quotes in `Execute` token:
 	- can't have quotes in the string, so use "%20" (?) to encode spaces
 
+- [ ] consider renaming DATA to DESIGN? and 'data' to 'design'?
 - [ ] consider how to get the DATA for any given step.  The simplest approach would be to save the DATA for every step, but that could be very space intensive; also storing it whenever it changes would be space intensive; better but more complicated would be to store 1) references to defined tables or the full table for generated tables, and 2) the subset of rows which are currently available.
 - [ ] consider how to support `object.SCOPE` or `scope` property, or whether to merge `Variable` object values into object.SCOPE; need to be able to document and set metadata on scope variables
 

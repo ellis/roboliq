@@ -61,6 +61,10 @@ function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], fi
 	return data;
 }
 
+function getDesignFactor(propertyName, DATA) {
+	return _(DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
+}
+
 /**
  * Recursively replace $-SCOPE, $$-DATA, and template strings in `x`.
  *
@@ -81,7 +85,7 @@ function substituteDeep(x, data, SCOPE, DATA) {
 		if (_.startsWith(x, "$$")) {
 			if (_.isArray(DATA)) {
 				const propertyName = x.substr(2);
-				x2 = _(DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
+				x2 = getDesignFactor(propertyName, DATA);
 				// console.log("DATA: "+JSON.stringify(DATA, null, '\t'));
 				// console.log({map: _(DATA).map(propertyName).value()});
 			}
@@ -489,7 +493,7 @@ function dereferenceVariable(data, name) {
 	if (_.startsWith(name, "$$")) {
 		if (_.isArray(data.objects.DATA)) {
 			const propertyName = name.substr(2);
-			result.value = _(data.objects.DATA).map(propertyName).filter(x => !_.isUndefined(x)).value();
+			result.value = getDesignFactor(propertyName, data.objects.DATA);
 			//console.log("data.objects.DATA: "+JSON.stringify(data.objects.DATA, null, '\t'));
 			//console.log({map: _(data.objects.DATA).map(propertyName).value()});
 
@@ -1135,6 +1139,7 @@ module.exports = {
 	asArray,
 	copyItemsWithDefaults,
 	createData,
+	getDesignFactor,
 	_dereferenceVariable: dereferenceVariable,
 	_g: g,
 	// getCommonValues: Design.getCommonValues,

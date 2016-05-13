@@ -56,7 +56,7 @@ describe('commands/absorbanceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\measurement.xml"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\measurement.xml", "_", "_"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -126,7 +126,7 @@ describe('commands/absorbanceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml", "_", "_"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -237,7 +237,7 @@ describe('commands/absorbanceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.2", "${TEMPDIR}\\absorbance.xml"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.2", "${TEMPDIR}\\absorbance.xml", "_", "_"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -319,7 +319,7 @@ describe('commands/absorbanceReader', function() {
 					},
 					design1: {
 						type: "Design",
-						conditions: {a: 1, well: "A1"}
+						conditions: {a: 1, testWell: "A1"}
 					}
 				},
 				steps: {
@@ -329,8 +329,9 @@ describe('commands/absorbanceReader', function() {
 						object: "plate1",
 						program: {
 							excitationWavelength: "600nm",
-							wells: "$$well"
-						}
+							wellDesignFactor: "testWell"
+						},
+						outputDataset: "absorbance"
 					}
 				}
 			});
@@ -353,7 +354,7 @@ describe('commands/absorbanceReader', function() {
 						command: "evoware._execute",
 						agent: "ourlab.mario.evoware",
 						path: "${ROBOLIQ}",
-						args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml"],
+						args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml", "testWell", "absorbance"],
 						wait: true
 					},
 					"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -362,23 +363,23 @@ describe('commands/absorbanceReader', function() {
 					"measurementType": "absorbance",
 					"program": {
 						"excitationWavelength": "600nm",
-						"wells": [
-							"A1"
-						]
+						"wellDesignFactor": "testWell"
 					},
-					"object": "plate1"
+					"object": "plate1",
+					"outputDataset": "absorbance"
 				},
 				"command": "absorbanceReader.measurePlate",
 				"object": "plate1",
 				"program": {
 					"excitationWavelength": "600nm",
-					"wells": "$$well"
-				}
+					"wellDesignFactor": "testWell"
+				},
+				"outputDataset": "absorbance"
 			});
 			// console.log("reports: "+JSON.stringify(result.output.reports, null, '\t'));
 			should.deepEqual(result.output.reports["1.1"], {
 				"measurementFactors": [
-					{ "a": 1, "well": "A1" }
+					{ "a": 1, "testWell": "A1" }
 				]
 			});
 		});

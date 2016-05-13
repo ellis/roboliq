@@ -18,10 +18,12 @@ absorbanceReader.measurePlate:
     program:
       description: "Program parameters"
       properties:
+        wellDesignFactor: {description: "Name of design column that indicates which wells to measure", type: string}
         wells: {description: "Array of wells to read", type: "Wells"}
     programFile: {description: "Program filename", type: "string"}
     programData: {description: "Program data"}
     outputFile: {description: "Filename for output", type: "string"}
+    outputDataset: {description: "Name of dataset to which the measurements values will be appended.", type: string}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}
