@@ -45,15 +45,15 @@
 
 * [x] Goal 1: run qc_mario_dye1 and get data for manual analysis
 * [x] Goal 2: run qc_mario_dye1 and extract JSON with factors
-* [ ] Goal 3: run qc_mario_dye2 and display analysis in real-time
 * [ ] Goal 4: implement loop breaking and calling external script to evaluate the break
-* [ ] Goal 5: run qc_mario_dye2 and automatically stop when linear range has been found
+* [ ] Goal 3: run qc_mario_dye2 and display analysis in real-time
+* [ ] Goal 5: run qc_mario_dye2 and automatically stop when peak value is no longer detectably above the base level
 * [ ] Goal 6: adapt the scan range automatically
 	* [ ] Goal: call external script to calculate runtime values from measurements
 	* [ ] Goal: load externally calculated runtime values
 	* [ ] Goal: save a runtime worklist using a mustache template and runtime values
 
-- [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
+- [x] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 	- [x] read RUNDIR from script's runId file
 	- [x] ensure that the runDir exists
 	- [x] try to get it to run with babel-node
@@ -62,18 +62,17 @@
 	- [x] TecanInfinite.js: extract absorbance spectrum values
 	- [x] move the XML file to the runDir
 	- [x] extract factors from protocol
-	- [?] join measurement data and factor data
+	- [x] join measurement data and factor data
 		- [x] join on hardcoded factorname 'wells', just to test
-		- [?] need to pass a 'wellDesignFactor' property to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
+		- [x] need to pass a 'wellDesignFactor' property to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
 	- [x] save a JSON file
-	- [?] append to JSON file for a given dataset
-		- [?] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
-		- [?] append JSON to the dataset file
-	- [?] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
+	- [x] append to JSON file for a given dataset
+		- [x] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
+		- [x] append JSON to the dataset file
+	- [x] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
 - [x] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range
-- [ ] should we measure empty wells before dispensing into them?
 - [ ] fix `bsse-lab` repository on mario's computer
 - [ ] absorbance.html: load absorbance.jsonl
 - [ ] HACK?: for now, create both .jsonl dataset AND re-write it as a .json dataset for easier usage by Vega
