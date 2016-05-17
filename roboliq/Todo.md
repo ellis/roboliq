@@ -44,50 +44,15 @@
 # Todos for QC finding measurable absorbance ranges
 
 * [x] Goal 1: run qc_mario_dye1 and get data for manual analysis
-* [ ] Goal 2: run qc_mario_dye1 and extract JSON with factors
-* [ ] Goal 3: run qc_mario_dye1 and display analysis in real-time
+* [x] Goal 2: run qc_mario_dye1 and extract JSON with factors
+* [ ] Goal 3: run qc_mario_dye2 and display analysis in real-time
 * [ ] Goal 4: implement loop breaking and calling external script to evaluate the break
-* [ ] Goal 5: run qc_mario_dye1 and automatically stop when range has been found
+* [ ] Goal 5: run qc_mario_dye2 and automatically stop when linear range has been found
 * [ ] Goal 6: adapt the scan range automatically
+	* [ ] Goal: call external script to calculate runtime values from measurements
+	* [ ] Goal: load externally calculated runtime values
+	* [ ] Goal: save a runtime worklist using a mustache template and runtime values
 
-- [x] pipetter.pipetteDilutionSeries: allow for adding dilute to a single well, and dispensing the extract into another well
-	- [x] let user indicate final volume
-	- [x] options for the final well: dilute and discard extract, dilute and don't extract, don't dilute; this can be three enums: [diluteAndExtract, diluteOnly, none]
-	- [x] implement `dilutionMethod` property to replace `diluteBeforeTransfer`
-	- [x] test `dilutionMethod: source` property
-		- [x] with 'dilutionMethod=source', we need to transfer volumeFinal from the extraction well
-		- [x] with 'dilutionMethod=source', handle last well properly
-- [x] fixup mixing specs, see pipetter.js:137
-- [x] design: assign: implement 'orderBy' property
-- [x] absorbanceReader.measurePlate: allow for measuring a spectrum (rather than just a single wavelength)
-	- [-] insert proper date
-	- [x] select between Single and Spectrum scans
-	- [x] insert proper `plateWithCover` value
-- [x] absorbanceReader.measurePlate: set `outputFile` automatically if its not specified (e.g. `1.3.2.1-absorbance.xml`)
-- [x] reader-InfiniteM200Pro: if no outputFile is specified, need to know which directory to save measurements to initially
-	- [x] add a 'dirTemp' property to the EvowareAgent 'config' property in (e.g. ourlab.js)
-- [x] reader-InfiniteM200Pro: figure out dir to move the measurement file to
-- [x] reader-InfiniteM200Pro: execute a script to handle the measured file
-- [x] ourlab.js: consider renaming 'dirTemp' to 'TEMPDIR', and 'pathTo..' to 'ROBOLIQ'
-- [x] EvowareMain/EvowareCompile: automatically generate Variable lines for some runtime variables
-	- [x] only include the variables in the script output if they are needed
-	- [x] SCRIPTDIR variable is either:
-		- same as save dir (default)
-		- user-specified (this is necessary if the script file will be copied elsewhere for execution)
-	- [x] RUNDIR variable is either:
-		- `~SCRIPTDIR~\\run~RUN~`
-		- user-specified
-	- [x] ROBOLIQ: command to execute `roboliq-server-cli`, set in the agent config
-- [x] EvowareCompiler: pass `--logpath ${RUNDIR}` to timing script
-- [x] EvowareCompiler: add a RUN variable that the user can change for different runs of the same script
-- [x] open the second reader command from within evoware, save it, save file, diff it to the file that roboliq produced (trying to find why the reader is crashing)
-	- didn't see any difference that seemed like it would be important...
-- [x] EvowareMain/EvowareCompile: substitute variable values (SCRIPTDIR, ROBOLIQ) rather than use variables
-	- using variables turns out to be really inconvenient, because then you need to manually enter in their values if you resume script execution rather than start from the beginning.
-- [x] `roboliq-runtime-cli-initRun`: create/update the runid file, containing a RUNID = `${DATE}_${TIME}`
-- [x] EvowareCompiler: make sure we `mkdir ~TEMPDIR~`
-- [x] EvowareCompiler: compile: remove first function argument
-- [x] EvowareCompiler: rather than using `RUN` variable in the evoware script, add an `Execute` to the beginning of the evoware script that increments the run ID -- this way, whenever the script is run from the beginning, it gets a new run ID automatically.
 - [ ] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 	- [x] read RUNDIR from script's runId file
 	- [x] ensure that the runDir exists
@@ -104,7 +69,16 @@
 	- [?] append to JSON file for a given dataset
 		- [?] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
 		- [?] append JSON to the dataset file
-	- [ ] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
+	- [?] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
+- [ ] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
+- [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
+	- [ ] call R script to analyze the data and decide on the wavelength range
+- [ ] should we measure empty wells before dispensing into them?
+- [ ] fix `bsse-lab` repository on mario's computer
+- [ ] absorbance.html: load absorbance.jsonl
+- [ ] HACK?: for now, create both .jsonl dataset AND re-write it as a .json dataset for easier usage by Vega
+- [ ] absorbance.html: create the Vega specification
+- [ ] absorbance.html: put the Vega specification in qc_mario_dye1/2 and have the file created by `roboliq.js`
 - [ ] Evoware: can we call a "subroutine" using a variable for the filename?  And change the variable name in a loop?
 - [ ] why are tips washed again before diluting first destination wells?
 - [ ] roboliqMain: automatically create a directory where the script files will go

@@ -239,7 +239,7 @@ function expandRowsByObject(nestedRows, rowIndexes, otherRowIndexes, conditions,
  *   if has star-suffix, call branchRowsByNamedValue
  *   else call assignRowsByNamedValue
  */
-function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
+export function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
 	if (DEBUG) {
 		console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
@@ -585,6 +585,10 @@ function countRows(nestedRows, rowIndexes) {
 	return sum;
 }*/
 
+/**
+ * If an action handler return 'undefined', it means that the handler took care of the action already.
+ * @type {Object}
+ */
 const actionHandlers = {
 	"allocatePlates": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		const action2 = _.cloneDeep(action);
@@ -611,6 +615,32 @@ const actionHandlers = {
 		return assign(_rows, rowIndexes, otherRowIndexes, name, action2, randomEngine);
 	},
 	"assign": assign,
+	"case": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const caseMap = _.toPairs(action.cases);
+		// Group the rows according to the first case they satisfy
+		const rowIndexesGroups = caseMap.map(x => []);
+		for (let j = 0; j < rowIndexes.length; j++) {
+			const rowIndex = rowIndexes[j];
+			const row = rows[rowIndex];
+			const table1 = [row];
+			for (let i = 0; i < caseMap.length; i++) {
+				const [caseName, caseSpec] = caseMap[i];
+				if (!caseSpec.where || filterOnWhere(table1, caseSpec.where).length === 1) {
+					rowIndexesGroups[i].push(rowIndex);
+					break;
+				}
+			}
+		}
+		if (DEBUG) { console.log({caseMap, rowIndexesGroups}); }
+
+		const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
+		for (let i = 0; i < caseMap.length; i++) {
+			const [caseName, caseSpec] = caseMap[i];
+			const rowIndexes2 = rowIndexesGroups[i];
+			expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, caseName, randomEngine)
+			expandRowsByObject(rows, rowIndexes2, otherRowIndexes2, caseSpec.conditions, randomEngine);
+		}
+	},
 	"calculate": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		const expr = _.isString(action) ? action : action.expression;
 		const action2 = _.isString(action) ? {} : action;

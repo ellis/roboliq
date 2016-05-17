@@ -710,7 +710,7 @@ describe('EvowareCompilerTest', function() {
 			const options = {timing: true, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json", TEMPDIR: "C:\\Temp"}};
 			const [{lines}] = EvowareCompiler.compile(table, protocol, agents, options);
 			// console.log({lines});
-			should(lines).containEql('Execute("mkdir C:\\Temp",2,"",2);');
+			should(lines).containEql('Execute("cmd /c mkdir C:\\Temp",2,"",2);');
 		});
 
 	});
