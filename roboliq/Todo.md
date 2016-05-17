@@ -70,7 +70,7 @@
 		- [?] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
 		- [?] append JSON to the dataset file
 	- [?] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
-- [ ] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
+- [x] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range
 - [ ] should we measure empty wells before dispensing into them?

@@ -68,7 +68,7 @@ if (wellDesignFactor !== "_") {
 	fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));
 
 	if (dataset !== "_" && table.length > 0) {
-		const datasetFile = path.join(runDir, dataset+".json");
+		const datasetFile = path.join(runDir, dataset+".jsonl");
 		const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
 		fs.appendFileSync(datasetFile, contents);
 	}

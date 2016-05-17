@@ -125,7 +125,7 @@ steps:
       program:
         excitationWavelengthMin: 230nm
         excitationWavelengthMax: 1000nm
-        excitationWavelengthStep: 50nm
+        excitationWavelengthStep: 10nm
         wellDesignFactor: well
       outputDataset: "absorbance"
     3:
@@ -162,8 +162,8 @@ steps:
         command: absorbanceReader.measurePlate
         object: plate1
         program:
-          excitationWavelengthMin: 230nm
-          excitationWavelengthMax: 1000nm
-          excitationWavelengthStep: 50nm
+          excitationWavelengthMin: 280nm
+          excitationWavelengthMax: 580nm
+          excitationWavelengthStep: 10nm
           wellDesignFactor: well
         outputDataset: "absorbance"
