@@ -10,6 +10,7 @@ opts
 	.command("begin", "log beginning of step")
 	.command("end", "log ending of step")
 	.command("initRun", "initialize a new protocol run (should be called at the beginning of a protocol)")
+	.command("execTest", "execute a run-time test, and return DOS exit code 0 for true/success and 1 for false/failure")
 	.command("zlevel", "log z-levels")
 	.command("TecanInfinite", "process Tecan Infinite measurements");
 

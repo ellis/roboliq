@@ -691,7 +691,7 @@ describe('EvowareCompilerTest', function() {
 			// console.log(JSON.stringify(results, null, '\t'));
 			should.deepEqual(results, [[
 				[
-					{ "line": "Execute(\"AAA runTest C:\\Here\\myscript.out.json 1.1\",6,\"EXITLOOP\",2);" },
+					{ "line": "Execute(\"AAA execTest C:\\Here\\myscript.out.json 1.1\",6,\"EXITLOOP\",2);" },
 					{ "line": "If(\"EXITLOOP\",0,\"0\",\"_1End\");" }
 				],
 				{ "line": "Comment(\"_1End\");" }

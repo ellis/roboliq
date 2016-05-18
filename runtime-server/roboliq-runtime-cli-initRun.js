@@ -1,6 +1,7 @@
 var fs = require('fs');
 var opts = require('commander');
-var moment = require('moment')
+var mkdirp = require('mkdirp');
+var moment = require('moment');
 var path = require('path');
 // var sendPacket = require('./roboliq-runtime-sendPacket.js');
 
@@ -17,8 +18,8 @@ const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".ru
 const runId = moment().format("YYYYMMDD_HHmmss");
 const runDir = path.join(scriptDir, runId);
 
+mkdirp.Sync(runDir);
 fs.writeFileSync(runFile, runId);
-fs.mkdirSync(runDir);
 
 var packet = {type: "initRun", protocolHash: "0", runId: runId};
 // sendPacket(packet, opts);

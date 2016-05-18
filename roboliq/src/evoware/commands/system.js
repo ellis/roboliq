@@ -7,7 +7,7 @@ import evowareHelper from './evowareHelper.js';
 export function runtimeExitLoop(params, parsed, data) {
 	const target = data.loopEndStack[0];
 	return [
-		{line: evowareHelper.createExecuteLine("${ROBOLIQ}", ["runTest", "${SCRIPTFILE}", data.path.join(".")], true, "EXITLOOP")},
+		{line: evowareHelper.createExecuteLine("${ROBOLIQ}", ["execTest", "${SCRIPTFILE}", data.path.join(".")], true, "EXITLOOP")},
 		{line: evowareHelper.createIfLine("EXITLOOP", "==", 0, target)}
 	];
 }
