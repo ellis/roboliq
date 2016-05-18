@@ -74,14 +74,14 @@
 - [x] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
 - [ ] make sure EvowareScripts is checked into git
 - [ ] should add protocolId, protocolHash, runId, and stepId to measurement output -- so that results of different runs can be distinguished
-- [ ] system.runtimeExitLoop: implement loop breaking by deciding at run-time whether to break
+- [x] system.runtimeExitLoop: implement loop breaking by deciding at run-time whether to break
 	- [x] create yaml
-	- [?] create command handler
-	- [ ] create evoware instruction handler
-		- [?] call `runtime-cli runTest`
-		- [?] extend `evowareHelper.createExecuteLine` to put exit code into a variable
-		- [?] check exit code of Execute line, and skip to end of current loop if result is not 0
-		- [?] EvowareCompiler: create data.loopEndStack
+	- [x] create command handler
+	- [x] create evoware instruction handler
+		- [x] call `runtime-cli runTest`
+		- [x] extend `evowareHelper.createExecuteLine` to put exit code into a variable
+		- [x] check exit code of Execute line, and skip to end of current loop if result is not 0
+		- [x] EvowareCompiler: create data.loopEndStack
 - [ ] runtime-cli runTest
 	- [ ] VBS: check exit code of node, and return it
 	- [ ] execute the code from runtime-cli

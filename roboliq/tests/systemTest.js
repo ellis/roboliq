@@ -150,5 +150,28 @@ describe('system', function() {
 				2: {1: {comment: "empty"}}
 			});
 		});
+
+		it("should handle system.repeat with system.runtimeExitLoop", () => {
+			var protocol = {
+				roboliq: "v1",
+				steps: {
+					"1": {
+						command: "system.repeat",
+						count: 2,
+						steps: {
+							1: {comment: "empty"},
+							2: {command: "system.runtimeExitLoop", testType: "R", test: "cat('true')"}
+						}
+					}
+				}
+			};
+			var result = roboliq.run(["-o", "", "-T"], protocol);
+			// console.log(JSON.stringify(result.output, null, '\t'));
+			should.deepEqual(_.pick(result.output.steps[1], ["1", "2"]), {
+				1: {1: {comment: "empty"}, 2: {command: "system.runtimeExitLoop", testType: "R", test: "cat('true')"}},
+				2: {1: {comment: "empty"}, 2: {command: "system.runtimeExitLoop", testType: "R", test: "cat('true')"}}
+			});
+		});
+
 	});
 });

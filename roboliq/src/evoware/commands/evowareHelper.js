@@ -34,11 +34,9 @@ function createFactsLine(equipment, variableName, value = "") {
  * @return {string} - line for an "If" token
  */
 function createIfLine(variable, test, value, target) {
-	const cmps = {
-		"==": 0, "!=": 1, ">": 2, "<": 3
-	};
-	assert(cmps[test], `Unknown test: ${test}`);
-	const cmp = cmps[test];
+	const cmps = ["==", "!-", ">", "<"];
+	const cmp = cmps.indexOf(test);
+	assert(cmp >= 0, `Unknown test: ${test}`);
 	return `If("${variable}",${cmp},"${value}","${target}");`
 }
 
@@ -54,6 +52,7 @@ function stripQuotes(s) {
 module.exports = {
 	createExecuteLine,
 	createFactsLine,
+	createIfLine,
 	quote,
 	stripQuotes
 };

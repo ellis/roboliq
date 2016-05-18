@@ -75,21 +75,20 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 	}
 
 	// console.log(`compileStep: ${path.join(".")}`)
-	// console.log({steps: protocol.steps})
+	//console.log({steps: protocol.steps})
 	const step = (_.isEmpty(path)) ? protocol.steps : _.get(protocol.steps, path);
+	// console.log({step})
 	if (_.isUndefined(step))
 		return undefined;
 
 	const results = [];
 
-	const commandHandler
-		= (_.isUndefined(step.command) || _.isUndefined(step.agent) || !_.includes(agents, step.agent))
-		? undefined
-		: commandHandlers[step.command];
+	const commandHandler = commandHandlers[step.command];
 	let generatedCommandLines = false;
 	let generatedTimingLogs = false;
+	const agentMatch = _.isUndefined(step.agent) || _.includes(agents, step.agent);
 	// If there is no command handler for this step, then handle sub-steps
-	if (_.isUndefined(commandHandler)) {
+	if (_.isUndefined(commandHandler) || !agentMatch) {
 		// Find all sub-steps (properties that start with a digit)
 		var keys = _.filter(_.keys(step), function(key) {
 			var c = key[0];
@@ -97,7 +96,7 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 		});
 		// Sort them in "natural" order
 		keys.sort(naturalSort);
-		//console.log({keys})
+		// console.log({keys})
 
 		const isLoop = _.includes(["system.repeat", "experiment.forEachGroup", "experiment.forEachRow"], step.command);
 		const loopEndName = `_${path.join(".")}End`;

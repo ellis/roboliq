@@ -670,6 +670,34 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
+		it("should handle system.repeat and system.runtimeExitLoop", () => {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "system.repeat",
+						1: {
+							command: "system.runtimeExitLoop",
+							testType: "R",
+							test: "cat('true')"
+						}
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const options = {timing: false, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json"}};
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], options);
+			// console.log(JSON.stringify(results, null, '\t'));
+			should.deepEqual(results, [[
+				[
+					{ "line": "Execute(\"AAA runTest C:\\Here\\myscript.out.json 1.1\",6,\"EXITLOOP\",2);" },
+					{ "line": "If(\"EXITLOOP\",0,\"0\",\"_1End\");" }
+				],
+				{ "line": "Comment(\"_1End\");" }
+			]]);
+		});
+
 	});
 
 	describe("compile", () => {
