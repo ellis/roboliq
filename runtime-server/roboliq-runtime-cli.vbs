@@ -23,3 +23,4 @@ jspath = Left(WScript.ScriptFullName, Len(WScript.ScriptFullName) - 3)
 cmd = "node " & jspath & "js " & Join(args, " ")
 'WScript.Echo cmd
 Return = objShell.Run(cmd, 0, true)
+WScript.Quit Return

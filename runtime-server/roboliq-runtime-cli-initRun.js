@@ -18,7 +18,7 @@ const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".ru
 const runId = moment().format("YYYYMMDD_HHmmss");
 const runDir = path.join(scriptDir, runId);
 
-mkdirp.Sync(runDir);
+mkdirp.sync(runDir);
 fs.writeFileSync(runFile, runId);
 
 var packet = {type: "initRun", protocolHash: "0", runId: runId};

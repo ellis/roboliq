@@ -34,7 +34,7 @@ objects:
     conditions:
       volume: 150ul
       syringe*: 4
-      step*=range: {from: 0, till: 8}
+      step*=range: {from: 0, till: 10}
       well=allocateWells:
         orderBy: step
         rows: 8
@@ -59,7 +59,7 @@ objects:
                   dilutionFactor=calculate: "dilutionFactor * 2"
                   dyeVolume=calculate: "dyeVolume / 2"
     orderBy: [step]
-    where: {step: {lte: 8}}
+    where: {step: {lte: 10}}
 
 steps:
   data:
@@ -173,5 +173,5 @@ steps:
         testType: R
         test: |
           library(jsonlite)
-          df = stream..("absorbance.jsonl")...
+          df = stream_in(file("absorbance.jsonl"), verbose=F)
           if (max(df$step) >= 2) cat("true")
