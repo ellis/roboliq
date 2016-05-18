@@ -77,7 +77,7 @@
 	- [x] create yaml
 	- [x] create command handler
 	- [x] create evoware instruction handler
-		- [x] call `runtime-cli runTest`
+		- [x] call `runtime-cli execTest`
 		- [x] extend `evowareHelper.createExecuteLine` to put exit code into a variable
 		- [x] check exit code of Execute line, and skip to end of current loop if result is not 0
 		- [x] EvowareCompiler: create data.loopEndStack
@@ -91,11 +91,14 @@
 			- or how could we just use the node libraries that are installed in our runtime server? (save the script in the RUNDIR and then call 'require' on it; or maybe use NODE_PATH environment variable)
 			- on 'mario', Rcmd is in /c/Program Files/R/R-3.3.0/bin/x64, but not in PATH
 	- [x] relay the decision whether to continue by exit code (0=success, 1=failure)
+- [ ] BUG: qc_mario_dye2: `step*=range: {from: 0, till: 10}` leads to wierd wellAllocation, whereas till 9 is OK
 - [ ] should add protocolId, protocolHash, runId, and stepId to measurement output -- so that results of different runs can be distinguished
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range
 - [ ] fix `bsse-lab` repository on mario's computer
 - [ ] absorbance.html: load absorbance.jsonl
+- [ ] runtime-cli-execTest: currently the path to Rscript is hard-coded; figure out how to provide a configurable path
+	- the complication is that I'd like to be able to run it on mac/linux too, not just on the agent's machine
 - [ ] HACK?: for now, create both .jsonl dataset AND re-write it as a .json dataset for easier usage by Vega
 - [ ] absorbance.html: create the Vega specification
 - [ ] absorbance.html: put the Vega specification in qc_mario_dye1/2 and have the file created by `roboliq.js`
