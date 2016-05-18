@@ -45,3 +45,10 @@ system.echo:
   description: "A trouble-shooting function to echo a variable or text"
   properties:
     value: {description: "Value to echo"}
+
+system.runtimeExitLoop:
+  description: "Perform a run-time check to test whether execution should exit the current loop"
+  properties:
+    testType: {description: "The type of code to execute to determine whether to break; a JSON truthy value should be returned.", enum: [nodejs, R]}
+    test: {description: "The code to execute at runtime that will test whether to exit.", type: string}
+  required: [testType, test]

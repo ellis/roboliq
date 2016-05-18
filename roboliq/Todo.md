@@ -45,13 +45,14 @@
 
 * [x] Goal 1: run qc_mario_dye1 and get data for manual analysis
 * [x] Goal 2: run qc_mario_dye1 and extract JSON with factors
+* [x] Goal 3: run qc_mario_dye2 and display analysis during run-time by manually re-running R script after measurements
 * [ ] Goal 4: implement loop breaking and calling external script to evaluate the break
-* [ ] Goal 3: run qc_mario_dye2 and display analysis in real-time
 * [ ] Goal 5: run qc_mario_dye2 and automatically stop when peak value is no longer detectably above the base level
 * [ ] Goal 6: adapt the scan range automatically
 	* [ ] Goal: call external script to calculate runtime values from measurements
 	* [ ] Goal: load externally calculated runtime values
 	* [ ] Goal: save a runtime worklist using a mustache template and runtime values
+* [ ] Goal 7: run qc_mario_dye2 and display analysis in real-time
 
 - [x] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
 	- [x] read RUNDIR from script's runId file
@@ -71,6 +72,28 @@
 		- [x] append JSON to the dataset file
 	- [x] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
 - [x] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
+- [ ] make sure EvowareScripts is checked into git
+- [ ] should add protocolId, protocolHash, runId, and stepId to measurement output -- so that results of different runs can be distinguished
+- [ ] system.runtimeExitLoop: implement loop breaking by deciding at run-time whether to break
+	- [x] create yaml
+	- [?] create command handler
+	- [ ] create evoware instruction handler
+		- [?] call `runtime-cli runTest`
+		- [?] extend `evowareHelper.createExecuteLine` to put exit code into a variable
+		- [?] check exit code of Execute line, and skip to end of current loop if result is not 0
+		- [?] EvowareCompiler: create data.loopEndStack
+- [ ] runtime-cli runTest
+	- [ ] VBS: check exit code of node, and return it
+	- [ ] execute the code from runtime-cli
+		- issues to consider include:
+			- should we set the CWD to rundir? to scriptdir?
+			- if we're executing nodejs code, how do we set the paths so that the nodejs libraries are accessible? (perhaps they need to be global, but that's really bad practice)
+			- if we set the CWD to SCRIPTDIR, we could run `npm install` to get most of the js libraries we might need
+			- or how could we just use the node libraries that are installed in our runtime server? (save the script in the RUNDIR and then call 'require' on it; or maybe use NODE_PATH environment variable)
+			- on 'mario', Rcmd is in /c/Program Files/R/R-3.3.0/bin/x64, but not in PATH
+	- [ ] relay the decision whether to continue:
+		- [ ] the code should probably output a JSON object?
+		- [ ] or should it just return a true/false (or "truthy") value?
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range
 - [ ] fix `bsse-lab` repository on mario's computer

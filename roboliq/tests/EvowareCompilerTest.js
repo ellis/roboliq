@@ -124,7 +124,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [
 				[{line: 'StartTimer("1");'}],
 				[{line: 'WaitTimer("1","60");'}]
@@ -146,7 +146,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [
 				[{ line: "Execute(\"wscript some.vbs\",0,\"\",2);" }]
 			]);
@@ -168,7 +168,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [
 				[{
 					line: "FACTS(\"RoboSeal\",\"RoboSeal_Seal\",\"VALUE\",\"0\",\"\");",
@@ -194,7 +194,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [
 				[
@@ -241,7 +241,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			);
 			const agents = ["ourlab.mario.evoware"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [
 				[
@@ -288,7 +288,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{line: "MoveLiha(1,1,0,1,\"0C0810000000000000\",4,4,0,400,0,0);"},
@@ -326,7 +326,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Aspirate(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{line: "MoveLiha(2,1,0,1,\"0C0820000000000000\",4,4,0,400,0,0);"},
@@ -367,7 +367,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{line: "MoveLiha(1,1,0,1,\"0C0810000000000000\",4,4,0,400,0,0);"},
@@ -415,7 +415,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Mix(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,0,0,0,0,1,0,1,\"0C08?0000000000000\",2,0,0);"},
 				{line: "MoveLiha(15,1,0,1,\"0C08?0000000000000\",4,4,0,400,0,0);"},
@@ -454,7 +454,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0820000000000000\",0,0);"},
@@ -501,7 +501,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Aspirate(3,\"Water free dispense\",\"10\",\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0830000000000000\",0,0);"},
 				{line: "Dispense(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0880000000000000\",0,0);"},
@@ -565,7 +565,7 @@ describe('EvowareCompilerTest', function() {
 				]}
 			]];
 			const agents = ["robot1"];
-			const results1 = EvowareCompiler.compileStep(table, protocol1, agents, [], undefined, {timing: false});
+			const results1 = EvowareCompiler.compileStep(table, protocol1, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results1, expected);
 
 			const protocol2 = _.merge({}, protocol0, {
@@ -602,7 +602,7 @@ describe('EvowareCompilerTest', function() {
 					}
 				}
 			});
-			const results2 = EvowareCompiler.compileStep(table, protocol2, agents, [], undefined, {timing: false});
+			const results2 = EvowareCompiler.compileStep(table, protocol2, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results2, expected);
 
 		});
@@ -635,7 +635,7 @@ describe('EvowareCompilerTest', function() {
 				}
 			});
 			const agents = ["robot1"];
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {timing: false});
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			//console.log(JSON.stringify(results, null, '\t'))
 			should.deepEqual(results, [[
 				{line: "Wash(15,1,1,1,0,\"4\",500,\"2\",500,10,70,30,0,0,1000,0);"},
@@ -643,7 +643,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it("should handling timing", function() {
+		it("should handle timing", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
@@ -659,7 +659,7 @@ describe('EvowareCompilerTest', function() {
 			});
 			const agents = ["robot1"];
 			const options = {timing: true, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json"}};
-			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, options);
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], options);
 			// console.log(JSON.stringify(results, null, '\t'));
 			should.deepEqual(results, [[
 				{ "line": "Group(\"Step 1\");" },

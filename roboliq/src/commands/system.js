@@ -60,6 +60,10 @@ const commandHandlers = {
 
 		return {expansion};
 	},
+	"system.runtimeExitLoop": function(params, parsed, data) {
+		// Do nothing, this command is its own instruction
+		return {};
+	}
 };
 
 module.exports = {

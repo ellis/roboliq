@@ -167,3 +167,11 @@ steps:
           excitationWavelengthStep: 10nm
           wellDesignFactor: well
         outputDataset: "absorbance"
+      3:
+        description: "Check whether to stop diluting yet"
+        command: system.runtimeExitLoop
+        testType: R
+        test: |
+          library(jsonlite)
+          df = stream..("absorbance.jsonl")...
+          if (max(df$step) >= 2) cat("true")

@@ -1,15 +1,17 @@
 import _ from 'lodash';
+import assert from 'assert';
 
 /**
  * Create the Evoware token to execute an external command.
  * @param  {string} path - path to command to execute
  * @param  {array} args - array of arguments to pass
  * @param  {boolean} wait - true if evoware should wait for the command to complete execution
+ * @param  {string} exitCodeVariableName - optional name of
  * @return {string} a string representing an Evoware 'Execute' token.
  */
-function createExecuteLine(path, args, wait) {
-	const flag1 = (wait) ? 2 : 0;
-	return `Execute("${path} ${args.join(" ")}",${flag1},"",2);`;
+function createExecuteLine(path, args, wait, exitCodeVariableName = "") {
+	const flag1 = ((wait) ? 2 : 0) + (_.isEmpty(exitCodeVariableName) ? 0 : 4);
+	return `Execute("${path} ${args.join(" ")}",${flag1},"${exitCodeVariableName}",2);`;
 }
 
 function createFactsLine(equipment, variableName, value = "") {
@@ -21,6 +23,23 @@ function createFactsLine(equipment, variableName, value = "") {
 		`""`
 	];
 	return `FACTS(${l.join(",")});`;
+}
+
+/**
+ * Create an 'If' token.
+ * @param  {string} variable - name of the variable to test
+ * @param  {string} test - one of "==", "!=", "<", ">"
+ * @param  {string|number} value - value to compare to
+ * @param  {string} target - target to jump to: an Evoware "Comment" token
+ * @return {string} - line for an "If" token
+ */
+function createIfLine(variable, test, value, target) {
+	const cmps = {
+		"==": 0, "!=": 1, ">": 2, "<": 3
+	};
+	assert(cmps[test], `Unknown test: ${test}`);
+	const cmp = cmps[test];
+	return `If("${variable}",${cmp},"${value}","${target}");`
 }
 
 function quote(s) {

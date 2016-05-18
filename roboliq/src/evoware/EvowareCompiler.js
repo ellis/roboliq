@@ -6,6 +6,7 @@ import * as EvowareTableFile from './EvowareTableFile.js';
 import evowareHelper from './commands/evowareHelper.js';
 import * as evoware from './commands/evoware.js';
 import * as pipetter from './commands/pipetter.js';
+import * as system from './commands/system.js';
 import * as timer from './commands/timer.js';
 import * as transporter from './commands/transporter.js';
 
@@ -18,6 +19,7 @@ const commandHandlers = {
 	"pipetter._mix": pipetter._mix,
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,
+	"system.runtimeExitLoop": system.runtimeExitLoop,
 	"timer._sleep": timer._sleep,
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,
@@ -38,7 +40,7 @@ export function compile(table, protocol, agents, options = {}) {
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
-	const results = compileStep(table, protocol, agents, [], objects, options);
+	const results = compileStep(table, protocol, agents, [], objects, [], options);
 
 	// Prepend token to call 'initRun'
 	results.unshift({line: evowareHelper.createExecuteLine(options.variables.ROBOLIQ, ["initRun", options.variables.SCRIPTFILE], true)});
@@ -54,9 +56,9 @@ export function compile(table, protocol, agents, options = {}) {
 	return [{table, lines}];
 }
 
-export function compileStep(table, protocol, agents, path, objects, options = {}) {
+export function compileStep(table, protocol, agents, path, objects, loopEndStack = [], options = {}) {
 	try {
-		const results = compileStepSub(table, protocol, agents, path, objects, options);
+		const results = compileStepSub(table, protocol, agents, path, objects, loopEndStack, options);
 		return results;
 	} catch (e) {
 		console.log("ERROR: "+path.join("."));
@@ -67,7 +69,7 @@ export function compileStep(table, protocol, agents, path, objects, options = {}
 	return [];
 }
 
-function compileStepSub(table, protocol, agents, path, objects, options) {
+function compileStepSub(table, protocol, agents, path, objects, loopEndStack, options) {
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}
@@ -96,10 +98,25 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 		// Sort them in "natural" order
 		keys.sort(naturalSort);
 		//console.log({keys})
+
+		const isLoop = _.includes(["system.repeat", "experiment.forEachGroup", "experiment.forEachRow"], step.command);
+		const loopEndName = `_${path.join(".")}End`;
+		const loopEndStack2 = (isLoop) ? [loopEndName].concat(loopEndStack) : loopEndStack;
+		let needLoopLabel = false;
+
 		// Try to expand the substeps
 		for (const key of keys) {
-			const result1 = compileStep(table, protocol, agents, path.concat(key), objects, options);
+			const result1 = compileStep(table, protocol, agents, path.concat(key), objects, loopEndStack2, options);
+			// Possibly check whether we need a loop label
+			if (isLoop && !needLoopLabel) {
+				const result2 = _.flattenDeep(result1);
+				needLoopLabel = _.some(result2, result => (result.line || "").indexOf(loopEndName) >= 0);
+			}
 			results.push(result1);
+		}
+
+		if (needLoopLabel) {
+			results.push({line: `Comment("${loopEndName}");`});
 		}
 	}
 	// Else, handle the step's command:
@@ -112,7 +129,8 @@ function compileStepSub(table, protocol, agents, path, objects, options) {
 			accesses: [],
 			//files: filecache,
 			protocol,
-			path
+			path,
+			loopEndStack
 		};
 		// Parse command options
 		const schema = protocol.schemas[step.command];
