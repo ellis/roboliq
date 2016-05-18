@@ -574,6 +574,25 @@ describe('design', () => {
 			);
 		});
 
+		it.only("should support allocateWells() with orderBy on a numeric field", () => {
+			should.deepEqual(
+				expandConditions({
+					"step*": [1, 2, 10],
+					"well=allocateWells": {
+						orderBy: "step",
+						rows: 8,
+						columns: 12,
+						wells: "A01 right A12"
+					}
+				}),
+				[
+					{step: 1, well: "A01"},
+					{step: 2, well: "A02"},
+					{step: 10, well: "A03"},
+				]
+			);
+		});
+
 		it("should support range() with groupBy and sameBy", () => {
 			should.deepEqual(
 				expandConditions({
