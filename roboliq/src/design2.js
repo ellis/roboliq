@@ -2,6 +2,7 @@ import _ from 'lodash';
 import assert from 'assert';
 // import Immutable, {Map, fromJS} from 'immutable';
 import math from 'mathjs';
+import naturalSort from 'javascript-natural-sort';
 import Random from 'random-js';
 //import yaml from 'yamljs';
 
@@ -702,21 +703,39 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 	const isSpecial = value instanceof Special;
 	const hasGroupOrSame = action.groupBy || action.sameBy;
 
-	// If 'orderBy' is set, we should either re-order the rowIndexes or the values
+	// If 'orderBy' is set, we should re-order the values (if just returning 'value') or rowIndexes (otherwise)
 	if (action.orderBy) {
 		if (hasGroupOrSame) {
-			// console.log({orderBy: action.orderBy, rowIndexes})
-			rowIndexes = query_orderBy(rows, rowIndexes, action.orderBy);
+			const rowIndexes2 = query_orderBy(rows, rowIndexes, action.orderBy);
+			// console.log({orderBy: action.orderBy, rowIndexes, rowIndexes2})
 			// console.log({rowIndexes})
+			rowIndexes = rowIndexes2;
 		}
 		else if (_.isArray(value)) {
-			// Get an array of indexes that indicates the new desired order of rowIndexes
-			const is0 = _.range(rowIndexes.length);
-			const is1 = _.sortBy(is0, i => _.values(_.pick(rows[rowIndexes[i]], action.orderBy)));
+			// This is a copy of 'makeComparer', but with more indirection in assignment of row1 and row2
+			const propertyNames = action.orderBy;
+			function comparer(i1, i2) {
+				const row1 = rows[rowIndexes[i1]];
+				const row2 = rows[rowIndexes[i2]];
+				const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
+				for (let j = 0; j < l.length; j++) {
+					const propertyName = l[j];
+					const value1 = row1[propertyName];
+					const value2 = row2[propertyName];
+					const cmp = naturalSort(value1, value2);
+					if (cmp !== 0)
+						return cmp;
+				}
+				return 0;
+			};
+			const is1 = _.range(rowIndexes.length);
+			is1.sort(comparer);
+			// console.log({is1});
+
 			// Allocate a new value array
 			const value1 = new Array(rowIndexes.length);
 			// Insert values into the new array according to the new desired order
-			for (let i = 0; i < is1.length; i++) {
+			for (let i = 0; i < rowIndexes.length; i++) {
 				const j = is1[i];
 				value1[j] = value[i];
 			}
@@ -1054,7 +1073,26 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
 export function query_orderBy(rows, rowIndexes, orderBy) {
 	// console.log({rows, rowIndexes, orderBy})
 	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
-	return _.sortBy(rowIndexes, i => _.values(_.pick(rows[i], orderBy)));
+	const rowIndexes2 = _.clone(rowIndexes);
+	rowIndexes2.sort(makeComparer(rows, orderBy));
+	return rowIndexes2;
+}
+
+function makeComparer(rows, propertyNames) {
+	return function(i1, i2) {
+		const row1 = rows[i1];
+		const row2 = rows[i2];
+		const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
+		for (let j = 0; j < l.length; j++) {
+			const propertyName = l[j];
+			const value1 = row1[propertyName];
+			const value2 = row2[propertyName];
+			const cmp = naturalSort(value1, value2);
+			if (cmp !== 0)
+				return cmp;
+		}
+		return 0;
+	};
 }
 
 export function query(table, q) {

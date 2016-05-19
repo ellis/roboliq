@@ -574,7 +574,7 @@ describe('design', () => {
 			);
 		});
 
-		it.only("should support allocateWells() with orderBy on a numeric field", () => {
+		it("should support allocateWells() with orderBy on a numeric field", () => {
 			should.deepEqual(
 				expandConditions({
 					"step*": [1, 2, 10],
