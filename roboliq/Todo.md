@@ -91,7 +91,7 @@
 			- or how could we just use the node libraries that are installed in our runtime server? (save the script in the RUNDIR and then call 'require' on it; or maybe use NODE_PATH environment variable)
 			- on 'mario', Rcmd is in /c/Program Files/R/R-3.3.0/bin/x64, but not in PATH
 	- [x] relay the decision whether to continue by exit code (0=success, 1=failure)
-- [ ] BUG: qc_mario_dye2: `step*=range: {from: 0, till: 10}` leads to wierd wellAllocation, whereas till 9 is OK
+- [x] BUG: qc_mario_dye2: `step*=range: {from: 0, till: 10}` leads to wierd wellAllocation, whereas till 9 is OK
 - [ ] should add protocolId, protocolHash, runId, and stepId to measurement output -- so that results of different runs can be distinguished
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range

@@ -714,7 +714,7 @@ function _run(opts, userProtocol) {
 				return jiff.patch(raw, protocol);
 			}
 			else {
-				var b = loadProtocol(protocol, raw, url, filecache);
+				var b = loadProtocol(protocol, raw, url || "", filecache);
 				return mergeProtocols(protocol, b);
 			}
 		},
