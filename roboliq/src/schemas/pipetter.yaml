@@ -94,11 +94,12 @@ pipetter.PipetteItem:
     source: {description: Source specifier, type: Source}
     destination: {description: Destination specifier, type: Well}
     volume: {description: Volume, type: Volume}
+    volumeCalibrated: {description: "Calculate a calibrated volume", type: object}
+    volumeTotal: {description: "Volume that the well should be brought up to.", type: Volume}
     layer: {description: "A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list."}
     cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: [boolean, pipetter.MixSpec]}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
-    volumeCalibrated: {description: "Calculate a calibrated volume", type: object}
 
 pipetter._PunctureItem:
   description: Parameters for low-level puncture items.

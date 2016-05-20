@@ -125,5 +125,36 @@ describe('pipetter', function() {
 				]
 			)
 		});
+
+		/*it.only("should translate calibration data to volumes", () => {
+			const protocol = _.cloneDeep(protocolA);
+			protocol.steps["1"] = {
+				command: "pipetter.pipetteMixtures",
+				clean: 'none',
+				calibration: {
+					absorbance: {
+						calibrationVariable: "absorbance",
+						calibrationData: [
+							{absorbance: 0.5, volume: "50ul"},
+							{absorbance: 1.5, volume: "150ul"},
+						]
+					}
+				},
+				mixtures: [
+					{destination: "plate1(A02)", sources: [{source: 'source1', absorbance: 1.0}, {source: 'source2'}], volume: "175ul"},
+				],
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			console.log(JSON.stringify(result.output.steps[1][1], null, '\t'));
+			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
+				command: "pipetter.pipette",
+				clean: 'none',
+				items: [
+					{source: 'source1', volume: '100ul', destination: 'plate1(A02)'},
+					{source: 'source2', volume: '75ul', destination: 'plate1(A02)'},
+				]
+			});
+		});*/
+
 	});
 });

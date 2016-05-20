@@ -125,7 +125,6 @@ function pipette(params, parsed, data, options={}) {
 
 	// 1) Add labware to well properties
 	// 2) Fixup mixing specs
-	// 3) Calculate calibrated volumes
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
 		if (item.source && parsed.objectName.sourceLabware) {
@@ -143,8 +142,18 @@ function pipette(params, parsed, data, options={}) {
 		if (item.hasOwnProperty("destinationMixing")) {
 			item.destinationMixing = processMixingSpecs([item.destinationMixing]);
 		}
-		// Calculate calibrated volumes
-		if (item.hasOwnProperty("volumeCalibrated")) {
+	}
+
+	// Calculate volumes from calibrators
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		if (item.hasOwnProperty("volume")) {
+			// Ignore other volume properties
+		}
+		else if (item.hasOwnProperty("volumeTotal")) {
+			// Ignore other volume properties
+		}
+		else if (item.hasOwnProperty("volumeCalibrated")) {
 			const spec = item.volumeCalibrated;
 			const calibratorName = spec.calibrator;
 			const targetValue = math.eval(spec.value);
@@ -170,7 +179,22 @@ function pipette(params, parsed, data, options={}) {
 				const p = math.divide(math.subtract(targetValue, valueLE), d);
 				item.volume = math.add(math.multiply(1 - p, volumeLE), math.multiply(p, volumeGE));
 			}
-			console.log({spec, dataLE, dataGE, volume: item.volume})
+			// console.log({spec, dataLE, dataGE, volume: item.volume})
+		}
+	}
+
+	// In order to handle 'volumeTotal',
+	// perform an initial calculation of well volumes, but this will skip source
+	// liquids, and therefore need to be performed again later after choosing source wells.
+	calculateWellVolumes(items, data);
+	for (let i = 0; i < items.length; i++) {
+		const item = items[i];
+		if (item.hasOwnProperty("volume")) {
+			// Ignore other volume properties
+		}
+		else if (item.hasOwnProperty("volumeTotal")) {
+			item.volume = math.subtract(item.volumeTotal, item.volumeBefore);
+			// console.log({item})
 		}
 	}
 	// console.log(JSON.stringify(items, null, '  '))
@@ -554,7 +578,7 @@ function calculateWellVolumes(items, data) {
 	const wellVolumes = {};
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
-		if (item.source) {
+		if (_.isString(item.source)) {
 			const well = item.source;
 			const volume0 = (wellVolumes.hasOwnProperty(well)) ? wellVolumes[well] : WellContents.getWellVolume(well, data)
 			const volume1 = math.subtract(volume0, item.volume);
@@ -571,6 +595,7 @@ function calculateWellVolumes(items, data) {
 			item.volumeBefore = volume0;
 			item.volumeAfter = volume1;
 			wellVolumes[well] = volume1;
+			// console.log({well, volume: wellVolumes[well]})
 		}
 	}
 }

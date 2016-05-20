@@ -1133,7 +1133,7 @@ describe('pipetter', function() {
 			should.deepEqual(result3.output.steps[1][1].items, expected[1].items.map(x => _.omit(x, "sourceMixing")));
 		});
 
-		it.only("should translate calibration data to volumes", () => {
+		it("should translate calibration data to volumes", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -1169,13 +1169,14 @@ describe('pipetter', function() {
 							}
 						},
 						items: [
-							{source: "source1", destination: "plate1(A02)", volumeCalibrated: {calibrator: "absorbance", value: 1.0}}
+							{source: "source1", destination: "plate1(A02)", volumeCalibrated: {calibrator: "absorbance", value: 1.0}},
+							{source: "source2", destination: "plate1(A02)", volumeTotal: "175ul"}
 						],
 					}
 				}
 			};
 			const result = roboliq.run(["-o", ""], protocol);
-			console.log(JSON.stringify(result.output.steps[1][1], null, '\t'));
+			// console.log(JSON.stringify(result.output.steps[1][1], null, '\t'));
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
@@ -1187,6 +1188,12 @@ describe('pipetter', function() {
 						"source": "plate1(A01)",
 						"destination": "plate1(A02)",
 						"volume": "100 ul"
+					},
+					{
+						"syringe": "ourlab.mario.liha.syringe.2",
+						"source": "plate1(B01)",
+						"destination": "plate1(A02)",
+						"volume": "75 ul"
 					}
 				]
 			});
