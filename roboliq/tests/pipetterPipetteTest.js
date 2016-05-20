@@ -1133,5 +1133,64 @@ describe('pipetter', function() {
 			should.deepEqual(result3.output.steps[1][1].items, expected[1].items.map(x => _.omit(x, "sourceMixing")));
 		});
 
+		it.only("should translate calibration data to volumes", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2",
+						contents: {
+							A01: ['100ul', 'source1'],
+							B01: ['100ul', 'source2']
+						}
+					},
+					source1: {
+						type: 'Liquid',
+						wells: 'plate1(A01)'
+					},
+					source2: {
+						type: 'Liquid',
+						wells: 'plate1(B01)'
+					},
+				},
+				steps: {
+					1: {
+						command: "pipetter.pipette",
+						clean: 'none',
+						calibrators: {
+							absorbance: {
+								calibratorVariable: "absorbance",
+								calibratorData: [
+									{absorbance: 0.5, volume: "50ul"},
+									{absorbance: 1.5, volume: "150ul"},
+								]
+							}
+						},
+						items: [
+							{source: "source1", destination: "plate1(A02)", volumeCalibrated: {calibrator: "absorbance", value: 1.0}}
+						],
+					}
+				}
+			};
+			const result = roboliq.run(["-o", ""], protocol);
+			console.log(JSON.stringify(result.output.steps[1][1], null, '\t'));
+			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
+				"command": "pipetter._pipette",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Dry_1000\"",
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"source": "plate1(A01)",
+						"destination": "plate1(A02)",
+						"volume": "100 ul"
+					}
+				]
+			});
+		});
+
 	});
 });

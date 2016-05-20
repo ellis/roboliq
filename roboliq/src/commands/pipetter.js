@@ -125,6 +125,7 @@ function pipette(params, parsed, data, options={}) {
 
 	// 1) Add labware to well properties
 	// 2) Fixup mixing specs
+	// 3) Calculate calibrated volumes
 	for (let i = 0; i < items.length; i++) {
 		const item = items[i];
 		if (item.source && parsed.objectName.sourceLabware) {
@@ -141,6 +142,35 @@ function pipette(params, parsed, data, options={}) {
 		}
 		if (item.hasOwnProperty("destinationMixing")) {
 			item.destinationMixing = processMixingSpecs([item.destinationMixing]);
+		}
+		// Calculate calibrated volumes
+		if (item.hasOwnProperty("volumeCalibrated")) {
+			const spec = item.volumeCalibrated;
+			const calibratorName = spec.calibrator;
+			const targetValue = math.eval(spec.value);
+			const calibratorVariable = _.get(parsed.orig, ["calibrators", calibratorName, "calibratorVariable"]);
+			assert(_.isString(calibratorVariable), "expected calibratorVariable to be a string: "+JSON.stringify(calibratorVariable));
+			const calibratorData0 = _.get(parsed.orig, ["calibrators", calibratorName, "calibratorData"]);
+			assert(_.isArray(calibratorData0), "expected calibratorData to be an array");
+			const calibratorData = _.sortBy(calibratorData0, calibratorVariable);
+			const dataLE = _.last(_.filter(calibratorData, x => x[calibratorVariable] <= targetValue));
+			const dataGE = _.first(_.filter(calibratorData, x => x[calibratorVariable] >= targetValue));
+			const valueLE = math.eval(dataLE[calibratorVariable]);
+			const valueGE = math.eval(dataGE[calibratorVariable]);
+			const volumeLE = math.eval(dataLE.volume);
+			const volumeGE = math.eval(dataGE.volume);
+			if (math.equal(valueLE, targetValue)) {
+				item.volume = volumeLE;
+			}
+			else if (math.equal(valueGE, targetValue)) {
+				item.volume = volumeGE;
+			}
+			else {
+				const d = math.subtract(valueGE, valueLE);
+				const p = math.divide(math.subtract(targetValue, valueLE), d);
+				item.volume = math.add(math.multiply(1 - p, volumeLE), math.multiply(p, volumeGE));
+			}
+			console.log({spec, dataLE, dataGE, volume: item.volume})
 		}
 	}
 	// console.log(JSON.stringify(items, null, '  '))

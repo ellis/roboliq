@@ -41,6 +41,25 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
+# Todos for QC part 2
+
+- [ ] Write a script that accepts a JSON object with the dye calibration data, and then prepare a well with a dye concentrations whose absorbance should be 1.
+
+We will fill an eppendorf tube to 1000ul.
+We want 150ul of its content to have an absorbance of 1.
+How much stock dye needs to be dispensed in the tube?
+
+```yaml
+command: pipetter.prepareMixtures
+calibration:
+  absorbance:
+    calibrationData: ./calib.json
+    calibrationVariable: absorbance
+mixtures:
+  - {source: dye1, absorbance: 1}
+```
+
+
 # Todos for QC finding measurable absorbance ranges
 
 * [x] Goal 1: run qc_mario_dye1 and get data for manual analysis
