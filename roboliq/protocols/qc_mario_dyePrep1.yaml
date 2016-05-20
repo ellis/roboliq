@@ -1,0 +1,50 @@
+roboliq: v1
+
+description: |
+  Dispense stock dye into a well such that we expect the well to have an
+  absorbance readout of 1.0.
+
+  Use calibration data from `qc_mario_dye?.yaml`.
+  For now, I'll manually enter the data into this script, but the next step
+  will be to read that data in from a JSON file.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+steps:
+  1:
+    command: pipetter.pipette
+    cleanEnd: light
+    calibrators:
+      absorbance:
+        calibratorVariable: "absorbance"
+        calibratorData:
+        - {absorbance: 0.5, volume: "50ul"}
+        - {absorbance: 1.5, volume: "150ul"}
+    items:
+    - {source: "dye", destination: "plate1(A01)", volumeCalibrated: {calibrator: "absorbance", value: 1.0}}
+    - {source: "ourlab.mario.systemLiquid", destination: "plate1(A01)", volumeTotal: "250ul"}
+  2:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 490nm
+      wells: A01

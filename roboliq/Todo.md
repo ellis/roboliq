@@ -44,6 +44,7 @@
 # Todos for QC part 2
 
 - [ ] Write a script that accepts a JSON object with the dye calibration data, and then prepare a well with a dye concentrations whose absorbance should be 1.
+- [ ] load the wavelength to measure
 
 We will fill an eppendorf tube to 1000ul.
 We want 150ul of its content to have an absorbance of 1.
