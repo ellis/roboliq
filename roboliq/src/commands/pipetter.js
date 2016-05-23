@@ -177,7 +177,10 @@ function pipette(params, parsed, data, options={}) {
 			else {
 				const d = math.subtract(valueGE, valueLE);
 				const p = math.divide(math.subtract(targetValue, valueLE), d);
-				item.volume = math.add(math.multiply(1 - p, volumeLE), math.multiply(p, volumeGE));
+				// console.log({d, p})
+				// console.log(math.multiply(math.subtract(1, p), volumeLE))
+				// console.log(math.multiply(p, volumeGE))
+				item.volume = math.add(math.multiply(math.subtract(1, p), volumeLE), math.multiply(p, volumeGE));
 			}
 			// console.log({spec, dataLE, dataGE, volume: item.volume})
 		}
