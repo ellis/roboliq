@@ -103,6 +103,12 @@ const nomnom = require('nomnom').options({
 		help: 'specify output directory',
 		metavar: 'DIR'
 	},
+	parentDir: {
+		abbr: 'P',
+		full: 'parent-dir',
+		help: "specify output's parent directory, under which a new subdirectory will be created with the protocol's name",
+		metavar: 'DIR'
+	},
 	print: {
 		abbr: 'p',
 		flag: true,
@@ -636,8 +642,12 @@ function run(argv, userProtocol) {
 		// If the output is not suppressed, write the protocol to an output file.
 		if (opts.output !== '') {
 			var inpath = _.last(opts.infiles);
-			var dir = opts.outputDir || path.dirname(inpath);
-			var outpath = opts.output || path.join(dir, path.basename(inpath, path.extname(inpath))+".out.json");
+			var basename = path.basename(inpath, path.extname(inpath));
+			var dir
+				= (opts.outputDir) ? opts.outputDir
+				: (opts.parentDir) ? path.join(opts.parentDir, basename)
+				: path.dirname(inpath);
+			var outpath = opts.output || path.join(dir, basename+".out.json");
 			if (!opts.quiet) {
 				console.log("output written to: "+outpath);
 			}
