@@ -44,7 +44,9 @@
 # Goals for Monday and Tuesday
 
 - [x] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script
-- [ ] Run qc_mario_dye2 with this variation: only measure 480nm (create qc_mario_dye2b)
+- [x] Run qc_mario_dye2 with this variation: only measure 480nm (create qc_mario_dye2b)
+- [ ] figure out problem with scan vs single measurements
+- [ ] order more plates!
 - [ ] make an evoware command(s) to create and run worklists using runtime variables
 
 # Todos for QC part 2, creating a dye mixture with the desired absorbance
@@ -52,6 +54,8 @@
 - [ ] Write a script that accepts a JSON object with the dye calibration data, and then prepare a well with a dye concentrations whose absorbance should be 1.
 - [ ] load the wavelength to measure
 - [ ] BUG: checkout the pipette test "should translate calibration data to volumes"; the second dispense should not use a Dry program.
+- [ ] BUG: can't use `pipetter.pipette` with items using both small and large tips (doesn't find a wash program)
+- [ ] BUG: `qc_mario_dyeDebug1`: why does small tip liquid class mix after dispensing?  And why does it wait so long in the source liquid after aspirating?
 
 We will fill an eppendorf tube to 1000ul.
 We want 150ul of its content to have an absorbance of 1.

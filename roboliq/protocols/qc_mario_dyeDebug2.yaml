@@ -1,0 +1,118 @@
+roboliq: v1
+
+description: |
+  Take a concentrated dye stock and dilute it to the find the optimal wavelength
+  for absorbance readouts.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
+  design:
+    type: Design
+    randomSeed: 1
+    conditions:
+      type*:
+        5:
+          dyeVolume0: 5ul
+          step*: 1
+        10:
+          dyeVolume0: 10ul
+          step*: 2
+        20:
+          dyeVolume0: 20ul
+          step*: 3
+        40:
+          dyeVolume0: 40ul
+          step*: 4
+        80:
+          dyeVolume0: 80ul
+          step*: 5
+        160:
+          dyeVolume0: 160ul
+          step*: 6
+      waterVolume0=calculate: "160ul - dyeVolume0"
+      dyeVolume=calculate: "dyeVolume0 / 2^(step - 1)"
+      syringe: 1
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        wells: "A12 + B11 right B12 + C10 right C12 + D09 right D12 + E08 right E12 + F07 right F12"
+
+steps:
+  data:
+    source: design
+  1:
+    description: Pipette water
+    command: pipetter.pipette
+    sources: ourlab.mario.systemLiquid
+    destinations: $$well
+    destinationLabware: plate1
+    volumes: $$waterVolume0
+    cleanBetween: none
+    cleanEnd: flush
+  1:
+    data:
+  2:
+    description: Begin dilutions
+    command: experiment.forEachGroup
+    groupBy: type
+    steps:
+      description: "`Dilution from {{$type}} ul`"
+      1:
+        data:
+          where: {step: 1}
+        description: Pipette dye to initial wells
+        command: pipetter.pipette
+        sources: dye
+        destinations: $$well
+        destinationLabware: plate1
+        volumes: $$dyeVolume0
+        cleanBetween: none
+        cleanEnd: flush
+      2:
+        description: "Dilute"
+        command: pipetter.pipetteDilutionSeries
+        diluent: ourlab.mario.systemLiquid
+        dilutionFactor: 2
+        dilutionMethod: source
+        volume: 160ul
+        destinationLabware: plate1
+        items:
+          "#data":
+            groupBy: type
+            templateGroup:
+              destinations: $$well
+              syringe: 1
+        clean: none
+        cleanEnd: flush
+        diluentParams:
+          clean: none
+  3:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+    outputDataset: "absorbance"

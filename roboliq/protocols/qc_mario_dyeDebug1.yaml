@@ -1,0 +1,86 @@
+roboliq: v1
+
+description: |
+  Take a concentrated dye stock and dilute it to the find the optimal wavelength
+  for absorbance readouts.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
+  design:
+    type: Design
+    randomSeed: 1
+    conditions:
+      volume: 150ul
+      dyeVolume*: [0ul, 5ul, 10ul, 15ul, 20ul, 25ul, 30ul, 35ul, 40ul]
+      syringe*: 8
+      waterVolume=calculate: "150ul - dyeVolume"
+      well=allocateWells:
+        rows: 8
+        columns: 12
+
+steps:
+  data:
+    source: design
+  1:
+    description: Pipette water
+    command: pipetter.pipette
+    sources: ourlab.mario.systemLiquid
+    destinations: $$well
+    destinationLabware: plate1
+    volumes: $$waterVolume
+    cleanBetween: none
+    cleanEnd: flush
+  2:
+    data:
+      where: {syringe: {"lte": 4}}
+    description: Pipette dye with large tips
+    command: pipetter.pipette
+    sources: dye
+    destinations: $$well
+    destinationLabware: plate1
+    volumes: $$dyeVolume
+    syringes: $$syringe
+    cleanBetween: flush
+    cleanEnd: flush
+  3:
+    data:
+      where: {syringe: {"gt": 4}}
+    description: Pipette dye with small tips
+    command: pipetter.pipette
+    sources: dye
+    destinations: $$well
+    destinationLabware: plate1
+    volumes: $$dyeVolume
+    syringes: $$syringe
+    cleanBetween: flush
+    cleanEnd: flush
+  4:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+    outputDataset: "absorbance"

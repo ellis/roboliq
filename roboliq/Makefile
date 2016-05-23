@@ -37,7 +37,13 @@ qc_mario_dye2b.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dye2b.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dye2b\qc_mario_dye2b.out.json' ourlab.mario.evoware
 
 qc_mario_dyePrep1.yaml:
-	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyePrep1.yaml -O 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyePrep1' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyePrep1\qc_mario_dyePrep1.out.json' ourlab.mario.evoware
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyePrep1.yaml -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyePrep1\qc_mario_dyePrep1.out.json' ourlab.mario.evoware
+
+qc_mario_dyeDebug1.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug1.yaml -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyeDebug1\qc_mario_dyeDebug1.out.json' ourlab.mario.evoware
+
+qc_mario_dyeDebug2.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug2.yaml -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyeDebug2\qc_mario_dyeDebug2.out.json' ourlab.mario.evoware
 
 prof:
 	node --prof dist/main.js --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml

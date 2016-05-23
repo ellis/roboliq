@@ -29,22 +29,45 @@ objects:
     wells: dyeLabware(C01 down F01)
 
 steps:
+  # 1:
+  #   command: pipetter.pipette
+  #   cleanEnd: light
+  #   calibrators:
+  #     absorbance:
+  #       calibratorVariable: "absorbance"
+  #       calibratorData:
+  #       - {volume: "37.5ul", absorbance: 3.07325}
+  #       - {volume: "18.75ul", absorbance: 1.41695}
+  #       - {volume: "9.375ul", absorbance: 0.64280}
+  #   items:
+  #   - {source: "dye", destination: "plate1(A01)", volumeCalibrated: {calibrator: "absorbance", value: 1.0}}
+  #   - {source: "ourlab.mario.systemLiquid", destination: "plate1(A01)", volumeTotal: "150ul"}
   1:
-    command: pipetter.pipette
+    command: pipetter.pipetteMixtures
+    cleanBegin: none
     cleanEnd: light
-    calibrators:
-      absorbance:
-        calibratorVariable: "absorbance"
-        calibratorData:
-        - {absorbance: 0.5, volume: "50ul"}
-        - {absorbance: 1.5, volume: "150ul"}
-    items:
-    - {source: "dye", destination: "plate1(A01)", volumeCalibrated: {calibrator: "absorbance", value: 1.0}}
-    - {source: "ourlab.mario.systemLiquid", destination: "plate1(A01)", volumeTotal: "250ul"}
+    destinationLabware: plate1
+    mixtures:
+      - {destination: E02, sources: [{source: ourlab.mario.systemLiquid, volume: 0ul}, {source: dye, volume: 150ul}]}
+      - {destination: E03, sources: [{source: ourlab.mario.systemLiquid, volume: 75ul}, {source: dye, volume: 75ul}]}
+      - {destination: E04, sources: [{source: ourlab.mario.systemLiquid, volume: 112.5ul}, {source: dye, volume: 37.5ul}]}
+      - {destination: E05, sources: [{source: ourlab.mario.systemLiquid, volume: 131.2ul}, {source: dye, volume: 18.8ul}]}
+      - {destination: E06, sources: [{source: ourlab.mario.systemLiquid, volume: 141.6ul}, {source: dye, volume: 9.4ul}]}
+      - {destination: E07, sources: [{source: ourlab.mario.systemLiquid, volume: 145.3ul}, {source: dye, volume: 4.7ul}]}
   2:
     description: "Measure absorbance"
     command: absorbanceReader.measurePlate
     object: plate1
     program:
-      excitationWavelength: 490nm
-      wells: A01
+      excitationWavelength: 480nm
+      # wells: A01
+      wells: "plate1(D02 right block E07)"
+  3:
+    description: "Scan absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelengthMin: 470nm
+      excitationWavelengthMax: 490nm
+      excitationWavelengthStep: 10nm
+      wells: "plate1(D02 right block E07)"
