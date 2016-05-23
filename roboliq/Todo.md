@@ -41,10 +41,17 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
-# Todos for QC part 2
+# Goals for Monday and Tuesday
+
+- [?] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script
+- [ ] Run qc_mario_dye2 with this variation: only measure 480nm (create qc_mario_dye2b)
+- [ ] make an evoware command(s) to create and run worklists using runtime variables
+
+# Todos for QC part 2, creating a dye mixture with the desired absorbance
 
 - [ ] Write a script that accepts a JSON object with the dye calibration data, and then prepare a well with a dye concentrations whose absorbance should be 1.
 - [ ] load the wavelength to measure
+- [ ] BUG: checkout the pipette test "should translate calibration data to volumes"; the second dispense should not use a Dry program.
 
 We will fill an eppendorf tube to 1000ul.
 We want 150ul of its content to have an absorbance of 1.
@@ -61,7 +68,7 @@ mixtures:
 ```
 
 
-# Todos for QC finding measurable absorbance ranges
+# Todos for QC part 1, finding measurable absorbance ranges
 
 * [x] Goal 1: run qc_mario_dye1 and get data for manual analysis
 * [x] Goal 2: run qc_mario_dye1 and extract JSON with factors
