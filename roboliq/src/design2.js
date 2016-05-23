@@ -4,6 +4,7 @@ import assert from 'assert';
 import math from 'mathjs';
 import naturalSort from 'javascript-natural-sort';
 import Random from 'random-js';
+import stableSort from 'stable';
 //import yaml from 'yamljs';
 
 import wellsParser from './parsers/wellsParser.js';
@@ -728,8 +729,7 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 				}
 				return 0;
 			};
-			const is1 = _.range(rowIndexes.length);
-			is1.sort(comparer);
+			const is1 = stableSort(_.range(rowIndexes.length), comparer);
 			// console.log({is1});
 
 			// Allocate a new value array
@@ -1073,9 +1073,7 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
 export function query_orderBy(rows, rowIndexes, orderBy) {
 	// console.log({rows, rowIndexes, orderBy})
 	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
-	const rowIndexes2 = _.clone(rowIndexes);
-	rowIndexes2.sort(makeComparer(rows, orderBy));
-	return rowIndexes2;
+	return stableSort(rowIndexes, makeComparer(rows, orderBy));
 }
 
 function makeComparer(rows, propertyNames) {

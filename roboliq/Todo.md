@@ -43,7 +43,7 @@
 
 # Goals for Monday and Tuesday
 
-- [?] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script
+- [x] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script
 - [ ] Run qc_mario_dye2 with this variation: only measure 480nm (create qc_mario_dye2b)
 - [ ] make an evoware command(s) to create and run worklists using runtime variables
 
@@ -119,6 +119,7 @@ mixtures:
 			- on 'mario', Rcmd is in /c/Program Files/R/R-3.3.0/bin/x64, but not in PATH
 	- [x] relay the decision whether to continue by exit code (0=success, 1=failure)
 - [x] BUG: qc_mario_dye2: `step*=range: {from: 0, till: 10}` leads to wierd wellAllocation, whereas till 9 is OK
+- [x] BUG: qc_mario_dye2b: wells are allocated in the kind-of-wrong order (syringes loose their order, we need a stable sort)
 - [ ] should add protocolId, protocolHash, runId, and stepId to measurement output -- so that results of different runs can be distinguished
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range
