@@ -52,16 +52,24 @@ objects:
         flush: false
       - mix: true
         flush: true
+      case=range: {}
       syringe=range:
         till: 4
         order: repeat
-      step*:
-      - dyeVolume: 10 ul
-      - dyeVolume: 5 ul
+      type*: [undiluted, destination]
       well=allocateWells:
         rows: 8
         columns: 12
         wells: "A01 right block H02"
+      .case1=case:
+        cases:
+          - where: 'type == "undiluted"'
+            conditions:
+              type*:
+                undiluted: {dyeVolume: 10 ul}
+                source: {dyeVolume: 5 ul}
+          - conditions:
+              dyeVolume: 5 ul
 
 steps:
   data:
@@ -69,7 +77,7 @@ steps:
   1:
     description: Handle initial wells
     data:
-      where: "step == 1"
+      where: 'type == "undiluted"'
     1:
       description: Pipette water
       command: pipetter.pipette
@@ -94,46 +102,64 @@ steps:
         excitationWavelength: 480nm
         wellDesignFactor: well
       outputDataset: "absorbance"
-    4:
-      description: Dilute
-      command: pipetter.pipette
-      sources: $$waterSource
-      destinations: $$well
-      destinationLabware: plate1
-      volumes: 150ul
-      clean: flush
-    5:
-      description: Mix without flush
-      data:
-        where: "mix & !flush"
-      command: pipetter.mix
-      wells: $$well
-      wellLabware: plate1
-      cleanEnd: none
-    5:
-      description: Mix and flush
-      data:
-        where: "mix & flush"
-      command: pipetter.mix
-      wells: $$well
-      wellLabware: plate1
-      cleanEnd: flush
   2:
-    description: Transfer dye to second well
-    command: pipetter.pipette
-    sources:
-      "#data":
-        where: {step: 1}
-        value: well
-    destinations:
-      "#data":
-        where: {step: 2}
-        value: well
-    destinationLabware: plate1
-    volumes: 150 ul
-    clean: flush
+    description: For each set of pipetting factors
+    command: experiment.forEachGroup
+    groupBy: [waterSource, mix, flush]
+    steps:
+      description: "`Case: {{$waterSource}}, {{$mix}}, {{$flush}}`"
+      1:
+        description: Handle dilution and possibly mixing
+        data:
+          where: 'type == "source"'
+        1:
+          description: Dilute
+          command: pipetter.pipette
+          sources: $waterSource
+          destinations: $well
+          destinationLabware: plate1
+          volumes: 150ul
+          syringes: $$syringe
+          clean: flush
+        2:
+          description: Mix?
+          command: system.if
+          test: $mix
+          then:
+            command: pipetter.mix
+            wells: $well
+            wellLabware: plate1
+            clean: none
+        3:
+          description: Flush?
+          command: system.if
+          test: $flush
+          then:
+            description: Flush
+            command: pipetter.cleanTips
+            equipment: ourlab.mario.liha
+            syringes: $$syringe
+            intensity: flush
+      2:
+        description: Transfer dye to second well
+        command: pipetter.pipette
+        sources:
+          "#data":
+            where: {type: source}
+            value: well
+        sourceLabware: plate1
+        destinations:
+          "#data":
+            where: {type: destination}
+            value: well
+        destinationLabware: plate1
+        volumes: 150 ul
+        cleanBegin: none
+        clean: flush
   3:
     description: "Measure absorbance"
+    data:
+      uniqueBy: well
     command: absorbanceReader.measurePlate
     object: plate1
     program:

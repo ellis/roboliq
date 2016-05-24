@@ -682,10 +682,17 @@ function processSources(result, path, x, data) {
 		x = x.map((x2, index) => {
 			const path2 = path.concat(index)
 			return expect.try({paramName: path2.join('.')}, () => {
-				const result2 = {value: {}, objectName: {}};
-				processSource(result2, path2, x2, data);
-				// console.log(`result2: ${JSON.stringify(result2)}`)
-				return _.get(result2.value, path2);
+				// console.log({x2})
+				if (_.isPlainObject(x2) && x2.type === 'Liquid') {
+					return [x.wells];
+				}
+				else {
+					const result2 = {value: {}, objectName: {}};
+					// console.log({result2, path2, x2})
+					processSource(result2, path2, x2, data);
+					// console.log(`result2: ${JSON.stringify(result2)}`)
+					return _.get(result2.value, path2);
+				}
 			});
 		});
 	}

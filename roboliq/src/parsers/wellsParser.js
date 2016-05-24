@@ -51,17 +51,18 @@ function processParserResult(result, objects, text, config = {}) {
 				//subject: 'Any?'
 			}
 		});
-		//console.log({clause, parsed});
+		// console.log({clause, parsed});
 		if (parsed.value.source) {
 			// If this was a source, return its wells
-			if (parsed.value.source.type === 'Source')
+			if (parsed.value.source.type === 'Source' || parsed.value.source.type === 'Liquid')
 				return [parsed.value.source.wells];
 			// Handle the case of when a variable is used and here we can substitute in its value
 			else if (_.isString(parsed.value.source) && parsed.value.source !== clause.source)
 				return parse(parsed.value.source, objects);
 			// Else
 			else {
-				expect.throw({}, "unrecognized source specifier: "+parsed.value.source);
+				// console.log({clause, parsed})
+				expect.throw({}, "unrecognized source specifier: "+JSON.stringify(parsed.value.source));
 			}
 		}
 		else if (parsed.value.labware || (config.rows && config.columns)) {

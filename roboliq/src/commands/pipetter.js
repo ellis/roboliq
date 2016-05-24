@@ -943,6 +943,14 @@ const commandHandlers = {
 		});
 		// console.log("items: "+JSON.stringify(items))
 
+		// Add labware to well properties
+		for (let i = 0; i < items.length; i++) {
+			const item = items[i];
+			if (item.well && parsed.objectName.wellLabware) {
+				item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
+			}
+		}
+
 		const items2 = _.map(items, (item, i) => {
 			assert(item.well, `missing well for mix item ${i}: ${JSON.stringify(item)}`);
 			const volume0 = WellContents.getWellVolume(item.well, data);

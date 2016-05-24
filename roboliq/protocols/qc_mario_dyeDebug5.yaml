@@ -1,0 +1,143 @@
+roboliq: v1
+
+description: |
+  Transfer dye repeatedly between wells to see whether absorbance changes strangely.
+
+  syringe  side  well  cyc  role  vol
+  =======  ====  ====  ===  ====  ===
+  1        U     A07    1   ini   10
+  1        D     B07    1   ini   10
+  1        U     A07    2   src    5
+  1        D     B07    2   dst   15
+  1        U     A07    3   dst   10
+  1        D     B07    3   src   10
+  1        U     A07    4   dst   15
+  1        D     B07    4   src    5
+  1        U     A07    5   src   10
+  1        D     B07    5   dst   10
+  ...
+  =======  ====  ====
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
+  design:
+    type: Design
+    conditions:
+      syringe*: 4
+      wellVolume0: 200 ul
+      dyeVolume0: [5 ul, 10 ul, 10 ul, 15 ul]
+      waterVolume0=calculate: "wellVolume0 - dyeVolume0"
+      .stuff*:
+      - role: S
+        dyeVolume=calculate: dyeVolume0
+        wellVolume=calculate: wellVolume0
+      - role: R
+        dyeVolume=calculate: dyeVolume0 / 4
+        wellVolume=calculate: wellVolume0 / 4
+      - role: L
+        dyeVolume=calculate: dyeVolume0
+        wellVolume=calculate: wellVolume0
+      - role: L
+        dyeVolume=calculate: dyeVolume0 * 1.25
+        wellVolume=calculate: wellVolume0 * 1.25
+      - role: R
+        dyeVolume=calculate: dyeVolume0
+        wellVolume=calculate: wellVolume0
+      cycle=range:
+        groupBy: syringe
+      side*: [L, R]
+      well=allocateWells:
+        sameBy: [syringe, side]
+        rows: 8
+        columns: 12
+        wells: "A03 right block D04"
+      .=case:
+        cases:
+        - where: 'side == "R"'
+          conditions:
+            dyeVolume=calculate: dyeVolume0 + (dyeVolume0 - dyeVolume)
+            wellVolume=calculate: wellVolume0 + (wellVolume0 - wellVolume)
+
+
+steps:
+  data:
+    source: design
+  1:
+    description: Handle initial concentrations
+    data:
+      where: 'role == "S"'
+      orderBy: side
+    1:
+      description: Fill wells
+      command: pipetter.pipetteMixtures
+      mixtures:
+        "#data":
+          groupBy: well
+          templateGroup:
+            destination: $well
+            sources:
+            - {source: ourlab.mario.systemLiquid, volume: $waterVolume0}
+            - {source: dye, volume: $dyeVolume0}
+      destinationLabware: plate1
+      clean: flush
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+
+  2:
+    command: experiment.forEachGroup
+    data:
+      where: "cycle > 1"
+    groupBy: cycle
+    steps:
+      description: "`Cycle {{$cycle}}`"
+      1:
+        description: "`Transfer aliquot to the {{$role}} side`"
+        command: pipetter.pipette
+        sourceLabware: plate1
+        sources:
+          "#data":
+            where: "side != role"
+            value: well
+        destinationLabware: plate1
+        destinations:
+          "#data":
+            where: "side == role"
+            value: well
+        volumes: 50 ul
+        clean: flush
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
