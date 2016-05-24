@@ -36,23 +36,28 @@ objects:
         5:
           dyeVolume0: 5ul
           step*: 1
+          dyeVolume: [5ul]
         10:
           dyeVolume0: 10ul
           step*: 2
+          dyeVolume: [5ul, 5ul]
         20:
           dyeVolume0: 20ul
           step*: 3
+          dyeVolume: [10ul, 5ul, 5ul]
         40:
           dyeVolume0: 40ul
           step*: 4
+          dyeVolume: [20ul, 10ul, 5ul, 5ul]
         80:
           dyeVolume0: 80ul
           step*: 5
+          dyeVolume: [40ul, 20ul, 10ul, 5ul, 5ul]
         160:
           dyeVolume0: 160ul
           step*: 6
+          dyeVolume: [80ul, 40ul, 20ul, 10ul, 5ul, 5ul]
       waterVolume0=calculate: "160ul - dyeVolume0"
-      dyeVolume=calculate: "dyeVolume0 / 2^(step - 1)"
       syringe: 1
       well=allocateWells:
         rows: 8
@@ -64,6 +69,8 @@ steps:
     source: design
   1:
     description: Pipette water
+    data:
+      where: {step: 1}
     command: pipetter.pipette
     sources: ourlab.mario.systemLiquid
     destinations: $$well

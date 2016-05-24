@@ -1,0 +1,145 @@
+roboliq: v1
+
+description: |
+  Take a concentrated dye stock and dilute it to the find the optimal wavelength
+  for absorbance readouts.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
+  design:
+    type: Design
+    conditions:
+      role1*:
+        control:
+          stepCount: 0
+          step: 1
+          role2: undiluted
+          dyeVolume0: 0 ul
+          waterVolume0: 160 ul
+          dyeVolume: 0 ul
+        experimental:
+          stepCount*: 6
+          step*=range: {groupBy: stepCount, till: stepCount}
+          role2=case:
+            cases:
+              undiluted:
+                where: "stepCount == 1"
+              yesA:
+                where: "step < stepCount & step == 1"
+                conditions:
+                  role2*: [undiluted, diluted]
+              diluted:
+                where: "step < stepCount"
+              replicate: {}
+          # role2=calculate: '(step == 1) ? ((stepCount == 1) ? "single" : "first") : (step == stepCount) ? "last" : "middle"'
+          # role3=case:
+          #   cases:
+          #     notLast:
+          #       where: {role2: first}
+          #       conditions:
+          #         role4*: [undiluted, diluted]
+          #     last:
+          #       conditions:
+          #         role4: replicate
+          dyeVolume0=calculate:
+            expression: "5*2^(stepCount-1)"
+            units: ul
+          waterVolume0=calculate: "160ul - dyeVolume0"
+          dyeVolume=calculate: '(role2 == "undiluted") ? dyeVolume0 : (role2 == "diluted") ? dyeVolume0 / 2^(step) : dyeVolume0 / 2^(step - 1)'
+      syringe: 1
+      well=allocateWells:
+        sameBy: [stepCount, step]
+        rows: 8
+        columns: 12
+        wells: "A11 + A12 + B11 right B12 + C10 right C12 + D09 right D12 + E08 right E12 + F07 right F12"
+
+steps:
+  data:
+    source: design
+  1:
+    description: Handle initial undiluted wells
+    data:
+      where: {role2: undiluted}
+    1:
+      description: Pipette water
+      command: pipetter.pipette
+      sources: ourlab.mario.systemLiquid
+      destinations: $$well
+      destinationLabware: plate1
+      volumes: $$waterVolume0
+      cleanBetween: none
+      cleanEnd: flush
+    2:
+      description: Pipette dye
+      command: pipetter.pipette
+      sources: dye
+      destinations: $$well
+      destinationLabware: plate1
+      volumes: $$dyeVolume0
+      cleanBetween: none
+      cleanEnd: flush
+    3:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+  2:
+    description: Begin dilutions
+    data:
+      where: {role2: {ne: "undiluted"}}
+    command: experiment.forEachGroup
+    groupBy: stepCount
+    steps:
+      1:
+        description: "`Dilution from {{$dyeVolume0}}`"
+        command: pipetter.pipetteDilutionSeries
+        diluent: ourlab.mario.systemLiquid
+        dilutionFactor: 2
+        dilutionMethod: source
+        volume: 160ul
+        destinationLabware: plate1
+        items:
+          "#data":
+            groupBy: stepCount
+            templateGroup:
+              destinations: $$well
+              syringe: 1
+        clean: none
+        cleanEnd: flush
+        diluentParams:
+          clean: none
+  3:
+    data:
+      where:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+    outputDataset: "absorbance"

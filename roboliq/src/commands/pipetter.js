@@ -670,20 +670,25 @@ function findPipettingPosition(items, data) {
 	}
 }
 
-function assignProgram(items, data) {
+function assignProgram(items0, data) {
 	// console.log("assignProgram: "+JSON.stringify(items))
-	const pipettingClass = findPipettingClass(items, data);
-	if (!pipettingClass) return false;
-	const pipettingPosition = findPipettingPosition(items, data);
-	if (!pipettingPosition) return false;
-	const tipModels = _(items).map('tipModel').uniq().value();
-	if (tipModels.length !== 1) return false;
-	const tipModelName = tipModels[0];
-	const tipModelCode = misc.getObjectsValue(tipModelName+".programCode", data.objects);
-	//console.log({equipment})
-	assert(tipModelCode, `missing value for ${tipModelName}.programCode`);
-	const program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
-	_.forEach(items, function(item) { item.program = program; });
+	const items = items0.filter(item => math.larger(item.volume, math.unit(0, "l")));
+	if (items.length > 0) {
+		// console.log({items})
+		const pipettingClass = findPipettingClass(items, data);
+		if (!pipettingClass) return false;
+		const pipettingPosition = findPipettingPosition(items, data);
+		if (!pipettingPosition) return false;
+		const tipModels = _(items).map('tipModel').compact().uniq().value();
+		if (tipModels.length !== 1) return false;
+		const tipModelName = tipModels[0];
+		assert(tipModelName, `missing value for tipModelName: `+JSON.stringify(tipModels));
+		const tipModelCode = misc.getObjectsValue(tipModelName+".programCode", data.objects);
+		//console.log({equipment})
+		assert(tipModelCode, `missing value for ${tipModelName}.programCode`);
+		const program = "\"Roboliq_"+pipettingClass+"_"+pipettingPosition+"_"+tipModelCode+"\"";
+		_.forEach(items0, function(item) { item.program = program; });
+	}
 	return true;
 }
 
