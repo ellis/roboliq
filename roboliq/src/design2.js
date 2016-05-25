@@ -706,13 +706,8 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 
 	// If 'orderBy' is set, we should re-order the values (if just returning 'value') or rowIndexes (otherwise)
 	if (action.orderBy) {
-		if (hasGroupOrSame) {
-			const rowIndexes2 = query_orderBy(rows, rowIndexes, action.orderBy);
-			// console.log({orderBy: action.orderBy, rowIndexes, rowIndexes2})
-			// console.log({rowIndexes})
-			rowIndexes = rowIndexes2;
-		}
-		else if (_.isArray(value)) {
+		// console.log("A")
+		if (_.isArray(value)) {
 			// This is a copy of 'makeComparer', but with more indirection in assignment of row1 and row2
 			const propertyNames = action.orderBy;
 			function comparer(i1, i2) {
@@ -739,52 +734,56 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 				const j = is1[i];
 				value1[j] = value[i];
 			}
-			// console.log({is0, is1, rowIndexes, rows, value, value1});
+			// console.log({is1, rowIndexes, rows, value, value1});
 			value = value1;
+		}
+		//if (hasGroupOrSame)
+		else {
+			const rowIndexes2 = query_orderBy(rows, rowIndexes, action.orderBy);
+			// console.log({orderBy: action.orderBy, rowIndexes, rowIndexes2})
+			// console.log({rowIndexes})
+			rowIndexes = rowIndexes2;
 		}
 	}
 
-	if (!action.groupBy && !action.sameBy) {
+	if (!action.groupBy && !action.sameBy && !action.orderBy) {
 		if (isSpecial) {
 			// console.log({name})
 			value.initGroup(rows, rowIndexes);
 		}
 		return value;
 	}
+	else if (action.groupBy) {
+		// printRows(rows);
+		const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
+		// console.log({rowIndexesGroups})
+		for (let i = 0; i < rowIndexesGroups.length; i++) {
+			const rowIndexes2 = rowIndexesGroups[i];
+
+			const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
+			// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
+			if (action.sameBy) {
+				assignSameBy(rows, rowIndexes2, otherRowIndexes2, name, action, randomEngine, value);
+			}
+			else {
+				if (isSpecial) {
+					// console.log({rows, rowIndexes2})
+					value.initGroup(rows, rowIndexes2);
+				}
+				expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
+			}
+		}
+		return undefined;
+	}
+	else if (action.sameBy) {
+		assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value);
+	}
 	else {
-		// console.log("GROUP!")
-
-		if (action.groupBy) {
-			// printRows(rows);
-			const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
-			// console.log({rowIndexesGroups})
-			for (let i = 0; i < rowIndexesGroups.length; i++) {
-				const rowIndexes2 = rowIndexesGroups[i];
-
-				const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
-				// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
-				if (action.sameBy) {
-					assignSameBy(rows, rowIndexes2, otherRowIndexes2, name, action, randomEngine, value);
-				}
-				else {
-					if (isSpecial) {
-						// console.log({rows, rowIndexes2})
-						value.initGroup(rows, rowIndexes2);
-					}
-					expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
-				}
-			}
-			return undefined;
+		if (isSpecial) {
+			value.initGroup(rows, rowIndexes);
 		}
-		else if (action.sameBy) {
-			assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value);
-		}
-		else {
-			if (isSpecial) {
-				value.initGroup(rows, rowIndexes);
-			}
-			return value;
-		}
+		expandRowsByNamedValue(rows, rowIndexes, otherRowIndexes, name, value, randomEngine);
+		return undefined;
 	}
 }
 

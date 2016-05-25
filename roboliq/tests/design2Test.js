@@ -372,6 +372,59 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle assign() with order=repeat and orderBy", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [6, 5, 4, 3, 2, 1],
+					"b=": {
+						values: [1, 2, 3],
+						order: "repeat",
+						orderBy: "a"
+					}
+				}),
+				[
+					{a: 6, b: 3}, {a: 5, b: 2}, {a: 4, b: 1},
+					{a: 3, b: 3}, {a: 2, b: 2}, {a: 1, b: 1}
+				]
+			);
+		});
+
+		it("should handle assign() with order=repeat and orderBy #2", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2, 3, 1, 2, 3],
+					"b=": {
+						values: [1, 2, 3],
+						order: "repeat",
+						orderBy: "a"
+					}
+				}),
+				[
+					{a: 1, b: 1}, {a: 2, b: 3}, {a: 3, b: 2},
+					{a: 1, b: 2}, {a: 2, b: 1}, {a: 3, b: 3}
+				]
+			);
+		});
+
+		it.only("should handle assign() with order=repeat and orderBy #3", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2, 3, 1, 2, 3],
+					"c*": [{
+						"b=": {
+							values: [1, 2, 3],
+							order: "repeat",
+							orderBy: "a"
+						}
+					}]
+				}),
+				[
+					{a: 1, c: 1, b: 1}, {a: 2, c: 1, b: 3}, {a: 3, c: 1, b: 2},
+					{a: 1, c: 1, b: 2}, {a: 2, c: 1, b: 1}, {a: 3, c: 1, b: 3}
+				]
+			);
+		});
+
 		it("should handle assign() with groupBy", () => {
 			should.deepEqual(
 				expandConditions({

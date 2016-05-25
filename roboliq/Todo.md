@@ -85,6 +85,8 @@ in a multi-agent protocol?
 # Todos for QC part 2, creating a dye mixture with the desired absorbance
 
 - [?] include RUNID in output
+- [ ] qc_mario_dyeDebug6: fix to Water_Wet for second layer
+- [ ] roboliq.js: accept parameters to call evoware compiler
 - [ ] rename 'value' to 'absorbance' and 'cycle' to 'absorbance_cycle'
 - [ ] Allow user to define values in objects.SCOPE (although I will probably eventually move SCOPE out of `objects`)
 - [ ] Allow for importing variables into SCOPE from external JSON file
