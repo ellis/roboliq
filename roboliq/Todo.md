@@ -82,6 +82,27 @@ in a multi-agent protocol?
 - [ ] runtime-cli-evowareRuntimeWorklist.js
 	- [ ] call roboliq.js with CONTINUE
 
+This crashes, write a test for it:
+
+```
+design:
+	type: Design
+	conditions:
+		dyeVolume0: 10 ul
+		waterVolume0: 240 ul
+		well*: [A01, B01, C01, D01, E01, F01, G01, H01]
+		stageA*: 1
+		.=case:
+			cases:
+			- where: 'stageA == 1'
+				conditions:
+					stageB*: 3
+					action=:
+						values: [mix, pip, none]
+						orderBy: stageB
+						order: repeat
+```
+
 # Todos for QC part 2, creating a dye mixture with the desired absorbance
 
 - [?] include RUNID in output

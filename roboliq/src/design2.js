@@ -10,7 +10,7 @@ import stableSort from 'stable';
 import wellsParser from './parsers/wellsParser.js';
 
 
-const DEBUG = false;
+const DEBUG = true;
 
 //import {locationRowColToText} from './parsers/wellsParser.js';
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
@@ -452,7 +452,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 			for (let rowIndex2 = 0; rowIndex2 < size; rowIndex2++) {
 				rows2[rowIndex2] = _.cloneDeep(row0);
 			}
-			// console.log(rows2)
+			// console.log({size, rows2})
 			assignRowsByNamedValue(rows2, _.range(size), [], name, value, randomEngine);
 			nestedRows[rowIndex] = _.flattenDeep(rows2);
 		}
@@ -1070,7 +1070,7 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
  * @return {array} a sorted ordering of rowIndexes
  */
 export function query_orderBy(rows, rowIndexes, orderBy) {
-	// console.log({rows, rowIndexes, orderBy})
+	console.log({rows, rowLen: rows.length, rowIndexes, orderBy})
 	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
 	return stableSort(rowIndexes, makeComparer(rows, orderBy));
 }
@@ -1079,6 +1079,9 @@ function makeComparer(rows, propertyNames) {
 	return function(i1, i2) {
 		const row1 = rows[i1];
 		const row2 = rows[i2];
+		if (!row1 || !row2) {
+			console.log({i1, i2, row1, row2})
+		}
 		const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
 		for (let j = 0; j < l.length; j++) {
 			const propertyName = l[j];

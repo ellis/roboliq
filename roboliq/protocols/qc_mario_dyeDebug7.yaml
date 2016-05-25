@@ -34,17 +34,14 @@ objects:
 
   design:
     type: Design
-    randomSeed: 1
     conditions:
-      dyeVolume0: 10 ul
-      waterVolume0: 240 ul
-      well*: [A01, B01, C01, D01, E01, F01, G01, H01]
-      stageA*:
-      - stageB*: 3
-        action=:
-          values: [mix, pip, none]
-          orderBy: stageB
-          order: repeat
+      X=case:
+        cases:
+        - conditions:
+            stageB*: 2
+            action: 2
+              # values: [mix, pip, none]
+              # order: sample
     # orderBy: [stageA, stageB]
 
   design1:
