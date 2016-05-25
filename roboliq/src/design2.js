@@ -283,7 +283,9 @@ export function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, 
 			value = _.range(1, value + 1);
 		}
 
+		console.log({loc: "A", rowIndexes, nestedRows})
 		branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine);
+		console.log("B")
 	}
 	else {
 		assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine);
@@ -457,7 +459,10 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 			nestedRows[rowIndex] = _.flattenDeep(rows2);
 		}
 	}
+	console.log({loc: "B", otherRowIndexes})
+	console.log(JSON.stringify(nestedRows))
 	flattenArrayAndIndexes(nestedRows, rowIndexes, otherRowIndexes);
+	console.log({loc: "C", otherRowIndexes})
 }
 
 function branchRowByArray(nestedRows, rowIndex, otherRowIndexes, values, randomEngine) {
