@@ -45,17 +45,56 @@
 
 - [x] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script
 - [x] Run qc_mario_dye2 with this variation: only measure 480nm (create qc_mario_dye2b)
+- [x] order more plates!
 - [ ] figure out problem with scan vs single measurements
-- [ ] order more plates!
 - [ ] make an evoware command(s) to create and run worklists using runtime variables
+
+How to generate worklists?
+
+One possibility would be to store the current protocol state (or a diff of it from the original state)
+and run roboliq.js+evowareMain.js on the commands to be put into the worklist.
+Problem is that this isn't generic -- we'd need to have some command to create a worklist.
+
+What if we annotate certain veriables as 'runtime variables', and if a command
+wants to use them (e.g. load them in commandHandler), then we automatically
+handle this?  But how do we decide whether to create a worklist or to generate
+an entirely new script?  If the worklist commands end up changing a critical
+aspect of state in a non-pre-determined way (such as putting a plate on a
+site which is determined at run-time), then the rest of the script needs to be
+re-compiled with that knowledge.
+
+What we might be able to do is have a 'system.runtimeSteps' command.
+It would indicate which variables to load from a named "variable set", and it
+would also specify the steps to execute.  Problem would be the effects.
+To begin with, I would probably want to assume that there were no state changes.
+We could, however, possibly check whether the sub-commands might create effects,
+and if so, then force the rest of the script to be compiled at runtime after
+the runtime variables have been loaded (problem being that compiler errors may
+then occur at runtime).
+A critical problem with `runtimeSteps` is: how to assign the agent, especially
+in a multi-agent protocol?
+
+- [?] system.yaml
+- [?] system.js
+- [?] EvowareCompiler
+- [ ] evowareHelper: createWorklistLine (or something like that)
+- [ ] evoware system.js
+- [ ] runtime-cli-evowareRuntimeWorklist.js
+	- [ ] call roboliq.js with CONTINUE
 
 # Todos for QC part 2, creating a dye mixture with the desired absorbance
 
+- [ ] rename 'value' to 'absorbance' and 'cycle' to 'absorbance_cycle'
+- [ ] include RUNID in output
+- [ ] Allow user to define values in objects.SCOPE (although I will probably eventually move SCOPE out of `objects`)
+- [ ] Allow for importing variables into SCOPE from external JSON file
 - [ ] Write a script that accepts a JSON object with the dye calibration data, and then prepare a well with a dye concentrations whose absorbance should be 1.
 - [ ] load the wavelength to measure
 - [ ] BUG: checkout the pipette test "should translate calibration data to volumes"; the second dispense should not use a Dry program.
 - [ ] BUG: can't use `pipetter.pipette` with items using both small and large tips (doesn't find a wash program)
 - [ ] BUG: `qc_mario_dyeDebug1`: why does small tip liquid class mix after dispensing?  And why does it wait so long in the source liquid after aspirating?
+- [ ] design: use '$' prefix to reference SCOPE variables instead of using the plain column names
+- [ ] reader-InfiniteM200Pro: will probably need to let user specify scope variables to add to the dataset output (e.g. for when the wavelength gets imported)
 
 We will fill an eppendorf tube to 1000ul.
 We want 150ul of its content to have an absorbance of 1.

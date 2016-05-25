@@ -1,0 +1,112 @@
+roboliq: v1
+
+description: |
+  Test the impact of aliquot transfers and mixing on absorbance and volume.
+
+  I will compare well volumes visually, so I'll just use the wells in
+  the first column (so I can see them all).  We'll also need to have reference
+  wells in which no further operations are performed.
+
+  * A01, B01: reference
+  * C01, D01: repeated transfers
+  * E01, F01: repeated mixing
+  * G01, H01: reference
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  design:
+    type: Design
+    conditions:
+      dyeVolume0: 10 ul
+      waterVolume0: 190 ul
+      type*: [tran, tran, mix, mix, ctrl, ctrl, ctrl, ctrl]
+      well: [C01, D01, E01, F01, A01, B01, G01, H01]
+      syringe: [1, 2, 3, 4, 1, 2, 3, 4]
+      cycle*: 16
+
+steps:
+  data:
+    source: design
+  1:
+    description: Handle initial concentrations
+    1:
+      description: Fill wells
+      command: pipetter.pipetteMixtures
+      mixtures:
+        "#data":
+          groupBy: well
+          templateGroup:
+            destination: $well
+            sources:
+            - {source: ourlab.mario.systemLiquid, volume: $waterVolume0}
+            - {source: dye, volume: $dyeVolume0}
+      destinationLabware: plate1
+      clean: flush
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+
+  2:
+    command: experiment.forEachGroup
+    groupBy: cycle
+    steps:
+      description: "`Cycle {{$cycle}}`"
+      1:
+        description: "Transfer aliquots among transer wells"
+        data:
+          where: 'type == "tran"'
+        command: pipetter.pipette
+        sourceLabware: plate1
+        sources:
+          "#data":
+            value: well
+        destinationLabware: plate1
+        destinations:
+          "#data":
+            value: well
+            reverse: true
+        volumes: 50 ul
+        clean: none
+      2:
+        description: "Mix the mixing wells"
+        data:
+          where: 'type == "mix"'
+        command: pipetter.mix
+        wells: $$well
+        wellLabware: plate1
+        clean: none
+      3:
+        command: pipetter.cleanTips
+        equipment: ourlab.mario.liha
+        intensity: flush
+      4:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"

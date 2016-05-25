@@ -54,14 +54,14 @@ objects:
         dyeVolume=calculate: dyeVolume0
         wellVolume=calculate: wellVolume0
       - role: R
-        dyeVolume=calculate: dyeVolume0 / 4
-        wellVolume=calculate: wellVolume0 / 4
+        dyeVolume=calculate: dyeVolume0 * 3 / 4
+        wellVolume=calculate: wellVolume0 * 3 / 4
       - role: L
         dyeVolume=calculate: dyeVolume0
         wellVolume=calculate: wellVolume0
       - role: L
-        dyeVolume=calculate: dyeVolume0 * 1.25
-        wellVolume=calculate: wellVolume0 * 1.25
+        dyeVolume=calculate: dyeVolume0 * 5 / 4
+        wellVolume=calculate: wellVolume0 * 5 / 4
       - role: R
         dyeVolume=calculate: dyeVolume0
         wellVolume=calculate: wellVolume0
