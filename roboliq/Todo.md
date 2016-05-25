@@ -84,8 +84,8 @@ in a multi-agent protocol?
 
 # Todos for QC part 2, creating a dye mixture with the desired absorbance
 
+- [?] include RUNID in output
 - [ ] rename 'value' to 'absorbance' and 'cycle' to 'absorbance_cycle'
-- [ ] include RUNID in output
 - [ ] Allow user to define values in objects.SCOPE (although I will probably eventually move SCOPE out of `objects`)
 - [ ] Allow for importing variables into SCOPE from external JSON file
 - [ ] Write a script that accepts a JSON object with the dye calibration data, and then prepare a well with a dye concentrations whose absorbance should be 1.

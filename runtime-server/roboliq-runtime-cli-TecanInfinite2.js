@@ -60,7 +60,7 @@ if (wellDesignFactor !== "_") {
 		// console.log(measurementRow)
 		// Try to get the factors for this well
 		const factorRow = wellToFactors[well];
-		return _.merge({}, factorRow, measurementRow);
+		return _.merge({RUNID: runId}, factorRow, measurementRow);
 	});
 	// console.log(table);
 

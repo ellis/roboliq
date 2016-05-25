@@ -777,9 +777,9 @@ function calculateMixingVolume(volume0, amount) {
  */
 const commandHandlers = {
 	"pipetter._aspirate": function(params, parsed, data) {
-		//console.log("params", JSON.stringify(params, null, '  '))
+		// console.log("params", JSON.stringify(params, null, '  '))
 		const effects = pipetterUtils.getEffects_pipette(parsed, data);
-		//console.log("effects:", JSON.stringify(effects, null, '  '))
+		// console.log("effects:", JSON.stringify(effects, null, '  '))
 		return {effects};
 	},
 	"pipetter._dispense": function(params, parsed, data) {
@@ -803,11 +803,10 @@ const commandHandlers = {
 		};
 	},
 	"pipetter._pipette": function(params, parsed, data) {
-		//console.log("params", JSON.stringify(params, null, '  '))
-		//console.log("effects:", JSON.stringify(pipetterUtils.getEffects_pipette(params, data), null, '  '))
-		return {
-			effects: pipetterUtils.getEffects_pipette(parsed, data)
-		};
+		// console.log("params", JSON.stringify(params, null, '  '))
+		const effects = pipetterUtils.getEffects_pipette(parsed, data);
+		// console.log("effects:", JSON.stringify(effects, null, '  '))
+		return {effects};
 	},
 	"pipetter._punctureSeal": function(params, parsed, data) {
 		// console.log("pipetter._punctureSeal: "+JSON.stringify(parsed, null, '\t'))

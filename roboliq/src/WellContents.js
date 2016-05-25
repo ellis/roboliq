@@ -253,6 +253,25 @@ export function flattenContents(contents) {
 	}
 }
 
+export function mergeContents(contents) {
+	const flat = flattenContents(contents);
+	const pairs = _.toPairs(flat);
+	if (pairs.length === 0) {
+		return [];
+	}
+	else if (pairs.length === 1) {
+		const l = pairs[0];
+		return [l[1], l[0]];
+	}
+	else {
+		const volumes1 = _.values(flat);
+		const volumes2 = volumes1.map(s => math.eval(s));
+		const sum = math.sum(volumes2);
+		const contents2 = [sum.format({precision: 14})].concat(pairs.map(l => [l[1], l[0]]));
+		return contents2;
+	}
+}
+
 /**
  * Add source contents to destination contents at the given volume.
  * @param {array} srcContents - current contents of the source well

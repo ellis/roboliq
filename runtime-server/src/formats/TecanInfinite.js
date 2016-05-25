@@ -34,7 +34,7 @@ export default function processXml(filename) {
 			const type = well.attr.Type;
 			if (type === "Single") {
 				const value = Number(well.lastChild.val);
-				const entry = {time, well: wellName, cycle, value};
+				const entry = {time, well: wellName, value_cycle: cycle, value};
 				// console.log(entry);
 				return entry;
 			}
@@ -44,7 +44,7 @@ export default function processXml(filename) {
 					const wavelength = Number(scan.attr.WL);
 					const value0 = scan.val;
 					const value = (value0 === "OVER") ? null : Number(value0);
-					const entry = {time, well: wellName, cycle, wavelength, value};
+					const entry = {time, well: wellName, value_cycle: cycle, wavelength, value};
 					return entry;
 				});
 			}

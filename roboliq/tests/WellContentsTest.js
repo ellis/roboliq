@@ -76,6 +76,16 @@ describe('WellContents', function() {
 		});
 	});
 
+	describe("mergeContents", () => {
+		it("works", () => {
+			const contents = ['30ul', ['10ul', 'reagent1'], ['20ul', ['10ul', 'reagent1'], ['10ul', 'reagent2'], ['20ul', 'water']]];
+			assert.deepEqual(
+				WellContents.mergeContents(contents),
+				["30 ul", ["15 ul", "reagent1"], ["5 ul", "reagent2"], ["10 ul", "water"]]
+			);
+		});
+	});
+
 	describe('transferContents', function () {
 		it('assert transfer contents between wells', function () {
 			assert.deepEqual(
@@ -116,4 +126,5 @@ describe('WellContents', function() {
 			);
 		});
 	});
+
 });
