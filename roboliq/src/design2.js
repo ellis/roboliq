@@ -337,6 +337,10 @@ function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, n
 		const rowIndexes = _.clone(l[il]);
 		console.log({il, rowIndexes, l})
 		let valueIndex = 0;
+		const isSpecial = value instanceof Special;
+		if (isSpecial) {
+			value.initGroup(nestedRows, rowIndexes);
+		}
 		/*// If value is an array of objects
 		if (_.isArray(value) && _.every(value, x => _.isObject(x))) {
 			// Assign indexes
@@ -345,7 +349,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, n
 			// Assign objects
 			expandRowsByObject(nestedRows, rowIndexes, otherRowIndexes, item, randomEngine);
 		}
-		else*/ if (value instanceof Special || _.isArray(value)) {
+		else*/ if (isSpecial || _.isArray(value)) {
 			for (let i = 0; i < rowIndexes.length; i++) {
 				const rowIndex = rowIndexes[i];
 				const rowIndexes2 = [rowIndex];
@@ -512,6 +516,18 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 		// Assign objects
 		for (let i = 0; i < size; i++) {
 			expandRowsByObject(rows2, rowIndexesGroups2Transposed[i], rowIndexesGroups2, value[i], randomEngine);
+		}
+	}
+	else if (_.isPlainObject(value)) {
+		// Assign indexes
+		const valueIndexes = _.keys(value);
+		assignRowsByNamedValue(rows2, rowIndexesGroups2, rowIndexesGroups2Transposed, name, valueIndexes, randomEngine, false);
+		// Assign objects
+		const otherRowIndexes3 = rowIndexesGroups2Transposed.concat(rowIndexesGroups2);
+		for (let i = 0; i < size; i++) {
+			const key = valueIndexes[i];
+			const rowIndexes3 = _.clone(rowIndexesGroups2Transposed[i]);
+			expandRowsByObject(rows2, rowIndexes3, otherRowIndexes3, value[key], randomEngine);
 		}
 	}
 	else {

@@ -389,14 +389,14 @@ describe('design', () => {
 				expandConditions({
 					"a*": [1, 2, 3, 4, 5, 6],
 					"b=": {
-						randomSeed: 444,
+						randomSeed: 1,
 						values: [1, 2, 3],
 						order: "reshuffle"
 					}
 				}),
 				[
-					{a: 1, b: 2}, {a: 2, b: 1}, {a: 3, b: 3},
-					{a: 4, b: 2}, {a: 5, b: 3}, {a: 6, b: 1}
+					{a: 1, b: 2}, {a: 2, b: 3}, {a: 3, b: 1},
+					{a: 4, b: 1}, {a: 5, b: 3}, {a: 6, b: 2}
 				]
 			);
 		});
@@ -516,7 +516,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle branching range() with custom 'from' value", () => {
+		it("should handle branching range() with custom 'from' value #1", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {from: 0, till: 3}
@@ -525,6 +525,9 @@ describe('design', () => {
 					{a: 0}, {a: 1}, {a: 2}, {a: 3}
 				]
 			);
+		});
+
+		it("should handle branching range() with custom 'from' value #2", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {from: 0, till: 3},
