@@ -775,6 +775,7 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 		console.log(`handleAssignmentWithQueries: ${JSON.stringify({name, action, value})}`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`)
 		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+		assertNoDuplicates(otherRowIndexes);
 	}
 	const isSpecial = value instanceof Special;
 	const hasGroupOrSame = action.groupBy || action.sameBy;
