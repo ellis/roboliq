@@ -101,6 +101,17 @@ describe('design', () => {
 			should.deepEqual(rows, l0);
 			should.deepEqual(rowIndexes, _.range(6));
 		});
+
+		it("should handle a previous bug", () => {
+			const rowsExpected = [{"a":"0","b":1},{"a":"0","b":2}];
+			const rows = [rowsExpected];
+			const rowIndexes = [0];
+			const otherRowIndexes = [[0],[0],[0],[0]];
+			flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes);
+			should.deepEqual(rows, rowsExpected);
+			should.deepEqual(rowIndexes, _.range(2));
+			should.deepEqual(otherRowIndexes, [[0, 1], [0, 1], [0, 1], [0, 1]]);
+		});
 	});
 
 	describe("query_groupBy", () => {
@@ -248,7 +259,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assignment of two branching arrays", () => {
+		it.only("should handle assignment of two branching arrays", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1,2],
@@ -540,7 +551,7 @@ describe('design', () => {
 			);
 		});
 
-		it.only("should handle case() #2", () => {
+		it("should handle case() #2", () => {
 			/*const rows = [{"a":1,"b":"A"},{"a":2},{"a":3}];
 			const rowIndexes = [0];
 			const otherRowIndexes = [[0,1,2],[0],[0,1,2]];

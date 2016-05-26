@@ -52,3 +52,12 @@ system.runtimeExitLoop:
     testType: {description: "The type of code to execute to determine whether to break; a JSON truthy value should be returned.", enum: [nodejs, R]}
     test: {description: "The code to execute at runtime that will test whether to exit.", type: string}
   required: [testType, test]
+
+system.runtimeSteps:
+  description: "Handle steps which require runtime variables"
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    varset: {description: "Name of the variable set to load", type: string}
+    variables: {description: "Array of variables to load from 'varset'", type: array, items: {type: string}}
+    steps: {description: "Steps to compile at runtime", type: [array, object]}
+  required: [varset, variables, steps]

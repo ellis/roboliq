@@ -20,6 +20,7 @@ const commandHandlers = {
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,
 	"system.runtimeExitLoop": system.runtimeExitLoop,
+	"system.runtimeSteps": system.runtimeSteps,
 	"timer._sleep": timer._sleep,
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,
@@ -218,6 +219,7 @@ function substitutePathVariables(results, options) {
 			if (line) {
 				line = line.replace("${ROBOLIQ}", options.variables.ROBOLIQ);
 				line = line.replace("${SCRIPTFILE}", options.variables.SCRIPTFILE);
+				line = line.replace("${SCRIPTDIR}", options.variables.SCRIPTDIR);
 				line = line.replace("${TEMPDIR}", options.variables.TEMPDIR);
 				results[i].line = line;
 			}

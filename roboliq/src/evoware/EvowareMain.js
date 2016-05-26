@@ -67,7 +67,8 @@ export function run(argv) {
 					variables: {
 						ROBOLIQ: agentConfig.ROBOLIQ,
 						TEMPDIR: agentConfig.TEMPDIR,
-						SCRIPTFILE: scriptFile
+						SCRIPTFILE: scriptFile,
+						SCRIPTDIR: scriptDir
 					},
 				};
 
