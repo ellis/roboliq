@@ -301,7 +301,7 @@ export function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, 
 		// console.log("B")
 	}
 	else {
-		assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine);
+		assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine, true);
 	}
 }
 
@@ -322,43 +322,48 @@ export function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, 
  *     for each row:
  *       setColumnValue(row, name, value)
  */
-function assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
+function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, name, value, randomEngine, doUnnest = true) {
+	const l = (_.every(rowIndexesGroups, l => _.isArray(l))) ? rowIndexesGroups : [rowIndexesGroups];
 	if (DEBUG) {
 		console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
-		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(nestedRows)}`)
+		console.log(` rowIndexesGroups: ${JSON.stringify(rowIndexesGroups)}\n ${JSON.stringify(nestedRows)}`)
 		assertNoDuplicates(otherRowIndexes);
-		assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
+		assertNoDuplicates(otherRowIndexes.concat(l));
 		//printRows(nestedRows)
 	}
-	if (value instanceof Special || _.isArray(value)) {
+	for (let il = 0; il < l.length; il++) {
+		const rowIndexes = l[il];
+		console.log({il, rowIndexes, l})
 		let valueIndex = 0;
-		for (let i = 0; i < rowIndexes.length; i++) {
-			const rowIndex = rowIndexes[i];
-			const rowIndexes2 = [rowIndex];
-			const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, undefined, randomEngine);
-			valueIndex += n;
-			i += rowIndexes2.length - 1;
-			console.log({rowIndex, dRowIndex: rowIndexes2.length, dValueIndex: n, valueIndex, i, rowIndexes})
-			console.log(` (assignRowsByNamedValue:) rowIndexes: ${rowIndexes.join(", ")}`)
+		if (value instanceof Special || _.isArray(value)) {
+			for (let i = 0; i < rowIndexes.length; i++) {
+				const rowIndex = rowIndexes[i];
+				const rowIndexes2 = [rowIndex];
+				const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, undefined, randomEngine, doUnnest);
+				valueIndex += n;
+				i += rowIndexes2.length - 1;
+				console.log({rowIndex, dRowIndex: rowIndexes2.length, dValueIndex: n, valueIndex, i, rowIndexes})
+				console.log(` (assignRowsByNamedValue:) rowIndexes: ${rowIndexes.join(", ")}`)
+			}
 		}
-	}
-	else if (_.isPlainObject(value)) {
-		let valueIndex = 0;
-		const keys = _.keys(value);
-		for (let i = 0; i < rowIndexes.length; i++) {
-			const rowIndex = rowIndexes[i];
-			const rowIndexes2 = [rowIndex];
-			const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, keys, randomEngine);
-			valueIndex += n;
-			i += rowIndexes2.length - 1;
+		else if (_.isPlainObject(value)) {
+			let valueIndex = 0;
+			const keys = _.keys(value);
+			for (let i = 0; i < rowIndexes.length; i++) {
+				const rowIndex = rowIndexes[i];
+				const rowIndexes2 = [rowIndex];
+				const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, keys, randomEngine, doUnnest);
+				valueIndex += n;
+				i += rowIndexes2.length - 1;
+			}
 		}
-	}
-	else {
-		for (let i = 0; i < rowIndexes.length; i++) {
-			const rowIndex = rowIndexes[i];
-			setColumnValue(nestedRows[rowIndex], name, value);
-			// console.log(JSON.stringify(nestedRows))
+		else {
+			for (let i = 0; i < rowIndexes.length; i++) {
+				const rowIndex = rowIndexes[i];
+				setColumnValue(nestedRows[rowIndex], name, value);
+				// console.log(JSON.stringify(nestedRows))
+			}
 		}
 	}
 }
@@ -376,7 +381,8 @@ function assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
  *     setColumnValue(row, name, item)
  * Returns number of values actually assigned (may be more than one for nested rows)
  */
-function assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes, name, values, valueKeyIndex, valueKeys, randomEngine) {
+function assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes, name, values, valueKeyIndex, valueKeys, randomEngine, doUnnest) {
+	assert(!_.isUndefined(doUnnest));
 	if (DEBUG) {
 		console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}, ${valueKeys}`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
@@ -384,15 +390,17 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes, name, 
 		assertNoDuplicates(otherRowIndexes);
 	}
 	const row = nestedRows[rowIndex];
-	let n = 0;
+	let n = (doUnnest) ? 0 : 1;
 	if (_.isArray(row)) {
 		// console.log("0")
 		const otherRowIndexes2 = otherRowIndexes.concat([_.range(row.length)]);
 		for (let i = 0; i < row.length; i++) {
 			// console.log(` (assignRowByNamedValuesKey) #${i} of ${row.length}`)
-			const n2 = assignRowByNamedValuesKey(row, i, otherRowIndexes2, name, values, valueKeyIndex, valueKeys, randomEngine);
-			n += n2;
-			valueKeyIndex += n2;
+			const n2 = assignRowByNamedValuesKey(row, i, otherRowIndexes2, name, values, valueKeyIndex, valueKeys, randomEngine, doUnnest);
+			if (doUnnest) {
+				n += n2;
+				valueKeyIndex += n2;
+			}
 			// console.log({i, n2, n, valueKeyIndex, row})
 		}
 		flattenArrayAndIndexes(nestedRows, [rowIndex], otherRowIndexes);
@@ -473,32 +481,36 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 	//flattenArrayAndIndexes(nestedRows, rowIndexes, otherRowIndexes);
 
 	// Create 'size' copies of each row in rowIndexes.
-	const rowIndexes2 = _.range(size);
-	const nestedRowsTransposed = rowIndexes2.map(i => rowIndexes.map(rowIndex => _.cloneDeep(nestedRows[rowIndex])));
-	console.log({nestedRowsTransposed})
+	const rows2 = Array(size * rowIndexes.length);
+	const rowIndexesGroups2 = Array(rowIndexes.length);
+	for (let j = 0; j < rowIndexes.length; j++) {
+		const rowIndex = rowIndexes[j];
+		rowIndexesGroups2[j] = Array(size);
+		for (let i = 0; i < size; i++) {
+			const k = j * size + i;
+			rowIndexesGroups2[j][i] = k;
+			rows2[k] = _.cloneDeep(nestedRows[rowIndex]);
+		}
+	}
+	console.log({rows2, rowIndexesGroups2});
 
 	// Assign to those copies
-	const otherRowIndexes2 = rowIndexes2.map(i => [i]);
-	assignRowsByNamedValue(nestedRowsTransposed, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
-	console.log({nestedRowsTransposed, otherRowIndexes2})
-	flattenArrayAndIndexes(nestedRowsTransposed, [], otherRowIndexes2);
-	console.log({nestedRowsTransposed, otherRowIndexes2})
+	assignRowsByNamedValue(rows2, rowIndexesGroups2, [], name, value, randomEngine, false);
+	console.log({rows2, rowIndexesGroups2});
+	flattenArrayAndIndexes(rows2, [], rowIndexesGroups2);
+	console.log({rows2, rowIndexesGroups2});
+
+	console.log({nestedRows})
 
 	// Transpose back into nestedRows
 	for (let j = 0; j < rowIndexes.length; j++) {
-		const rows2 = [];
-		for (let i = 0; i < size; i++) {
-			const rowIndexes3 = otherRowIndexes2[i];
-			for (let k = 0; k < rowIndexes3.length; k++) {
-				const rowIndex3 = rowIndexes3[k];
-				console.log({j, i, k, rowIndex3})
-				rows2.push(nestedRowsTransposed[rowIndex3]);
-			}
-		}
-		console.log({rows2})
+		const rowIndexes3 = rowIndexesGroups2[j];
+		const rows3 = rowIndexes3.map(i => rows2[i]);
 		const rowIndex = rowIndexes[j];
-		nestedRows[rowIndex] = rows2;
+		console.log({rows3, rowIndex})
+		nestedRows[rowIndex] = rows3;
 	}
+	console.log({nestedRows})
 
 	// console.log({loc: "B", otherRowIndexes})
 	// console.log(JSON.stringify(nestedRows))

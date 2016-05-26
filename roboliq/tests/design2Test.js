@@ -259,7 +259,7 @@ describe('design', () => {
 			);
 		});
 
-		it.only("should handle assignment of two branching arrays", () => {
+		it("should handle assignment of two branching arrays", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1,2],
@@ -317,7 +317,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle branching 'range' action with expressions for property values", () => {
+		it.only("should handle branching 'range' action with expressions for property values", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*=range": {till: 3},
