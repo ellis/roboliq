@@ -264,14 +264,14 @@ module.exports = {
 						"wasteSite": 2,
 						"cleanerGrid": 1,
 						"cleanerSite": 1,
-						"wasteVolume": 1,
+						"wasteVolume": 4,
 						"wasteDelay": 500,
-						"cleanerVolume": 1,
+						"cleanerVolume": 3,
 						"cleanerDelay": 500,
 						"airgapVolume": 10,
 						"airgapSpeed": 70,
 						"retractSpeed": 30,
-						"fastWash": false
+						"fastWash": true
 					},
 					"flush_0050": {
 						"type": "EvowareWashProgram",
