@@ -116,6 +116,7 @@ design:
 - [ ] BUG: checkout the pipette test "should translate calibration data to volumes"; the second dispense should not use a Dry program.
 - [ ] BUG: can't use `pipetter.pipette` with items using both small and large tips (doesn't find a wash program)
 - [ ] BUG: `qc_mario_dyeDebug1`: why does small tip liquid class mix after dispensing?  And why does it wait so long in the source liquid after aspirating?
+- [ ] BUG: `qc_mario_dyeDebug7`: centrifuge isn't assigned labware
 - [ ] design: use '$' prefix to reference SCOPE variables instead of using the plain column names
 - [ ] reader-InfiniteM200Pro: will probably need to let user specify scope variables to add to the dataset output (e.g. for when the wavelength gets imported)
 

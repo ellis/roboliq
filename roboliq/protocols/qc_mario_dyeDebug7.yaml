@@ -23,6 +23,11 @@ objects:
     description: Dilution plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    description: Balance plate for centrifuge
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
   dyeLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml
@@ -32,6 +37,38 @@ objects:
     type: Liquid
     wells: dyeLabware(C01 down F01)
 
+  design0:
+    type: Design
+    randomSeed: 1
+    conditions:
+      dyeVolume0: 10 ul
+      waterVolume0: 240 ul
+      well*: [A01, B01, C01, D01, E01, F01, G01, H01]
+      action=:
+        values: [none, pip, mix1, mix3]
+        order: reshuffle
+      stageA*:
+      - action: prep
+      - action: shake
+      - action: cent
+      - stageB*: 16
+        syringe=:
+          values: [1, 2, 3, 4]
+          orderBy: stageB
+          order: reshuffle
+        type=case:
+          cases:
+            control:
+              where: 'action == "none"'
+            experimental:
+              conditions:
+                program=:
+                  values: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
+                  orderBy: stageB
+                  where: 'action != none'
+                  order: repeat
+    orderBy: [stageA, stageB]
+
   design:
     type: Design
     randomSeed: 1
@@ -39,18 +76,18 @@ objects:
       dyeVolume0: 10 ul
       waterVolume0: 240 ul
       well*: [A01, B01, C01, D01, E01, F01, G01, H01]
+      action=:
+        values: [none, pip, mix1, mix3]
+        order: reshuffle
       stageA*:
-      - stageB: 1
-        action: prep
-      - stageB: 1
-        action: shake
-      - stageB: 1
-        action: cent
-      - stageB*: 3
-        action=:
+      - action: prep
+      - action: shake
+      - action: cent
+      - action=:
           values: [none, pip, mix1, mix3]
           groupBy: stageB
           order: repeat
+        stageB*: 12
         syringe=:
           values: [1, 2, 3, 4]
           orderBy: stageB
@@ -60,6 +97,37 @@ objects:
           orderBy: stageB
           order: reshuffle
     orderBy: [stageA, stageB]
+
+  # design1:
+  #   type: Design
+  #   randomSeed: 1
+  #   conditions:
+  #     type*:
+  #       control:
+  #         action: none
+  #       experimental:
+  #         action*: [pip, mix1, mix3]
+  #     .a=case:
+  #       groupBy: action
+  #       cases:
+  #       - where: 'action == "none"'
+  #         conditions:
+  #           program*: [none, none, none, none]
+  #       - where: 'action != "none"'
+  #         conditions:
+  #           program*: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
+  #     replicate*: 2
+  #     stageB=range:
+  #       groupBy: [action, replicate]
+  #     syringe=:
+  #       values: [1, 2, 3, 4]
+  #       orderBy: [stageB, replicate]
+  #       order: reshuffle
+  #     well=:
+  #       values: [A01, B01, C01, D01, E01, F01, G01, H01]
+  #       orderBy: [stageB, replicate]
+  #       order: reshuffle
+  #   orderBy: [stageB, replicate, syringe]
 
 steps:
   data:
@@ -80,7 +148,7 @@ steps:
             - {source: ourlab.mario.systemLiquid, volume: $waterVolume0}
             - {source: dye, volume: $dyeVolume0, program: "Roboliq_Water_Wet_1000"}
       destinationLabware: plate1
-      clean: light
+      clean: flush
     2:
       description: "Measure absorbance"
       command: absorbanceReader.measurePlate
@@ -139,7 +207,7 @@ steps:
       1:
         description: "Pipette aliquot into and out of wells"
         data:
-          where: 'type == "pip"'
+          where: 'action == "pip"'
         command: pipetter.pipette
         sourceLabware: plate1
         sources: $$well
@@ -151,17 +219,7 @@ steps:
       2:
         description: "Mix wells once"
         data:
-          where: 'type == "mix1"'
-        command: pipetter.mix
-        wells: $$well
-        wellLabware: plate1
-        syringes: $$syringe
-        counts: 1
-        cleanEnd: none
-      2:
-        description: "Mix wells three times"
-        data:
-          where: 'type == "mix3"'
+          where: 'action == "mix1"'
         command: pipetter.mix
         wells: $$well
         wellLabware: plate1
@@ -169,11 +227,21 @@ steps:
         counts: 1
         cleanEnd: none
       3:
+        description: "Mix wells three times"
+        data:
+          where: 'action == "mix3"'
+        command: pipetter.mix
+        wells: $$well
+        wellLabware: plate1
+        syringes: $$syringe
+        counts: 3
+        cleanEnd: none
+      4:
         command: pipetter.cleanTips
         equipment: ourlab.mario.liha
-        intensity: light
+        intensity: flush
         syringes: [1,2,3,4]
-      4:
+      5:
         description: "Measure absorbance"
         command: absorbanceReader.measurePlate
         object: plate1
