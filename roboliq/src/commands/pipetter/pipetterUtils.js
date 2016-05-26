@@ -75,12 +75,12 @@ export function getEffects_pipette(parsed, data, effects) {
 			const [srcContents1a, syringeContents1a] = WellContents.transferContents(srcContents0, syringeContents0, item.volume);
 			const srcContents1 = WellContents.mergeContents(srcContents1a);
 			const syringeContents1 = WellContents.mergeContents(syringeContents1a);
-			//console.log({srcContents1, syringeContents1});
+			// console.log({srcContents1, syringeContents1a, syringeContents1});
 			// Update content effect for source
 			addEffect(srcContentsName, srcContents1);
 
 			// Get list of syringe contaminants
-			const contaminants1 = _.keys(syringeContents1);
+			const contaminants1 = _.keys(WellContents.flattenContents(syringeContents1));
 			//console.log({syringeContaminantsName, syringeContaminants0, contaminants1});
 			// Update contaminant effects
 			if (!_.isEqual(syringeContaminants0, contaminants1))

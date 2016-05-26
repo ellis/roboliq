@@ -672,7 +672,8 @@ function findPipettingPosition(items, data) {
 
 function assignProgram(items0, data) {
 	// console.log("assignProgram: "+JSON.stringify(items))
-	const items = items0.filter(item => math.larger(item.volume, math.unit(0, "l")));
+	// console.log({items0})
+	const items = items0.filter(item => item.volume && math.larger(item.volume, math.unit(0, "l")));
 	if (items.length > 0) {
 		// console.log({items})
 		const pipettingClass = findPipettingClass(items, data);
