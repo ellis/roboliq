@@ -395,8 +395,8 @@ describe('design', () => {
 					}
 				}),
 				[
-					{a: 1, b: 2}, {a: 2, b: 3}, {a: 3, b: 1},
-					{a: 4, b: 1}, {a: 5, b: 3}, {a: 6, b: 2}
+					{a: 1, b: 1}, {a: 2, b: 3}, {a: 3, b: 2},
+					{a: 4, b: 2}, {a: 5, b: 3}, {a: 6, b: 1}
 				]
 			);
 		});
@@ -768,8 +768,8 @@ describe('design', () => {
 			// console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
-				{"a":1,"b":1,"order":5},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":6},
-				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":4},{"a":2,"b":3,"order":3}
+				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":5},{"a":1,"b":3,"order":3},
+				{"a":2,"b":1,"order":4},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":6}
 			]);
 		});
 
@@ -1055,7 +1055,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support allocatePlates() assignments", () => {
+		it("should support allocatePlates() assignments", () => {
 			const design1 = {
 				conditions: {
 					"condition*": [1, 2, 3],
@@ -1189,8 +1189,8 @@ describe('design', () => {
 			// console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
-				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":3},{"a":1,"b":3,"order":1},
-				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}
+				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":3},{"a":1,"b":3,"order":2},
+				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":3},{"a":2,"b":3,"order":1}
 			]);
 		});
 

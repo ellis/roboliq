@@ -339,7 +339,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, n
 		let valueIndex = 0;
 		const isSpecial = value instanceof Special;
 		if (isSpecial) {
-			value.initGroup(nestedRows, rowIndexes);
+			value.reset();
 		}
 		/*// If value is an array of objects
 		if (_.isArray(value) && _.every(value, x => _.isObject(x))) {
@@ -607,6 +607,7 @@ class Special {
 		this.randomEngine = randomEngine;
 		this.next = (next || this.defaultNext);
 		this.initGroup = (initGroup || this.defaultInitGroup);
+		this.reset = this.defaultReset;
 	}
 
 	defaultInitGroup(nestedRows, rowIndexes) {
@@ -672,6 +673,12 @@ class Special {
 		}
 
 		return [key, value];
+	}
+
+	defaultReset() {
+		if (this.nextIndex) {
+			this.nextIndex = 0;
+		}
 	}
 }
 
@@ -968,6 +975,8 @@ function assign_allocatePlates_initGroup(rows, rowIndexes) {
 	}
 
 	// TODO: allow for rotating plates for each group rather than assigning each plate until its full
+	console.log()
+	console.log({this})
 
 	this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
 	// console.log({this_action_values: this.action.values});
