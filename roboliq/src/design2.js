@@ -834,7 +834,7 @@ function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, ac
 		const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
 		// console.log({rowIndexesGroups})
 		for (let i = 0; i < rowIndexesGroups.length; i++) {
-			const rowIndexes2 = rowIndexesGroups[i];
+			const rowIndexes2 = _.clone(rowIndexesGroups[i]);
 
 			const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
 			// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
