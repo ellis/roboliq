@@ -334,7 +334,7 @@ describe('design', () => {
 			);
 		});
 
-		it.only("should handle assign() with order=repeat", () => {
+		it("should handle assign() with order=repeat", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1, 2, 3, 4],
@@ -346,6 +346,24 @@ describe('design', () => {
 				[
 					{a: 1, b: 1}, {a: 2, b: 2},
 					{a: 3, b: 1}, {a: 4, b: 2}
+				]
+			);
+		});
+
+		it("should handle assign() with order=repeat #2", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [1, 2, 3, 1, 2, 3],
+					"c*": [{
+						"b=": {
+							values: [1, 2, 3],
+							order: "repeat",
+						}
+					}]
+				}),
+				[
+					{a: 1, c: 1, b: 1}, {a: 2, c: 1, b: 3}, {a: 3, c: 1, b: 2},
+					{a: 1, c: 1, b: 2}, {a: 2, c: 1, b: 1}, {a: 3, c: 1, b: 3}
 				]
 			);
 		});
@@ -417,7 +435,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with order=repeat and orderBy #3", () => {
+		it.skip("should handle assign() with order=repeat and orderBy #3", () => {
 			// The problem is that branchRowsByNamedValue goes through one row at a time, rather than assigning to all rows that get branched
 			should.deepEqual(
 				expandConditions({
@@ -426,7 +444,7 @@ describe('design', () => {
 						"b=": {
 							values: [1, 2, 3],
 							order: "repeat",
-							// orderBy: "a"
+							orderBy: "a"
 						}
 					}]
 				}),

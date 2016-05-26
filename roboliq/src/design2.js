@@ -332,11 +332,20 @@ function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, n
 		assertNoDuplicates(otherRowIndexes.concat(l));
 		//printRows(nestedRows)
 	}
+	const otherRowIndexes2 = otherRowIndexes.concat(l);
 	for (let il = 0; il < l.length; il++) {
-		const rowIndexes = l[il];
+		const rowIndexes = _.clone(l[il]);
 		console.log({il, rowIndexes, l})
 		let valueIndex = 0;
-		if (value instanceof Special || _.isArray(value)) {
+		/*// If value is an array of objects
+		if (_.isArray(value) && _.every(value, x => _.isObject(x))) {
+			// Assign indexes
+			const valueIndexes = _.range(1, value.length + 1);
+			assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, valueIndexes, randomEngine, doUnnest);
+			// Assign objects
+			expandRowsByObject(nestedRows, rowIndexes, otherRowIndexes, item, randomEngine);
+		}
+		else*/ if (value instanceof Special || _.isArray(value)) {
 			for (let i = 0; i < rowIndexes.length; i++) {
 				const rowIndex = rowIndexes[i];
 				const rowIndexes2 = [rowIndex];
@@ -483,6 +492,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 	// Create 'size' copies of each row in rowIndexes.
 	const rows2 = Array(size * rowIndexes.length);
 	const rowIndexesGroups2 = Array(rowIndexes.length);
+	const rowIndexesGroups2Transposed = _.range(size).map(i => Array(rowIndexes.length));
 	for (let j = 0; j < rowIndexes.length; j++) {
 		const rowIndex = rowIndexes[j];
 		rowIndexesGroups2[j] = Array(size);
@@ -490,13 +500,25 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 			const k = j * size + i;
 			rowIndexesGroups2[j][i] = k;
 			rows2[k] = _.cloneDeep(nestedRows[rowIndex]);
+			rowIndexesGroups2Transposed[i][j] = k;
 		}
 	}
-	console.log({rows2, rowIndexesGroups2});
+	console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
 
-	// Assign to those copies
-	assignRowsByNamedValue(rows2, rowIndexesGroups2, [], name, value, randomEngine, false);
-	console.log({rows2, rowIndexesGroups2});
+	if (_.isArray(value) && _.every(value, x => _.isPlainObject(x))) {
+		// Assign indexes
+		const valueIndexes = _.range(1, value.length + 1);
+		assignRowsByNamedValue(rows2, rowIndexesGroups2, rowIndexesGroups2Transposed, name, valueIndexes, randomEngine, false);
+		// Assign objects
+		for (let i = 0; i < size; i++) {
+			expandRowsByObject(rows2, rowIndexesGroups2Transposed[i], rowIndexesGroups2, value[i], randomEngine);
+		}
+	}
+	else {
+		// Assign to those copies
+		assignRowsByNamedValue(rows2, rowIndexesGroups2, [], name, value, randomEngine, false);
+	}
+	console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
 	flattenArrayAndIndexes(rows2, [], rowIndexesGroups2);
 	console.log({rows2, rowIndexesGroups2});
 
