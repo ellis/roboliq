@@ -947,6 +947,9 @@ function assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEng
 }
 
 function assign_allocatePlates_initGroup(rows, rowIndexes) {
+	if (DEBUG) {
+		console.log(`assign_allocatePlates_initGroup: ${rows}, ${rowIndexes}`)
+	}
 	const action = this.action;
 	if (_.isUndefined(this.plateIndex))
 		this.plateIndex = 0;
