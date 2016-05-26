@@ -10,7 +10,7 @@ import stableSort from 'stable';
 import wellsParser from './parsers/wellsParser.js';
 
 
-const DEBUG = true;
+const DEBUG = false;
 
 //import {locationRowColToText} from './parsers/wellsParser.js';
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
@@ -335,7 +335,7 @@ function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, n
 	const otherRowIndexes2 = otherRowIndexes.concat(l);
 	for (let il = 0; il < l.length; il++) {
 		const rowIndexes = _.clone(l[il]);
-		console.log({il, rowIndexes, l})
+		// console.log({il, rowIndexes, l})
 		let valueIndex = 0;
 		const isSpecial = value instanceof Special;
 		if (isSpecial) {
@@ -356,8 +356,10 @@ function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, n
 				const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, undefined, randomEngine, doUnnest);
 				valueIndex += n;
 				i += rowIndexes2.length - 1;
-				console.log({rowIndex, dRowIndex: rowIndexes2.length, dValueIndex: n, valueIndex, i, rowIndexes})
-				console.log(` (assignRowsByNamedValue:) rowIndexes: ${rowIndexes.join(", ")}`)
+				if (DEBUG) {
+					console.log({rowIndex, dRowIndex: rowIndexes2.length, dValueIndex: n, valueIndex, i, rowIndexes})
+					console.log(` (assignRowsByNamedValue:) rowIndexes: ${rowIndexes.join(", ")}`)
+				}
 			}
 		}
 		else if (_.isPlainObject(value)) {
@@ -507,7 +509,7 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 			rowIndexesGroups2Transposed[i][j] = k;
 		}
 	}
-	console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
+	// console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
 
 	if (_.isArray(value) && _.every(value, x => _.isPlainObject(x))) {
 		// Assign indexes
@@ -534,21 +536,21 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 		// Assign to those copies
 		assignRowsByNamedValue(rows2, rowIndexesGroups2, [], name, value, randomEngine, false);
 	}
-	console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
+	// console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
 	flattenArrayAndIndexes(rows2, [], rowIndexesGroups2);
-	console.log({rows2, rowIndexesGroups2});
+	// console.log({rows2, rowIndexesGroups2});
 
-	console.log({nestedRows})
+	// console.log({nestedRows})
 
 	// Transpose back into nestedRows
 	for (let j = 0; j < rowIndexes.length; j++) {
 		const rowIndexes3 = rowIndexesGroups2[j];
 		const rows3 = rowIndexes3.map(i => rows2[i]);
 		const rowIndex = rowIndexes[j];
-		console.log({rows3, rowIndex})
+		// console.log({rows3, rowIndex})
 		nestedRows[rowIndex] = rows3;
 	}
-	console.log({nestedRows})
+	// console.log({nestedRows})
 
 	// console.log({loc: "B", otherRowIndexes})
 	// console.log(JSON.stringify(nestedRows))
@@ -975,8 +977,8 @@ function assign_allocatePlates_initGroup(rows, rowIndexes) {
 	}
 
 	// TODO: allow for rotating plates for each group rather than assigning each plate until its full
-	console.log()
-	console.log({this})
+	// console.log()
+	// console.log({this})
 
 	this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
 	// console.log({this_action_values: this.action.values});
@@ -1196,7 +1198,7 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
  * @return {array} a sorted ordering of rowIndexes
  */
 export function query_orderBy(rows, rowIndexes, orderBy) {
-	console.log({rows, rowLen: rows.length, rowIndexes, orderBy})
+	// console.log({rows, rowLen: rows.length, rowIndexes, orderBy})
 	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
 	return stableSort(rowIndexes, makeComparer(rows, orderBy));
 }
