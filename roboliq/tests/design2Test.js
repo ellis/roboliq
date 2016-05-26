@@ -768,8 +768,8 @@ describe('design', () => {
 			// console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
-				{"a":1,"b":1,"order":1},{"a":1,"b":2,"order":5},{"a":1,"b":3,"order":3},
-				{"a":2,"b":1,"order":4},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":6}
+				{"a":1,"b":1,"order":5},{"a":1,"b":2,"order":2},{"a":1,"b":3,"order":6},
+				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":4},{"a":2,"b":3,"order":3}
 			]);
 		});
 
@@ -1055,7 +1055,7 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support allocatePlates() assignments", () => {
+		it.only("should support allocatePlates() assignments", () => {
 			const design1 = {
 				conditions: {
 					"condition*": [1, 2, 3],
@@ -1173,7 +1173,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support range() with groupBy and shuffle", () => {
+		it("should support range() with groupBy and shuffle", () => {
 			const design = {
 				randomSeed: 1,
 				conditions: {
@@ -1189,8 +1189,8 @@ describe('design', () => {
 			// console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
-				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":1},{"a":1,"b":3,"order":3},
-				{"a":2,"b":1,"order":2},{"a":2,"b":2,"order":3},{"a":2,"b":3,"order":1}
+				{"a":1,"b":1,"order":2},{"a":1,"b":2,"order":3},{"a":1,"b":3,"order":1},
+				{"a":2,"b":1,"order":1},{"a":2,"b":2,"order":2},{"a":2,"b":3,"order":3}
 			]);
 		});
 
