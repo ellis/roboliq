@@ -1173,9 +1173,9 @@ describe('design', () => {
 			]);
 		});
 
-		it("should support range() with groupBy and shuffle", () => {
+		it.only("should support range() with groupBy and shuffle", () => {
 			const design = {
-				randomSeed: 444,
+				randomSeed: 1,
 				conditions: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
