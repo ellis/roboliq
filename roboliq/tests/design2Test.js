@@ -334,7 +334,7 @@ describe('design', () => {
 			);
 		});
 
-		it("should handle assign() with order=repeat", () => {
+		it.only("should handle assign() with order=repeat", () => {
 			should.deepEqual(
 				expandConditions({
 					"a*": [1, 2, 3, 4],
