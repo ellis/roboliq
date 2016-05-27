@@ -137,6 +137,22 @@ describe('commands/centrifgue', function() {
 					},
 					"5": {
 						"1": {
+							"1": {
+								"command": "evoware._facts",
+								"agent": "ourlab.mario.evoware",
+								"factsEquipment": "Centrifuge",
+								"factsVariable": "Centrifuge_Close"
+							},
+							"command": "equipment.close|ourlab.mario.evoware|ourlab.mario.centrifuge",
+							"agent": "ourlab.mario.evoware",
+							"equipment": "ourlab.mario.centrifuge"
+						},
+						"command": "equipment.close",
+						"agent": "ourlab.mario.evoware",
+						"equipment": "ourlab.mario.centrifuge"
+					},
+					"6": {
+						"1": {
 							"agent": "ourlab.mario.evoware",
 							"command": "evoware._facts",
 							"factsEquipment": "Centrifuge",
@@ -152,7 +168,7 @@ describe('commands/centrifgue', function() {
 							"temperature": "25 degC"
 						}
 					},
-					"6": {
+					"7": {
 						"1": {
 							"1": {
 								"command": "evoware._facts",
@@ -177,7 +193,7 @@ describe('commands/centrifgue', function() {
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_2"
 					},
-					"7": {
+					"8": {
 						"1": {
 							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
@@ -198,7 +214,7 @@ describe('commands/centrifgue', function() {
 						"object": "plate1",
 						"destination": "ourlab.mario.site.P2"
 					},
-					"8": {
+					"9": {
 						"1": {
 							"1": {
 								"command": "evoware._facts",
@@ -223,7 +239,7 @@ describe('commands/centrifgue', function() {
 						"equipment": "ourlab.mario.centrifuge",
 						"site": "ourlab.mario.site.CENTRIFUGE_4"
 					},
-					"9": {
+					"10": {
 						"1": {
 							"command": "transporter._movePlate",
 							"agent": "ourlab.mario.evoware",
@@ -244,7 +260,7 @@ describe('commands/centrifgue', function() {
 						"object": "plate2",
 						"destination": "ourlab.mario.site.P3"
 					},
-					"10": {
+					"11": {
 						"1": {
 							"1": {
 								"command": "evoware._facts",
