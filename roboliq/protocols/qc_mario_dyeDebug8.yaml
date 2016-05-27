@@ -1,0 +1,271 @@
+roboliq: v1
+
+description: |
+  Test the impact of aliquot transfers and mixing on absorbance and volume.
+
+  I will compare well volumes visually, so I'll just use the wells in
+  the first column (so I can see them all).  We'll also need to have reference
+  wells in which no further operations are performed.
+
+  * A01, B01: reference
+  * C01, D01: repeated transfers
+  * E01, F01: repeated mixing
+  * G01, H01: reference
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    description: Balance plate for centrifuge
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 1
+    conditions:
+      dyeVolume0: 10 ul
+      waterVolume0: 240 ul
+      well*: [A01, B01, C01, D01, E01, F01, G01, H01]
+      wellAction=:
+        values: [none, pip, mix1, mix3]
+        order: reshuffle
+      stageA*:
+      - stageAction: prepare
+      - stageAction: shake
+        stageB*: 3
+      - stageAction: centrifuge
+      - stageAction: wait
+        stageB*: 3
+      - stageAction: manipulate
+        stageB*: 3
+        syringe=:
+          values: [1, 2, 3, 4]
+          orderBy: stageB
+          order: reshuffle
+        .type=case:
+          cases:
+            control:
+              where: 'wellAction == "none"'
+            experimental:
+              conditions:
+                program=:
+                  values: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
+                  orderBy: stageB
+                  order: repeat
+      - stageAction: extract
+        extractVolume: 50 ul
+        waterVolume=calculate: "dyeVolume0 + waterVolume0 - extractVolume"
+        role*:
+          source: {}
+          destination:
+            well: [A02, B02, C02, D02, E02, F02, G02, H02]
+        .subphase*:
+        - {}
+        - stageA=calculate: "stageA + 1"
+          stageAction: wait2
+          stageB*: 5
+
+    orderBy: [stageA, stageB]
+
+steps:
+  data:
+    source: design
+  1:
+    description: "StageAction: prepare wells"
+    data:
+      where: 'stageAction == "prepare"'
+    1:
+      description: Fill wells
+      command: pipetter.pipetteMixtures
+      mixtures:
+        "#data":
+          groupBy: well
+          templateGroup:
+            destination: $well
+            sources:
+            - {source: ourlab.mario.systemLiquid, volume: $waterVolume0}
+            - {source: dye, volume: $dyeVolume0, program: "Roboliq_Water_Wet_1000"}
+      destinationLabware: plate1
+      clean: flush
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+  2:
+    description: "StageAction: shake"
+    data:
+      where: 'stageAction == "shake"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: `stageB = {{$stageB}}`
+      1:
+        description: Shake plate in order to mix the dye in
+        command: shaker.shakePlate
+        object: plate1
+        program:
+          duration: 1 minute
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
+  3:
+    description: "StageAction: centrifuge"
+    data:
+      where: 'stageAction == "centrifuge"'
+    1:
+      description: Centrifuge plate in order to move dye off of the well walls
+      command: centrifuge.centrifuge2
+      object1: plate1
+      object2: plate2
+      program:
+        "rpm": 3000
+        "duration": "1 minutes"
+        "temperature": "25 degC"
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+  4:
+    description: "StageAction: wait"
+    data:
+      where: 'stageAction == "wait"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: "`StageB {{$stageB}}`"
+      1:
+        command: timer.sleep
+        duration: 1 minute
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
+  5:
+    description: "StageAction: manipulate wells"
+    data:
+      where: 'stageAction == "manipulate"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: "`StageB {{$stageB}}`"
+      1:
+        description: "Pipette aliquot into and out of wells"
+        data:
+          where: 'wellAction == "pip"'
+        command: pipetter.pipette
+        sourceLabware: plate1
+        sources: $$well
+        destinationLabware: plate1
+        destinations: $$well
+        syringes: $$syringe
+        volumes: 50 ul
+        cleanEnd: none
+      2:
+        description: "Mix wells once"
+        data:
+          where: 'wellAction == "mix1"'
+        command: pipetter.mix
+        wells: $$well
+        wellLabware: plate1
+        syringes: $$syringe
+        counts: 1
+        cleanEnd: none
+      3:
+        description: "Mix wells three times"
+        data:
+          where: 'wellAction == "mix3"'
+        command: pipetter.mix
+        wells: $$well
+        wellLabware: plate1
+        syringes: $$syringe
+        counts: 3
+        cleanEnd: none
+      4:
+        command: pipetter.cleanTips
+        equipment: ourlab.mario.liha
+        intensity: flush
+        syringes: [1,2,3,4]
+      5:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
+  6:
+    description: "StageAction: extract aliquot"
+    data:
+      where: 'stageAction == "extract"'
+    command: experiment.forEachGroup
+    groupBy: stageAction
+    steps:
+      command: pipetter.pipetteMixtures
+      mixtures:
+        "#data":
+          where: 'role == "source"'
+          template:
+            sources:
+            - {source: ourlab.mario.systemLiquid, volume: $waterVolume}
+            - {source: $well, volume: $extractVolume, program: "Roboliq_Water_Wet_1000"}
+      sourceLabware: plate1
+      destinationLabware: plate1
+      destinations:
+        "#data":
+          where: 'role == "destination"'
+          value: well
+      clean: flush
+  7:
+    description: "StageAction: wait after extraction"
+    data:
+      where: 'stageAction == "wait2"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: "`StageB {{$stageB}}`"
+      1:
+        command: timer.sleep
+        duration: 1 minute
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"

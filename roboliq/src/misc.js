@@ -158,11 +158,13 @@ function handleDirective(spec, data) {
 function handleDirectiveDeep(x, data) {
 	//return mapDeep(spec, function(spec) { return handleDirective(spec, data); });
 	if (_.isPlainObject(x)) {
-		x = _.mapValues(x, function(value, key) {
-			return (key === 'steps')
-				? value
-				: handleDirectiveDeep(value, data);
-		});
+		if (!x.hasOwnProperty('data')) {
+			x = _.mapValues(x, function(value, key) {
+				return (key === 'steps')
+					? value
+					: handleDirectiveDeep(value, data);
+			});
+		}
 	}
 	else if (_.isArray(x)) {
 		x = _.map(x, function(value, i) {

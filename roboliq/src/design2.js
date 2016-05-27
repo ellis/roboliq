@@ -1322,6 +1322,7 @@ function filterOnWhere(table, where) {
 	else if (_.isString(where)) {
 		// console.log({where})
 		table2 = _.filter(table, row => {
+			// console.log({where, row})
 			const result = math.eval(where, row);
 			// console.log({result});
 			return result;

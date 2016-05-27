@@ -50,6 +50,7 @@
 - [?] BUG: `qc_mario_dyeDebug7`: centrifuge needs to be closed before running it
 - [ ] BUG: `qc_mario_dyeDebug7`: centrifuge isn't assigned labware
 - [ ] make an evoware command(s) to create and run worklists using runtime variables
+- [ ] runtime-cli: create a 'stepTiming.jsonl' file
 
 - [ ] `qc_mario_dyeDispersion1`: create an experiment to see how long it takes for dispensed dye to reach an absorbance steady state
 
