@@ -55,7 +55,7 @@ objects:
       - stageAction: wait
         stageB*: 3
       - stageAction: manipulate
-        stageB*: 3
+        stageB*: 12
         syringe=:
           values: [1, 2, 3, 4]
           orderBy: stageB
