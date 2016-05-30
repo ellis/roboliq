@@ -372,7 +372,7 @@ describe('roboliq', function() {
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
-			// console.log("CONTINUE:\n"+JSON.stringify(result.protocol.RESUME, null, '\t'));
+			// console.log("RESUME:\n"+JSON.stringify(result.protocol.RESUME, null, '\t'));
 			should.deepEqual(result.output.steps, {
 				"1": {
 					"1": {
@@ -395,9 +395,72 @@ describe('roboliq', function() {
 				}
 			});
 			should.deepEqual(result.protocol.RESUME, {
-				"after": "2",
-				"varset": "varset1"
+				"stepId": "2"
 			});
+		});
+
+		it("should handle resuming on `system.runtimeLoadVariables`", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					SCOPE: {
+						a: 3
+					}
+				},
+				steps: {
+					"1": {
+						"1": {
+							"command": "system._echo",
+							"value": "first"
+						},
+						"command": "system.echo",
+						"value": "first"
+					},
+					"2": {
+						"command": "system.runtimeLoadVariables",
+						"variables": [
+							"a"
+						],
+						"varset": "varset1"
+					},
+					"3": {
+						"command": "system.echo",
+						"value": "$a"
+					}
+				},
+				RESUME: {
+					stepId: "2"
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			// console.log("RESUME:\n"+JSON.stringify(result.protocol.RESUME, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"command": "system._echo",
+						"value": "first"
+					},
+					"command": "system.echo",
+					"value": "first"
+				},
+				"2": {
+					"command": "system.runtimeLoadVariables",
+					"variables": [
+						"a"
+					],
+					"varset": "varset1"
+				},
+				"3": {
+					"1": {
+						"command": "system._echo",
+						"value": 3
+					},
+					"command": "system.echo",
+					"value": "$a"
+				}
+			});
+			should.deepEqual(result.protocol.RESUME || {}, {});
 		});
 
 	});

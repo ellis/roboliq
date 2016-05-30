@@ -43,16 +43,16 @@
 
 # Goals for presentation
 
-- [?] add protocol.RESUME.stepId
-- [?] add protocol.RESUME.varset
-- [?] `system.runtimeLoadVariables`:
+- [x] add protocol.RESUME.stepId
+- [x] `system.runtimeLoadVariables`:
 	- [x] system.yaml
 	- [x] system.js
 - [?] roboliq.js: suspending
 	- [x] stop compiling after encountering `system.runtimeLoadVariables`
 	- [?] save a dump file `${stepId}.dump` in same directory as `.out.json`
 - [ ] roboliq.js: resuming
-	- [ ] roboliq.js: when continuing on a `system.runtimeLoadVariables`, then compile it `${SCRIPTDIR}/${stepId}.esc` and copy it to `${SCRIPTDIR}/continue.esc`
+	- [x] handle resuming at RESUME.stepId
+	- [ ] roboliq.js: when continuing on a `system.runtimeLoadVariables`, then compile it to `${SCRIPTDIR}/${stepId}.esc` and copy it to `${SCRIPTDIR}/continue.esc`
 	- [ ] roboliq.js: implement --evoware argument
 - [ ] Evoware:
 	- [ ] should call runtime-cli to continue compiling from the dumpfile

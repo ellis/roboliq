@@ -230,20 +230,21 @@ function loadProtocol(a, b, url, filecache) {
 
 	// Create a clone keeping only valid protocol properties.
 	var c = _.cloneDeep(_.pick(b,
-		'description',
-		'config',
-		'objects',
-		'steps',
-		'effects',
-		'predicates',
-		'directiveHandlers',
-		'objectToPredicateConverters',
-		'schemas',
-		'commandHandlers',
-		'planHandlers',
-		'files',
-		'errors',
-		'warnings'
+		"description",
+		"config",
+		"objects",
+		"steps",
+		"effects",
+		"predicates",
+		"directiveHandlers",
+		"objectToPredicateConverters",
+		"schemas",
+		"commandHandlers",
+		"planHandlers",
+		"files",
+		"errors",
+		"warnings",
+		"RESUME"
 	));
 	if (_.isUndefined(c.errors)) {
 		c.errors = {};
@@ -528,7 +529,7 @@ function validateProtocol1(protocol, o, path) {
 		const fullName = path2.join(".");
 		const doit = () => {
 			//console.log({name, value, fullName})
-			if (name !== 'type') {
+			if (name !== 'type' && name !== "DATA" && name !== "SCOPE") {
 				assert(!_.isEmpty(value.type), "Missing `type` property.");
 				if (value.type === "Namespace") {
 					validateProtocol1(protocol, value, path.concat(name));
@@ -797,6 +798,10 @@ function _run(opts, userProtocol) {
 	function expandProtocol(protocol) {
 		var objects0 = _.cloneDeep(protocol.objects);
 		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
+		if (protocol.RESUME) {
+			protocol.SKIPTO = protocol.RESUME.stepId
+			protocol.RESUME = undefined;
+		}
 		expandStep(protocol, [], protocol.steps, objects0);
 		return objects0;
 	}
@@ -824,6 +829,7 @@ function _run(opts, userProtocol) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
+		console.log({id, RESUME: protocol.RESUME, SKIPTO: protocol.SKIPTO})
 		if (opts.progress) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
@@ -883,11 +889,19 @@ function _run(opts, userProtocol) {
 				}
 			}
 			else {
-				if (commandName === "system.runtimeLoadVariables") {
-					protocol.RESUME = {
-						after: prefix.join("."),
-						varset: params.varset
+				// If we're skipping to a specific step
+				if (protocol.SKIPTO) {
+					// If the step has been reached:
+					if (protocol.SKIPTO === id) {
+						protocol.SKIPTO = undefined;
+						assert(commandName === "system.runtimeLoadVariables", "Roboliq can only resume compiling at a `system.runtimeLoadVariables` command");
 					}
+					else {
+						expandSubsteps(protocol, prefix, step, objects, SCOPE2, DATA);
+					}
+				}
+				else if (commandName === "system.runtimeLoadVariables") {
+					protocol.RESUME = {stepId: id};
 				}
 				else {
 					if (commandName) {
@@ -1038,7 +1052,7 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "warnings", "errors")
+			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "warnings", "errors", "RESUME")
 		);
 
 		const tables = {
