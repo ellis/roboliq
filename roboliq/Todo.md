@@ -41,6 +41,26 @@
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
+# Goals for presentation
+
+- [?] add protocol.RESUME.stepId
+- [?] add protocol.RESUME.varset
+- [?] `system.runtimeLoadVariables`:
+	- [x] system.yaml
+	- [x] system.js
+- [?] roboliq.js: suspending
+	- [x] stop compiling after encountering `system.runtimeLoadVariables`
+	- [?] save a dump file `${stepId}.dump` in same directory as `.out.json`
+- [ ] roboliq.js: resuming
+	- [ ] roboliq.js: when continuing on a `system.runtimeLoadVariables`, then compile it `${SCRIPTDIR}/${stepId}.esc` and copy it to `${SCRIPTDIR}/continue.esc`
+	- [ ] roboliq.js: implement --evoware argument
+- [ ] Evoware:
+	- [ ] should call runtime-cli to continue compiling from the dumpfile
+	- [ ] should call `Procedure("${SCRIPTDIR}/continue.esc")` or whatever the name is
+	- [ ] Should create an empty continue.esc file
+- [ ] runtime-cli: should compile dumpfile and run evoware, producing a new
+- [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
+
 # Goals for Monday and Tuesday
 
 - [x] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script

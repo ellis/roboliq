@@ -53,6 +53,14 @@ system.runtimeExitLoop:
     test: {description: "The code to execute at runtime that will test whether to exit.", type: string}
   required: [testType, test]
 
+system.runtimeLoadVariables:
+  description: "Handle steps which require runtime variables"
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    varset: {description: "Name of the variable set to load", type: string}
+    variables: {description: "Array of variables to load from 'varset'", type: array, items: {type: string}}
+  required: [varset, variables]
+
 system.runtimeSteps:
   description: "Handle steps which require runtime variables"
   properties:

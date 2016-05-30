@@ -64,6 +64,10 @@ const commandHandlers = {
 		// Do nothing, this command is its own instruction
 		return {};
 	},
+	"system.runtimeLoadVariables": function(params, parsed, data) {
+		// Do nothing, this command is its own instruction
+		return {};
+	},
 	"system.runtimeSteps": function(params, parsed, data) {
 		// Do nothing, this command is its own instruction
 		return {};

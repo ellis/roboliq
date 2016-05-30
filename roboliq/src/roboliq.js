@@ -653,6 +653,14 @@ function run(argv, userProtocol) {
 			}
 			mkdirp.sync(path.dirname(outpath));
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
+
+			if (result.protocol.RESUME) {
+				const dumppath = path.join(path.dirname(output), "continue.dump");
+				if (!opts.quiet) {
+					console.log("dump written to: "+dumppath);
+				}
+				fs.writeFileSync(dumppath, JSON.stringify(result.protocol, null, '\t')+"\n");
+			}
 		}
 	}
 
@@ -808,6 +816,11 @@ function _run(opts, userProtocol) {
 	 * @param  {object} objects - a mutable copy of the protocol's objects.
 	 */
 	function expandStep(protocol, prefix, step, objects, SCOPE = {}, DATA = []) {
+		// If protocol.RESUME is set, compiling should be suspended and continued later
+		if (protocol.RESUME) {
+			return;
+		}
+
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
@@ -870,10 +883,18 @@ function _run(opts, userProtocol) {
 				}
 			}
 			else {
-				if (commandName) {
-					expandCommand(protocol, prefix, step, objects, SCOPE2, params, commandName, handler, DATA, id);
+				if (commandName === "system.runtimeLoadVariables") {
+					protocol.RESUME = {
+						after: prefix.join("."),
+						varset: params.varset
+					}
 				}
-				expandSubsteps(protocol, prefix, step, objects, SCOPE2, DATA);
+				else {
+					if (commandName) {
+						expandCommand(protocol, prefix, step, objects, SCOPE2, params, commandName, handler, DATA, id);
+					}
+					expandSubsteps(protocol, prefix, step, objects, SCOPE2, DATA);
+				}
 			}
 		}
 	}

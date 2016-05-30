@@ -350,5 +350,55 @@ describe('roboliq', function() {
 				}
 			});
 		});
+
+		it("should handle suspension on `system.runtimeLoadVariables`", () => {
+			const protocol = {
+				roboliq: "v1",
+				steps: {
+					1: {
+						command: "system.echo",
+						value: "first"
+					},
+					2: {
+						command: "system.runtimeLoadVariables",
+						variables: ["a"],
+						varset: "varset1"
+					},
+					3: {
+						command: "system.echo",
+						value: "$a"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			// console.log("CONTINUE:\n"+JSON.stringify(result.protocol.RESUME, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"command": "system._echo",
+						"value": "first"
+					},
+					"command": "system.echo",
+					"value": "first"
+				},
+				"2": {
+					"command": "system.runtimeLoadVariables",
+					"variables": [
+						"a"
+					],
+					"varset": "varset1"
+				},
+				"3": {
+					"command": "system.echo",
+					"value": "$a"
+				}
+			});
+			should.deepEqual(result.protocol.RESUME, {
+				"after": "2",
+				"varset": "varset1"
+			});
+		});
+
 	});
 });
