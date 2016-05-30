@@ -52,13 +52,14 @@
 	- [?] save a dump file `${stepId}.dump` in same directory as `.out.json`
 - [ ] roboliq.js: resuming
 	- [x] handle resuming at RESUME.stepId
-	- [ ] roboliq.js: when continuing on a `system.runtimeLoadVariables`, then compile it to `${SCRIPTDIR}/${stepId}.esc` and copy it to `${SCRIPTDIR}/continue.esc`
+	- [ ] automatically try to load the varset
 	- [ ] roboliq.js: implement --evoware argument
 - [ ] Evoware:
 	- [ ] should call runtime-cli to continue compiling from the dumpfile
 	- [ ] should call `Procedure("${SCRIPTDIR}/continue.esc")` or whatever the name is
 	- [ ] Should create an empty continue.esc file
-- [ ] runtime-cli: should compile dumpfile and run evoware, producing a new
+- [ ] runtime-cli:
+	- [ ] should compile dumpfile `${stepId}.dump` and run evoware, producing a new `${SCRIPTDIR}/continue.esc`
 - [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
 
 # Goals for Monday and Tuesday

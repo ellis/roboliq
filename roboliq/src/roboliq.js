@@ -76,6 +76,9 @@ const nomnom = require('nomnom').options({
 		flag: true,
 		help: 'Print debugging info'
 	},
+	evoware: {
+		help: "Invoke evoware supplier and pass the comma-separated arguements"
+	}
 	fileData: {
 		full: 'file-data',
 		list: true,
@@ -662,6 +665,17 @@ function run(argv, userProtocol) {
 				}
 				fs.writeFileSync(dumppath, JSON.stringify(result.protocol, null, '\t')+"\n");
 			}
+
+			if (opts.evoware) {
+				const evowareArgv = _.clone(opts.evoware.split(","));
+				assert(evowareArgv.length === 2, "two arguments must be passed to --evoware options");
+				const evowareRun = require("./evoware/EvowareMain").run;
+				evowareArgv.push(outpath);
+				if (!opts.quiet) {
+					console.log(`calling evoware: ${evowareArgv.join(" ")}`);
+				}
+				evowareRun(evowareArgv);
+			}
 		}
 	}
 
@@ -829,7 +843,7 @@ function _run(opts, userProtocol) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
-		console.log({id, RESUME: protocol.RESUME, SKIPTO: protocol.SKIPTO})
+		// console.log({id, RESUME: protocol.RESUME, SKIPTO: protocol.SKIPTO})
 		if (opts.progress) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}

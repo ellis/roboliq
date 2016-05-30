@@ -27,7 +27,7 @@ const commander = require('commander')
 		"    agents    list of agents to compile for (comma-separated)\n"
 	);
 
-export function run(argv) {
+function run(argv) {
 	var opts = commander.parse(argv);
 	if (opts.args.length === 0 || opts.rawArgs.indexOf("--help") >= 0 || opts.rawArgs.indexOf("-h") >= 0) {
 		opts.outputHelp();
@@ -92,4 +92,11 @@ export function run(argv) {
 	}
 }
 
-run(process.argv);
+// If called from the command line:
+if (require.main === module) {
+	run(process.argv);
+}
+
+module.exports = {
+	run
+};
