@@ -55,7 +55,7 @@ export function compile(table, protocol, agents, options = {}) {
 		lines.unshift(evowareHelper.createExecuteLine("cmd", ["/c", "mkdir", options.variables.TEMPDIR], true));
 	}
 
-	return [{table, lines, tokenTree: result}];
+	return [{table, lines, tokenTree: results}];
 }
 
 export function compileStep(table, protocol, agents, path, objects, loopEndStack = [], options = {}) {
@@ -84,18 +84,28 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 	if (_.isUndefined(step))
 		return undefined;
 
-	if (protocol.COMPILER.suspendStepId) {
-		const cmp = naturalSort(stepId, protocol.COMPILER.suspendStepId);
-		// console.log({stepId, suspendStepId: protocol.COMPILER.suspendStepId, cmp})
-		// If we've passed the suspend step, quit compiling
-		if (cmp > 0) {
-			return undefined;
+	if (stepId !== "" && protocol.COMPILER) {
+		// Handle suspending
+		if (protocol.COMPILER.suspendStepId) {
+			const cmp = naturalSort(stepId, protocol.COMPILER.suspendStepId);
+			// console.log({stepId, suspendStepId: protocol.COMPILER.suspendStepId, cmp})
+			// If we've passed the suspend step, quit compiling
+			if (cmp > 0) {
+				return undefined;
+			}
+			// If we're before the suspend step, skip unless the current step is a parent step
+			else if (cmp < 0 && !_.startsWith(protocol.COMPILER.suspendStepId, stepId+".")) {
+				return undefined;
+			}
 		}
-		else if (stepId === "") {
-			// do nothing
-		}
-		else if (cmp < 0 && !_.startsWith(protocol.COMPILER.suspendStepId, stepId+".")) {
-			return undefined;
+		// Handle resuming
+		if (protocol.COMPILER.resumeStepId) {
+			const cmp = naturalSort(stepId, protocol.COMPILER.resumeStepId);
+			// console.log({stepId, resumeStepId: protocol.COMPILER.resumeStepId, cmp})
+			// Skip until we've passed the resume step
+			if (cmp <= 0) {
+				return undefined;
+			}
 		}
 	}
 

@@ -57,17 +57,17 @@
 	- [x] --varset option with filename variables to load into SCOPE
 	- [ ] --varset option with filename and optional selection of variables to load into SCOPE
 - [ ] Evoware: suspending
-	- [?] should add line to call runtime-cli to continue compiling from the dumpfile
-	- [?] should add line to call `StartScript("${SCRIPTDIR}/continue.esc")`
-	- [ ] Should create an empty continue.esc file
-	- [ ] stop processing after `protocol.COMPILER.suspendStepId`
+	- [x] should add line to call runtime-cli to continue compiling from the dumpfile
+	- [x] should add line to call `StartScript("${SCRIPTDIR}/continue.esc")`
+	- [x] stop processing after `protocol.COMPILER.suspendStepId`
+	- [?] Should create an empty continue.esc file
+- [ ] Evoware: resuming
+	- [ ] start processing after `protocol.COMPILER.resumeStepId`
+	- [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
 - [ ] runtime-cli:
 	- [ ] should optionally call an R script to generate the varset
 	- [ ] should compile dumpfile `${stepId}.dump.json` and run evoware, producing a new `${SCRIPTDIR}/continue.esc`
 	- [ ] if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
-- [ ] Evoware: resuming
-	- [ ] start processing after `protocol.COMPILER.resumeStepId`
-	- [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
 
 - [ ] get rid of `system.runtimeLoadVariables` and use `system.runtimeSteps` instead, in order to give the runtime variables a proper scope.
 

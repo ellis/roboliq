@@ -698,7 +698,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it.only("should handle suspending at system.runtimeLoadVariables", () => {
+		it("should handle suspending at system.runtimeLoadVariables", () => {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
@@ -725,6 +725,35 @@ describe('EvowareCompilerTest', function() {
 				[
 					{ "line": "Execute(\"AAA runtimeLoadVariables C:\\Here\\myscript.out.json 1\",2,\"\",2);" },
 					{ "line": "StartScript(\"undefined\\continue.esc\");", "file": { "filename": "continue.esc", "data": "" } }
+				]
+			]);
+		});
+
+		it("should handle resuming at system.runtimeLoadVariables", () => {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "system.runtimeLoadVariables",
+						"varset": "varset1",
+						"variables": ["a"]
+					},
+					2: {
+						"command": "system.echo",
+						"value": "$a"
+					}
+				},
+				COMPILER: {
+					resumeStepId: "1"
+				}
+			});
+			const agents = ["robot1"];
+			const options = {timing: false, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json"}};
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], options);
+			// console.log("results: "+JSON.stringify(results, null, '\t'));
+			should.deepEqual(results, [
+				[
 				]
 			]);
 		});
