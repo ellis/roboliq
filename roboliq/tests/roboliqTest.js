@@ -512,5 +512,30 @@ describe('roboliq', function() {
 			should.deepEqual(result.protocol.RESUME || {}, {});
 		});
 
+		it("should support --varset option", () => {
+			const protocol = {
+				roboliq: "v1",
+				steps: {
+					"1": {
+						"command": "system.echo",
+						"value": "$a"
+					}
+				}
+			};
+			var result = roboliq.run(["-o", "", "-T", "--varset", '{"a": 3}'], protocol);
+			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			// console.log("scope:\n"+JSON.stringify(result.output.objects.SCOPE, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"command": "system._echo",
+						"value": 3
+					},
+					"command": "system.echo",
+					"value": "$a"
+				}
+			});
+		});
+
 	});
 });

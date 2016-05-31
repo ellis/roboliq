@@ -663,7 +663,7 @@ function run(argv, userProtocol) {
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 
 			if (result.protocol.RESUME) {
-				const dumppath = path.join(path.dirname(output), "continue.dump");
+				const dumppath = path.join(path.dirname(output), "continue.dump.json");
 				if (!opts.quiet) {
 					console.log("dump written to: "+dumppath);
 				}
@@ -744,20 +744,28 @@ function _run(opts, userProtocol) {
 		urlToProtocol_l.push([undefined, userProtocol]);
 
 	// Load varsets
-	_.forEach(opt.varset, varsetString => {
+	// console.log({opts})
+	_.forEach(opts.varset, varsetString => {
+		// console.log({varsetString})
+		let url;
 		let varset;
-		if (_.startsWith(varsetString, "{")) {
+		if (_.isPlainObject(varsetString)) { // This is strange, apparently nomnom automatically converted the string to an object!
+			varset = varsetString;
+		}
+		else if (_.startsWith(varsetString, "{")) {
 			varset = JSON.parse(varsetString);
 		}
 		else {
-			const varsetFilename = varsetString;
-			varset = loadUrlContent(varsetFilename, filecache);
+			url = varsetString;
+			varset = loadUrlContent(url, filecache);
 		}
 		const varsetProtocol = {
+			roboliq: version,
 			objects: {
 				SCOPE: varset
 			}
 		};
+		// console.log({varsetProtocol})
 		urlToProtocol_l.push([url, varsetProtocol]);
 	});
 
