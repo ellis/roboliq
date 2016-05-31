@@ -141,6 +141,10 @@ const nomnom = require('nomnom').options({
 		flag: true,
 		help: 'throw error when errors encountered during processing (in order to get a backtrace)'
 	},
+	varset: {
+		help: "Variable set to load",
+		list: true
+	},
 	version: {
 		flag: true,
 		help: 'print version and exit',
@@ -738,6 +742,24 @@ function _run(opts, userProtocol) {
 	// (this lets unit tests pass in JSON protocols rather than loading them from files).
 	if (userProtocol)
 		urlToProtocol_l.push([undefined, userProtocol]);
+
+	// Load varsets
+	_.forEach(opt.varset, varsetString => {
+		let varset;
+		if (_.startsWith(varsetString, "{")) {
+			varset = JSON.parse(varsetString);
+		}
+		else {
+			const varsetFilename = varsetString;
+			varset = loadUrlContent(varsetFilename, filecache);
+		}
+		const varsetProtocol = {
+			objects: {
+				SCOPE: varset
+			}
+		};
+		urlToProtocol_l.push([url, varsetProtocol]);
+	});
 
 	// Reduce the list of URLs by merging or patching them together, starting
 	// with the empty protocol.

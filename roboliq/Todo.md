@@ -53,6 +53,7 @@
 - [ ] roboliq.js: resuming
 	- [x] handle resuming at RESUME.stepId
 	- [x] roboliq.js: implement --evoware argument
+	- [?] --varset option with filename variables to load into SCOPE
 	- [ ] --varset option with filename and optional selection of variables to load into SCOPE
 - [ ] Evoware:
 	- [ ] should call an R script to generate the varset
