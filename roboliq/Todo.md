@@ -70,6 +70,7 @@
 	- [ ] if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
 
 - [ ] get rid of `system.runtimeLoadVariables` and use `system.runtimeSteps` instead, in order to give the runtime variables a proper scope.
+- [ ] BUG: qc_mario_dye3: volume is off in A04, I think it's a rounding error -- it leads to putting extra water in the well
 
 # Goals for Monday and Tuesday
 

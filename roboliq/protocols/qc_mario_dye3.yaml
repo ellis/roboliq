@@ -21,6 +21,11 @@ objects:
     description: Dilution plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    description: Balance plate for centrifuge
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
   dyeLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml
@@ -80,6 +85,15 @@ steps:
     data:
       where: 'actionA == "pipette"'
     1:
+      description: "Fill the balance plate"
+      command: pipetter.pipette
+      sources: ourlab.mario.systemLiquid
+      destinationLabware: plate2
+      destinations: $$well
+      volumes: $volume
+      clean: none
+    2:
+      description: "Fill the dilution plate"
       command: pipetter.pipetteMixtures
       mixtures:
         "#data":
@@ -91,7 +105,7 @@ steps:
             - {source: dye, volume: $dyeVolume0, program: "Roboliq_Water_Wet_1000"}
       destinationLabware: plate1
       clean: flush
-    2:
+    3:
       description: "Measure absorbance"
       command: absorbanceReader.measurePlate
       object: plate1
@@ -103,24 +117,20 @@ steps:
     description: "StageAction: shake"
     data:
       where: 'actionA == "shake"'
-    command: experiment.forEachGroup
-    groupBy: stageB
-    steps:
-      description: `stageB = {{$stageB}}`
-      1:
-        description: Shake plate in order to mix the dye in
-        command: shaker.shakePlate
-        object: plate1
-        program:
-          duration: 1 minute
-      2:
-        description: "Measure absorbance"
-        command: absorbanceReader.measurePlate
-        object: plate1
-        program:
-          excitationWavelength: $wavelength
-          wellDesignFactor: well
-        outputDataset: "absorbance"
+    1:
+      description: Shake plate in order to mix the dye in
+      command: shaker.shakePlate
+      object: plate1
+      program:
+        duration: 1 minute
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: $wavelength
+        wellDesignFactor: well
+      outputDataset: "absorbance"
   3:
     description: "StageAction: centrifuge"
     data:
