@@ -53,13 +53,15 @@
 - [ ] roboliq.js: resuming
 	- [x] handle resuming at RESUME.stepId
 	- [x] roboliq.js: implement --evoware argument
-	- [ ] automatically try to load the varset
+	- [ ] --varset option with filename and optional selection of variables to load into SCOPE
 - [ ] Evoware:
+	- [ ] should call an R script to generate the varset
 	- [ ] should call runtime-cli to continue compiling from the dumpfile
 	- [ ] should call `Procedure("${SCRIPTDIR}/continue.esc")` or whatever the name is
 	- [ ] Should create an empty continue.esc file
 - [ ] runtime-cli:
 	- [ ] should compile dumpfile `${stepId}.dump` and run evoware, producing a new `${SCRIPTDIR}/continue.esc`
+	- if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
 - [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
 
 # Goals for Monday and Tuesday
