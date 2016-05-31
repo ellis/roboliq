@@ -723,7 +723,7 @@ describe('EvowareCompilerTest', function() {
 			// console.log("results: "+JSON.stringify(results, null, '\t'));
 			should.deepEqual(results, [
 				[
-					{ "line": "Execute(\"AAA runtimeLoadVariables C:\\Here\\myscript.out.json 1\",2,\"\",2);" },
+					{ "line": "Execute(\"AAA evowareRuntimeLoadVariables C:\\Here\\myscript.out.json 1\",2,\"\",2);" },
 					{ "line": "StartScript(\"undefined\\continue.esc\");", "file": { "filename": "continue.esc", "data": "" } }
 				]
 			]);

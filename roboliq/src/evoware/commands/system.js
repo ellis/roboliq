@@ -15,7 +15,7 @@ export function runtimeExitLoop(params, parsed, data) {
 export function runtimeLoadVariables(params, parsed, data) {
 	const stepId = data.path.join(".");
 	return [
-		{line: evowareHelper.createExecuteLine("${ROBOLIQ}", ["runtimeLoadVariables", "${SCRIPTFILE}", stepId], true)},
+		{line: evowareHelper.createExecuteLine("${ROBOLIQ}", ["evowareRuntimeLoadVariables", "${SCRIPTFILE}", stepId], true)},
 		{line: evowareHelper.createStartScriptLine(`\${SCRIPTDIR}\\continue.esc`), file: {filename: "continue.esc", data: ""}}
 	];
 }

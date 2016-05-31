@@ -565,13 +565,6 @@ function validateProtocol1(protocol, o, path) {
 	}
 }
 
-/**
- * Process a roboliq protocol.
- *
- * @param  {array} argv - command line options.
- * @param  {Protocol} [userProtocol] - an optional protocol that can be directly passed into the function rather than supplied via argv; currently this is only for testing purposes.
- * @return {object} Processing results with properties `output` (the final processed protocol) and `protocol` (the result of merging all input protocols).
- */
 function run(argv, userProtocol) {
 	// Validate the command line arguments
 	var opts = nomnom.parse(argv);
@@ -579,6 +572,18 @@ function run(argv, userProtocol) {
 		console.log(nomnom.getUsage());
 		process.exit(0);
 	}
+
+	return runWithOpts(opts, userProtocol);
+}
+
+/**
+ * Process a roboliq protocol.
+ *
+ * @param  {array} argv - command line options.
+ * @param  {Protocol} [userProtocol] - an optional protocol that can be directly passed into the function rather than supplied via argv; currently this is only for testing purposes.
+ * @return {object} Processing results with properties `output` (the final processed protocol) and `protocol` (the result of merging all input protocols).
+ */
+function runWithOpts(opts, userProtocol) {
 
 	// Configure mathjs to use bignumbers
 	require('mathjs').config({
@@ -797,6 +802,10 @@ function _run(opts, userProtocol) {
 	/*if (opts.debug) {
 		console.log(protocol);
 	}*/
+
+	// Add command line options
+	console.log({opts})
+	protocol.COMPILER.roboliqOpts = opts;
 
 	postProcessProtocol(protocol);
 	//console.log("A")
@@ -1203,5 +1212,6 @@ function _run(opts, userProtocol) {
 }
 
 module.exports = {
-	run: run
+	run,
+	runWithOpts,
 }

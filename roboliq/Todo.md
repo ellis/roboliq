@@ -61,11 +61,11 @@
 	- [x] should add line to call `StartScript("${SCRIPTDIR}/continue.esc")`
 	- [x] stop processing after `protocol.COMPILER.suspendStepId`
 	- [?] Should create an empty continue.esc file
-- [ ] Evoware: resuming
-	- [ ] start processing after `protocol.COMPILER.resumeStepId`
-	- [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
+- [x] Evoware: resuming
+	- [x] start processing after `protocol.COMPILER.resumeStepId`
+- [?] roboliq: store command line arguments in protocol, output, and dump
 - [ ] runtime-cli:
-	- [ ] should optionally call an R script to generate the varset
+	- [?] should optionally call an R script to generate the varset
 	- [ ] should compile dumpfile `${stepId}.dump.json` and run evoware, producing a new `${SCRIPTDIR}/continue.esc`
 	- [ ] if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
 
