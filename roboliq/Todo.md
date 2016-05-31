@@ -49,8 +49,8 @@
 	- [x] system.js
 - [?] roboliq.js: suspending
 	- [x] stop compiling after encountering `system.runtimeLoadVariables`
+	- [x] set `protocol.COMPILER.suspendStepId`
 	- [?] save a dump file `${stepId}.dump.json` in same directory as `.out.json`
-	- [ ] set `protocol.COMPILER.suspendStepId`
 - [ ] roboliq.js: resuming
 	- [x] handle resuming at RESUME.stepId
 	- [x] roboliq.js: implement --evoware argument

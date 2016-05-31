@@ -421,7 +421,8 @@ describe('roboliq', function() {
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
-			// console.log("RESUME:\n"+JSON.stringify(result.protocol.RESUME, null, '\t'));
+			// console.log("output COMPILER:\n"+JSON.stringify(result.output.COMPILER, null, '\t'));
+			// console.log("dump COMPILER:\n"+JSON.stringify(result.dump.COMPILER, null, '\t'));
 			should.deepEqual(result.output.steps, {
 				"1": {
 					"1": {
@@ -443,8 +444,11 @@ describe('roboliq', function() {
 					"value": "$a"
 				}
 			});
-			should.deepEqual(result.protocol.RESUME, {
-				"stepId": "2"
+			should.deepEqual(result.output.COMPILER, {
+				"suspendStepId": "2"
+			});
+			should.deepEqual(result.dump.COMPILER, {
+				"resumeStepId": "2"
 			});
 		});
 

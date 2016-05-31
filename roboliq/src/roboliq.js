@@ -169,6 +169,7 @@ const protocolEmpty = {
 	reports: {},
 	errors: {},
 	warnings: {},
+	COMPILER: {},
 };
 
 /**
@@ -647,6 +648,15 @@ function run(argv, userProtocol) {
 		if (opts.debug || opts.print)
 			console.log(outputText);
 
+		// If compilation was suspended, crease a dumpfile for later continuation
+		if (result.protocol.COMPILER.suspend) {
+			result.dump = _.clone(result.protocol);
+			// Resume where this compilation suspended
+			result.dump.COMPILER = {
+				resumeStepId: result.protocol.COMPILER.suspendStepId
+			};
+		}
+
 		// If the output is not suppressed, write the protocol to an output file.
 		if (opts.output !== '') {
 			var inpath = _.last(opts.infiles);
@@ -662,12 +672,12 @@ function run(argv, userProtocol) {
 			mkdirp.sync(path.dirname(outpath));
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 
-			if (result.protocol.RESUME) {
-				const dumppath = path.join(path.dirname(output), "continue.dump.json");
+			if (result.dump) {
+				const dumppath = path.join(path.dirname(output), `${result.dump.COMPILER.resumeStepId}.dump.json`);
 				if (!opts.quiet) {
 					console.log("dump written to: "+dumppath);
 				}
-				fs.writeFileSync(dumppath, JSON.stringify(result.protocol, null, '\t')+"\n");
+				fs.writeFileSync(dumppath, JSON.stringify(result.dump, null, '\t')+"\n");
 			}
 
 			if (opts.evoware) {
@@ -843,9 +853,10 @@ function _run(opts, userProtocol) {
 	function expandProtocol(protocol) {
 		var objects0 = _.cloneDeep(protocol.objects);
 		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
-		if (protocol.RESUME) {
-			protocol.SKIPTO = protocol.RESUME.stepId
-			protocol.RESUME = undefined;
+		// If we should resume expansion at a particular step:
+		delete protocol.COMPILER.suspend;
+		if (protocol.COMPILER.resumeStepId) {
+			protocol.COMPILER.skipTo = protocol.COMPILER.resumeStepId; // HACKy...
 		}
 		expandStep(protocol, [], protocol.steps, objects0);
 		return objects0;
@@ -866,15 +877,15 @@ function _run(opts, userProtocol) {
 	 * @param  {object} objects - a mutable copy of the protocol's objects.
 	 */
 	function expandStep(protocol, prefix, step, objects, SCOPE = {}, DATA = []) {
-		// If protocol.RESUME is set, compiling should be suspended and continued later
-		if (protocol.RESUME) {
+		// If protocol.COMPILER.suspend is set, compiling should be suspended and continued later
+		if (protocol.COMPILER.suspend) {
 			return;
 		}
 
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
-		// console.log({id, RESUME: protocol.RESUME, SKIPTO: protocol.SKIPTO})
+		// console.log({id, RESUME: protocol.COMPILER, SKIPTO: protocol.SKIPTO})
 		if (opts.progress) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
@@ -946,7 +957,8 @@ function _run(opts, userProtocol) {
 					}
 				}
 				else if (commandName === "system.runtimeLoadVariables") {
-					protocol.RESUME = {stepId: id};
+					protocol.COMPILER.suspend = true;
+					protocol.COMPILER.suspendStepId = id;
 				}
 				else {
 					if (commandName) {
@@ -1097,8 +1109,12 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "warnings", "errors", "RESUME")
+			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "warnings", "errors")
 		);
+		// Handle protocol.COMPILER
+		if (!_.isEmpty(protocol.COMPILER)) {
+			output.COMPILER = _.pick(protocol.COMPILER, "resumeStepId", "suspendStepId");
+		}
 
 		const tables = {
 			labware: [],
