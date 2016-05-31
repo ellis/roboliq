@@ -452,7 +452,7 @@ describe('roboliq', function() {
 			});
 		});
 
-		it("should handle resuming on `system.runtimeLoadVariables`", () => {
+		it.only("should handle resuming on `system.runtimeLoadVariables`", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {
@@ -464,7 +464,7 @@ describe('roboliq', function() {
 					"1": {
 						"1": {
 							"command": "system._echo",
-							"value": "first"
+							"value": "!!!!!!!" // This is here because it will be overwritten if its parent command gets processed
 						},
 						"command": "system.echo",
 						"value": "first"
@@ -481,18 +481,18 @@ describe('roboliq', function() {
 						"value": "$a"
 					}
 				},
-				RESUME: {
-					stepId: "2"
+				COMPILER: {
+					resumeStepId: "2"
 				}
 			};
 			var result = roboliq.run(["-o", ""], protocol);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
-			// console.log("RESUME:\n"+JSON.stringify(result.protocol.RESUME, null, '\t'));
+			// console.log("COMPILER:\n"+JSON.stringify(result.output.COMPILER, null, '\t'));
 			should.deepEqual(result.output.steps, {
 				"1": {
 					"1": {
 						"command": "system._echo",
-						"value": "first"
+						"value": "!!!!!!!"
 					},
 					"command": "system.echo",
 					"value": "first"
@@ -513,7 +513,9 @@ describe('roboliq', function() {
 					"value": "$a"
 				}
 			});
-			should.deepEqual(result.protocol.RESUME || {}, {});
+			should.deepEqual(result.output.COMPILER, {
+				resumeStepId: "2"
+			});
 		});
 
 		it("should support --varset option", () => {

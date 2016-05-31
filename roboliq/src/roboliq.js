@@ -252,7 +252,7 @@ function loadProtocol(a, b, url, filecache) {
 		"files",
 		"errors",
 		"warnings",
-		"RESUME"
+		"COMPILER"
 	));
 	if (_.isUndefined(c.errors)) {
 		c.errors = {};
@@ -855,6 +855,7 @@ function _run(opts, userProtocol) {
 		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
 		// If we should resume expansion at a particular step:
 		delete protocol.COMPILER.suspend;
+		// console.log({COMPILER: protocol.COMPILER})
 		if (protocol.COMPILER.resumeStepId) {
 			protocol.COMPILER.skipTo = protocol.COMPILER.resumeStepId; // HACKy...
 		}
@@ -885,7 +886,7 @@ function _run(opts, userProtocol) {
 		//console.log("expandStep: "+prefix+JSON.stringify(step))
 		var commandHandlers = protocol.commandHandlers;
 		var id = prefix.join('.');
-		// console.log({id, RESUME: protocol.COMPILER, SKIPTO: protocol.SKIPTO})
+		// console.log({id, RESUME: protocol.COMPILER})
 		if (opts.progress) {
 			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
 		}
@@ -946,10 +947,11 @@ function _run(opts, userProtocol) {
 			}
 			else {
 				// If we're skipping to a specific step
-				if (protocol.SKIPTO) {
+				// console.log({COMPILER: protocol.COMPILER})
+				if (protocol.COMPILER.skipTo) {
 					// If the step has been reached:
-					if (protocol.SKIPTO === id) {
-						protocol.SKIPTO = undefined;
+					if (protocol.COMPILER.skipTo === id) {
+						protocol.COMPILER.skipTo = undefined;
 						assert(commandName === "system.runtimeLoadVariables", "Roboliq can only resume compiling at a `system.runtimeLoadVariables` command");
 					}
 					else {
