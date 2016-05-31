@@ -189,6 +189,21 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle a branching array of branching arrays", () => {
+			should.deepEqual(
+				expandConditions({
+					"a*": [
+						{"b*": 2},
+						{"c*": 2},
+					]
+				}),
+				[
+					{a: 1, b: 1}, {a: 1, b: 2},
+					{a: 2, c: 1}, {a: 2, c: 2}
+				]
+			);
+		});
+
 		it("should handle a branching array of complex objects", () => {
 			should.deepEqual(
 				expandConditions({

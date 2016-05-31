@@ -37,38 +37,6 @@ objects:
     type: Liquid
     wells: dyeLabware(C01 down F01)
 
-  design0:
-    type: Design
-    randomSeed: 1
-    conditions:
-      dyeVolume0: 10 ul
-      waterVolume0: 240 ul
-      well*: [A01, B01, C01, D01, E01, F01, G01, H01]
-      action=:
-        values: [none, pip, mix1, mix3]
-        order: reshuffle
-      stageA*:
-      - action: prep
-      - action: shake
-      - action: cent
-      - stageB*: 16
-        syringe=:
-          values: [1, 2, 3, 4]
-          orderBy: stageB
-          order: reshuffle
-        type=case:
-          cases:
-            control:
-              where: 'action == "none"'
-            experimental:
-              conditions:
-                program=:
-                  values: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
-                  orderBy: stageB
-                  where: 'action != none'
-                  order: repeat
-    orderBy: [stageA, stageB]
-
   design:
     type: Design
     randomSeed: 1
@@ -76,66 +44,54 @@ objects:
       dyeVolume0: 10 ul
       waterVolume0: 240 ul
       well*: [A01, B01, C01, D01, E01, F01, G01, H01]
-      action=:
+      wellAction=:
         values: [none, pip, mix1, mix3]
         order: reshuffle
       stageA*:
-      - action: prep
-      - action: shake
-      - action: cent
-      - action=:
-          values: [none, pip, mix1, mix3]
-          groupBy: stageB
-          order: repeat
+      - stageAction: prepare
+      - stageAction: shake
+        stageB*: 3
+      - stageAction: centrifuge
+      - stageAction: wait
+        stageB*: 3
+      - stageAction: manipulate
         stageB*: 12
         syringe=:
           values: [1, 2, 3, 4]
           orderBy: stageB
           order: reshuffle
-        program=:
-          values: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
-          orderBy: stageB
-          order: reshuffle
-    orderBy: [stageA, stageB]
+        .type=case:
+          cases:
+            control:
+              where: 'wellAction == "none"'
+            experimental:
+              conditions:
+                program=:
+                  values: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
+                  orderBy: stageB
+                  order: repeat
+      - stageAction: extract
+        extractVolume: 50 ul
+        waterVolume=calculate: "dyeVolume0 + waterVolume0 - extractVolume"
+        role*:
+          source: {}
+          destination:
+            well: [A02, B02, C02, D02, E02, F02, G02, H02]
+        .subphase*:
+        - {}
+        - stageA=calculate: "stageA + 1"
+          stageAction: wait2
+          stageB*: 5
 
-  # design1:
-  #   type: Design
-  #   randomSeed: 1
-  #   conditions:
-  #     type*:
-  #       control:
-  #         action: none
-  #       experimental:
-  #         action*: [pip, mix1, mix3]
-  #     .a=case:
-  #       groupBy: action
-  #       cases:
-  #       - where: 'action == "none"'
-  #         conditions:
-  #           program*: [none, none, none, none]
-  #       - where: 'action != "none"'
-  #         conditions:
-  #           program*: [Roboliq_Water_Air_1000, Roboliq_Water_Wet_1000, Roboliq_Water_Dry_1000, DM Water free dispense]
-  #     replicate*: 2
-  #     stageB=range:
-  #       groupBy: [action, replicate]
-  #     syringe=:
-  #       values: [1, 2, 3, 4]
-  #       orderBy: [stageB, replicate]
-  #       order: reshuffle
-  #     well=:
-  #       values: [A01, B01, C01, D01, E01, F01, G01, H01]
-  #       orderBy: [stageB, replicate]
-  #       order: reshuffle
-  #   orderBy: [stageB, replicate, syringe]
+    orderBy: [stageA, stageB]
 
 steps:
   data:
     source: design
   1:
-    description: "StageA 1: prepare wells"
+    description: "StageAction: prepare wells"
     data:
-      where: "stageA == 1"
+      where: 'stageAction == "prepare"'
     1:
       description: Fill wells
       command: pipetter.pipetteMixtures
@@ -158,27 +114,31 @@ steps:
         wellDesignFactor: well
       outputDataset: "absorbance"
   2:
-    description: "StageA 2: shake"
+    description: "StageAction: shake"
     data:
-      where: "stageA == 2"
-    1:
-      description: Shake plate in order to mix the dye in
-      command: shaker.shakePlate
-      object: plate1
-      program:
-        duration: 1 minute
-    2:
-      description: "Measure absorbance"
-      command: absorbanceReader.measurePlate
-      object: plate1
-      program:
-        excitationWavelength: 480nm
-        wellDesignFactor: well
-      outputDataset: "absorbance"
+      where: 'stageAction == "shake"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: `stageB = {{$stageB}}`
+      1:
+        description: Shake plate in order to mix the dye in
+        command: shaker.shakePlate
+        object: plate1
+        program:
+          duration: 1 minute
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
   3:
-    description: "StageA 3: centrifuge"
+    description: "StageAction: centrifuge"
     data:
-      where: "stageA == 3"
+      where: 'stageAction == "centrifuge"'
     1:
       description: Centrifuge plate in order to move dye off of the well walls
       command: centrifuge.centrifuge2
@@ -197,9 +157,28 @@ steps:
         wellDesignFactor: well
       outputDataset: "absorbance"
   4:
-    description: "StageA 4: manipulate wells"
+    description: "StageAction: wait"
     data:
-      where: "stageA == 4"
+      where: 'stageAction == "wait"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: "`StageB {{$stageB}}`"
+      1:
+        command: timer.sleep
+        duration: 1 minute
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
+  5:
+    description: "StageAction: manipulate wells"
+    data:
+      where: 'stageAction == "manipulate"'
     command: experiment.forEachGroup
     groupBy: stageB
     steps:
@@ -207,7 +186,7 @@ steps:
       1:
         description: "Pipette aliquot into and out of wells"
         data:
-          where: 'action == "pip"'
+          where: 'wellAction == "pip"'
         command: pipetter.pipette
         sourceLabware: plate1
         sources: $$well
@@ -219,7 +198,7 @@ steps:
       2:
         description: "Mix wells once"
         data:
-          where: 'action == "mix1"'
+          where: 'wellAction == "mix1"'
         command: pipetter.mix
         wells: $$well
         wellLabware: plate1
@@ -229,7 +208,7 @@ steps:
       3:
         description: "Mix wells three times"
         data:
-          where: 'action == "mix3"'
+          where: 'wellAction == "mix3"'
         command: pipetter.mix
         wells: $$well
         wellLabware: plate1
@@ -242,6 +221,47 @@ steps:
         intensity: flush
         syringes: [1,2,3,4]
       5:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
+  6:
+    description: "StageAction: extract aliquot"
+    data:
+      where: 'stageAction == "extract"'
+    command: experiment.forEachGroup
+    groupBy: stageAction
+    steps:
+      command: pipetter.pipetteMixtures
+      mixtures:
+        "#data":
+          where: 'role == "source"'
+          template:
+            sources:
+            - {source: ourlab.mario.systemLiquid, volume: $waterVolume}
+            - {source: $well, volume: $extractVolume, program: "Roboliq_Water_Wet_1000"}
+      sourceLabware: plate1
+      destinationLabware: plate1
+      destinations:
+        "#data":
+          where: 'role == "destination"'
+          value: well
+      clean: flush
+  7:
+    description: "StageAction: wait after extraction"
+    data:
+      where: 'stageAction == "wait2"'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      description: "`StageB {{$stageB}}`"
+      1:
+        command: timer.sleep
+        duration: 1 minute
+      2:
         description: "Measure absorbance"
         command: absorbanceReader.measurePlate
         object: plate1

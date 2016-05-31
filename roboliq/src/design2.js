@@ -516,8 +516,10 @@ function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, v
 		const valueIndexes = _.range(1, value.length + 1);
 		assignRowsByNamedValue(rows2, rowIndexesGroups2, rowIndexesGroups2Transposed, name, valueIndexes, randomEngine, false);
 		// Assign objects
+		const otherRowIndexes3 = rowIndexesGroups2Transposed.concat(rowIndexesGroups2);
 		for (let i = 0; i < size; i++) {
-			expandRowsByObject(rows2, rowIndexesGroups2Transposed[i], rowIndexesGroups2, value[i], randomEngine);
+			const rowIndexes3 = _.clone(rowIndexesGroups2Transposed[i]);
+			expandRowsByObject(rows2, rowIndexes3, otherRowIndexes3, value[i], randomEngine);
 		}
 	}
 	else if (_.isPlainObject(value)) {
@@ -1320,6 +1322,7 @@ function filterOnWhere(table, where) {
 	else if (_.isString(where)) {
 		// console.log({where})
 		table2 = _.filter(table, row => {
+			// console.log({where, row})
 			const result = math.eval(where, row);
 			// console.log({result});
 			return result;

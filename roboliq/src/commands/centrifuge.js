@@ -138,6 +138,11 @@ var commandHandlers = {
 				}
 			],
 			{
+				command: "equipment.close",
+				agent: params2.agent,
+				equipment: params2.equipment
+			},
+			{
 				command: ["equipment.run", params2.agent, params2.equipment].join('|'),
 				agent: params2.agent,
 				equipment: params2.equipment,

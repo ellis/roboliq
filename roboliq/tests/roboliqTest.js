@@ -351,6 +351,55 @@ describe('roboliq', function() {
 			});
 		});
 
+		it("should post-pone evaluation of directives in steps that have a 'data' property", () => {
+			const protocol = {
+				roboliq: "v1",
+				objects: {
+					design: {
+						type: "Design",
+						conditions: {
+							"a*": {
+								B: { b: 1, c: 1},
+								C: { c: 2}
+							}
+						}
+					}
+				},
+				steps: {
+					1: {
+						// "@DATA": [
+						// 	{a: "B", b: 1, c: 1},
+						// 	{a: "C", c: 2}
+						// ],
+						data: {source: "design"},
+						1: {
+							command: "system.echo",
+							value: {"#data": {value: "a", join: ","}}
+						},
+						2: {
+							data: {where: {a: "C"}},
+							command: "system.echo",
+							value: "$c"
+						},
+						3: {
+							command: "system.echo",
+							value: {"#data": {value: "b", join: ","}}
+						}
+					}
+				}
+			};
+			var result = roboliq.run(["-o", ""], protocol);
+			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps[1][1][1], {
+				command: "system._echo",
+				value: "B,C"
+			});
+			should.deepEqual(result.output.steps[1][2][1], {
+				command: "system._echo",
+				value: 2
+			});
+		});
+
 		it("should handle suspension on `system.runtimeLoadVariables`", () => {
 			const protocol = {
 				roboliq: "v1",
