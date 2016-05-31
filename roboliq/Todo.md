@@ -52,8 +52,8 @@
 	- [?] save a dump file `${stepId}.dump` in same directory as `.out.json`
 - [ ] roboliq.js: resuming
 	- [x] handle resuming at RESUME.stepId
+	- [?] roboliq.js: implement --evoware argument
 	- [ ] automatically try to load the varset
-	- [ ] roboliq.js: implement --evoware argument
 - [ ] Evoware:
 	- [ ] should call runtime-cli to continue compiling from the dumpfile
 	- [ ] should call `Procedure("${SCRIPTDIR}/continue.esc")` or whatever the name is
