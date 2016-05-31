@@ -452,7 +452,7 @@ describe('roboliq', function() {
 			});
 		});
 
-		it.only("should handle resuming on `system.runtimeLoadVariables`", () => {
+		it("should handle resuming on `system.runtimeLoadVariables`", () => {
 			const protocol = {
 				roboliq: "v1",
 				objects: {

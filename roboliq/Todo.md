@@ -52,25 +52,24 @@
 	- [x] set `protocol.COMPILER.suspendStepId`
 	- [?] save a dump file `${stepId}.dump.json` in same directory as `.out.json`
 - [ ] roboliq.js: resuming
-	- [x] handle resuming at RESUME.stepId
+	- [x] handle resuming at `protocol.COMPILER.resumeStepId`
 	- [x] roboliq.js: implement --evoware argument
 	- [x] --varset option with filename variables to load into SCOPE
-	- [ ] set `protocol.COMPILER.resumeStepId`
 	- [ ] --varset option with filename and optional selection of variables to load into SCOPE
-- [ ] Evoware:
-	- [?] should call runtime-cli to continue compiling from the dumpfile
-	- [?] should call `StartScript("${SCRIPTDIR}/continue.esc")` or whatever the name is
+- [ ] Evoware: suspending
+	- [?] should add line to call runtime-cli to continue compiling from the dumpfile
+	- [?] should add line to call `StartScript("${SCRIPTDIR}/continue.esc")`
 	- [ ] Should create an empty continue.esc file
 	- [ ] stop processing after `protocol.COMPILER.suspendStepId`
-	- [ ] start processing after `protocol.COMPILER.resumeStepId`
 - [ ] runtime-cli:
 	- [ ] should optionally call an R script to generate the varset
 	- [ ] should compile dumpfile `${stepId}.dump.json` and run evoware, producing a new `${SCRIPTDIR}/continue.esc`
-	- if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
-- [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
+	- [ ] if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
+- [ ] Evoware: resuming
+	- [ ] start processing after `protocol.COMPILER.resumeStepId`
+	- [ ] Evoware: handle system.runtimeLoadVariables by calling runtime-cli to continue compiling from the dumpfile
 
 - [ ] get rid of `system.runtimeLoadVariables` and use `system.runtimeSteps` instead, in order to give the runtime variables a proper scope.
-- [ ] maybe use `protocol.COMPILER.resumeStepId` instead of `protocol.RESUME`, because we might want to have other COMPILER flags, e.g. for compiling a sub-set of steps
 
 # Goals for Monday and Tuesday
 

@@ -20,7 +20,7 @@ const commandHandlers = {
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,
 	"system.runtimeExitLoop": system.runtimeExitLoop,
-	"system.runtimeLoadVariables": system.runtimeSteps,
+	"system.runtimeLoadVariables": system.runtimeLoadVariables,
 	"system.runtimeSteps": system.runtimeSteps,
 	"timer._sleep": timer._sleep,
 	"timer._start": timer._start,
@@ -76,12 +76,28 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 		objects = _.cloneDeep(protocol.objects);
 	}
 
+	const stepId = path.join(".");
 	// console.log(`compileStep: ${path.join(".")}`)
 	//console.log({steps: protocol.steps})
 	const step = (_.isEmpty(path)) ? protocol.steps : _.get(protocol.steps, path);
 	// console.log({step})
 	if (_.isUndefined(step))
 		return undefined;
+
+	if (protocol.COMPILER.suspendStepId) {
+		const cmp = naturalSort(stepId, protocol.COMPILER.suspendStepId);
+		// console.log({stepId, suspendStepId: protocol.COMPILER.suspendStepId, cmp})
+		// If we've passed the suspend step, quit compiling
+		if (cmp > 0) {
+			return undefined;
+		}
+		else if (stepId === "") {
+			// do nothing
+		}
+		else if (cmp < 0 && !_.startsWith(protocol.COMPILER.suspendStepId, stepId+".")) {
+			return undefined;
+		}
+	}
 
 	const results = [];
 
@@ -101,7 +117,7 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 		// console.log({keys})
 
 		const isLoop = _.includes(["system.repeat", "experiment.forEachGroup", "experiment.forEachRow"], step.command);
-		const loopEndName = `_${path.join(".")}End`;
+		const loopEndName = `_${stepId}End`;
 		const loopEndStack2 = (isLoop) ? [loopEndName].concat(loopEndStack) : loopEndStack;
 		let needLoopLabel = false;
 
@@ -113,7 +129,9 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 				const result2 = _.flattenDeep(result1);
 				needLoopLabel = _.some(result2, result => (result.line || "").indexOf(loopEndName) >= 0);
 			}
-			results.push(result1);
+			if (!_.isUndefined(result1)) {
+				results.push(result1);
+			}
 		}
 
 		if (needLoopLabel) {
@@ -168,15 +186,15 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 			const agent = _.get(objects, step.agent);
 			const exePath = "${ROBOLIQ}";//options.variables.ROBOLIQ;
 			// console.log({agent})
-			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", path.join("."), "--script", "${SCRIPTFILE}"], false)});
-			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", path.join("."), "--script", "${SCRIPTFILE}"], false)});
+			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", stepId, "--script", "${SCRIPTFILE}"], false)});
+			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", stepId, "--script", "${SCRIPTFILE}"], false)});
 			generatedTimingLogs = true;
 		}
 
 	}
 
 	// Process the protocol's effects
-	const effects = _.get(protocol, ["effects", path.join(".")]);
+	const effects = _.get(protocol, ["effects", stepId]);
 	if (!_.isUndefined(effects)) {
 		_.forEach(effects, (effect, path2) => {
 			M.setMut(objects, path2, effect);
@@ -186,7 +204,7 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 	const generatedComment = !_.isEmpty(step.description);
 	if (generatedComment) {
 		const hasInstruction = _.find(_.flattenDeep(results), x => _.has(x, "line"));
-		const text = `${path.join(".")}) ${step.description}`;
+		const text = `${stepId}) ${step.description}`;
 		results.unshift({line: `Comment("${text}");`});
 	}
 
@@ -195,11 +213,12 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 		(generatedTimingLogs) ||
 		(!generatedCommandLines && generatedComment && results.length > 1);
 	if (generatedGroup) {
-		const text = `Step ${path.join(".")}`;
+		const text = `Step ${stepId}`;
 		results.unshift({line: `Group("${text}");`});
 		results.push({line: `GroupEnd();`});
 	}
 
+	// console.log({stepId, results})
 	substitutePathVariables(results, options);
 
 	return results;
@@ -227,60 +246,3 @@ function substitutePathVariables(results, options) {
 		}
 	}
 }
-
-/*
-export function headerLines(protocol, options, linesOfSteps) {
-	// console.log({options, linesOfSteps})
-	// Check which variables were used in a line
-	const checkList = ["RUN", "ROBOLIQ", "SCRIPTDIR", "RUNDIR"];
-	const use = {};
-	let useChanged = false;
-	function check(line) {
-		for (let i = 0; i < checkList.length; i++) {
-			const name = checkList[i];
-			// console.log({name, use: use[name], line, index: line.indexOf("~"+name+"~")})
-			if (!use[name] && line.indexOf("~"+name+"~") >= 0) {
-				use[name] = true;
-				useChanged = true;
-			}
-		}
-	}
-
-	// Create variable line
-	function getString(name, value, description) {
-		return `Variable(${name},"${value}",0,"${description}",0,1.000000,10.000000,1,2,0,0);`;
-	}
-
-	// Check which variables were used in the script
-	_.forEach(linesOfSteps, check);
-	// console.log(use)
-
-	// Create the necessary variable lines
-	const descriptions = {
-		ROBOLIQ: "Path to Roboliq executable program",
-		SCRIPTDIR: "Directory of this script and related files",
-		RUNDIR: "Directory where run-time files should be saved (e.g. logfiles and measurement data)",
-		RUN: "Identifier for the current run of this script"
-	};
-	const variableLines = {};
-	while (useChanged) {
-		useChanged = false;
-		_.forEach(checkList, name => {
-			if (use[name] && !variableLines[name]) {
-				const line = getString(name, options.variables[name], descriptions[name]);
-				variableLines[name] = line;
-				check(line);
-			}
-		});
-	}
-
-	const lines = [];
-	_.forEach(checkList, name => {
-		if (variableLines[name]) {
-			lines.push(variableLines[name]);
-		}
-	});
-
-	return lines;
-}
-*/

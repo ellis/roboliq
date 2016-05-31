@@ -698,28 +698,35 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it("should handle system.runtimeLoadVariables and ", () => {
+		it.only("should handle suspending at system.runtimeLoadVariables", () => {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				steps: {
 					1: {
 						"command": "system.runtimeLoadVariables",
-						"varset": "varset1"
+						"varset": "varset1",
+						"variables": ["a"]
+					},
+					2: {
+						"command": "system.echo",
+						"value": "$a"
 					}
+				},
+				COMPILER: {
+					suspendStepId: "1"
 				}
 			});
 			const agents = ["robot1"];
 			const options = {timing: false, variables: {ROBOLIQ: "AAA", SCRIPTFILE: "C:\\Here\\myscript.out.json"}};
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], options);
-			// console.log(JSON.stringify(results, null, '\t'));
-			should.deepEqual(results, [[
+			// console.log("results: "+JSON.stringify(results, null, '\t'));
+			should.deepEqual(results, [
 				[
-					{ "line": "Execute(\"AAA execTest C:\\Here\\myscript.out.json 1.1\",6,\"EXITLOOP\",2);" },
-					{ "line": "If(\"EXITLOOP\",0,\"0\",\"_1End\");" }
-				],
-				{ "line": "Comment(\"_1End\");" }
-			]]);
+					{ "line": "Execute(\"AAA runtimeLoadVariables C:\\Here\\myscript.out.json 1\",2,\"\",2);" },
+					{ "line": "StartScript(\"undefined\\continue.esc\");", "file": { "filename": "continue.esc", "data": "" } }
+				]
+			]);
 		});
 
 	});
