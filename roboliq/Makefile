@@ -52,6 +52,7 @@ qc_mario_dyeDebug4.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug4.yaml -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyeDebug4\qc_mario_dyeDebug4.out.json' ourlab.mario.evoware
 
 qc_mario_dyeDebug5.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug5.yaml --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug5.yaml -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyeDebug5\qc_mario_dyeDebug5.out.json' ourlab.mario.evoware
 
 qc_mario_dyeDebug6.yaml:

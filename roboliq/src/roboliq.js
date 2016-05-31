@@ -78,7 +78,7 @@ const nomnom = require('nomnom').options({
 	},
 	evoware: {
 		help: "Invoke evoware supplier and pass the comma-separated arguements"
-	}
+	},
 	fileData: {
 		full: 'file-data',
 		list: true,
@@ -667,14 +667,15 @@ function run(argv, userProtocol) {
 			}
 
 			if (opts.evoware) {
-				const evowareArgv = _.clone(opts.evoware.split(","));
-				assert(evowareArgv.length === 2, "two arguments must be passed to --evoware options");
+				const evowareArgs = _.clone(opts.evoware.split(","));
+				assert(evowareArgs.length >= 3, "at least three arguments must be passed to --evoware options: carrier file, table file, and one or more agent names");
+				// Insert
 				const evowareRun = require("./evoware/EvowareMain").run;
-				evowareArgv.push(outpath);
+				evowareArgs.splice(2, 0, outpath);
 				if (!opts.quiet) {
-					console.log(`calling evoware: ${evowareArgv.join(" ")}`);
+					console.log(`calling evoware: ${evowareArgs.join(" ")}`);
 				}
-				evowareRun(evowareArgv);
+				evowareRun({args: evowareArgs});
 			}
 		}
 	}

@@ -27,13 +27,16 @@ const commander = require('commander')
 		"    agents    list of agents to compile for (comma-separated)\n"
 	);
 
-function run(argv) {
+function runWithArgv(argv) {
 	var opts = commander.parse(argv);
 	if (opts.args.length === 0 || opts.rawArgs.indexOf("--help") >= 0 || opts.rawArgs.indexOf("-h") >= 0) {
 		opts.outputHelp();
 		return;
 	}
+	run(opts);
+}
 
+function run(opts) {
 	if (opts.debug) {
 		console.log(opts);
 	}
@@ -98,5 +101,6 @@ if (require.main === module) {
 }
 
 module.exports = {
+	runWithArgv,
 	run
 };
