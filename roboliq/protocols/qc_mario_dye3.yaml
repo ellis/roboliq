@@ -51,7 +51,7 @@ objects:
         rows: 8
         columns: 12
         wells: "A01 right block H06 + A07 right block H12"
-      caseA=case:
+      .caseA=case:
         cases:
         - where: "dilutionStep == 0"
           conditions:
@@ -75,6 +75,14 @@ objects:
             orderA=calculate: "3 + dilutionStep"
             actionA: dilute
             dilutionRole: destination
+      .caseB=case:
+        cases:
+        - where: 'actionA == "dilute"'
+          conditions:
+            dilutionPair=range:
+              orderBy: [orderA]
+              groupBy: [dilutionStep, dilutionRole]
+
     orderBy: [orderA]
 
 steps:
@@ -170,8 +178,7 @@ steps:
         destinationLabware: plate1
         items:
           "#data":
-            groupBy: syringe
-            orderBy: syringe
+            groupBy: dilutionPair
             templateGroup:
               destinations: $$well
               syringe: $syringe
