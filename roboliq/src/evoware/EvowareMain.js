@@ -88,6 +88,15 @@ function run(opts) {
 					const encoded = iconv.encode(output, "ISO-8859-1");
 					fs.writeFileSync(outpath, encoded);
 					console.log("output written to "+outpath);
+
+					// Save any additional files generated
+					_.flattenDeep(result.tokenTree).forEach(token => {
+						if (token.file) {
+							const filepath = path.join(dir, token.file);
+							fs.writeFileSync(filepath, token.data);
+							console.log("output written to "+filepath);
+						}
+					});
 				});
 				//console.log(JSON.stringify(results, null, '\t'))
 			}

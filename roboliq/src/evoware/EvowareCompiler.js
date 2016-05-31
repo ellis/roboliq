@@ -20,6 +20,7 @@ const commandHandlers = {
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,
 	"system.runtimeExitLoop": system.runtimeExitLoop,
+	"system.runtimeLoadVariables": system.runtimeSteps,
 	"system.runtimeSteps": system.runtimeSteps,
 	"timer._sleep": timer._sleep,
 	"timer._start": timer._start,
@@ -54,7 +55,7 @@ export function compile(table, protocol, agents, options = {}) {
 		lines.unshift(evowareHelper.createExecuteLine("cmd", ["/c", "mkdir", options.variables.TEMPDIR], true));
 	}
 
-	return [{table, lines}];
+	return [{table, lines, tokenTree: result}];
 }
 
 export function compileStep(table, protocol, agents, path, objects, loopEndStack = [], options = {}) {

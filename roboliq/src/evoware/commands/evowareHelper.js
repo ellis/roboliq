@@ -40,6 +40,10 @@ function createIfLine(variable, test, value, target) {
 	return `If("${variable}",${cmp},"${value}","${target}");`
 }
 
+function createStartScriptLine(path) {
+	return `StartScript("${path}");`;
+}
+
 function quote(s) {
 	return `"${stripQuotes(s)}"`;
 }
@@ -53,6 +57,7 @@ module.exports = {
 	createExecuteLine,
 	createFactsLine,
 	createIfLine,
+	createStartScriptLine,
 	quote,
 	stripQuotes
 };
