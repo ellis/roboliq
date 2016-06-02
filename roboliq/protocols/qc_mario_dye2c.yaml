@@ -1,0 +1,182 @@
+roboliq: v1
+
+description: |
+  Take a concentrated dye stock and dilute it to the find the optimal wavelength
+  for absorbance readouts.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    description: Dilution plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  # SCOPE:
+  #   volume: 150ul
+  #   plate: plate1
+
+  design:
+    type: Design
+    randomSeed: 1
+    conditions:
+      volume: 150ul
+      syringe*: 4
+      step*=range: {from: 0, till: 10}
+      well=allocateWells:
+        orderBy: step
+        rows: 8
+        columns: 12
+        wells: "A01 down block D12 + E01 down block H12"
+      type1=case:
+        cases:
+          control:
+            where: {step: 0}
+            conditions:
+              dilutionFactor: null
+              dyeVolume: 0ul
+              role*: [empty, control]
+          experimental:
+            conditions:
+              dilutionFactor=calculate: "2^(step-1)"
+              dyeVolume=calculate: "volume / dilutionFactor"
+              role*:
+                destination: {}
+                source:
+                  step=calculate: "step + 1"
+                  dilutionFactor=calculate: "dilutionFactor * 2"
+                  dyeVolume=calculate: "dyeVolume / 2"
+    orderBy: [step]
+    where: {step: {lte: 10}}
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    description: "Handle control wells"
+    1:
+      data:
+        where: {type: control, role: empty}
+      description: "Measure absorbance of empty control wells"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelengthMin: 230nm
+        excitationWavelengthMax: 1000nm
+        excitationWavelengthStep: 10nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+    2:
+      data:
+        where: {type: control, role: empty}
+      description: "Fill control wells with water"
+      command: pipetter.pipette
+      sources: ourlab.mario.systemLiquid
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: $volume
+      clean: flush
+    3:
+      data:
+        where: {type: control, role: control}
+      description: "Measure absorbance of filled control wells"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelengthMin: 230nm
+        excitationWavelengthMax: 1000nm
+        excitationWavelengthStep: 10nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+  3:
+    description: "Handle the initial dye wells"
+    1:
+      data:
+        where: {step: 1}
+      description: "Step 1: Transfer dye to to dilution plate"
+      command: pipetter.pipette
+      sources: dye
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: $volume
+      clean: flush
+    2:
+      data:
+        where: {step: 1}
+      description: "Measure absorbance of initial dye aliquot"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelengthMin: 230nm
+        excitationWavelengthMax: 1000nm
+        excitationWavelengthStep: 10nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+    3:
+      description: run R analysis
+      command: system.runtimeExitLoop
+      testType: R
+      test: ./qc_mario_dye2--findWavelengthDomain.R
+  4:
+    description: Load wavelength domain data
+    command: system.runtimeLoadVariables
+    varset: wavelengths
+    variables: [wavelengthMin, wavelengthMax]
+  5:
+    description: Begin dilutions
+    data:
+      where: {step: {gte: 2}}
+    command: experiment.forEachGroup
+    groupBy: step
+    steps:
+      description: "`Step {{$step}}`"
+      1:
+        description: "Dilute"
+        command: pipetter.pipetteDilutionSeries
+        diluent: ourlab.mario.systemLiquid
+        dilutionFactor: 2
+        dilutionMethod: source
+        volume: 150ul
+        destinationLabware: plate1
+        items:
+          "#data":
+            groupBy: syringe
+            orderBy: syringe
+            templateGroup:
+              destinations: $$well
+              syringe: $syringe
+        clean: none
+        cleanEnd: flush
+        diluentParams:
+          clean: none
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelengthMin: $wavelengthMin
+          excitationWavelengthMax: $wavelengthMax
+          excitationWavelengthStep: 10nm
+          wellDesignFactor: well
+        outputDataset: "absorbance"
+      3:
+        description: "Check whether to stop diluting yet"
+        command: system.runtimeExitLoop
+        testType: R
+        test: ./qc_mario_dye2--checkDoneDiluting.R
