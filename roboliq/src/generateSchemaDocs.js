@@ -20,7 +20,7 @@ function toMarkdown(pair) {
 	}
 	else {
 		return _.flattenDeep([
-			`### ${name}`,
+			`### \`${name}\``,
 			"",
 			o.description ? [o.description, ""] : [],
 			"Properties:",

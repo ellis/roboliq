@@ -69,6 +69,11 @@
 	- [ ] should compile dumpfile `${stepId}.dump.json` and run evoware, producing a new `${SCRIPTDIR}/continue.esc`
 	- [ ] if varset is a string instead of a filename, might look for varset file in protocol dir, SCRIPTDIR, or load runId and look in RUNDIR
 
+- [ ] system.runtimeCreateVarset: implement
+- [ ] system.runtimeExitLoop and system.runtimeCreateVarset: make sure it can accept a file in the `test` property
+- [ ] qc_mario_dye2--findWavelengthDomain.R: calculate domain and write it out to 'wavelengths.json'
+- [ ] qc_mario_dye2--checkDoneDiluting.R:
+
 - [ ] get rid of `system.runtimeLoadVariables` and use `system.runtimeSteps` instead, in order to give the runtime variables a proper scope.
 - [ ] BUG: qc_mario_dye3: volume is off in A04, I think it's a rounding error -- it leads to putting extra water in the well
 
@@ -84,31 +89,6 @@
 - [ ] runtime-cli: create a 'stepTiming.jsonl' file
 
 - [ ] `qc_mario_dyeDispersion1`: create an experiment to see how long it takes for dispensed dye to reach an absorbance steady state
-
-How to generate worklists?
-
-One possibility would be to store the current protocol state (or a diff of it from the original state)
-and run roboliq.js+evowareMain.js on the commands to be put into the worklist.
-Problem is that this isn't generic -- we'd need to have some command to create a worklist.
-
-What if we annotate certain veriables as 'runtime variables', and if a command
-wants to use them (e.g. load them in commandHandler), then we automatically
-handle this?  But how do we decide whether to create a worklist or to generate
-an entirely new script?  If the worklist commands end up changing a critical
-aspect of state in a non-pre-determined way (such as putting a plate on a
-site which is determined at run-time), then the rest of the script needs to be
-re-compiled with that knowledge.
-
-What we might be able to do is have a 'system.runtimeSteps' command.
-It would indicate which variables to load from a named "variable set", and it
-would also specify the steps to execute.  Problem would be the effects.
-To begin with, I would probably want to assume that there were no state changes.
-We could, however, possibly check whether the sub-commands might create effects,
-and if so, then force the rest of the script to be compiled at runtime after
-the runtime variables have been loaded (problem being that compiler errors may
-then occur at runtime).
-A critical problem with `runtimeSteps` is: how to assign the agent, especially
-in a multi-agent protocol?
 
 - [?] system.yaml
 - [?] system.js
@@ -183,45 +163,6 @@ mixtures:
 	* [ ] Goal: save a runtime worklist using a mustache template and runtime values
 * [ ] Goal 7: run qc_mario_dye2 and display analysis in real-time
 
-- [x] `roboliq-runtime-cli-TecanInfinite`: create file and have it move the XML file to the appropriate directory and prepend the filename with `DATE_TIME-`
-	- [x] read RUNDIR from script's runId file
-	- [x] ensure that the runDir exists
-	- [x] try to get it to run with babel-node
-	- [x] extract datetime from XML file
-	- [x] parse the XML
-	- [x] TecanInfinite.js: extract absorbance spectrum values
-	- [x] move the XML file to the runDir
-	- [x] extract factors from protocol
-	- [x] join measurement data and factor data
-		- [x] join on hardcoded factorname 'wells', just to test
-		- [x] need to pass a 'wellDesignFactor' property to 'absorbanceReader.measurePlate', and then let wells be automatically extracted (and check that well factors are unique)
-	- [x] save a JSON file
-	- [x] append to JSON file for a given dataset
-		- [x] measurement commands should accept a 'datasetName', which is used to accumulate all measurements with that name (streamed JSON)
-		- [x] append JSON to the dataset file
-	- [x] add time column, and try to extract the time from the 'Section' node by interpolating between start and end times
-- [x] qc_mario_dye2: adapt design of qc_mario_dye1 to measure dye-less control wells before first dye dispense
-- [x] make sure EvowareScripts is checked into git
-- [x] system.runtimeExitLoop: implement loop breaking by deciding at run-time whether to break
-	- [x] create yaml
-	- [x] create command handler
-	- [x] create evoware instruction handler
-		- [x] call `runtime-cli execTest`
-		- [x] extend `evowareHelper.createExecuteLine` to put exit code into a variable
-		- [x] check exit code of Execute line, and skip to end of current loop if result is not 0
-		- [x] EvowareCompiler: create data.loopEndStack
-- [x] runtime-cli execTest
-	- [x] VBS: check exit code of node, and return it
-	- [x] execute the code from runtime-cli
-		- issues to consider include:
-			- should we set the CWD to rundir? to scriptdir?
-			- if we're executing nodejs code, how do we set the paths so that the nodejs libraries are accessible? (perhaps they need to be global, but that's really bad practice)
-			- if we set the CWD to SCRIPTDIR, we could run `npm install` to get most of the js libraries we might need
-			- or how could we just use the node libraries that are installed in our runtime server? (save the script in the RUNDIR and then call 'require' on it; or maybe use NODE_PATH environment variable)
-			- on 'mario', Rcmd is in /c/Program Files/R/R-3.3.0/bin/x64, but not in PATH
-	- [x] relay the decision whether to continue by exit code (0=success, 1=failure)
-- [x] BUG: qc_mario_dye2: `step*=range: {from: 0, till: 10}` leads to wierd wellAllocation, whereas till 9 is OK
-- [x] BUG: qc_mario_dye2b: wells are allocated in the kind-of-wrong order (syringes loose their order, we need a stable sort)
 - [ ] should add protocolId, protocolHash, runId, and stepId to measurement output -- so that results of different runs can be distinguished
 - [ ] qc_mario_dye2: after measuring control well and first well, set the wavelength range for subsequent reads, and re-read the first dye well using that range
 	- [ ] call R script to analyze the data and decide on the wavelength range
