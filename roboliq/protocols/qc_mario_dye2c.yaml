@@ -131,13 +131,13 @@ steps:
     3:
       description: run R analysis
       command: system.runtimeCreateVarset
-      varset: wavelengths
+      varset: dyeAndReader
       testType: R
       test: ./qc_mario_dye2--findWavelengthDomain.R
   4:
     description: Load wavelength domain data
     command: system.runtimeLoadVariables
-    varset: wavelengths
+    varset: dyeAndReader
     variables: [wavelengthMin, wavelengthMax]
   5:
     description: Begin dilutions
