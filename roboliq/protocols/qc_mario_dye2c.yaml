@@ -137,7 +137,7 @@ steps:
   4:
     description: Load wavelength domain data
     command: system.runtimeLoadVariables
-    varset: dyeAndReader
+    varset: dyeAndReader1
     variables: [wavelengthMin, wavelengthMax]
   5:
     description: Begin dilutions
@@ -177,6 +177,12 @@ steps:
           wellDesignFactor: well
         outputDataset: "absorbance"
       3:
+        description: run R analysis
+        command: system.runtimeCreateVarset
+        varset: dyeAndReader2
+        testType: R
+        test: ./qc_mario_dye2--findWavelength.R
+      4:
         description: "Check whether to stop diluting yet"
         command: system.runtimeExitLoop
         testType: R
