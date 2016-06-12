@@ -10,6 +10,36 @@
 - UI: load and compile
 - UI: design
 
+# Notes to move later (2016-06-12)
+
+Z-level detection:
+* weigh empty plate and reference plate
+* distribute dye (e.g. 10ul)
+* weigh
+* distribute various water volumes
+* stage 2: initial measurements and impact assessment
+	* weigh
+	* read absorbance
+	* weigh
+	* shake
+	* weigh
+	* read absorbance
+	* weigh
+	* z-level detection
+	* weigh
+* stage 3: repeat N times
+	* alternate between z-level detection, read absorbance, and no-op
+	* weigh
+	* wait till 5 minutes has passed
+* stage 4: extract aliquot from wells
+	* transfer 50ul (or v_0 / 2, or whatever) from each well to empty wells
+	* weigh plates
+	* shake
+	* read absorbance
+	* z-level detection
+
+Impact of z-level detection, evaporation, and absorbance
+
 # Todos for Paper 1
 
 - [ ] reader-InfiniteM200Pro.js: add support for generating fluorescence programs, see `(true || measurementType === "absorbance")` around line 177
