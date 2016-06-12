@@ -71,7 +71,82 @@ Impact of z-level detection, evaporation, and absorbance
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
-# Goals for presentation
+# Todos for QC shotgun
+
+Evaporation Questions:
+- [ ] What is the evaporation rate in the middle wells, edge wells, and corner wells?
+	- with which measurements? z-level, weight, absorbance, fluorescence
+	- e ~ v + l + l:x + l:y + neighbors
+- [ ] What is the evaporation rate of a well without filled neighbors vs with filled neighbors?
+- [ ] What is the evaporation rate at different volumes?
+	- dz ~ dv
+- [ ] When a dye solution evaporates, what happens to the concentration?  Does all the dye stay in the well?
+- [ ] Is the rate of evaporation consistent over time, or are there effects for time of day, day of week, or season?
+- [ ] Is the rate of evaporation consistent over time, or are there time of day, day of week, or seasonal effects?
+- [ ] What are the evaporation rates in labware that can't be put in the reader (e.g. tubes)?
+
+Models:
+* v ~ d1 + d2 - e*dt
+
+Time questions:
+- [ ] What is the impact of time on volume due to evaporation?
+- [ ] What is the impact of time on absorption (e.g. due to volume change, evaporation, mixing, sticking to walls)
+- [ ] What is the impact of time on z-level?
+
+Location questions:
+- [ ] What is the impact of location on evaporation?
+- [ ] What is the impact of location on pipetting accuracy?
+- [ ] What is the impact of location on z-level detection?
+
+Labware questions:
+- [ ] evaporation
+- [ ] absorbance
+- [ ] z-level
+- [ ] pipetting accuracy
+
+Pipetting questions:
+- [ ] What is the impact of dispensing dye-then-water vs water-then-dye?
+- [ ] Does liquid detection impact well volume?
+- [ ] How often do water droplets stick to the tips after washing? (liquid detection might then dispense that drop into the well)
+- [ ] How often do water droplets stick to the tips after aspirating?
+- [ ] How often do water droplets stick to the tips after dispensing?
+- [ ] What is the impact of "liquid class" on pipetting accuracy?
+- [ ] how much OrangeG gets caught in the syringe when pipetting?
+
+Reader questions:
+- [ ] What is the wavelength of maximum absorbance for the dye being used?
+- [ ] What is a good wavelength domain for the reader?
+- [ ] Does absorbance measurement impact well volume?
+
+Z-level detection:
+- [ ] How well can we use z-level detection?
+- [ ] impact on volume
+- [ ] impact on absorbance
+
+Shaking:
+- [ ] impact on evaporation
+- [ ] when does shaking lead to spillage?
+
+Centrifuging:
+- [ ] impact on orange G mixing
+- [ ] impact on OrangeG settlement to bottom of well? (e.g. test by extracting aliquot from top)
+
+Important interactions:
+- [ ] shaking and evaporation
+- [ ] centrifugation and evaporation
+- [ ] absorbance and volume
+- [ ] evaporation and volume
+- [ ] syringe and dispense volume
+- [ ] syringe and liquid class
+- [ ] liquid class and dispense volume
+
+A couple experiments:
+
+* dispense a minimal volume of dye, read, dispense 10ul water, read, loop until we reach the maximum level
+* let liquid contents evaporate, measure absorbance, extract a sample, measure aborbance
+* measure evaporation rates for three conditions: shaking plate, centrifuging plate, still plate
+
+# Goals for protocol continuation
 
 - [x] add protocol.RESUME.stepId
 - [x] `system.runtimeLoadVariables`:
@@ -105,16 +180,11 @@ Impact of z-level detection, evaporation, and absorbance
 - [ ] qc_mario_dye2--checkDoneDiluting.R:
 
 - [ ] get rid of `system.runtimeLoadVariables` and use `system.runtimeSteps` instead, in order to give the runtime variables a proper scope.
-- [ ] BUG: qc_mario_dye3: volume is off in A04, I think it's a rounding error -- it leads to putting extra water in the well
+- [ ] BUG: `qc_mario_dyeDebug7`: centrifuge isn't assigned labware
 
 # Goals for Monday and Tuesday
 
-- [x] roboliqMain: add a `-P` option for the output *parent* directory, whereby a subdirectory is created with the name of the input script
-- [x] Run qc_mario_dye2 with this variation: only measure 480nm (create qc_mario_dye2b)
-- [x] order more plates!
-- [x] figure out problem with scan vs single measurements
-- [?] BUG: `qc_mario_dyeDebug7`: centrifuge needs to be closed before running it
-- [ ] BUG: `qc_mario_dyeDebug7`: centrifuge isn't assigned labware
+- [.] order more plates! (+waiting)
 - [ ] make an evoware command(s) to create and run worklists using runtime variables
 - [ ] runtime-cli: create a 'stepTiming.jsonl' file
 
@@ -252,26 +322,6 @@ mixtures:
 	- [ ] write the full script for luigi
 - [ ] move my config and protocols from roboliq repo to bsse-lab repo
 - [ ] factors: centricity, plate, site, volume, z-level measured?, absorbance measured?
-
-Questions:
-- [ ] What is the evaporation rate in the middle wells, edge wells, and corner wells?
-	- with which measurements? z-level, weight, absorbance, fluorescence
-	- e ~ v + l + l:x + l:y + neighbors
-- [ ] What is the evaporation rate of a well without filled neighbors vs with filled neighbors?
-- [ ] What is the evaporation rate at different volumes?
-	- dz ~ dv
-- [ ] When a dye solution evaporates, what happens to the concentration?  Does all the dye stay in the well?
-- [ ] Does liquid detection impact well volume?
-- [ ] Does absorbance measurement impact well volume?
-- [ ] How often do water droplets stick to the tips after washing? (liquid detection might then dispense that drop into the well)
-- [ ] Is the rate of evaporation consistent over time, or are there effects for time of day, day of week, or season?
-- [ ] Is the rate of evaporation consistent over time, or are there time of day, day of week, or seasonal effects?
-- [ ] What are the evaporation rates in labware that can't be put in the reader (e.g. tubes)?
-
-A couple experiments:
-
-* dispense a minimal volume of dye, read, dispense 10ul water, read, loop until we reach the maximum level
-* let liquid contents evaporate, measure absorbance, extract a sample, measure aborbance
 
 # Todos for growth curve experiment
 
