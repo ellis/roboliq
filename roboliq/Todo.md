@@ -40,6 +40,9 @@ Z-level detection:
 
 Impact of z-level detection, evaporation, and absorbance
 
+6 volume levels: 50, 100, 150, 200, 250, 300
+
+
 # Todos for Paper 1
 
 - [ ] reader-InfiniteM200Pro.js: add support for generating fluorescence programs, see `(true || measurementType === "absorbance")` around line 177
@@ -139,6 +142,35 @@ Important interactions:
 - [ ] syringe and dispense volume
 - [ ] syringe and liquid class
 - [ ] liquid class and dispense volume
+
+Evaporation questions:
+- [ ] What is the rate of evaporation in labware+well+volume+site
+- [ ] What is the pattern of the evaporation rate at different locations?  I'd like a per-well heatmap of evaporation across the bench.
+	To test at a single location using scale and absorbance reader:
+	- weigh reference and plate1
+	- dispense 10ul dye
+	- dispense 290ul water
+	- weigh plate1
+	- move plate1 to site of interest
+	- wait 1hr
+	- weight plate1
+	- calculate loss of volume
+	- transfer 150ul from plate1 to plate2
+	- shake plate2?
+	- measure absorbance plate2
+
+	To test at a single location using absorbance reader:
+	- dispense 10ul dye
+	- dispense 290ul water
+	- absorbance plate1
+	- wait 1hr
+	- absorbance plate1
+	- transfer 150ul from plate1 to plate2 (or to trash)
+	- shake plate1
+	- measure absorbance plate1
+	- (shake plate2)
+	- (measure absorbance plate2)
+- [ ] What is the impact of having a lid?
 
 A couple experiments:
 
