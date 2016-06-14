@@ -12,6 +12,7 @@
     "jsonfile": "^2.2.2",
     "lodash": "^4.2.0",
     "mathjs": "^2.7.0",
+    "mathjs": "git+https://github.com/josdejong/mathjs.git#develop",
     "mkdirp": "^0.5.1",
     "moment": "^2.13.0",
     "mustache": "^2.1.3",

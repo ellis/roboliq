@@ -1,0 +1,203 @@
+roboliq: v1
+
+description: |
+  Perform pipetting using dye in a randomized manner in order to check
+  the spread of results.
+
+  The following factors are be randomized:
+
+  * site
+  * syringe
+  * liquid class
+  * whether water is dispensed first or second
+  * volume
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P7
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 123
+    conditions:
+      well*=allocateWells:
+        rows: 8
+        columns: 12
+        order: shuffle
+      site=:
+        values:
+          - ourlab.mario.site.P2
+          - ourlab.mario.site.P3
+          - ourlab.mario.site.P4
+          - ourlab.mario.site.P5
+          - ourlab.mario.site.P6
+          - ourlab.mario.site.P7
+          - ourlab.mario.site.P8
+        order: reshuffle
+      orderA=range:
+        sameBy: site
+      syringe=range:
+        till: 8
+        groupBy: site
+        order: reshuffle
+      orderB=range:
+        groupBy: [site, syringe]
+      firstComponent=:
+        values: [water, dye]
+        order: reshuffle
+      .caseA=case:
+        cases:
+          - where: "syringe <= 4"
+            conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Air_1000
+                  - Roboliq_Water_Wet_1000
+                  - Roboliq_Water_Dry_1000
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 100 ul, 200 ul, 300 ul]
+                order: reshuffle
+          - conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Wet_0050
+                  - Roboliq_Water_Dry_0050
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
+                order: reshuffle
+      waterVolume=calculate: "300 ul - dyeVolume"
+      .caseB=case:
+        cases:
+          - where: "dyeVolume >= (10ul)"
+            conditions:
+              dyeSource: dyeLight
+          - conditions:
+              dyeSource: dyeDark
+
+    orderBy: [orderA, orderB]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: [1,2,3,4]
+  2:
+    description: "Fill wells with dye and water"
+    data:
+      where: 'action == "prepare"'
+    1:
+      description: "Add dye"
+      command: pipetter.pipette
+      sources: dye
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: 10 ul
+      syringes: $$syringe
+      clean: flush
+    2:
+      description: "Add water"
+      command: pipetter.pipette
+      sources: ourlab.mario.systemLiquid
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: 290 ul
+      syringes: $$syringe
+      clean: none
+      cleanEnd: flush
+    3:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+      destinationAfter: ourlab.mario.site.P6
+  3:
+    description: "Wait and measure"
+    data:
+      where: 'action == "wait"'
+    1:
+      description: "wait"
+      command: timer.sleep
+      duration: 0.5 hour
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+  4:
+    description: "Wait and measure"
+    data:
+      where: 'action == "removed"'
+    1:
+      description: "Extract aliquots"
+      command: pipetter.pipette
+      sourceLabware: plate1
+      sources: $$well
+      destinationLabware: plate2
+      destinations: $$well
+      volumes: 150 ul
+      syringes: $$syringe
+      clean: flush
+    2:
+      description: "Shake plate1"
+      command: shaker.shakePlate
+      object: plate1
+      program:
+        duration: 1 minute
+    3:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
+  5:
+    description: "Also measure extracted wells"
+    data:
+      where: 'action == "added"'
+    1:
+      description: "Shake plate2"
+      command: shaker.shakePlate
+      object: plate2
+      program:
+        duration: 1 minute
+    2:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate2
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+      outputDataset: "absorbance"
