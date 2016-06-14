@@ -371,12 +371,12 @@ module.exports = {
 					"columns": 1,
 					"evowareName": "Trough 100ml"
 				},
-				"troughModel_100ml_lowvol_tips": {
+				"troughModel_25ml": {
 					"type": "PlateModel",
-					"label": "Trough 100ml LowVol Tips",
+					"label": "Trough 25ml",
 					"rows": 8,
 					"columns": 1,
-					"evowareName": "Trough 100ml LowVol Tips"
+					"evowareName": "Trough 25ml"
 				},
 				"tubeHolderModel_1500ul": {
 					"type": "PlateModel",

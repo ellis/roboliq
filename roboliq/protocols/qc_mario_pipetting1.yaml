@@ -24,7 +24,7 @@ objects:
     location: ourlab.mario.site.P3
   dyeLightLabware:
     type: Plate
-    model: ourlab.model.troughModel_100ml
+    model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R5
     contents: [Infinity l, dyeLight]
   dyeLight:
@@ -32,7 +32,7 @@ objects:
     wells: dyeLightLabware(C01 down F01)
   dyeDarkLabware:
     type: Plate
-    model: ourlab.model.troughModel_100ml
+    model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, dyeDark]
   dyeDark:
@@ -70,7 +70,7 @@ objects:
         order: reshuffle
       .caseA=case:
         cases:
-          - where: "syringe <= 4"
+          - where: 'syringe <= 4 and firstComponent == "water"'
             conditions:
               liquidClass=:
                 values:
@@ -82,10 +82,31 @@ objects:
               dyeVolume=:
                 values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
                 order: reshuffle
-          - conditions:
+          - where: 'syringe <= 4 and firstComponent == "dye"'
+            conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Air_1000
+                  - Roboliq_Water_Dry_1000
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
+                order: reshuffle
+          - where: 'firstComponent == "water"'
+            conditions:
               liquidClass=:
                 values:
                   - Roboliq_Water_Wet_0050
+                  - Roboliq_Water_Dry_0050
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
+                order: reshuffle
+          - conditions:
+              liquidClass=:
+                values:
                   - Roboliq_Water_Dry_0050
                 order: reshuffle
                 groupBy: [site, syringe]
@@ -101,7 +122,7 @@ objects:
           - conditions:
               dyeSource: dyeDark
 
-    orderBy: [orderA, orderB]
+    orderBy: [orderA, orderB, syringe]
 
 steps:
   data:
@@ -130,9 +151,12 @@ steps:
           destinationLabware: plate1
           destinations: $$well
           volumes: $$waterVolume
-          syringes: $$syringe
           clean: none
         3:
+          command: pipetter.cleanTips
+          equipment: ourlab.mario.liha
+          intensity: flush
+        4:
           command: experiment.forEachGroup
           groupBy: liquidClass
           steps:
@@ -145,8 +169,11 @@ steps:
             volumes: $$dyeVolume
             syringes: $$syringe
             clean: none
-            cleanEnd: flush
-        4:
+        5:
+          command: pipetter.cleanTips
+          equipment: ourlab.mario.liha
+          intensity: flush
+        6:
           description: "Distribute water to wells that require water second"
           data: {where: 'firstComponent == "dye"'}
           command: pipetter.pipette
@@ -154,8 +181,8 @@ steps:
           destinationLabware: plate1
           destinations: $$well
           volumes: $$waterVolume
-          syringes: $$syringe
           clean: none
+          cleanEnd: flush
   3:
     description: "Shake plate1"
     command: shaker.shakePlate
@@ -169,4 +196,35 @@ steps:
     program:
       excitationWavelength: 480nm
       wellDesignFactor: well
+      userValues: {replicate: 1}
+    outputDataset: "absorbance"
+  5:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 1 minute
+  6:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {replicate: 2}
+    outputDataset: "absorbance"
+  7:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 1 minute
+  8:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {replicate: 3}
     outputDataset: "absorbance"

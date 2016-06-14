@@ -43,6 +43,7 @@ fs.renameSync(xmlFile, baseFile+".xml");
 if (wellDesignFactor !== "_") {
 	const protocol = require(scriptFile);
 	const factors = protocol.reports[stepId].measurementFactors;
+	const userValues = _.get(protocol.steps, stepId+".program.userValues");
 	// console.log(factors);
 
 	const wellToFactors = {};
@@ -60,7 +61,7 @@ if (wellDesignFactor !== "_") {
 		// console.log(measurementRow)
 		// Try to get the factors for this well
 		const factorRow = wellToFactors[well];
-		return _.merge({RUNID: runId}, factorRow, measurementRow);
+		return _.merge({RUNID: runId}, factorRow, userValues, measurementRow);
 	});
 	// console.log(table);
 
