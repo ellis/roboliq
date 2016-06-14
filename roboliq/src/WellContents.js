@@ -201,9 +201,13 @@ export function getContentsAndName(wellName, data, effects) {
  * @return {object} map of substance name to the volume or amount of that substance in the well
  */
 export function flattenContents(contents) {
+	if (_.isUndefined(contents)) {
+		return {};
+	}
+	
 	checkContents(contents);
 	//console.log("flattenContents:", contents);
-	assert(_.isArray(contents));
+	assert(_.isArray(contents), "Expected 'contents' to be an array: "+JSON.stringify(contents));
 	// The first element always holds the volume in the well.
 	// If the array has exactly one element, the volume should be 0l.
 	if (contents.length <= 1) {

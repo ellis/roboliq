@@ -115,43 +115,47 @@ steps:
     groupBy: site
     steps:
       description: "`Site {{$site}}`"
-      1:
-        command: transporter.movePlate
-        object: plate1
-        destination: $site
-      2:
-        description: "Distribute water to wells that require water first"
-        data: {where: 'firstComponent == "water"'}
-        command: pipetter.pipette
-        sources: ourlab.mario.systemLiquid
-        destinationLabware: plate1
-        destinations: $$well
-        volumes: $$waterVolume
-        syringes: $$syringe
-        clean: none
-      3:
-        description: "Distribute dye"
-        command: pipetter.pipette
-        sources: $$dyeSource
-        destinationLabware: plate1
-        destinations: $$well
-        volumes: $$dyeVolume
-        items:
-          "#data":
-            template:
-              program: $liquidClass
-        syringes: $$syringe
-        clean: flush
-      4:
-        description: "Distribute water to wells that require water second"
-        data: {where: 'firstComponent == "dye"'}
-        command: pipetter.pipette
-        sources: ourlab.mario.systemLiquid
-        destinationLabware: plate1
-        destinations: $$well
-        volumes: $$waterVolume
-        syringes: $$syringe
-        clean: none
+      command: experiment.forEachGroup
+      groupBy: orderB
+      steps:
+        1:
+          command: transporter.movePlate
+          object: plate1
+          destination: $site
+        2:
+          description: "Distribute water to wells that require water first"
+          data: {where: 'firstComponent == "water"'}
+          command: pipetter.pipette
+          sources: ourlab.mario.systemLiquid
+          destinationLabware: plate1
+          destinations: $$well
+          volumes: $$waterVolume
+          syringes: $$syringe
+          clean: none
+        3:
+          command: experiment.forEachGroup
+          groupBy: liquidClass
+          steps:
+            description: "`Distribute dye using {{$liquidClass}}`"
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: $$dyeSource
+            destinationLabware: plate1
+            destinations: $$well
+            volumes: $$dyeVolume
+            syringes: $$syringe
+            clean: none
+            cleanEnd: flush
+        4:
+          description: "Distribute water to wells that require water second"
+          data: {where: 'firstComponent == "dye"'}
+          command: pipetter.pipette
+          sources: ourlab.mario.systemLiquid
+          destinationLabware: plate1
+          destinations: $$well
+          volumes: $$waterVolume
+          syringes: $$syringe
+          clean: none
   3:
     description: "Shake plate1"
     command: shaker.shakePlate
