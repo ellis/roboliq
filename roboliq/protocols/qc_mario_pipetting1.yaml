@@ -22,18 +22,22 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  plate2:
+  dyeLightLabware:
     type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P7
-  dyeLabware:
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dyeLight]
+  dyeLight:
+    type: Liquid
+    wells: dyeLightLabware(C01 down F01)
+  dyeDarkLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
-    contents: [Infinity l, dye]
-  dye:
+    contents: [Infinity l, dyeDark]
+  dyeDark:
     type: Liquid
-    wells: dyeLabware(C01 down F01)
+    wells: dyeDarkLabware(C01 down F01)
 
   design:
     type: Design
@@ -76,7 +80,7 @@ objects:
                 order: reshuffle
                 groupBy: [site, syringe]
               dyeVolume=:
-                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 100 ul, 200 ul, 300 ul]
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
                 order: reshuffle
           - conditions:
               liquidClass=:
@@ -88,7 +92,7 @@ objects:
               dyeVolume=:
                 values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
                 order: reshuffle
-      waterVolume=calculate: "300 ul - dyeVolume"
+      waterVolume=calculate: "200 ul - dyeVolume"
       .caseB=case:
         cases:
           - where: "dyeVolume >= (10ul)"
@@ -106,98 +110,59 @@ steps:
     command: pipetter.cleanTips
     equipment: ourlab.mario.liha
     intensity: thorough
-    syringes: [1,2,3,4]
   2:
-    description: "Fill wells with dye and water"
-    data:
-      where: 'action == "prepare"'
-    1:
-      description: "Add dye"
-      command: pipetter.pipette
-      sources: dye
-      destinationLabware: plate1
-      destinations: $$well
-      volumes: 10 ul
-      syringes: $$syringe
-      clean: flush
-    2:
-      description: "Add water"
-      command: pipetter.pipette
-      sources: ourlab.mario.systemLiquid
-      destinationLabware: plate1
-      destinations: $$well
-      volumes: 290 ul
-      syringes: $$syringe
-      clean: none
-      cleanEnd: flush
-    3:
-      description: "Measure absorbance"
-      command: absorbanceReader.measurePlate
-      object: plate1
-      program:
-        excitationWavelength: 480nm
-        wellDesignFactor: well
-      outputDataset: "absorbance"
-      destinationAfter: ourlab.mario.site.P6
+    command: experiment.forEachGroup
+    groupBy: site
+    steps:
+      description: "`Site {{$site}}`"
+      1:
+        command: transporter.movePlate
+        object: plate1
+        destination: $site
+      2:
+        description: "Distribute water to wells that require water first"
+        data: {where: 'firstComponent == "water"'}
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationLabware: plate1
+        destinations: $$well
+        volumes: $$waterVolume
+        syringes: $$syringe
+        clean: none
+      3:
+        description: "Distribute dye"
+        command: pipetter.pipette
+        sources: $$dyeSource
+        destinationLabware: plate1
+        destinations: $$well
+        volumes: $$dyeVolume
+        items:
+          "#data":
+            template:
+              program: $liquidClass
+        syringes: $$syringe
+        clean: flush
+      4:
+        description: "Distribute water to wells that require water second"
+        data: {where: 'firstComponent == "dye"'}
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationLabware: plate1
+        destinations: $$well
+        volumes: $$waterVolume
+        syringes: $$syringe
+        clean: none
   3:
-    description: "Wait and measure"
-    data:
-      where: 'action == "wait"'
-    1:
-      description: "wait"
-      command: timer.sleep
-      duration: 0.5 hour
-    2:
-      description: "Measure absorbance"
-      command: absorbanceReader.measurePlate
-      object: plate1
-      program:
-        excitationWavelength: 480nm
-        wellDesignFactor: well
-      outputDataset: "absorbance"
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 1 minute
   4:
-    description: "Wait and measure"
-    data:
-      where: 'action == "removed"'
-    1:
-      description: "Extract aliquots"
-      command: pipetter.pipette
-      sourceLabware: plate1
-      sources: $$well
-      destinationLabware: plate2
-      destinations: $$well
-      volumes: 150 ul
-      syringes: $$syringe
-      clean: flush
-    2:
-      description: "Shake plate1"
-      command: shaker.shakePlate
-      object: plate1
-      program:
-        duration: 1 minute
-    3:
-      description: "Measure absorbance"
-      command: absorbanceReader.measurePlate
-      object: plate1
-      program:
-        excitationWavelength: 480nm
-        wellDesignFactor: well
-      outputDataset: "absorbance"
-  5:
-    description: "Also measure extracted wells"
-    data:
-      where: 'action == "added"'
-    1:
-      description: "Shake plate2"
-      command: shaker.shakePlate
-      object: plate2
-      program:
-        duration: 1 minute
-    2:
-      description: "Measure absorbance"
-      command: absorbanceReader.measurePlate
-      object: plate2
-      program:
-        excitationWavelength: 480nm
-        wellDesignFactor: well
-      outputDataset: "absorbance"
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+    outputDataset: "absorbance"

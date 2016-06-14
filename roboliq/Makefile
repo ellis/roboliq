@@ -71,6 +71,10 @@ qc_mario_dyeDebug7.yaml:
 qc_mario_dyeDebug8.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug8.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyeDebug8\qc_mario_dyeDebug8.out.json' ourlab.mario.evoware
 
+qc_mario_pipetting1.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_pipetting1.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware
+
+
 prof:
 	node --prof dist/main.js --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml
 	node --prof-process `ls -tr isolate-0000000000* | tail --lines=1` > prof.txt
