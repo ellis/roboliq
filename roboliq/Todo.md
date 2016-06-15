@@ -71,6 +71,14 @@ Impact of z-level detection, evaporation, and absorbance
 - [?] implement `system.description`
 - [ ] system.repeat: handle properties stepDuration, stepWaitBefore, stepWaitAfter, noStepDurationEnd (lookup after/end/last terminology in pipetter commands)
 
+# Big questions for QC
+
+1. [ ] test procedure for finding pipetting problems
+2. [ ] evaporation rates and patterns (over volumes and sites: one experiment with single reference volume over sites, next experiment using 3 volumes at sites which had the closest evaporation rates)
+3. [ ] map from absorbance value to dye quantity, along with confidence intervals
+4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul)
+5. [ ] z-level stuff
+
 # Todos for QC shotgun
 
 Evaporation Questions:
