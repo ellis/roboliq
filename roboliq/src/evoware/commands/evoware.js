@@ -33,3 +33,8 @@ export function _facts(params, parsed, data) {
 export function _raw(params, parsed, data) {
 	return _(parsed.value.commands).split(";").map(_.trim).compact().map(s => ({line: s+";"})).value();
 }
+
+export function _userPrompt(params, parsed, data) {
+	const line = evowareHelper.createUserPromptLine(parsed.orig.text, parsed.orig.beep, parsed.orig.autoclose);
+	return [{line}];
+}

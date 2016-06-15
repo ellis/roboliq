@@ -133,10 +133,21 @@ module.exports = {
 			},
 			required: ["commands"]
 		},
+		"evoware._userPrompt": {
+			description: "An Evoware UserPrompt command",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				text: {description: "Text to show the user", type: "string"},
+				beep: {description: "0: no beep, 1: beep once, 2: beep three times, 3: beep every 3 seconds", type: "integer"},
+				autoclose: {description: "number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)", type: "integer"}
+			},
+			required: ["text"]
+		}
 	}),
 	getCommandHandlers: () => ({
 		"evoware._execute": function(params, parsed, data) {},
 		"evoware._facts": function(params, parsed, data) {},
 		"evoware._raw": function(params, parsed, data) {},
+		"evoware._userPrompt": function(params, parsed, data) {},
 	}),
 };

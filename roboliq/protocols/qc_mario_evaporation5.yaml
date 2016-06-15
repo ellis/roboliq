@@ -1,0 +1,185 @@
+roboliq: v1
+
+description: |
+  Experiment to get an "evaporation heatmap" for a labware model and location.
+
+  The procedure is a follows:
+
+  - dispense 150ul dye whose concentration is such 150ul and 75ul are in the linear range of the reader
+  - shake plate1
+  - absorbance plate1
+  - weigh plate1
+  - wait X hours
+  - weigh plate1
+  - absorbance plate1
+  - transfer 75ul from plate1 to plate2
+  - weight plate1 and plate2
+  - shake plate1
+  - measure absorbance plate1
+  - shake plate2
+  - measure absorbance plate2
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate0:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P8
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P5
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 123
+    conditions:
+      stage*:
+      - action: empty
+        plate*: [plate0, plate1, plate2]
+      - action: pipette
+        plate*: [plate0, plate1]
+      - action: wait
+        plate*: [plate0, plate1]
+      - action: extract
+        plate*: [plate0, plate1, plate2]
+      id=range: {}
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: [1,2,3,4]
+  2:
+    description: "Stage 1: weigh empty plates"
+    data:
+      where: 'action == "empty"'
+    1:
+      description: "Weigh the plates"
+      command: experiment.forEachRow
+      steps:
+        description: "`Weight {{$plate}}`"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+  3:
+    description: "Stage 2: distribute dye"
+    data:
+      where: 'action == "pipette"'
+    1:
+      description: "Add dye"
+      command: pipetter.pipette
+      sources: dye
+      destinations: plate1(all)
+      volumes: 150 ul
+      clean: none
+      cleanEnd: flush
+    2:
+      description: "Shake plate1"
+      command: shaker.shakePlate
+      object: plate1
+      program:
+        duration: 1 minute
+    3:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wells: plate1(all)
+      outputDataset: "absorbance"
+    4:
+      description: "Weigh the plates"
+      command: experiment.forEachRow
+      steps:
+        description: "`Weigh {{$plate}}``"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+  4:
+    description: "Stage 3: wait"
+    data:
+      where: 'action == "wait"'
+    1:
+      description: "Wait for evaporation to take place"
+      command: timer.sleep
+      duration: 1 hour
+    2:
+      description: "Weigh the plates"
+      command: experiment.forEachRow
+      steps:
+        description: "`Weigh {{$plate}}``"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+    3:
+      description: "Measure absorbance"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wells: plate1(all)
+      outputDataset: "absorbance"
+  5:
+    description: "Stage 4: extract aliquots"
+    data:
+      where: 'action == "extract"'
+    1:
+      description: "Extract aliquots"
+      command: pipetter.pipette
+      sources: plate1(all)
+      destinations: plate2(all)
+      volumes: 75 ul
+      clean: flush
+    2:
+      description: "Shake plate1"
+      command: shaker.shakePlate
+      object: plate1
+      program:
+        duration: 1 minute
+    3:
+      description: "Weigh the plates"
+      command: experiment.forEachRow
+      steps:
+        description: "`Weigh {{$plate}}``"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+    4:
+      description: "Shake and measure absorbance on the plates"
+      command: experiment.forEachRow
+      steps:
+        description: "`Handle {{$plate}}`"
+        1:
+          description: "`Shake {{$plate}}`"
+          command: shaker.shakePlate
+          object: $plate
+          program:
+            duration: 1 minute
+        2:
+          description: "Measure absorbance"
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: 480nm
+            wells: "`{{$plate}}(all)`"
+          outputDataset: "absorbance"

@@ -179,6 +179,25 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
+		it("should compile evoware._userPrompt", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._userPrompt",
+						"agent": "robot1",
+						"text": "Hello"
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
+			should.deepEqual(results, [
+				[{ line: "UserPrompt(\"Hello\",0,-1);" }]
+			]);
+		});
+
 		it("should compile transporter._movePlate #1", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {

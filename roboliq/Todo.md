@@ -76,10 +76,15 @@ Impact of z-level detection, evaporation, and absorbance
 
 # Big questions for QC
 
-1. [ ] test procedure for finding pipetting problems
+1. [.] test procedure for finding pipetting problems
 2. [ ] evaporation rates and patterns (over volumes and sites: one experiment with single reference volume over sites, next experiment using 3 volumes at sites which had the closest evaporation rates)
-3. [ ] map from absorbance value to dye quantity, along with confidence intervals
-4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul)
+	- protocol to find evaporation rates and patterns on a single site (probably should not be the shaker, because we may need to shake extraction plates)
+		- distribute, shake, absorbance, weigh, wait, weigh, absorbance, transfer to extraction plate, shake plates, absorbance, weigh plates
+	- protocol to
+3. [ ] map from absorbance value to relative dye quantity, along with confidence intervals
+	- accuracy: estimate accuracy for 150ul, which we can thereafter use as a reference
+	- dispense various volumes of water to wells, weigh and read, fill wells to 150ul with dye, weigh and read
+4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
 
 # Todos for QC shotgun

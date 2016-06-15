@@ -801,6 +801,20 @@ module.exports = {
 				sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
 				return {expansion: expansionList};
 			},
+			"scale.weigh": function(params, parsed, data) {
+				console.log({params, parsed})
+				const expansion = [
+					{
+						command: "evoware._userPrompt",
+						agent: parsed.objectName.agent,
+						equipment: parsed.objectName.equipment,
+						text: "Weigh "+parsed.objectName.object,
+						beep: 2 // beep three times
+					}
+				];
+
+				return {expansion};
+			},
 		},
 		Equipment.evoware.getCommandHandlers(),
 		Equipment.reader.getCommandHandlers("ourlab.mario.evoware", "ourlab.mario.reader"),

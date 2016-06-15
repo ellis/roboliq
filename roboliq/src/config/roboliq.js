@@ -140,6 +140,7 @@ module.exports = {
 		'../commands/fluorescenceReader.js',
 		'../commands/incubator.js',
 		'../commands/pipetter.js',
+		'../commands/scale.js',
 		'../commands/sealer.js',
 		'../commands/shaker.js',
 		'../commands/timer.js',

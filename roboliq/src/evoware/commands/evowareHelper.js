@@ -44,6 +44,16 @@ function createStartScriptLine(path) {
 	return `StartScript("${path}");`;
 }
 
+/**
+ * Create the Evoware token to prompt the user.
+ * @param  {string} text - text to show the user
+ * @param  {numeric} beep - 0: none, 1: beep once, 2: beep three times, 3: beep every 3 seconds
+ * @param  {numeric} autoclose - number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)
+ */
+function createUserPromptLine(text, beep = 0, autoclose = -1) {
+	return `UserPrompt("${text}",${beep},${autoclose});`;
+}
+
 function quote(s) {
 	return `"${stripQuotes(s)}"`;
 }
@@ -58,6 +68,7 @@ module.exports = {
 	createFactsLine,
 	createIfLine,
 	createStartScriptLine,
+	createUserPromptLine,
 	quote,
 	stripQuotes
 };

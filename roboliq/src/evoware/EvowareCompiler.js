@@ -14,6 +14,7 @@ const commandHandlers = {
 	"evoware._execute": evoware._execute,
 	"evoware._facts": evoware._facts,
 	"evoware._raw": evoware._raw,
+	"evoware._userPrompt": evoware._userPrompt,
 	"pipetter._aspirate": pipetter._aspirate,
 	"pipetter._dispense": pipetter._dispense,
 	"pipetter._mix": pipetter._mix,
