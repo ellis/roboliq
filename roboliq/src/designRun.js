@@ -25,7 +25,7 @@ function handleDesign(design, opts) {
 
 function run(argv) {
 	require('mathjs').config({
-		number: 'bignumber', // Default type of number
+		number: 'BigNumber', // Default type of number
 		precision: 64		// Number of significant digits for BigNumbers
 	});
 

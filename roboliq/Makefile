@@ -27,6 +27,9 @@ qc_mario_evaporation2.yaml:
 qc_mario_evaporation3.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_evaporation3.yaml --print-designs && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt protocols/qc_mario_evaporation3.out.json ourlab.mario.evoware && cp protocols/qc_mario_evaporation3.out.esc 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis'
 
+qc_mario_evaporation4.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_evaporation4.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware
+
 qc_mario_dye1.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dye1.yaml --print-designs -O 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dye1' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dye1\qc_mario_dye1.out.json' ourlab.mario.evoware
 
@@ -67,6 +70,10 @@ qc_mario_dyeDebug7.yaml:
 
 qc_mario_dyeDebug8.yaml:
 	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_dyeDebug8.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' && npm run evoware -- ../testdata/bsse-mario/Carrier.cfg ../testdata/bsse-mario/NewLayout_Feb2015.ewt 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc_mario_dyeDebug8\qc_mario_dyeDebug8.out.json' ourlab.mario.evoware
+
+qc_mario_pipetting1.yaml:
+	npm start -- --progress --no-ourlab src/config/ourlab.js protocols/qc_mario_pipetting1.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware
+
 
 prof:
 	node --prof dist/main.js --progress --no-ourlab src/config/ourlab_luigi.js protocols/growthcurve04_firstWithYeast.yaml

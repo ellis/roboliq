@@ -35,7 +35,7 @@ var data = {
 describe('config/roboliqDirectiveHandlers', function() {
 
 	require('mathjs').config({
-		number: 'bignumber', // Default type of number
+		number: 'BigNumber', // Default type of number
 		precision: 64        // Number of significant digits for BigNumbers
 	});
 

@@ -587,7 +587,7 @@ function runWithOpts(opts, userProtocol) {
 
 	// Configure mathjs to use bignumbers
 	require('mathjs').config({
-		number: 'bignumber', // Default type of number
+		number: 'BigNumber', // Default type of number
 		precision: 64        // Number of significant digits for BigNumbers
 	});
 

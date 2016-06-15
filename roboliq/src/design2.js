@@ -1322,8 +1322,22 @@ function filterOnWhere(table, where) {
 	else if (_.isString(where)) {
 		// console.log({where})
 		table2 = _.filter(table, row => {
-			// console.log({where, row})
-			const result = math.eval(where, row);
+			const scope = _.mapValues(row, x => {
+				// console.log({x})
+				try {
+					const result = math.eval(x);
+					// If evaluation succeeds, but it was just a unit name, then set value as string instead
+					if (result.type === "Unit" && result.value === null)
+						return x;
+					else {
+						return result;
+					}
+				}
+				catch (e) {}
+				return x;
+			});
+			// console.log({where, row, scope})
+			const result = math.eval(where, scope);
 			// console.log({result});
 			return result;
 		});
