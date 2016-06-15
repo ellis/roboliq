@@ -804,7 +804,7 @@ function _run(opts, userProtocol) {
 	}*/
 
 	// Add command line options
-	console.log({opts})
+	//console.log({opts})
 	protocol.COMPILER.roboliqOpts = opts;
 
 	postProcessProtocol(protocol);

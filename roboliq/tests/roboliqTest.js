@@ -400,7 +400,7 @@ describe('roboliq', function() {
 			});
 		});
 
-		it.only("should handle suspension on `system.runtimeLoadVariables`", () => {
+		it("should handle suspension on `system.runtimeLoadVariables`", () => {
 			const protocol = {
 				roboliq: "v1",
 				steps: {
