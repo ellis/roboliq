@@ -56,9 +56,10 @@ describe('pipetter', function() {
 				{destination: "B02", sources: [{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '20ul'}]},
 			]
 		};
-		it("should pipette 2D mixture array to destination wells", function() {
+		it.only("should pipette 2D mixture array to destination wells", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
+			console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",
 				clean: 'none',
