@@ -151,12 +151,6 @@ steps:
       volumes: 75 ul
       clean: flush
     2:
-      description: "Shake plate1"
-      command: shaker.shakePlate
-      object: plate1
-      program:
-        duration: 1 minute
-    3:
       description: "Weigh the plates"
       command: experiment.forEachRow
       steps:
@@ -164,7 +158,7 @@ steps:
         command: scale.weigh
         object: $plate
         outputDataset: "weight"
-    4:
+    3:
       description: "Shake and measure absorbance on the plates"
       command: experiment.forEachRow
       steps:
