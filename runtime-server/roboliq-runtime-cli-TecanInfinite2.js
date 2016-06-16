@@ -12,6 +12,7 @@ import processXml from './src/formats/TecanInfinite.js';
 
 opts
 	.version("1.0")
+	.option("--no-rename", "don't rename the xmlfile")
 	.arguments("<script> <step> <xmlfile> <factor> <dataset>")
 	.parse(process.argv);
 
@@ -78,6 +79,7 @@ else {
 	fs.writeFileSync(jsonFile, JSON.stringify(result.table, null, '\t'));
 }
 
+console.log("hi")
 //
 // var packet = {type: "TecanInfinite", protocolHash: "0", runId: runId, xml: xml};
 // sendPacket(packet, opts);

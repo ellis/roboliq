@@ -1,0 +1,96 @@
+roboliq: v1
+
+description: |
+  Check evaporation rate on various sites.
+
+  The procedure is a follows:
+
+  - distribute 300ul water to all plates (randomly choose plate order)
+  - weigh all plates
+  - wait X hour(s)
+  - weigh all plates
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plateP2: { type: Plate, location: ourlab.mario.site.P2, model: ourlab.model.plateModel_96_round_transparent_nunc }
+  plateP3: { type: Plate, location: ourlab.mario.site.P3, model: ourlab.model.plateModel_96_round_transparent_nunc }
+  plateP4: { type: Plate, location: ourlab.mario.site.P4, model: ourlab.model.plateModel_96_round_transparent_nunc }
+  plateP5: { type: Plate, location: ourlab.mario.site.P5, model: ourlab.model.plateModel_96_round_transparent_nunc }
+  plateP6: { type: Plate, location: ourlab.mario.site.P6, model: ourlab.model.plateModel_96_round_transparent_nunc }
+  plateP7: { type: Plate, location: ourlab.mario.site.P7, model: ourlab.model.plateModel_96_round_transparent_nunc }
+  plateP8: { type: Plate, location: ourlab.mario.site.P8, model: ourlab.model.plateModel_96_round_transparent_nunc }
+
+  design:
+    type: Design
+    randomSeed: 123
+    conditions:
+      plate*: [plateP2, plateP3, plateP4, plateP5, plateP6, plateP7, plateP8]
+      site: [P2, P3, P4, P5, P6, P7, P8]
+      stageA*:
+        - action: pipette
+          stageB: 0
+          orderA=range:
+            order: shuffle
+        - action: weigh
+          stageB*: 4
+          measurementId=range:
+            orderBy: [stageA, stageB]
+    orderBy: [stageA, stageB]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: [1,2,3,4]
+  2:
+    description: "Action: distribute water"
+    data:
+      where: 'action == "pipette"'
+      orderBy: [orderA]
+    command: experiment.forEachRow
+    steps:
+      description: "`Add water to {{$plate}}`"
+      command: pipetter.pipette
+      sources: ourlab.mario.systemLiquid
+      destinations: "`{{$plate}}(all)`"
+      volumes: 300 ul
+      clean: none
+      cleanEnd: flush
+  2:
+    description: "Action: measure initial plate weights"
+    data:
+      where: 'action == "weigh" and stageB == 1'
+    4:
+      description: "Weigh the plates"
+      command: experiment.forEachRow
+      steps:
+        description: "`Weigh {{$plate}}``"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+  3:
+    description: "Wait and re-weight"
+    data:
+      where: 'action == "weigh" and stageB > 1'
+    command: experiment.forEachGroup
+    groupBy: stageB
+    steps:
+      1:
+        description: "Wait for evaporation to take place"
+        command: timer.sleep
+        duration: 1 hour
+      2:
+        description: "Weigh the plates"
+        command: experiment.forEachRow
+        steps:
+          description: "`Weigh {{$plate}}``"
+          command: scale.weigh
+          object: $plate
+          outputDataset: "weight"
