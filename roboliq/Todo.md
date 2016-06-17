@@ -76,6 +76,9 @@ Impact of z-level detection, evaporation, and absorbance
 
 # Big questions for QC
 
+trough weight:
+09:31 118.114
+
 1. [.] test procedure for finding pipetting problems
 2. [.] evaporation rates and patterns (over volumes and sites: one experiment with single reference volume over sites, next experiment using 3 volumes at sites which had the closest evaporation rates)
 	- protocol to find evaporation rates and patterns on a single site (probably should not be the shaker, because we may need to shake extraction plates)
@@ -85,6 +88,14 @@ Impact of z-level detection, evaporation, and absorbance
 3. [ ] map from absorbance value to relative dye quantity, along with confidence intervals
 	- [ ] ask about using scale next week!!!!
 	- accuracy: estimate accuracy for 150ul, which we can thereafter use as a reference
+	- need to log timing of dispenses in order to estimate evaporation
+	- protocol:
+		weigh empty plate
+		pipette 150ul to each well, recording time of dispense
+		weigh plate (now we can estimate average weight/volume dispensed after accounting for evaporation in each well)
+		read, read, read (can calculate sd on non-shaken plate)
+		shake, read, read, read (can calculate sd on shaken plate, as well as differences between non-shaken and shaken)
+		shake, read, shake, read, shake, read (can calculate sd of wells between shaking)
 	- confidence interval of reader/shaker: read, read, read, shake, read, read, read, shake, read, shake, read, shake, read
 		also ROTATE
 	- dispense various volumes of water to wells, weigh and read, fill wells to 150ul with dye, weigh and read
