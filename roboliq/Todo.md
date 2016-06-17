@@ -91,11 +91,21 @@ Impact of z-level detection, evaporation, and absorbance
 4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
 
+## Manual dye prep
+
 10ul of 0.8g => 1 absorbance
 We want 2 absorbance with 150ul of dye solution.
 What dilution of 0.8g do I need?
 20ul of 0.8g per 150ul solution.  So 2:15 ratio.
 Can add 5ul of 0.8g dye and then fill tube to 37.5 with water.
+
+## Models
+
+ALSO NEED EVAPORATION RATE OF TROUGH
+weight of plate = sum weight of wells
+weight of well (t) = weight of total dispenses in well - evaporation(dv_i, dt_i)
+wellAbsorbance ~= dyeConcentration(t) * dispenseVolume * absorbanceFactor
+
 
 # Todos for QC shotgun
 
