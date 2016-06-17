@@ -76,8 +76,15 @@ Impact of z-level detection, evaporation, and absorbance
 
 # Big questions for QC
 
-trough weight:
+trough weight R5, filled with water:
 09:31 118.114
+11:54 117.883
+13:01 117.698
+
+Robot bug: qc_mario_pipetting2, step 3.3.2.2, roma 1 failed to grip and move plate from P2 to REGRIP (it went through the movement without gripping).
+Then it worked from REGRIP to P2, but failed again from P2 to P3.  It made a slight jerking movement when it tried to grip, and it closed a millimeter or two, but not all the way.
+Once it tried to move from P2 to REGRIP again, it succeeded, but with a loud "clank".
+The next time, I recorded it on video; it succeeded, but we hear the loud clank. (2016-06-17)
 
 1. [.] test procedure for finding pipetting problems
 2. [.] evaporation rates and patterns (over volumes and sites: one experiment with single reference volume over sites, next experiment using 3 volumes at sites which had the closest evaporation rates)
@@ -98,7 +105,7 @@ trough weight:
 		shake, read, shake, read, shake, read (can calculate sd of wells between shaking)
 	- confidence interval of reader/shaker: read, read, read, shake, read, read, read, shake, read, shake, read, shake, read
 		also ROTATE
-	- dispense various volumes of water to wells, weigh and read control wells, fill wells to 150ul with dye, weigh and read
+	- dispense various volumes of water to wells, shake, read control wells, weigh, fill wells to 150ul with dye, weigh and read
 4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
 
@@ -106,6 +113,12 @@ trough weight:
 
 10ul of 0.8g => 1 absorbance
 We want 2 absorbance with 150ul of dye solution.
+What dilution of 0.8g do I need?
+20ul of 0.8g per 150ul solution.  So 2:15 ratio.
+Can add 5ul of 0.8g dye and then fill tube to 37.5 with water.
+
+10ul of 0.08g => .1 absorbance
+We want 1 absorbance with 150ul of dye solution.
 What dilution of 0.8g do I need?
 20ul of 0.8g per 150ul solution.  So 2:15 ratio.
 Can add 5ul of 0.8g dye and then fill tube to 37.5 with water.

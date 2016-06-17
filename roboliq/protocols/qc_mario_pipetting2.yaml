@@ -66,6 +66,8 @@ steps:
     description: "StageA: weigh"
     data:
       where: 'stageA == "weigh"'
+    command: experiment.forEachGroup
+    groupBy: stageA
     steps:
       1:
         description: "Weigh empty plate"
