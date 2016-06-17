@@ -98,7 +98,7 @@ trough weight:
 		shake, read, shake, read, shake, read (can calculate sd of wells between shaking)
 	- confidence interval of reader/shaker: read, read, read, shake, read, read, read, shake, read, shake, read, shake, read
 		also ROTATE
-	- dispense various volumes of water to wells, weigh and read, fill wells to 150ul with dye, weigh and read
+	- dispense various volumes of water to wells, weigh and read control wells, fill wells to 150ul with dye, weigh and read
 4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
 
@@ -257,6 +257,7 @@ A couple experiments:
 
 - [ ] get rid of `system.runtimeLoadVariables` and use `system.runtimeSteps` instead, in order to give the runtime variables a proper scope.
 - [ ] BUG: `qc_mario_dyeDebug7`: centrifuge isn't assigned labware
+- [ ] BUG: should expand "`...`" templates when appropriate; currently it's only done in `experiment.*` commands
 
 # Goals for Monday and Tuesday
 

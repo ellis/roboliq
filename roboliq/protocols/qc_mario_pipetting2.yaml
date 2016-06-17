@@ -1,0 +1,160 @@
+roboliq: v1
+
+description: |
+  1) Calculate confidence intervals on absorbance readings
+  2) Calculate accuracy for 150ul dispenses, which we can thereafter use as a reference/control.
+
+  Protocol steps:
+
+  * weigh empty plate
+  * pipette 150ul to each well, recording time of dispense
+  * weigh plate (now we can estimate average weight/volume dispensed after accounting for evaporation in each well)
+  * read, read, read (can calculate sd on non-shaken plate)
+  * shake, read, read, read (can calculate sd on shaken plate, as well as differences between non-shaken and shaken)
+  * shake, read, shake, read, shake, read (can calculate sd of wells between shaking)
+  * rotate, read
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 123
+    conditions:
+      agent: mario
+      site: P2
+      plate: plate1
+      dyeVolume0: 150 ul
+      orderA*:
+      - stageA: weigh
+        status*: [empty, full]
+      - stageA: read
+        orderB*:
+        - stageB: reads
+          replicate*: 3
+        - stageB: shake
+          replicate*: 3
+        - stageB: shakes
+          replicate*: 3
+        - stageB: rotate
+      id=range: {}
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    description: "StageA: weigh"
+    data:
+      where: 'stageA == "weigh"'
+    steps:
+      1:
+        description: "Weigh empty plate"
+        data:
+          where: 'status == "empty"'
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+      2:
+        description: "Fill the plate"
+        command: pipetter.pipette
+        sources: dye
+        destinations: "`{{$plate}}(all)`"
+        volumes: $dyeVolume0
+        clean: flush
+      3:
+        description: "Weigh full plate"
+        data:
+          where: 'status == "full"'
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+  3:
+    description: "StageA: read"
+    data: { where: 'stageA == "read"' }
+    1:
+      description: "StageB: repeat reads"
+      data: { where: 'stageB == "reads"' }
+      command: experiment.forEachRow
+      steps:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: $plate
+        program:
+          excitationWavelength: 480nm
+          wells: "`{{$plate}}(all)`"
+        outputDataset: "absorbance"
+    2:
+      description: "StageB: shake then repeat reads"
+      data: { where: 'stageB == "shake"' }
+      1:
+        description: "Shake"
+        command: shaker.shakePlate
+        object: $plate
+        program:
+          duration: 1 minute
+      2:
+        command: experiment.forEachRow
+        steps:
+          description: "Measure absorbance"
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: 480nm
+            wells: "`{{$plate}}(all)`"
+          outputDataset: "absorbance"
+    3:
+      description: "StageB: repeat shake+reads"
+      data: { where: 'stageB == "shakes"' }
+      command: experiment.forEachRow
+      steps:
+        1:
+          description: "Shake"
+          command: shaker.shakePlate
+          object: $plate
+          program:
+            duration: 1 minute
+        2:
+          description: "Measure absorbance"
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: 480nm
+            wells: "`{{$plate}}(all)`"
+          outputDataset: "absorbance"
+    4:
+      description: "StageB: rotate and read"
+      data: { where: 'stageB == "rotate"' }
+      command: experiment.forEachRow
+      steps:
+        1:
+          command: evoware._userPrompt
+          text: "`rotate {{$plate}}`"
+        2:
+          description: "Measure absorbance"
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: 480nm
+            wells: "`{{$plate}}(all)`"
+            rotated: true
+          outputDataset: "absorbance"
