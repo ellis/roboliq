@@ -93,7 +93,6 @@ The next time, I recorded it on video; it succeeded, but we hear the loud clank.
 	- a few different sites, just evaporation rate
 	- a few different volumes, just on main evaporation site
 3. [ ] map from absorbance value to relative dye quantity, along with confidence intervals
-	- [ ] ask about using scale next week!!!!
 	- accuracy: estimate accuracy for 150ul, which we can thereafter use as a reference
 	- need to log timing of dispenses in order to estimate evaporation
 	- protocol:
@@ -105,7 +104,11 @@ The next time, I recorded it on video; it succeeded, but we hear the loud clank.
 		shake, read, shake, read, shake, read (can calculate sd of wells between shaking)
 	- confidence interval of reader/shaker: read, read, read, shake, read, read, read, shake, read, shake, read, shake, read
 		also ROTATE
-	- dispense various volumes of water to wells, shake, read control wells, weigh, fill wells to 150ul with dye, weigh and read
+		- [ ] implement "rotate: true" in absorbanceReader.js program
+	- dispense various volumes of water to wells, read, weigh, fill wells to 150ul with dye (some wells have 0ul dye for control), weigh, shake, read
+		- water first
+		- single, reference site
+		- [ ] log timing of dispenses in order to estimate evaporation
 4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
 
