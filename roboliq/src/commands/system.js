@@ -54,7 +54,14 @@ const commandHandlers = {
 		if (parsed.value.steps) {
 			const count = parsed.value.count;
 			for (let i = 1; i <= count; i++) {
-				expansion[i] = _.cloneDeep(parsed.value.steps);
+				let iteration = _.cloneDeep(parsed.value.steps);
+				if (parsed.value.variableName) {
+					if (_.isArray(iteration)) {
+						iteration = {"1": iteration};
+					}
+					iteration["@SCOPE"] = {[parsed.value.variableName]: i};
+				}
+				expansion[i] = iteration;
 			}
 		}
 

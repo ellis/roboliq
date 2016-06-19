@@ -1,0 +1,145 @@
+roboliq: v1
+
+description: |
+  Dispense various volumes of dye to all wells on plate.
+  Dye volumes vary from 10ul to 150ul (along with control wells of 0ul).
+
+  Using the volume estimates for 150ul and 10ul (see qc_mario_evaporation5 and
+  qc_mario_pipetting3), estimate the relative volumes of the dispenses in
+  this experiment.
+
+  This experiment only uses the large tips, Wet and Air dispense.
+
+  The protocol has these steps:
+
+  * dispense appropriate water volumes to each well
+  * weigh plate
+  * fill wells to 150ul with dye (some wells have 0ul dye for control)
+  * weigh
+  * repeat 3 times: shake, read
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  dyeLightLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dyeLight]
+  dyeLight:
+    type: Liquid
+    wells: dyeLightLabware(C01 down F01)
+  dyeDarkLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dyeDark]
+  dyeDark:
+    type: Liquid
+    wells: dyeDarkLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 123
+    conditions:
+      site: ourlab.mario.site.P2
+      plate: plate1
+      id*: 96
+      syringe=:
+        values: [1,2,3,4]
+        order: repeat
+      well=allocateWells:
+        rows: 8
+        columns: 12
+      liquidClass=:
+        values:
+          - Roboliq_Water_Air_1000
+          - Roboliq_Water_Wet_1000
+        groupBy: syringe
+        order: repeat
+      wellVolume: 150 ul
+      dyeVolume=:
+        values: [0ul, 3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul]
+        groupBy: syringe
+        order: reshuffle
+      waterVolume=calculate: "wellVolume - dyeVolume"
+      dyeSource: dyeLight
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    description: "Handle plates"
+    command: experiment.forEachGroup
+    groupBy: plate
+    steps:
+      description: "`Handle {{$plate}}`"
+      1:
+        description: "Fill the plate with water"
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $$waterVolume
+        clean: none
+        cleanEnd: flush
+      2:
+        description: "Weigh dye-less plate"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+      3:
+        description: "Distribute dye"
+        command: pipetter.pipette
+        sources: $dyeSource
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $$dyeVolume
+        syringes: $$syringe
+        items:
+          "#data":
+            template:
+              program: $liquidClass
+        clean: flush
+      4:
+        description: "Weigh full plate"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+      5:
+        description: Move plate to shaker
+        command: transporter.movePlate
+        object: $plate
+        destination: ourlab.mario.site.P3
+      6:
+        description: Read absorbance three times
+        command: system.repeat
+        count: 3
+        variableName: replicate
+        steps:
+          1:
+            description: "Shake"
+            command: shaker.shakePlate
+            object: $plate
+            program:
+              duration: 1 minute
+          2:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wellDesignFactor: well
+              userValues: {replicate: $replicate}
+            outputDataset: "absorbance"

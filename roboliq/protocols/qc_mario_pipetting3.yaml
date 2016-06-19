@@ -27,14 +27,14 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P2
-  dyeLightLabware:
+  dyeDarkLabware:
     type: Plate
     model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R5
-    contents: [Infinity l, dyeLight]
-  dyeLight:
+    contents: [Infinity l, dyeDark]
+  dyeDark:
     type: Liquid
-    wells: dyeLightLabware(C01 down F01)
+    wells: dyeDarkLabware(C01 down F01)
 
   design:
     type: Design
@@ -44,7 +44,7 @@ objects:
       site: P2
       wellVolume: 150 ul
       dyeVolume*: [10 ul]
-      dyeSource: [dyeLight]
+      dyeSource: [dyeDark]
       waterVolume=calculate: "wellVolume - dyeVolume"
       plate: [plate1]
       orderA=range: {}
@@ -78,12 +78,12 @@ steps:
         volumes: $waterVolume
         clean: none
         cleanEnd: flush
-      2:
-        description: "Shake"
-        command: shaker.shakePlate
-        object: $plate
-        program:
-          duration: 1 minute
+      # 2:
+      #   description: "Shake"
+      #   command: shaker.shakePlate
+      #   object: $plate
+      #   program:
+      #     duration: 1 minute
       3:
         description: "Measure absorbance"
         data: {where: 'status == "empty"'}

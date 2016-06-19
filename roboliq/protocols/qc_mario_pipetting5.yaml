@@ -1,0 +1,260 @@
+roboliq: v1
+
+description: |
+  Half of the wells should be full of dye (e.g. 150ul), and the other half
+  should have a randomized amount less than full.  Absorbance is read.
+  Then aliquots are transfed from randomized full wells
+  to fill the non-full wells (the non-full wells will now be full),
+  and absorbance is read.
+  The process repeats.
+
+  The following factors are randomized:
+
+  * syringe
+  * liquid class
+  * volume
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  dyeLightLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dyeLight]
+  dyeLight:
+    type: Liquid
+    wells: dyeLightLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 123
+    conditions:
+      wellVolume: 150 ul
+      wellA*=allocateWells:
+        rows: 8
+        columns: 12
+        wells: A01 down D01
+        # groupBy: wellA
+        # order: reshuffle
+      aliquotVolume*: [3 ul, 5 ul, 10 ul] # [3 ul, 5 ul, 10 ul, 20 ul, 40 ul]
+      cycle=range:
+        groupBy: wellA
+      source=:
+        values: [A, B]
+        groupBy: wellA
+        order: repeat
+      wellB=allocateWells:
+        rows: 8
+        columns: 12
+        wells: E01 down H01
+        groupBy: wellA
+        order: reshuffle
+      subgroup*: 2
+      .caseA=case:
+        cases:
+          - where: 'subgroup == 1'
+            conditions:
+              well=calculate: "wellA"
+          - conditions:
+              well=calculate: "wellB"
+      # .caseB=case:
+      #   cases:
+      #     - where: 'role == "source"'
+      #     - conditions:
+      #         dyeVolume=calculate: "wellVolume - aliquotVolume"
+      # .caseC=case:
+      #   cases:
+      #     - where: '(cycle % 2) == 0'
+      #       conditions:
+      #         role=calculate: '(role == "source") ? "destination" : "source"'
+    # orderBy: [cycle, well]
+    orderBy: [cycle]
+
+  design0:
+    type: Design
+    randomSeed: 123
+    conditions:
+      well*=allocateWells:
+        rows: 8
+        columns: 1
+        order: shuffle
+      site: ourlab.mario.site.P2
+      orderA=range:
+        sameBy: site
+      syringe=range:
+        till: 8
+        groupBy: site
+        order: reshuffle
+      orderB=range:
+        groupBy: [site, syringe]
+      firstComponent=:
+        values: [water, dye]
+        order: reshuffle
+      .caseA=case:
+        cases:
+          - where: 'syringe <= 4 and firstComponent == "water"'
+            conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Air_1000
+                  - Roboliq_Water_Wet_1000
+                  - Roboliq_Water_Dry_1000
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
+                order: reshuffle
+          - where: 'syringe <= 4 and firstComponent == "dye"'
+            conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Air_1000
+                  - Roboliq_Water_Dry_1000
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
+                order: reshuffle
+          - where: 'firstComponent == "water"'
+            conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Wet_0050
+                  - Roboliq_Water_Dry_0050
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
+                order: reshuffle
+          - conditions:
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Dry_0050
+                order: reshuffle
+                groupBy: [site, syringe]
+              dyeVolume=:
+                values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
+                order: reshuffle
+      waterVolume=calculate: "200 ul - dyeVolume"
+      .caseB=case:
+        cases:
+          - where: "dyeVolume >= (10ul)"
+            conditions:
+              dyeSource: dyeLight
+          - conditions:
+              dyeSource: dyeDark
+
+    orderBy: [orderA, orderB, syringe]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    command: experiment.forEachGroup
+    groupBy: site
+    steps:
+      description: "`Site {{$site}}`"
+      command: experiment.forEachGroup
+      groupBy: orderB
+      steps:
+        1:
+          command: transporter.movePlate
+          object: plate1
+          destination: $site
+        2:
+          description: "Distribute water to wells that require water first"
+          data: {where: 'firstComponent == "water"'}
+          command: pipetter.pipette
+          sources: ourlab.mario.systemLiquid
+          destinationLabware: plate1
+          destinations: $$well
+          volumes: $$waterVolume
+          clean: none
+        3:
+          command: pipetter.cleanTips
+          equipment: ourlab.mario.liha
+          intensity: flush
+        4:
+          command: experiment.forEachGroup
+          groupBy: liquidClass
+          steps:
+            description: "`Distribute dye using {{$liquidClass}}`"
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: $$dyeSource
+            destinationLabware: plate1
+            destinations: $$well
+            volumes: $$dyeVolume
+            syringes: $$syringe
+            clean: none
+        5:
+          command: pipetter.cleanTips
+          equipment: ourlab.mario.liha
+          intensity: flush
+        6:
+          description: "Distribute water to wells that require water second"
+          data: {where: 'firstComponent == "dye"'}
+          command: pipetter.pipette
+          sources: ourlab.mario.systemLiquid
+          destinationLabware: plate1
+          destinations: $$well
+          volumes: $$waterVolume
+          clean: none
+          cleanEnd: flush
+  3:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 1 minute
+  4:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {replicate: 1}
+    outputDataset: "absorbance"
+  5:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 1 minute
+  6:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {replicate: 2}
+    outputDataset: "absorbance"
+  7:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 1 minute
+  8:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {replicate: 3}
+    outputDataset: "absorbance"
