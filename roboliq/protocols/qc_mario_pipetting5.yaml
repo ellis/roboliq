@@ -37,45 +37,62 @@ objects:
     type: Design
     randomSeed: 123
     conditions:
-      wellVolume: 150 ul
+      fullVolume: 150 ul
+      cycle*: 3
       wellA*=allocateWells:
         rows: 8
         columns: 12
-        wells: A01 down D01
-        # groupBy: wellA
+        wells: A01 down block D12
+        groupBy: cycle
         # order: reshuffle
-      aliquotVolume*: [3 ul, 5 ul, 10 ul] # [3 ul, 5 ul, 10 ul, 20 ul, 40 ul]
-      cycle=range:
-        groupBy: wellA
+      wellB=allocateWells:
+        rows: 8
+        columns: 12
+        wells: E01 down block H12
+        groupBy: cycle
+        order: reshuffle
       source=:
         values: [A, B]
         groupBy: wellA
         order: repeat
-      wellB=allocateWells:
-        rows: 8
-        columns: 12
-        wells: E01 down H01
+      syringe=:
+        values: [1,2,3,4,5,6,7,8]
+        order: repeat
+      aliquotVolume=:
+        values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul]
         groupBy: wellA
         order: reshuffle
-      subgroup*: 2
+      subgroup*: [A, B]
       .caseA=case:
         cases:
-          - where: 'subgroup == 1'
+          - where: 'subgroup == "A"'
             conditions:
               well=calculate: "wellA"
           - conditions:
               well=calculate: "wellB"
-      # .caseB=case:
-      #   cases:
-      #     - where: 'role == "source"'
-      #     - conditions:
-      #         dyeVolume=calculate: "wellVolume - aliquotVolume"
-      # .caseC=case:
-      #   cases:
-      #     - where: '(cycle % 2) == 0'
-      #       conditions:
-      #         role=calculate: '(role == "source") ? "destination" : "source"'
-    # orderBy: [cycle, well]
+      .caseB=case:
+        cases:
+          - where: 'source == subgroup'
+            conditions:
+              wellVolume=calculate: "fullVolume - aliquotVolume"
+          - conditions:
+              wellVolume=calculate: "fullVolume"
+      .caseC=case:
+        cases:
+          - where: 'syringe <= 4'
+            conditions:
+              tipModel: T1000
+              liquidClass=:
+                values:
+                  - Roboliq_Water_Air_1000
+                  - Roboliq_Water_Wet_1000
+                order: reshuffle
+                groupBy: syringe
+              pos=calculate: '(liquidClass == "Roboliq_Water_Air_1000") ? "air" : "wet"'
+          - conditions:
+              tipModel: T0050
+              liquidClass: Roboliq_Water_Wet_0050
+              pos: wet
     orderBy: [cycle]
 
   design0:
