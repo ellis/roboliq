@@ -58,26 +58,7 @@ objects:
       syringe=:
         values: [1,2,3,4,5,6,7,8]
         order: repeat
-      aliquotVolume=:
-        values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul]
-        groupBy: wellA
-        order: reshuffle
-      subgroup*: [A, B]
       .caseA=case:
-        cases:
-          - where: 'subgroup == "A"'
-            conditions:
-              well=calculate: "wellA"
-          - conditions:
-              well=calculate: "wellB"
-      .caseB=case:
-        cases:
-          - where: 'source == subgroup'
-            conditions:
-              wellVolume=calculate: "fullVolume - aliquotVolume"
-          - conditions:
-              wellVolume=calculate: "fullVolume"
-      .caseC=case:
         cases:
           - where: 'syringe <= 4'
             conditions:
@@ -89,10 +70,33 @@ objects:
                 order: reshuffle
                 groupBy: syringe
               pos=calculate: '(liquidClass == "Roboliq_Water_Air_1000") ? "air" : "wet"'
+              aliquotVolume=:
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul]
+                groupBy: wellA
+                order: reshuffle
           - conditions:
               tipModel: T0050
               liquidClass: Roboliq_Water_Wet_0050
               pos: wet
+              aliquotVolume=:
+                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul]
+                groupBy: wellA
+                order: reshuffle
+      subgroup*: [A, B]
+      .caseB=case:
+        cases:
+          - where: 'subgroup == "A"'
+            conditions:
+              well=calculate: "wellA"
+          - conditions:
+              well=calculate: "wellB"
+      .caseC=case:
+        cases:
+          - where: 'source == subgroup'
+            conditions:
+              wellVolume=calculate: "fullVolume - aliquotVolume"
+          - conditions:
+              wellVolume=calculate: "fullVolume"
     orderBy: [cycle]
 
   design0:
