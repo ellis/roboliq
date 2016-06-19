@@ -1,15 +1,21 @@
 roboliq: v1
 
 description: |
-  Perform pipetting using dye in a randomized manner in order to check
-  the spread of results.  This procedure is performed at a single site
-  (the "reference" site chosen for the prior evaporation experiments).
+  1) Calculate average volume for the given dispense levels (use weight measurements)
+  2) Calculate standard deviation of volumes for the given dispense levels (use absorbance measurements)
 
-  The following factors are be randomized:
+  Each level will be distributed over an entire plate.
+  Right now, the script is just testing 10ul.
 
-  * syringe
-  * liquid class
-  * volume
+  Protocol steps:
+
+  * distribue water to all wells
+  * shake
+  * read absorbance (validity assumes that dyeVolume is small)
+  * weigh plate
+  * distribute dye to all wells
+  * weight plate
+  * repeat 3 times: shake + read absorbance
 
 config:
   evowareCompiler:
@@ -20,7 +26,7 @@ objects:
   plate1:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P3
+    location: ourlab.mario.site.P2
   dyeLightLabware:
     type: Plate
     model: ourlab.model.troughModel_25ml
@@ -29,88 +35,26 @@ objects:
   dyeLight:
     type: Liquid
     wells: dyeLightLabware(C01 down F01)
-  dyeDarkLabware:
-    type: Plate
-    model: ourlab.model.troughModel_25ml
-    location: ourlab.mario.site.R6
-    contents: [Infinity l, dyeDark]
-  dyeDark:
-    type: Liquid
-    wells: dyeDarkLabware(C01 down F01)
 
   design:
     type: Design
     randomSeed: 123
     conditions:
-      well*=allocateWells:
-        rows: 8
-        columns: 12
-        order: shuffle
-      site: ourlab.mario.site.P2
-      syringe=range:
-        till: 8
-        groupBy: site
-        order: reshuffle
-      orderB=range:
-        groupBy: [syringe]
-      firstComponent=:
-        values: [water, dye]
-        order: reshuffle
-      .caseA=case:
-        cases:
-          - where: 'syringe <= 4 and firstComponent == "water"'
-            conditions:
-              liquidClass=:
-                values:
-                  - Roboliq_Water_Air_1000
-                  - Roboliq_Water_Wet_1000
-                  - Roboliq_Water_Dry_1000
-                order: reshuffle
-                groupBy: [site, syringe]
-              dyeVolume=:
-                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
-                order: reshuffle
-          - where: 'syringe <= 4 and firstComponent == "dye"'
-            conditions:
-              liquidClass=:
-                values:
-                  - Roboliq_Water_Air_1000
-                  - Roboliq_Water_Dry_1000
-                order: reshuffle
-                groupBy: [site, syringe]
-              dyeVolume=:
-                values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul, 100 ul, 200 ul]
-                order: reshuffle
-          - where: 'firstComponent == "water"'
-            conditions:
-              liquidClass=:
-                values:
-                  - Roboliq_Water_Wet_0050
-                  - Roboliq_Water_Dry_0050
-                order: reshuffle
-                groupBy: [site, syringe]
-              dyeVolume=:
-                values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
-                order: reshuffle
-          - conditions:
-              liquidClass=:
-                values:
-                  - Roboliq_Water_Dry_0050
-                order: reshuffle
-                groupBy: [site, syringe]
-              dyeVolume=:
-                values: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
-                order: reshuffle
-      waterVolume=calculate: "200 ul - dyeVolume"
-      .caseB=case:
-        cases:
-          - where: "dyeVolume >= (10ul)"
-            conditions:
-              dyeSource: dyeLight
-          - conditions:
-              dyeSource: dyeDark
-
-    orderBy: [orderA, orderB, syringe]
+      agent: mario
+      site: P2
+      wellVolume: 150 ul
+      dyeVolume*: [10 ul]
+      dyeSource: [dyeLight]
+      waterVolume=calculate: "wellVolume - dyeVolume"
+      plate: [plate1]
+      orderA=range: {}
+      orderB*:
+      - stageB: weigh
+        status*: [empty, full]
+      - stageB: read
+        status: full
+        replicate*: 3
+      id=range: {}
 
 steps:
   data:
@@ -119,100 +63,71 @@ steps:
     command: pipetter.cleanTips
     equipment: ourlab.mario.liha
     intensity: thorough
+    syringes: [1,2,3,4]
   2:
+    description: "Handle plates"
     command: experiment.forEachGroup
-    groupBy: site
+    groupBy: plate
     steps:
-      description: "`Site {{$site}}`"
-      command: experiment.forEachGroup
-      groupBy: orderB
-      steps:
-        1:
-          command: transporter.movePlate
-          object: plate1
-          destination: $site
-        2:
-          description: "Distribute water to wells that require water first"
-          data: {where: 'firstComponent == "water"'}
-          command: pipetter.pipette
-          sources: ourlab.mario.systemLiquid
-          destinationLabware: plate1
-          destinations: $$well
-          volumes: $$waterVolume
-          clean: none
-        3:
-          command: pipetter.cleanTips
-          equipment: ourlab.mario.liha
-          intensity: flush
-        4:
-          command: experiment.forEachGroup
-          groupBy: liquidClass
-          steps:
-            description: "`Distribute dye using {{$liquidClass}}`"
-            command: pipetter.pipette
-            program: $liquidClass
-            sources: $$dyeSource
-            destinationLabware: plate1
-            destinations: $$well
-            volumes: $$dyeVolume
-            syringes: $$syringe
-            clean: none
-        5:
-          command: pipetter.cleanTips
-          equipment: ourlab.mario.liha
-          intensity: flush
-        6:
-          description: "Distribute water to wells that require water second"
-          data: {where: 'firstComponent == "dye"'}
-          command: pipetter.pipette
-          sources: ourlab.mario.systemLiquid
-          destinationLabware: plate1
-          destinations: $$well
-          volumes: $$waterVolume
-          clean: none
-          cleanEnd: flush
-  3:
-    description: "Shake plate1"
-    command: shaker.shakePlate
-    object: plate1
-    program:
-      duration: 1 minute
-  4:
-    description: "Measure absorbance"
-    command: absorbanceReader.measurePlate
-    object: plate1
-    program:
-      excitationWavelength: 480nm
-      wellDesignFactor: well
-      userValues: {replicate: 1}
-    outputDataset: "absorbance"
-  5:
-    description: "Shake plate1"
-    command: shaker.shakePlate
-    object: plate1
-    program:
-      duration: 1 minute
-  6:
-    description: "Measure absorbance"
-    command: absorbanceReader.measurePlate
-    object: plate1
-    program:
-      excitationWavelength: 480nm
-      wellDesignFactor: well
-      userValues: {replicate: 2}
-    outputDataset: "absorbance"
-  7:
-    description: "Shake plate1"
-    command: shaker.shakePlate
-    object: plate1
-    program:
-      duration: 1 minute
-  8:
-    description: "Measure absorbance"
-    command: absorbanceReader.measurePlate
-    object: plate1
-    program:
-      excitationWavelength: 480nm
-      wellDesignFactor: well
-      userValues: {replicate: 3}
-    outputDataset: "absorbance"
+      description: "`Handle {{$plate}}`"
+      1:
+        description: "Fill the plate with water"
+        command: pipetter.pipette
+        sources: ourlab.mario.systemLiquid
+        destinations: "`{{$plate}}(all)`"
+        volumes: $waterVolume
+        clean: none
+        cleanEnd: flush
+      2:
+        description: "Shake"
+        command: shaker.shakePlate
+        object: $plate
+        program:
+          duration: 1 minute
+      3:
+        description: "Measure absorbance"
+        data: {where: 'status == "empty"'}
+        command: absorbanceReader.measurePlate
+        object: $plate
+        program:
+          excitationWavelength: 480nm
+          wells: "`{{$plate}}(all)`"
+        outputDataset: "absorbance"
+      4:
+        description: "Weigh dye-less plate"
+        data: {where: 'status == "empty"'}
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+      5:
+        description: "Distribute dye"
+        command: pipetter.pipette
+        sources: $dyeSource
+        destinations: "`{{$plate}}(all)`"
+        volumes: $dyeVolume
+        clean: flush
+      6:
+        description: "Weigh full plate"
+        data: {where: 'status == "full"'}
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+      7:
+        description: "Repeat shake+reads"
+        data: { where: 'stageB == "read"' }
+        command: experiment.forEachRow
+        steps:
+          1:
+            description: "Shake"
+            command: shaker.shakePlate
+            object: $plate
+            program:
+              duration: 1 minute
+          2:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wells: "`{{$plate}}(all)`"
+            outputDataset: "absorbance"

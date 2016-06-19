@@ -105,9 +105,10 @@ The next time, I recorded it on video; it succeeded, but we hear the loud clank.
 	- confidence interval of reader/shaker: read, read, read, shake, read, read, read, shake, read, shake, read, shake, read
 		also ROTATE
 		- [ ] implement "rotate: true" in absorbanceReader.js program
-	- dispense various volumes of water to wells, read, weigh, fill wells to 150ul with dye (some wells have 0ul dye for control), weigh, shake, read
+	- dispense various volumes of water to wells, weigh, fill wells to 150ul with dye (some wells have 0ul dye for control), weigh, shake, read
 		- water first
-		- single, reference site
+		- single site (the reference site)
+		- single syringe type (large or small)
 		- [ ] log timing of dispenses in order to estimate evaporation
 4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
