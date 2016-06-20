@@ -75,6 +75,7 @@ function directive_data(spec, data) {
 		if (spec.reverse) {
 			result = _.reverse(result);
 		}
+		// console.log("result: "+JSON.stringify(result, null, '\t'))
 		return result;
 	});
 }

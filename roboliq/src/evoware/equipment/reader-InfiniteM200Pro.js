@@ -141,12 +141,12 @@ module.exports = {
 					const wells2 = wells1.map(s => {
 						const match = s.match(rx);
 						return (match) ? match[1] : s;
-					})
+					});
 					// console.log({wells1})
 					const rowcols = wells2.map(s => wellsParser.locationTextToRowCol(s));
 					// console.log({rowcols})
 					// rowcols.sort();
-					//rowcols.sort((a, b) => (a[0] == b[0]) ? a[1] - b[1] : a[0] - b[0]);
+					rowcols.sort((a, b) => (a[0] == b[0]) ? a[1] - b[1] : a[0] - b[0]);
 					// console.log({rowcols})
 
 					if (_.isEmpty(rowcols)) {
@@ -160,7 +160,7 @@ module.exports = {
 							const rowcol = rowcols[i];
 							const indexOnPlate = (rowcol[0] - 1) * labwareModel.columns + rowcol[1];
 							// If continuity is broken:
-							if (true || indexOnPlate !== indexOnPlatePrev + 1) {
+							if (indexOnPlate !== indexOnPlatePrev + 1) {
 								wells += locationRowColToText(prev[0], prev[1])+"|"+locationRowColToText(rowcol[0], rowcol[1])+":";
 							}
 							prev = rowcol;

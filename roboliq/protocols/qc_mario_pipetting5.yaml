@@ -108,70 +108,6 @@ objects:
         orderBy: [cycle]
     orderBy: [cycle]
 
-  # design1:
-  #   type: Design
-  #   randomSeed: 123
-  #   conditions:
-  #     fullVolume: 150 ul
-  #     site: ourlab.mario.site.P2
-  #     cycle*: 3
-  #     wellA*=allocateWells:
-  #       rows: 8
-  #       columns: 12
-  #       wells: A01 down block D01 #D12
-  #       groupBy: cycle
-  #       # order: reshuffle
-  #     wellB=allocateWells:
-  #       rows: 8
-  #       columns: 8
-  #       wells: E01 down block H01 #H12
-  #       groupBy: cycle
-  #       order: reshuffle
-  #     source=:
-  #       values: [A, B]
-  #       groupBy: wellA
-  #       order: repeat
-  #     syringe=:
-  #       values: [1,2,3,4,5,6,7,8]
-  #       order: repeat
-  #     syringeGroup=range:
-  #       groupBy: [cycle, syringe]
-  #     .caseA=case:
-  #       cases:
-  #         - where: 'syringe <= 4'
-  #           conditions:
-  #             tipModel: T1000
-  #             liquidClass=:
-  #               values:
-  #                 - Roboliq_Water_Air_1000
-  #                 - Roboliq_Water_Wet_1000
-  #               order: reshuffle
-  #               sameBy: syringeGroup
-  #             pos=calculate: '(liquidClass == "Roboliq_Water_Air_1000") ? "air" : "wet"'
-  #             aliquotVolume=:
-  #               values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 75 ul]
-  #               groupBy: wellA
-  #               order: reshuffle
-  #         - conditions:
-  #             tipModel: T0050
-  #             liquidClass: Roboliq_Water_Wet_0050
-  #             pos: wet
-  #             aliquotVolume=:
-  #               values: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul] #[0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 3 ul, 5 ul, 10 ul, 40 ul]
-  #               groupBy: wellA
-  #               order: reshuffle
-  #     subgroup*: [A, B]
-  #     .caseB=case:
-  #       cases:
-  #         - where: 'subgroup == "A"'
-  #           conditions:
-  #             well=calculate: "wellA"
-  #         - conditions:
-  #             well=calculate: "wellB"
-  #     wellVolume=calculate: '(source == subgroup) ? fullVolume - aliquotVolume : fullVolume'
-  #     aliquotVolume=calculate: '(source == subgroup) ? -aliquotVolume : aliquotVolume'
-  #   orderBy: [cycle]
-
 steps:
   data:
     source: design
@@ -234,13 +170,16 @@ steps:
         description: "Transfer from source wells to destination wells"
         command: pipetter.pipette
         sourceLabware: plate1
+        sources:
+          "#data":
+            where: 'source == subgroup'
+            value: well
         destinationLabware: plate1
         items:
           "#data":
             where: 'source != subgroup'
             template:
-              source: $wellA
-              destination: $wellB
+              destination: $well
               volume: $aliquotVolume
               syringe: $syringe
               program: $liquidClass
