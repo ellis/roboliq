@@ -10,7 +10,7 @@ import stableSort from 'stable';
 import wellsParser from './parsers/wellsParser.js';
 
 
-const DEBUG = false;
+const DEBUG = true;
 
 //import {locationRowColToText} from './parsers/wellsParser.js';
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
