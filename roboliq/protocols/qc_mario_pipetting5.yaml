@@ -40,18 +40,65 @@ objects:
     type: Liquid
     wells: dyeLightLabware(C01 down F01)
 
-  design0:
+  design1:
     type: Design
-    randomSeed: 1234
+    randomSeed: 12345
     description: |
-      * `cycleA`: 
+      * `cycleA`: a cycle for transfering aliquots from group A to B and back to A.
+      * `cycleB`: 1 for transfer from A to B, 2 for transfer from B to A.
     conditions:
       fullVolume: 150 ul
       site: ourlab.mario.site.P3
-      aliquotVolume*=:
-        values: [3 ul, 4 ul, 5 ul, 7 ul, 10 ul, 20 ul, 30 ul, 40 ul]
       cycleA*: 2
+      aliquot_ul*=:
+        values: [3, 4, 5, 7] #, 10 ul, 20 ul, 30 ul, 40 ul]
+        groupBy: cycleA
+        order: reshuffle
       cycleB*: 2
+      syringe=:
+        values: [1,2,3,4,5,6,7,8]
+        groupBy: [cycleA, cycleB]
+      .caseA=case:
+        cases:
+          - where: 'cycleB == 1'
+            conditions:
+              src=allocateWells:
+                rows: 8
+                columns: 12
+                wells: A01 down block D02
+                orderBy: [cycleA, cycleB, syringe]
+          - conditions:
+              src=allocateWells:
+                rows: 8
+                columns: 12
+                wells: E01 down block H02
+                order: shuffle
+      dst=rotateColumn:
+        column: src
+        n: 1
+        orderBy: [aliquot_ul, cycleA, cycleB, syringe]
+    orderBy: [cycleA, cycleB, syringe]
+
+  design0:
+    type: Design
+    randomSeed: 12345
+    description: |
+      * `cycleA`: a cycle for transfering aliquots from group A to B and back to A.
+      * `cycleB`: 1 for transfer from A to B, 2 for transfer from B to A.
+    conditions:
+      fullVolume: 150 ul
+      site: ourlab.mario.site.P3
+      cycleA*: 2
+      aliquot_ul*=:
+        values: [3, 4, 5, 7] #, 10 ul, 20 ul, 30 ul, 40 ul]
+        groupBy: cycleA
+        order: reshuffle
+      aliquotVolume=calculate:
+        expression: "aliquot_ul"
+        units: "ul"
+      cycleB*: 2
+      # orderA=range:
+      #   groupBy: cycle
       syringe=:
         values: [1,2,3,4,5,6,7,8]
         # order: reshuffle
@@ -64,7 +111,7 @@ objects:
                 rows: 8
                 columns: 12
                 wells: A01 down block D02
-                groupBy: [cycleA, cycleB]
+                groupBy: [aliquot_ul, cycleA, cycleB]
                 orderBy: syringe
                 # order: shuffle
           - conditions:
@@ -75,7 +122,10 @@ objects:
                 groupBy: [cycleA, cycleB]
                 order: shuffle
       # cycleB*: 2
-      # dst=rotateColumn: src
+      dst=rotateColumn:
+        column: src
+        orderBy: [aliquot_ul, cycleA, cycleB]
+        n: 1
       # .caseB=case:
       #   cases:
       #     - where: 'syringe <= 4'
@@ -102,6 +152,7 @@ objects:
       #   orderBy: [cycleA, cycleB, syringe]
     # orderBy: [syringe, cycleA, cycleB]
     # orderBy: [cycleA, cycleB, syringe]
+    orderBy: [aliquotVolume]
 
   design:
     type: Design
