@@ -780,6 +780,10 @@ const actionHandlers = {
 		_.defaults(action2, {from: 1, step: 1});
 		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_range_initGroup);
 	},
+	"rotateColumn": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const action2 = _.isString(action) ? ({column: action, n: 1}) : _.cloneDeep(action);
+		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_rotateColumn_initGroup);
+	},
 	"sample": {
 
 	}
@@ -1122,6 +1126,26 @@ function assign_range_initGroup(rows, rowIndexes) {
 
 	this.defaultInitGroup(rows, rowIndexes);
 }
+
+function assign_rotateColumn_initGroup(rows, rowIndexes) {
+	const l = rowIndexes.map(i => rows[i][this.action.column]);
+	if (this.action.n > 0) {
+		for (let i = 0; i < this.action.n; i++) {
+			const x = l.pop();
+			l.unshift(x);
+		}
+	}
+	else {
+		for (let i = 0; i < -this.action.n; i++) {
+			const x = l.shift();
+			l.push(x);
+		}
+	}
+	this.action.values = l;
+
+	this.defaultInitGroup(rows, rowIndexes);
+}
+
 /*
 function assign_range_next(nestedRows, rowIndex) {
 	const commonHolder = []; // cache for common values, if needed
