@@ -76,6 +76,7 @@ Impact of z-level detection, evaporation, and absorbance
 
 # Big questions for QC
 
+Evaporation rate of dye in trough:
 trough weight R5, filled with water:
 09:31 118.114
 11:54 117.883
