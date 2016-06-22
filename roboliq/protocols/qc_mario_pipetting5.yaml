@@ -103,9 +103,9 @@ objects:
               pos: wet
       cycleC*:
       - well=calculate: src
+        dv=calculate: '-dv'
       - well=calculate: dst
       wellVolume=calculate: '(cycleC == 1) ? fullVolume - dv : fullVolume'
-      dv=calculate: '(cycleC == 1) ? -dv : dv'
       cycle=range:
         orderBy: [cycleA, cycleB]
         sameBy: [cycleA, cycleB]
