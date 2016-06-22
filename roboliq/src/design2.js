@@ -10,7 +10,7 @@ import stableSort from 'stable';
 import wellsParser from './parsers/wellsParser.js';
 
 
-const DEBUG = true;
+const DEBUG = false;
 
 //import {locationRowColToText} from './parsers/wellsParser.js';
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
@@ -633,8 +633,10 @@ class Special {
 	}
 
 	defaultNext() {
+		// if (DEBUG) { console.log("defaultNext: "+)}
 		// console.log({this});
 		if (this.nextIndex >= this.valueCount) {
+			// console.log(`next: this.nextIndex >= this.valueCount, ${this.nextIndex} >= ${this.valueCount}`)
 			switch (this.reuse) {
 				case "repeat":
 					this.nextIndex = 0;
@@ -651,6 +653,7 @@ class Special {
 				default:
 					assert(false, "not enough values supplied to fill the rows: "+JSON.stringify(this.action));
 			}
+			// console.log("this.nextIndex = "+this.nextIndex)
 		}
 
 		let index, key;
@@ -670,6 +673,7 @@ class Special {
 			default:
 				assert(false, "unknown 'draw' value: "+JSON.stringify(this.draw)+" in "+JSON.stringify(this.action));
 		}
+		// console.log({index, key})
 
 		const value = this.action.values[index];
 		if (this.draw !== "sample") {
@@ -945,15 +949,15 @@ function assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEng
 	const table2 = _.zip.apply(_, table2);
 	for (let i = 0; i < rowIndexesSame.length; i++) {
 		const rowIndexes3 = rowIndexesSame[i];
-		if (isSpecial) {
-			value.nextIndex = i;
-		}
+		// if (isSpecial) {
+		// 	value.nextIndex = i;
+		// }
 		const value2
 			= (isArray) ? value[i]
 			: (isObject) ? value[keys[i]]
 			: (isSpecial) ? value.next(rows, [rowIndexes3[0]])[1]
 			: value;
-		// console.log({i, rowIndexes3, value2})
+		// console.log({i, rowIndexes3, value2, value})
 		for (let i = 0; i < rowIndexes3.length; i++) {
 			const rowIndex = rowIndexes3[i];
 			expandRowsByNamedValue(rows, [rowIndex], otherRowIndexes, name, value2, randomEngine);

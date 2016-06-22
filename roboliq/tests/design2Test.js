@@ -1325,12 +1325,12 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should handle previous bug #3", () => {
+		it("should handle previous bug #3", () => {
 			const design = {
 				conditions: {
 					"a*": 2,
-					"b*": [{"c=range": {}}, {"c=range": {}}],
-					"d=": {
+					"b*": 2,
+					"c=": {
 						values: [1, 2],
 						order: "repeat",
 						sameBy: ["a", "b"]
@@ -1341,10 +1341,10 @@ describe('design', () => {
 			// console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
-				{a: 1, b: 1, c: 1, d: 1},
-				{a: 1, b: 2, c: 1, d: 2},
-				{a: 2, b: 1, c: 2, d: 1},
-				{a: 2, b: 2, c: 2, d: 2},
+				{a: 1, b: 1, c: 1},
+				{a: 1, b: 2, c: 2},
+				{a: 2, b: 1, c: 1},
+				{a: 2, b: 2, c: 2},
 			]);
 		});
 
