@@ -114,6 +114,22 @@ The next time, I recorded it on video; it succeeded, but we hear the loud clank.
 4. [ ] estimation of accuracy and precision of pipetting over a range of volumes (e.g 0.1 to 300ul) (and for the various syringes and liquid classes?)
 5. [ ] z-level stuff
 
+For P(v;d) for volumes 75ul, 150ul, 300ul:
+
+dispense dye, weigh plates, shake and measure absorbance 3 times.  E(v;d) = plate weight * factor, adjusted for evaporation;
+How to calculate Var(v) given multiple measurements of $a in each well?
+How to calculate C.I. of E(v;d)?  Just sqrt(Var(v) / 96)?
+
+For E(v;d) for small volumes (0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3ul):
+
+Dispense 150ul into wells on two plates.  weigh.  wait T minutes to allow for evaporation.  weigh.
+for all V: dispense volume V to wells on plate1; weigh.
+in the middle and at the end, add a cycle wherein we just wait for evaporation, and weigh.
+
+For Var(v;d) for small volumes (0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3ul):
+
+
+
 ## Manual dye prep
 
 10ul of 0.8g => 1 absorbance

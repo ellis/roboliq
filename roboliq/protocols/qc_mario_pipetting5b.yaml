@@ -7,20 +7,20 @@ description: |
   how reliable a range of volumes can be pipetted by the large tips using
   either air or wet dispense.
 
-  At any given time, half of the wells should be full (e.g. 150ul), and the other half
+  At any given time, half of the wells should be full (300ul), and the other half
   should have a randomized amount less than full.  Absorbance is read.
   Then aliquots are transfed from randomized full wells
   to fill the non-full wells (the non-full wells will now be full),
   and absorbance is read.
   The process repeats.
 
-  The volumes are chosen to be in the range of both the large and small tips,
+  The volumes are chosen to be in the range of the large,
   and such that we can use the light dye.
 
   Steps:
 
-  * Fill the first source wells to 150ul
-  * Fill the first destination wells 150ul - first aliquotVolumes
+  * Fill the first source wells to 250ul
+  * Fill the first destination wells 250ul - first aliquotVolumes
   * shake + read absorbance
   * for each cycle, transfer from source wells to destination wells, then shake+read
 
@@ -36,7 +36,7 @@ objects:
     location: ourlab.mario.site.P3
   dyeLightLabware:
     type: Plate
-    model: ourlab.model.troughModel_25ml
+    model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, dyeLight]
   dyeLight:
@@ -50,17 +50,20 @@ objects:
       * `cycleA`: a cycle for transfering aliquots from group A to B and back to A.
       * `cycleB`: 1 for transfer from A to B, 2 for transfer from B to A.
     conditions:
-      fullVolume: 150 ul
+      fullVolume: 300 ul
       site: ourlab.mario.site.P3
       cycleA*: 24
       aliquot_ul*=:
-        values: [3, 4, 5, 7, 10, 20, 30, 40]
+        values: [5, 10, 20, 40, 60, 80, 100, 150]
         groupBy: cycleA
         order: reshuffle
       cycleB*: 2
-      syringe=:
-        values: [1,2,3,4,5,6,7,8]
+      orderB=range:
         groupBy: [cycleA, cycleB]
+      syringe=:
+        values: [1,2,3,4]
+        groupBy: [cycleA, cycleB]
+        order: repeat
       .caseA=case:
         cases:
           - where: 'cycleB == 1'
@@ -70,7 +73,7 @@ objects:
                 columns: 12
                 wells: A01 down block D02
                 groupBy: cycleA
-                orderBy: [cycleA, cycleB, syringe]
+                orderBy: [cycleA, cycleB, orderB]
           - conditions:
               src=allocateWells:
                 rows: 8
@@ -81,39 +84,45 @@ objects:
       dst=rotateColumn:
         column: src
         n: 1
-        orderBy: [aliquot_ul, cycleA, cycleB, syringe]
+        orderBy: [aliquot_ul, cycleA, cycleB, orderB]
       dv=calculate:
         expression: "aliquot_ul"
         units: "ul"
-      .caseB=case:
-        cases:
-          - where: 'syringe <= 4'
-            conditions:
-              tipModel: T1000
-              liquidClass=:
-                values:
-                  - Roboliq_Water_Air_1000
-                  - Roboliq_Water_Wet_1000
-                order: reshuffle
-                # groupBy: [syringe, dv]
-                orderBy: [cycleA, cycleB]
-                sameBy: [cycleA, cycleB]
-              pos=calculate: '(liquidClass == "Roboliq_Water_Air_1000") ? "air" : "wet"'
-          - conditions:
-              tipModel: T0050
-              liquidClass: Roboliq_Water_Wet_0050
-              pos: wet
+      tipModel: T1000
+      liquidClass=:
+        values:
+          - Roboliq_Water_Air_1000
+          - Roboliq_Water_Wet_1000
+        order: reshuffle
+        orderBy: [cycleA, cycleB]
+        sameBy: [cycleA, cycleB]
+      pos=calculate: '(liquidClass == "Roboliq_Water_Air_1000") ? "air" : "wet"'
       cycleC*:
       - well=calculate: src
+        wellVolume=calculate: 'fullVolume - dv'
         dv=calculate: '-dv'
       - well=calculate: dst
-      wellVolume=calculate: '(cycleC == 1) ? fullVolume - dv : fullVolume'
+        wellVolume=calculate: 'fullVolume'
       cycle=range:
         orderBy: [cycleA, cycleB]
         sameBy: [cycleA, cycleB]
+      .caseB=case:
+        description: "Create block for the initial pipetting"
+        cases:
+          - where: 'cycleA == 1 and cycleB == 1'
+            description: "Add a cycle=0 block for the initial pipetting"
+            conditions:
+              .*:
+              - {}
+              - cycleA: 0
+                cycle: 0
+                wellVolume=calculate: '(cycleC == 1) ? fullVolume : fullVolume - dv'
+                dv=calculate: 'wellVolume'
+                liquidClass: Roboliq_Water_Dry_1000
+                pos: dry
       id=range:
-        orderBy: [cycleA, cycleB, syringe]
-    orderBy: [cycleA, cycleB, syringe]
+        orderBy: [cycleA, cycleB, orderB]
+    orderBy: [cycleA, cycleB, orderB]
 
 steps:
   data:
@@ -123,32 +132,17 @@ steps:
     equipment: ourlab.mario.liha
     intensity: thorough
   2:
-    data: {where: 'cycle == 1'}
+    data: {where: 'cycle == 0', orderBy: cycleC}
     command: experiment.forEachGroup # HACK: remove this repeat later
     groupBy: fullVolume
     steps:
       1:
-        description: "Fill the first source wells"
-        data: {where: 'cycleC == 1'}
+        description: "Distribute dye to the wells"
         command: pipetter.pipette
         sources: dyeLight
         destinationLabware: plate1
         destinations: $$well
-        volumes: $fullVolume
-        clean: flush
-      2:
-        description: "Fill the first destination wells"
-        command: pipetter.pipette
-        sources: dyeLight
-        destinationLabware: plate1
-        destinations:
-          "#data":
-            where: 'cycleC == 2'
-            value: well
-        volumes:
-          "#data":
-            where: 'cycleC == 1'
-            value: wellVolume
+        volumes: $$wellVolume
         clean: flush
       3:
         description: "Shake plate1"
@@ -168,6 +162,7 @@ steps:
         outputDataset: "absorbance"
         destinationAfter: $site
   3:
+    data: {where: 'cycle > 0'}
     description: "Process cycles"
     command: experiment.forEachGroup
     groupBy: cycle
