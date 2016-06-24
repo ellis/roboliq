@@ -72,6 +72,7 @@ objects:
         rows: 8
         columns: 12
         orderBy: id
+      liquidClass: Roboliq_Water_Wet_0050
     orderBy: id
 
 steps:
