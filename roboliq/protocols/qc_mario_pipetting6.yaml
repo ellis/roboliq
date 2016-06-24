@@ -38,12 +38,13 @@ objects:
     randomSeed: 12345
     description: |
     conditions:
-      divisions: 1 #10
+      divisions: 10
       fullVolume: 150 ul
       aliquotVolume: 10 ul
+      site: ourlab.mario.site.P3
       roleA*:
       - roleAName: control
-        replicate*: 1 #20
+        replicate*: 20
         dyeDispenses: 0
         startCycle: 0
         type: empty
@@ -57,8 +58,6 @@ objects:
             dyeDispenses*=range: {from: 2, till: divisions}
             startCycle: 1
         waterVolume0=calculate: 'fullVolume - aliquotVolume * divisions'
-        # cycle*=range: {till: divisions}
-        # src=calculate: '(cycle >= startCycle and cycle < startCycle + dyeDispenses) ? "dye" : "water"'
         replicate*: 4
       id=range:
         order: shuffle
@@ -80,15 +79,15 @@ steps:
     equipment: ourlab.mario.liha
     intensity: thorough
     syringes: [1,2,3,4]
-  # 2:
-  #   description: "Distribute water to wells"
-  #   command: pipetter.pipette
-  #   sources: ourlab.mario.systemLiquid
-  #   destinationLabware: plate1
-  #   destinations: $$well
-  #   volumes: $$waterVolume0
-  #   clean: none
-  #   cleanEnd: light
+  2:
+    description: "Distribute water to wells"
+    command: pipetter.pipette
+    sources: ourlab.mario.systemLiquid
+    destinationLabware: plate1
+    destinations: $$well
+    volumes: $$waterVolume0
+    clean: none
+    cleanEnd: light
   3:
     description: "Process cycles: dispense dye or water aliquots to each well"
     data: {where: 'roleAName == "experiment"'}
@@ -98,87 +97,27 @@ steps:
     steps:
       description: "`Cycle {{$cycle}}`"
       command: pipetter.pipette
-      destinationLabware: plate1
-      items:
+      sources:
         "#data":
-          template:
-            source: $`(cycle >= startCycle and cycle < startCycle + dyeDispenses) ? "dye" : "water"`
+          value: $`(cycle >= startCycle and cycle < startCycle + dyeDispenses) ? "dye" : "water"`
+      destinationLabware: plate1
+      destinations: $$well
       volumes: $aliquotVolume
+      syringes: $$syringe
       clean: flush
-
   4:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 2 minute
+    destinationAfter: stay
+  5:
     description: "Measure absorbance"
-
-
-
-  # 2:
-  #   data: {where: 'cycle == 0', orderBy: cycleC}
-  #   command: experiment.forEachGroup # HACK: remove this repeat later
-  #   groupBy: fullVolume
-  #   steps:
-  #     1:
-  #       description: "Distribute dye to the wells"
-  #       command: pipetter.pipette
-  #       sources: dye
-  #       destinationLabware: plate1
-  #       destinations: $$well
-  #       volumes: $$wellVolume
-  #       clean: flush
-  #     3:
-  #       description: "Shake plate1"
-  #       command: shaker.shakePlate
-  #       object: plate1
-  #       program:
-  #         duration: 1 minute
-  #       destinationAfter: stay
-  #     4:
-  #       description: "Measure absorbance"
-  #       command: absorbanceReader.measurePlate
-  #       object: plate1
-  #       program:
-  #         excitationWavelength: 480nm
-  #         wellDesignFactor: well
-  #         userValues: {cycle: 0}
-  #       outputDataset: "absorbance"
-  #       destinationAfter: $site
-  # 3:
-  #   data: {where: 'cycle > 0'}
-  #   description: "Process cycles"
-  #   command: experiment.forEachGroup
-  #   groupBy: cycle
-  #   steps:
-  #     description: "`Cycle {{$cycle}}`"
-  #     1:
-  #       description: "Transfer from source wells to destination wells"
-  #       command: pipetter.pipette
-  #       sourceLabware: plate1
-  #       sources:
-  #         "#data":
-  #           where: 'cycleC == 1'
-  #           value: well
-  #       destinationLabware: plate1
-  #       items:
-  #         "#data":
-  #           where: 'cycleC == 2'
-  #           template:
-  #             destination: $well
-  #             volume: $dv
-  #             syringe: $syringe
-  #             program: $liquidClass
-  #       clean: flush
-  #     2:
-  #       description: "Shake plate1"
-  #       command: shaker.shakePlate
-  #       object: plate1
-  #       program:
-  #         duration: 1 minute
-  #       destinationAfter: stay
-  #     3:
-  #       description: "Measure absorbance"
-  #       command: absorbanceReader.measurePlate
-  #       object: plate1
-  #       program:
-  #         excitationWavelength: 480nm
-  #         wellDesignFactor: well
-  #       outputDataset: "absorbance"
-  #       destinationAfter: $site
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+    outputDataset: "absorbance"
+    destinationAfter: $site

@@ -96,6 +96,7 @@ function substituteDeep(x, data, SCOPE, DATA) {
 			// console.log({expr})
 			// process.exit()
 			x2 = Design.calculate(expr, SCOPE);
+			// console.log({x2, expr})
 		}
 		// SCOPE substitution
 		else if (_.startsWith(x, "$")) {

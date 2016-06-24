@@ -1021,7 +1021,7 @@ export function calculate(expr, row, action = {}) {
 	let value = math.eval(expr, scope);
 	// console.log({type: value.type, value})
 	if (_.isString(value) || _.isNumber(value)) {
-		return [0, value];
+		return value;
 	}
 
 	// Get units to use in the end, and the unitless value
