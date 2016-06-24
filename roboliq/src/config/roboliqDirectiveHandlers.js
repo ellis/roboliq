@@ -56,13 +56,22 @@ function directive_data(spec, data) {
 			}));
 			// console.log("result1: "+JSON.stringify(result))
 		}
-		result = (spec.groupBy) ? result : _.flatten(result);
-		// console.log("result2: "+JSON.stringify(result))
 
 		if (spec.value) {
-			result = _.map(result, spec.value);
-			// console.log("result3: "+JSON.stringify(result))
+			result = _.map(result, DATA => _.map(DATA, row => {
+				if (_.startsWith(spec.value, "$`")) {
+					const SCOPE = _.merge({}, data.objects.SCOPE, row);
+					return commandHelper.substituteDeep(spec.value, data, SCOPE, DATA);
+				}
+				else {
+					return row[spec.value];
+				}
+			}));
+			// console.log("result1: "+JSON.stringify(result))
 		}
+
+		result = (spec.groupBy) ? result : _.flatten(result);
+		// console.log("result2: "+JSON.stringify(result))
 
 		if (spec.head) {
 			result = _.head(result);

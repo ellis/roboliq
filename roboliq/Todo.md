@@ -129,6 +129,50 @@ in the middle and at the end, add a cycle wherein we just wait for evaporation, 
 For Var(v;d) for small volumes (0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3ul):
 
 
+NOTE: $E[a;d]$ is NOT PARTICULARLY USEFUL, because $a$ will always be changing as the concentration of the source well changes.
+More useful would be a relative measure, such as $E[a;v,v_i,a_i]$, where $v_i$ and $a_0$ are reference values.
+
+## Calibration curve for absorbance: map %conc to %a
+
+Design an experiment such as:
+10 cycles, 10 wells get dye at exactly one (incrementing) cycle, and 9 wells get dye at exactly 2..10 cycles.
+We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
+In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
+divisions: 10
+roleA*:
+- roleAName: control
+	replicate*: 16
+- roleAName: experiment
+	.type*:
+	- dyeDispenses: 1
+		startCycle*=calculate: divisions
+	- dyeDispenses*=range: {from: 2, till: divisions}
+	  startCycle: 1
+	cycle*: divisions
+
+
+## $Var(a;d,tip)$
+
+* `qc_mario_evaporation5`: 150, 300 (large tips, dry dispense)
+* `qc_mario_pipetting1`: ?
+* `qc_mario_pipetting2`: ?
+* `qc_mario_pipetting5b`: 5, 10, 20, 40, 60, 80, 100, 150 (large tips, wet and air dispense)
+
+Also, but not necessarily the best:
+
+* `qc_mario_pipetting5`: 3, 4, 5, 7, 10, 20, 30, 40 (large and small tips, wet and air dispense); problem is that there's a lot more variation in absorbance due to the different amount of dye attracted by the small vs large tips.
+
+## C.I. $E[a;d,tip]$
+
+
+## $Var(a;v)$
+
+* `qc_mario_pipetting2`: ?
+
+## $E[v;d,tip]$
+
+* `qc_mario_evaporation5`: 150, 300 (large tips, dry dispense)
+* `qc_mario_pipetting3`: ?
 
 ## Manual dye prep
 

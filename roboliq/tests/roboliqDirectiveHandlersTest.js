@@ -48,6 +48,10 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{"#data": {where: {age: 2}, head: true}}, data),
 			{name: "tom", gender: "male", age: 2}
 		);
+		should.deepEqual(misc.handleDirective(
+			{"#data": {value: "$`age*2`", join: ";"}}, data),
+			"2;4;2"
+		);
 	});
 
 	it('should handle #destinationWells', function() {

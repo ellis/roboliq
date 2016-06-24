@@ -90,6 +90,13 @@ function substituteDeep(x, data, SCOPE, DATA) {
 				// console.log({map: _(DATA).map(propertyName).value()});
 			}
 		}
+		// Calculation
+		else if (x.length > 2 && _.startsWith(x, "$`") && _.endsWith(x, "`")) {
+			const expr = x.substr(2, x.length - 3);
+			// console.log({expr})
+			// process.exit()
+			x2 = Design.calculate(expr, SCOPE);
+		}
 		// SCOPE substitution
 		else if (_.startsWith(x, "$")) {
 			const propertyName = x.substr(1);

@@ -996,72 +996,82 @@ function assign_allocatePlates_initGroup(rows, rowIndexes) {
 	this.defaultInitGroup(rows, rowIndexes);
 }
 
+/**
+ * Calculate `expr` using variables in `row`, with optinoal `action` object specifying `units` and/or `decimals`
+ */
+export function calculate(expr, row, action = {}) {
+	const scope = _.mapValues(row, x => {
+		// console.log({x})
+		try {
+			const result = math.eval(x);
+			// If evaluation succeeds, but it was just a unit name, then set value as string instead
+			if (result.type === "Unit" && result.value === null)
+				return x;
+			else {
+				return result;
+			}
+		}
+		catch (e) {}
+		return x;
+	});
+
+	assert(!_.isUndefined(expr), "`expression` property must be specified");
+	// console.log({expr, scope})
+	// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+	let value = math.eval(expr, scope);
+	// console.log({type: value.type, value})
+	if (_.isString(value) || _.isNumber(value)) {
+		return [0, value];
+	}
+
+	// Get units to use in the end, and the unitless value
+	const {units0, units, unitless} = (() => {
+		const result = {
+			units0: undefined,
+			units: action.units,
+			unitless: value
+		};
+		// If the result has units:
+		if (value.type === "Unit") {
+			result.units0 = value.formatUnits();
+			if (_.isUndefined(result.units))
+				result.units = result.units0;
+			const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+			// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
+			if (_.isEmpty(conversionUnits)) {
+				// TODO: find a better way to get the unit-less quantity from `value`
+				// console.log({action})
+				// console.log({result, conversionUnits});
+				result.unitless = math.eval(value.format());
+			}
+			else {
+				result.unitless = value.toNumeric(conversionUnits);
+			}
+		}
+		return result;
+	})();
+	// console.log(`unitless: ${JSON.stringify(unitless)}`)
+
+	// Restrict decimal places
+	const unitlessText = (_.isNumber(action.decimals))
+		? unitless.toFixed(action.decimals)
+		: _.isNumber(unitless) ? unitless : unitless.toNumber();
+
+	// Set units
+	const valueText = (!_.isEmpty(units))
+		? unitlessText + " " + units
+		: unitlessText;
+
+	return valueText;
+}
+
 function assign_calculate_next(expr, action) {
 	return function(nestedRows, rowIndex) {
 		const row0 = nestedRows[rowIndex];
 		const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
 		// Build the scope for evaluating the math expression from the current data row
-		const scope = _.mapValues(row, x => {
-			// console.log({x})
-			try {
-				const result = math.eval(x);
-				// If evaluation succeeds, but it was just a unit name, then set value as string instead
-				if (result.type === "Unit" && result.value === null)
-					return x;
-				else {
-					return result;
-				}
-			}
-			catch (e) {}
-			return x;
-		});
 
-		assert(!_.isUndefined(expr), "`expression` property must be specified");
-		// console.log({expr, scope})
-		// console.log("scope:"+JSON.stringify(scope, null, '\t'))
-		let value = math.eval(expr, scope);
-		// console.log({type: value.type, value})
-		if (_.isString(value) || _.isNumber(value)) {
-			return [0, value];
-		}
-
-		// Get units to use in the end, and the unitless value
-		const {units0, units, unitless} = (() => {
-			const result = {
-				units0: undefined,
-				units: action.units,
-				unitless: value
-			};
-			// If the result has units:
-			if (value.type === "Unit") {
-				result.units0 = value.formatUnits();
-				if (_.isUndefined(result.units))
-					result.units = result.units0;
-				const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
-				// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
-				if (_.isEmpty(conversionUnits)) {
-					// TODO: find a better way to get the unit-less quantity from `value`
-					// console.log({action})
-					// console.log({result, conversionUnits});
-					result.unitless = math.eval(value.format());
-				}
-				else {
-					result.unitless = value.toNumeric(conversionUnits);
-				}
-			}
-			return result;
-		})();
-		// console.log(`unitless: ${JSON.stringify(unitless)}`)
-
-		// Restrict decimal places
-		const unitlessText = (_.isNumber(action.decimals))
-			? unitless.toFixed(action.decimals)
-			: _.isNumber(unitless) ? unitless : unitless.toNumber();
-
-		// Set units
-		const valueText = (!_.isEmpty(units))
-			? unitlessText + " " + units
-			: unitlessText;
+		const valueText = calculate(expr, row, action);
 
 		this.nextIndex++;
 		return [this.nextIndex, valueText];
