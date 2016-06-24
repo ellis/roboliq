@@ -613,16 +613,14 @@ describe('design', () => {
 
 			should.deepEqual(
 				expandConditions({
-					"a=case": {
-						cases: [
-							{
-								conditions: {
-									"b*": 2,
-									"c": 0
-								}
+					"a=case": [
+						{
+							conditions: {
+								"b*": 2,
+								"c": 0
 							}
-						]
-					}
+						}
+					]
 				}),
 				[
 					{a: 1, b: 1, c: 0},

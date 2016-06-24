@@ -36,6 +36,56 @@ objects:
     type: Liquid
     wells: waterLabware(C01 down F01)
 
+  design0:
+    type: Design
+    randomSeed: 12345
+    description: |
+    conditions:
+    - block*: 24
+      blockOrder=range:
+        order: shuffle
+      role=:
+        values: [control, control, control, control, control, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment]
+      syringe*=range: {from: 5, till: 8}
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: id
+    - divisions: 2 #10
+      fullVolume: 150 ul
+      aliquotVolume: 10 ul
+      site: ourlab.mario.site.P3
+      .caseA=case:
+        cases:
+      - roleAName: control
+        replicate*: 20
+        dyeDispenses: 0
+        startCycle: 0
+        type: empty
+        waterVolume0=calculate: 'fullVolume'
+      - roleAName: experiment
+        type*:
+          single:
+            dyeDispenses: 1
+            startCycle*=range: {till: divisions}
+          multiple:
+            dyeDispenses*=range: {from: 2, till: divisions}
+            startCycle: 1
+        waterVolume0=calculate: 'fullVolume - aliquotVolume * divisions'
+        replicate*: 4
+      # id=range:
+      #   order: shuffle
+      # syringe=:
+      #   values: [1,2,3,4]
+      #   order: repeat
+      #   orderBy: id
+      # well=allocateWells:
+      #   rows: 8
+      #   columns: 12
+      #   orderBy: id
+      liquidClass: Roboliq_Water_Wet_0050
+    # orderBy: id
+
   design:
     type: Design
     randomSeed: 12345

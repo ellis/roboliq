@@ -764,9 +764,10 @@ const actionHandlers = {
 			assertNoDuplicates(otherRowIndexes);
 			assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
 		}
-		const caseMap = _.isArray(action.cases)
-			? action.cases.map((v, i) => [i + 1, v])
-			: _.toPairs(action.cases);
+		const cases = _.isArray(action) ? action : action.cases;
+		const caseMap = _.isArray(cases)
+			? cases.map((v, i) => [i + 1, v])
+			: _.toPairs(cases);
 		// Group the rows according to the first case they satisfy
 		const rowIndexesGroups = caseMap.map(x => []);
 		for (let j = 0; j < rowIndexes.length; j++) {
