@@ -1,13 +1,13 @@
 roboliq: v1
 
 description: |
+  This is a variation on `qc_mario_pipetting6` that uses the small tips.
+
   Try to get a calibration curve for absorbance vs volume.
 
   10 cycles, 10 wells get dye at exactly one (incrementing) cycle, and 9 wells get dye at exactly 2..10 cycles.
   We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
   In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
-
-  Execution took 2.5 hours.
 
 config:
   evowareCompiler:
@@ -21,7 +21,7 @@ objects:
     location: ourlab.mario.site.P3
   dyeLabware:
     type: Plate
-    model: ourlab.model.troughModel_100ml
+    model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, dye]
   dye:
@@ -29,7 +29,7 @@ objects:
     wells: dyeLabware(C01 down F01)
   waterLabware:
     type: Plate
-    model: ourlab.model.troughModel_100ml
+    model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R5
     contents: [Infinity l, water]
   water:
@@ -41,13 +41,13 @@ objects:
     randomSeed: 12345
     description: |
     conditions:
-      divisions: 10
+      divisions: 2 #10
       fullVolume: 150 ul
       aliquotVolume: 10 ul
       site: ourlab.mario.site.P3
       roleA*:
       - roleAName: control
-        replicate*: 20
+        replicate*: 1 #20
         dyeDispenses: 0
         startCycle: 0
         type: empty

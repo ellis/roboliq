@@ -132,23 +132,27 @@ For Var(v;d) for small volumes (0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 3ul):
 NOTE: $E[a;d]$ is NOT PARTICULARLY USEFUL, because $a$ will always be changing as the concentration of the source well changes.
 More useful would be a relative measure, such as $E[a;v,v_i,a_i]$, where $v_i$ and $a_0$ are reference values.
 
+Knowing the absolute volume dispensed is nice, but only important to a certain degree.
+Much more important is knowing the relative volumes.
+For example: when we tell the robot to dispense 150ul water and 50ul dye, what is the
+C.I. on the final dye concentration?
+
+## Preparatory
+
+TODO:
+
+* measure empty wells of plate; add 50ul, measure wells, add 50ul, measure wells, etc.
+
 ## Calibration curve for absorbance: map %conc to %a
 
-Design an experiment such as:
-10 cycles, 10 wells get dye at exactly one (incrementing) cycle, and 9 wells get dye at exactly 2..10 cycles.
-We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
-In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
-divisions: 10
-roleA*:
-- roleAName: control
-	replicate*: 16
-- roleAName: experiment
-	.type*:
-	- dyeDispenses: 1
-		startCycle*=calculate: divisions
-	- dyeDispenses*=range: {from: 2, till: divisions}
-	  startCycle: 1
-	cycle*: divisions
+* `qc_mario_pipetting6`: tried dye volumes in 10ul steps, from 0 to 100ul.  But I think there are effects from the tips touching so many times.
+
+TODO:
+
+* try `qc_mario_pipetting6` again, using the small tips.
+* dispense 300ul dye to plate (1/4th of wells are water instead for control) such that we measure absorbance around 3, weigh and measure absorbance; do the same for 150ul, then also add 150ul water and measure absorbance again.
+	maybe repeat the whole process three times, using 6 plates.
+  This gives us three points (0, 150ul, 300ul) which we should be able to
 
 
 ## $Var(a;d,tip)$
@@ -158,21 +162,60 @@ roleA*:
 * `qc_mario_pipetting2`: ?
 * `qc_mario_pipetting5b`: 5, 10, 20, 40, 60, 80, 100, 150 (large tips, wet and air dispense)
 
+TODO:
+
+* something like `qc_mario_pipetting5b`, but for small volumes and small tips
+* something like `qc_mario_pipetting5b`, but for medium volumes and small tips
+
 Also, but not necessarily the best:
 
 * `qc_mario_pipetting5`: 3, 4, 5, 7, 10, 20, 30, 40 (large and small tips, wet and air dispense); problem is that there's a lot more variation in absorbance due to the different amount of dye attracted by the small vs large tips.
 
-## C.I. $E[a;d,tip]$
-
-
 ## $Var(a;v)$
 
-* `qc_mario_pipetting2`: ?
+* `qc_mario_pipetting2`: 150
+
+TODO:
+
+* dispense various volumes of dye (50 - 300ul) to fill a plate; then 8 times: shake and read.
+* dispense fixed dye volume to all wells, read, then keep adding more water (air dispense) and reading again.
 
 ## $E[v;d,tip]$
 
 * `qc_mario_evaporation5`: 150, 300 (large tips, dry dispense)
 * `qc_mario_pipetting3`: ?
+
+## $Var(v;d,tip)$
+
+We assume that the relative standard deviation of the volume is equal to the
+relative standard deviation of absorbance.  This is a conservative estimate,
+because the absorbance reader adds addition variance.  As long as the reader
+variance is reasonably small, this should not be a problem.
+
+If need be, we could use multiple plates, fill them with water from the trough,
+and weigh them, using volume replicates in order to estimate the variance.
+But this will only work for volumes that are sufficiently large to be reliably
+weighed, and due to the manual weighing step and plate requirements, it
+probably shouldn't be done too much.
+
+TODO:
+
+* repeat 3 times: weigh empty plate, fill with dye to 150ul, weigh filled plate, shake, read absorbance.  Calculate Var(v;d=150,tip=large), see whether it jives with Var(a;d=150,tip=large)
+* repeat 3 times: weigh empty plate, fill with dye to 40ul, weigh filled plate, add 110ul water?, shake, read absorbance.  Calculate Var(v;d=40,tip=small), see whether it jives with Var(a;d=150,tip=large)
+
+## C.I. $E[v;d,tip]$
+
+
+## Report
+
+In the end, I want to print out a report that can be displayed near the robot:
+
+* Good range of reader
+* Calibration curve of reader
+* Absorbance variance at various well volumes in the nunc plates
+* Distribution of empty-well absorbances for various volumes of water
+* table of true volume and stddev for various tips, volumes, syringes, and liquidClasses
+* maintainence report using the script for random sites, volumes, tips, and liquid classes
 
 ## Manual dye prep
 
