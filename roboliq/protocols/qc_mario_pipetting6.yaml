@@ -97,19 +97,14 @@ steps:
     variableName: cycle
     steps:
       description: "`Cycle {{$cycle}}`"
-      command: system.echo
-      # value: $`cycle + 1`
-      value:
+      command: pipetter.pipette
+      destinationLabware: plate1
+      items:
         "#data":
-          value: $`startCycle`
-          join: ", "
-      # command: pipetter.pipette
-      # destinationLabware: plate1
-      # items:
-      #   "#data":
-      #     template:
-      #       source: {"#calculate": ''}
-      #``(cycle >= startCycle and cycle < startCycle + dyeDispenses) ? "dye" : "water"'``
+          template:
+            source: $`(cycle >= startCycle and cycle < startCycle + dyeDispenses) ? "dye" : "water"`
+      volumes: $aliquotVolume
+      clean: flush
 
   4:
     description: "Measure absorbance"

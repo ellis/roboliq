@@ -56,7 +56,7 @@ describe('pipetter', function() {
 				{destination: "B02", sources: [{source: 'source1', volume: '10ul'}, {source: 'source2', volume: '20ul'}]},
 			]
 		};
-		it.only("should pipette 2D mixture array to destination wells", function() {
+		it("should pipette 2D mixture array to destination wells", function() {
 			const protocol = protocolA;
 			const result = roboliq.run(["-o", ""], protocol);
 			console.log(JSON.stringify(result.output.steps, null, '\t'))
@@ -70,6 +70,7 @@ describe('pipetter', function() {
 					{source: 'source2', volume: '20ul', destination: 'plate1(B02)'},
 				]
 			});
+			// TODO: need to test for dry dispense with source1 and wet dispense with source2
 		});
 		it("should pipette mixtures to destination wells", function() {
 			const protocol = protocolB;
