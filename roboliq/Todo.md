@@ -195,6 +195,14 @@ weight of plate = sum weight of wells
 weight of well (t) = weight of total dispenses in well - evaporation(dv_i, dt_i)
 wellAbsorbance ~= dyeConcentration(t) * dispenseVolume * absorbanceFactor
 
+## Z-level detection
+
+- [-] `pipetter.measureVolume`: schema
+- [-] `pipetter.measureVolume`: command
+- [-] `pipetter._measureVolume`: instruction
+- [ ] `pipetter._measureVolume`: evoware implementation
+- [ ] `pipetter._measureVolume`: API for saving measurements
+
 
 # Todos for QC shotgun
 
