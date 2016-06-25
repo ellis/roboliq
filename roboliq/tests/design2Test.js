@@ -613,16 +613,14 @@ describe('design', () => {
 
 			should.deepEqual(
 				expandConditions({
-					"a=case": {
-						cases: [
-							{
-								conditions: {
-									"b*": 2,
-									"c": 0
-								}
+					"a=case": [
+						{
+							conditions: {
+								"b*": 2,
+								"c": 0
 							}
-						]
-					}
+						}
+					]
 				}),
 				[
 					{a: 1, b: 1, c: 0},
@@ -761,6 +759,26 @@ describe('design', () => {
 					{a: 2, b: 1, c: 2, d: 1},
 					{a: 2, b: 2, c: 3, d: 2},
 					{a: 2, b: 2, c: 4, d: 2},
+				]
+			);
+		});
+
+		it("should support a list of conditions which will be aggregated", () => {
+			should.deepEqual(
+				expandConditions([
+					{
+						"a*": 2,
+						"b*": 2
+					},
+					{
+						"c*": 4
+					}
+				]),
+				[
+					{a: 1, b: 1, c: 1},
+					{a: 1, b: 2, c: 2},
+					{a: 2, b: 1, c: 3},
+					{a: 2, b: 2, c: 4},
 				]
 			);
 		});

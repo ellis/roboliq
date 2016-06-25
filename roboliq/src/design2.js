@@ -81,7 +81,16 @@ export function flattenDesign(design) {
 		randomEngine.autoSeed();
 	}
 
-	let rows = expandConditions(design.conditions, randomEngine);
+	const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
+	const conditionsRows = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine));
+	let rows;
+	if (conditionsRows.length == 1) {
+		rows = conditionsRows[0];
+	}
+	else {
+		rows = _.merge.apply(_, [[]].concat(conditionsRows));
+	}
+
 	if (design.where) {
 		rows = filterOnWhere(rows, design.where);
 	}
@@ -220,12 +229,23 @@ export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
 }
 
 /**
+ * If conditions is an array, then each element will be processed individually and then the results will be merged together.
+ * @param {object|array} conditions - an object of conditions or an array of such objects.
  */
 export function expandConditions(conditions, randomEngine) {
 	// console.log("expandConditions: "+JSON.stringify(conditions))
-	const table = [{}];
-	expandRowsByObject(table, [0], [], conditions, randomEngine);
-	flattenArrayM(table);
+
+	const conditionsList = _.isArray(conditions) ? conditions : [conditions];
+	const conditionsRows = conditionsList.map(conditions => {
+		const table = [{}];
+		expandRowsByObject(table, [0], [], conditions, randomEngine);
+		flattenArrayM(table);
+		return table;
+	});
+
+	let table = (conditionsRows.length == 1)
+		? conditionsRows[0]
+		: _.merge.apply(_, [[]].concat(conditionsRows));
 	return table;
 }
 
@@ -744,9 +764,10 @@ const actionHandlers = {
 			assertNoDuplicates(otherRowIndexes);
 			assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
 		}
-		const caseMap = _.isArray(action.cases)
-			? action.cases.map((v, i) => [i + 1, v])
-			: _.toPairs(action.cases);
+		const cases = _.isArray(action) ? action : action.cases;
+		const caseMap = _.isArray(cases)
+			? cases.map((v, i) => [i + 1, v])
+			: _.toPairs(cases);
 		// Group the rows according to the first case they satisfy
 		const rowIndexesGroups = caseMap.map(x => []);
 		for (let j = 0; j < rowIndexes.length; j++) {

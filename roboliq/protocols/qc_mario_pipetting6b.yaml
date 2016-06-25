@@ -1,13 +1,13 @@
 roboliq: v1
 
 description: |
+  This is a variation on `qc_mario_pipetting6` that uses the small tips.
+
   Try to get a calibration curve for absorbance vs volume.
 
   10 cycles, 10 wells get dye at exactly one (incrementing) cycle, and 9 wells get dye at exactly 2..10 cycles.
   We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
   In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
-
-  Execution took 2.5 hours.
 
 config:
   evowareCompiler:
@@ -21,7 +21,7 @@ objects:
     location: ourlab.mario.site.P3
   dyeLabware:
     type: Plate
-    model: ourlab.model.troughModel_100ml
+    model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, dye]
   dye:
@@ -29,25 +29,75 @@ objects:
     wells: dyeLabware(C01 down F01)
   waterLabware:
     type: Plate
-    model: ourlab.model.troughModel_100ml
+    model: ourlab.model.troughModel_25ml
     location: ourlab.mario.site.R5
     contents: [Infinity l, water]
   water:
     type: Liquid
     wells: waterLabware(C01 down F01)
 
+  design0:
+    type: Design
+    randomSeed: 12345
+    description: |
+    conditions:
+    - block*: 24
+      blockOrder=range:
+        order: shuffle
+      role=:
+        values: [control, control, control, control, control, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment, experiment]
+      syringe*=range: {from: 5, till: 8}
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: id
+    - divisions: 2 #10
+      fullVolume: 150 ul
+      aliquotVolume: 10 ul
+      site: ourlab.mario.site.P3
+      .caseA=case:
+        cases:
+      - roleAName: control
+        replicate*: 20
+        dyeDispenses: 0
+        startCycle: 0
+        type: empty
+        waterVolume0=calculate: 'fullVolume'
+      - roleAName: experiment
+        type*:
+          single:
+            dyeDispenses: 1
+            startCycle*=range: {till: divisions}
+          multiple:
+            dyeDispenses*=range: {from: 2, till: divisions}
+            startCycle: 1
+        waterVolume0=calculate: 'fullVolume - aliquotVolume * divisions'
+        replicate*: 4
+      # id=range:
+      #   order: shuffle
+      # syringe=:
+      #   values: [1,2,3,4]
+      #   order: repeat
+      #   orderBy: id
+      # well=allocateWells:
+      #   rows: 8
+      #   columns: 12
+      #   orderBy: id
+      liquidClass: Roboliq_Water_Wet_0050
+    # orderBy: id
+
   design:
     type: Design
     randomSeed: 12345
     description: |
     conditions:
-      divisions: 10
+      divisions: 2 #10
       fullVolume: 150 ul
       aliquotVolume: 10 ul
       site: ourlab.mario.site.P3
       roleA*:
       - roleAName: control
-        replicate*: 20
+        replicate*: 1 #20
         dyeDispenses: 0
         startCycle: 0
         type: empty
@@ -72,6 +122,7 @@ objects:
         rows: 8
         columns: 12
         orderBy: id
+      liquidClass: Roboliq_Water_Wet_0050
     orderBy: id
 
 steps:
