@@ -1,7 +1,10 @@
 roboliq: v1
 
 description: |
-  TODO: should use air dispense to increase speed; probably don't need to shake for a whole minute.
+  FIXME: messed up well arrangement -- all dye wells are on the left; 'finalVolume' should be renamed to 'fullVolume'; name clash with 'replicate' in design and in userValues for measurement loop
+
+  Experiment to estimate absorbance variance at various well volumes in the nunc
+  plates.  Gives us $Var(a;v)$.
 
   Steps:
 

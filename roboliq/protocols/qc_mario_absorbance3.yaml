@@ -1,0 +1,197 @@
+roboliq: v1
+
+description: |
+  FIXME: messed up well arrangement -- all dye wells are on the left; 'finalVolume' should be renamed to 'fullVolume'; name clash with 'replicate' in design and in userValues for measurement loop
+
+  Experiment to find how linear the good range of the absorbance reader is.
+  The question can be formulated as, if we halve the dye volume, does the absorbance also halve (approximately)?
+
+  Steps:
+
+  * weigh empty plates
+  * read empty plates
+  * dispense 150ul dye in plate1
+  * weigh, shake, read
+  * dispense 75 ul dye in plate2
+  * weigh, shake, read
+  * air dispense 75ul water in plate2
+  * shake, read
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P7
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P8
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+  design:
+    type: Design
+    conditions:
+      plate*:
+        plate1:
+          layer*:
+          - dyeVolume: 0 ul
+            waterVolume: 0 ul
+          - dyeVolume: 150 ul
+            waterVolume: 0 ul
+        plate2:
+          layer*:
+          - dyeVolume: 0 ul
+            waterVolume: 0 ul
+          - dyeVolume: 75 ul
+            waterVolume: 0 ul
+          - dyeVolume: 75 ul
+            waterVolume: 75 ul
+      totalVolume=calculate: 'dyeVolume + waterVolume'
+      id=range:
+        orderBy: [layer, plate]
+    orderBy: [layer, plate]
+
+steps:
+  data:
+    source: design
+  1:
+    description: "Weigh empty plates"
+    data: {where: 'layer == 1'}
+    command: experiment.forEachRow
+    steps:
+      description: "`Weight {{$plate}}`"
+      command: scale.weigh
+      object: $plate
+      outputDataset: "weight"
+  2:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: [1,2,3,4]
+  3:
+    description: "Measure absorbance of empty plates"
+    data: {where: 'layer == 1'}
+    command: experiment.forEachRow
+    steps:
+      command: absorbanceReader.measurePlate
+      object: $plate
+      program:
+        excitationWavelength: 480nm
+      outputDataset: "absorbance"
+  4:
+    description: "Handle plate1, layer 2"
+    data: {where: 'plate == "plate1" and layer == 2'}
+    command: transporter.doThenRestoreLocation
+    objects: [plate1]
+    steps:
+      0:
+        command: system.echo
+        value: SCOPE
+      1:
+        command: transporter.movePlate
+        object: $plate
+        destination: ourlab.mario.site.P3
+      2:
+        description: "Distribute dye"
+        command: pipetter.pipette
+        sources: dye
+        destinations: "`{{$plate}}(all)`"
+        volumes: $dyeVolume
+        clean: flush
+        cleanEnd: thorough
+      3:
+        description: "`Weight {{$plate}}`"
+        command: scale.weigh
+        object: $plate
+        outputDataset: "weight"
+      4:
+        description: "Shake plate1"
+        command: shaker.shakePlate
+        object: $plate
+        program:
+          duration: 1 minute
+      5:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: $plate
+        program:
+          excitationWavelength: 480nm
+        outputDataset: "absorbance"
+  5:
+    description: "Handle plate2"
+    data: {where: 'plate == "plate2"'}
+    command: transporter.doThenRestoreLocation
+    objects: [plate2]
+    steps:
+      1:
+        command: transporter.movePlate
+        object: $plate
+        destination: ourlab.mario.site.P3
+      2:
+        description: "Handle layer 2"
+        data: {where: 'layer == 2'}
+        1:
+          description: "Distribute dye"
+          command: pipetter.pipette
+          sources: dye
+          destinations: "`{{$plate}}(all)`"
+          volumes: $dyeVolume
+          clean: flush
+        2:
+          description: "`Weight {{$plate}}`"
+          command: scale.weigh
+          object: $plate
+          outputDataset: "weight"
+        3:
+          description: "Shake plate"
+          command: shaker.shakePlate
+          object: $plate
+          program:
+            duration: 1 minute
+        4:
+          description: "Measure absorbance"
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: 480nm
+          outputDataset: "absorbance"
+      3:
+        description: "Handle layer 3"
+        data: {where: 'layer == 3'}
+        1:
+          description: "Distribute water"
+          command: pipetter.pipette
+          program: Roboliq_Water_Air_1000
+          sources: ourlab.mario.systemLiquid
+          destinations: "`{{$plate}}(all)`"
+          volumes: $waterVolume
+          clean: none
+          cleanEnd: thorough
+        2:
+          description: "Shake plate"
+          command: shaker.shakePlate
+          object: $plate
+          program:
+            duration: 1 minute
+        3:
+          description: "Measure absorbance"
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: 480nm
+          outputDataset: "absorbance"
