@@ -1,6 +1,8 @@
 roboliq: v1
 
 description: |
+  TODO: should use air dispense to increase speed; probably don't need to shake for a whole minute.
+
   Find absorbance of wells without dye.
   Start with empty wells, and cycle 6 times, each time adding 50ul to all wells and measuring absorbance.
 
@@ -60,7 +62,6 @@ steps:
             object: plate1
             program:
               excitationWavelength: 480nm
-              userValues: {stage: "empty"}
             outputDataset: "absorbance"
           3:
             description: "Loop for adding water"
@@ -80,7 +81,7 @@ steps:
                 command: shaker.shakePlate
                 object: $plate
                 program:
-                  duration: 2 minute
+                  duration: 1 minute
               3:
                 description: "Measure absorbance"
                 command: absorbanceReader.measurePlate

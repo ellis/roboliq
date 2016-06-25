@@ -1,0 +1,139 @@
+roboliq: v1
+
+description: |
+  TODO: should use air dispense to increase speed; probably don't need to shake for a whole minute.
+
+  Steps:
+
+  * Read empty plate
+  * To half the wells, distribute 50ul of dye to obtain a medium absorbance level; the other half gets water
+  * Shake and read
+  * Distribute various volumes of water (50 - 250ul in 50ul steps)
+  * Then 6 times: shake and read
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+  design:
+    type: Design
+    conditions:
+      plate: plate1
+      aliquotVolume: 50 ul
+      aliquotSource*: [dye, water]
+      diluentVolume*: [0 ul, 50 ul, 100 ul, 150 ul, 200 ul, 250 ul]
+      finalVolume=calculate: 'aliquotVolume + diluentVolume'
+      replicate*: 8
+      syringe=:
+        values: [1,2,3,4]
+        groupBy: [aliquotSource, diluentVolume]
+        order: repeat
+      block=range:
+        groupBy: syringe
+      blockOrder=range:
+        sameBy: block
+        order: shuffle
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: [block, syringe]
+      # stage*:
+      #   empty:
+      #   aliquot:
+      #   full:
+      #     replicate*: 6
+      id=range:
+        orderBy: [blockOrder]
+    orderBy: [blockOrder]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: [1,2,3,4]
+  2:
+    description: "Measure absorbance of empty plate"
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {stage: "empty"}
+    outputDataset: "absorbance"
+  3:
+    description: "Distribute initial aliquots"
+    command: pipetter.pipette
+    sources: $$aliquotSource
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$aliquotVolume
+    syringes: $$syringe
+    clean: flush
+  4:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: $plate
+    program:
+      duration: 1 minute
+  5:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {stage: "aliquot"}
+    outputDataset: "absorbance"
+  6:
+    description: "Fill plates with various volumes of water"
+    command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
+    sources: water
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$aliquotVolume
+    syringes: $$syringe
+    clean: flush
+  7:
+    description: "Shake and read 6 times"
+    command: system.repeat
+    count: 6
+    variableName: i
+    steps:
+      description: "`Replicate {{$i}}`"
+      1:
+        description: "Shake plate1"
+        command: shaker.shakePlate
+        object: $plate
+        program:
+          duration: 1 minute
+      2:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: $plate
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+          userValues: {stage: "full", replicate: $i}
+        outputDataset: "absorbance"
