@@ -77,6 +77,9 @@ function directive_data(spec, data) {
 			result = _.head(result);
 			// console.log("result4: "+JSON.stringify(result))
 		}
+		else if (spec.unique) {
+			result = _.uniq(result);
+		}
 		if (spec.join) {
 			result = result.join(spec.join);
 			// console.log("result5: "+JSON.stringify(result))

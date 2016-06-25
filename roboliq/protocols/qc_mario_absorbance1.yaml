@@ -1,0 +1,91 @@
+roboliq: v1
+
+description: |
+  TODO: should use air dispense to increase speed; probably don't need to shake for a whole minute.
+
+  Find absorbance of wells without dye.
+  Start with empty wells, and cycle 6 times, each time adding 50ul to all wells and measuring absorbance.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_A1
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_B1
+  plate3:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_C1
+
+  design:
+    type: Design
+    conditions:
+      plate*: [plate1, plate2, plate3]
+      step*=range: {from: 0, till: 6}
+      aliquotVolume: 50 ul
+      waterVolume=calculate: 'step * aliquotVolume'
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: [1,2,3,4]
+  2:
+    description: "Loop over plates"
+    command: experiment.forEachGroup
+    groupBy: plate
+    steps:
+      description: "`Plate {{$plate}}`"
+      1:
+        command: transporter.doThenRestoreLocation
+        objects: [$plate]
+        steps:
+          1:
+            command: transporter.movePlate
+            object: $plate
+            destination: ourlab.mario.site.P3
+          2:
+            description: "Measure absorbance of empty plate"
+            data: {where: 'step == 0'}
+            command: absorbanceReader.measurePlate
+            object: plate1
+            program:
+              excitationWavelength: 480nm
+            outputDataset: "absorbance"
+          3:
+            description: "Loop for adding water"
+            data: {where: 'step > 0'}
+            command: experiment.forEachRow
+            steps:
+              description: "`Step {{$step}}`"
+              1:
+                command: pipetter.pipette
+                sources: ourlab.mario.systemLiquid
+                destinations: "`{{$plate}}(all)`"
+                volumes: $aliquotVolume
+                clean: none
+                cleanEnd: flush
+              2:
+                description: "Shake plate1"
+                command: shaker.shakePlate
+                object: $plate
+                program:
+                  duration: 1 minute
+              3:
+                description: "Measure absorbance"
+                command: absorbanceReader.measurePlate
+                object: $plate
+                program:
+                  excitationWavelength: 480nm
+                outputDataset: "absorbance"

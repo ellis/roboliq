@@ -137,11 +137,21 @@ Much more important is knowing the relative volumes.
 For example: when we tell the robot to dispense 150ul water and 50ul dye, what is the
 C.I. on the final dye concentration?
 
-## Preparatory
+## Distribution of empty-well absorbances for various volumes of water
 
-TODO:
+Gives us $P(a;dye=0,~v)$.
 
-* measure empty wells of plate; add 50ul, measure wells, add 50ul, measure wells, etc.
+* [.] `qc_mario_absorbance1`: 0, 50, 100, 150, 200, 250, 300 (just water, 3 plates)
+
+	Start with empty wells, and cycle 6 times, each time adding 50ul to all wells and measuring absorbance.
+
+## Absorbance variance at various well volumes in the nunc plates
+
+Gives us $Var(a;~v)$
+
+* [.] `qc_mario_absorbance2`: 50, 100, 150, 200, 250, 300
+
+	Distribute various volumes of water, distribute aliquot of dye to obtain a medium absorbance level, then 6 times: shake and measure absorbance
 
 ## Calibration curve for absorbance: map %conc to %a
 
@@ -149,11 +159,32 @@ TODO:
 
 TODO:
 
-* try `qc_mario_pipetting6` again, using the small tips.
-* dispense 300ul dye to plate (1/4th of wells are water instead for control) such that we measure absorbance around 3, weigh and measure absorbance; do the same for 150ul, then also add 150ul water and measure absorbance again.
+* [x] try `qc_mario_pipetting6` again, using the small tips.
+* [ ] dispense 300ul dye to plate (1/4th of wells are water instead for control) such that we measure absorbance around 3, weigh and measure absorbance; do the same for 150ul, then also add 150ul water and measure absorbance again.
 	maybe repeat the whole process three times, using 6 plates.
   This gives us three points (0, 150ul, 300ul) which we should be able to
 
+* [ ] read empty plates, dispense 150ul dye/water in plate1, weigh, shake, read; dispense 75 ul dye/water in plate2, weigh, shake, read, air dispense 75ul water in plate2, shake, read
+
+CONSIDER make a `system.branch` command that can be used for performing different actions depending on the label in an action column.
+```yaml
+command: system.branch
+test: $action
+branches:
+  weight:
+    ...
+  dispenseDye:
+    ...
+```
+
+BUG: in `qc_mario_absorbance3`, can't use `$plate`, need to write `plate2` for it to compile:
+
+```
+	description: "Handle plate2"
+	data: {where: 'plate == "plate2"'}
+	command: transporter.doThenRestoreLocation
+	objects: [$plate]
+```
 
 ## $Var(a;d,tip)$
 
@@ -210,12 +241,13 @@ TODO:
 
 In the end, I want to print out a report that can be displayed near the robot:
 
-* Good range of reader
-* Calibration curve of reader
-* Absorbance variance at various well volumes in the nunc plates
-* Distribution of empty-well absorbances for various volumes of water
-* table of true volume and stddev for various tips, volumes, syringes, and liquidClasses
-* maintainence report using the script for random sites, volumes, tips, and liquid classes
+* [ ] Calibration curve of reader and its "good" range
+* [ ] Distribution of empty-well absorbances for various volumes of water (`qc_mario_absorbance1`)
+* [ ] Absorbance shift and variance at various well volumes in the nunc plates (`qc_mario_absorbance2`)
+* [ ] table of true volume and stddev for various tips, volumes, syringes, and liquidClasses
+* [ ] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes
+* [ ] Evaporation maps (detailed on one site, overall rates on other sites)
+* [ ] z-level detection calibration
 
 ## Manual dye prep
 
