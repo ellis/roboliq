@@ -1041,7 +1041,7 @@ export function calculate(expr, row, action = {}) {
 	// console.log("scope:"+JSON.stringify(scope, null, '\t'))
 	let value = math.eval(expr, scope);
 	// console.log({type: value.type, value})
-	if (_.isString(value) || _.isNumber(value)) {
+	if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
 		return value;
 	}
 

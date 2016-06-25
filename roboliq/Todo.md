@@ -141,7 +141,7 @@ C.I. on the final dye concentration?
 
 TODO:
 
-* measure empty wells of plate; add 50ul, measure wells, add 50ul, measure wells, etc.
+* [.] measure empty wells of plate; add 50ul, measure wells, add 50ul, measure wells, etc.
 
 ## Calibration curve for absorbance: map %conc to %a
 
@@ -149,7 +149,7 @@ TODO:
 
 TODO:
 
-* try `qc_mario_pipetting6` again, using the small tips.
+* [x] try `qc_mario_pipetting6` again, using the small tips.
 * dispense 300ul dye to plate (1/4th of wells are water instead for control) such that we measure absorbance around 3, weigh and measure absorbance; do the same for 150ul, then also add 150ul water and measure absorbance again.
 	maybe repeat the whole process three times, using 6 plates.
   This gives us three points (0, 150ul, 300ul) which we should be able to
