@@ -1,0 +1,154 @@
+roboliq: v1
+
+description: |
+  This is a variation on `qc_mario_pipetting6` that uses the small tips.
+
+  Try to get a calibration curve for absorbance vs volume.
+
+  10 cycles, 10 wells get dye at exactly one (incrementing) cycle, and 9 wells get dye at exactly 2..10 cycles.
+  We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
+  In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
+
+  Execution time: ?
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    wells: dyeLabware(C01 down F01)
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 12345
+    description: |
+    conditions:
+    - divisions: 10
+      fullVolume: 150 ul
+      aliquotVolume: 10 ul
+      site: ourlab.mario.site.P3
+      .blockPos*: 24
+      block=range:
+        order: shuffle
+      blockOrder=range:
+        order: shuffle
+      role=:
+        values: [empty, empty, empty, empty, empty, single, single, single, single, single, single, single, single, single, single, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple]
+      .caseA=case:
+      - where: 'role == "empty"'
+        conditions:
+          dyeDispenses: 0
+          startCycle: 0
+          waterVolume0=calculate: 'fullVolume'
+      - where: 'role == "single"'
+        conditions:
+          dyeDispenses: 1
+          startCycle=range: {till: divisions}
+          waterVolume0=calculate: 'fullVolume - aliquotVolume * divisions'
+      - conditions:
+          dyeDispenses=range: {from: 2, till: divisions}
+          startCycle: 1
+          waterVolume0=calculate: 'fullVolume - aliquotVolume * divisions'
+      syringe*=range: {from: 5, till: 8}
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: block
+      liquidClass: Roboliq_Water_Wet_0050
+      id=range:
+        orderBy: [blockOrder]
+    orderBy: [id]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes:
+      "#data":
+        value: syringe
+        unique: true
+  2:
+    description: "Preparation"
+    1:
+      description: "Measure absorbance of empty plate"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+        userValues: {stage: "empty"}
+      outputDataset: "absorbance"
+    2:
+      description: "Distribute water to wells"
+      command: pipetter.pipette
+      sources: ourlab.mario.systemLiquid
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: $$waterVolume0
+      clean: none
+      cleanEnd: light
+    5:
+      description: "Measure absorbance of plate with only water it in"
+      command: absorbanceReader.measurePlate
+      object: plate1
+      program:
+        excitationWavelength: 480nm
+        wellDesignFactor: well
+        userValues: {stage: "water"}
+      outputDataset: "absorbance"
+  3:
+    description: "Process cycles: dispense dye or water aliquots to each well"
+    data: {where: 'role != "empty"'}
+    command: system.repeat
+    count: $divisions
+    variableName: cycle
+    steps:
+      1:
+        description: "`Cycle {{$cycle}}`"
+        command: pipetter.pipette
+        sources:
+          "#data":
+            value: $`(cycle >= startCycle and cycle < startCycle + dyeDispenses) ? "dye" : "water"`
+        destinationLabware: plate1
+        destinations: $$well
+        volumes: $aliquotVolume
+        syringes: $$syringe
+        clean: flush
+  4:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 2 minute
+  5:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: plate1
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {stage: "end"}
+    outputDataset: "absorbance"

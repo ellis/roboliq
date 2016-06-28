@@ -4,7 +4,7 @@ description: |
   TODO: should use air dispense to increase speed; probably don't need to shake for a whole minute.
 
   Find absorbance of wells without dye.
-  Start with empty wells, and cycle 6 times, each time adding 50ul to all wells and measuring absorbance.
+  Start with empty wells, and cycle 6 times, each time adding 50ul of water to all wells and measuring absorbance.
 
 config:
   evowareCompiler:

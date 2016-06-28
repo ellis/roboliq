@@ -1,8 +1,8 @@
 roboliq: v1
 
 description: |
-  Experiment to find how linear the good range of the absorbance reader is.
-  The question can be formulated as, if we halve the dye volume, does the absorbance also halve (approximately)?
+  Experiment to find the relationship between volume dispensed and amount of dye dispensed,
+  comparing dispense instructions for 150ul and 75ul.
 
   Steps:
 

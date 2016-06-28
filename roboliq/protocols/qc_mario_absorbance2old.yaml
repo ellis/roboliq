@@ -1,6 +1,8 @@
 roboliq: v1
 
 description: |
+  FIXME: messed up well arrangement -- all dye wells are on the left; 'finalVolume' should be renamed to 'fullVolume'; name clash with 'replicate' in design and in userValues for measurement loop
+
   Experiment to estimate absorbance variance at various well volumes in the nunc
   plates.  Gives us $Var(a;v)$.
 
@@ -12,7 +14,6 @@ description: |
   * Distribute various volumes of water (0 - 250ul in 50ul steps)
   * Then 6 times: shake and read
 
-  Execution time: 40min
 config:
   evowareCompiler:
     timing: false
@@ -42,17 +43,14 @@ objects:
       aliquotVolume: 50 ul
       aliquotSource*: [dye, water]
       diluentVolume*: [0 ul, 50 ul, 100 ul, 150 ul, 200 ul, 250 ul]
-      fullVolume=calculate: 'aliquotVolume + diluentVolume'
-      .replicate*: 8
+      finalVolume=calculate: 'aliquotVolume + diluentVolume'
+      replicate*: 8
       syringe=:
         values: [1,2,3,4]
         groupBy: [aliquotSource, diluentVolume]
         order: repeat
-      block0=range:
-        groupBy: syringe
       block=range:
-        sameBy: block0
-        order: shuffle
+        groupBy: syringe
       blockOrder=range:
         sameBy: block
         order: shuffle
@@ -60,9 +58,14 @@ objects:
         rows: 8
         columns: 12
         orderBy: [block, syringe]
+      # stage*:
+      #   empty:
+      #   aliquot:
+      #   full:
+      #     replicate*: 6
       id=range:
         orderBy: [blockOrder]
-    # orderBy: [blockOrder]
+    orderBy: [blockOrder]
 
 steps:
   data:
@@ -107,16 +110,14 @@ steps:
     outputDataset: "absorbance"
   6:
     description: "Fill plates with various volumes of water"
-    data: {orderBy: [block, syringe]}
     command: pipetter.pipette
     program: Roboliq_Water_Air_1000
     sources: water
     destinationLabware: $plate
     destinations: $$well
-    volumes: $$diluentVolume
+    volumes: $$aliquotVolume
     syringes: $$syringe
-    clean: none
-    cleanEnd: flush
+    clean: flush
   7:
     description: "Shake and read 6 times"
     command: system.repeat
