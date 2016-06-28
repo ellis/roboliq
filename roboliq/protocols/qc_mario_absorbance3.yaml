@@ -1,8 +1,6 @@
 roboliq: v1
 
 description: |
-  FIXME: messed up well arrangement -- all dye wells are on the left; 'finalVolume' should be renamed to 'fullVolume'; name clash with 'replicate' in design and in userValues for measurement loop
-
   Experiment to find how linear the good range of the absorbance reader is.
   The question can be formulated as, if we halve the dye volume, does the absorbance also halve (approximately)?
 

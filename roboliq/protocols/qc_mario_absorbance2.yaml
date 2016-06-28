@@ -11,7 +11,7 @@ description: |
   * Read empty plate
   * To half the wells, distribute 50ul of dye to obtain a medium absorbance level; the other half gets water
   * Shake and read
-  * Distribute various volumes of water (50 - 250ul in 50ul steps)
+  * Distribute various volumes of water (0 - 250ul in 50ul steps)
   * Then 6 times: shake and read
 
 config:
