@@ -1354,7 +1354,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should handle previous bug #2", () => {
+		it("should handle previous bug #2", () => {
 			const design = {
 				conditions: {
 					n: 2,
@@ -1363,7 +1363,7 @@ describe('design', () => {
 				}
 			};
 			const table = flattenDesign(design);
-			console.log(JSON.stringify(table))
+			// console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
 				{n: 2, i: 1, j: 1},

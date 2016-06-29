@@ -854,6 +854,7 @@ function handleAssignmentWithQueries(rows, rowIndexes0, otherRowIndexes, name, a
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`)
 		console.log(` rowIndexes: ${JSON.stringify(rowIndexes0)}\n ${JSON.stringify(rows)}`)
 		assertNoDuplicates(otherRowIndexes);
+		assertNoDuplicates(otherRowIndexes.concat([rowIndexes0]));
 	}
 	const isSpecial = value0 instanceof Special;
 	const hasGroupOrSame = action.groupBy || action.sameBy;
@@ -868,7 +869,7 @@ function handleAssignmentWithQueries(rows, rowIndexes0, otherRowIndexes, name, a
 
 	const rowIndexesGroups = (action.groupBy)
 		? query_groupBy(rows, rowIndexes0, action.groupBy)
-		: [rowIndexes0];
+		: [_.clone(rowIndexes0)];
 
 	// console.log({rowIndexesGroups})
 	for (let i = 0; i < rowIndexesGroups.length; i++) {
@@ -917,20 +918,24 @@ function handleAssignmentWithQueries(rows, rowIndexes0, otherRowIndexes, name, a
 			}
 		}
 
-		const rowIndexes2 = _.clone(rowIndexes);
+		// const rowIndexes2 = _.clone(rowIndexes);
 
-		const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
+		// console.log({rowIndexes, rowIndexesGroups})
+		const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes0]).concat(rowIndexesGroups);
+		if (DEBUG) {
+			assertNoDuplicates(otherRowIndexes2);
+		}
 		// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
 		if (action.sameBy) {
-			assignSameBy(rows, rowIndexes2, otherRowIndexes2, name, action, randomEngine, value);
+			assignSameBy(rows, rowIndexes, otherRowIndexes2, name, action, randomEngine, value);
 		}
 		else {
 			if (isSpecial) {
 				// console.log({rows, rowIndexes2})
-				value.initGroup(rows, rowIndexes2);
+				value.initGroup(rows, rowIndexes);
 			}
 			// console.log({rows, rowIndexes2, otherRowIndexes2, name, value})
-			expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
+			expandRowsByNamedValue(rows, rowIndexes, otherRowIndexes2, name, value, randomEngine);
 		}
 	}
 
@@ -941,6 +946,8 @@ function assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEng
 	if (DEBUG) {
 		console.log(`assignSameBy: ${JSON.stringify({name, action, value})}`);
 		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+		// assertNoDuplicates(otherRowIndexes);
+		assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
 	}
 	const isArray = _.isArray(value);
 	const isObject = _.isPlainObject(value);
