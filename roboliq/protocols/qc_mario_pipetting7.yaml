@@ -93,6 +93,10 @@ objects:
   design:
     type: Design
     randomSeed: 1234
+    description: |
+      * `g1`: dummy, groups by tipModel+liquidClass (and = 0 for control wells)
+      * `g2`: dummy, within g1, groups the range of syringes together so that they can be used simultaneously
+      * `blk`: dummy, enumerates contiguous blocks on a plate for simultaneous pipetting -- e.g. blk 1 = A01 down D01, blk 2 = E01 down H01
     conditions:
       site: ourlab.mario.site.P3
       fullVolume: 150 ul
@@ -103,8 +107,8 @@ objects:
           tipModel: large
           liquidClass: Roboliq_Water_Air_1000
           dispensePos: air
-          group1: 0
-          group2*: 3
+          g1: 0
+          g2*: 3
           syringe*: [1,2,3,4]
         experiment:
           .combination*:
@@ -131,37 +135,38 @@ objects:
                   first: dye
               dyeVolume1*: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 2 ul, 3 ul, 5 ul, 20 ul, 40 ul]
               syringe*: [5,6,7,8]
-          group1=range:
+          g1=range:
             sameBy: [tipModel, liquidClass]
-          group2=range:
-            groupBy: [group1, syringe]
-      groupSeq=range:
-        sameBy: [group1, group2]
+          g2=range:
+            groupBy: [g1, syringe]
+      blk=range:
+        sameBy: [g1, g2]
         order: shuffle
       waterVolume1=calculate: 'fullVolume - dyeVolume1'
       # wellNum=range: {}
       plate=allocatePlates:
-        groupBy: groupSeq
+        groupBy: blk
         wellsPerPlate: 96
         plates: [plate1, plate2, plate3, plate4]
       groupOrder=range:
         order: shuffle
         groupBy: plate
-        sameBy: groupSeq
+        sameBy: blk
       well=allocateWells:
         rows: 8
         columns: 12
         groupBy: plate
-        orderBy: groupOrder
+        orderBy: blk
       dyeSource=calculate: '(dyeVolume1 >= 40 ul) ? "dyeLight" : (dyeVolume1 >= 2 ul) ? "dyeMedium" : "dyeDark"'
-      # layer*:
-      #   - dyeVolume=calculate: '(first == "dye") ? dyeVolume1 : 0 ul'
-      #     waterVolume=calculate: '(role == "control" or first == "water") ? waterVolume1 : 0 ul'
-      #   - dyeVolume=calculate: 'dyeVolume1'
-      #     waterVolume=calculate: 'waterVolume1'
-      # wellVolume=calculate: 'dyeVolume + waterVolume'
-      id=range: {}
-    # orderBy: [plate, groupOrder]
+      layer*:
+        - dyeVolume=calculate: '(first == "dye") ? dyeVolume1 : 0 ul'
+          waterVolume=calculate: '(role == "control" or first == "water") ? waterVolume1 : 0 ul'
+        - dyeVolume=calculate: 'dyeVolume1'
+          waterVolume=calculate: 'waterVolume1'
+      wellVolume=calculate: 'dyeVolume + waterVolume'
+      id=range:
+        orderBy: [plate, layer, groupOrder]
+    orderBy: [plate, layer, groupOrder]
 
 steps:
   data:
