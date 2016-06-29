@@ -250,11 +250,14 @@ In the end, I want to print out a report that can be displayed near the robot:
 * [ ] table of true volume and stddev for various tips, volumes, syringes, and liquidClasses
 	* large tips, dry dispense (5, 10, 20, 40, 80, 100, 150, 300)
 		* `qc_mario_absorbance3`: 75, 150
-		* `qc_mario_evaporation5`: 150, 300
+		* `qc_mario_evaporation5`: 150
+		* `qc_mario_evaporation5b`: 300
 	* large tips, wet dispense (5, 10, 20, 40, 80, 100, 150, 300)
 	* large tips, air dispense (5, 10, 20, 40, 80, 100, 150, 300)
 * [.] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes
 * [.] Evaporation maps (detailed on one site, overall rates on other sites)
+	* `qc_mario_evaporation5`: 150
+	* `qc_mario_evaporation5b`: 300
 * [ ] z-level detection calibration
 
 Todo:
@@ -265,8 +268,8 @@ Todo:
 
 Still need to analyze:
 
-* [ ] evaporation 5, 5b, and 6
-* [ ] qc_mario_pipetting6
+* [ ] evaporation 5b, and 6
+* [ ] qc_mario_pipetting*
 
 ## Manual dye prep
 
