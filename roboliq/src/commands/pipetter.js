@@ -79,7 +79,7 @@ function pipette(params, parsed, data, options={}) {
 	const llpl = require('../HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
-	console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
+	// console.log("pipette: "+JSON.stringify(parsed, null, '\t'))
 
 	// let items = (_.isUndefined(parsed.value.items))
 	// 	? []

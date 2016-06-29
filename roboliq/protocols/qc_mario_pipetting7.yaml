@@ -194,11 +194,11 @@ steps:
             description: "Distribute water to wells that require water first"
             data: {where: 'first == "water"'}
             command: pipetter.pipette
+            program: Roboliq_Water_Dry_1000
             sources: water
             destinationLabware: $plate
             destinations: $$well
             volumes: $$waterVolume
-            syringes: $$syringe
             clean: none
             cleanEnd: thorough
           2:
@@ -210,6 +210,53 @@ steps:
             destinations: $$well
             volumes: $$dyeVolume
             syringes: $$syringe
+            items:
+              "#data":
+                template:
+                  program: $liquidClass
+            clean: flush
+            cleanEnd: thorough
+          3:
+            description: "Shake plate1"
+            command: shaker.shakePlate
+            object: $plate
+            program:
+              duration: 1 minute
+          4:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wellDesignFactor: well
+            outputDataset: "absorbance"
+        3:
+          description: "Handle second layer"
+          data: {where: 'layer == 2'}
+          1:
+            description: "Distribute water to wells that require water second"
+            data: {where: 'first != "water"'}
+            command: pipetter.pipette
+            program: Roboliq_Water_Air_1000
+            sources: water
+            destinationLabware: $plate
+            destinations: $$well
+            volumes: $$waterVolume
+            clean: none
+            cleanEnd: thorough
+          2:
+            description: "Distribute dye to wells that require dye second"
+            data: {where: 'first != "dye"'}
+            command: pipetter.pipette
+            sources: $$dyeSource
+            destinationLabware: $plate
+            destinations: $$well
+            volumes: $$dyeVolume
+            syringes: $$syringe
+            items:
+              "#data":
+                template:
+                  program: $liquidClass
             clean: flush
             cleanEnd: thorough
           3:
