@@ -1,0 +1,223 @@
+roboliq: v1
+
+description: |
+  Perform pipetting using dye in a randomized manner in order to check
+  the spread of results.
+
+  The following factors are be randomized:
+
+  * tipModel
+  * liquid class
+  * volume
+  * syringe
+
+  We'll use these tipModel/liquidClass/sryinge combinations:
+
+  - large, dry, syringe: [1,2,3,4]
+  - large, air, syringe: [1,2,3,4]
+  - large, wet, syringe: [1,2,3,4]
+  - small, wet, syringe: [5,6,7,8]
+  - small, dry, syringe: [5,6,7,8]
+
+  `5 tip/class combination * 4 syringes = 20`
+
+  In addition, we'll use 9 volumes.  So
+  `20 * 9 volumes = 180`, leaving 12 control wells available if we use two
+  96-well plates.
+
+  `dyeSource`: we use volumes ranging from 0.1 to 150ul.  We will therefore
+  need several dye concentrations.  For 0.1 to 1, 2 to 20, and 40 to 150.
+
+  * 0.1 to 1: 1:1 of 8g/L, should give => 0.1 (0.1ul) to 1 (1ul)
+  * 2 to 20: 1:1 of 0.8g/L, should give range of 0.2 (2ul) to 2 (20ul)
+  * 40 to 150: 4:96 of 0.8g/L, should give range of 0.16 (40ul) to 0.6 (150ul)
+
+  Steps:
+
+  * For each plate:
+      * Dispense first layer (water then dye)
+      * Shake and read plate
+      * Dispense second layer (water then dye)
+      * Shake and read plate
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_A1
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_B1
+  plate3:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_C1
+  plate4:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_D1
+  dyeLightLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R4
+    contents: [Infinity l, dyeLight]
+  dyeLight:
+    type: Liquid
+    wells: dyeLightLabware(C01 down F01)
+  dyeMediumLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dyeMedium]
+  dyeMedium:
+    type: Liquid
+    wells: dyeMediumLabware(C01 down F01)
+  dyeDarkLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dyeDark]
+  dyeDark:
+    type: Liquid
+    wells: dyeDarkLabware(C01 down F01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+  design:
+    type: Design
+    randomSeed: 1234
+    conditions:
+      site: ourlab.mario.site.P3
+      fullVolume: 150 ul
+      role*:
+        control:
+          dyeVolume1: 0 ul
+          first: water
+          tipModel: large
+          liquidClass: Roboliq_Water_Air_1000
+          dispensePos: air
+          group1: 0
+          group2*: 3
+          syringe*: [1,2,3,4]
+        experiment:
+          .combination*:
+            - tipModel: large
+              liquidClass*:
+                Roboliq_Water_Air_1000:
+                  dispensePos: air
+                  first: water
+                Roboliq_Water_Wet_1000:
+                  dispensePos: wet
+                  first: water
+                Roboliq_Water_Dry_1000:
+                  dispensePos: dry
+                  first: dye
+              dyeVolume1*: [3 ul, 5 ul, 10 ul, 20 ul, 40 ul, 60 ul, 80 ul, 100 ul, 150 ul]
+              syringe*: [1,2,3,4]
+            - tipModel: small
+              liquidClass*:
+                Roboliq_Water_Wet_0050:
+                  dispensePos: wet
+                  first: water
+                Roboliq_Water_Dry_0050:
+                  dispensePos: dry
+                  first: dye
+              dyeVolume1*: [0.1 ul, 0.2 ul, 0.5 ul, 1 ul, 2 ul, 3 ul, 5 ul, 20 ul, 40 ul]
+              syringe*: [5,6,7,8]
+          group1=range:
+            sameBy: [tipModel, liquidClass]
+          group2=range:
+            groupBy: [group1, syringe]
+      groupSeq=range:
+        sameBy: [group1, group2]
+        order: shuffle
+      waterVolume1=calculate: 'fullVolume - dyeVolume1'
+      # wellNum=range: {}
+      plate=allocatePlates:
+        groupBy: groupSeq
+        wellsPerPlate: 96
+        plates: [plate1, plate2, plate3, plate4]
+      groupOrder=range:
+        order: shuffle
+        groupBy: plate
+        sameBy: groupSeq
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        groupBy: plate
+        orderBy: groupOrder
+      dyeSource=calculate: '(dyeVolume1 >= 40 ul) ? "dyeLight" : (dyeVolume1 >= 2 ul) ? "dyeMedium" : "dyeDark"'
+      # layer*:
+      #   - dyeVolume=calculate: '(first == "dye") ? dyeVolume1 : 0 ul'
+      #     waterVolume=calculate: '(role == "control" or first == "water") ? waterVolume1 : 0 ul'
+      #   - dyeVolume=calculate: 'dyeVolume1'
+      #     waterVolume=calculate: 'waterVolume1'
+      # wellVolume=calculate: 'dyeVolume + waterVolume'
+      id=range: {}
+    # orderBy: [plate, groupOrder]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    command: experiment.forEachGroup
+    groupBy: plate
+    steps:
+      description: "`Plate {{$plate}}`"
+      command: transporter.doThenRestoreLocation
+      objects: [$plate]
+      steps:
+        1:
+          command: transporter.movePlate
+          object: $plate
+          destination: $site
+        2:
+          description: "Handle first layer"
+          data: {where: 'layer == 1'}
+          1:
+            description: "Distribute water to wells that require water first"
+            data: {where: 'first == "water"'}
+            command: pipetter.pipette
+            sources: water
+            destinationLabware: $plate
+            destinations: $$well
+            volumes: $$waterVolume
+            syringes: $$syringe
+            clean: none
+            cleanEnd: thorough
+          2:
+            description: "Distribute dye to wells that require dye first"
+            data: {where: 'first == "dye"'}
+            command: pipetter.pipette
+            sources: $$dyeSource
+            destinationLabware: $plate
+            destinations: $$well
+            volumes: $$dyeVolume
+            syringes: $$syringe
+            clean: flush
+            cleanEnd: thorough
+          3:
+            description: "Shake plate1"
+            command: shaker.shakePlate
+            object: $plate
+            program:
+              duration: 1 minute
+          4:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wellDesignFactor: well
+            outputDataset: "absorbance"

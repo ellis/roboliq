@@ -156,7 +156,8 @@ Gives us $Var(a;~v)$
 ## Calibration curve for absorbance: map %conc to %a
 
 * `qc_mario_pipetting6`: tried dye volumes in 10ul steps, from 0 to 100ul.  But I think there are effects from the tips touching so many times.  If the script used wet dispense, should try air dispense instead.
-* `qc_mario_pipetting6b`: this worked very well, using the small tips.  Demonstrated affine linearity between .2 and 2.
+* `qc_mario_pipetting6b`: this worked very well, using the small tips.  Demonstrated affine linearity between .2 and 2 above base level.
+* `qc_mario_pipetting6c`: this worked very well, using the small tips.  Demonstrated affine linearity between .04 and .4 above base level.
 
 TODO:
 
@@ -185,6 +186,16 @@ BUG: in `qc_mario_absorbance3`, can't use `$plate`, need to write `plate2` for i
 	data: {where: 'plate == "plate2"'}
 	command: transporter.doThenRestoreLocation
 	objects: [$plate]
+```
+
+BUG: in `qc_mario_pipetting7`, `orderBy` causes `allocateWells` not to fill in all rows:
+
+```
+well=allocateWells:
+	rows: 8
+	columns: 12
+	groupBy: plate
+	orderBy: groupOrder
 ```
 
 ## $Var(a;d,tip)$
@@ -242,34 +253,64 @@ TODO:
 
 In the end, I want to print out a report that can be displayed near the robot:
 
-* [ ] Calibration curve of reader and its "good" range
-	* [.] `qc_mario_pipetting6b`: this worked very well, using the small tips.  Demonstrated affine linearity between .2 and 2.
-	* [ ] do same thing for other ranges
 * [x] Distribution of empty-well absorbances for various volumes of water (`qc_mario_absorbance1`)
 * [x] Absorbance shift and variance at various well volumes in the nunc plates (`qc_mario_absorbance2`)
+* [ ] Calibration curve of reader and its "good" range
+	* [.] `qc_mario_pipetting6b`: this worked very well, using the small tips.  Demonstrated affine linearity between .2 and 2.
+	* [.] `qc_mario_pipetting6c`: this worked very well, using the small tips.  Demonstrated affine linearity between .04 and .4.
+	* [ ] do same thing for other ranges
+* [ ] Variance of absorbance readouts
+	* [ ] `qc_mario_pipetting6b`: variance for .2 and 2.
+	* [ ] `qc_mario_pipetting6c`: variance for .04 and .4.
+	* [ ] another for ~.4 to 4
+* [ ] Curve of dye aliquot volume to absorbance (because some dye particles may stick to the tips)
+	* `qc_mario_absorbance3`: 75, 150
+* [.] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes
+* [ ] variance of dispense for various tip models, volumes, syringes, and liquidClasses
+	```
+	- large, dry
+		syringe*: [1,2,3,4]
+	- large, air
+		syringe*: [1,2,3,4]
+	- large, wet
+		syringe*: [1,2,3,4]
+	- small, wet
+		syringe*: [5,6,7,8]
+	- small, dry
+		syringe*: [5,6,7,8]
+	5*4=20
+	*8 volumes = 160
+	+ 32 control wells?
+	on two plate?
+
+	or *9 volumes = 180, leaving 12 control wells
+
+	replicates?
+	```
 * [ ] table of true volume and stddev for various tips, volumes, syringes, and liquidClasses
+	* large, dry
+	* large, air
+	* large, wet
+	* small, wet
+	* small, dry
 	* large tips, dry dispense (5, 10, 20, 40, 80, 100, 150, 300)
 		* `qc_mario_absorbance3`: 75, 150
-		* `qc_mario_evaporation5`: 150
-		* `qc_mario_evaporation5b`: 300
+		* `qc_mario_evaporation5`: 150, 300
 	* large tips, wet dispense (5, 10, 20, 40, 80, 100, 150, 300)
 	* large tips, air dispense (5, 10, 20, 40, 80, 100, 150, 300)
-* [.] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes
-* [.] Evaporation maps (detailed on one site, overall rates on other sites)
-	* `qc_mario_evaporation5`: 150
-	* `qc_mario_evaporation5b`: 300
+* [x] Evaporation maps (detailed on one site, overall rates on other sites)
 * [ ] z-level detection calibration
 
 Todo:
 
-* [ ] run variant on `qc_mario_pipetting6b`, skipping the middle readout, fix well randomization, try to get range from 0.04 to 0.4 or 0.4 to 4.0
+* [x] run variant on `qc_mario_pipetting6b`, skipping the middle readout, fix well randomization, try to get range from 0.04 to 0.4 or 0.4 to 4.0
 * run an experiment to get weights of various kinds of dispenses, maybe use eppendorfs where possible
 * run an experiment to get the relationship between d-volume and absorbance, whereby some wells have multiple dispenses of small volumes and other wells have single dispenses of larger volumes that should be equal to the multiple of smaller dispenses -- probably not a good idea for an experiment, because we don't know the actual volumes dispensed...
 
 Still need to analyze:
 
-* [ ] evaporation 5b, and 6
-* [ ] qc_mario_pipetting*
+* [ ] evaporation 5, 5b, and 6
+* [ ] qc_mario_pipetting6
 
 ## Manual dye prep
 

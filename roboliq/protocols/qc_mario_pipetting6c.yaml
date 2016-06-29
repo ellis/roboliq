@@ -9,7 +9,7 @@ description: |
   We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
   In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
 
-  Execution time: ?
+  Execution time: 2:10h
 
 config:
   evowareCompiler:

@@ -1185,6 +1185,34 @@ describe('design', () => {
 			]);
 		});
 
+		it.only("should support allocateWells() assignments on multiple plates with and orderBy field", () => {
+			const design1 = {
+				conditions: {
+					"plate*": ["A", "B"],
+					"seq*": [2, 1],
+					"*": 2,
+					"well=allocateWells": {
+						rows: 8, columns: 12, wells: "A01 right A04",
+						groupBy: "plate",
+						orderBy: "seq"
+					}
+				}
+			};
+			const table1 = flattenDesign(design1);
+			// console.log(JSON.stringify(table1))
+			// printRows(table1);
+			should.deepEqual(table1, [
+				{"plate":"A","seq":2,"well":"A03"},
+				{"plate":"A","seq":2,"well":"A04"},
+				{"plate":"A","seq":1,"well":"A01"},
+				{"plate":"A","seq":1,"well":"A02"},
+				{"plate":"B","seq":2,"well":"A03"},
+				{"plate":"B","seq":2,"well":"A04"},
+				{"plate":"B","seq":1,"well":"A01"},
+				{"plate":"B","seq":1,"well":"A02"}
+			]);
+		});
+
 		it("should support range() with groupBy", () => {
 			const design = {
 				conditions: {
