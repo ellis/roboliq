@@ -1185,7 +1185,7 @@ describe('design', () => {
 			]);
 		});
 
-		it.only("should support allocateWells() assignments on multiple plates with and orderBy field", () => {
+		it("should support allocateWells() assignments on multiple plates with and orderBy field", () => {
 			const design1 = {
 				conditions: {
 					"plate*": ["A", "B"],
@@ -1354,7 +1354,7 @@ describe('design', () => {
 			]);
 		});
 
-		it("should handle previous bug #2", () => {
+		it.only("should handle previous bug #2", () => {
 			const design = {
 				conditions: {
 					n: 2,
@@ -1363,7 +1363,7 @@ describe('design', () => {
 				}
 			};
 			const table = flattenDesign(design);
-			// console.log(JSON.stringify(table))
+			console.log(JSON.stringify(table))
 			// printRows(table);
 			should.deepEqual(table, [
 				{n: 2, i: 1, j: 1},

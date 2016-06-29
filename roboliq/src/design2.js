@@ -848,97 +848,93 @@ function assign(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, n
 	return handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, action, randomEngine2, value2);
 }
 
-function handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value) {
+function handleAssignmentWithQueries(rows, rowIndexes0, otherRowIndexes, name, action, randomEngine, value0) {
 	if (DEBUG) {
-		console.log(`handleAssignmentWithQueries: ${JSON.stringify({name, action, value})}`);
+		console.log(`handleAssignmentWithQueries: ${JSON.stringify({name, action, value0})}`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`)
-		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+		console.log(` rowIndexes: ${JSON.stringify(rowIndexes0)}\n ${JSON.stringify(rows)}`)
 		assertNoDuplicates(otherRowIndexes);
 	}
-	const isSpecial = value instanceof Special;
+	const isSpecial = value0 instanceof Special;
 	const hasGroupOrSame = action.groupBy || action.sameBy;
-
-	// If 'orderBy' is set, we should re-order the values (if just returning 'value') or rowIndexes (otherwise)
-	if (action.orderBy) {
-		// console.log("A")
-		if (_.isArray(value)) {
-			// This is a copy of 'makeComparer', but with more indirection in assignment of row1 and row2
-			const propertyNames = action.orderBy;
-			function comparer(i1, i2) {
-				const row1 = rows[rowIndexes[i1]];
-				const row2 = rows[rowIndexes[i2]];
-				const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
-				for (let j = 0; j < l.length; j++) {
-					const propertyName = l[j];
-					const value1 = row1[propertyName];
-					const value2 = row2[propertyName];
-					const cmp = naturalSort(value1, value2);
-					if (cmp !== 0)
-						return cmp;
-				}
-				return 0;
-			};
-			const is1 = stableSort(_.range(rowIndexes.length), comparer);
-			// console.log({is1});
-
-			// Allocate a new value array
-			const value1 = new Array(rowIndexes.length);
-			// Insert values into the new array according to the new desired order
-			for (let i = 0; i < rowIndexes.length; i++) {
-				const j = is1[i];
-				value1[j] = value[i];
-			}
-			// console.log({is1, rowIndexes, rows, value, value1});
-			value = value1;
-		}
-		//if (hasGroupOrSame)
-		else {
-			const rowIndexes2 = query_orderBy(rows, rowIndexes, action.orderBy);
-			// console.log({orderBy: action.orderBy, rowIndexes, rowIndexes2})
-			// console.log({rowIndexes})
-			rowIndexes = rowIndexes2;
-		}
-	}
 
 	if (!action.groupBy && !action.sameBy && !action.orderBy) {
 		if (isSpecial) {
 			// console.log({name})
-			value.initGroup(rows, rowIndexes);
+			value0.initGroup(rows, rowIndexes0);
 		}
-		return value;
+		return value0;
 	}
-	else if (action.groupBy) {
-		// printRows(rows);
-		const rowIndexesGroups = query_groupBy(rows, rowIndexes, action.groupBy);
-		// console.log({rowIndexesGroups})
-		for (let i = 0; i < rowIndexesGroups.length; i++) {
-			const rowIndexes2 = _.clone(rowIndexesGroups[i]);
 
-			const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
-			// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
-			if (action.sameBy) {
-				assignSameBy(rows, rowIndexes2, otherRowIndexes2, name, action, randomEngine, value);
-			}
-			else {
-				if (isSpecial) {
-					// console.log({rows, rowIndexes2})
-					value.initGroup(rows, rowIndexes2);
+	const rowIndexesGroups = (action.groupBy)
+		? query_groupBy(rows, rowIndexes0, action.groupBy)
+		: [rowIndexes0];
+
+	// console.log({rowIndexesGroups})
+	for (let i = 0; i < rowIndexesGroups.length; i++) {
+		let rowIndexes = _.clone(rowIndexesGroups[i]);
+
+		let value = value0;
+		// If 'orderBy' is set, we should re-order the values (if just returning 'value') or rowIndexes (otherwise)
+		if (action.orderBy) {
+			// console.log("A")
+			if (_.isArray(value)) {
+				// This is a copy of 'makeComparer', but with more indirection in assignment of row1 and row2
+				const propertyNames = action.orderBy;
+				function comparer(i1, i2) {
+					const row1 = rows[rowIndexes[i1]];
+					const row2 = rows[rowIndexes[i2]];
+					const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
+					for (let j = 0; j < l.length; j++) {
+						const propertyName = l[j];
+						const value1 = row1[propertyName];
+						const value2 = row2[propertyName];
+						const cmp = naturalSort(value1, value2);
+						if (cmp !== 0)
+							return cmp;
+					}
+					return 0;
+				};
+				const is1 = stableSort(_.range(rowIndexes.length), comparer);
+				// console.log({is1});
+
+				// Allocate a new value array
+				const value1 = new Array(rowIndexes.length);
+				// Insert values into the new array according to the new desired order
+				for (let i = 0; i < rowIndexes.length; i++) {
+					const j = is1[i];
+					value1[j] = value[i];
 				}
-				expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
+				// console.log({is1, rowIndexes, rows, value, value1});
+				value = value1;
+			}
+			//if (hasGroupOrSame)
+			else {
+				const rowIndexes2 = query_orderBy(rows, rowIndexes, action.orderBy);
+				// console.log({orderBy: action.orderBy, rowIndexes, rowIndexes2})
+				// console.log({rowIndexes})
+				rowIndexes = rowIndexes2;
 			}
 		}
-		return undefined;
-	}
-	else if (action.sameBy) {
-		assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value);
-	}
-	else {
-		if (isSpecial) {
-			value.initGroup(rows, rowIndexes);
+
+		const rowIndexes2 = _.clone(rowIndexes);
+
+		const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
+		// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
+		if (action.sameBy) {
+			assignSameBy(rows, rowIndexes2, otherRowIndexes2, name, action, randomEngine, value);
 		}
-		expandRowsByNamedValue(rows, rowIndexes, otherRowIndexes, name, value, randomEngine);
-		return undefined;
+		else {
+			if (isSpecial) {
+				// console.log({rows, rowIndexes2})
+				value.initGroup(rows, rowIndexes2);
+			}
+			// console.log({rows, rowIndexes2, otherRowIndexes2, name, value})
+			expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, value, randomEngine);
+		}
 	}
+
+	return undefined;
 }
 
 function assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value) {
@@ -1404,10 +1400,14 @@ function filterOnWhere(table, where) {
 	return table2;
 }
 
+/**
+ * Check whether the same underlying array shows up more than once in otherRowIndexes.
+ * This should never be the case, because if we modify one, the "other" will also be modified.
+ */
 function assertNoDuplicates(otherRowIndexes) {
 	for (let i = 0; i < otherRowIndexes.length - 1; i++) {
 		for (let j = i + 1; j < otherRowIndexes.length; j++) {
-			assert(otherRowIndexes[i] != otherRowIndexes[j])
+			assert(otherRowIndexes[i] != otherRowIndexes[j], `same underlying array appears in 'otherRowIndexs' at both ${i} and ${j}: ${JSON.stringify(otherRowIndexes)}`)
 		}
 	}
 }
