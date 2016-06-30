@@ -266,33 +266,17 @@ In the end, I want to print out a report that can be displayed near the robot:
 * [ ] Curve of dye aliquot volume to absorbance (because some dye particles may stick to the tips)
 	* `qc_mario_absorbance3`: 75, 150
 * [.] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes
-* [ ] variance of dispense for various tip models, volumes, syringes, and liquidClasses
-	```
-	- large, dry
-		syringe*: [1,2,3,4]
-	- large, air
-		syringe*: [1,2,3,4]
-	- large, wet
-		syringe*: [1,2,3,4]
-	- small, wet
-		syringe*: [5,6,7,8]
-	- small, dry
-		syringe*: [5,6,7,8]
-	5*4=20
-	*8 volumes = 160
-	+ 32 control wells?
-	on two plate?
-
-	or *9 volumes = 180, leaving 12 control wells
-
-	replicates?
-	```
-* [ ] table of true volume and stddev for various tips, volumes, syringes, and liquidClasses
+* [ ] variance of dispense and relative absorbance levels for various tip models, volumes, syringes, and liquidClasses
+	* `qc_mario_pipetting7`
 	* large, dry
 	* large, air
 	* large, wet
-	* small, wet
 	* small, dry
+	* small, wet
+* [ ] table of true volume for several critical combinations of tip models, volumes, and liquidClasses
+	* large, dry: 150, 300
+	* small, dry: 40
+	* small, wet: 1, 3?
 	* large tips, dry dispense (5, 10, 20, 40, 80, 100, 150, 300)
 		* `qc_mario_absorbance3`: 75, 150
 		* `qc_mario_evaporation5`: 150, 300
