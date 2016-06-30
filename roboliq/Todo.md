@@ -277,9 +277,10 @@ In the end, I want to print out a report that can be displayed near the robot:
 	* large, dry
 		* `qc_mario_absorbance3`: 75, 150
 		* `qc_mario_evaporation5`: 150, 300
-		* need one for 5 or other small volumes
+		* need one for 5ul or other small volumes
 	* small, wet: 1, 3?, 5?, 10?, 0.5?, 0.2?, 0.1?
 		* [.] `qc_mario_pipetting8`: 1
+		* should probably test for 5ul too
 * [x] Evaporation maps (detailed on one site, overall rates on other sites)
 	* `qc_mario_evaporation6`: 300ul on various sites
 	* `qc_mario_evaporation5b`: 300
