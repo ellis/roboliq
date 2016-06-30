@@ -1,0 +1,132 @@
+roboliq: v1
+
+description: |
+  Try to measure volume of small dispense volumes, in this case 1ul.
+  We will use eppendorf tubes for this.
+
+  Steps:
+
+  * We will use three eppendorf tubes: tube1, tube2, tube3
+  * Fill tube1 and tube2 to 500ul with water, and tube3 to `500ul + d * s * n`,
+    where $d$ is the dispense volume (e.g. 1ul), $s$ is the number of syringes,
+    and $n$ is the number of times the dispenses with all syringes will be repeated.
+  * Weigh each tube.
+  * Repeat 3 times:
+      * Repeat $n$ times: dispense $x$ with each syringe into tube1.
+      * Weigh each tube.
+
+  Execution time: 1:30h
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  tubes:
+    type: Plate
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(C01 down F01)
+
+  design:
+    type: Design
+    randomSeed: 1234
+    description: |
+      * $n1$: number of times to weight plate (after initial weighing)
+      * $n2$: number of dispenses between weighings
+      * $syringeCount$: number of syringes use per dispense
+    conditions:
+      site: ourlab.mario.site.P3
+      aliquotVolume: 1 ul
+      n1: 3
+      n2: 20
+      syringeCount: 4
+      liquidClass: Roboliq_Water_Wet_0050
+      cycle*=range: {from: 0, till: n1}
+      tube*:
+        - well: D1
+          role: experiment
+          volume0: 500 ul
+          dispensedVolume=calculate: 'aliquotVolume * syringeCount * n2 * cycle'
+        - well: D3
+          role: control
+          volume0: 500 ul
+          dispensedVolume: 0 ul
+        - well: D5
+          role: control
+          volume0=calculate: '(500 ul) + aliquotVolume * n1 * n2 * syringeCount'
+          dispensedVolume: 0 ul
+      totalVolume=calculate: 'volume0 + dispensedVolume'
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+    syringes: []
+  2:
+    description: "Initial filling and weighing"
+    data: {where: 'cycle == 0'}
+    1:
+      description: "Distribute water"
+      command: pipetter.pipette
+      program: Roboliq_Water_Dry_1000
+      sources: ourlab.mario.systemLiquid
+      destinationLabware: tubes
+      destinations: $$well
+      volumes: $$volume0
+      clean: light
+    2:
+      description: "Weigh tubes"
+      command: scale.weigh
+      object: tubes
+      outputDataset: "weight"
+  3:
+    description: "Start cycles for dispensing aliquots and weighing"
+    data: {where: 'cycle > 0'}
+    command: experiment.forEachGroup
+    groupBy: cycle
+    steps:
+      description: "`Cycle {{$cycle}}`"
+      1:
+        command: pipetter.cleanTips
+        equipment: ourlab.mario.liha
+        intensity: thorough
+        syringes: [5,6,7,8]
+      2:
+        description: "Dispense aliquots in tube1"
+        command: system.repeat
+        count: $n2
+        variableName: i
+        steps:
+          1:
+            description: "`Dispense {{$i}}`"
+            data: {where: 'role == "experiment"'}
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: water
+            destinationLabware: tubes
+            destinations: $well
+            volumes: $aliquotVolume
+            items:
+              - syringe: 5
+              - syringe: 6
+              - syringe: 7
+              - syringe: 8
+            clean: none
+            cleanEnd: flush
+      3:
+        description: "Weigh tubes"
+        command: scale.weigh
+        object: tubes
+        outputDataset: "weight"
