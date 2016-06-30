@@ -17,7 +17,7 @@ description: |
       * Repeat $n$ times: dispense $x$ with each syringe into tube1.
       * Weigh each tube.
 
-  Execution time: 35min
+  Execution time: 16min
 
 config:
   evowareCompiler:
@@ -52,7 +52,7 @@ objects:
       n1: 1
       n2: 20
       syringeCount: 4
-      liquidClass: Roboliq_Water_Wet_0050
+      liquidClass: Roboliq_Water_Wet_1000
       cycle*=range: {from: 0, till: n1}
       tube*:
         - well: D1
