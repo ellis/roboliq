@@ -40,6 +40,8 @@ description: |
       * Dispense second layer (water then dye)
       * Shake and read plate
 
+  Execution time: 50min
+  
 config:
   evowareCompiler:
     timing: false

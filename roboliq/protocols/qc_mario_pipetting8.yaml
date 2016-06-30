@@ -15,6 +15,8 @@ description: |
       * Repeat $n$ times: dispense $x$ with each syringe into tube1.
       * Weigh each tube.
 
+  Execution time: 1:30h
+
 config:
   evowareCompiler:
     timing: false
@@ -71,7 +73,7 @@ steps:
     command: pipetter.cleanTips
     equipment: ourlab.mario.liha
     intensity: thorough
-    syringes: [5,6,7,8]
+    syringes: []
   2:
     description: "Initial filling and weighing"
     data: {where: 'cycle == 0'}
@@ -83,8 +85,7 @@ steps:
       destinationLabware: tubes
       destinations: $$well
       volumes: $$volume0
-      clean: none
-      cleanEnd: thorough
+      clean: light
     2:
       description: "Weigh tubes"
       command: scale.weigh
@@ -98,13 +99,18 @@ steps:
     steps:
       description: "`Cycle {{$cycle}}`"
       1:
+        command: pipetter.cleanTips
+        equipment: ourlab.mario.liha
+        intensity: thorough
+        syringes: [5,6,7,8]
+      2:
         description: "Dispense aliquots in tube1"
         command: system.repeat
         count: $n2
         variableName: i
         steps:
           1:
-            description: "Dispense {{$i}}"
+            description: "`Dispense {{$i}}`"
             data: {where: 'role == "experiment"'}
             command: pipetter.pipette
             program: $liquidClass
@@ -112,9 +118,14 @@ steps:
             destinationLabware: tubes
             destinations: $well
             volumes: $aliquotVolume
+            items:
+              - syringe: 5
+              - syringe: 6
+              - syringe: 7
+              - syringe: 8
             clean: none
             cleanEnd: flush
-      2:
+      3:
         description: "Weigh tubes"
         command: scale.weigh
         object: tubes

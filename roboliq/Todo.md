@@ -258,7 +258,7 @@ In the end, I want to print out a report that can be displayed near the robot:
 * [ ] Calibration curve of reader and its "good" range
 	* [.] `qc_mario_pipetting6b`: this worked very well, using the small tips.  Demonstrated affine linearity between .2 and 2.
 	* [.] `qc_mario_pipetting6c`: this worked very well, using the small tips.  Demonstrated affine linearity between .04 and .4.
-	* [ ] do same thing for other ranges
+	* [ ] do same thing for .4 to 4
 * [ ] Variance of absorbance readouts
 	* [ ] `qc_mario_pipetting6b`: variance for .2 and 2.
 	* [ ] `qc_mario_pipetting6c`: variance for .04 and .4.
@@ -274,15 +274,16 @@ In the end, I want to print out a report that can be displayed near the robot:
 	* small, dry
 	* small, wet
 * [ ] table of true volume for several critical combinations of tip models, volumes, and liquidClasses
-	* large, dry: 150, 300
-	* small, dry: 40
-	* small, wet: 1, 3?
-	* large tips, dry dispense (5, 10, 20, 40, 80, 100, 150, 300)
+	* large, dry
 		* `qc_mario_absorbance3`: 75, 150
 		* `qc_mario_evaporation5`: 150, 300
-	* large tips, wet dispense (5, 10, 20, 40, 80, 100, 150, 300)
-	* large tips, air dispense (5, 10, 20, 40, 80, 100, 150, 300)
+		* need one for 5 or other small volumes
+	* small, wet: 1, 3?, 5?, 10?, 0.5?, 0.2?, 0.1?
+		* [.] `qc_mario_pipetting8`: 1
 * [x] Evaporation maps (detailed on one site, overall rates on other sites)
+	* `qc_mario_evaporation6`: 300ul on various sites
+	* `qc_mario_evaporation5b`: 300
+	* `qc_mario_evaporation5`: 150
 * [ ] z-level detection calibration
 
 Todo:
