@@ -432,7 +432,7 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
-				{line: "Detect_Liquid(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,0,0,0,0,1,0,1,\"0C08?0000000000000\",2,0,0);"},
+				{line: "Detect_Liquid(15,\"Water free dispense\",1,0,1,\"0C08?0000000000000\",0,0);"},
 				{line: "MoveLiha(15,1,0,1,\"0C08?0000000000000\",4,4,0,400,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]

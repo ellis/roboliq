@@ -342,13 +342,16 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 		const l = [
 			syringeMask,
 			`"${evowareHelper.stripQuotes(program)}"`,
-			volumes.join(","),
+			(func != "Detect_Liquid") ? volumes.join(",") : undefined,
 			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
 			group.syringeSpacing || 1,
 			`"${plateMask}"`,
 			0,
 			0
 		];
+		_.remove(l, _.isUndefined);
+		// console.log({l0, l1: _.remove(l, _.isUndefined)})
+		// const l = l0;
 		let lines = [{line: `${func}(${l.join(",")});`}];
 
 		// sourceMixing
