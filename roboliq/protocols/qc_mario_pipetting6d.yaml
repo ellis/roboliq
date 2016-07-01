@@ -1,15 +1,15 @@
 roboliq: v1
 
 description: |
-  This is a variation on `qc_mario_pipetting6` that uses the small tips.
+  This is a variation on `qc_mario_pipetting6c` that uses large-tips air dispense.
 
   Try to get a calibration curve for absorbance vs volume.
 
-  10 cycles, 10 wells get dye at exactly one (incrementing) cycle, and 9 wells get dye at exactly 2..10 cycles.
+  20 cycles, 1 well gets dye at exactly one (incrementing) cycle, and 19 wells get dye at exactly 2..20 cycles.
   We can have replicates (e.g. 4 replicates would fit on a 96-well plate).
   In any cycle where a well gets no dye, it gets water.  We should also have control wells that are filled with water at the start.
 
-  Execution time: 2:10h
+  Execution time: ?
 
 config:
   evowareCompiler:
@@ -23,7 +23,7 @@ objects:
     location: ourlab.mario.site.P3
   dyeLabware:
     type: Plate
-    model: ourlab.model.troughModel_25ml
+    model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, dye]
   dye:
@@ -31,7 +31,7 @@ objects:
     wells: dyeLabware(C01 down F01)
   waterLabware:
     type: Plate
-    model: ourlab.model.troughModel_25ml
+    model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R5
     contents: [Infinity l, water]
   water:
@@ -43,8 +43,8 @@ objects:
     randomSeed: 12345
     description: |
     conditions:
-    - divisions: 10
-      fullVolume: 150 ul
+    - divisions: 20
+      fullVolume: 200 ul
       aliquotVolume: 10 ul
       site: ourlab.mario.site.P3
       .blockPos*: 24
@@ -53,7 +53,7 @@ objects:
       blockOrder=range:
         order: shuffle
       role=:
-        values: [empty, empty, empty, empty, empty, single, single, single, single, single, single, single, single, single, single, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple]
+        values: [empty, empty, empty, empty, single, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple, multiple]
       .caseA=case:
       - where: 'role == "empty"'
         conditions:
@@ -69,12 +69,13 @@ objects:
           dyeDispenses=range: {from: 2, till: divisions}
           startCycle: 1
           waterVolume0=calculate: 'fullVolume - aliquotVolume * divisions'
-      syringe*=range: {from: 5, till: 8}
+      syringe*=range: {from: 1, till: 4}
+      dyeVolume=calculate: 'dyeDispenses * aliquotVolume'
       well=allocateWells:
         rows: 8
         columns: 12
         orderBy: block
-      liquidClass: Roboliq_Water_Wet_0050
+      liquidClass: Roboliq_Water_Air_1000
       id=range:
         orderBy: [blockOrder]
     orderBy: [id]
@@ -110,7 +111,7 @@ steps:
       volumes: $$waterVolume0
       clean: none
       cleanEnd: light
-    5:
+    3:
       description: "Measure absorbance of plate with only water it in"
       command: absorbanceReader.measurePlate
       object: plate1
