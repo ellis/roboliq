@@ -334,6 +334,8 @@ wellAbsorbance ~= dyeConcentration(t) * dispenseVolume * absorbanceFactor
 - [ ] `pipetter._measureVolume`: evoware implementation
 - [ ] `pipetter._measureVolume`: API for saving measurements
 
+If reading the logfile from `C:\ProgramData\Tecan\EVOware\AuditTrail\log`, we might use a regular expression such as this:
+`content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
 
 # Todos for QC shotgun
 

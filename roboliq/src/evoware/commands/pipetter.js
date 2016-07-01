@@ -17,7 +17,12 @@ export function _dispense(params, parsed, data) {
 }
 
 export function _measureVolume(params, parsed, data) {
-	return handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
+	const lines0 = handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
+
+	const args = ["EvowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(_.range(8).map(i => `~DETECTED_VOLUME_${i+1}~`));
+	const lines1 = [{line: evowareHelper.createExecuteLine("${ROBOLIQ}", args, true)}];
+
+	return lines0.concat(lines1)
 }
 
 export function _mix(params, parsed, data) {
