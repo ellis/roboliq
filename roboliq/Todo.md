@@ -288,16 +288,22 @@ In the end, I want to print out a report that can be displayed near the robot:
 	* `qc_mario_evaporation5`: 150
 * [ ] z-level detection calibration
 
-Todo:
-
-* [x] run variant on `qc_mario_pipetting6b`, skipping the middle readout, fix well randomization, try to get range from 0.04 to 0.4 or 0.4 to 4.0
-* run an experiment to get weights of various kinds of dispenses, maybe use eppendorfs where possible
-* run an experiment to get the relationship between d-volume and absorbance, whereby some wells have multiple dispenses of small volumes and other wells have single dispenses of larger volumes that should be equal to the multiple of smaller dispenses -- probably not a good idea for an experiment, because we don't know the actual volumes dispensed...
-
 Still need to analyze:
 
 * [ ] evaporation 5, 5b, and 6
 * [ ] qc_mario_pipetting6
+
+Z-level experiment:
+
+* fill wells with various amounts of dye
+* shake and read
+* perform z-level measurements on experimental wells (randomized access), but leave a control well for each volume untouched
+* read absorbance
+* loop?
+* fill all wells with water to about 200ul
+* shake and read
+
+Should we divide the wells up by tipModel?  Do we want variance by tipModel, syringe?
 
 ## Manual dye prep
 

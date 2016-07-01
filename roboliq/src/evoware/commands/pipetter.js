@@ -325,7 +325,7 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 	const volumes = _.fill(Array(12), "0");
 	_.forEach(tuples, tuple => {
 		const index = (tuple.syringeRow || 1) - 1;
-		const ul = tuple.item.volume.toNumber('ul');
+		const ul = (tuple.item.volume) ? tuple.item.volume.toNumber('ul') : 0;
 		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
 	});
 
