@@ -259,6 +259,7 @@ In the end, I want to print out a report that can be displayed near the robot:
 	* [.] `qc_mario_pipetting6b`: this worked very well, using the small tips.  Demonstrated affine linearity between .2 and 2.
 	* [.] `qc_mario_pipetting6c`: this worked very well, using the small tips.  Demonstrated affine linearity between .04 and .4.
 	* [ ] `qc_mario_pipetting6c`: second run, for 1 to 10
+	* [ ] consider making a new script that tries to cover the whole range from 0.04 to 4?
 * [ ] Variance of absorbance readouts
 	* [ ] `qc_mario_pipetting6b`: variance for .2 and 2.
 	* [ ] `qc_mario_pipetting6c`: variance for .04 and .4.
