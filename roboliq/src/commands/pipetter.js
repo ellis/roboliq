@@ -287,6 +287,7 @@ function pipette(params, parsed, data, options={}) {
 		}
 	}
 
+	// console.log("A: "+JSON.stringify(_.first(items)))
 	// Make sure all items have a 'tipModel' property
 	{
 		// Try to find tipModel, first for all items
@@ -309,6 +310,7 @@ function pipette(params, parsed, data, options={}) {
 			});
 		}
 	}
+	// console.log("B: "+JSON.stringify(_.first(items)))
 
 	// Make sure all items have a 'program' property
 	{
@@ -329,6 +331,7 @@ function pipette(params, parsed, data, options={}) {
 			});
 		}
 	}
+	// console.log("C: "+JSON.stringify(_.first(items)))
 
 	// TODO: Limit syringe choices based on params
 	const syringesAvailable = _.map(_.keys(equipment.syringe), s => `${equipmentName}.syringe.${s}`) || [];
@@ -399,6 +402,7 @@ function pipette(params, parsed, data, options={}) {
 	//console.log("expansionList:")
 	//console.log(JSON.stringify(expansionList, null, '  '));
 
+	// console.log("D: "+JSON.stringify(_.first(groups)))
 	const syringeToCleanAfterValue = {};
 	let doCleanBefore = false
 	_.forEach(groups, function(group) {
@@ -447,6 +451,7 @@ function pipette(params, parsed, data, options={}) {
 		}
 		doCleanBefore = true;
 
+		// console.log("E: "+JSON.stringify(_.first(group)))
 		// _PipetteItems
 		const items2 = _.map(group, function(item) {
 			const item2 = _.pick(item, ["syringe", "source", "destination", "well", "volume", "count", "distance"]);
@@ -477,6 +482,7 @@ function pipette(params, parsed, data, options={}) {
 			}
 			return item2;
 		});
+		// console.log("Z: "+JSON.stringify(_.first(items2)))
 
 		// _pipette instruction
 		expansionList.push(_.merge({}, {
@@ -672,6 +678,7 @@ function findPipettingPosition(items, data) {
 
 function assignProgram(items0, data) {
 	// console.log("assignProgram: "+JSON.stringify(items))
+	// items0.forEach(x => console.log(JSON.stringify(x)))
 	// console.log({items0})
 	const items = items0.filter(item => item.volume && math.larger(item.volume, math.unit(0, "l")));
 	if (items.length > 0) {
@@ -922,13 +929,31 @@ const commandHandlers = {
 		return {expansion};
 	},
 	"pipetter.measureVolume": function(params, parsed, data) {
-		const result = pipette(params, parsed, data, {keepVolumelessItems: true});
+		// console.log("pipetter.measureVolume: "+JSON.stringify(parsed))
+
+		const items = commandHelper.copyItemsWithDefaults(parsed.value.items, {
+			well: parsed.value.wells,
+		});
+		// console.log("items: "+JSON.stringify(items))
+
+		// Add labware to well properties
+		for (let i = 0; i < items.length; i++) {
+			const item = items[i];
+			if (item.well && parsed.objectName.wellLabware) {
+				item.well = getLabwareWell(parsed.objectName.wellLabware, item.well);
+			}
+		}
+
+		const parsed2 = _.cloneDeep(parsed);
+		// _.merge(parsed2.value, defaults3);
+		parsed2.value.items = items;
+
+		const result = pipette(params, parsed2, data, {keepVolumelessItems: true});
 
 		_.forEach(result.expansion, step => {
 			if (step.command === "pipetter._pipette") {
 				step.command = "pipetter._measureVolume";
 			}
-			delete step.program;
 		});
 
 		return result;

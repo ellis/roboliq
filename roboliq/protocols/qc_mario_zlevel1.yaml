@@ -1,0 +1,148 @@
+roboliq: v1
+
+description: |
+  Try to test z-level detection.
+
+  Steps:
+
+  * fill wells with various amounts of dye
+  * shake and read
+  * perform z-level measurements on experimental wells (randomized access), but leave a control well for each volume untouched
+  * read absorbance
+  * loop
+  * fill all wells with water to about 200ul
+  * shake and read
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_A1
+  plate2:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_B1
+  dyeLightLabware:
+    type: Plate
+    model: ourlab.model.troughModel_25ml
+    location: ourlab.mario.site.R4
+    contents: [Infinity l, dyeLight]
+  dyeLight:
+    type: Liquid
+    wells: dyeLightLabware(C01 down F01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+  design:
+    type: Design
+    randomSeed: 1234
+    description: |
+      * `replicate`: a dummy variable to let us set the 'control' factor on 1 of 4 wells per volume
+      * `group`: a dummy grouping variable for the syringes
+    conditions:
+      # site*: [ourlab.mario.site.P2, ourlab.mario.site.P3]
+      .plateSite*:
+        - plate: plate1
+          site: ourlab.mario.site.P2
+      fullVolume: 200 ul
+      volume*: [30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150, 160, 180, 190, 200]
+      volume=calculate:
+        expression: volume
+        units: ul
+      replicate*: 4
+      role=calculate: '(replicate == 1) ? "control" : "experiment"'
+      wellNum=range:
+        order: shuffle
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: wellNum
+      cycle*: 1
+      syringe=range:
+        from: 1
+        till: 8
+        groupBy: cycle
+        order: reshuffle
+      group=range:
+        groupBy: [cycle, syringe]
+      liquidClass=calculate: '(syringe <= 4) ? "Roboliq_Water_Wet_1000" : "Roboliq_Water_Wet_0050"'
+    orderBy: [group, syringe]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    command: experiment.forEachGroup
+    groupBy: plate
+    steps:
+      description: "`Plate {{$plate}}`"
+      command: transporter.doThenRestoreLocation
+      objects: [$plate]
+      steps:
+        1:
+          command: transporter.movePlate
+          object: $plate
+          destination: $site
+        2:
+          description: "Fill plate with dye"
+          data: {where: 'cycle == 0'}
+          1:
+            description: "Distribute water to wells that require water first"
+            command: pipetter.pipette
+            program: Roboliq_Water_Dry_1000
+            sources: dyeLight
+            destinationLabware: $plate
+            destinations: $$well
+            volumes: $$dyeVolume
+            clean: none
+            cleanEnd: thorough
+          2:
+            description: "Shake plate1"
+            command: shaker.shakePlate
+            object: $plate
+            program:
+              duration: 1 minute
+          3:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wellDesignFactor: well
+            outputDataset: "absorbance"
+        3:
+          description: "Cycles of z-level detection"
+          data: {where: 'cycle > 0'}
+          command: experiment.forEachGroup
+          groupBy: cycle
+          steps:
+            description: "`Cycle {{$cycle}}`"
+            1:
+              command: pipetter.measureVolume
+              wellLabware: $plate
+              items:
+                "#data":
+                  template:
+                    syringe: $syringe
+                    well: $well
+                    program: $liquidClass
+              clean: flush
+              outputDataset: "volume"
+            2:
+              description: "Measure absorbance"
+              command: absorbanceReader.measurePlate
+              object: $plate
+              program:
+                excitationWavelength: 480nm
+                wellDesignFactor: well
+              outputDataset: "absorbance"
