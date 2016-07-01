@@ -17,6 +17,7 @@ const commandHandlers = {
 	"evoware._userPrompt": evoware._userPrompt,
 	"pipetter._aspirate": pipetter._aspirate,
 	"pipetter._dispense": pipetter._dispense,
+	"pipetter._measureVolume": pipetter._measureVolume,
 	"pipetter._mix": pipetter._mix,
 	"pipetter._pipette": pipetter._pipette,
 	"pipetter._washTips": pipetter._washTips,

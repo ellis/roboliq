@@ -396,8 +396,8 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it("should compile pipetter._measureVolume", function() {
-			const table = {};CONTINUE
+		it.only("should compile pipetter._measureVolume", function() {
+			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
 				objects: {
@@ -416,14 +416,10 @@ describe('EvowareCompilerTest', function() {
 				},
 				steps: {
 					"1": {
-						command: "pipetter._mix",
+						command: "pipetter._measureVolume",
 						agent: "robot1",
 						equipment: "pipetter1",
 						program: "\"Water free dispense\"",
-						itemDefaults: {
-							volume: "50 ul",
-							count: 2
-						},
 						items: [
 							{ syringe: "pipetter1.syringe.1", well: "plate1(A01)" },
 							{ syringe: "pipetter1.syringe.2", well: "plate1(B01)" },
@@ -436,7 +432,7 @@ describe('EvowareCompilerTest', function() {
 			const agents = ["robot1"];
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
-				{line: "Mix(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,0,0,0,0,1,0,1,\"0C08?0000000000000\",2,0,0);"},
+				{line: "Detect_Liquid(15,\"Water free dispense\",\"50\",\"50\",\"50\",\"50\",0,0,0,0,0,0,0,0,1,0,1,\"0C08?0000000000000\",2,0,0);"},
 				{line: "MoveLiha(15,1,0,1,\"0C08?0000000000000\",4,4,0,400,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
