@@ -433,11 +433,11 @@ describe('EvowareCompilerTest', function() {
 			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results, [[
 				{line: "Detect_Liquid(15,\"Water free dispense\",1,0,1,\"0C08?0000000000000\",0,0);"},
+				{line: "Execute(\"${ROBOLIQ} EvowareDetectedVolume ${SCRIPTFILE} 1 plate1,A01,~DETECTED_VOLUME_1~ plate1,B01,~DETECTED_VOLUME_2~ plate1,C01,~DETECTED_VOLUME_3~ plate1,D01,~DETECTED_VOLUME_4~\",2,\"\",2);"},
 				{line: "MoveLiha(15,1,0,1,\"0C08?0000000000000\",4,4,0,400,0,0);"},
 				{"tableEffects": [
 					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
-				]},
-				{line: "Execute(\"${ROBOLIQ} EvowareDetectedVolume ${SCRIPTFILE} 1 ~DETECTED_VOLUME_1~ ~DETECTED_VOLUME_2~ ~DETECTED_VOLUME_3~ ~DETECTED_VOLUME_4~ ~DETECTED_VOLUME_5~ ~DETECTED_VOLUME_6~ ~DETECTED_VOLUME_7~ ~DETECTED_VOLUME_8~\",2,\"\",2);"}
+				]}
 			]]);
 		});
 

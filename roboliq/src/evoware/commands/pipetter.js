@@ -17,12 +17,8 @@ export function _dispense(params, parsed, data) {
 }
 
 export function _measureVolume(params, parsed, data) {
-	const lines0 = handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
-
-	const args = ["EvowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(_.range(8).map(i => `~DETECTED_VOLUME_${i+1}~`));
-	const lines1 = [{line: evowareHelper.createExecuteLine("${ROBOLIQ}", args, true)}];
-
-	return lines0.concat(lines1)
+	// console.log("measureVolume: "+JSON.stringify(parsed, null, '\t'))
+	return handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
 }
 
 export function _mix(params, parsed, data) {
@@ -151,7 +147,7 @@ function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
  * Returns an array of groupings of the pipette items.  Each group has these properties:
  *
  * - `groupType` -- either "source" or "destination", depending on whether this group is for aspiration or dispense
- * - `tuples` -- an array with these properties:
+ * - `tuples` -- an array of objects with these properties:
  *     - `item` -- the original pipette item
  *     - `syringeName` -- roboliq name of the syringe to use
  *     - `syringe` -- syringe object
@@ -376,11 +372,20 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
 			if (!_.isEmpty(mixTuples)) {
 				// console.log(parsed.value.destinationMixing)
-				// CONTINUE
 				const count = (mixTuples[0].item.destinationMixing || parsed.value.destinationMixing).count;
 				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.destinationMixing, "destinationMixing.volume", parsed.value.program, group.syringeSpacing || 1, count);
 				lines = lines.concat(lines2);
 			}
+		}
+
+		if (func === "Detect_Liquid") {
+			// console.log({tuples})
+			// console.log({well: _.first(tuples).well})
+			const l = tuples.map(tuple => [tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~DETECTED_VOLUME_${tuple.syringeRow}~`].join(","))
+			// console.log({l})
+			const args = ["EvowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(l);
+			const lines2 = [{line: evowareHelper.createExecuteLine("${ROBOLIQ}", args, true)}];
+			lines = lines.concat(lines2);
 		}
 
 		return lines;
