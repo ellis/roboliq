@@ -52,6 +52,8 @@ function toNumber(s) {
 
 const table0 = _drop(opts.args, 2).map(s => {
 	const l = s.split(",");
+	const value0 = toNumber(l[3]);
+	const value = (value0 === -1) ? null : value0;
 	const row = {
 		step_agent: step.agent,
 		step_equipment: step.equipment,
@@ -61,60 +63,103 @@ const table0 = _drop(opts.args, 2).map(s => {
 		well: l[2],
 		value_type: "volume",
 		value_units: "ul",
-		value: toNumber(l[3])
+		value
 	};
 	return row;
 });
 // console.log(table0)
 
-// `C:\ProgramData\Tecan\EVOware\AuditTrail\log`, we might use a regular expression such as this:
-// `content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
-// `content.match(/> C\d,SML(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
+function step1() {
+	// See if we can find the logfile
+	const logDir = "C:\\ProgramData\\Tecan\\EVOware\\AuditTrail\\log";
+	const files = fs.readdirSync(logDir).filter(filename => (filename.indexOf("EVO_") === 0));
+	if (files.length > 0) {
+		files.sort();
+		const logFile = files[files.length - 1];
 
-// Values that should be in all rows
-const common = _defaults({RUNID: runId, date: date.toISOString()}, designHelper.getCommonValues(DATA));
+		/*const lineReader = require('reverse-line-reader');
+		lineReader.eachLine(logfile, function(line, last) {
+			console.log(line);
 
-let table;
-if (!_isEmpty(DATA)) {
-	const joinKey = output.joinKey;
-	if (!_isEmpty(joinKey)) {
-		const wellToFactors = {};
-		_forEach(DATA, factorRow => {
-			const well = factorRow[joinKey];
-			wellToFactors[well] = factorRow;
+			if ( done ) {
+				return false; // stop reading
+			}
 		});
-		// console.log(wellToFactors);
+		*/
 
-		// For each row in the measurement table, try to add the factor columns
-		table = table0.map(measurementRow0 => {
-			const well = measurementRow0.well;
-			// Omit the "well" column from the measurement row, unless the joinKey = "well"
-			const measurementRow = (joinKey === "well") ? measurementRow0 : _.omit(measurementRow0, "well");
+		const content = fs.readFileSync(path.join(logDir, logFile), "utf8");
+		// const matches = content.match(/> C\d,SML(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/g);
+		// const matches = content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/g);
+		// if (matches) {
+		const match = content.match(/[\S\s]*> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/);
+		if (match) {
+			// const match = matches[matches.length - 1].match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/);
+			table0.forEach(row => {
+				const z = Number(match[row.step_syringe]);
+				if (!_isNaN(z) && row.value > 0) {
+					row.value2_type = "zlevel";
+					row.value2 = z;
+				}
+			})
+		}
+		// `C:\ProgramData\Tecan\EVOware\AuditTrail\log`, we might use a regular expression such as this:
+		// `content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
+		// `content.match(/> C\d,SML(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
+	}
+
+	step2();
+}
+
+function step2() {
+	// Values that should be in all rows
+	const common = _defaults({RUNID: runId, date: date.toISOString()}, designHelper.getCommonValues(DATA));
+
+	let table;
+	if (!_isEmpty(DATA)) {
+		const joinKey = output.joinKey;
+		if (!_isEmpty(joinKey)) {
+			const wellToFactors = {};
+			_forEach(DATA, factorRow => {
+				const well = factorRow[joinKey];
+				wellToFactors[well] = factorRow;
+			});
+			// console.log(wellToFactors);
+
+			// For each row in the measurement table, try to add the factor columns
+			table = table0.map(measurementRow0 => {
+				const well = measurementRow0.well;
+				// Omit the "well" column from the measurement row, unless the joinKey = "well"
+				const measurementRow = (joinKey === "well") ? measurementRow0 : _.omit(measurementRow0, "well");
+				// console.log(measurementRow)
+				// Try to get the factors for this well
+				const factorRow = wellToFactors[well];
+				return _merge({}, common, factorRow, output.userValues, measurementRow);
+			});
+		}
+		// console.log(table);
+	}
+
+	if (!table) {
+		table = table0.map(measurementRow => {
 			// console.log(measurementRow)
-			// Try to get the factors for this well
-			const factorRow = wellToFactors[well];
-			return _merge({}, common, factorRow, output.userValues, measurementRow);
+			return _merge({}, common, output.userValues, measurementRow);
 		});
 	}
-	// console.log(table);
+
+	// Save the JSON file
+	if (!_isEmpty(output.writeTo)) {
+		const filename = path.join(runDir, `${prefix}${output.writeTo}.json`);
+		fs.writeFileSync(filename, JSON.stringify(table, null, '\t'));
+	}
+
+	if (!_isEmpty(output.appendTo)) {
+		const filename = path.join(runDir, `${output.appendTo}.jsonl`);
+		const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
+		console.log(contents)
+		fs.appendFileSync(filename, contents);
+	}
+
+	process.exit(0);
 }
 
-if (!table) {
-	table = table0.map(measurementRow => {
-		// console.log(measurementRow)
-		return _merge({}, common, output.userValues, measurementRow);
-	});
-}
-
-// Save the JSON file
-if (!_isEmpty(output.writeTo)) {
-	const filename = path.join(runDir, `${prefix}${output.writeTo}.json`);
-	fs.writeFileSync(filename, JSON.stringify(table, null, '\t'));
-}
-
-if (!_isEmpty(output.appendTo)) {
-	const filename = path.join(runDir, `${output.appendTo}.jsonl`);
-	const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
-	console.log(contents)
-	fs.appendFileSync(filename, contents);
-}
+step1();

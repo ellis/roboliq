@@ -32,7 +32,7 @@ objects:
   #   location: ourlab.mario.site.HOTEL32_B1
   dyeLightLabware:
     type: Plate
-    model: ourlab.model.troughModel_25ml
+    model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
     contents: [Infinity l, dyeLight]
   dyeLight:
