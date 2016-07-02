@@ -381,9 +381,9 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 		if (func === "Detect_Liquid") {
 			// console.log({tuples})
 			// console.log({well: _.first(tuples).well})
-			const l = tuples.map(tuple => [tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~DETECTED_VOLUME_${tuple.syringeRow}~`].join(","))
+			const l = tuples.map(tuple => [tuple.syringeRow, tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~DETECTED_VOLUME_${tuple.syringeRow}~`].join(","))
 			// console.log({l})
-			const args = ["EvowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(l);
+			const args = ["evowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(l);
 			const lines2 = [{line: evowareHelper.createExecuteLine("${ROBOLIQ}", args, true)}];
 			lines = lines.concat(lines2);
 		}

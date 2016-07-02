@@ -3,6 +3,8 @@ roboliq: v1
 description: |
   Try to test z-level detection.
 
+  Dye: Orange G 0.08g/L, which should give us absorbances between 0.3 and 2.0 for 30ul to 200ul.
+
   Steps:
 
   * fill wells with various amounts of dye
@@ -22,15 +24,16 @@ objects:
   plate1:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_A1
-  plate2:
-    type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_B1
+    location: ourlab.mario.site.P3
+    # location: ourlab.mario.site.HOTEL32_A1
+  # plate2:
+  #   type: Plate
+  #   model: ourlab.model.plateModel_96_round_transparent_nunc
+  #   location: ourlab.mario.site.HOTEL32_B1
   dyeLightLabware:
     type: Plate
     model: ourlab.model.troughModel_25ml
-    location: ourlab.mario.site.R4
+    location: ourlab.mario.site.R6
     contents: [Infinity l, dyeLight]
   dyeLight:
     type: Liquid
@@ -46,10 +49,11 @@ objects:
       * `replicate`: a dummy variable to let us set the 'control' factor on 1 of 4 wells per volume
       * `group`: a dummy grouping variable for the syringes
     conditions:
-      # site*: [ourlab.mario.site.P2, ourlab.mario.site.P3]
       .plateSite*:
         - plate: plate1
-          site: ourlab.mario.site.P2
+          site: ourlab.mario.site.P3
+        # - plate: plate2
+        #   site: ourlab.mario.site.P3
       fullVolume: 200 ul
       volume*: [30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150, 160, 180, 190, 200]
       volume=calculate:
@@ -62,17 +66,24 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
+        groupBy: plate
         orderBy: wellNum
-      cycle*: 1
+      wellOrder=range:
+        order: shuffle
+      cycle*: 3
       syringe=range:
         from: 1
         till: 8
-        groupBy: cycle
         order: reshuffle
+        groupBy: [plate, cycle]
+        orderBy: wellOrder
       group=range:
-        groupBy: [cycle, syringe]
+        groupBy: [plate, cycle, syringe]
+        orderBy: wellOrder
       liquidClass=calculate: '(syringe <= 4) ? "Roboliq_Water_Wet_1000" : "Roboliq_Water_Wet_0050"'
-    orderBy: [group, syringe]
+      id=range:
+        orderBy: [plate, cycle, group, syringe]
+    orderBy: [plate, cycle, group, syringe]
 
 steps:
   data:
@@ -94,16 +105,16 @@ steps:
           object: $plate
           destination: $site
         2:
-          description: "Fill plate with dye"
-          data: {where: 'cycle == 0'}
+          description: "Handle plate preparation"
+          data: {where: 'cycle == 1', orderBy: wellNum}
           1:
-            description: "Distribute water to wells that require water first"
+            description: "Fill plate with dye"
             command: pipetter.pipette
             program: Roboliq_Water_Dry_1000
             sources: dyeLight
             destinationLabware: $plate
             destinations: $$well
-            volumes: $$dyeVolume
+            volumes: $$volume
             clean: none
             cleanEnd: thorough
           2:
@@ -119,10 +130,11 @@ steps:
             program:
               excitationWavelength: 480nm
               wellDesignFactor: well
+              userValues: {cycle: 0}
             outputDataset: "absorbance"
         3:
           description: "Cycles of z-level detection"
-          data: {where: 'cycle > 0'}
+          # data: {where: 'cycle > 0'}
           command: experiment.forEachGroup
           groupBy: cycle
           steps:

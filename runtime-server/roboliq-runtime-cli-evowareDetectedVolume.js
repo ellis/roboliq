@@ -67,6 +67,10 @@ const table0 = _drop(opts.args, 2).map(s => {
 });
 // console.log(table0)
 
+// `C:\ProgramData\Tecan\EVOware\AuditTrail\log`, we might use a regular expression such as this:
+// `content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
+// `content.match(/> C\d,SML(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
+
 // Values that should be in all rows
 const common = _defaults({RUNID: runId, date: date.toISOString()}, designHelper.getCommonValues(DATA));
 
