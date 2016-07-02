@@ -799,7 +799,12 @@ const commandHandlers = {
 	"pipetter._measureVolume": function(params, parsed, data) {
 		// console.log("pipetter._punctureSeal: "+JSON.stringify(parsed, null, '\t'))
 		const effects = pipetterUtils.getEffects_pipette(parsed, data);
-		return { effects };
+		return {
+			effects,
+			reports: (_.isEmpty(data.objects.DATA)) ? undefined : {
+				measurementFactors: data.objects.DATA
+			}
+		};
 	},
 	"pipetter._mix": function(params, parsed, data) {
 		// console.log("pipetter._mix: "+JSON.stringify(parsed, null, '\t'))

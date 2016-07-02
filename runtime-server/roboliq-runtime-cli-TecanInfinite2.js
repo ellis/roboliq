@@ -8,6 +8,7 @@ var path = require('path');
 // var sendPacket = require('./roboliq-runtime-sendPacket.js');
 // console.log("D")
 import processXml from './src/formats/TecanInfinite.js';
+import designHelper from './src/designHelper.js';
 // console.log("E")
 
 opts
@@ -50,23 +51,6 @@ const userValues = _.get(step, "program.userValues");
 const objectName = step.object;
 // console.log(factors);
 
-// HACK: copied from design2.js
-function getCommonValues(table) {
-	if (_.isEmpty(table)) return {};
-
-	let common = _.clone(table[0]);
-	for (let i = 1; i < table.length; i++) {
-		// Remove any value from common which aren't shared with this row.
-		_.forEach(table[i], (value, name) => {
-			if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
-				delete common[name];
-			}
-		});
-	}
-
-	return common;
-}
-
 let table;
 if (wellDesignFactor !== "_") {
 	const wellToFactors = {};
@@ -89,7 +73,7 @@ if (wellDesignFactor !== "_") {
 	// console.log(table);
 }
 else {
-	const common = getCommonValues(factors);
+	const common = designHelper.getCommonValues(factors);
 	// For each row in the measurement table, try to add the factor columns
 	table = result.table.map(measurementRow => {
 		// console.log(measurementRow)
