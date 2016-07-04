@@ -88,19 +88,26 @@ function step1() {
 		*/
 
 		const content = fs.readFileSync(path.join(logDir, logFile), "utf8");
-		// const matches = content.match(/> C\d,SML(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/g);
-		// const matches = content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/g);
-		// if (matches) {
-		const match = content.match(/[\S\s]*> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/);
-		if (match) {
+		const matchRPZ0 = content.match(/[\S\s]*> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/);
+		const matchRVZ1 = content.match(/[\S\s]*> C\d,RVZ1[\s]+.{14}- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/);
+		if (matchRPZ0 || matchRVZ1) {
 			// const match = matches[matches.length - 1].match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/);
 			table0.forEach(row => {
-				const z = Number(match[row.step_syringe]);
-				if (!_isNaN(z) && row.value > 0) {
-					row.value2_type = "zlevel";
-					row.value2 = z;
+				if (matchRPZ0) {
+					const z = Number(matchRPZ0[row.step_syringe]);
+					if (!_isNaN(z) && row.value > 0) {
+						row.value3_type = "zlevel";
+						row.value3 = z;
+					}
 				}
-			})
+				if (matchRVZ1) {
+					const z = Number(matchRVZ1[row.step_syringe]);
+					if (!_isNaN(z) && row.value > 0) {
+						row.value2_type = "zlevel";
+						row.value2 = z;
+					}
+				}
+			});
 		}
 		// `C:\ProgramData\Tecan\EVOware\AuditTrail\log`, we might use a regular expression such as this:
 		// `content.match(/> C\d,RPZ0[\s]+- C\d,0,(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*),(\d*)/)`
