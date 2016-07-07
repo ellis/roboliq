@@ -264,9 +264,13 @@ In the end, I want to print out a report that can be displayed near the robot:
 	* [ ] `qc_mario_pipetting6b`: variance for .2 and 2.
 	* [ ] `qc_mario_pipetting6c`: variance for .04 and .4.
 	* [ ] `qc_mario_pipetting6c`: second run, for .1 to 10
+* [x] Evaporation maps (detailed on one site, overall rates on other sites)
+	* `qc_mario_evaporation6`: 300ul on various sites
+	* `qc_mario_evaporation5b`: 300
+	* `qc_mario_evaporation5`: 150
 * [ ] Curve of dye aliquot volume to absorbance (because some dye particles may stick to the tips)
 	* `qc_mario_absorbance3`: 75, 150
-* [.] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes
+* [.] maintenance report using the "shotgun" script for random sites, volumes, tips, and liquid classes (`qc_mario_pipetting1`)
 * [ ] variance of dispense and relative absorbance levels for various tip models, volumes, syringes, and liquidClasses
 	* `qc_mario_pipetting7`
 	* large, dry
@@ -277,33 +281,19 @@ In the end, I want to print out a report that can be displayed near the robot:
 * [ ] table of true volume for several critical combinations of tip models, volumes, and liquidClasses
 	* large, dry
 		* `qc_mario_absorbance3`: 75, 150
-		* `qc_mario_evaporation5`: 150, 300
+		* [x] `qc_mario_evaporation5`: 150, 300
 		* `qc_mario_weight1_tube_5_large`: 5
 	* small, wet: 1, 3?, 5?, 10?, 0.5?, 0.2?, 0.1?
 		* [.] `qc_mario_pipetting8`: 1
 		* `qc_mario_weight1_tube_5_small`: 5
-* [x] Evaporation maps (detailed on one site, overall rates on other sites)
-	* `qc_mario_evaporation6`: 300ul on various sites
-	* `qc_mario_evaporation5b`: 300
-	* `qc_mario_evaporation5`: 150
 * [ ] z-level detection calibration
 
 Still need to analyze:
 
-* [ ] evaporation 5, 5b, and 6
+* [ ] evaporation6
 * [ ] qc_mario_pipetting6
+* [ ] qc_mario_zlevel1
 
-Z-level experiment:
-
-* fill wells with various amounts of dye
-* shake and read
-* perform z-level measurements on experimental wells (randomized access), but leave a control well for each volume untouched
-* read absorbance
-* loop?
-* fill all wells with water to about 200ul
-* shake and read
-
-Should we divide the wells up by tipModel?  Do we want variance by tipModel, syringe?
 
 ## Manual dye prep
 
