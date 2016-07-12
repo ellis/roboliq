@@ -2,6 +2,7 @@
 
 * [ ] email Fabian to ask about the volumes/concentrations for all the components
 * [ ] design2.js: add functionality for joining independent designs column-wise
+* [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for selecting partial factorial design
 * [ ] design2.js: add functionality for randomly selecting a number of rows
 * [ ] design2.js: add functionality for selecting rows in a d-optimal way
@@ -28,6 +29,7 @@
 * OD600
 * Cell count
 
+
 # Various design notes
 
 <http://www.itl.nist.gov/div898/handbook/pri/pri.htm>
@@ -39,3 +41,25 @@
 	* regression design
 * Need to find the optimal amounts of media compounds
 	* response surface: Central composite or Box-Behnken
+
+Reading: Box, ANOVA p138
+
+# Specification format
+
+```{yaml}
+factors:
+  buffer:
+    range: []
+* Buffer
+* Glucose
+* mixture of:
+	* Nitrogen
+	* Phosphate
+	* Sulfur
+* Vitamin mix
+* Trace elements
+
+design:
+bufferVolume*: [5ul,]
+glucoseVolume*: [ ]
+```
