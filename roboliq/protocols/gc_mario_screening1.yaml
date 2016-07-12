@@ -80,68 +80,75 @@ steps:
     equipment: ourlab.mario.liha
     intensity: thorough
   2:
-    command: experiment.forEachGroup
-    groupBy: plate
-    steps:
-      description: "`Plate {{$plate}}`"
-      command: transporter.doThenRestoreLocation
-      objects: [$plate]
-      steps:
-        1:
-          command: transporter.movePlate
-          object: $plate
-          destination: $site
-        2:
-          description: "Handle plate preparation"
-          data: {where: 'cycle == 1', orderBy: wellNum}
+    description: "Pipette media mixtures"
+      command: pipetter.pipetteMixtures
+      destinationLabware: $plate
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: buffer, volume: $bufferVolume}
+              - {source: glucose, volume: $glucoseVolume}
+              - {source: nps, volume: $npsVolume}
+              - {source: vitamin, volume: $vitaminVolume}
+              - {source: trace, volume: $traceVolume}
+      clean: thorough
+      cleanBetweenSameSource: none
+  3:
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: $plate
+    program:
+      duration: 1 minute
+  4:
+    description: "Pipette strain or water"
+      command: pipetter.pipetteMixtures
+      destinationLabware: $plate
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: buffer, volume: $bufferVolume}
+              - {source: glucose, volume: $glucoseVolume}
+              - {source: nps, volume: $npsVolume}
+              - {source: vitamin, volume: $vitaminVolume}
+              - {source: trace, volume: $traceVolume}
+      clean: thorough
+      cleanEnd: decontaminate
+  5:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {cycle: 0}
+    outputDataset: "absorbance"
+      3:
+        description: "Cycles of z-level detection"
+        # data: {where: 'cycle > 0'}
+        command: experiment.forEachGroup
+        groupBy: cycle
+        steps:
+          description: "`Cycle {{$cycle}}`"
           1:
-            description: "Fill plate with dye"
-            command: pipetter.pipette
-            program: Roboliq_Water_Dry_1000
-            sources: dyeLight
-            destinationLabware: $plate
-            destinations: $$well
-            volumes: $$volume
-            clean: none
-            cleanEnd: thorough
+            command: pipetter.measureVolume
+            wellLabware: $plate
+            items:
+              "#data":
+                template:
+                  syringe: $syringe
+                  well: $well
+                  program: $liquidClass
+            clean: flush
+            outputDataset: "volume"
           2:
-            description: "Shake plate1"
-            command: shaker.shakePlate
-            object: $plate
-            program:
-              duration: 1 minute
-          3:
             description: "Measure absorbance"
             command: absorbanceReader.measurePlate
             object: $plate
             program:
               excitationWavelength: 480nm
               wellDesignFactor: well
-              userValues: {cycle: 0}
             outputDataset: "absorbance"
-        3:
-          description: "Cycles of z-level detection"
-          # data: {where: 'cycle > 0'}
-          command: experiment.forEachGroup
-          groupBy: cycle
-          steps:
-            description: "`Cycle {{$cycle}}`"
-            1:
-              command: pipetter.measureVolume
-              wellLabware: $plate
-              items:
-                "#data":
-                  template:
-                    syringe: $syringe
-                    well: $well
-                    program: $liquidClass
-              clean: flush
-              outputDataset: "volume"
-            2:
-              description: "Measure absorbance"
-              command: absorbanceReader.measurePlate
-              object: $plate
-              program:
-                excitationWavelength: 480nm
-                wellDesignFactor: well
-              outputDataset: "absorbance"
