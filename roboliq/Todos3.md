@@ -17,12 +17,14 @@
 
 * Buffer
 * Glucose
+* Nitrogen
 * mixture of:
-	* Nitrogen
 	* Phosphate
 	* Sulfur
+	* Trace elements
 * Vitamin mix
-* Trace elements
+
+Components will contain antibiotics to avoid contamination.
 
 *Output responses*:
 
