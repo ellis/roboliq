@@ -1,0 +1,147 @@
+roboliq: v1
+
+description: |
+  Water test for the initial screening experiment using a
+  5-factor central composite design.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  tubeLabware1:
+    type: Plate
+    model: ourlab.model.tubeHolderModel_15ml
+    location: ourlab.mario.site.T1
+  buffer: {type: Liquid, wells: tubeLabware1(A01)}
+  glucose: {type: Liquid, wells: tubeLabware1(B01)}
+  nps: {type: Liquid, wells: tubeLabware1(C01)}
+  vitamin: {type: Liquid, wells: tubeLabware1(D01)}
+  trace: {type: Liquid, wells: tubeLabware1(E01)}
+  strain: {type: Liquid, wells: tubeLabware1(F01)}
+
+  design:
+    type: Design
+    randomSeed: 1234
+    description: |
+      5-factor central composite design.
+    conditions:
+      part*:
+        factorial:
+          x1*: [-1, 1]
+          x2*: [-1, 1]
+          x3*: [-1, 1]
+          x4*: [-1, 1]
+          x5*: [-1, 1]
+          replicate*: 2
+        axial:
+          .axis*:
+            - {x1*: [-1, 1], x2: 0, x3: 0, x4: 0, x5: 0}
+            - {x2*: [-1, 1], x1: 0, x3: 0, x4: 0, x5: 0}
+            - {x3*: [-1, 1], x2: 0, x1: 0, x4: 0, x5: 0}
+            - {x4*: [-1, 1], x2: 0, x3: 0, x1: 0, x5: 0}
+            - {x5*: [-1, 1], x2: 0, x3: 0, x4: 0, x1: 0}
+          replicate*: 2
+        central:
+          x1: 0
+          x2: 0
+          x3: 0
+          x4: 0
+          x5: 0
+          replicate*: 6
+        control:
+          x1: 0
+          x2: 0
+          x3: 0
+          x4: 0
+          x5: 0
+          replicate*: 6
+      plate: plate1
+      wellNum=range:
+        order: shuffle
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: wellNum
+      id=range:
+        orderBy: [wellNum]
+    orderBy: [wellNum]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    command: experiment.forEachGroup
+    groupBy: plate
+    steps:
+      description: "`Plate {{$plate}}`"
+      command: transporter.doThenRestoreLocation
+      objects: [$plate]
+      steps:
+        1:
+          command: transporter.movePlate
+          object: $plate
+          destination: $site
+        2:
+          description: "Handle plate preparation"
+          data: {where: 'cycle == 1', orderBy: wellNum}
+          1:
+            description: "Fill plate with dye"
+            command: pipetter.pipette
+            program: Roboliq_Water_Dry_1000
+            sources: dyeLight
+            destinationLabware: $plate
+            destinations: $$well
+            volumes: $$volume
+            clean: none
+            cleanEnd: thorough
+          2:
+            description: "Shake plate1"
+            command: shaker.shakePlate
+            object: $plate
+            program:
+              duration: 1 minute
+          3:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wellDesignFactor: well
+              userValues: {cycle: 0}
+            outputDataset: "absorbance"
+        3:
+          description: "Cycles of z-level detection"
+          # data: {where: 'cycle > 0'}
+          command: experiment.forEachGroup
+          groupBy: cycle
+          steps:
+            description: "`Cycle {{$cycle}}`"
+            1:
+              command: pipetter.measureVolume
+              wellLabware: $plate
+              items:
+                "#data":
+                  template:
+                    syringe: $syringe
+                    well: $well
+                    program: $liquidClass
+              clean: flush
+              outputDataset: "volume"
+            2:
+              description: "Measure absorbance"
+              command: absorbanceReader.measurePlate
+              object: $plate
+              program:
+                excitationWavelength: 480nm
+                wellDesignFactor: well
+              outputDataset: "absorbance"
