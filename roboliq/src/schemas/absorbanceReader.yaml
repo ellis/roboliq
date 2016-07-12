@@ -18,6 +18,11 @@ absorbanceReader.measurePlate:
     program:
       description: "Program parameters"
       properties:
+        shakerProgram:
+          description: Program for shaker.
+          properties:
+            rpm: {description: Rotations per minute (RPM), type: number}
+            duration: {description: "Duration of shaking", type: Duration}
         wellDesignFactor: {description: "Name of design column that indicates which wells to measure", type: string}
         wells: {description: "Array of wells to read", type: "Wells"}
         userValues: {description: "User-specificed values that should be included in the output table", type: object}
@@ -25,6 +30,11 @@ absorbanceReader.measurePlate:
     programData: {description: "Program data"}
     outputFile: {description: "Filename for output", type: "string"}
     outputDataset: {description: "Name of dataset to which the measurements values will be appended.", type: string}
+    output:
+      description: "Output definition for where and how to save the measurements"
+      joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
+      writeTo: {description: "Filename to write measured to as JSON", type: "string"}
+      appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}

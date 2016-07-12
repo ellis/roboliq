@@ -563,7 +563,7 @@ module.exports = {
 					equipment: {description: "Equipment identifier", type: "Equipment"},
 				}
 			},
-			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.shaker": {
+			"shaker.run|ourlab.luigi.evoware|ourlab.luigi.shaker": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
 					equipment: {description: "Equipment identifier", type: "Equipment"},
@@ -669,7 +669,7 @@ module.exports = {
 				return {expansion};
 			},
 			"equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox": function(params, parsed, data) {
-				// console.log("equipment.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
+				// console.log("shaker.run|ourlab.luigi.evoware|ourlab.luigi.culturebox:"); console.log({parsed, params})
 				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 				const parsedProgram = parsed.value.program;
 				//console.log({parsedProgram});

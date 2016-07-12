@@ -170,11 +170,12 @@ pipetter._measureVolume:
     items: {description: "List of parameters for individual wells", "type": "array", items: {type: pipetter._MeasureVolumeItem}}
     output:
       description: "Output definition for where and how to save the measurements"
-      joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
-      writeTo: {description: "Filename to write measured to as JSON", type: "string"}
-      appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
-      #database: [database, table]
-      #dbTable:
+      properties:
+        joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
+        writeTo: {description: "Filename to write measured to as JSON", type: "string"}
+        appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
+        #database: [database, table]
+        #dbTable:
   required: [agent, equipment, items]
 
 pipetter._mix:
@@ -256,10 +257,11 @@ pipetter.measureVolume:
     tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
     output:
       description: "Output definition for where and how to save the measurements"
-      joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
-      # writeTo: {description: "Filename to write measured to as JSON", type: "string"}
-      appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
-      userValues: {description: "Map of user-defined key-values to include in the output"}
+      properties:
+        joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
+        # writeTo: {description: "Filename to write measured to as JSON", type: "string"}
+        appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
+        userValues: {description: "Map of user-defined key-values to include in the output"}
 
 pipetter.mix:
   description: Mix well contents by aspirating and re-dispensing.

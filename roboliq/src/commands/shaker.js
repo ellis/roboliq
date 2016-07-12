@@ -34,7 +34,7 @@ const commandHandlers = {
 
 		const expansion = [
 			{
-				command: "equipment.run|"+params2.agent+"|"+params2.equipment,
+				command: "shaker.run|"+params2.agent+"|"+params2.equipment,
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: parsed.orig.program
@@ -77,7 +77,7 @@ const commandHandlers = {
 				"destination": params2.site
 			},
 			{
-				command: "equipment.run|"+params2.agent+"|"+params2.equipment,
+				command: "shaker.run|"+params2.agent+"|"+params2.equipment,
 				agent: params2.agent,
 				equipment: params2.equipment,
 				program: parsed.orig.program,

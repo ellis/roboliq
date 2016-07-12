@@ -499,6 +499,13 @@ module.exports = {
 			}
 		},
 		{
+			"shaker.canAgentEquipmentSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.reader",
+				"site": "ourlab.mario.site.READER"
+			}
+		},
+		{
 			"pipetter.canAgentEquipment": {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.liha"
@@ -630,7 +637,7 @@ module.exports = {
 				},
 				required: ["program"]
 			},
-			"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": {
+			"shaker.run|ourlab.mario.evoware|ourlab.mario.shaker": {
 				properties: {
 					agent: {description: "Agent identifier", type: "Agent"},
 					equipment: {description: "Equipment identifier", type: "Equipment"},
@@ -720,7 +727,7 @@ module.exports = {
 				return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
 			},
 			// Shaker
-			"equipment.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
+			"shaker.run|ourlab.mario.evoware|ourlab.mario.shaker": function(params, parsed, data) {
 				//console.log("equipment.run|ourlab.mario.evoware|ourlab.mario.shaker: "+JSON.stringify(parsed, null, '\t'))
 				const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 				const rpm = parsed.value.program.rpm || 750;

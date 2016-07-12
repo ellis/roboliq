@@ -5,23 +5,23 @@ description: |
 
   Protocol steps:
 
-  * Fill balancePlate to 300ul with water
-  * Put balancePlate into centrifuge
   * Fill plate1 wells to 300ul with dye mixture (absorbance should be around 1)
     * have controls wells that just have water too -- one in each column (12 in total)
   * Weigh plate1
-  * Read plate1, shake for 24? hours, read plate
+  * Read plate1, shake for 24? hours in the reader, read plate1 again
   * Move plate1 back to bench
   * Weigh plate1
   * Calculate total volume loss
-  * #Centrifuge plate1
-  * #Shake plate1
   * Extract 50ul from each well on plate1 to plate2
   * Fill plate2 to 250ul with water
   * Shake plate2
   * Read plate2
   * Calculate relative volume loss based on absorbance readout
   * Calculate volume loss in each well
+
+  10ul => 1
+  10ul+290ul
+  300ul => 1
 
 config:
   evowareCompiler:
@@ -32,144 +32,144 @@ objects:
   plate1:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P7
-  plate1:
+    location: ourlab.mario.site.P2
+  plate2:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P8
+    location: ourlab.mario.site.P3
   dyeLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml
-    location: ourlab.mario.site.R6
+    location: ourlab.mario.site.R5
     contents: [Infinity l, dye]
   dye:
     type: Liquid
     wells: dyeLabware(C01 down F01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
 
-  design:
+  designWells:
     type: Design
     randomSeed: 1234
-    description: |
-      5-factor central composite design.
+    # description: |
     conditions:
-      part*:
-        factorial:
-          x1*: [-1, 1]
-          x2*: [-1, 1]
-          x3*: [-1, 1]
-          x4*: [-1, 1]
-          x5*: [-1, 1]
-          replicate*: 2
-        axial:
-          .axis*:
-            - {x1*: [-1, 1], x2: 0, x3: 0, x4: 0, x5: 0}
-            - {x2*: [-1, 1], x1: 0, x3: 0, x4: 0, x5: 0}
-            - {x3*: [-1, 1], x2: 0, x1: 0, x4: 0, x5: 0}
-            - {x4*: [-1, 1], x2: 0, x3: 0, x1: 0, x5: 0}
-            - {x5*: [-1, 1], x2: 0, x3: 0, x4: 0, x1: 0}
-          replicate*: 2
-        central:
-          x1: 0
-          x2: 0
-          x3: 0
-          x4: 0
-          x5: 0
-          replicate*: 6
-        control:
-          x1: 0
-          x2: 0
-          x3: 0
-          x4: 0
-          x5: 0
-          replicate*: 6
-      plate: plate1
-      wellNum=range:
+      wellCol*: 12
+      wellRow*: 8
+      well=calculateWell: {row: wellRow, column: wellCol}
+      dummy1=range:
+        groupBy: wellCol
         order: shuffle
-      well=allocateWells:
-        rows: 8
-        columns: 12
-        orderBy: wellNum
-      id=range:
-        orderBy: [wellNum]
-    orderBy: [wellNum]
+      source=calculate: '(dummy1 == 1) ? "water" : "dye"'
+      id=range: {}
+
+  # designPlates:
+  #   type: Design
+  #   randomSeed: 1234
+  #   conditions:
+  #     stageA*:
+  #       - stageAName: before
+  #         plate: plate1
+  #         dyeVolume: 300 ul
+  #         waterVolume: 0 ul
+  #       - stageAName: after
+  #         plate: plate1
+  #         dyeVolume: 300 ul
+  #         waterVolume: 0 ul
+  #       - stageAName: extract
+  #         plate: plate2
+  #         dyeVolume: 50 ul
 
 steps:
   data:
-    source: design
+    source: designWells
   1:
     command: pipetter.cleanTips
     equipment: ourlab.mario.liha
     intensity: thorough
   2:
     description: "Pipette media mixtures"
-      command: pipetter.pipetteMixtures
-      destinationLabware: $plate
-      mixtures:
-        "#data":
-          template:
-            destination: $well
-            sources:
-              - {source: buffer, volume: $bufferVolume}
-              - {source: glucose, volume: $glucoseVolume}
-              - {source: nps, volume: $npsVolume}
-              - {source: vitamin, volume: $vitaminVolume}
-              - {source: trace, volume: $traceVolume}
-      clean: thorough
-      cleanBetweenSameSource: none
+    data: designWells
+    command: pipetter.pipette
+    sources: $$source
+    destinationLabware: plate1
+    destinations: $$well
+    volumes: 300 ul
+    clean: none
+    cleanEnd: thorough
   3:
-    description: "Shake plate1"
+    description: "Weigh plate1"
+    command: scale.weigh
+    object: plate1
+    outputDataset: "weight"
+  4:
+    description: Read plate1, shake for 24 hours in the reader, read plate1 again
+    command: transporter.doThenRestoreLocation
+    objects: [plate1]
+    steps:
+      1:
+        description: "Measure absorbance"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+          userValues: {stage: "before", plate: plate1}
+        outputDataset: "absorbance"
+        destinationAfter: stay
+      # 2:
+      #   description: "Shake 16h"
+      #   command: shaker.run
+      #   agent: ourlab.mario
+      #   equipment: ourlab.mario.reader
+      #   program:
+      #     duration: 16 hours
+      #     amplitude: max
+      3:
+        description: "Measure absorbance again"
+        command: absorbanceReader.measurePlate
+        object: plate1
+        program:
+          excitationWavelength: 480nm
+          wellDesignFactor: well
+          userValues: {stage: "after", plate: plate1}
+        outputDataset: "absorbance"
+  5:
+    description: "Weigh plate1 after waiting"
+    command: scale.weigh
+    object: plate1
+    outputDataset: "weight"
+  6:
+    description: Extract 50ul from each well on plate1 to plate2
+    command: pipetter.pipette
+    sourceLabware: plate1
+    sources: $$well
+    destinationLabware: plate2
+    destinations: $$well
+    volumes: 50 ul
+    clean: none
+    cleanEnd: thorough
+  7:
+    description: Fill plate2 to 250ul with water
+    command: pipetter.pipette
+    sources: water
+    destinationLabware: plate2
+    destinations: $$well
+    volumes: 200 ul
+    clean: none
+    cleanEnd: thorough
+  8:
+    description: "Shake plate2"
     command: shaker.shakePlate
-    object: $plate
+    object: plate2
     program:
       duration: 1 minute
-  4:
-    description: "Pipette strain or water"
-      command: pipetter.pipetteMixtures
-      destinationLabware: $plate
-      mixtures:
-        "#data":
-          template:
-            destination: $well
-            sources:
-              - {source: buffer, volume: $bufferVolume}
-              - {source: glucose, volume: $glucoseVolume}
-              - {source: nps, volume: $npsVolume}
-              - {source: vitamin, volume: $vitaminVolume}
-              - {source: trace, volume: $traceVolume}
-      clean: thorough
-      cleanEnd: decontaminate
-  5:
-    description: "Measure absorbance"
+  9:
+    description: "Measure absorbance on plate2"
     command: absorbanceReader.measurePlate
-    object: $plate
+    object: plate2
     program:
       excitationWavelength: 480nm
       wellDesignFactor: well
-      userValues: {cycle: 0}
+      userValues: {stage: "extract", plate: plate2}
     outputDataset: "absorbance"
-      3:
-        description: "Cycles of z-level detection"
-        # data: {where: 'cycle > 0'}
-        command: experiment.forEachGroup
-        groupBy: cycle
-        steps:
-          description: "`Cycle {{$cycle}}`"
-          1:
-            command: pipetter.measureVolume
-            wellLabware: $plate
-            items:
-              "#data":
-                template:
-                  syringe: $syringe
-                  well: $well
-                  program: $liquidClass
-            clean: flush
-            outputDataset: "volume"
-          2:
-            description: "Measure absorbance"
-            command: absorbanceReader.measurePlate
-            object: $plate
-            program:
-              excitationWavelength: 480nm
-              wellDesignFactor: well
-            outputDataset: "absorbance"

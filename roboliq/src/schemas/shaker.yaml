@@ -14,8 +14,10 @@ shaker.ShakerProgram:
   description: Program for shaker.
   properties:
     #type: {enum: [shaker.ShakerProgram]}
-    rpm: {description: Rotations per minute (RPM), type: number}
+    amplitude: {description: "Amplitude", enum: ["min", "low", "high", "max"]}
     duration: {description: "Duration of shaking", type: Duration}
+    rpm: {description: Rotations per minute (RPM), type: number}
+  required: [duration]
 
 shaker.shakePlate:
   description: "Shake a plate."
@@ -33,11 +35,5 @@ shaker.run:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program:
-      description: "Program for shaking"
-      type: "object"
-      properties:
-        rpm: {type: "number"}
-        duration: {type: "Duration"}
-      required: [duration]
+    program: {description: "Program for shaking", type: shaker.ShakerProgram}
   required: ["program"]
