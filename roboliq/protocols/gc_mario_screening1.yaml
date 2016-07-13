@@ -29,8 +29,18 @@ objects:
     type: Design
     randomSeed: 1234
     description: |
-      5-factor central composite design.
+      $2^{5-1}$ partial factorial central composite design, repeated three
+      times at different starting points.
+
+      * $x1$: Buffer concentration
+      * $x2$: Glucose concentration
+      * $x3$: Nitrogen concentration
+      * $x4$: Phosphate/Sulfur/Trace elements mix concentration
+      * $x5$: Vitamin mix concentation
+
     conditions:
+      node*:
+        - x1c:
       part*:
         factorial:
           x1*: [-1, 1]
@@ -48,13 +58,6 @@ objects:
             - {x5*: [-1, 1], x2: 0, x3: 0, x4: 0, x1: 0}
           replicate*: 2
         central:
-          x1: 0
-          x2: 0
-          x3: 0
-          x4: 0
-          x5: 0
-          replicate*: 6
-        control:
           x1: 0
           x2: 0
           x3: 0
