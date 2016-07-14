@@ -68,6 +68,10 @@ export function printRows(rows, hideRedundancies = false) {
 	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
 }
 
+/**
+ * Turn a design specification into a design table.
+ * @param {object} design - the design specification.
+ */
 export function flattenDesign(design) {
 	if (_.isEmpty(design)) {
 		return [];
@@ -82,7 +86,7 @@ export function flattenDesign(design) {
 	}
 
 	const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
-	const conditionsRows = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine));
+	const conditionsRows = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine, design.initialRows));
 	let rows;
 	if (conditionsRows.length == 1) {
 		rows = conditionsRows[0];
@@ -231,21 +235,22 @@ export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
 /**
  * If conditions is an array, then each element will be processed individually and then the results will be merged together.
  * @param {object|array} conditions - an object of conditions or an array of such objects.
+ * @param {array} table0 - the initial rows to start expanding conditions on (default `[{}]`)
  */
-export function expandConditions(conditions, randomEngine) {
+export function expandConditions(conditions, randomEngine, table0 = [{}]) {
 	// console.log("expandConditions: "+JSON.stringify(conditions))
 
 	const conditionsList = _.isArray(conditions) ? conditions : [conditions];
 	const conditionsRows = conditionsList.map(conditions => {
-		const table = [{}];
-		expandRowsByObject(table, [0], [], conditions, randomEngine);
+		const table = _.cloneDeep(table0);
+		expandRowsByObject(table, _.range(0, table.length), [], conditions, randomEngine);
 		flattenArrayM(table);
 		return table;
 	});
 
 	let table = (conditionsRows.length == 1)
 		? conditionsRows[0]
-		: _.merge.apply(_, [[]].concat(conditionsRows));
+		: _.merge.apply(_, [[]].concat(conditionsRows));  // should probably be `_.merge([], ...conditionsRows)`
 	return table;
 }
 

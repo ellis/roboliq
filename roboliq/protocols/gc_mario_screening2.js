@@ -1,4 +1,6 @@
 import _ from 'lodash';
+// import Design from '../src/design2.js'
+const Design = require('../src/design2.js');
 
 const fractional_5_1a = {
 	x1: [-1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1],
@@ -42,3 +44,14 @@ const rows1 = createFractional_5_1(1, undefined, 6)
 console.log(rows1);
 const rows2 = createFractional_5_1(2, undefined, 6)
 const rows3 = createFractional_5_1(1, undefined, 6)
+
+
+const design1 = {
+	initialRows: rows1,
+	conditions: {
+		group: 1,
+	}
+};
+console.log(require('../src/design2.js'))
+const data1 = Design.flattenDesign(design1);
+console.log(data1)

@@ -1468,5 +1468,21 @@ describe('design', () => {
 			]);
 		});
 
+		it("should handle 'initialRows' property", () => {
+			const design = {
+				initialRows: [
+					{a: 1}, {a: 2}, {a: 3}
+				],
+				conditions: {
+					"b": 1
+				}
+			};
+			const table = flattenDesign(design);
+			// console.log(JSON.stringify(table)); printRows(table);
+			should.deepEqual(table, [
+				{a: 1, b: 1}, {a: 2, b: 1}, {a: 3, b: 1}
+			]);
+		});
+
 	});
 });
