@@ -1,15 +1,30 @@
 # Todos for optimization of medium
 
 * [x] handle proportions of different nitrogen sources
-* [ ] plug the design table into the script
-* [ ] Fabian: volume of buffer?
-* [ ] Fabian: what to use for decontamination wash?  Bleach?
-* [ ] Fabian: open the student lab to return scale?
-* [ ] Fabian: can we just flush between strain dispenses (then decontam at end), or do we need to decontaminate between with dispense?
-* [ ] Fabian: centers3 values?
-* [ ] Fabian: rather than 'x' concentrations, we could also use values like `8 mg / L`
-* [ ] Fabian: we don't need to shake the plate on the shaker before putting it in the reader, do we?
-* [ ] Fabian: reader doesn't like plate with lid, says bad height
+* [x] Fabian: what to use for decontamination wash?  Bleach? A: Yes
+* [x] trace1 needs to be added second-to-last
+* [x] plug the design table into the script
+* [x] Fabian: centers3 values?
+	lower box:
+	glucose: 2%-4% (1x - 2x)
+	nitrogen1: 1x-2x
+	nitrogen2: 0-3x
+	trace1: 1x-2x
+	trace2: 0-3x
+
+	higher box:
+	glucose: 1.5x - 3x (3% - 6%)
+	nitrogen1: 1.5x-4x
+	nitrogen2: 1-4x
+	trace1: 1.5x-4x
+	trace2: 1-4x
+* [x] Fabian: reader doesn't like plate with lid, says bad height; Gregor says just run it and indicate lid-less
+* [?] between strain dispenses, no flushing; but decontam before and end
+* [ ] fix gc_mario_screening2.mdfx so that it doesn't loop
+* [ ] test absorbanceReader with new `output` property and shaking and stuff
+* [ ] generate with lots of loops, so that it continues over the weekend
+* [ ] Fabian: start the cooling system
+
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for selecting partial factorial design

@@ -547,8 +547,9 @@ function findTipModel(items, equipment, equipmentName) {
 	else {*/
 		const tipModelName = _.findKey(equipment.tipModel, (tipModel) => {
 			return _.every(items, item => {
-				if (!_.isUndefined(item.volume)) {
-					const volume = item.volume;
+				const volume = item.volume;
+				// Only if the item has a volume, then we'll need a tipModel
+				if (!_.isUndefined(volume) && math.compare(volume, math.unit(0, "ul")) > 0) {
 					assert(math.unit('l').equalBase(volume), "expected units to be in liters");
 					if (math.compare(volume, math.eval(tipModel.min)) < 0 || math.compare(volume, math.eval(tipModel.max)) > 0) {
 						return false;

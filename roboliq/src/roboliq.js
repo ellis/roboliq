@@ -1105,7 +1105,7 @@ function _run(opts, userProtocol) {
 		_.forEach(designs, (design, name) => {
 			console.log();
 			console.log(`Design "${name}":`);
-			console.log(JSON.stringify(design, null, '\t'))
+			// console.log(JSON.stringify(design, null, '\t'))
 			const rows = Design.flattenDesign(design);
 			Design.printRows(rows);
 		});

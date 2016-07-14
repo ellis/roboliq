@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2016-04-01T10:06:32.0780948Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+    <TecanMeasurement id="1" class="Measurement">
+        <MeasurementManualCycle id="2" number="1" type="Standard">
+            <CyclePlate id="3" file="NUN96ft" plateWithCover="False">
+                <PlateRange id="0" range="A1~H12" auto="true">
+                    <Temperature id="4" module="PLATE" temperature="340" switch="ON" />
+                </PlateRange>
+                <PlateRange id="5" range="A1:H12" auto="false">
+                    <MeasurementAbsorbance id="8" mode="Normal" type="" name="ABS" longname="" description="">
+                        <MeasurementKinetic id="6" loops="720" timeSpan="PT6M" maxDeviation="P10675199DT2H48M5.4775807S" duration="PT1M" useDuration="false">
+                            <Shaking id="7" mode="Orbital" time="PT4M" frequency="0" amplitude="4000" maxDeviation="PT0S" settleTime="PT0S" />
+                            <Well id="9" auto="true">
+                                <MeasurementReading id="10" name="" refID="6" refTimeMaxDeviation="PT6M" refName="KINETIC.RUN.CYCLE" beamDiameter="700" beamGridType="XLine" beamGridSize="2" beamEdgeDistance="2500">
+                                    <ReadingLabel id="11" name="Label1" scanType="ScanFixed" refID="0">
+                                        <ReadingSettings number="18" rate="25000" />
+                                        <ReadingTime integrationTime="0" lagTime="0" readDelay="0" flash="0" dark="0" excitationTime="0" />
+                                        <ReadingFilter id="0" type="Ex" wavelength="6000" bandwidth="90" attenuation="0" usage="ABS" />
+                                    </ReadingLabel>
+                                </MeasurementReading>
+                            </Well>
+                            <CustomData id="12" />
+                        </MeasurementKinetic>
+                    </MeasurementAbsorbance>
+                </PlateRange>
+            </CyclePlate>
+        </MeasurementManualCycle>
+        <MeasurementInfo id="0" description="">
+            <ScriptTemplateSettings id="0">
+                <ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+                <ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+            </ScriptTemplateSettings>
+        </MeasurementInfo>
+    </TecanMeasurement>
+</TecanFile>

@@ -14,16 +14,24 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
+  trough1:
+    type: Plate
+    description: trough for sterile water with antibiotics
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
   tubeLabware1:
     type: Plate
     model: ourlab.model.tubeHolderModel_15ml
     location: ourlab.mario.site.T1
+  water: {type: Liquid, wells: trough1(A01 down H01)}
   buffer: {type: Liquid, wells: tubeLabware1(A01)}
   glucose: {type: Liquid, wells: tubeLabware1(B01)}
-  nps: {type: Liquid, wells: tubeLabware1(C01)}
-  vitamin: {type: Liquid, wells: tubeLabware1(D01)}
-  trace: {type: Liquid, wells: tubeLabware1(E01)}
-  strain: {type: Liquid, wells: tubeLabware1(F01)}
+  nitrogen1: {type: Liquid, wells: tubeLabware1(C01)}
+  nitrogen2: {type: Liquid, wells: tubeLabware1(D01)}
+  trace2: {type: Liquid, wells: tubeLabware1(E01)}
+  trace1: {type: Liquid, wells: tubeLabware1(F01)}
+  strain: {type: Liquid, wells: tubeLabware1(G01)}
 
   design:
     type: Design
@@ -37,103 +45,6 @@ objects:
       * $x4$: Phosphate/Sulfur/Trace elements mix concentration
       * $x5$: Vitamin mix concentation
     randomSeed: 1234
-    initialRows:
-      - {"x1":-1,"x2":-1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"118 ul"}
-      - {"x1":1,"x2":-1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"100 ul"}
-      - {"x1":-1,"x2":1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"114 ul"}
-      - {"x1":1,"x2":1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"80 ul"}
-      - {"x1":-1,"x2":-1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"126 ul"}
-      - {"x1":1,"x2":-1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"92 ul"}
-      - {"x1":-1,"x2":1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"106 ul"}
-      - {"x1":1,"x2":1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"88 ul"}
-      - {"x1":-1,"x2":-1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"120 ul"}
-      - {"x1":1,"x2":-1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"86 ul"}
-      - {"x1":-1,"x2":1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"100 ul"}
-      - {"x1":1,"x2":1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"82 ul"}
-      - {"x1":-1,"x2":-1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"112 ul"}
-      - {"x1":1,"x2":-1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"94 ul"}
-      - {"x1":-1,"x2":1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"108 ul"}
-      - {"x1":1,"x2":1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"74 ul"}
-      - {"x1":-1.5,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"20 ul","glucoseC":"1.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"120 ul"}
-      - {"x1":1.5,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"80 ul"}
-      - {"x1":0,"x2":-1.5,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"4 ul","nitrogen1C":"1.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"108 ul"}
-      - {"x1":0,"x2":1.5,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"92 ul"}
-      - {"x1":0,"x2":0,"x3":-1.5,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"0 ul","nitrogen2C":"0.00","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":1.5,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":-1.5,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"4 ul","trace1C":"1.00","trace2V":"6 ul","trace2C":"1.50","waterV":"104 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":1.5,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"12 ul","trace1C":"3.00","trace2V":"6 ul","trace2C":"1.50","waterV":"96 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":-1.5,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"0 ul","trace2C":"0.00","waterV":"106 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":1.5,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"12 ul","trace2C":"3.00","waterV":"94 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":-1,"x2":-1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"126 ul"}
-      - {"x1":1,"x2":-1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"92 ul"}
-      - {"x1":-1,"x2":1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"106 ul"}
-      - {"x1":1,"x2":1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"88 ul"}
-      - {"x1":-1,"x2":-1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"118 ul"}
-      - {"x1":1,"x2":-1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"100 ul"}
-      - {"x1":-1,"x2":1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"2 ul","trace2C":"0.50","waterV":"114 ul"}
-      - {"x1":1,"x2":1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"5 ul","trace1C":"1.25","trace2V":"10 ul","trace2C":"2.50","waterV":"80 ul"}
-      - {"x1":-1,"x2":-1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"112 ul"}
-      - {"x1":1,"x2":-1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"94 ul"}
-      - {"x1":-1,"x2":1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"108 ul"}
-      - {"x1":1,"x2":1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"2 ul","nitrogen2C":"0.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"74 ul"}
-      - {"x1":-1,"x2":-1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"120 ul"}
-      - {"x1":1,"x2":-1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"5 ul","nitrogen1C":"1.25","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"86 ul"}
-      - {"x1":-1,"x2":1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"27 ul","glucoseC":"1.35","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"10 ul","trace2C":"2.50","waterV":"100 ul"}
-      - {"x1":1,"x2":1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"53 ul","glucoseC":"2.65","nitrogen1V":"11 ul","nitrogen1C":"2.75","nitrogen2V":"10 ul","nitrogen2C":"2.50","trace1V":"11 ul","trace1C":"2.75","trace2V":"2 ul","trace2C":"0.50","waterV":"82 ul"}
-      - {"x1":-1.5,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"20 ul","glucoseC":"1.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"120 ul"}
-      - {"x1":1.5,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"80 ul"}
-      - {"x1":0,"x2":-1.5,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"4 ul","nitrogen1C":"1.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"108 ul"}
-      - {"x1":0,"x2":1.5,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"92 ul"}
-      - {"x1":0,"x2":0,"x3":-1.5,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"0 ul","nitrogen2C":"0.00","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":1.5,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":-1.5,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"4 ul","trace1C":"1.00","trace2V":"6 ul","trace2C":"1.50","waterV":"104 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":1.5,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"12 ul","trace1C":"3.00","trace2V":"6 ul","trace2C":"1.50","waterV":"96 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":-1.5,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"0 ul","trace2C":"0.00","waterV":"106 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":1.5,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"12 ul","trace2C":"3.00","waterV":"94 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferV":"20 ul","strainV":"10 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"8 ul","trace1C":"2.00","trace2V":"6 ul","trace2C":"1.50","waterV":"100 ul"}
-      - {"x1":-1,"x2":-1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"16 ul","trace2C":"4.00","waterV":"60 ul"}
-      - {"x1":1,"x2":-1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"8 ul","trace2C":"2.00","waterV":"42 ul"}
-      - {"x1":-1,"x2":1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"8 ul","trace2C":"2.00","waterV":"56 ul"}
-      - {"x1":1,"x2":1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"16 ul","trace2C":"4.00","waterV":"22 ul"}
-      - {"x1":-1,"x2":-1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"8 ul","trace2C":"2.00","waterV":"68 ul"}
-      - {"x1":1,"x2":-1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"16 ul","trace2C":"4.00","waterV":"34 ul"}
-      - {"x1":-1,"x2":1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"16 ul","trace2C":"4.00","waterV":"48 ul"}
-      - {"x1":1,"x2":1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"9 ul","trace1C":"2.25","trace2V":"8 ul","trace2C":"2.00","waterV":"30 ul"}
-      - {"x1":-1,"x2":-1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"8 ul","trace2C":"2.00","waterV":"62 ul"}
-      - {"x1":1,"x2":-1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"16 ul","trace2C":"4.00","waterV":"28 ul"}
-      - {"x1":-1,"x2":1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"16 ul","trace2C":"4.00","waterV":"42 ul"}
-      - {"x1":1,"x2":1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"8 ul","nitrogen2C":"2.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"8 ul","trace2C":"2.00","waterV":"24 ul"}
-      - {"x1":-1,"x2":-1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"16 ul","trace2C":"4.00","waterV":"54 ul"}
-      - {"x1":1,"x2":-1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"9 ul","nitrogen1C":"2.25","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"8 ul","trace2C":"2.00","waterV":"36 ul"}
-      - {"x1":-1,"x2":1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"47 ul","glucoseC":"2.35","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"8 ul","trace2C":"2.00","waterV":"50 ul"}
-      - {"x1":1,"x2":1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"73 ul","glucoseC":"3.65","nitrogen1V":"15 ul","nitrogen1C":"3.75","nitrogen2V":"16 ul","nitrogen2C":"4.00","trace1V":"15 ul","trace1C":"3.75","trace2V":"16 ul","trace2C":"4.00","waterV":"16 ul"}
-      - {"x1":-1.5,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"40 ul","glucoseC":"2.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"62 ul"}
-      - {"x1":1.5,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"80 ul","glucoseC":"4.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"22 ul"}
-      - {"x1":0,"x2":-1.5,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"8 ul","nitrogen1C":"2.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"50 ul"}
-      - {"x1":0,"x2":1.5,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"16 ul","nitrogen1C":"4.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"34 ul"}
-      - {"x1":0,"x2":0,"x3":-1.5,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"6 ul","nitrogen2C":"1.50","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":1.5,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"18 ul","nitrogen2C":"4.50","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":-1.5,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"8 ul","trace1C":"2.00","trace2V":"12 ul","trace2C":"3.00","waterV":"46 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":1.5,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"16 ul","trace1C":"4.00","trace2V":"12 ul","trace2C":"3.00","waterV":"38 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":-1.5,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"6 ul","trace2C":"1.50","waterV":"48 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":1.5,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"18 ul","trace2C":"4.50","waterV":"36 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
-      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferV":"20 ul","strainV":"30 ul","glucoseV":"60 ul","glucoseC":"3.00","nitrogen1V":"12 ul","nitrogen1C":"3.00","nitrogen2V":"12 ul","nitrogen2C":"3.00","trace1V":"12 ul","trace1C":"3.00","trace2V":"12 ul","trace2C":"3.00","waterV":"42 ul"}
     conditions:
       plate: plate1
       wellNum=range:
@@ -175,25 +86,25 @@ steps:
             - {source: glucose, volume: $glucoseV}
             - {source: nitrogen1, volume: $nitrogen1V}
             - {source: nitrogen2, volume: $nitrogen2V}
-            - {source: trace1, volume: $trace1V}
             - {source: trace2, volume: $trace2V}
+            - {source: trace1, volume: $trace1V}
     clean: thorough
     cleanBetweenSameSource: none
   4:
     description: "Distribute strain"
     command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
     sources: strain
     destinationLabware: $plate
     destinations: $$well
     volumes: $$strainV
-    cleanBegin: decontaminate
-    clean: thorough
-    cleanEnd: decontaminate
+    clean: decontaminate
+    cleanBetweenSameSource: none
   5:
     description: "Move plate to reader"
     command: transporter.movePlate
     object: $plate
-    destination: ourlab.mario.READER
+    destination: ourlab.mario.site.READER
   6:
     description: "Loop to measure OD600"
     command: system.repeat
@@ -204,6 +115,8 @@ steps:
       command: absorbanceReader.measurePlate
       object: $plate
       programFile: ./gc_mario_screening2.mdfx
+      # program:
+      #   excitationWavelength: 480nm
       output:
         joinKey: well
         userValues: {cycle: $cycle}

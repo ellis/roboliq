@@ -211,6 +211,8 @@ module.exports = {
 						"evowareGrid": -1,
 						"evowareSite": 0
 					},
+					T1: { type: "Site", evowareCarrier: "Cooled 8Pos*15ml 8Pos*50ml", evowareGrid: 4, evowareSite: 1 },
+					T2: { type: "Site", evowareCarrier: "Cooled 8Pos*15ml 8Pos*50ml", evowareGrid: 4, evowareSite: 2 },
 					T3: { type: "Site", evowareCarrier: "Block 20Pos", evowareGrid: 16, evowareSite: 1 },
 				},
 				"systemLiquidLabwareModel": {
@@ -310,6 +312,14 @@ module.exports = {
 					"thorough_0050": {
 						"type": "EvowareWashProgram",
 						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Thorough_0050.esc"
+					},
+					"decontaminate_1000": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Decontaminate_1000.esc"
+					},
+					"decontaminate_0050": {
+						"type": "EvowareWashProgram",
+						"script": "C:\\ProgramData\\TECAN\\EVOware\\database\\scripts\\Roboliq\\Roboliq_Clean_Decontaminate_0050.esc"
 					}
 				}
 			},
@@ -384,6 +394,20 @@ module.exports = {
 					"rows": 4,
 					"columns": 5,
 					"evowareName": "Block 20Pos 1.5 ml Eppendorf"
+				},
+				"tubeHolderModel_15ml": {
+					"type": "PlateModel",
+					"label": "8 tube block 15ml",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "Reagent Cooled 8*15ml"
+				},
+				"tubeHolderModel_50ml": {
+					"type": "PlateModel",
+					"label": "8 tube block 50ml",
+					"rows": 8,
+					"columns": 1,
+					"evowareName": "Reagent Cooled 8*50ml"
 				}
 			}
 		}
