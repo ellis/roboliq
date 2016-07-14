@@ -172,4 +172,5 @@ const table3 = Design.flattenDesign(design3);
 // Design.printRows(table3)
 
 const table = table1.concat(table2).concat(table3);
-Design.printRows(table)
+// Design.printRows(table)
+table.forEach(row => console.log("- "+JSON.stringify(row)))

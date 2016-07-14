@@ -1,0 +1,238 @@
+roboliq: v1
+
+description: |
+  Water test for the initial screening experiment using a
+  5-factor central composite design.
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  tubeLabware1:
+    type: Plate
+    model: ourlab.model.tubeHolderModel_15ml
+    location: ourlab.mario.site.T1
+  buffer: {type: Liquid, wells: tubeLabware1(A01)}
+  glucose: {type: Liquid, wells: tubeLabware1(B01)}
+  nps: {type: Liquid, wells: tubeLabware1(C01)}
+  vitamin: {type: Liquid, wells: tubeLabware1(D01)}
+  trace: {type: Liquid, wells: tubeLabware1(E01)}
+  strain: {type: Liquid, wells: tubeLabware1(F01)}
+
+  design:
+    type: Design
+    description: |
+      $2^{5-1}$ partial factorial central composite design, repeated three
+      times at different starting points.
+
+      * $x1$: Buffer concentration
+      * $x2$: Glucose concentration
+      * $x3$: Nitrogen concentration or type
+      * $x4$: Phosphate/Sulfur/Trace elements mix concentration
+      * $x5$: Vitamin mix concentation
+    randomSeed: 1234
+    initialRows:
+      - {"x1":-1,"x2":-1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"80 ul"}
+      - {"x1":1,"x2":-1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"80 ul"}
+      - {"x1":-1,"x2":1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"80 ul"}
+      - {"x1":1,"x2":1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"60 ul"}
+      - {"x1":-1,"x2":-1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"70 ul"}
+      - {"x1":1,"x2":-1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"50 ul"}
+      - {"x1":-1,"x2":1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"50 ul"}
+      - {"x1":1,"x2":1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"50 ul"}
+      - {"x1":-1,"x2":-1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"80 ul"}
+      - {"x1":1,"x2":-1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"60 ul"}
+      - {"x1":-1,"x2":1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"60 ul"}
+      - {"x1":1,"x2":1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"60 ul"}
+      - {"x1":-1,"x2":-1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"50 ul"}
+      - {"x1":1,"x2":-1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"50 ul"}
+      - {"x1":-1,"x2":1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":1,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"50 ul"}
+      - {"x1":1,"x2":1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":1,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"30 ul"}
+      - {"x1":-2,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"0.6 mg / L","bufferV":"15 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"70 ul"}
+      - {"x1":2,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1.4 mg / L","bufferV":"35 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":-2,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"0.6 mg / L","glucoseV":"15 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"70 ul"}
+      - {"x1":0,"x2":2,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1.4 mg / L","glucoseV":"35 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":0,"x3":-2,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"10 ul","nitrogen1C":"0.4 mg / L","nitrogen2V":"35 ul","nitrogen2C":"1.4 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"80 ul"}
+      - {"x1":0,"x2":0,"x3":2,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"30 ul","nitrogen1C":"1.2 mg / L","nitrogen2V":"15 ul","nitrogen2C":"0.6 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"40 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":-2,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.6 mg / L","mixV":"15 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"70 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":2,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1.4 mg / L","mixV":"35 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":-2,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"0.6 mg / L","vitaminV":"15 ul","waterV":"70 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":2,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1.4 mg / L","vitaminV":"35 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":1,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":-1,"x2":-1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"90 ul"}
+      - {"x1":1,"x2":-1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"70 ul"}
+      - {"x1":-1,"x2":1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"70 ul"}
+      - {"x1":1,"x2":1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"70 ul"}
+      - {"x1":-1,"x2":-1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"60 ul"}
+      - {"x1":1,"x2":-1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"60 ul"}
+      - {"x1":-1,"x2":1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"60 ul"}
+      - {"x1":1,"x2":1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.8 mg / L","mixV":"20 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"40 ul"}
+      - {"x1":-1,"x2":-1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"70 ul"}
+      - {"x1":1,"x2":-1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"70 ul"}
+      - {"x1":-1,"x2":1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"70 ul"}
+      - {"x1":1,"x2":1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"50 ul"}
+      - {"x1":-1,"x2":-1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"60 ul"}
+      - {"x1":1,"x2":-1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"0.8 mg / L","glucoseV":"20 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"40 ul"}
+      - {"x1":-1,"x2":1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":2,"bufferC":"0.8 mg / L","bufferV":"20 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"1.2 mg / L","vitaminV":"30 ul","waterV":"40 ul"}
+      - {"x1":1,"x2":1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":2,"bufferC":"1.2 mg / L","bufferV":"30 ul","glucoseC":"1.2 mg / L","glucoseV":"30 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"1.2 mg / L","mixV":"30 ul","vitaminC":"0.8 mg / L","vitaminV":"20 ul","waterV":"40 ul"}
+      - {"x1":-2,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"0.6 mg / L","bufferV":"15 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"70 ul"}
+      - {"x1":2,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1.4 mg / L","bufferV":"35 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":-2,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"0.6 mg / L","glucoseV":"15 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"70 ul"}
+      - {"x1":0,"x2":2,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1.4 mg / L","glucoseV":"35 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":0,"x3":-2,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"10 ul","nitrogen1C":"0.4 mg / L","nitrogen2V":"35 ul","nitrogen2C":"1.4 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"80 ul"}
+      - {"x1":0,"x2":0,"x3":2,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"30 ul","nitrogen1C":"1.2 mg / L","nitrogen2V":"15 ul","nitrogen2C":"0.6 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"40 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":-2,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.6 mg / L","mixV":"15 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"70 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":2,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1.4 mg / L","mixV":"35 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":-2,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"0.6 mg / L","vitaminV":"15 ul","waterV":"70 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":2,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1.4 mg / L","vitaminV":"35 ul","waterV":"50 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":2,"bufferC":"1 mg / L","bufferV":"25 ul","glucoseC":"1 mg / L","glucoseV":"25 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"1 mg / L","mixV":"25 ul","vitaminC":"1 mg / L","vitaminV":"25 ul","waterV":"60 ul"}
+      - {"x1":-1,"x2":-1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"130 ul"}
+      - {"x1":1,"x2":-1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"130 ul"}
+      - {"x1":-1,"x2":1,"x3":-1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"130 ul"}
+      - {"x1":1,"x2":1,"x3":-1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"110 ul"}
+      - {"x1":-1,"x2":-1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"120 ul"}
+      - {"x1":1,"x2":-1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"100 ul"}
+      - {"x1":-1,"x2":1,"x3":1,"x4":-1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"100 ul"}
+      - {"x1":1,"x2":1,"x3":1,"x4":-1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.3 mg / L","mixV":"7.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"100 ul"}
+      - {"x1":-1,"x2":-1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"130 ul"}
+      - {"x1":1,"x2":-1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"110 ul"}
+      - {"x1":-1,"x2":1,"x3":-1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"110 ul"}
+      - {"x1":1,"x2":1,"x3":-1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"15 ul","nitrogen1C":"0.6 mg / L","nitrogen2V":"30 ul","nitrogen2C":"1.2 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"110 ul"}
+      - {"x1":-1,"x2":-1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"100 ul"}
+      - {"x1":1,"x2":-1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.3 mg / L","glucoseV":"7.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"100 ul"}
+      - {"x1":-1,"x2":1,"x3":1,"x4":1,"x5":-1,"fullVolume":"200 ul","group":3,"bufferC":"0.3 mg / L","bufferV":"7.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.3 mg / L","vitaminV":"7.5 ul","waterV":"100 ul"}
+      - {"x1":1,"x2":1,"x3":1,"x4":1,"x5":1,"fullVolume":"200 ul","group":3,"bufferC":"0.7 mg / L","bufferV":"17.5 ul","glucoseC":"0.7 mg / L","glucoseV":"17.5 ul","nitrogen1V":"25 ul","nitrogen1C":"1 mg / L","nitrogen2V":"20 ul","nitrogen2C":"0.8 mg / L","mixC":"0.7 mg / L","mixV":"17.5 ul","vitaminC":"0.7 mg / L","vitaminV":"17.5 ul","waterV":"80 ul"}
+      - {"x1":-2,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.1 mg / L","bufferV":"2.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"120 ul"}
+      - {"x1":2,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.9 mg / L","bufferV":"22.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"100 ul"}
+      - {"x1":0,"x2":-2,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.1 mg / L","glucoseV":"2.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"120 ul"}
+      - {"x1":0,"x2":2,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.9 mg / L","glucoseV":"22.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"100 ul"}
+      - {"x1":0,"x2":0,"x3":-2,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"10 ul","nitrogen1C":"0.4 mg / L","nitrogen2V":"35 ul","nitrogen2C":"1.4 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"130 ul"}
+      - {"x1":0,"x2":0,"x3":2,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"30 ul","nitrogen1C":"1.2 mg / L","nitrogen2V":"15 ul","nitrogen2C":"0.6 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"90 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":-2,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.1 mg / L","mixV":"2.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"120 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":2,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.9 mg / L","mixV":"22.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"100 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":-2,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.1 mg / L","vitaminV":"2.5 ul","waterV":"120 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":2,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.9 mg / L","vitaminV":"22.5 ul","waterV":"100 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"110 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"110 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"110 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"110 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"110 ul"}
+      - {"x1":0,"x2":0,"x3":0,"x4":0,"x5":0,"fullVolume":"200 ul","group":3,"bufferC":"0.5 mg / L","bufferV":"12.5 ul","glucoseC":"0.5 mg / L","glucoseV":"12.5 ul","nitrogen1V":"20 ul","nitrogen1C":"0.8 mg / L","nitrogen2V":"25 ul","nitrogen2C":"1 mg / L","mixC":"0.5 mg / L","mixV":"12.5 ul","vitaminC":"0.5 mg / L","vitaminV":"12.5 ul","waterV":"110 ul"}
+    conditions:
+      plate: plate1
+      wellNum=range:
+        order: shuffle
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        orderBy: wellNum
+      id=range:
+        orderBy: [wellNum]
+    orderBy: [wellNum]
+
+steps:
+  data:
+    source: design
+  1:
+    command: pipetter.cleanTips
+    equipment: ourlab.mario.liha
+    intensity: thorough
+  2:
+    description: "Distribute water"
+      command: pipetter.pipette
+      sources: water
+      destinationLabware: $plate
+      destinations: $$well
+      volumes: $$waterV
+      clean: none
+      cleanEnd: thorough
+  3:
+    description: "Pipette media mixtures"
+      command: pipetter.pipetteMixtures
+      destinationLabware: $plate
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: buffer, volume: $bufferV}
+              - {source: glucose, volume: $glucoseV}
+              - {source: nitrogen1, volume: $nitrogen1V}
+              - {source: nitrogen2, volume: $nitrogen2V}
+              - {source: mix, volume: $mixV}
+              - {source: vitamin, volume: $vitaminV}
+      clean: thorough
+      cleanBetweenSameSource: none
+  4: ?
+    description: "Shake plate1"
+    command: shaker.shakePlate
+    object: $plate
+    program:
+      duration: 1 minute
+  4:
+    description: "Distribute strain"
+      command: pipetter.pipette
+      sources: strain
+      destinationLabware: $plate
+      destinations: $$well
+      CONTINUE
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: water, volume: $waterV}
+              - {source: strain, volume: $strainV}
+      clean: thorough
+      cleanEnd: decontaminate
+  5:
+    description: "Measure absorbance"
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: 480nm
+      wellDesignFactor: well
+      userValues: {cycle: 0}
+    outputDataset: "absorbance"
+      3:
+        description: "Cycles of z-level detection"
+        # data: {where: 'cycle > 0'}
+        command: experiment.forEachGroup
+        groupBy: cycle
+        steps:
+          description: "`Cycle {{$cycle}}`"
+          1:
+            command: pipetter.measureVolume
+            wellLabware: $plate
+            items:
+              "#data":
+                template:
+                  syringe: $syringe
+                  well: $well
+                  program: $liquidClass
+            clean: flush
+            outputDataset: "volume"
+          2:
+            description: "Measure absorbance"
+            command: absorbanceReader.measurePlate
+            object: $plate
+            program:
+              excitationWavelength: 480nm
+              wellDesignFactor: well
+            outputDataset: "absorbance"
