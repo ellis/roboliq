@@ -34,7 +34,7 @@ objects:
 
       * $x1$: Buffer concentration
       * $x2$: Glucose concentration
-      * $x3$: Nitrogen concentration
+      * $x3$: Nitrogen concentration or type
       * $x4$: Phosphate/Sulfur/Trace elements mix concentration
       * $x5$: Vitamin mix concentation
 
