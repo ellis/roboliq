@@ -39,7 +39,7 @@ export function printRows(rows, hideRedundancies = false) {
 			lines.push(["---"]);
 		}
 		_.forEach(group, row => {
-			const line = _.map(columns, key => _.get(row, key, ""));
+			const line = _.map(columns, key => _.get(row, key, "").toString());
 			lines.push(line);
 		});
 	});

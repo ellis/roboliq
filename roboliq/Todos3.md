@@ -2,9 +2,14 @@
 
 * [x] handle proportions of different nitrogen sources
 * [ ] plug the design table into the script
-* [ ] Fabian: what to use for decontamination wash?
+* [ ] Fabian: volume of buffer?
+* [ ] Fabian: what to use for decontamination wash?  Bleach?
 * [ ] Fabian: open the student lab to return scale?
-* [ ] email Fabian to ask about the volumes/concentrations for all the components
+* [ ] Fabian: can we just flush between strain dispenses (then decontam at end), or do we need to decontaminate between with dispense?
+* [ ] Fabian: centers3 values?
+* [ ] Fabian: rather than 'x' concentrations, we could also use values like `8 mg / L`
+* [ ] Fabian: we don't need to shake the plate on the shaker before putting it in the reader, do we?
+* [ ] Fabian: reader doesn't like plate with lid, says bad height
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for selecting partial factorial design
