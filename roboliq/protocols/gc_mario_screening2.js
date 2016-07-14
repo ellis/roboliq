@@ -1,6 +1,13 @@
 import _ from 'lodash';
+import math from 'mathjs';
 // import Design from '../src/design2.js'
 const Design = require('../src/design2.js');
+
+// Configure mathjs to use bignumbers
+require('mathjs').config({
+	number: 'BigNumber', // Default type of number
+	precision: 64        // Number of significant digits for BigNumbers
+});
 
 const fractional_5_1a = {
 	x1: [-1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1, -1,  1],
@@ -40,18 +47,44 @@ function createFractional_5_1(fractionIndex, axialAlpha, centerCount) {
 	return rows;
 }
 
-const rows1 = createFractional_5_1(1, undefined, 6)
+const rows1 = createFractional_5_1(1, 2, 6)
 console.log(rows1);
 const rows2 = createFractional_5_1(2, undefined, 6)
 const rows3 = createFractional_5_1(1, undefined, 6)
 
+const ranges = {
+	x1: {min: "0 mg/L", max: "2 mg/L"}
+};
 
+const sources = {
+	x1: "8 mg/L",
+}
+
+
+const centers1 = {
+	x1: "1 mg/L",
+};
+
+const deltas1 = {
+	x1: math.eval(`((${ranges.x1.max}) - (${ranges.x1.min})) / 10`).format()
+};
+
+/*
+* $x1$: Buffer concentration
+* $x2$: Glucose concentration
+* $x3$: Nitrogen concentration or type
+* $x4$: Phosphate/Sulfur/Trace elements mix concentration
+* $x5$: Vitamin mix concentation
+*/
 const design1 = {
 	initialRows: rows1,
 	conditions: {
+		fullVolume: "200 ul",
 		group: 1,
+		"x1c=calculate": `(${centers1.x1}) + x1 * (${deltas1.x1})`,
+		"bufferVolume=calculate": `to(fullVolume * x1c / (${sources.x1}), "ul")`
 	}
 };
 console.log(require('../src/design2.js'))
-const data1 = Design.flattenDesign(design1);
-console.log(data1)
+const table1 = Design.flattenDesign(design1);
+Design.printRows(table1)
