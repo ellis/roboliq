@@ -1,5 +1,7 @@
 # Todos for optimization of medium
 
+* [x] handle proportions of different nitrogen sources
+* [ ] plug the table into the script
 * [ ] email Fabian to ask about the volumes/concentrations for all the components
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for joining independent designs column-wise
