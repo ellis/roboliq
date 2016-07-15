@@ -14,13 +14,13 @@ import designHelper from './src/designHelper.js';
 opts
 	.version("1.0")
 	.option("--no-rename", "don't rename the xmlfile")
-	.arguments("<script> <step> <xmlfile> <factor> <dataset>")
+	.arguments("<script> <step> <xmlfile>")
 	.parse(process.argv);
 
 // console.log(opts);
 
 const [scriptFile, stepId, xmlFile] = opts.args;
-// console.log({scriptFile, stepId, xmlFile, wellDesignFactor, dataset})
+// console.log({scriptFile, stepId, xmlFile, joinKey, dataset})
 
 const scriptDir = path.dirname(scriptFile);
 const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".run");
@@ -47,15 +47,17 @@ if (opts.rename) {
 const protocol = require(scriptFile);
 const factors = _.get(protocol.reports, [stepId, "measurementFactors"]);
 const step = _.get(protocol.steps, stepId);
+const joinKey = _.get(step, "output.joinKey", _.get(step, "program.wellDesignFactor"));
 const userValues = _.get(step, "output.userValues", _.get(step, "program.userValues"));
+const appendTo = _.get(step, "output.appendTo", _.get(step, "outputDataset"));
 const objectName = step.object;
 // console.log(factors);
 
 let table;
-if (wellDesignFactor !== "_") {
+if (joinKey !== "_") {
 	const wellToFactors = {};
 	_.forEach(factors, factorRow => {
-		const well = factorRow[wellDesignFactor];
+		const well = factorRow[joinKey];
 		wellToFactors[well] = factorRow;
 	});
 	// console.log(wellToFactors);
@@ -63,8 +65,8 @@ if (wellDesignFactor !== "_") {
 	// For each row in the measurement table, try to add the factor columns
 	table = result.table.map(measurementRow0 => {
 		const well = measurementRow0.well;
-		// Omit the "well" column from the measurement row, unless the wellDesignFactor = "well"
-		const measurementRow = (wellDesignFactor === "well") ? measurementRow0 : _.omit(measurementRow0, "well");
+		// Omit the "well" column from the measurement row, unless the joinKey = "well"
+		const measurementRow = (joinKey === "well") ? measurementRow0 : _.omit(measurementRow0, "well");
 		// console.log(measurementRow)
 		// Try to get the factors for this well
 		const factorRow = wellToFactors[well];
@@ -84,10 +86,10 @@ else {
 // Save the JSON file
 fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));
 
-if (dataset !== "_" && !_.isEmpty(table)) {
-	const datasetFile = path.join(runDir, dataset+".jsonl");
+if (appendTo !== "_" && !_.isEmpty(table)) {
+	const appendToFile = path.join(runDir, appendTo+".jsonl");
 	const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
-	fs.appendFileSync(datasetFile, contents);
+	fs.appendFileSync(appendToFile, contents);
 }
 
 console.log("done")
