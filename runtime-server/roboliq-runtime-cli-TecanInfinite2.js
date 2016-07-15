@@ -17,13 +17,15 @@ opts
 	.arguments("<script> <step> <xmlfile>")
 	.parse(process.argv);
 
-// console.log(opts);
+console.log(opts);
 
 const [scriptFile, stepId, xmlFile] = opts.args;
-// console.log({scriptFile, stepId, xmlFile, joinKey, dataset})
+console.log({scriptFile, stepId, xmlFile})
 
 const scriptDir = path.dirname(scriptFile);
+console.log({scriptDir})
 const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".run");
+console.log({runFile})
 const runId = _.trim(fs.readFileSync(runFile));
 const runDir = path.join(scriptDir, runId);
 
@@ -31,6 +33,7 @@ const runDir = path.join(scriptDir, runId);
 mkdirp.sync(runDir);
 
 const result = processXml(xmlFile);
+console.log({result})
 
 const date = moment(result.date);
 const prefix = date.format("YYYYMMDD_HHmmss")+"-"+stepId+"-"; // TODO: might need to change this to local time/date
@@ -52,9 +55,10 @@ const userValues = _.get(step, "output.userValues", _.get(step, "program.userVal
 const appendTo = _.get(step, "output.appendTo", _.get(step, "outputDataset"));
 const objectName = step.object;
 // console.log(factors);
+console.log({joinKey, appendTo})
 
 let table;
-if (joinKey !== "_") {
+if (!_.isEmpty(joinKey)) {
 	const wellToFactors = {};
 	_.forEach(factors, factorRow => {
 		const well = factorRow[joinKey];
@@ -86,7 +90,7 @@ else {
 // Save the JSON file
 fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));
 
-if (appendTo !== "_" && !_.isEmpty(table)) {
+if (!_.isEmpty(appendTo) && !_.isEmpty(table)) {
 	const appendToFile = path.join(runDir, appendTo+".jsonl");
 	const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
 	fs.appendFileSync(appendToFile, contents);

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import assert from 'assert';
 import fs from 'fs';
 import moment from 'moment';
 import {XmlDocument} from 'xmldoc';
@@ -10,7 +11,9 @@ import {XmlDocument} from 'xmldoc';
  */
 export default function processXml(filename) {
 	const content = fs.readFileSync(filename);
+	// console.log("content:"); console.log(content)
 	const doc = new XmlDocument(content);
+	console.log({doc})
 	//const o = XML.parseFileSync(filename);
 
 	const timeOfMeasurement = moment(doc.attr.Date);
@@ -34,6 +37,15 @@ export default function processXml(filename) {
 			const type = well.attr.Type;
 			if (type === "Single") {
 				const value = Number(well.lastChild.val);
+				const entry = {time, well: wellName, value_type: "absorbance", value_cycle: cycle, value};
+				// console.log(entry);
+				return entry;
+			}
+			else if (type === "Multiple") {
+				const multiples = well.childrenNamed("Multiple");
+				const mean = _.find(multiples, x => x.attr.MRW_Position === "Mean");
+				assert(mean, "Mean not found in children: "+JSON.stringify(multiples));
+				const value = Number(mean.val);
 				const entry = {time, well: wellName, value_type: "absorbance", value_cycle: cycle, value};
 				// console.log(entry);
 				return entry;
