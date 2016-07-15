@@ -145,6 +145,7 @@ function makeDesign(group, initialRows, centers, deltas) {
 			"nitrogen2C=calculate": {expression: `(${sources.nitrogen2}) * nitrogen2V / fullVolume`, decimals: 2},
 			"trace1V=calculate": {expression: `max(0 ul, to(fullVolume * ((${centers.trace1}) + x4 * (${deltas.trace1})) / (${sources.trace1}), "ul"))`, decimals: 0},
 			"trace1C=calculate": {expression: `(${sources.trace1}) * trace1V / fullVolume`, decimals: 2},
+			// Trace 2 has to be pipetted with large tips, so make sure it has at least 3ul
 			"trace2V=calculate": {expression: `max(0 ul, to(fullVolume * ((${centers.trace2}) + x5 * (${deltas.trace2})) / (${sources.trace2}), "ul"))`, decimals: 0},
 			"trace2C=calculate": {expression: `(${sources.trace2}) * trace2V / fullVolume`, decimals: 2},
 			"waterV=calculate": 'fullVolume - bufferV - glucoseV - nitrogen1V - nitrogen1V - trace1V - trace2V - strainV'

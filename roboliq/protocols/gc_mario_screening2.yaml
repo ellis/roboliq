@@ -47,6 +47,18 @@ objects:
     randomSeed: 1234
     conditions:
       plate: plate1
+      .caseA=case:
+        cases:
+          - where: 'nitrogen2V < (3 ul)'
+            conditions:
+              nitrogen2V: 0 ul
+              nitrogen2C: '0.00'
+      .caseB=case:
+        cases:
+          - where: 'trace2V < (3 ul)'
+            conditions:
+              trace2V: 0 ul
+              trace2C: '0.00'
       wellNum=range:
         order: shuffle
       well=allocateWells:
@@ -74,22 +86,45 @@ steps:
     clean: none
     cleanEnd: thorough
   3:
-    description: "Pipette media mixtures"
-    command: pipetter.pipetteMixtures
-    destinationLabware: $plate
-    mixtures:
-      "#data":
-        template:
-          destination: $well
-          sources:
-            - {source: buffer, volume: $bufferV}
-            - {source: glucose, volume: $glucoseV}
-            - {source: nitrogen1, volume: $nitrogen1V}
-            - {source: nitrogen2, volume: $nitrogen2V}
-            - {source: trace2, volume: $trace2V}
-            - {source: trace1, volume: $trace1V}
-    clean: thorough
-    cleanBetweenSameSource: none
+    1:
+      description: "Pipette media mixtures"
+      command: pipetter.pipetteMixtures
+      destinationLabware: $plate
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: buffer, volume: $bufferV, tipModel: ourlab.mario.liha.tipModel.tipModel1000}
+              - {source: glucose, volume: $glucoseV, tipModel: ourlab.mario.liha.tipModel.tipModel1000}
+              - {source: nitrogen1, volume: $nitrogen1V, tipModel: ourlab.mario.liha.tipModel.tipModel1000}
+              - {source: nitrogen2, volume: $nitrogen2V, tipModel: ourlab.mario.liha.tipModel.tipModel1000}
+      clean: thorough
+      cleanBetweenSameSource: none
+    2:
+      description: "Pipette media mixtures (trace2)"
+      command: pipetter.pipetteMixtures
+      destinationLabware: $plate
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: trace2, volume: $trace2V, tipModel: ourlab.mario.liha.tipModel.tipModel1000}
+      clean: thorough
+      cleanBetweenSameSource: none
+    3:
+      description: "Pipette media mixtures (trace1)"
+      command: pipetter.pipetteMixtures
+      destinationLabware: $plate
+      mixtures:
+        "#data":
+          template:
+            destination: $well
+            sources:
+              - {source: trace1, volume: $trace1V, tipModel: ourlab.mario.liha.tipModel.tipModel1000}
+      clean: thorough
+      cleanBetweenSameSource: none
   4:
     description: "Distribute strain"
     command: pipetter.pipette
@@ -109,6 +144,7 @@ steps:
     description: "Loop to measure OD600"
     command: system.repeat
     count: 864 # 3 days * 24 hours/day * 12 times/hour
+    # count: 1
     variableName: cycle
     steps:
       description: "`Measure absorbance #{{$cycle}}`"

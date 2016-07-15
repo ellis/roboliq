@@ -25,10 +25,15 @@
 * [x] test absorbanceReader with new `output` property and shaking and stuff
 * [x] generate with lots of loops, so that it continues over the weekend
 * [x] automatically copy recording data to network drive, so I can look at it over the weekend
-* [ ] Fabian: start the cooling system
-* [ ] Fabian: the reader program only has one heating setting, not a separate one for the top?
+* [x] write EvowareCompilerTest for aspirating from single well and dispensing in adjacent wells
+* [x] Fabian: start the cooling system? No, not for this single test
+* [x] Fabian: the reader program only has one heating setting, not a separate one for the top? OK.
+* [ ] make sure trace 1 is pipetted with large tips
+* [ ] run till done with pipetting, then manually put on the lid and continue
 
-* [ ] write EvowareCompilerTest for aspirating from single well and dispensing in adjacent wells
+* [ ] BUG: cleans tips around trace2 at the wrong time!
+* [ ] gc_mario_screening2: robot should take the lid off before pipetting and put it on again afterwards
+
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for selecting partial factorial design

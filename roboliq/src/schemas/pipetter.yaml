@@ -84,6 +84,7 @@ pipetter._PipetteItem:
     volume: {description: Volume, type: Volume}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: pipetter._MixSpec}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: pipetter._MixSpec}
+    tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
   # required: [syringe, source, destination, volume]
   required: [syringe, volume]
 
