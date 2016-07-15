@@ -21,12 +21,14 @@
 * [x] Fabian: reader doesn't like plate with lid, says bad height; Gregor says just run it and indicate lid-less
 * [x] fix gc_mario_screening2.mdfx so that it doesn't loop
 * [x] reserve robot for the weekend / respond to Gabrielle
-* [?] between strain dispenses, no flushing; but decontam before and end
-* [ ] test absorbanceReader with new `output` property and shaking and stuff
-* [ ] generate with lots of loops, so that it continues over the weekend
+* [x] between strain dispenses, no flushing; but decontam before and end
+* [x] test absorbanceReader with new `output` property and shaking and stuff
+* [x] generate with lots of loops, so that it continues over the weekend
+* [x] automatically copy recording data to network drive, so I can look at it over the weekend
 * [ ] Fabian: start the cooling system
-* [ ] automatically copy recording data to network drive, so I can look at it over the weekend
+* [ ] Fabian: the reader program only has one heating setting, not a separate one for the top?
 
+* [ ] write EvowareCompilerTest for aspirating from single well and dispensing in adjacent wells
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for selecting partial factorial design

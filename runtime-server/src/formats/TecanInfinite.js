@@ -13,7 +13,7 @@ export default function processXml(filename) {
 	const content = fs.readFileSync(filename);
 	// console.log("content:"); console.log(content)
 	const doc = new XmlDocument(content);
-	console.log({doc})
+	// console.log({doc})
 	//const o = XML.parseFileSync(filename);
 
 	const timeOfMeasurement = moment(doc.attr.Date);

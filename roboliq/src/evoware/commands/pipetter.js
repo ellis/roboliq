@@ -218,7 +218,12 @@ function groupItems(parsed, data) {
 				const dRow2 = wellInfo.row - wellInfoRef.row;
 				//console.log({tupleSyringe: tuple.item.syringe, refSyringe: ref.item.syringe})
 				if (_.isUndefined(group.syringeSpacing)) {
-					if (dRow1 === 0 || dRow2 === 0) {
+					// If using the same well
+					if (dRow2 === 0) {
+						group.syringeSpacing = 0;
+						return true;
+					}
+					else if (dRow1 === 0 || dRow2 === 0) {
 						if (debug) console.log({group, tuple, dRow1, dRow2})
 						return false;
 					}
@@ -237,8 +242,12 @@ function groupItems(parsed, data) {
 					}
 				}
 				else {
+					// If using the same well
+					if (dRow2 === 0 && group.syringeSpacing === 0) {
+						return true;
+					}
 					// console.log(3)
-					if (math.equal(math.fraction(dRow2, dRow1), group.syringeSpacing))
+					else if (math.equal(math.fraction(dRow2, dRow1), group.syringeSpacing))
 						return true;
 					// console.log(4)
 				}
@@ -316,6 +325,14 @@ function groupItems(parsed, data) {
 
 function handleGroup(parsed, data, group, groupTypeToFunc) {
 	assert(group.tuples.length > 0);
+	// If the syringe spacing is 0, that means that each syringe is accessing the
+	// same well, in which case we actually need to seaparate the group items:
+	if (group.syringeSpacing === 0) {
+		const groups = group.tuples.map(tuple => ({
+			groupType: group.groupType, tuples: [tuple]
+		}));
+		return _.flatMap(groups, group => handleGroup(parsed, data, group, groupTypeToFunc));
+	}
 
 	const tuples = group.tuples;
 	// Calculate syringe mask

@@ -396,7 +396,7 @@ describe('EvowareCompilerTest', function() {
 			]]);
 		});
 
-		it.only("should compile pipetter._measureVolume", function() {
+		it("should compile pipetter._measureVolume", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
 				roboliq: "v1",
@@ -668,7 +668,68 @@ describe('EvowareCompilerTest', function() {
 			});
 			const results2 = EvowareCompiler.compileStep(table, protocol2, agents, [], undefined, [], {timing: false});
 			should.deepEqual(results2, expected);
+		});
 
+		it("should compile pipetter._pipette for aspirating from single well and dispensing to multiple wells", () => {
+			// console.log("schemas: "+JSON.stringify(schemas))
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						contents: {
+							A01: ["10 ul", "water"]
+						}
+					}
+				},
+				steps: {
+					"1": {
+						"command": "pipetter._pipette",
+						"agent": "robot1",
+						"equipment": "pipetter1",
+						"program": "Water free dispense",
+						"items": [
+							{
+								"syringe": "pipetter1.syringe.1",
+								"source": "plate1(A01)",
+								"destination": "plate1(A02)",
+								"volume": "10 ul"
+							},
+							{
+								"syringe": "pipetter1.syringe.2",
+								"source": "plate1(A01)",
+								"destination": "plate1(B02)",
+								"volume": "10 ul"
+							},
+							{
+								"syringe": "pipetter1.syringe.3",
+								"source": "plate1(A01)",
+								"destination": "plate1(C02)",
+								"volume": "10 ul"
+							},
+							{
+								"syringe": "pipetter1.syringe.4",
+								"source": "plate1(A01)",
+								"destination": "plate1(D02)",
+								"volume": "10 ul"
+							}
+						]
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, [], {timing: false});
+			should.deepEqual(results, [[
+				{line: "Aspirate(1,\"Water free dispense\",\"10\",0,0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Aspirate(2,\"Water free dispense\",0,\"10\",0,0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Aspirate(4,\"Water free dispense\",0,0,\"10\",0,0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Aspirate(8,\"Water free dispense\",0,0,0,\"10\",0,0,0,0,0,0,0,0,1,0,1,\"0C0810000000000000\",0,0);"},
+				{line: "Dispense(15,\"Water free dispense\",\"10\",\"10\",\"10\",\"10\",0,0,0,0,0,0,0,0,1,0,1,\"0C080N000000000000\",0,0);"},
+				{line: "MoveLiha(15,1,0,1,\"0C08?0000000000000\",4,4,0,400,0,0);"},
+				{"tableEffects": [
+					[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+				]}
+			]]);
 		});
 
 		it("should compile pipetter._wash light", function() {

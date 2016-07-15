@@ -17,15 +17,16 @@ opts
 	.arguments("<script> <step> <xmlfile>")
 	.parse(process.argv);
 
-console.log(opts);
+// console.log(opts);
 
 const [scriptFile, stepId, xmlFile] = opts.args;
-console.log({scriptFile, stepId, xmlFile})
+// console.log({scriptFile, stepId, xmlFile})
 
+const scriptBase = path.basename(scriptFile, ".out.json");
 const scriptDir = path.dirname(scriptFile);
-console.log({scriptDir})
-const runFile = path.join(scriptDir, path.basename(scriptFile, ".out.json")+".run");
-console.log({runFile})
+// console.log({scriptDir})
+const runFile = path.join(scriptDir, scriptBase+".run");
+// console.log({runFile})
 const runId = _.trim(fs.readFileSync(runFile));
 const runDir = path.join(scriptDir, runId);
 
@@ -33,7 +34,7 @@ const runDir = path.join(scriptDir, runId);
 mkdirp.sync(runDir);
 
 const result = processXml(xmlFile);
-console.log({result})
+// console.log({result})
 
 const date = moment(result.date);
 const prefix = date.format("YYYYMMDD_HHmmss")+"-"+stepId+"-"; // TODO: might need to change this to local time/date
@@ -55,7 +56,7 @@ const userValues = _.get(step, "output.userValues", _.get(step, "program.userVal
 const appendTo = _.get(step, "output.appendTo", _.get(step, "outputDataset"));
 const objectName = step.object;
 // console.log(factors);
-console.log({joinKey, appendTo})
+// console.log({joinKey, appendTo})
 
 let table;
 if (!_.isEmpty(joinKey)) {
@@ -94,6 +95,17 @@ if (!_.isEmpty(appendTo) && !_.isEmpty(table)) {
 	const appendToFile = path.join(runDir, appendTo+".jsonl");
 	const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
 	fs.appendFileSync(appendToFile, contents);
+
+	// HACK to copy data to shared drive
+	if (true) {
+		const hackDir = path.join("Y:\\Projects\\Roboliq\\labdata", scriptBase, runId);
+		console.log({hackDir})
+		mkdirp.sync(hackDir);
+		const hackFile = path.join(hackDir, appendTo+".jsonl");
+		console.log("writing duplicate file to: "+hackFile)
+		const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
+		fs.appendFileSync(hackFile, contents);
+	}
 }
 
 console.log("done")

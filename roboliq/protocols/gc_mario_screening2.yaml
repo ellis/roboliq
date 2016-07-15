@@ -108,7 +108,7 @@ steps:
   6:
     description: "Loop to measure OD600"
     command: system.repeat
-    count: 2
+    count: 864 # 3 days * 24 hours/day * 12 times/hour
     variableName: cycle
     steps:
       description: "`Measure absorbance #{{$cycle}}`"
