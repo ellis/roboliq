@@ -61,6 +61,18 @@ var commandHandlers = {
 			: _.isUndefined(parsed.objectName.destinationAfter) ? location0
 			: parsed.objectName.destinationAfter;
 
+		// Program to pass to sub-command
+		const program = _.merge({}, parsed.orig.program, {
+			wells: (parsed.value.program || {}).wells
+		});
+		// Handle deprecated values
+		const output = _.merge({}, parsed.orig.output, {
+			joinKey: _.get(parsed.orig, "program.wellDesignFactor"),
+			userValues: _.get(parsed.orig, "program.userValues"),
+			writeTo: _.get(parsed.orig, "outputFile"),
+			appendTo: _.get(parsed.orig, "outputDataset"),
+		});
+
 		var expansion = [
 			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
@@ -72,12 +84,11 @@ var commandHandlers = {
 				agent: params2.agent,
 				equipment: params2.equipment,
 				measurementType: "absorbance",
-				program: parsed.value.program,
+				program: (_.isEmpty(program)) ? undefined : program,
 				programFile: parsed.value.programFile,
 				programData: parsed.value.programData,
 				object: parsed.objectName.object,
-				outputFile: parsed.value.outputFile,
-				outputDataset: parsed.value.outputDataset
+				output: (_.isEmpty(output)) ? undefined : output
 			}),
 			(destinationAfter === null || destinationAfter === params2.site) ? null : {
 				command: "transporter.movePlate",

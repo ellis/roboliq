@@ -32,7 +32,9 @@ describe('commands/absorbanceReader', function() {
 							excitationWavelength: "600nm",
 							wells: "plate1(A1 right A12, B1, B3 right B12, C3)"
 						},
-						outputFile: "measurement.xml"
+						output: {
+							writeTo: "measurement.xml"
+						}
 					}
 				}
 			});
@@ -56,7 +58,7 @@ describe('commands/absorbanceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\measurement.xml", "_", "_"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\measurement.xml"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -73,12 +75,14 @@ describe('commands/absorbanceReader', function() {
 								'plate1(C03)'
 							]
 						},
-						"outputFile": "measurement.xml"
+						output: {
+							writeTo: "measurement.xml"
+						}
 					},
 					"command": "absorbanceReader.measurePlate",
 					"object": "plate1",
 					"program": {"excitationWavelength": "600nm", wells: "plate1(A1 right A12, B1, B3 right B12, C3)"},
-					"outputFile": "measurement.xml"
+					output: { writeTo: "measurement.xml" }
 				}
 			);
 			should.not.exist(result.output.reports[1]);
@@ -126,7 +130,7 @@ describe('commands/absorbanceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml", "_", "_"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -237,7 +241,7 @@ describe('commands/absorbanceReader', function() {
 							command: "evoware._execute",
 							agent: "ourlab.mario.evoware",
 							path: "${ROBOLIQ}",
-							args: ["TecanInfinite", "${SCRIPTFILE}", "1.2", "${TEMPDIR}\\absorbance.xml", "_", "_"],
+							args: ["TecanInfinite", "${SCRIPTFILE}", "1.2", "${TEMPDIR}\\absorbance.xml"],
 							wait: true
 						},
 						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -328,10 +332,12 @@ describe('commands/absorbanceReader', function() {
 						command: "absorbanceReader.measurePlate",
 						object: "plate1",
 						program: {
-							excitationWavelength: "600nm",
-							wellDesignFactor: "testWell"
+							excitationWavelength: "600nm"
 						},
-						outputDataset: "absorbance"
+						output: {
+							joinKey: "testWell",
+							appendTo: "absorbance"
+						}
 					}
 				}
 			});
@@ -354,7 +360,7 @@ describe('commands/absorbanceReader', function() {
 						command: "evoware._execute",
 						agent: "ourlab.mario.evoware",
 						path: "${ROBOLIQ}",
-						args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml", "testWell", "absorbance"],
+						args: ["TecanInfinite", "${SCRIPTFILE}", "1.1", "${TEMPDIR}\\absorbance.xml"],
 						wait: true
 					},
 					"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.reader",
@@ -362,19 +368,23 @@ describe('commands/absorbanceReader', function() {
 					"equipment": "ourlab.mario.reader",
 					"measurementType": "absorbance",
 					"program": {
-						"excitationWavelength": "600nm",
-						"wellDesignFactor": "testWell"
+						"excitationWavelength": "600nm"
 					},
-					"object": "plate1",
-					"outputDataset": "absorbance"
+					"output": {
+						"joinKey": "testWell",
+						"appendTo": "absorbance"
+					},
+					"object": "plate1"
 				},
 				"command": "absorbanceReader.measurePlate",
 				"object": "plate1",
 				"program": {
-					"excitationWavelength": "600nm",
-					"wellDesignFactor": "testWell"
+					"excitationWavelength": "600nm"
 				},
-				"outputDataset": "absorbance"
+				"output": {
+					"joinKey": "testWell",
+					"appendTo": "absorbance"
+				}
 			});
 			// console.log("reports: "+JSON.stringify(result.output.reports, null, '\t'));
 			should.deepEqual(result.output.reports["1.1"], {

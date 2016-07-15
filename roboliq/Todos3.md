@@ -22,8 +22,10 @@
 * [?] between strain dispenses, no flushing; but decontam before and end
 * [ ] fix gc_mario_screening2.mdfx so that it doesn't loop
 * [ ] test absorbanceReader with new `output` property and shaking and stuff
+* [ ] reserve robot for the weekend / respond to Gabrielle
 * [ ] generate with lots of loops, so that it continues over the weekend
 * [ ] Fabian: start the cooling system
+* [ ] automatically copy recording data to network drive, so I can look at it over the weekend
 
 * [ ] design2.js: add functionality for joining independent designs column-wise
 * [ ] design2.js: add functionality for joining independent designs column-wise

@@ -19,7 +19,7 @@ opts
 
 // console.log(opts);
 
-const [scriptFile, stepId, xmlFile, wellDesignFactor, dataset] = opts.args;
+const [scriptFile, stepId, xmlFile] = opts.args;
 // console.log({scriptFile, stepId, xmlFile, wellDesignFactor, dataset})
 
 const scriptDir = path.dirname(scriptFile);
@@ -47,7 +47,7 @@ if (opts.rename) {
 const protocol = require(scriptFile);
 const factors = _.get(protocol.reports, [stepId, "measurementFactors"]);
 const step = _.get(protocol.steps, stepId);
-const userValues = _.get(step, "program.userValues");
+const userValues = _.get(step, "output.userValues", _.get(step, "program.userValues"));
 const objectName = step.object;
 // console.log(factors);
 

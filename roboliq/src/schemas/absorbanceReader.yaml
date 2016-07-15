@@ -18,24 +18,30 @@ absorbanceReader.measurePlate:
     program:
       description: "Program parameters"
       properties:
-        shakerProgram:
-          description: Program for shaker.
-          properties:
-            rpm: {description: Rotations per minute (RPM), type: number}
-            duration: {description: "Duration of shaking", type: Duration}
-        wellDesignFactor: {description: "Name of design column that indicates which wells to measure", type: string}
+        # shakerProgram:
+        #   description: Program for shaker.
+        #   properties:
+        #     rpm: {description: Rotations per minute (RPM), type: number}
+        #     duration: {description: "Duration of shaking", type: Duration}
+        excitationWavelength: {description: "Excitation wavelength", type: Length}
+        excitationBandwidth: {description: "Excitation bandwidth", type: Length}
+        excitationWavelengthMin: {description: "Minimum excitation wavelength for a scan", type: Length}
+        excitationWavelengthMax: {description: "Maximum excitation wavelength for a scan", type: Length}
+        excitationWavelengthStep: {description: "Size of steps for a scan", type: Length}
         wells: {description: "Array of wells to read", type: "Wells"}
-        userValues: {description: "User-specificed values that should be included in the output table", type: object}
+        wellDesignFactor: {description: "Name of design column that indicates which wells to measure (deprecated, use `output.joinKey`)", type: string}
+        userValues: {description: "User-specificed values that should be included in the output table (deprecated, use `output.userValues`)", type: object}
     programFile: {description: "Program filename", type: "string"}
     programData: {description: "Program data"}
-    outputFile: {description: "Filename for output", type: "string"}
-    outputDataset: {description: "Name of dataset to which the measurements values will be appended.", type: string}
+    outputFile: {description: "Filename for output (deprecated, use `output.writeTo`)", type: "string"}
+    outputDataset: {description: "Name of dataset to which the measurements values will be appended. (deprecated, use `output.appendTo`)", type: string}
     output:
       description: "Output definition for where and how to save the measurements"
       properties:
         joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
         writeTo: {description: "Filename to write measured to as JSON", type: "string"}
         appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
+        userValues: {description: "User-specificed values that should be included in the output table", type: object}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}
