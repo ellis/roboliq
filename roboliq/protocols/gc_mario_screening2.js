@@ -59,7 +59,7 @@ const sources = {
 	glucose: 10,
 	nitrogen1: 50,
 	nitrogen2: 50,
-	trace1: 50,
+	trace1: 10,
 	trace2: 50
 };
 
@@ -117,10 +117,9 @@ const deltas3 = {
 	glucose: "(3-1.5)/2",
 	nitrogen1: "(4-1.5)/2",
 	nitrogen2: "(4-1)/2",
-	trace1: "(4-1.5)/2",
+	trace1: "(3-1)/2",
 	trace2: "(4-1)/2",
 };
-
 
 /*
 * $x1$: Buffer concentration
