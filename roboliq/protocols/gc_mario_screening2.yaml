@@ -4,6 +4,9 @@ description: |
   Water test for the initial screening experiment using a
   5-factor central composite design.
 
+imports:
+  - gc_mario_screening2.js
+
 config:
   evowareCompiler:
     timing: false
