@@ -63,6 +63,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
+        wells: A02 down block H11
         orderBy: wellNum
       id=range:
         orderBy: [wellNum]
@@ -125,6 +126,11 @@ steps:
       clean: thorough
       cleanBetweenSameSource: none
   4:
+    command: evoware._userPrompt
+    agent: ourlab.mario.evoware
+    text: "Shake strain tube, open it, and place it at T1(7)"
+    beep: 3
+  5:
     description: "Distribute strain"
     command: pipetter.pipette
     program: Roboliq_Water_Air_1000
@@ -134,16 +140,21 @@ steps:
     volumes: $$strainV
     clean: decontaminate
     cleanBetweenSameSource: none
-  5:
+  6:
+    command: evoware._userPrompt
+    agent: ourlab.mario.evoware
+    text: "Place lid on plate"
+    beep: 3
+  7:
     description: "Move plate to reader"
     command: transporter.movePlate
     object: $plate
     destination: ourlab.mario.site.READER
-  6:
+  8:
     description: "Loop to measure OD600"
     command: system.repeat
     count: 864 # 3 days * 24 hours/day * 12 times/hour
-    # count: 1
+    #count: 1
     variableName: cycle
     steps:
       description: "`Measure absorbance #{{$cycle}}`"
