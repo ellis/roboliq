@@ -1,7 +1,7 @@
 roboliq: v1
 
 description: |
-  Water test for the initial screening experiment using a
+  Initial screening experiment using a
   5-factor central composite design.
 
 config:
