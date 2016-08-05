@@ -4,6 +4,9 @@ description: |
   Initial screening experiment using a
   5-factor central composite design.
 
+imports:
+  - gc_mario_screening2.js
+
 config:
   evowareCompiler:
     timing: false
