@@ -169,7 +169,7 @@ const design1 = makeDesign(1, rows1, centers1, deltas1);
 const table1 = Design.flattenDesign(design1);
 // Design.printRows(table1)
 
-const design2 = makeDesign(2, rows2, centers1, deltas1);
+const design2 = makeDesign(2, rows2, centers1, deltas1); // ERROR FIXME: should be `centers3` and `deltas3`
 const table2 = Design.flattenDesign(design2);
 
 // const design3 = makeDesign(3, rows3, centers3, deltas3);
