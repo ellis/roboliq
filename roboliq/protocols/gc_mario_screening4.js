@@ -137,20 +137,21 @@ function makeDesign(group, initialRows, centers, deltas) {
 		initialRows,
 		conditions: {
 			fullVolume: "200 ul",
-			group,
+			//group,
 			"bufferV=calculate": {expression: `to(fullVolume * (${centers.buffer}) / (${sources.buffer}), "ul")`, decimals: 1},
 			"strainV=calculate": {expression: `to(fullVolume * (${centers.strain}) / (${sources.strain}), "ul")`, decimals: 1},
 			"glucoseV=calculate": {expression: `to(fullVolume * ((${centers.glucose}) + x1 * (${deltas.glucose})) / (${sources.glucose}), "ul")`, decimals: 1},
 			"nitrogen1V=calculate": {expression: `max(4 ul, to(fullVolume * ((${centers.nitrogen1}) + x2 * (${deltas.nitrogen1})) / (${sources.nitrogen1}), "ul"))`, decimals: 1},
-			"nitrogen2V=calculate": {expression: `max(0 ul, to(fullVolume * ((${centers.nitrogen2}) + x3 * (${deltas.nitrogen2})) / (${sources.nitrogen2}), "ul"))`, decimals: 1},
+			"nitrogen2V=calculate": {expression: `to(fullVolume * ((${centers.nitrogen2}) + x3 * (${deltas.nitrogen2})) / (${sources.nitrogen2}), "ul")`, decimals: 1},
 			"trace1V=calculate": {expression: `max(0 ul, to(fullVolume * ((${centers.trace1}) + x4 * (${deltas.trace1})) / (${sources.trace1}), "ul"))`, decimals: 1},
 			// Trace 2 has to be pipetted with large tips, so make sure it has at least 3ul
 			"trace2V=calculate": {expression: `max(0 ul, to(fullVolume * ((${centers.trace2}) + x5 * (${deltas.trace2})) / (${sources.trace2}), "ul"))`, decimals: 1},
 			".tooSmall=case": {
 				cases: [
-					{where: 'glucoseV < (4ul)', conditions: {glucoseV: "0 ul"}},
+					{where: 'glucoseV < (4ul)', conditions: {glucoseV: "4 ul"}},
 					//{where: 'nitrogen1V < (4ul)', conditions: {nitrogen1V: "0 ul"}},
-					{where: 'nitrogen2V < (4ul)', conditions: {nitrogen2V: "0 ul"}},
+					{where: 'nitrogen2V < (2ul)', conditions: {nitrogen2V: "0 ul"}},
+					{where: 'nitrogen2V < (4ul)', conditions: {nitrogen2V: "4 ul"}},
 					{where: 'trace1V < (4ul)', conditions: {trace1V: "0 ul"}},
 					{where: 'trace1V < (4ul)', conditions: {trace1V: "0 ul"}},
 				]
