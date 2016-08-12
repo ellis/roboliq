@@ -325,6 +325,13 @@ module.exports = {
 			},
 			"model": {
 				"type": "Namespace",
+				"plateModel_48_flower": {
+					"type": "PlateModel",
+					"label": "48 flower-well plate",
+					"rows": 6,
+					"columns": 8,
+					"evowareName": "Ellis 48 Flower Plate"
+				},
 				"plateModel_96_pcr": {
 					"type": "PlateModel",
 					"label": "96 well PCR plate",

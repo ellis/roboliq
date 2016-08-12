@@ -191,18 +191,6 @@ function makeDesign(group, initialRows, centers, deltas) {
 			"trace1C=calculate": {expression: `(${sources.trace1}) * trace1V / fullVolume`, decimals: 2},
 			"trace2C=calculate": {expression: `(${sources.trace2}) * trace2V / fullVolume`, decimals: 2},
 			"waterV=calculate": {expression: 'fullVolume - bufferV - glucoseV - nitrogen1V - nitrogen1V - trace1V - trace2V - strainV', decimals: 1}
-			// "bufferV": `to(fullVolume * bufferC / (${sources.buffer}), "ul")`,
-			// "glucoseC=calculate": `(${centers.glucose}) + x2 * (${deltas.glucose})`,
-			// "glucoseV=calculate": `to(fullVolume * glucoseC / (${sources.glucose}), "ul")`,
-			// "nitrogen1V=calculate": `to((${centers.nitrogenV}) + x3 * (${deltas.nitrogen}), "ul")`,
-			// "nitrogen1C=calculate": `to((${sources.nitrogen1}) * nitrogen1V / fullVolume, "mg / L")`,
-			// "nitrogen2V=calculate": `to((${centers.nitrogenV}) + (1 - x3) * (${deltas.nitrogen}), "ul")`,
-			// "nitrogen2C=calculate": `to((${sources.nitrogen2}) * nitrogen2V / fullVolume, "mg / L")`,
-			// "mixC=calculate": `(${centers.mix}) + x4 * (${deltas.mix})`,
-			// "mixV=calculate": `to(fullVolume * mixC / (${sources.mix}), "ul")`,
-			// "vitaminC=calculate": `(${centers.vitamin}) + x5 * (${deltas.vitamin})`,
-			// "vitaminV=calculate": `to(fullVolume * vitaminC / (${sources.vitamin}), "ul")`,
-			// "waterV=calculate": 'fullVolume - bufferV - glucoseV - nitrogen1V - nitrogen1V - mixV - vitaminV'
 		},
 		orderBy: ["center", "x1", "x2", "x3", "x4", "x5"]
 	};

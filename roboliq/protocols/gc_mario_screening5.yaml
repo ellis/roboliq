@@ -14,7 +14,7 @@ config:
 objects:
   plate1:
     type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
+    model: ourlab.model.plateModel_48_flower
     location: ourlab.mario.site.P3
   trough1:
     type: Plate
@@ -58,11 +58,14 @@ objects:
       #       conditions:
       #         trace2V: 0 ul
       #         trace2C: '0.00'
+      comboId=range:
+        orderBy: [wellNum]
+      .replicate*: 2
       wellNum=range:
         order: shuffle
       well=allocateWells:
-        rows: 4
-        columns: 6
+        rows: 6
+        columns: 8
         orderBy: wellNum
       id=range:
         orderBy: [wellNum]
@@ -142,28 +145,5 @@ steps:
   6:
     command: evoware._userPrompt
     agent: ourlab.mario.evoware
-    text: "Place lid on plate"
+    text: "Seal plate and put in BioLector"
     beep: 3
-  7:
-    description: "Move plate to reader"
-    command: transporter.movePlate
-    object: $plate
-    destination: ourlab.mario.site.READER
-  8:
-    description: "Loop to measure OD600"
-    command: system.repeat
-    #count: 864 # 3 days * 24 hours/day * 12 times/hour
-    #count: 432 # 1.5 days * 24 hours/day * 12 times/hour
-    count: 1
-    variableName: cycle
-    steps:
-      description: "`Measure absorbance #{{$cycle}}`"
-      command: absorbanceReader.measurePlate
-      object: $plate
-      programFile: ./gc_mario_screening2.mdfx
-      # program:
-      #   excitationWavelength: 480nm
-      output:
-        joinKey: well
-        userValues: {cycle: $cycle}
-        appendTo: "absorbance"
