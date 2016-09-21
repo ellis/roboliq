@@ -1,4 +1,14 @@
-### Centrifuge
+### `Reader`
+
+Reader equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
+### `Centrifuge`
 
 Centrifuge equipment.
 
@@ -20,17 +30,29 @@ Example:
 
 
 
-### Reader
+### `Incubator`
 
-Reader equipment.
+Incubator equipment.
 
 Properties:
 
 * `type` -- 
 * `[description]: string` -- 
 * `[label]: string` -- 
+* `sitesInternal: array` -- 
 
-### Pipetter
+Example:
+
+```
+"incubator": {
+  "type": "Incubator",
+  "sitesInternal": ["ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8"],
+}
+```
+
+
+
+### `Pipetter`
 
 Pipetting equipment.
 
@@ -40,7 +62,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-### Syringe
+### `Syringe`
 
 Pipetting syringe.
 
@@ -49,10 +71,10 @@ Properties:
 * `type` -- 
 * `[description]: string` -- 
 * `[label]: string` -- 
-* `[tipModel]: string` -- 
+* `[tipModel]: string` -- Tip model identifier
 * `[tipModelPermanent]: string` -- 
 
-### Agent
+### `Agent`
 
 An agent that can execute commands.
 
@@ -62,7 +84,17 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-### Liquid
+### `Design`
+
+Specification of an experimental design.
+
+Properties:
+
+* `type` -- 
+* `[conditions]: object` -- 
+* `[actions]: array` -- 
+
+### `Liquid`
 
 Liquid substance.
 
@@ -73,7 +105,7 @@ Properties:
 * `[label]: string` -- 
 * `[wells]: array` -- 
 
-### Plate
+### `Plate`
 
 Plate labware.
 
@@ -86,7 +118,7 @@ Properties:
 * `[location]: Site` -- 
 * `[contents]: object,array` -- 
 
-### PlateModel
+### `PlateModel`
 
 Model for plate labware.
 
@@ -98,7 +130,7 @@ Properties:
 * `rows: integer` -- 
 * `columns: integer` -- 
 
-### Site
+### `Site`
 
 Represents a bench site where labware can placed.
 
@@ -108,7 +140,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-### Template
+### `Template`
 
 A template object, used by the `system.call` command.
 
@@ -119,7 +151,7 @@ Properties:
 * `[label]: string` -- 
 * `[template]` -- 
 
-### Variable
+### `Variable`
 
 User-defined variable.
 
@@ -130,7 +162,17 @@ Properties:
 * `[label]: string` -- 
 * `[value]` -- 
 
-### Sealer
+### `Scale`
+
+Scale equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
+### `Sealer`
 
 Sealing equipment.
 
@@ -140,7 +182,17 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-### Timer
+### `Shaker`
+
+Shaker equipment.
+
+Properties:
+
+* `type` -- 
+* `[description]: string` -- 
+* `[label]: string` -- 
+
+### `Timer`
 
 Timer equipment.
 
@@ -150,7 +202,7 @@ Properties:
 * `[description]: string` -- 
 * `[label]: string` -- 
 
-### Transporter
+### `Transporter`
 
 Labware transporter equipment.
 

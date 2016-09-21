@@ -1,6 +1,6 @@
 # Roboliq
 
-Roboliq compiles biological protocols specifications down to low-level commands
+Roboliq takes biological protocols and compiles them down to low-level commands
 for robotic lab automation.
 
 # Setup
