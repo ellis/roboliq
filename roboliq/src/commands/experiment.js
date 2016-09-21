@@ -2,7 +2,7 @@ import _ from 'lodash';
 import assert from 'assert';
 import yaml from 'yamljs';
 import commandHelper from '../commandHelper.js';
-import * as Design from '../design2.js';
+import * as Design from '../design.js';
 import expect from '../expect.js';
 import misc from '../misc.js';
 

@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const should = require('should');
-import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, query_groupBy, expandConditions, printRows} from '../src/design2.js';
+import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, query_groupBy, expandConditions, printRows} from '../src/design.js';
 
 describe('design', () => {
 	// Configure mathjs to use bignumbers

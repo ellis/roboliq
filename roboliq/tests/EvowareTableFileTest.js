@@ -191,7 +191,7 @@ describe('EvowareTableFile', function() {
 				},
 				"LI - Trough 3Pos 100ml": {
 					"3": {
-						"2": { "label": "Labware7", "labwareModelName": "Trough 25ml Max. Recovery" },
+						"3": { "label": "Bleach", "labwareModelName": "Trough 25ml Max. Recovery" },
 						"internal": true
 					}
 				},

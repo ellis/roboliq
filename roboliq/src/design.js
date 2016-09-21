@@ -1,124 +1,28 @@
 import _ from 'lodash';
 import assert from 'assert';
-import Immutable, {Map, fromJS} from 'immutable';
+// import Immutable, {Map, fromJS} from 'immutable';
 import math from 'mathjs';
+import naturalSort from 'javascript-natural-sort';
 import Random from 'random-js';
+import stableSort from 'stable';
 //import yaml from 'yamljs';
 
-import {locationRowColToText} from './parsers/wellsParser.js';
+import wellsParser from './parsers/wellsParser.js';
 
 
-/*
- * What's the impact of:
- * - evaporation
- * - number of sealing layers
- * - sampling (removing content from wells)
- * - position in shaker
- *
- * The interactions among the factors are complex:
- * - sampling causes a seal puncture, which leads to accelerated evaporation
- * - but if we don't sample all wells at the same time, it's much more difficult to compare readouts at the end
- * - the experiments take a long time (48h) so if we're going to re-test conditions using swapped shaker positions, it going to take a long time
- * - we could possible minimize the effect of position by swapping positions frequently, but this seems complex
- * - each sealing layer reduces air exchange, so if we add another seal layer after puncturing in order to minimize evaporation, we've change the conditions
- * - could we inject more media to compensate for evaporation?  If so, which effects would this have?
- *
- * Additional confounding factors:
- * - position of well
- * - syringe used
- * - frequency and duration of stopping incubator to perform operations
- *
- * Design ideas for isolating evaporation:
- * - puncture wells at various time points; measure all wells at 48h; model could be $y \sim f(48 - t1)$; restricted to 8 wells.
- * - puncture wells at various time points and measure; measure all wells at 48h; model could be $y \sim f(t1, y1)$ or $y/y1 \sim f(t1)$; restricted to 8 wells.
- * - puncture wells at various time points; measures wells later; model: $y_t \sim dt$, where $y_t$ are all measurements at a given time, $dt$ is time since puncture.
- *
- * Design ideas for isolating site effects:
- * - use 2, 8, or 16 plates with the same conditions; just interleave their processing
- *
- * Design ideas for isolating well position effects:
- * - randomize wells and see whether col/row have an effect
- *
- * Design ideas for isolating sampling:
- * - pre-puncture all wells before incubation; assign wells to be sampled 1, 2, 3, or 4 times, where the last timepoint is the same for all
- * - dispense media, seal;
- * - puncture wells at various time points before 24h and measure; measure again 24h later; model is $y - y1 \sim f(evaporationTime)$
- * - puncture wells at various time points and measure or not; measures wells 12hr later;
- *     model 1) $y \sim x$, where $x$ is 1 if first puncture also involved measurement (0 otherwise)
- *
- * Design ideas for number of sealing layers:
- * -
- * Design ideas for general experiment:
- * - sample wells at various time points; measure again 12hr later (if we think 12hr is ok for evaporation); 4 wells have first measurement, 4 have second measurement for each time period;
- *     model 1) $y_i^{(t)} \sim k_i$, where $y_i^{(t)}$ are the measurements at a given time point, and $k$ is 1 for the first measurement and 2 for the second measurement.  This helps us assess the impact of evaporation+priorsampling; if we already quantified the impact of 12hr evaporation, then we may be able to extract the impact of prior sampling.
- *     model 2) ...
- * - puncture wells at various time points and measure or not; measures wells later;
- *     model 1) $y_t \sim x + dt$, where $y_t$ are all measurements at a given time, $x$ is 1 if first puncture also involved measurement (0 otherwise), $dt$ is time since puncture.
- *     model 2) $y \sim f(t, x, dt)$, full model
- *
- * More details for the first general design:
- * - measure every 20 minutes (=> 16hr = 48 sample times)
- * - for the first 48 sample times, sample 1 well
- * - for the next 48 sample times, resample each well from before and 1 new well
- * - for the last 48 sample times, resample each well that's only been sampled once
- * - PROBLEM: 16hr may be too long with respect to evaporation
- */
+const DEBUG = false;
 
-// TODO: add cultureOrder so that random groups of items with syringes 1-8 are assigned increasing order numbers
-export const design2 = {
-	conditions: {
-		"strainSource": "strain1",
-		"mediaSource": "media1",
-		//"cultureNum*": _.range(1, 4+1),
-		"cultureNum*=range": {
-			till: 96
-		},
-		"cultureWell=range": {
-			till: 96,
-			shuffle: true
-		},
-		//"cultureCol=math": "floor((cultureWell - 1) / 8) + 1",
-		//"cultureRow=math": "((cultureWell - 1) % 8) + 1",
-		// TODO: syringe should be unique for each cultureWell, and ideally different for every sampleCycle
-		"syringe=range": {
-			till: 8,
-			shuffle: true,
-			rotateValues: true
-		},
-		/*"sampleNum": 1,
-		"sampleCycle=range": {
-			shuffle: true
-		},
-		"*": {
-			conditions: {
-				sampleNum: 2,
-				"sampleCycle=math": "sampleCycle + 48"
-			}
-		},
-		"dNum*=range": {till: 5},
-		"dPlate=allocatePlates": {
-			plates: ["dPlate1", "dPlate2", "dPlate3", "dPlate4", "dPlate5", "dPlate6", "dPlate7", "dPlate8", "dPlate9", "dPlate10", "dPlate11"],
-			wellsPerPlate: 96,
-			groupBy: "sampleCycle",
-			orderBy: "sampleCycle",
-			alternatePlatesByGroup: true
-		},
-		"dWell=range": {
-			till: 96,
-			groupBy: "dPlate",
-			shuffle: true
-		}*/
-	},
-	// TODO: add randomSeed
-	actions: [
-	]
-};
+//import {locationRowColToText} from './parsers/wellsParser.js';
+// FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
+function locationRowColToText(row, col) {
+	var colText = col.toString();
+	if (colText.length == 1) colText = "0"+colText;
+	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
+}
 
-// function printConditions(conditions) {
-// 	console.log(yaml.stringify(conditions, 6, 2));
-// }
+export function printRows(rows, hideRedundancies = false) {
+	const data = _.flattenDeep(rows);
 
-export function printData(data, hideRedundancies = false) {
 	// Get column names
 	const columnMap = {};
 	_.forEach(data, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
@@ -135,7 +39,7 @@ export function printData(data, hideRedundancies = false) {
 			lines.push(["---"]);
 		}
 		_.forEach(group, row => {
-			const line = _.map(columns, key => _.get(row, key, ""));
+			const line = _.map(columns, key => _.get(row, key, "").toString());
 			lines.push(line);
 		});
 	});
@@ -148,8 +52,8 @@ export function printData(data, hideRedundancies = false) {
 	});
 	// console.log({widths})
 
-	// console.log(columns.map((s, i) => _.padEnd(s, widths[i])).join("  "));
-	// console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
+	console.log(columns.map((s, i) => _.padEnd(s, widths[i])).join("  "));
+	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
 	let linePrev;
 	_.forEach(lines, line => {
 		const s = line.map((s, i) => {
@@ -158,78 +62,1241 @@ export function printData(data, hideRedundancies = false) {
 				: s;
 			return _.padEnd(s2, widths[i]);
 		}).join("  ");
-		// console.log(s);
+		console.log(s);
 		linePrev = line;
 	});
-	// console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
+	console.log(columns.map((s, i) => _.repeat("=", widths[i])).join("  "));
 }
-// Consider: select, groupBy, orderBy, unique
 
-function flattenConditions(conditions, depth = -1) {
-	assert(_.isPlainObject(conditions));
-	let flatter = [conditions];
-	let again = true;
-	while (again && depth != 0) {
-		//console.log({depth})
-		again = false;
-		flatter = _.flatMap(flatter, (row) => {
-			//console.log({row})
-			assert(_.isPlainObject(row));
-			let rows = [{}];
-			_.forEach(row, (value, key) => {
-				if (depth != 0 && _.endsWith(key, "*")) {
-					again = true;
-				}
-				rows = expandRows(rows, key, value, depth);
-			});
-			//console.log({rows})
-			return rows;
-		});
-		if (depth > 0)
-			depth--;
+/**
+ * Turn a design specification into a design table.
+ * @param {object} design - the design specification.
+ */
+export function flattenDesign(design) {
+	if (_.isEmpty(design)) {
+		return [];
 	}
 
-	return flatter;
-}
-
-function expandRows(rows, key, value, depth = -1) {
-	//console.log({key, value})
-	if (depth != 0 && _.endsWith(key, "*")) {
-		const key2 = key.substring(0, key.length - 1);
-		// For each entry in value, make a copy of every row in rows with the properties of the entry
-		rows = _.flatMap(rows, x => {
-			return _.map(value, (value3, key3) => {
-				//console.log({key3, value3})
-				if (_.isPlainObject(value3)) {
-					const value2 = (_.isNumber(key3)) ? key3 + 1 : key3;
-					return _.merge({}, x, _.fromPairs([[key2, value2]]), value3);
-				}
-				else {
-					return _.merge({}, x, _.fromPairs([[key2, value3]]));
-				}
-			});
-		});
+	const randomEngine = Random.engines.mt19937();
+	if (_.isNumber(design.randomSeed)) {
+		randomEngine.seed(design.randomSeed);
 	}
 	else {
-		_.forEach(rows, row => { row[key] = value; });
-		/*if (key === "reseal") {
-			console.log("reseal: "+value)
-			console.log(rows)
-		}*/
+		randomEngine.autoSeed();
+	}
+
+	const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
+	const conditionsRows = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine, design.initialRows));
+	let rows;
+	if (conditionsRows.length == 1) {
+		rows = conditionsRows[0];
+	}
+	else {
+		rows = _.merge.apply(_, [[]].concat(conditionsRows));
+	}
+
+	if (design.where) {
+		rows = filterOnWhere(rows, design.where);
+	}
+	if (design.orderBy) {
+		rows = _.orderBy(rows, design.orderBy);
+	}
+	if (design.select) {
+		rows = rows.map(row => _.pick(row, design.select));
 	}
 	return rows;
 }
 
-export function query(table, q) {
-	let table2 = _.clone(table);
-	if (q.select) {
-		table2 = _.map(table2, x => _.pick(x, q.select));
+export function getCommonValues(table) {
+	if (_.isEmpty(table)) return {};
+
+	let common = _.clone(table[0]);
+	for (let i = 1; i < table.length; i++) {
+		// Remove any value from common which aren't shared with this row.
+		_.forEach(table[i], (value, name) => {
+			if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
+				delete common[name];
+			}
+		});
 	}
 
-	if (q.where) {
-		_.forEach(q.where, (value, key) => {
-			table2 = _.filter(table, row => _.isEqual(row[key], value));
+	return common;
+}
+
+export function getCommonValuesNested(nestedRows, rowIndexes, common) {
+	if (_.isEmpty(rowIndexes)) return {};
+
+	for (let i = 0; i < rowIndexes.length; i++) {
+		const rowIndex = rowIndexes[i];
+		const row = nestedRows[rowIndex];
+		if (_.isArray(row)) {
+			getCommonValuesNested(row, _.range(row.length), common);
+		}
+		else if (_.isUndefined(common)) {
+			common = _.clone(row);
+		}
+		else {
+			// Remove any value from common which aren't shared with this row.
+			_.forEach(row, (value, name) => {
+				if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
+					delete common[name];
+				}
+			});
+		}
+	}
+
+	return common;
+}
+
+/**
+ * Is like _.flattenDeep, but it mutates the array in-place.
+ *
+ * @param  {array} rows - array to flatten
+ */
+export function flattenArrayM(rows) {
+	let i = rows.length;
+	while (i > 0) {
+		i--;
+		const item = rows[i];
+		if (_.isArray(item)) {
+			// Flatten the sub-array
+			flattenArrayM(item);
+			// Splice the original sub-array back into the parent array
+			rows.splice(i, 1, ...item);
+		}
+	}
+	return rows;
+}
+
+/**
+ * Is like _.flattenDeep, but only for the given rows, and it mutates both the rows array and rowIndexes array in-place.
+ *
+ * @param {array} rows - array to flatten
+ * @param {array} rowIndexes - array of row indexes to flatten
+ * @param {array} [otherRowIndexes] - a second, optional array of row indexes that should have the same modifications made to it as rowIndexes
+ * @param {integer} rowIndexesOffset - index in rowIndexes to start at
+ */
+export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
+	if (DEBUG) {
+		console.log(`flattenArrayAndIndexes:`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+	}
+	let i = 0;
+	while (i < rowIndexes.length) {
+		const rowIndex = rowIndexes[i];
+		const item = rows[rowIndex];
+		if (_.isArray(item)) {
+			// Flatten the sub-array
+			flattenArrayM(item);
+			// Splice the original sub-array back into the parent array
+			rows.splice(rowIndex, 1, ...item);
+
+			// Update rowIndexes
+			for (let j = i + 1; j < rowIndexes.length; j++) {
+				rowIndexes[j] += item.length - 1;
+			}
+			// console.log(` 1: ${rowIndexes.join(",")}`)
+			const x = _.range(rowIndex, rowIndex + item.length);
+			// console.log({x})
+			rowIndexes.splice(i, 1, ...x);
+			// console.log(` 2: ${rowIndexes.join(",")}`)
+
+			for (let m = 0; m < otherRowIndexes.length; m++) {
+				const rowIndexes2 = otherRowIndexes[m];
+				let k = -1;
+				for (let j = 0; j < rowIndexes2.length; j++) {
+					if (rowIndexes2[j] === rowIndex) {
+						k = j;
+					}
+					else if (rowIndexes2[j] > rowIndex) {
+						rowIndexes2[j] += item.length - 1;
+					}
+				}
+				if (k >= 0) {
+					const x = _.range(rowIndex, rowIndex + item.length);
+					// console.log({x})
+					rowIndexes2.splice(k, 1, ...x);
+				}
+				// console.log({m, len: otherRowIndexes.length, k})
+				// console.log(` 3 otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+			}
+
+			i += item.length;
+		}
+		else {
+			i++;
+		}
+		// console.log(` 4 otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+	}
+	if (DEBUG) { console.log(" (flattenArrayAndIndexes) otherRowIndexes: "+JSON.stringify(otherRowIndexes)); }
+}
+
+/**
+ * If conditions is an array, then each element will be processed individually and then the results will be merged together.
+ * @param {object|array} conditions - an object of conditions or an array of such objects.
+ * @param {array} table0 - the initial rows to start expanding conditions on (default `[{}]`)
+ */
+export function expandConditions(conditions, randomEngine, table0 = [{}]) {
+	// console.log("expandConditions: "+JSON.stringify(conditions))
+
+	const conditionsList = _.isArray(conditions) ? conditions : [conditions];
+	const conditionsRows = conditionsList.map(conditions => {
+		const table = _.cloneDeep(table0);
+		expandRowsByObject(table, _.range(0, table.length), [], conditions, randomEngine);
+		flattenArrayM(table);
+		return table;
+	});
+
+	let table = (conditionsRows.length == 1)
+		? conditionsRows[0]
+		: _.merge.apply(_, [[]].concat(conditionsRows));  // should probably be `_.merge([], ...conditionsRows)`
+	return table;
+}
+
+/**
+ * expandRowsByObject:
+ *   for each key/value pair, call expandRowsByNamedValue
+ */
+function expandRowsByObject(nestedRows, rowIndexes, otherRowIndexes, conditions, randomEngine) {
+	if (DEBUG) {
+		console.log("expandRowsByObject: "+JSON.stringify(conditions));
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndexes: ${rowIndexes}\n ${JSON.stringify(nestedRows)}`)
+		assertNoDuplicates(otherRowIndexes);
+	}
+	for (let name in conditions) {
+		expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, conditions[name], randomEngine);
+	}
+}
+
+/**
+ * // REQUIRED by: expandRowsByObject
+ * expandRowsByNamedValue:
+ *   TODO: turn the name/value into an action in order to allow for more sophisticated expansion
+ *   if has star-suffix, call branchRowsByNamedValue
+ *   else call assignRowsByNamedValue
+ */
+export function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
+	if (DEBUG) {
+		console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(nestedRows)}`)
+		assertNoDuplicates(otherRowIndexes);
+		assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
+	}
+	// If an action is specified using the "=" symbol:
+	const iEquals = name.indexOf("=");
+	if (iEquals >= 0) {
+		// Need to flatten the rows in case the action uses groupBy or sameBy
+		flattenArrayAndIndexes(nestedRows, rowIndexes, otherRowIndexes);
+		// console.log(` 'otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		// console.log(` 'rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(nestedRows)}`)
+		const actionType = name.substr(iEquals + 1) || "assign";
+		const actionHandler = actionHandlers[actionType];
+		assert(actionHandler, `unknown action type: ${actionType} in ${name}`)
+		name = name.substr(0, iEquals);
+
+		const result = actionHandler(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine);
+		// If no result was returned, the action handled modified the rows directly:
+		if (_.isUndefined(result)) {
+			return;
+		}
+		// Otherwise, continue processing using the action's results
+		else {
+			value = result;
+		}
+	}
+
+	const starIndex = name.indexOf("*");
+	if (starIndex >= 0) {
+		// Remove the branching suffix from the name
+		name = name.substr(0, starIndex);
+		// If the name is empty, automatically pick a dummy name that will be omitted
+		if (_.isEmpty(name)) {
+			name = ".HIDDEN";
+		}
+		// If the branching value is just a number, then assume it means the number of replicates
+		if (_.isNumber(value)) {
+			value = _.range(1, value + 1);
+		}
+
+		// console.log({loc: "A", rowIndexes, nestedRows})
+		branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine);
+		// console.log("B")
+	}
+	else {
+		assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine, true);
+	}
+}
+
+/*
+ * // REQUIRED by: expandRowsByNamedValue, branchRowsByNamedValue
+ * assignRowsByNamedValue: (REQUIRED FOR ASSIGNING ARRAY TO ROWS)
+ *   if value is array:
+ *     for i in count:
+ *       rowIndex = rowIndexes[i]
+ *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, i+1, value[i])
+ *   else if value is object:
+ *     keys = _.keys(value)
+ *     for each i in keys.length:
+ *       key = keys[i]
+ *       item = value[key]
+ *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item)
+ *   else:
+ *     for each row:
+ *       setColumnValue(row, name, value)
+ */
+function assignRowsByNamedValue(nestedRows, rowIndexesGroups, otherRowIndexes, name, value, randomEngine, doUnnest = true) {
+	const l = (_.every(rowIndexesGroups, l => _.isArray(l))) ? rowIndexesGroups : [rowIndexesGroups];
+	if (DEBUG) {
+		console.log(`assignRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndexesGroups: ${JSON.stringify(rowIndexesGroups)}\n ${JSON.stringify(nestedRows)}`)
+		assertNoDuplicates(otherRowIndexes);
+		assertNoDuplicates(otherRowIndexes.concat(l));
+		//printRows(nestedRows)
+	}
+	const otherRowIndexes2 = otherRowIndexes.concat(l);
+	for (let il = 0; il < l.length; il++) {
+		const rowIndexes = _.clone(l[il]);
+		// console.log({il, rowIndexes, l})
+		let valueIndex = 0;
+		const isSpecial = value instanceof Special;
+		if (isSpecial) {
+			value.reset();
+		}
+		/*// If value is an array of objects
+		if (_.isArray(value) && _.every(value, x => _.isObject(x))) {
+			// Assign indexes
+			const valueIndexes = _.range(1, value.length + 1);
+			assignRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, valueIndexes, randomEngine, doUnnest);
+			// Assign objects
+			expandRowsByObject(nestedRows, rowIndexes, otherRowIndexes, item, randomEngine);
+		}
+		else*/ if (isSpecial || _.isArray(value)) {
+			for (let i = 0; i < rowIndexes.length; i++) {
+				const rowIndex = rowIndexes[i];
+				const rowIndexes2 = [rowIndex];
+				const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, undefined, randomEngine, doUnnest);
+				valueIndex += n;
+				i += rowIndexes2.length - 1;
+				if (DEBUG) {
+					console.log({rowIndex, dRowIndex: rowIndexes2.length, dValueIndex: n, valueIndex, i, rowIndexes})
+					console.log(` (assignRowsByNamedValue:) rowIndexes: ${rowIndexes.join(", ")}`)
+				}
+			}
+		}
+		else if (_.isPlainObject(value)) {
+			let valueIndex = 0;
+			const keys = _.keys(value);
+			for (let i = 0; i < rowIndexes.length; i++) {
+				const rowIndex = rowIndexes[i];
+				const rowIndexes2 = [rowIndex];
+				const n = assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes.concat([rowIndexes, rowIndexes2]), name, value, valueIndex, keys, randomEngine, doUnnest);
+				valueIndex += n;
+				i += rowIndexes2.length - 1;
+			}
+		}
+		else {
+			for (let i = 0; i < rowIndexes.length; i++) {
+				const rowIndex = rowIndexes[i];
+				setColumnValue(nestedRows[rowIndex], name, value);
+				// console.log(JSON.stringify(nestedRows))
+			}
+		}
+	}
+}
+
+/*
+ * // REQUIRED by: assignRowsByNamedValue
+ * assignRowByNamedValuesKey:
+ *   if item is array:
+ *     setColumnValue(row, name, key)
+ *     branchRowByArray(nestdRows, rowIndex, item)
+ *   else if item is object:
+ *     setColumnValue(row, name, key)
+ *     expandRowsByObject(nestedRows, [rowIndex], item)
+ *   else:
+ *     setColumnValue(row, name, item)
+ * Returns number of values actually assigned (may be more than one for nested rows)
+ */
+function assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes, name, values, valueKeyIndex, valueKeys, randomEngine, doUnnest) {
+	assert(!_.isUndefined(doUnnest));
+	if (DEBUG) {
+		console.log(`assignRowByNamedValuesKey: ${name}, ${JSON.stringify(values)}, ${valueKeyIndex}, ${valueKeys}`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndex: ${rowIndex}\n ${JSON.stringify(nestedRows)}`)
+		assertNoDuplicates(otherRowIndexes);
+	}
+	const row = nestedRows[rowIndex];
+	let n = (doUnnest) ? 0 : 1;
+	if (_.isArray(row)) {
+		// console.log("0")
+		const otherRowIndexes2 = otherRowIndexes.concat([_.range(row.length)]);
+		for (let i = 0; i < row.length; i++) {
+			// console.log(` (assignRowByNamedValuesKey) #${i} of ${row.length}`)
+			const n2 = assignRowByNamedValuesKey(row, i, otherRowIndexes2, name, values, valueKeyIndex, valueKeys, randomEngine, doUnnest);
+			if (doUnnest) {
+				n += n2;
+				valueKeyIndex += n2;
+			}
+			// console.log({i, n2, n, valueKeyIndex, row})
+		}
+		flattenArrayAndIndexes(nestedRows, [rowIndex], otherRowIndexes);
+	}
+	else {
+		// Error.stackTraceLimit = Infinity;
+
+		// console.log("A")
+		let item, key;
+		if (values instanceof Special) {
+			// console.log("B: "+rowIndex)
+			// console.log(nestedRows[rowIndex])
+			const result = values.next(nestedRows, rowIndex);
+			// console.log({result})
+			key = result[0];
+			item = result[1];
+			// [key, item] = result;
+		}
+		else {
+			// console.log("C")
+			assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
+			const valueKey = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
+			key = (valueKeys) ? valueKey : valueKey + 1;
+			item = values[valueKey];
+		}
+
+		// console.log("D")
+		// console.log({item})
+		const rowIndexes2 = [rowIndex];
+		if (_.isArray(item)) {
+			setColumnValue(row, name, key);
+			branchRowByArray(nestedRows, rowIndex, otherRowIndexes, item, randomEngine);
+		}
+		else if (_.isPlainObject(item)) {
+			setColumnValue(row, name, key);
+			expandRowsByObject(nestedRows, rowIndexes2, otherRowIndexes, item, randomEngine);
+		}
+		else {
+			setColumnValue(row, name, item);
+		}
+		// n = rowIndexes2.length
+		n = 1;
+	}
+	if (DEBUG) {
+		console.log(` (assignRowByNamedValuesKey): ${JSON.stringify(nestedRows)}`)
+	}
+	return n;
+}
+
+/*
+ * // REQUIRED by: expandRowsByNamedValue
+ * branchRowsByNamedValue:
+ *   size
+ *     = (value is array) ? value.length
+ *     : (value is object) ? _.size(value)
+ *     : 1
+ *   row0 = nestedRows[rowIndex];
+ *   rows2 = Array(size)
+ *   for each rowIndex2 in _.range(size):
+ *     rows2[rowIndex] = _.cloneDeep(row0)
+ *
+ *   expandRowsByNamedValue(rows2, _.range(size), name, value);
+ *   nestedRows[rowIndex] = _.flattenDeep(rows2);
+ */
+function branchRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
+	if (DEBUG) {
+		console.log(`branchRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(nestedRows)}`)
+	}
+	const isSpecial = (value instanceof Special);
+	const size
+		= (_.isArray(value)) ? value.length
+		: (_.isPlainObject(value)) ? _.size(value)
+		: (isSpecial) ? value.valueCount
+		: 1;
+
+	//flattenArrayAndIndexes(nestedRows, rowIndexes, otherRowIndexes);
+
+	// Create 'size' copies of each row in rowIndexes.
+	const rows2 = Array(size * rowIndexes.length);
+	const rowIndexesGroups2 = Array(rowIndexes.length);
+	const rowIndexesGroups2Transposed = _.range(size).map(i => Array(rowIndexes.length));
+	for (let j = 0; j < rowIndexes.length; j++) {
+		const rowIndex = rowIndexes[j];
+		rowIndexesGroups2[j] = Array(size);
+		for (let i = 0; i < size; i++) {
+			const k = j * size + i;
+			rowIndexesGroups2[j][i] = k;
+			rows2[k] = _.cloneDeep(nestedRows[rowIndex]);
+			rowIndexesGroups2Transposed[i][j] = k;
+		}
+	}
+	// console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
+
+	if (_.isArray(value) && _.every(value, x => _.isPlainObject(x))) {
+		// Assign indexes
+		const valueIndexes = _.range(1, value.length + 1);
+		assignRowsByNamedValue(rows2, rowIndexesGroups2, rowIndexesGroups2Transposed, name, valueIndexes, randomEngine, false);
+		// Assign objects
+		const otherRowIndexes3 = rowIndexesGroups2Transposed.concat(rowIndexesGroups2);
+		for (let i = 0; i < size; i++) {
+			const rowIndexes3 = _.clone(rowIndexesGroups2Transposed[i]);
+			expandRowsByObject(rows2, rowIndexes3, otherRowIndexes3, value[i], randomEngine);
+		}
+	}
+	else if (_.isPlainObject(value)) {
+		// Assign indexes
+		const valueIndexes = _.keys(value);
+		assignRowsByNamedValue(rows2, rowIndexesGroups2, rowIndexesGroups2Transposed, name, valueIndexes, randomEngine, false);
+		// Assign objects
+		const otherRowIndexes3 = rowIndexesGroups2Transposed.concat(rowIndexesGroups2);
+		for (let i = 0; i < size; i++) {
+			const key = valueIndexes[i];
+			const rowIndexes3 = _.clone(rowIndexesGroups2Transposed[i]);
+			expandRowsByObject(rows2, rowIndexes3, otherRowIndexes3, value[key], randomEngine);
+		}
+	}
+	else {
+		// Assign to those copies
+		assignRowsByNamedValue(rows2, rowIndexesGroups2, [], name, value, randomEngine, false);
+	}
+	// console.log({rows2, rowIndexesGroups2, rowIndexesGroups2Transposed});
+	flattenArrayAndIndexes(rows2, [], rowIndexesGroups2);
+	// console.log({rows2, rowIndexesGroups2});
+
+	// console.log({nestedRows})
+
+	// Transpose back into nestedRows
+	for (let j = 0; j < rowIndexes.length; j++) {
+		const rowIndexes3 = rowIndexesGroups2[j];
+		const rows3 = rowIndexes3.map(i => rows2[i]);
+		const rowIndex = rowIndexes[j];
+		// console.log({rows3, rowIndex})
+		nestedRows[rowIndex] = rows3;
+	}
+	// console.log({nestedRows})
+
+	// console.log({loc: "B", otherRowIndexes})
+	// console.log(JSON.stringify(nestedRows))
+	flattenArrayAndIndexes(nestedRows, rowIndexes, otherRowIndexes);
+	// console.log({loc: "C", otherRowIndexes})
+}
+
+function branchRowByArray(nestedRows, rowIndex, otherRowIndexes, values, randomEngine) {
+	if (DEBUG) {
+		console.log(`branchRowByArray: ${JSON.stringify(values)}`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+		console.log(` rowIndex: ${rowIndex}\n ${JSON.stringify(nestedRows)}`)
+		assertNoDuplicates(otherRowIndexes);
+	}
+	const size = values.length;
+	// Make replicates of row
+	const row0 = nestedRows[rowIndex];
+	const rows2 = Array(size);
+	for (let rowIndex2 = 0; rowIndex2 < size; rowIndex2++) {
+		const value = values[rowIndex2];
+		rows2[rowIndex2] = _.cloneDeep(row0);
+		expandRowsByObject(rows2, [rowIndex2], [], values[rowIndex2], randomEngine);
+	}
+
+	nestedRows[rowIndex] = _.flattenDeep(rows2);
+	flattenArrayAndIndexes(nestedRows, [rowIndex], otherRowIndexes);
+	if (DEBUG) {
+		console.log(` (branchRowByArray): ${JSON.stringify(nestedRows)}`)
+	}
+}
+
+// Set the given value, but only if the name doesn't start with a period
+function setColumnValue(row, name, value) {
+	if (DEBUG) { console.log(`setColumnValue: ${name}, ${JSON.stringify(value)}`); console.log("row: "+JSON.stringify(row)); }
+	if (name.length >= 1 && name[0] != ".") {
+		// Recurse into sub-rows
+		if (_.isArray(row)) {
+			// console.log("isArray")
+			for (let i = 0; i < row.length; i++) {
+				setColumnValue(row[i], name, value);
+			}
+		}
+		// Set the value in the row
+		else {
+			row[name] = value;
+			// console.log(`row[name] = ${row[name]}`)
+		}
+	}
+}
+
+class Special {
+	constructor({action, draw, reuse, randomEngine}, next, initGroup) {
+		this.action = action;
+		this.draw = draw;
+		this.reuse = reuse;
+		this.randomEngine = randomEngine;
+		this.next = (next || this.defaultNext);
+		this.initGroup = (initGroup || this.defaultInitGroup);
+		this.reset = this.defaultReset;
+	}
+
+	defaultInitGroup(nestedRows, rowIndexes) {
+		this.nextIndex = 0;
+		this.valueCount = _.size(this.action.values);
+		// Initialize this.indexes
+		switch (this.draw) {
+			case "direct":
+				this.indexes = _.range(this.valueCount);
+				break;
+			case "shuffle":
+				if (this.action.shuffleOnce !== true || !this.indexes) {
+					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+				} else {
+					// FIXME: if this.valueCount is now larger than this.indexes.length, then generate more indexes
+				}
+				break;
+		}
+	}
+
+	defaultNext() {
+		// if (DEBUG) { console.log("defaultNext: "+)}
+		// console.log({this});
+		if (this.nextIndex >= this.valueCount) {
+			// console.log(`next: this.nextIndex >= this.valueCount, ${this.nextIndex} >= ${this.valueCount}`)
+			switch (this.reuse) {
+				case "repeat":
+					this.nextIndex = 0;
+					break;
+				case "reverse":
+					this.indexes = _.reverse(this.indexes);
+					this.nextIndex = 0;
+					break;
+				case "reshuffle":
+					this.indexes = Random.sample(this.randomEngine, _.range(this.valueCount), this.valueCount);
+					this.nextIndex = 0;
+					// console.log("shuffled indexes: "+this.indexes)
+					break;
+				default:
+					assert(false, "not enough values supplied to fill the rows: "+JSON.stringify(this.action));
+			}
+			// console.log("this.nextIndex = "+this.nextIndex)
+		}
+
+		let index, key;
+		switch (this.draw) {
+			case "direct":
+				index = this.indexes[this.nextIndex];
+				key = index + 1;
+				break;
+			case "shuffle":
+				index = this.indexes[this.nextIndex];
+				key = index + 1;
+				break;
+			case "sample":
+				index = Random.integer(0, this.valueCount - 1)(this.randomEngine);
+				key = index + 1;
+				break;
+			default:
+				assert(false, "unknown 'draw' value: "+JSON.stringify(this.draw)+" in "+JSON.stringify(this.action));
+		}
+		// console.log({index, key})
+
+		const value = this.action.values[index];
+		if (this.draw !== "sample") {
+			this.nextIndex++;
+		}
+
+		return [key, value];
+	}
+
+	defaultReset() {
+		if (this.nextIndex) {
+			this.nextIndex = 0;
+		}
+	}
+}
+
+/*
+function countRows(nestedRows, rowIndexes) {
+	let sum = 0;
+	for (let i = 0; i < rowIndexes.length; i++) {
+		const rowIndex = rowIndexes[i];
+		const row = nestedRows[rowIndex];
+		if (_.isPlainObject(row)) {
+			sum++;
+		}
+		else {
+			sum += countRows(row, _.range(row.length));
+		}
+	}
+	return sum;
+}*/
+
+/**
+ * If an action handler return 'undefined', it means that the handler took care of the action already.
+ * @type {Object}
+ */
+const actionHandlers = {
+	"allocatePlates": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const action2 = _.cloneDeep(action);
+		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_allocatePlates_initGroup);
+	},
+	"allocateWells": (_rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const rows = action.rows;
+		const cols = action.columns;
+		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
+		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
+		const byColumns = _.get(action, "byColumns", true);
+		const values = (action.wells)
+			? wellsParser.parse(action.wells, {}, {rows, columns: cols})
+			: _.range(rows * cols).map(i => {
+					const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+					const s = locationRowColToText(row + 1, col + 1);
+					// console.log({row, col, s});
+					return s;
+				});
+		// console.log({values})
+		const action2 = _.cloneDeep(action);
+		action2.values = values;
+		// console.log({values})
+		return assign(_rows, rowIndexes, otherRowIndexes, name, action2, randomEngine);
+	},
+	"assign": assign,
+	"case": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		if (DEBUG) {
+			console.log(`=case: ${name}=${JSON.stringify(action)}`);
+			console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+			console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+			assertNoDuplicates(otherRowIndexes);
+			assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
+		}
+		const cases = _.isArray(action) ? action : action.cases;
+		const caseMap = _.isArray(cases)
+			? cases.map((v, i) => [i + 1, v])
+			: _.toPairs(cases);
+		// Group the rows according to the first case they satisfy
+		const rowIndexesGroups = caseMap.map(x => []);
+		for (let j = 0; j < rowIndexes.length; j++) {
+			const rowIndex = rowIndexes[j];
+			const row = rows[rowIndex];
+			const table1 = [row];
+			for (let i = 0; i < caseMap.length; i++) {
+				const [caseName, caseSpec] = caseMap[i];
+				if (!caseSpec.where || filterOnWhere(table1, caseSpec.where).length === 1) {
+					rowIndexesGroups[i].push(rowIndex);
+					break;
+				}
+			}
+		}
+		if (DEBUG) { console.log({caseMap, rowIndexesGroups}); }
+
+		const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes]).concat(rowIndexesGroups);
+		for (let i = 0; i < caseMap.length; i++) {
+			const [caseName, caseSpec] = caseMap[i];
+			const rowIndexes2 = _.clone(rowIndexesGroups[i]);
+			expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, caseName, randomEngine)
+			expandRowsByObject(rows, rowIndexes2, otherRowIndexes2, caseSpec.conditions, randomEngine);
+		}
+	},
+	"calculate": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const expr = _.isString(action) ? action : action.expression;
+		const action2 = _.isString(action) ? {} : action;
+		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculate_next(expr, action2));
+	},
+	"calculateWell": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculateWell_next(action, {}));
+	},
+	"range": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const action2 = _.cloneDeep(action);
+		_.defaults(action2, {from: 1, step: 1});
+		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_range_initGroup);
+	},
+	"rotateColumn": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		const action2 = _.isString(action) ? ({column: action, n: 1}) : _.cloneDeep(action);
+		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_rotateColumn_initGroup);
+	},
+	"sample": {
+
+	}
+}
+
+function assign(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, next, initGroup) {
+	assert(_.isPlainObject(action), "expect an object for assignment")
+	// Handle order in which to assign values
+	let draw = "direct";
+	let reuse = "none";
+	if (!_.isEmpty(action.order)) {
+		switch (action.order) {
+			case "direct": case "direct/none": break;
+			case "direct/repeat": case "repeat": draw = "direct"; reuse = "repeat"; break;
+			case "direct/reverse": case "reverse": draw = "direct"; reuse = "reverse"; break;
+			case "shuffle": draw = "shuffle"; reuse = "none"; break;
+			case "reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+			case "shuffle/reshuffle": draw = "shuffle"; reuse = "reshuffle"; break;
+			case "shuffle/repeat": draw = "shuffle"; reuse = "repeat"; break;
+			case "shuffle/reverse": draw = "shuffle"; reuse = "reverse"; break;
+			case "sample": draw = "sample"; break;
+			default: assert(false, "unrecognized 'order' value: "+action.order);
+		}
+	}
+
+	if (_.isString(action.calculate)) {
+		next = assign_calculate_next(action.calculate, action)
+	}
+
+	const randomEngine2 = (_.isNumber(action.randomSeed))
+		? Random.engines.mt19937().seed(action.randomSeed)
+		: randomEngine;
+	const value2 = ((_.isArray(action.values)) && draw === "direct" && reuse === "none" && !initGroup)
+		? action.values
+		: new Special({action, draw, reuse, randomEngine: randomEngine2}, next, initGroup);
+
+	return handleAssignmentWithQueries(rows, rowIndexes, otherRowIndexes, name, action, randomEngine2, value2);
+}
+
+function handleAssignmentWithQueries(rows, rowIndexes0, otherRowIndexes, name, action, randomEngine, value0) {
+	if (DEBUG) {
+		console.log(`handleAssignmentWithQueries: ${JSON.stringify({name, action, value0})}`);
+		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`)
+		console.log(` rowIndexes: ${JSON.stringify(rowIndexes0)}\n ${JSON.stringify(rows)}`)
+		assertNoDuplicates(otherRowIndexes);
+		assertNoDuplicates(otherRowIndexes.concat([rowIndexes0]));
+	}
+	const isSpecial = value0 instanceof Special;
+	const hasGroupOrSame = action.groupBy || action.sameBy;
+
+	if (!action.groupBy && !action.sameBy && !action.orderBy) {
+		if (isSpecial) {
+			// console.log({name})
+			value0.initGroup(rows, rowIndexes0);
+		}
+		return value0;
+	}
+
+	const rowIndexesGroups = (action.groupBy)
+		? query_groupBy(rows, rowIndexes0, action.groupBy)
+		: [_.clone(rowIndexes0)];
+
+	// console.log({rowIndexesGroups})
+	for (let i = 0; i < rowIndexesGroups.length; i++) {
+		let rowIndexes = _.clone(rowIndexesGroups[i]);
+
+		let value = value0;
+		// If 'orderBy' is set, we should re-order the values (if just returning 'value') or rowIndexes (otherwise)
+		if (action.orderBy) {
+			// console.log("A")
+			if (_.isArray(value)) {
+				// This is a copy of 'makeComparer', but with more indirection in assignment of row1 and row2
+				const propertyNames = action.orderBy;
+				function comparer(i1, i2) {
+					const row1 = rows[rowIndexes[i1]];
+					const row2 = rows[rowIndexes[i2]];
+					const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
+					for (let j = 0; j < l.length; j++) {
+						const propertyName = l[j];
+						const value1 = row1[propertyName];
+						const value2 = row2[propertyName];
+						const cmp = naturalSort(value1, value2);
+						if (cmp !== 0)
+							return cmp;
+					}
+					return 0;
+				};
+				const is1 = stableSort(_.range(rowIndexes.length), comparer);
+				// console.log({is1});
+
+				// Allocate a new value array
+				const value1 = new Array(rowIndexes.length);
+				// Insert values into the new array according to the new desired order
+				for (let i = 0; i < rowIndexes.length; i++) {
+					const j = is1[i];
+					value1[j] = value[i];
+				}
+				// console.log({is1, rowIndexes, rows, value, value1});
+				value = value1;
+			}
+			//if (hasGroupOrSame)
+			else {
+				const rowIndexes2 = query_orderBy(rows, rowIndexes, action.orderBy);
+				// console.log({orderBy: action.orderBy, rowIndexes, rowIndexes2})
+				// console.log({rowIndexes})
+				rowIndexes = rowIndexes2;
+			}
+		}
+
+		// const rowIndexes2 = _.clone(rowIndexes);
+
+		// console.log({rowIndexes, rowIndexesGroups})
+		const otherRowIndexes2 = otherRowIndexes.concat([rowIndexes0]).concat(rowIndexesGroups);
+		if (DEBUG) {
+			assertNoDuplicates(otherRowIndexes2);
+		}
+		// console.log({otherRowIndexes, rowIndexes, rowIndexesGroups, otherRowIndexes2})
+		if (action.sameBy) {
+			assignSameBy(rows, rowIndexes, otherRowIndexes2, name, action, randomEngine, value);
+		}
+		else {
+			if (isSpecial) {
+				// console.log({rows, rowIndexes2})
+				value.initGroup(rows, rowIndexes);
+			}
+			// console.log({rows, rowIndexes2, otherRowIndexes2, name, value})
+			expandRowsByNamedValue(rows, rowIndexes, otherRowIndexes2, name, value, randomEngine);
+		}
+	}
+
+	return undefined;
+}
+
+function assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, value) {
+	if (DEBUG) {
+		console.log(`assignSameBy: ${JSON.stringify({name, action, value})}`);
+		console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+		// assertNoDuplicates(otherRowIndexes);
+		assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
+	}
+	const isArray = _.isArray(value);
+	const isObject = _.isPlainObject(value);
+	const isSpecial = value instanceof Special;
+	const rowIndexesSame = query_groupBy(rows, rowIndexes, action.sameBy);
+	// console.log({rowIndexesSame})
+
+	/*
+	for (let i = 0; i < rowIndexesSame.length; i++) {
+		const rowIndexes2 = rowIndexesSame[i];
+		const rowIndex = rowIndexes2[0];
+		const rows2 = rowIndexes2.map(i => rows[i]);
+		rows.splice(rowIndex, 1, ..rows2);
+		for (let j = 0; j < rowIndexesSame.length;)
+	}
+	*/
+	if (isSpecial) {
+		const rowIndexesFirst = rowIndexesSame.map(l => l[0]);
+		value.initGroup(rows, rowIndexesFirst);
+	}
+
+	const keys = (isObject) ? _.keys(value) : 0;
+	const table2 = _.zip.apply(_, table2);
+	for (let i = 0; i < rowIndexesSame.length; i++) {
+		const rowIndexes3 = rowIndexesSame[i];
+		// if (isSpecial) {
+		// 	value.nextIndex = i;
+		// }
+		const value2
+			= (isArray) ? value[i]
+			: (isObject) ? value[keys[i]]
+			: (isSpecial) ? value.next(rows, [rowIndexes3[0]])[1]
+			: value;
+		// console.log({i, rowIndexes3, value2, value})
+		for (let i = 0; i < rowIndexes3.length; i++) {
+			const rowIndex = rowIndexes3[i];
+			expandRowsByNamedValue(rows, [rowIndex], otherRowIndexes, name, value2, randomEngine);
+		}
+	}
+}
+
+function assign_allocatePlates_initGroup(rows, rowIndexes) {
+	if (DEBUG) {
+		console.log(`assign_allocatePlates_initGroup: ${rows}, ${rowIndexes}`)
+	}
+	const action = this.action;
+	if (_.isUndefined(this.plateIndex))
+		this.plateIndex = 0;
+	if (_.isUndefined(this.wellsUsed))
+		this.wellsUsed = 0;
+
+	assert(rowIndexes.length <= action.wellsPerPlate, "too many positions in group for plate to accomodate");
+
+	if (this.wellsUsed + rowIndexes.length <= action.wellsPerPlate) {
+		this.wellsUsed += rowIndexes.length;
+	}
+	else {
+		this.plateIndex++;
+		assert(this.plateIndex < action.plates.length, `require more plates than the ${action.plates.length} supplied: ${action.plates.join(", ")}`);
+		this.wellsUsed = rowIndexes.length;
+	}
+
+	// TODO: allow for rotating plates for each group rather than assigning each plate until its full
+	// console.log()
+	// console.log({this})
+
+	this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
+	// console.log({this_action_values: this.action.values});
+
+	this.defaultInitGroup(rows, rowIndexes);
+}
+
+/**
+ * Calculate `expr` using variables in `row`, with optinoal `action` object specifying `units` and/or `decimals`
+ */
+export function calculate(expr, row, action = {}) {
+	const scope = _.mapValues(row, x => {
+		// console.log({x})
+		try {
+			const result = math.eval(x);
+			// If evaluation succeeds, but it was just a unit name, then set value as string instead
+			if (result.type === "Unit" && result.value === null)
+				return x;
+			else {
+				return result;
+			}
+		}
+		catch (e) {}
+		return x;
+	});
+
+	assert(!_.isUndefined(expr), "`expression` property must be specified");
+	// console.log({expr, scope})
+	// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+	let value = math.eval(expr, scope);
+	// console.log({type: value.type, value})
+	if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
+		return value;
+	}
+
+	// Get units to use in the end, and the unitless value
+	const {units0, units, unitless} = (() => {
+		const result = {
+			units0: undefined,
+			units: action.units,
+			unitless: value
+		};
+		// If the result has units:
+		if (value.type === "Unit") {
+			result.units0 = value.formatUnits();
+			if (_.isUndefined(result.units))
+				result.units = result.units0;
+			const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+			// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
+			if (_.isEmpty(conversionUnits)) {
+				// TODO: find a better way to get the unit-less quantity from `value`
+				// console.log({action})
+				// console.log({result, conversionUnits});
+				result.unitless = math.eval(value.format());
+			}
+			else {
+				result.unitless = value.toNumeric(conversionUnits);
+			}
+		}
+		return result;
+	})();
+	// console.log(`unitless: ${JSON.stringify(unitless)}`)
+
+	// Restrict decimal places
+	const unitlessText = (_.isNumber(action.decimals))
+		? unitless.toFixed(action.decimals)
+		: _.isNumber(unitless) ? unitless : unitless.toNumber();
+
+	// Set units
+	const valueText = (!_.isEmpty(units))
+		? unitlessText + " " + units
+		: unitlessText;
+
+	return valueText;
+}
+
+function assign_calculate_next(expr, action) {
+	return function(nestedRows, rowIndex) {
+		const row0 = nestedRows[rowIndex];
+		const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+		// Build the scope for evaluating the math expression from the current data row
+
+		const valueText = calculate(expr, row, action);
+
+		this.nextIndex++;
+		return [this.nextIndex, valueText];
+	}
+}
+
+function assign_calculateWell_next(action) {
+	return function(nestedRows, rowIndex) {
+		const row0 = nestedRows[rowIndex];
+		const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+		// Build the scope for evaluating the math expression from the current data row
+		const scope = _.mapValues(row, x => {
+			// console.log({x})
+			try {
+				const result = math.eval(x);
+				// If evaluation succeeds, but it was just a unit name, then set value as string instead
+				if (result.type === "Unit" && result.value === null)
+					return x;
+				else {
+					return result;
+				}
+			}
+			catch (e) {}
+			return x;
 		});
+
+		// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+		let wellRow = math.eval(action.row, scope).toNumber();
+		let wellCol = math.eval(action.column, scope).toNumber();
+		const wellName = locationRowColToText(wellRow, wellCol);
+		// console.log({wellRow, wellCol, wellName})
+
+		this.nextIndex++;
+		return [this.nextIndex, wellName];
+	}
+}
+
+function assign_range_initGroup(rows, rowIndexes) {
+	// console.log(`assign_range_initGroup:`, {rows, rowIndexes})
+	const commonHolder = []; // cache for common values, if needed
+	const from = getOrCalculateNumber(this.action, "from", rowIndexes.length, rows, rowIndexes, commonHolder);
+	const till = getOrCalculateNumber(this.action, "till", rowIndexes.length, rows, rowIndexes, commonHolder);
+	const end = till + 1;
+
+	let values;
+	if (_.isNumber(this.action.count)) {
+		const diff = till - from;
+		values = _.range(this.action.count).map(i => {
+			const d = diff * i / (this.action.count - 1);
+			return from + d;
+		});
+	}
+	else {
+		values = _.range(from, end, this.action.step);
+	}
+	if (values) {
+		if (_.isNumber(this.action.decimals)) {
+			values = values.map(n => Number(n.toFixed(this.action.decimals)));
+		}
+		if (_.isString(this.action.units)) {
+			values = values.map(n => `${n} ${this.action.units}`);
+		}
+	}
+	this.action.values = values;
+	// console.log({this_action_values: this.action.values});
+
+	this.defaultInitGroup(rows, rowIndexes);
+}
+
+function assign_rotateColumn_initGroup(rows, rowIndexes) {
+	const l = rowIndexes.map(i => rows[i][this.action.column]);
+	if (this.action.n > 0) {
+		for (let i = 0; i < this.action.n; i++) {
+			const x = l.pop();
+			l.unshift(x);
+		}
+	}
+	else {
+		for (let i = 0; i < -this.action.n; i++) {
+			const x = l.shift();
+			l.push(x);
+		}
+	}
+	this.action.values = l;
+
+	this.defaultInitGroup(rows, rowIndexes);
+}
+
+/*
+function assign_range_next(nestedRows, rowIndex) {
+	const commonHolder = []; // cache for common values, if needed
+	const from = getOrCalculateNumber(this.action, "from", rowIndexes.length, nestedRows, [rowIndex], commonHolder);
+	const till = getOrCalculateNumber(this.action, "till", rowIndexes.length, nestedRows, [rowIndex], commonHolder);
+	const end = till + 1;
+
+	let values;
+	if (_.isNumber(this.action.count)) {
+		const diff = till - from;
+		values = _.range(this.action.count).map(i => {
+			const d = diff * i / (this.action.count - 1);
+			return from + d;
+		});
+	}
+	else {
+		values = _.range(from, end, this.action.step);
+	}
+	if (values) {
+		if (_.isNumber(this.action.decimals)) {
+			values = values.map(n => Number(n.toFixed(this.action.decimals)));
+		}
+		if (_.isString(this.action.units)) {
+			values = values.map(n => `${n} ${this.action.units}`);
+		}
+	}
+	console.log({values});
+
+	this.nextIndex++;
+	return [this.nextIndex, values];
+}
+*/
+function getOrCalculateNumber(action, propertyName, dflt, nestedRows, rowIndexes, commonHolder) {
+	const value = _.get(action, propertyName);
+	if (_.isUndefined(value)) {
+		return dflt;
+	}
+	else if (_.isNumber(value)) {
+		return value;
+	}
+	else if (_.isString(value)) {
+		const options = {};
+		const next = assign_calculate_next(value, options);
+		const fakethis = {nextIndex: 0};
+		if (commonHolder.length === 0) {
+			// console.log({nestedRows, rowIndexes})
+			commonHolder.push(commonHolder.push(getCommonValuesNested(nestedRows, rowIndexes)));
+		}
+		const common = commonHolder[0];
+		// console.log({common})
+		const [dummyIndex, result] = next.bind(fakethis)([common], [0]);
+		return result;
+	}
+}
+
+/*
+const assign_range_next = (expr, action) => function(nestedRows, rowIndex) {
+	console.log("assign_range_next: "+JSON.stringify(this));
+	const n = this.action.from + this.nextIndex * this.action.step;
+	assert(!_.isNumber(this.action.till) || n < this.action.till, "range could not fill rows");
+	this.nextIndex++;
+	return [this.nextIndex, n];
+}*/
+
+export function query_groupBy(rows, rowIndexes, groupBy) {
+	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
+	// console.log({groupBy, groupKeys, rowIndexes, rows});
+	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
+}
+
+/**
+ * Return an array of rowIndexes which are ordered by the `orderBy` criteria.
+ * @param  {array} rows - a flat array of row objects
+ * @param  {array} rowIndexes - array of row indexes to consider
+ * @param  {string|array} orderBy - the column(s) to order by
+ * @return {array} a sorted ordering of rowIndexes
+ */
+export function query_orderBy(rows, rowIndexes, orderBy) {
+	// console.log({rows, rowLen: rows.length, rowIndexes, orderBy})
+	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
+	return stableSort(rowIndexes, makeComparer(rows, orderBy));
+}
+
+function makeComparer(rows, propertyNames) {
+	return function(i1, i2) {
+		const row1 = rows[i1];
+		const row2 = rows[i2];
+		if (!row1 || !row2) {
+			console.log({i1, i2, row1, row2})
+		}
+		const l = (_.isArray(propertyNames)) ? propertyNames : [propertyNames];
+		for (let j = 0; j < l.length; j++) {
+			const propertyName = l[j];
+			const value1 = row1[propertyName];
+			const value2 = row2[propertyName];
+			const cmp = naturalSort(value1, value2);
+			if (cmp !== 0)
+				return cmp;
+		}
+		return 0;
+	};
+}
+
+export function query(table, q) {
+	let table2 = _.clone(table);
+
+	if (q.where) {
+		table2 = filterOnWhere(table2, q.where);
 	}
 
 	if (q.shuffle) {
@@ -269,6 +1336,10 @@ export function query(table, q) {
 		table2 = [table2];
 	}
 
+	if (q.select) {
+		table2 = table2.map(rows => rows.map(row => _.pick(row, q.select)));
+	}
+
 	if (q.transpose) {
 		table2 = _.zip.apply(_, table2);
 	}
@@ -276,138 +1347,54 @@ export function query(table, q) {
 	return table2;
 }
 
-class ActionResult {
-	constructor(functions) {
-		//console.log({functions})
-		this._functions = functions;
-	}
-
-	getGroupValues(groupIndex) {
-		//console.log("this: "+JSON.stringify(this))
-		if (this._functions.getGroupValues)
-			return this._functions.getGroupValues(groupIndex);
-	}
-
-	getRowValues(rowIndex) {
-
-	}
-}
-
-// TODO: wells on dilution plates need to be unique
-// figure out better way to chain operations.
-// In this case, it might be best to 1) group, 2) shuffle, 3) assign to rows
-// In other cases, we'll want to 1) shuffle, 2) group, 3) assign one value per each group as a whole
-// An in yet other cases, 1) shuffle, 2) group, 3) assign to rows
-//
-// Every action handler is passed: row, rowIndex, group, groupIndex.
-// The action handler returns an array of values to be expanded back into the row.
-// The "row" may, in fact, be the first row of a group, if 'distinctBy' was used.
-//
-// So the options are:
-// 1) group+shuffle+rows (re-shuffled for each group)
-// 2) shuffle+group+rows (same shuffling is applied to each group)
-// 3) shuffle+group+group (one value per group)
-//
-// Action properties:
-// - groupBy -- creates groupings
-// - distinctBy -- groups rows together that will get the same value
-// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
-const actionHandlers = {
-	"add": function(action, data) {
-		return action.object;
-	},
-	"assign": function(action, data) {
-		// console.log("assign: "+JSON.stringify(action));
-		if (_.isArray(action.values)) {
-			return {[action.name]: action.values};
-		}
-		else if (_.isFunction(action.calculate)) {
-			return {[action.name]: action.calculate(data)};
-		}
-		else {
-			return {[action.name]: action.values};
-		}
-	},
-	/*"assignRandomly": function(action, data) {
-		const group = data.group;
-		if (!group) return;
-		const output = Array(group.length);
-		let values = [];
-		let j = 0;
-		for (let i = 0; i < output.length; i++) {
-			if (j >= values.length) {
-				CONTINUE with shuffling values
-				values = _.shuffle(action.values);
-				j = 0;
-			}
-			output[i] = values[j++];
-		}
-	},*/
-	"allocatePlates": function(action, data) {
-		const groups = data.groupsOfSames;
-		if (!groups) return;
-
-		//printData(groups);
-
-		// Find number of plates required
-		let plateCount = -1;
-		let n = 0;
-		const sequence = [];
-		for (let i = 0; i < groups.length; i++) {
-			const group = groups[i];
-			const n2 = n + group.length;
-			if (plateCount < 0 && n2 > 0) {
-				plateCount = 1;
-			}
-
-			if (n2 <= action.wellsPerPlate) {
-				n = n2;
+function filterOnWhere(table, where) {
+	let table2 = table;
+	if (_.isPlainObject(where)) {
+		_.forEach(where, (value, key) => {
+			if (_.isPlainObject(value)) {
+				_.forEach(value, (x, op) => {
+					switch (op) {
+						case "eq":
+							table2 = _.filter(table, row => _.isEqual(row[key], x));
+							break;
+						case "gt":
+							// console.log("before:"); printRows(table2);
+							table2 = _.filter(table, row => _.gt(row[key], x));
+							// console.log("after:"); printRows(table2);
+							break;
+						case "gte":
+							table2 = _.filter(table, row => _.gte(row[key], x));
+							break;
+						case "lt":
+							// console.log("before:"); printRows(table2);
+							table2 = _.filter(table, row => _.lt(row[key], x));
+							// console.log("after:"); printRows(table2);
+							break;
+						case "lte":
+							table2 = _.filter(table, row => _.lte(row[key], x));
+							break;
+						case "ne":
+							table2 = _.filter(table, row => !_.isEqual(row[key], x));
+							break;
+						default:
+							assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
+					}
+				});
 			}
 			else {
-				assert(n > 0, "too many positions in group for plate to accomodate");
-				plateCount++;
-				n = groups[i].length;
+				table2 = _.filter(table, row => _.isEqual(row[key], value));
 			}
-			sequence.push(plateCount - 1);
-			// console.log({i, group, n2, n, plateCount})
-		}
-
-		assert(plateCount <= action.plates.length, `required ${plateCount} plates, but only ${action.plates.length} supplied: ${action.plates.join(",")}`);
-
-		const groupValues = (action.alternatePlatesByGroup)
-			? _.map(groups, (group, i) => action.plates[i % plateCount])
-			: _.map(groups, (group, i) => action.plates[sequence[i]]);
-		//console.log({plateCount, groupLength: groups.length, sequence, plateValues: values})
-
-		return new ActionResult({
-			getGroupValues: (groupIndex) => _.fromPairs([[action.name, groupValues[groupIndex]]])
 		});
-	},
-	"allocateWells": function(action, data) {
-		const rows = action.rows;
-		const cols = action.columns;
-		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
-		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
-		const byColumns = _.get(action, "byColumns", true);
-		const values = _.range(rows * cols).map(i => {
-			const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
-			const s = locationRowColToText(row + 1, col + 1);
-			// console.log({row, col, s});
-			return s;
-		});
-		// console.log({values})
-		return { [action.name]: values };
-	},
-	"math": function(action, data) {
-		// TODO: adapt so that it can work on groups?
-		if (data.row) {
-			// Build the scope for evaluating the math expression from the current data row
-			const scope = _.mapValues(data.row, x => {
+	}
+	else if (_.isString(where)) {
+		// console.log({where})
+		table2 = _.filter(table, row => {
+			const scope = _.mapValues(row, x => {
 				// console.log({x})
 				try {
 					const result = math.eval(x);
 					// If evaluation succeeds, but it was just a unit name, then set value as string instead
- 					if (result.type === "Unit" && result.value === null)
+					if (result.type === "Unit" && result.value === null)
 						return x;
 					else {
 						return result;
@@ -416,764 +1403,23 @@ const actionHandlers = {
 				catch (e) {}
 				return x;
 			});
-			const expr = _.get(action, "expression", action.values);
-			assert(!_.isUndefined(expr), "`expression` property must be specified");
-			// console.log("scope:"+JSON.stringify(scope, null, '\t'))
-			let value = math.eval(expr, scope);
-			// console.log({type: value.type, value})
-			if (_.isString(value)) {
-				return { [action.name]: value };
-			}
-
-			// Get units to use in the end, and the unitless value
-			const {units0, units, unitless} = (() => {
-				const result = {
-					units0: undefined,
-					units: action.units,
-					unitless: value
-				};
-				// If the result has units:
-				if (value.type === "Unit") {
-					result.units0 = value.formatUnits();
-					if (_.isUndefined(result.units))
-						result.units = result.units0;
-					const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
-					// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
-					if (_.isEmpty(conversionUnits)) {
-						// TODO: find a better way to get the unit-less quantity from `value`
-						// console.log({action})
-						// console.log({result, conversionUnits});
-						result.unitless = math.eval(value.format());
-					}
-					else {
-						result.unitless = value.toNumeric(conversionUnits);
-					}
-				}
-				return result;
-			})();
-			// console.log({unitless})
-
-			// Restrict decimal places
-			const unitlessText = (_.isNumber(action.decimals))
-				? unitless.toFixed(action.decimals)
-				: unitless.toNumber().toString();
-
-			// Set units
-			const valueText = (!_.isEmpty(units))
-				? unitlessText + " " + units
-				: unitlessText;
-
-			return { [action.name]: valueText };
-		}
-	},
-	"range": function(action, data) {
-		let till = action.till;
-		if (_.isUndefined(till)) {
-			const rows = data.group || data.table;
-			if (rows)
-				till = rows.length;
-		}
-		let range;
-		if (!_.isUndefined(till)) {
-			const from = _.get(action, "from", 1);
-			assert(_.isNumber(from), "`from` must be a number");
-			if (_.isNumber(action.count)) {
-				const diff = till - from;
-				range = _.range(action.count).map(i => {
-					const d = diff * i / (action.count - 1);
-					return from + d;
-				});
-			}
-			else {
-				const step = _.get(action, "step", 1);
-				range = _.range(from, till+1, step);
-			}
-		}
-		if (range) {
-			if (_.isNumber(action.decimals)) {
-				range = range.map(n => Number(n.toFixed(action.decimals)));
-			}
-			if (_.isString(action.units)) {
-				range = range.map(n => `${n} ${action.units}`);
-			}
-			return { [action.name]: range };
-		}
-	},
-	"sample": function(action, data) {
-		action.sample = true;
-		console.log('sample')
-		console.log({action})
-		return actionHandlers.assign(_.merge({}, action, {sample: true}), data);
-	}
-	/*case "assignPlates":
-		table = assignPlates(table, action);
-		break;
-	case "replicate":
-		table = replicate(table, action);
-		break;
-	*/
-};
-
-export function flattenDesign(design) {
-	//let table = flattenConditions(design.conditions);
-
-	//console.log({assign: design.assign})
-
-	const conditionActions = convertConditionsToActions(design.conditions);
-	const actions = _.compact(conditionActions.concat(design.actions));
-	// console.log({actions})
-
-	var randomEngine = Random.engines.mt19937();
-	if (_.isNumber(design.randomSeed)) {
-		randomEngine.seed(design.randomSeed);
-	}
-	else {
-		randomEngine.autoSeed();
-	}
-	//random.shuffle(randomEngine, combined);
-
-	let table = [{}];
-	_.forEach(actions, action => {
-		applyActionToTable(table, action, randomEngine);
-	});
-
-	return table;
-}
-
-function convertConditionsToActions(conditions) {
-	return _.map(conditions, (value, key) => {
-		// Create replicate rows
-		if (_.startsWith(key, "*")) {
-			return _.merge({}, {action: "replicate"}, value);
-		}
-		else if (_.includes(key, "=")) {
-			const [name, action] = key.split("=");
-			if (!_.isEmpty(action)) {
-				const handler2 = actionHandlers[action];
-				assert(handler2, "unknown action: "+key+": "+JSON.stringify(value));
-				const value2 = _.isString(value) || _.isArray(value) ? {values: value} : value;
-				return _.merge({}, {action, name}, value2);
-			}
-			else {
-				return (_.isPlainObject(value))
-					? _.merge({action: "assign", name}, value)
-					: {action: "assign", name, values: value};
-			}
-		}
-		else {
-			return {action: "assign", name: key, values: value};
-		}
-	});
-}
-
-function applyActionToTable(table, action, randomEngine) {
-	console.log("action: "+JSON.stringify(action))
-	const groupsOfSames = groupSameIndexes(table, action);
-	// console.log("groupsOfSames: "+JSON.stringify(groupsOfSames))
-
-	// Action properties:
-	// - groupBy -- creates groupings
-	// - sameBy -- groups rows together that will get the same value
-	// - applyPerGroup: true -- call function to get values once per group, rather than applying same result to all groups
-
-	const replacements = [];
-	if (action.action === "replicate") {
-		replicate(action, table, _.flattenDeep(groupsOfSames), replacements);
-	}
-	else {
-		const handler = actionHandlers[action.action];
-		if (!handler) return;
-
-		let valueOffset = 0;
-		function getValues(action, data) {
-			// console.log(`getValues, dataKeys=${_.keys(data).join(",")}`)
-			// console.log(data)
-			valueOffset = 0;
-			let values = handler(action, data);
-			// console.log({values})
-			if (!_.isUndefined(values)) {
-				//console.log("sample? "+(_.isNumber(action.sample) || action.sample === true))
-				// TEMPORARY: For legacy reasons, allow for use of deprecated 'random' alias
-				const shuffle = _.get(action, "shuffle", action.random);
-				if (_.isNumber(shuffle) || shuffle === true) {
-					const randomEngine2 = (_.isNumber(shuffle))
-						? Random.engines.mt19937().seed(shuffle)
-						: randomEngine;
-					if (_.isArray(values)) {
-						values = Random.sample(randomEngine2, values, values.length);
-					}
-					else if (_.isPlainObject(values)) {
-						values = _.mapValues(values, x => {
-							return (_.isArray(x)) ? Random.sample(randomEngine2, x, x.length) : x;
-						});
-					}
-				}
-				/*else if (_.isNumber(action.sample) || action.sample === true) {
-					const randomEngine2 = (_.isNumber(action.sample))
-						? Random.engines.mt19937().seed(action.sample)
-						: randomEngine;
-					const count
-						= (data.row) ? 1
-						: (data.groups) ? data.groups.length
-						: (data.groupsOfSames) ? _.sum(data.groupsOfSames.map(groupOfSames => groupOfSames.length))
-						: values.length;
-					console.log({action, count, dataKeys: _.keys(data), values})
-					if (_.isArray(values)) {
-						values = sample(values, count, randomEngine2);
-					}
-					else if (_.isPlainObject(values)) {
-						values = _.mapValues(values, x => {
-							return (_.isArray(x)) ? sample(x, count, randomEngine2) : x;
-						});
-					}
-				}*/
-			}
-			return values;
-		}
-
-		// Call getValues for the entire table if:
-		const doGetValuesTable = (
-			// Assume we can,
-			true &&
-			// But don't if 'applyPerGroup' is set
-			!action.applyPerGroup &&
-			// Nor if the value is randomized (and 'shuffleOnce' isn't set)
-			!(action.shuffle && !action.shuffleOnce)
-		)
-		const valuesTable = (doGetValuesTable) ? getValues(action, {table, groupsOfSames}) : undefined;
-		// console.log({valuesTable})
-
-		let shuffledIndexes = [];
-		_.forEach(groupsOfSames, (groupOfSames, groupIndex) => {
-			// Create group using the first row in each set of "same" rows (ones which will be assigned the same value)
-			const group = _.map(groupOfSames, sames => table[sames[0]]);
-			const valuesGroup
-				= (valuesTable instanceof ActionResult) ? valuesTable.getGroupValues(groupIndex)
-				: (_.isUndefined(valuesTable)) ? getValues(action, {table, group, groupIndex})
-				: valuesTable;
-			// console.log({valuesGroup})
-			_.forEach(groupOfSames, (sames, samesIndex) => {
-				// console.log({sames, samesIndex})
-				let values;
-				if (_.isUndefined(valuesGroup)) {
-					const row = table[sames[0]]; // Arbitrarily pick first row of sames
-					values = (_.isUndefined(valuesGroup)) ? getValues(action, {table, group, groupIndex, row, rowIndex: samesIndex}) : valuesGroup;
-					//console.log("row: "+JSON.stringify(row));
-					//console.log("value: "+JSON.stringify(value));
-				}
-				else {
-					if (_.isArray(valuesGroup)) {
-						const j = (action.rotateValues || action.shuffle) ? (samesIndex + valueOffset) % valuesGroup.length : samesIndex;
-						if (j === 0 && action.shuffle) {
-							shuffledIndexes = Random.shuffle(randomEngine, _.range(valuesGroup.length));
-						}
-						const k = (action.shuffle) ? shuffledIndexes[j] : j;
-						values = valuesGroup[j];
-					}
-					else if (_.isPlainObject(valuesGroup)) {
-						//assert(_.size(valuesGroup) === 1, "can only handle a single assignment: "+JSON.stringify(valuesGroup));
-						const values2 = _(valuesGroup).toPairs().flatMap(([key, value]) => {
-							if (!_.isArray(value) || _.endsWith(key, "*")) {
-								return [[key, value]];
-							}
-							else {
-								const j = (action.rotateValues) ? valueOffset % value.length : samesIndex;
-								return (
-									(_.isPlainObject(value[j])) ? [[key, j + 1]].concat(_.toPairs(value[j])) :
-									(_.isArray(value[j])) ? [[key, j + 1], [".IGNORE*", value[j]]] :
-									[[key, value[j]]]
-								);
-							}
-						}).value();
-						// console.log("values2: "+JSON.stringify(values2));
-						values = _.fromPairs(values2);
-					}
-					else {
-						assert(false, "expected an array or object: "+JSON.stringify(valuesGroup))
-					}
-				}
-				// console.log({values, valueOffset})
-				mergeValues(table, sames, values, valueOffset, action, replacements);
-				valueOffset++;
-			});
+			// console.log({where, row, scope})
+			const result = math.eval(where, scope);
+			// console.log({result});
+			return result;
 		});
 	}
-
-	// Apply row replacements to table
-	//console.log("replacements:\n"+replacements.map(JSON.stringify).join("\n"));
-	//console.log({table});
-	for (let i = replacements.length - 1; i >= 0; i--) {
-		const rows = replacements[i];
-		//console.log({i, rows})
-		if (_.isArray(rows)) {
-			table.splice(i, 1, ...rows);
-			//console.log("table: "+JSON.stringify(table));
-		}
-	}
-	// printData(table);
-}
-
-function groupSameIndexes(table, action) {
-	const indexes = _.range(table.length);
-
-	// Group the row indexes
-	let groups = [];
-	if (action.groupBy) {
-		const keys = (_.isArray(action.groupBy)) ? action.groupBy : [action.groupBy];
-		groups = _(indexes).groupBy(rowIndex => _.map(keys, key => table[rowIndex][key])).values().value();
-	}
-	else {
-		groups = [indexes];
-	}
-
-	// For each group, combine the row indexes that should be treated as being the same
-	let groupsOfSames = [];
-	if (action.sameBy) {
-		const keys = (_.isArray(action.sameBy)) ? action.sameBy : [action.sameBy];
-		groupsOfSames = _.map(groups, indexes => {
-			return _(indexes).groupBy(rowIndex => _.map(keys, key => table[rowIndex][key])).values().value();
-		});
-	}
-	else {
-		// Every row should be treated as unique
-		groupsOfSames = _.map(groups, indexes => _.map(indexes, i => [i]));
-	}
-
-	return groupsOfSames;
-}
-
-/**
- * [mergeValues description]
- * @param  {array} table - source table
- * @param  {array} sames - indexes of rows to be assigned the same value
- * @param  {object} values - map from column keys to new values
- * @param  {integer} valueOffset CONTINUE
- * @param  {[type]} changeMap [description]
- * @return {[type]}           [description]
- */
-function mergeValues(table, sames, values, valueOffset, action, replacements) {
-	// console.log("mergeValues:")
-	// console.log({valueOffset, values, sames})
-	if (_.isArray(values)) {
-		_.forEach(sames, (rowIndex, i) => {
-			const j = (action.rotateValues) ? (valueOffset + i) % values.length : i;
-			const values1 = values[j];
-			// console.log({i, j, value1})
-			expandRowByValues(table, rowIndex, values1, replacements)
-		});
-	}
-	else if (_.isPlainObject(values)) {
-		_.forEach(sames, rowIndex => {
-			expandRowByValues(table, rowIndex, values, replacements)
-		});
-	}
-	else {
-		assert(false, "expected and array or object: "+JSON.stringify(values));
-	}
-}
-
-/**
- * Add the properties in 'values' to the given row in the table,
- * possibly expanding the number of rows in the table.
- * 'replacements' will be updated with the new array of rows to replace the
- * original row.
- * @param  {array} table - original table of rows
- * @param  {integer} rowIndex - index of row to modify
- * @param  {object} values - map from either colum name to column value, or starred column name to a map of more column names.
- * @param  {object} replacements - map from rowIndex to array of replacement rows
- */
-function expandRowByValues(table, rowIndex, values, replacements) {
-	// console.log("expandRowByValues:")
-	// console.log({table, rowIndex, values, replacements})
-
-	function expandRowByObject(row, starName, starKey, starValue) {
-		const conditionActions = convertConditionsToActions(starValue);
-		// Add starName/Key to row (but ignore names that start with a '.')
-		const row1 = (_.startsWith(starName, ".")) ? row : _.merge({}, row, {[starName]: starKey});
-		// Create a table from the row
-		const table2 = [_.cloneDeep(row1)];
-		// Expand the table
-		_.forEach(conditionActions, action => {
-			applyActionToTable(table2, action);
-		});
-		// Return the expanded table
-		return table2;
-	}
-
-	let rows = [table[rowIndex]];
-	_.forEach(values, (value, key) => {
-		// console.log({key, value})
-		if (_.endsWith(key, "*")) {
-			const starName = key.substring(0, key.length - 1);
-			const starValues = value;
-			// console.log({starName, starValues})
-			if (_.isPlainObject(starValues)) {
-				// For each entry in value, make a copy of every row in rows with the properties of the entry
-				rows = _.flatMap(rows, row => {
-					return _.flatMap(starValues, (starValue, starKey) => {
-						assert(_.isPlainObject(starValue));
-						return expandRowByObject(row, starName, starKey, starValue);
-					});
-				});
-			}
-			else if (_.isArray(starValues)) {
-				// For each entry in value, make a copy of every row in rows with the properties of the entry
-				rows = _.flatMap(rows, row => {
-					return _.flatMap(starValues, (starValue, starValueIndex) => {
-						// console.log({starName, starValueIndex, starValue})
-						if (_.isPlainObject(starValue)) {
-							const starKey = starValueIndex + 1;
-							return expandRowByObject(row, starName, starKey, starValue);
-						}
-						else {
-							const starKey = starValue;
-							return _.merge({}, row, {[starName]: starKey});
-						}
-					});
-				});
-			}
-			else {
-				assert(false, "expected and array or object: "+JSON.stringify(starValues));
-			}
-		}
-		else {
-			_.forEach(rows, row => { row[key] = value; });
-			/*if (key === "reseal") {
-				console.log("reseal: "+value)
-				console.log(rows)
-			}*/
-		}
-	});
-	replacements[rowIndex] = rows;
-}
-
-/**
- * expandRowsByConditions:
- *   for each key/value pair, call expandRowsByNamedValue
- *
- * // REQUIRED by: branchRowsByNamedValue
- * expandRowsByNamedValue:
- *   TODO: turn the name/value into an action in order to allow for more sophisticated expansion
- *   if has star-suffix, call branchRowsByNamedValue
- *   else call assignRowsByNamedValue
- *
- * // REQUIRED by: expandRowsByNamedValue, branchRowsByNamedValue
- * assignRowsByNamedValue: (REQUIRED FOR ASSIGNING ARRAY TO ROWS)
- *   if value is array:
- *     for i in count:
- *       rowIndex = rowIndexes[i]
- *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, i+1, value[i])
- *   else if value is object:
- *     keys = _.keys(value)
- *     for each i in keys.length:
- *       key = keys[i]
- *       item = value[key]
- *       assignRowByNamedKeyItem(nestedRows, rowIndex, name, key, item)
- *   else:
- *     for each row:
- *       setColumnValue(row, name, value)
- *
- * // REQUIRED by: assignRowsByNamedValue
- * assignRowByNamedKeyItem:
- *   setColumnValue(row, name, key)
- *   if item is array:
- *     branchRowByArray(nestdRows, rowIndex, item)
- *   else if item is object:
- *     setColumnValue(row, name, key)
- *     expandRowsByValue(nestedRows, [rowIndex], value)
- *   else:
- *     setColumnValue(row, name, item)
- *
- * // REQUIRED by: expandRowsByNamedValue
- * branchRowsByNamedValue:
- *   size
- *     = (value is array) ? value.length
- *     : (value is object) ? _.size(value)
- *     : 1
- *   row0 = nestedRows[rowIndex];
- *   rows2 = Array(size)
- *   for each rowIndex2 in _.range(size):
- *     rows2[rowIndex] = _.cloneDeep(row0)
- *
- *   expandRowsByNamedValue(rows2, _.range(size), name, value);
- *   nestedRows[rowIndex] = _.flattenDeep(rows2);
- *
- *
- *
- * - extendRowsByValue:
- *     - if value is an object, for each key/value pair, call extendRowsByNamedValue
- *     - if value is an array of objects, for each object, call extendRows
- *     - for each selected row, call extendRowByValue
- * - extendRowsByObject:
- *     - for each key/value pair, call extendRowsByNamedValue
- * - extendRowsByNamedValue:
- *     - TODO: turn the name/value into an action in order to allow for more sophisticated expansion
- *     - if the value is an array or object, for each row and subvalue, call extendRowByNamedValue with subvalue
- *     - otherwise, for each row, call extendRowByNamedValue
- * - extendRowByNamedValue:
- *     - if the value is an array, replicate the row N times, set `$name=i+1`, and then call extendRowByValue for each
- *     - if the value is an object, replicate the row N times, set `$name=key`, then call extendRowByValue for each
- *     - otherwise, call setColumnValue
- * - extendRowByValue:
- *     - if the value is an array, replicate the row N times, and call extendRowsByValue for each
- *     - if the value is an object, for each key/value pair, call extendRowsByValue
- *     - otherwise error
- * - setColumnValue: sets a basic named value on a row
- *
- * PROBLEM: when should an array be assigned to rows, and when should it replicate the rows?
- */
-/*
-a*: [a, b] # branching
-b: [a, b] # assignment
-c: hello # assignment
-d: [[{e: A, f: L}, {e: B, f: R}], [{e: A, f: R}, {e: B, f: L}]] # Assignment then branching
-e: [[1, 2], [3, 4]] # ERROR
-
-then figure out actions for sampling and whatnot
- */
-
-// TODO: rename extendRow* to expandRow*
-
-export function extendRowsByValue(nestedRows, rowIndexes, value) {
-	assert(_.isArray(nestedRows));
-	assert(_.isArray(rowIndexes));
-
-	for (let i = 0; i < rowIndexes.length; i++) {
-		const rowIndex = rowIndexes[i];
-		extendRowByValue(nestedRows, rowIndex, value);
-	}
-}
-
-export function extendRowsByObject(nestedRows, rowIndexes, o) {
-	assert(_.isArray(nestedRows));
-	assert(_.isArray(rowIndexes));
-
-	_.forEach(o, (name, value) => {
-		extendRowsByNamedValue(nestedRows, rowIndexes, name, value);
-	});
-}
-
-export function extendRowsByNamedValue(nestedRows, rowIndexes, name, value) {
-	assert(_.isArray(nestedRows));
-	assert(_.isArray(rowIndexes));
-	assert(!_.endsWith(name, "*"), `extendRowsByNamedValue() cannot handle branch factor names: ${name}`);
-
-	if (_.isArray(value) || _.isPlainObject(value)) {
-		const valueKeys = (_.isArray(value)) ? _.range(value.length) : _.keys(value);
-		assert(rowIndexes.length <= valueKeys.length, "fewer values than rows: "+JSON.stringify({name, values, rowIndexes}));
-		for (let i = 0; i < rowIndexes.length; i++) {
-			const valueKey = valueKeys[i];
-			const value = values[valueKey];
-			const rowIndex = rowIndexes[i];
-			const row = nestedRows[rowIndex];
-			// If this "row" is has nested rows:
-			if (_.isArray(row)) {
-				extendRowsByNamedValue(row, _.range(row.length), name, value);
-			}
-			// If this is an actual row:
-			else if (_.isPlainObject(row)) {
-				extendRowByNamedValue(nestedRows, rowIndex, name, value);
-				if (_.isArray(value)) {
-					setColumnValue(row, name, valueKey);
-					multiplyRowByArray(nestedRows, rowIndex, value);
-				}
-				else if (_.isPlainObject(value)) {
-					setColumnValue(row, name, valueKey);
-					extendRowByNamedObject(nestedRows, rowIndex, name, value);
-				}
-				else {
-					setColumnValue(row, name, value)
-				}
-			}
-			else {
-				assert(false, "row must be a plain object or an array: "+JSON.stringify(row));
-			}
-		}
-	}
-	else {
-		for (let i = 0; i < rowIndexes.length; i++) {
-			const rowIndex = rowIndexes[i];
-			const row = nestedRows[rowIndex];
-			if (_.isArray(row)) {
-				extendRowsByNamedValue(row, _.range(row.length), name, value);
-			}
-			else {
-				assert(_.isPlainObject(row), "row must be a plain object or an array: "+JSON.stringify(row));
-				setColumnValue(row, name, value);
-			}
-		}
-	}
-}
-
-export function extendRowByNamedValue(nestedRows, rowIndex, name, value) {
-	assert(_.isArray(nestedRows));
-	assert(!_.endsWith(name, "*"), `extendRowsByNamedValue() cannot handle branch factor names: ${name}`);
-
-	const row = nestedRows[rowIndex];
-
-	if (_.isArray(value) || _.isPlainObject(value)) {
-		const valueKeys = (_.isArray(value)) ? _.range(value.length) : _.keys(value);
-		assert(rowIndexes.length <= valueKeys.length, "fewer values than rows: "+JSON.stringify({name, values, rowIndexes}));
-		const valueKey = valueKeys[i];
-		const value = values[valueKey];
-		// If this "row" is has nested rows:
-		if (_.isArray(row)) {
-			extendRowsByNamedValue(row, _.range(row.length), name, value);
-		}
-		// If this is an actual row:
-		else if (_.isPlainObject(row)) {
-			if (_.isArray(value)) {
-				setColumnValue(row, name, valueKey);
-				multiplyRowByArray(nestedRows, rowIndex, value);
-			}
-			else if (_.isPlainObject(value)) {
-				setColumnValue(row, name, valueKey);
-				extendRowByNamedObject(nestedRows, rowIndex, name, value);
-			}
-			else {
-				setColumnValue(row, name, value)
-			}
-		}
-		else {
-			assert(false, "row must be a plain object or an array: "+JSON.stringify(row));
-		}
-	}
-	else {
-		if (_.isArray(row)) {
-			extendRowsByNamedValue(row, _.range(row.length), name, value);
-		}
-		else {
-			assert(_.isPlainObject(row), "row must be a plain object or an array: "+JSON.stringify(row));
-			setColumnValue(row, name, value);
-		}
-	}
-}
-
-// Set the given value, but only if the name doesn't start with a period
-function setColumnValue(row, name, value) {
-	if (name.length > 1 && name[0] != ".") {
-		row[name] = value;
-	}
-}
-
-function multiplyRowByArray(nestedRows, rowIndex, values) {
-	assert(_.isArray(nestedRows));
-	assert(_.isArray(values));
-	const row0 = nestedRows[rowIndex];
-	assert(_.isPlainObject(row));
-	const rows = Array(values.length);
-	nestedRows[rowIndex] = rows;
-
-	for (let i = 0; i < rows.length; i++) {
-		const row = _.clone(row0);
-		rows[i] = row;
-		const value = values[i];
-		// If the value is an array, we set name=index, create another nesting
-		// of rows, and multiply them.
-		if (_.isArray(value)) {
-			rows[i] = [rows[i]];
-			multiplyRowByArray(rows, i, value);
-		}
-		// If the value is an object, we set name=index, create another nesting
-		// of rows, and extend them.
-		else if (_.isPlainObject(value)) {
-			extendRowByObject(rows, i, value);
-		}
-		else {
-			assert(false, "all array items must be objects or arrays: "+JSON.stringify(values[i]));
-		}
-	}
-}
-
-function extendRowByObject(nestedRows, rowIndex, o) {
-	_.forEach(o, (value, name) => {
-		extendRowByNamedValue(nestedRows, rowIndex, name, value);
-	});
-}
-
-function expandRowByNamedValue(nestedRows, rowIndex, name, value) {
-	CONTINUE
-	const conditionActions = convertConditionsToActions(starValue);
-	// Add starName/Key to row (but ignore names that start with a '.')
-	const row1 = (_.startsWith(starName, ".")) ? row : _.merge({}, row, {[starName]: starKey});
-	// Create a table from the row
-	const table2 = [_.cloneDeep(row1)];
-	// Expand the table
-	_.forEach(conditionActions, action => {
-		applyActionToTable(table2, action);
-	});
-	// Return the expanded table
 	return table2;
 }
 
-function replicate(action, table, rowIndexes, replacements) {
-	// console.log("replicate:")
-	// console.log({action, table, rowIndexes, replacements})
-	_.forEach(rowIndexes, rowIndex => {
-		const row0 = table[rowIndex];
-		const count = _.get(action, "count", 1);
-		let rows1 = (count === 1) ? [row0] : _.map(_.range(count), i => _.clone(row0));
-
-		if (action.map) {
-			const rows2 = _.flatMap(rows1, row1 => {
-				const row2 = action.map(row1);
-				return (_.isArray(row2)) ? [row1].concat(row2)
-					: (_.isPlainObject(row2)) ? [row1, row2]
-					: [row1];
-			});
-			replacements[rowIndex] = rows2;
+/**
+ * Check whether the same underlying array shows up more than once in otherRowIndexes.
+ * This should never be the case, because if we modify one, the "other" will also be modified.
+ */
+function assertNoDuplicates(otherRowIndexes) {
+	for (let i = 0; i < otherRowIndexes.length - 1; i++) {
+		for (let j = i + 1; j < otherRowIndexes.length; j++) {
+			assert(otherRowIndexes[i] != otherRowIndexes[j], `same underlying array appears in 'otherRowIndexs' at both ${i} and ${j}: ${JSON.stringify(otherRowIndexes)}`)
 		}
-		else if (action.conditions) {
-			const rows2 = _.flatMap(rows1, row1 => {
-				const conditionActions = convertConditionsToActions(action.conditions);
-				const table2 = [_.cloneDeep(row1)];
-				_.forEach(conditionActions, action => {
-					applyActionToTable(table2, action);
-				});
-				return [row1].concat(table2);
-			});
-			replacements[rowIndex] = rows2;
-		}
-		else {
-			replacements[rowIndex] = rows1;
-		}
-	});
-	// console.log({replacements})
-}
-
-export function getCommonValues(table) {
-	if (_.isEmpty(table)) return {};
-
-	let common = _.clone(table[0]);
-	for (let i = 1; i < table.length; i++) {
-		// Remove any value from common which aren't shared with this row.
-		_.forEach(table[i], (value, name) => {
-			if (common.hasOwnProperty(name) && !_.isEqual(common[name], value)) {
-				delete common[name];
-			}
-		})
 	}
-
-	return common;
 }
-
-/*
-function sample(source, count, randomEngine) {
-	// console.log("sample", source, count)
-	const output = Array(count);
-	let values = _.clone(source);
-	let j = values.length;
-	for (let i = 0; i < output.length; i++) {
-		if (j >= values.length) {
-			Random.shuffle(randomEngine, values);
-			j = 0;
-		}
-		output[i] = values[j++];
-	}
-	return output;
-}*/
-
-// const table = flattenDesign(design2);
-// printConditions(design2.conditions);
-// printData(table);
-//console.log(yaml.stringify(table, 4, 2))

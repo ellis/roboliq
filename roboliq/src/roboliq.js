@@ -61,7 +61,7 @@ var expect = require('./expect.js');
 var misc = require('./misc.js');
 import * as WellContents from './WellContents.js';
 var wellsParser = require('./parsers/wellsParser.js');
-import * as Design from './design2.js';
+import * as Design from './design.js';
 
 const version = "v1";
 

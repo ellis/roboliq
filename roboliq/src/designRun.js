@@ -2,7 +2,7 @@ import _ from 'lodash';
 import jsonfile from 'jsonfile';
 import path from 'path';
 import yaml from 'yamljs';
-import * as Design from './design2.js';
+import * as Design from './design.js';
 
 const commander = require('commander')
 	.version("1.0")

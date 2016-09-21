@@ -34,11 +34,11 @@
 * [ ] BUG: cleans tips around trace2 at the wrong time!
 * [ ] gc_mario_screening2: robot should take the lid off before pipetting and put it on again afterwards
 
-* [ ] design2.js: add functionality for joining independent designs column-wise
-* [ ] design2.js: add functionality for joining independent designs column-wise
-* [ ] design2.js: add functionality for selecting partial factorial design
-* [ ] design2.js: add functionality for randomly selecting a number of rows
-* [ ] design2.js: add functionality for selecting rows in a d-optimal way
+* [ ] design.js: add functionality for joining independent designs column-wise
+* [ ] design.js: add functionality for joining independent designs column-wise
+* [ ] design.js: add functionality for selecting partial factorial design
+* [ ] design.js: add functionality for randomly selecting a number of rows
+* [ ] design.js: add functionality for selecting rows in a d-optimal way
 
 # Experiment
 

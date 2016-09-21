@@ -10,7 +10,7 @@ var jmespath = require('jmespath');
 import math from 'mathjs';
 import naturalSort from 'javascript-natural-sort';
 import tv4 from 'tv4';
-const Design = require('./design2.js');
+const Design = require('./design.js');
 import misc from './misc.js';
 import roboliqSchemas from './roboliqSchemas.js';
 import wellsParser from './parsers/wellsParser.js';

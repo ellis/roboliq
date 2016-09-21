@@ -8,7 +8,7 @@ var assert = require('assert');
 var math = require('mathjs');
 var random = require('random-js');
 import commandHelper from '../commandHelper.js';
-var Design = require('../design2.js');
+var Design = require('../design.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 var wellsParser = require('../parsers/wellsParser.js');

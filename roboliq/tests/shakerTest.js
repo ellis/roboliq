@@ -50,7 +50,7 @@ describe('commands/shaker', function() {
 						},
 					},
 					"2": {
-						"command": "equipment.run|ourlab.mario.evoware|ourlab.mario.shaker",
+						"command": "shaker.run|ourlab.mario.evoware|ourlab.mario.shaker",
 						"agent": "ourlab.mario.evoware",
 						"equipment": "ourlab.mario.shaker",
 						"program": {
