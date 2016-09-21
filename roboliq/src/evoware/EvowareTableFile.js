@@ -182,7 +182,7 @@ function parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines) {
 
 /**
  * Parse the hotel objects
- * @param  {[type]} lsLine:         List[String]  [description]
+ * @param  {EvowareSemicolonFile} lines - lines of table file
  * @return {array} an array of HotelObjects
  */
 function parse14_getHotelObjects(lines) {
@@ -200,7 +200,7 @@ function parse14_getHotelObjects(lines) {
 
 /**
  * Parse the external objects.
- * @param  {[type]} lines       [description]
+ * @param  {EvowareSemicolonFile} lines - lines of table file
  * @return {array} an array of external objects
  */
 function parse14_getExternalObjects(lines) {
@@ -219,7 +219,7 @@ function parse14_getExternalObjects(lines) {
 
 /**
  * Parse labware on external sites
- * @param  {[type]} lines       [description]
+ * @param  {EvowareSemicolonFile} lines - lines of table file
  * @return {object} list of tuples (carrier ID, labware model name)
  */
 function parse14_getExternalLabwares(lines) {
@@ -246,52 +246,13 @@ function parse14_getExternalCarrierGrids(externalObjects, lines) {
 	});
 }
 
+/**
+ * Create a string representation of an Evoware table layout
+ * @param  {EvowareCarrierData} carrierData - data loaded from an evoware carrier file
+ * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
+ * @return {string} string representation of table layout
+ */
 export function toStrings(carrierData, table) {
-	/*
-		siteIdToLabel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (label, _)) =>
-			for {
-				carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
-			} yield {
-				val siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex - 1)
-				val label2 = label.split('.').last
-				siteId -> label2
-			}
-		}
-		siteIdToLabwareModel_m2 <- ResultC.map(siteToNameAndLabel_m) { case (cngsi, (_, labwareModelName)) =>
-			for {
-				carrier <- ResultC.from(configFile.mapNameToCarrier.get(cngsi.carrierName), s"carrier `${cngsi.carrierName}` not present in the evoware config file")
-				siteId = CarrierGridSiteIndex(carrier.id, cngsi.gridIndex, cngsi.siteIndex - 1)
-				labwareModel <- ResultC.from(configFile.mapNameToLabwareModel.get(labwareModelName), s"labware model `${labwareModelName}` not present in the evoware config file")
-			} yield siteId -> labwareModel
-		}
-	} yield {
-		val siteIdToLabel_m3 = siteIdToLabel_m ++ siteIdToLabel_m2
-		val siteIdToLabwareModel_m3 = siteIdToLabwareModel_m ++ siteIdToLabwareModel_m2
-		//println("siteIdToLabwareModel_m:")
-		//siteIdToLabwareModel_m3.foreach(println)
-		// TODO: output current date and time
-		// TODO: See whether we need to save the RES section when loading in the table
-		// TODO: do we need to save values for the 999 line when loading the table?
-		val l = List(
-				"00000000",
-				"20000101_000000 No log in       ",
-				"                                                                                                                                ",
-				"No user logged in                                                                                                               ",
-				"--{ RES }--",
-				"V;200",
-				"--{ CFG }--",
-				"999;219;32;"
-			) ++
-			toString_carriers(carrierData, table) ++
-			toString_tableLabware(siteIdToLabel_m3, siteIdToLabwareModel_m3) ++
-			toString_hotels() ++
-			toString_externals() ++
-			toString_externalLabware(siteIdToLabwareModel_m3) ++
-			toString_externalGrids() ++
-			List("996;0;0;", "--{ RPG }--")
-		l.mkString("\n")
-	}
-	*/
 	const l1 = [
 		"00000000",
 		"20000101_000000 No log in       ",
@@ -315,6 +276,12 @@ export function toStrings(carrierData, table) {
 	return l;
 }
 
+/**
+ * Create a string representation of the internal carriers
+ * @param  {EvowareCarrierData} carrierData - data loaded from an evoware carrier file
+ * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
+ * @return {string} string representation of internal carriers
+ */
 export function toString_internalCarriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites
 	// [[a, b]]
@@ -343,6 +310,12 @@ export function toString_internalCarriers(carrierData, table) {
 	return `14;${l.join(";")};`;
 }
 
+/**
+ * Create a string representation of the internal labware
+ * @param  {EvowareCarrierData} carrierData - data loaded from an evoware carrier file
+ * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
+ * @return {string} string representation of internal labware
+ */
 export function toStrings_internalLabware(carrierData, table) {
 	const items0 = [];
 	_.forEach(table, (c, carrierName) => {
@@ -383,6 +356,12 @@ export function toStrings_internalLabware(carrierData, table) {
 	}));
 }
 
+/**
+ * Create a string representation of the hotels
+ * @param  {EvowareCarrierData} carrierData - data loaded from an evoware carrier file
+ * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
+ * @return {string} string representation of hotels
+ */
 export function toStrings_hotels(carrierData, table) {
 	const hotelItems0 = [];
 	_.forEach(table, (c, carrierName) => {
@@ -401,6 +380,12 @@ export function toStrings_hotels(carrierData, table) {
 	]);
 }
 
+/**
+ * Create a string representation of external carriers
+ * @param  {EvowareCarrierData} carrierData - data loaded from an evoware carrier file
+ * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
+ * @return {string} string representation of external carriers
+ */
 export function toStrings_externals(carrierData, table) {
 	const items0 = [];
 	_.forEach(table, (c, carrierName) => {

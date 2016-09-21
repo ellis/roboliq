@@ -156,9 +156,9 @@ function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
  *     - `destination` -- destination properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
  * - `syringeSpacing`
  *
- * @param  {[type]} parsed [description]
- * @param  {[type]} data   [description]
- * @return {[type]}        [description]
+ * @param  {object} parsed - parsed command parameters
+ * @param  {object} data - protocol data
+ * @return {array} an array of groupings of the pipette items
  */
 function groupItems(parsed, data) {
 	//console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))

@@ -9,7 +9,7 @@ function getMoveRomaHomeLine(romaIndex) {
  * Move a ROMA
  * @param  {number} romaIndex - index of roma
  * @param  {number} action - 0=open gripper, 1=close gripper, 2=move home, 3=move relative,
- * @return {[type]}           [description]
+ * @return {string} string representation of ROMA command
  */
 function getRomaMoveLine(romaIndex, action) {
 	const x = {

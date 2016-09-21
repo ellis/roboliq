@@ -34,16 +34,6 @@ const intensityToValue = {
 
 const valueToIntensity = ["none", "flush", "light", "thorough", "decontaminate"];
 
-function extractLiquidNamesFromContents(contents) {
-	if (_.isEmpty(contents) || contents.length < 2) return [];
-	if (contents.length === 2 && _.isString(contents[1])) return [contents[1]];
-	else {
-		return _(contents).tail().map(function(contents2) {
-			return extractLiquidNamesFromContents(contents2);
-		}).flatten().value();
-	}
-}
-
 /**
  * Takes a labware name and a well and returns a fully specified well.
  * If the wells is undefined, return undefined.
@@ -607,6 +597,16 @@ function calculateWellVolumes(items, data) {
 			wellVolumes[well] = volume1;
 			// console.log({well, volume: wellVolumes[well]})
 		}
+	}
+}
+
+function extractLiquidNamesFromContents(contents) {
+	if (_.isEmpty(contents) || contents.length < 2) return [];
+	if (contents.length === 2 && _.isString(contents[1])) return [contents[1]];
+	else {
+		return _(contents).tail().map(function(contents2) {
+			return extractLiquidNamesFromContents(contents2);
+		}).flatten().value();
 	}
 }
 
