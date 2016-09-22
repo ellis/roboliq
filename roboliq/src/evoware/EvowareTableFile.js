@@ -1,3 +1,9 @@
+/**
+ * Module to load and save Evoware table files.
+ *
+ * @module
+ */
+
 import _ from 'lodash';
 import assert from 'assert';
 //import {sprintf} from 'sprintf-js';
@@ -6,6 +12,8 @@ import * as EvowareCarrierFile from './EvowareCarrierFile.js';
 import M from '../Medley.js';
 
 /**
+ * Represent a hotel object in an Evoware table file
+ * @class module:evoware/EvowareTableFile.HotelObject
  * @param {integer} parentCarrierId - carrier ID for the carrier holding this hotel
  * @param {integer} gridIndex - grid index of the hotel
  */
@@ -17,6 +25,8 @@ export class HotelObject {
 }
 
 /**
+ * Represent an external object in an Evoware table file
+ * @class module:evoware/EvowareTableFile.ExternalObject
  * @param {integer} n1 - Value of unknown significance (4 for System, 0 for others?)
  * @param {integer} n2 - I think this is the on-screen display index
  * @param {string} carrierName - carrier name for the carrier holding this hotel/object

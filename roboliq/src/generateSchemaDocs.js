@@ -1,5 +1,11 @@
 /**
- * @file Generate documentation from the schemas in `schemas/*.yaml`
+ * Generate documentation from the schemas in `schemas/*.yaml`.
+ * Running this module will create these files:
+ *
+ * * `tutorials/Object_Types.md`
+ * * `tutorials/Commands.md`
+ * 
+ * @module
  */
 
 import _ from 'lodash';

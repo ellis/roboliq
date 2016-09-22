@@ -1,3 +1,8 @@
+/**
+ * A collection of helper utilities for our Evoware compiler.
+ * @module
+ */
+
 import _ from 'lodash';
 import fs from 'fs';
 import iconv from 'iconv-lite';
@@ -8,14 +13,14 @@ import iconv from 'iconv-lite';
  * @param  {number} n - integer to encode as a character
  * @return {string} a single-character string that represents the number
  */
-function encode(n) {
+export function encode(n) {
 	return String.fromCharCode("0".charCodeAt(0) + n);
 }
 
 /**
  * Decode a character to an integer.
  */
-function decode(c) {
+export function decode(c) {
 	return c.charCodeAt(0) - "0".charCodeAt(0);
 }
 
@@ -24,7 +29,7 @@ function decode(c) {
  * @param  {integer} n - number between 0 and 15
  * @return {char}
  */
-function hex(n) {
+export function hex(n) {
 	return n.toString(16).toUpperCase()[0];
 }
 
@@ -34,7 +39,7 @@ function hex(n) {
  * @param  {string} encoded - an encoded list of indexes
  * @return {array} tuple of [rows on surface, columns on surface, selected indexes on surface]
  */
-function parseEncodedIndexes(encoded) {
+export function parseEncodedIndexes(encoded) {
 	// HACK: for some reason, there is this strange sequence "ï¿½" that shows
 	// up in some places.  It appears to simply indicate 7 bits, e.g. "0"+127, e.g. '¯'
 	encoded = encoded.replace(/ï¿½/g, String.fromCharCode(48+127));
@@ -63,13 +68,19 @@ function parseEncodedIndexes(encoded) {
  *   identifying the type of line, and items is a string array of the remaining
  *   components of the line.
  */
-function splitSemicolons(line) {
+export function splitSemicolons(line) {
 	const l = line.split(";");
 	const kind = parseInt(l[0]);
 	return [kind, _.tail(l)];
 }
 
-class EvowareSemicolonFile {
+/**
+ * A class to handle Evoware's semicolon-based file format.
+ * @class module:evoware/EvowareUtils.EvowareSemicolonFile
+ * @param  {string} filename - path to semicolon file
+ * @param  {number} skip - number of lines to initially skip at the top of the file
+ */
+export class EvowareSemicolonFile {
 	constructor(filename, skip) {
 		const raw = fs.readFileSync(filename);
 		const filedata = iconv.decode(raw, "ISO-8859-1");
@@ -79,6 +90,10 @@ class EvowareSemicolonFile {
 		this.lineIndex = skip;
 	}
 
+	/**
+	 * Get the next line
+	 * @return {string} next line in semicolon file
+	 */
 	next() {
 		if (this.lineIndex >= this.lines.length)
 			return undefined;
@@ -87,6 +102,10 @@ class EvowareSemicolonFile {
 		return line;
 	}
 
+	/**
+	 * Get the next line in the file and split it on semicolons.
+	 * @return {array} array of strings resulting from splitting the line at semicolons.
+	 */
 	nextSplit() {
 		const line = this.next();
 		if (_.isUndefined(line))
@@ -95,10 +114,19 @@ class EvowareSemicolonFile {
 		return result;
 	}
 
+	/**
+	 * Whether there are any more lines in the file.
+	 * @return {boolean} true if there are more lines to read
+	 */
 	hasNext() {
 		return (this.lineIndex < this.lines.length);
 	}
 
+	/**
+	 * Return a line that is `skip` lines ahead of the last line read.
+	 * @param  {number} skip - number of lines to skip over
+	 * @return {string} line in file
+	 */
 	peekAhead(skip) {
 		const i = this.lineIndex + skip;
 		if (i >= this.lines.length)
@@ -107,24 +135,22 @@ class EvowareSemicolonFile {
 		return line;
 	}
 
+	/**
+	 * Skip `n` lines ahead
+	 * @param  {number} n - number of lines to skip
+	 */
 	skip(n) {
 		this.lineIndex += n;
 	}
 
+	/**
+	 * Get the next `n` lines from the file.
+	 * @param  {number} n - number of lines to read.
+	 * @return {array} array of strings read.
+	 */
 	take(n) {
 		const l = this.lines.slice(this.lineIndex, this.lineIndex + n);
 		this.lineIndex += n;
 		return l;
 	}
 }
-
-const exports = {
-	EvowareSemicolonFile,
-	decode,
-	encode,
-	hex,
-	parseEncodedIndexes,
-	splitSemicolons
-};
-
-export default exports;

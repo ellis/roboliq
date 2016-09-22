@@ -1,13 +1,16 @@
-/*
-- break the items into groups that should be handled simultaneously, possible methods include:
-    - each item is its own group
-    - groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)
-    - groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns
-    - have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips
-*/
+/**
+ * Functions to break pipeetting items into groups that should be handled simultaneously.
+ * Possible methods include:
+ *
+ * - each item is its own group
+ * - groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)
+ * - groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns
+ * - have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips
+ * @module
+ */
 
-var _ = require('lodash');
-var assert = require('assert');
+import _ from 'lodash'
+import assert from 'assert'
 
 /**
  * Place each item into its own group.
@@ -15,7 +18,7 @@ var assert = require('assert');
  * @param {array} items Array of pipetting items.
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
-function groupingMethod1(items) {
+export function groupingMethod1(items) {
 	return _.map(items, function(item) { return [item]; });
 }
 
@@ -31,7 +34,7 @@ function groupingMethod1(items) {
  * @param {object} tipModelToSyringes An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
-function groupingMethod2(items, syringes, tipModelToSyringes) {
+export function groupingMethod2(items, syringes, tipModelToSyringes) {
 	//console.log({items, syringes, tipModelToSyringes})
 	const groups = [];
 	while (!_.isEmpty(items)) {
@@ -91,7 +94,7 @@ function groupingMethod2(items, syringes, tipModelToSyringes) {
  * @param {object} tipModelToSyringes An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
-function groupingMethod3(items, syringes, tipModelToSyringes) {
+export function groupingMethod3(items, syringes, tipModelToSyringes) {
 	//console.log({items, syringes, tipModelToSyringes})
 
 	if (_.isEmpty(items))
@@ -223,10 +226,4 @@ function groupingMethod3(items, syringes, tipModelToSyringes) {
 	}
 
 	return groups;
-}
-
-module.exports = {
-	groupingMethod1,
-	groupingMethod2,
-	groupingMethod3,
 }

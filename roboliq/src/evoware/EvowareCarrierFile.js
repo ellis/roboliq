@@ -1,3 +1,8 @@
+/**
+ * Loads data from an Evoware carrier file.
+ * @module
+ */
+
 import _ from 'lodash';
 import assert from 'assert';
 //import fs from 'fs';
@@ -8,7 +13,7 @@ import EvowareUtils from './EvowareUtils.js';
 
 /**
  * Tuple for location refered to by carrier+grid+site indexes
- * @typedef {object} CarrierGridSiteIndex
+ * @class module:evoware/EvowareCarrierFile.CarrierGridSiteIndex
  * @property {integer} carrierId - ID for the carrier
  * @property {integer} gridIndex - 1-based index of grid
  * @property {integer} siteIndex -  0-based index of site
@@ -24,7 +29,7 @@ export class CarrierGridSiteIndex {
 
 /**
  * Tuple for location refered to by carrier+site index
- * @typedef {object} CarrierSiteIndex
+ * @class module:evoware/EvowareCarrierFile.CarrierSiteIndex
  * @property {integer} carrierId - ID for the carrier
  * @property {integer} siteIndex -  0-based index of site
  */
@@ -44,7 +49,7 @@ export class CarrierSiteIndex {
 
 /**
  * A Carrier object
- * @typedef {EvowareModel} Carrier
+ * @class module:evoware/EvowareCarrierFile.Carrier
  * @property {string} type - should be "Carrier"
  * @property {string} name
  * @property {integer} id
@@ -67,7 +72,7 @@ export class Carrier {
 
 /**
  * An evoware labware model
- * @typedef {EvowareModel} LabwareModel
+ * @class module:evoware/EvowareCarrierFile.LabwareModel
  * @property {string} type - should be "LabwareModel"
  * @property {string} name
  * @property {integer} rows
@@ -89,7 +94,7 @@ export class LabwareModel {
 
 /**
  * A tranporter "vector", related to movements that the RoMas can make
- * @typedef {EvowareModel} Vector
+ * @class module:evoware/EvowareCarrierFile.Vector
  * @property {string} type - should be "Vector"
  * @property {integer} carrierId - which carrier this vector is for
  * @property {string} clazz - Wide, Narrow, or user-defined
@@ -108,7 +113,7 @@ export class Vector {
 /**
  * An object representing an evoware carrier file
  *
- * @typedef {object} EvowareCarrierData
+ * @class module:evoware/EvowareCarrierFile.EvowareCarrierData
  * @property {object} models - map from model name to model data
  * @property {object} idToName - map of model ID to model name
  * @property {object} carrierIdToVectors - map of carrier ID to list of Vectors

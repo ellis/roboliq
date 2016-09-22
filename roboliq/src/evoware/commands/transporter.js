@@ -1,3 +1,9 @@
+/**
+ * Handles transporter instructions and supplies some additional control functions
+ * for moving the ROMAs.
+ * @module
+ */
+
 import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 
@@ -26,6 +32,14 @@ function getRomaMoveLine(romaIndex, action) {
 	return `ROMA(${x.action},${x.gripperDistance},${x.force},${x.dx},${x.dy},${x.dz},${x.speed},${x.maximumSpeed},${x.romaIndex});`;
 }
 
+/**
+ * Handle the `transporter._movePlate` instruction.
+ *
+ * @param  {object} params - original paramters
+ * @param  {object} parsed - parsed parameters
+ * @param  {object} data - protocol data
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
 export function _movePlate(params, parsed, data) {
 	//console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
 	// romaIndex: "(@equipment).evowareRoma: integer"
@@ -108,6 +122,12 @@ export function _movePlate(params, parsed, data) {
 	return items;
 }
 
+/**
+ * Move the last-moved ROMA back to its home position.
+ *
+ * @param  {object} data - protocol data
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
 export function moveLastRomaHome(data) {
 	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"]);
 	if (romaIndexPrev) {

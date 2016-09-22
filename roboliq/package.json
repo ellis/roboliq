@@ -11,7 +11,6 @@
     "jmespath": "^0.12.0",
     "jsonfile": "^2.2.2",
     "lodash": "^4.2.0",
-    "mathjs": "^2.7.0",
     "mathjs": "git+https://github.com/josdejong/mathjs.git#develop",
     "mkdirp": "^0.5.1",
     "moment": "^2.13.0",
@@ -30,7 +29,7 @@
     "babel-preset-react": "^6.3.13",
     "babel-register": "^6.7.2",
     "ink-docstrap": "~0.5.2",
-    "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
+    "jsdoc": "^3.4.1",
     "mocha": "^2.3.4",
     "pegjs": "~0.8.0",
     "should": "^8.1.1"
