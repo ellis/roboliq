@@ -23,5 +23,8 @@
 		"linenums"        : true,
 		"collapseSymbols" : false,
 		"inverseNav"      : true
-    }
+	},
+	"opts": {
+		"template": "node_modules/docdash"
+	}
 }
