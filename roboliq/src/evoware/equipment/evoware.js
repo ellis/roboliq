@@ -1,9 +1,16 @@
+/**
+ * Module for Evoware commands.
+ * In order to use Evoware commands in Roboliq, you'll need to calls these
+ * functions in your robot configuration file.
+ * @module
+ */
+
 import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 import expect from '../../expect.js';
 
 /**
- * Have Evoware execute an external command.
+ * Create an instruction for Evoware execute an external command.
  * @param  {string} agentName - Agent identifier
  * @param  {string} path - path to command to execute
  * @param  {array} args - array of arguments to pass
@@ -18,6 +25,15 @@ function makeEvowareExecute(agentName, path, args, wait) {
 	};
 }
 
+/**
+ * Create an instruction for Evoware FACTS.
+ * @param  {[type]} parsed      [description]
+ * @param  {[type]} data        [description]
+ * @param  {[type]} variable    [description]
+ * @param  {[type]} value       [description]
+ * @param  {[type]} labwareName [description]
+ * @return {[type]}             [description]
+ */
 function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
 	const result2 = {

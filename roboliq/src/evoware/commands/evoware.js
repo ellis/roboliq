@@ -1,3 +1,8 @@
+/**
+ * Handles instructions which are specifically for controlling evoware.
+ * @module
+ */
+
 import _ from 'lodash';
 import commandHelper from '../../commandHelper.js';
 import * as evowareHelper from './evowareHelper.js';

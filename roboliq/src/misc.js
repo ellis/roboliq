@@ -1,3 +1,11 @@
+/**
+ * A set of miscellaneous helper functions.
+ *
+ * Some of these are HACKs that should be moved to another module or removed entirely.
+ *
+ * @module
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var mustache = require('mustache');
@@ -5,7 +13,8 @@ var mustache = require('mustache');
 /**
  * queryResults: value returned from llpl.query()
  * predicateName: name of the predicate that was used for the query
- * return: {parameterName1: parameterValues1, ...}
+ * @returns {object} `{parameterName1: parameterValues1, ...}`
+ * @static
  */
 function extractValuesFromQueryResults(queryResults, predicateName) {
 	var acc = _.reduce(queryResults, function(acc, x1) {
@@ -178,6 +187,7 @@ function handleDirectiveDeep(x, data) {
 /**
  * Recurses into object properties and maps them to the result of fn.
  *
+ * @static
  * @param  {Any} x Any value.
  * @param  {Function} fn A function (x, key, path) that returns a mapped value.
  * @return {Any} Return the deeply mapped object.
@@ -198,9 +208,10 @@ function mapDeep(x, fn, key, path = []) {
 }
 
 /**
-* Recurses into object properties and replaces them with the result of fn.
-* 'x' will be mutated.
-*
+ * Recurses into object properties and replaces them with the result of fn.
+ * 'x' will be mutated.
+ *
+ * @static
  * @param  {Any} x Any value.
  * @param  {Function} fn A function that returns a transformed value.
  * @return nothing

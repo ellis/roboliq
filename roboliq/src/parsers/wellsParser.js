@@ -1,17 +1,36 @@
+/**
+ * Module for parsing strings that represent wells and labware.
+ * @module
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var random = require('random-js');
 var expect = require('../expectCore.js');
 var misc = require('../misc.js');
 var wellsParser0 = require('./wellsParser0.js');
-//import commandHelper from '../commandHelper.js';
 
+/**
+ * Take a well identifier (e.g. A01) and returns an integer array
+ * representing the row and column of that well.
+ * @param  {string} location - a well identifier starting with a capital letter and followed by a number (e.g. A01)
+ * @return {array} an integer array of `[row, col]`.  The values are 1-based (i.e. row 1 is the first row)
+ * @static
+ */
 function locationTextToRowCol(location) {
 	var row = location.charCodeAt(0) - "A".charCodeAt(0) + 1;
 	var col = parseInt(location.substr(1));
 	return [row, col];
 }
 
+/**
+ * Converts a row and column index to a string.
+ * For example, `[1, 1] => A01`, and `[8, 12] => H12`.
+ * @param  {number} row - row of well
+ * @param  {number} col - column of well
+ * @return {string} string representation of location of well on labware
+ * @static
+ */
 function locationRowColToText(row, col) {
 	var colText = col.toString();
 	if (colText.length == 1) colText = "0"+colText;
@@ -19,7 +38,15 @@ function locationRowColToText(row, col) {
 }
 
 /**
- * @param {object} config - optional object that contains properties for 'rows' and 'columns', in case we want to expand something like 'A1 down C3' without having specified a plate
+ * Parses a text which should represent one or more labwares and wells.
+ * If the `objects` parameter is passed, this function will return an array of the individual wells;
+ * otherwise it will return the raw parser results.
+ *
+ * @param {string} text - text to parse
+ * @param {object} objects - map of protocol objects, in order to find labwares and number of rows and columns on labware.
+ * @param {object} [config] - optional object that contains properties for 'rows' and 'columns', in case we want to expand something like 'A1 down C3' without having specified a plate
+ * @return {array} If the `objects` parameter is passed, this function will return an array of the individual wells; otherwise it will return the raw parser results.
+ * @static
  */
 function parse(text, objects, config) {
 	assert(_.isString(text), "wellsParser.parse() expected a string, received: "+text)
@@ -35,6 +62,15 @@ function parse(text, objects, config) {
 	return processParserResult(result, objects, text, config);
 }
 
+/**
+ * Take the raw parser results and return an array of location names,
+ * one entry for each well.
+ * @param {array} result - raw parser results.
+ * @param {object} objects - map of protocol objects, in order to find labwares and number of rows and columns on labware.
+ * @param {string} text - the original text that was parsed; this is merely used for error output.
+ * @param {object} [config] - optional object that contains properties for 'rows' and 'columns', in case we want to expand something like 'A1 down C3' without having specified a plate
+ * @return {array} array of names for each plate + well (e.g. `plate1(C04)`)
+ */
 function processParserResult(result, objects, text, config = {}) {
 	var commandHelper = require('../commandHelper.js');
 	//console.log("text", text)
@@ -298,6 +334,14 @@ function processParserResult(result, objects, text, config = {}) {
 	return _.flatten(ll);
 }
 
+/**
+ * Parses a string which should represent a single well, and return the raw
+ * parser results.
+ *
+ * @param {string} text - text to parse
+ * @return {object} an object representing the raw parser results.
+ * @static
+ */
 function parseOne(text) {
 	assert(_.isString(text), "wellsParser.parseOne() expected a string, received: "+JSON.stringify(text))
 	try {
