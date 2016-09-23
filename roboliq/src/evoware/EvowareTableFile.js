@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import assert from 'assert';
 //import {sprintf} from 'sprintf-js';
-import EvowareUtils from './EvowareUtils.js';
+import * as EvowareUtils from './EvowareUtils.js';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
 import M from '../Medley.js';
 

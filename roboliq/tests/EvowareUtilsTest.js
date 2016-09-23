@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var should = require('should');
-import EvowareUtils from '../src/evoware/EvowareUtils.js';
+import * as EvowareUtils from '../src/evoware/EvowareUtils.js';
 
 describe("EvowareUtils", function() {
 	describe("parseEncodedIndexes", function() {

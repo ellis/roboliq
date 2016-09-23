@@ -8,7 +8,7 @@ import assert from 'assert';
 //import fs from 'fs';
 //import iconv from 'iconv-lite';
 import {sprintf} from 'sprintf-js';
-import EvowareUtils from './EvowareUtils.js';
+import * as EvowareUtils from './EvowareUtils.js';
 
 
 /**

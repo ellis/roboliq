@@ -1,10 +1,14 @@
+/**
+ * Handles pipetter instructions.
+ * @module
+ */
 import _ from 'lodash';
 import assert from 'assert';
 import math from 'mathjs';
 import {sprintf} from 'sprintf-js';
 import commandHelper from '../../commandHelper.js';
-import evowareHelper from './evowareHelper.js';
-import EvowareUtils from '../EvowareUtils.js';
+import * as evowareHelper from './evowareHelper.js';
+import * as EvowareUtils from '../EvowareUtils.js';
 import * as Tokens from './tokens.js';
 import wellsParser from '../../parsers/wellsParser.js';
 

@@ -1,9 +1,14 @@
+/**
+ * Module for compiling an instruction list (created by roboliq) to
+ * an Evoware script.
+ * @module
+ */
 import _ from 'lodash';
 import naturalSort from 'javascript-natural-sort';
 import M from '../Medley.js';
 import commandHelper from '../commandHelper.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
-import evowareHelper from './commands/evowareHelper.js';
+import * as evowareHelper from './commands/evowareHelper.js';
 import * as evoware from './commands/evoware.js';
 import * as pipetter from './commands/pipetter.js';
 import * as system from './commands/system.js';

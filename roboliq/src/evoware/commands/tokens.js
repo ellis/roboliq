@@ -1,18 +1,20 @@
-import evowareHelper from './evowareHelper.js';
+/**
+ * Create a Mix token.
+ * @param {object} params - {syringeMask, program, volumes
+ * @param {string} params.syringeMask
+ * @param {string} params.program
+ * @param {array} params.volumes - 12 numbers representing mix volumes in ul for each tip
+ * @param {integer} params.evowareGrid
+ * @param {integer} params.evowareSite - (site index starts at 1 rather than 0)
+ * @param {integer} [params.syringeSpacing] - optional spacing between syringes (starts at 1)
+ * @param {string} params.plateMask
+ * @param {integer} params.count - number of times to mix
+ * @class
+ */
+
+import * as evowareHelper from './evowareHelper.js'
 
 export class Mix {
-	/**
-	 * Create a Mix token.
-	 * @param {object} params - {syringeMask, program, volumes
-	 * @param {string} params.syringeMask
-	 * @param {string} params.program
-	 * @param {array} params.volumes - 12 numbers representing mix volumes in ul for each tip
-	 * @param {integer} params.evowareGrid
-	 * @param {integer} params.evowareSite - (site index starts at 1 rather than 0)
-	 * @param {integer} [params.syringeSpacing] - optional spacing between syringes (starts at 1)
-	 * @param {string} params.plateMask
-	 * @param {integer} params.count - number of times to mix
-	 */
 	constructor(params) {
 		// console.log(params)
 		this.params = params;

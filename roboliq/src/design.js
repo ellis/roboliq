@@ -1,3 +1,9 @@
+/**
+ * Functions for processing design specifications.
+ * In particular, it can take concise design specifications and expand them
+ * into a long table of factor values.
+ * @module
+ */
 import _ from 'lodash';
 import assert from 'assert';
 // import Immutable, {Map, fromJS} from 'immutable';
