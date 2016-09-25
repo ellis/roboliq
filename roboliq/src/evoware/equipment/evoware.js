@@ -11,6 +11,7 @@ import expect from '../../expect.js';
 
 /**
  * Create an instruction for Evoware execute an external command.
+ * @static
  * @param  {string} agentName - Agent identifier
  * @param  {string} path - path to command to execute
  * @param  {array} args - array of arguments to pass
@@ -27,12 +28,13 @@ function makeEvowareExecute(agentName, path, args, wait) {
 
 /**
  * Create an instruction for Evoware FACTS.
- * @param  {[type]} parsed      [description]
- * @param  {[type]} data        [description]
- * @param  {[type]} variable    [description]
- * @param  {[type]} value       [description]
- * @param  {[type]} labwareName [description]
- * @return {[type]}             [description]
+ * @static
+ * @param  {object} parsed - parsed object of command parameters
+ * @param  {object} data - protocol data
+ * @param  {string} variable    [description]
+ * @param  {any} [value] - optional value; if value is a function, it will be called with the parameters (parsed, data).
+ * @param  {string} labwareName - labware used in this command
+ * @return {object} an object representing an Evoware 'FACTS' instruction.
  */
 function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 	const equipmentId = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
@@ -49,8 +51,12 @@ function makeEvowareFacts(parsed, data, variable, value, labwareName) {
 }
 
 /**
+ * Create the predictates to be added to Roboliq's robot
+ * configuration for Evoware's site/model relationships.
+ *
  * Expect spec of this form:
  * ``{siteModel: string, sites: [string], labwareModels: [string]}``
+ * @static
  */
 function makeSiteModelPredicates(spec) {
 	return _.flatten([
@@ -61,8 +67,12 @@ function makeSiteModelPredicates(spec) {
 }
 
 /**
+ * Create the predictates to be added to Roboliq's robot
+ * configuration for Evoware's RoMa relationships.
+ *
  * Expect specs of this form:
  * ``{<transporter>: {<program>: [site names]}}``
+ * @static
  */
 function makeTransporterPredicates(namespaceName, agentName, specs) {
 	let siteCliqueId = 1;
@@ -95,6 +105,9 @@ module.exports = {
 	makeSiteModelPredicates,
 	makeTransporterPredicates,
 
+	/**
+	 * objectToPredicateConverters for Evoware
+	 */
 	objectToPredicateConverters: {
 		"EvowareRobot": function(name) {
 			return {
@@ -106,6 +119,10 @@ module.exports = {
 			};
 		}
 	},
+	/**
+	 * Returns the schemas for Evoware commands and objects.
+	 * @return {object} map from name to schema
+	 */
 	getSchemas: () => ({
 		"EvowareRobot": {
 			properties: {
@@ -160,6 +177,10 @@ module.exports = {
 			required: ["text"]
 		}
 	}),
+	/**
+	 * Return command handlers for low-level evoware instructions.
+	 * @return {object} map from instruction name to handler.
+	 */
 	getCommandHandlers: () => ({
 		"evoware._execute": function(params, parsed, data) {},
 		"evoware._facts": function(params, parsed, data) {},

@@ -1,3 +1,19 @@
+/**
+ * Methods for assigning which source well to use when a source liquid is
+ * available in multiple wells.
+ *
+ * Details:
+ * Assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
+ *
+ * - pick first one
+ * - rotate through source wells in order
+ * - rotate through source wells in order of max volume
+ * - try a simple geometrical assignment considering whether there are more tips or wells; if that fails, use previous method
+ * - same as above, but if wells > tips, try starting at first (wells - tips) wells and see which one produces the greatest minimum final volume
+ *
+ * @module
+ */
+
 var _ = require('lodash');
 var assert = require('assert');
 var math = require('mathjs');
@@ -6,16 +22,15 @@ var expect = require('../../expect.js');
 var pipetterUtils = require('./pipetterUtils.js');
 var WellContents = require('../../WellContents.js');
 
-/*
-- assign source well by group for items without assigned source wells; if multiple syringes need to access the same source, and that source has multiple wells, then possible methods include:
-    - pick first one
-    - rotate through source wells in order
-    - rotate through source wells in order of max volume
-    - try a simple geometrical assignment considering whether there are more tips or wells; if that fails, use previous method
-    - same as above, but if wells > tips, try starting at first (wells - tips) wells and see which one produces the greatest minimum final volume
-*/
-
-// Pick the first well in a source set and ignore the others
+/**
+ * Pick the first well in a source set and ignore the others.
+ *
+ * The 'sourceWell' property of each item in 'group' will be set.
+ *
+ * @static
+ * @param  {array} group   Array of pipetting items that are grouped together
+ * @param  {object} data    Data passed to the commandHandler
+ */
 function sourceMethod1(group, data) {
 	_.forEach(group, function (item) {
 		var source = item.source;
@@ -54,6 +69,7 @@ function sourceMethod1(group, data) {
  * Rotate through source wells in order of max volume.
  * The 'sourceWell' property of each item in 'group' will be set.
  *
+ * @static
  * @param  {array} group   Array of pipetting items that are grouped together
  * @param  {object} data    Data passed to the commandHandler
  * @param  {object} effects (Optional) Map from variable to effects
