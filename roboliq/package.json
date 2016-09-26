@@ -29,7 +29,7 @@
     "babel-preset-es2015": "^6.3.13",
     "babel-preset-react": "^6.3.13",
     "babel-register": "^6.7.2",
-    "ink-docstrap": "~0.5.2",
+    "ink-docstrap": "^1.3.0",
     "jsdoc": "^3.4.1",
     "mocha": "^2.3.4",
     "pegjs": "~0.8.0",
