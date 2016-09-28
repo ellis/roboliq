@@ -2,7 +2,8 @@
 
 Roboliq was developed to help automate protocols on liquid handling robots,
 especially for lab experiments in molecular biology.
-This tutorial will explain how to write such protocols.
+This tutorial will explain the four main parts of a protocol and how to write
+write them.
 
 First consider this short example -- it uses Roboliq version "v1"; it defines a `Plate` named `sourcePlate`; and it instructs us to shake the plate:
 
@@ -61,24 +62,23 @@ objects:
 
 Objects are the things that can be used in the protocol's steps, including
 materials, equipment, and even user-defined variables.
-The type of an object is defined by its `type` property (e.g. `Plate` in the
-example above), and the available types can be found in the [type documentation]{@link types}.
+Each object requires a `type` property (e.g. `Plate` in the
+example above) -- the most common types used in protocols are:
 
-Most of the types are used in the robot configuration rather than in protocols.
-The most common types used in protocols are:
-
-* `Plate`: for defining labware (including tubes and troughs)
+* [`Plate`]{@link types.Plate}: for defining labware (including tubes and troughs)
 * `Liquid`: for defining liquids
 * `Variable`: for defining variables that the user can change
 * `Design`: for defining an experimental design
 
-When you create an object, you will need to specify its `type` along with any other
-required properties.  Each type may have a different set of optional and
-required properties, as documented in the [type documentation]{@link types}.
-All objects have an optional `description` property that you can use to
-add your own notes about the object.
+A complete list of types can be found in the [type documentation]{@link types},
+but most of them are only used in the
+[robot configuration]{@tutorial write-a-robot-configuration} rather than in protocols.
 
-Here are examples of each of the four main object types:
+In addition to the `type` property, object have other properties as well
+(also available in the [type documentation]{@link types}), and
+all objects have an optional `description` property that you can use to
+add your own notes about the object.
+Here are examples for each of the four main object types:
 
 ```yaml
 objects:
@@ -102,9 +102,13 @@ objects:
       ... {properties not included here}
 ```
 
+The `Variable` type lets you specify a value which can be used in
+the protocol steps -- this is a good idea if you need
+the value multiple times in the protocol steps but expect to change it in the
+future.
 
-For more information about designing experiments, see the
-[Design Documentation]{@tutorial Writing-a-Design}.
+The `Design` type facilitates complex experimental designs, and you can read
+more about it in the [Design Documentation]{@tutorial Writing-a-Design}.
 
 # Steps
 
