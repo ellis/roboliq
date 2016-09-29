@@ -65,10 +65,15 @@ materials, equipment, and even user-defined variables.
 Each object requires a `type` property (e.g. `Plate` in the
 example above) -- the most common types used in protocols are:
 
-* [`Plate`]{@link types.Plate}: for defining labware (including tubes and troughs)
-* `Liquid`: for defining liquids
-* `Variable`: for defining variables that the user can change
-* `Design`: for defining an experimental design
+* [`Plate`]{@link types.Plate}: for defining labware, including tubes and troughs.
+* [`Liquid`]{@link types.Liquid}: for defining liquids.
+* [`Variable`]{@link types.Variable}: for defining variables that the user can change.
+  `Variable` object lets you name a value which can be referenced by name in
+  the protocol steps -- this is a good idea if the steps reference the value
+	multiple times and you expect to change the value in the future.
+* [`Design`]{@link types.Design}: for defining an experimental design.
+  The `Design` type facilitates complex experimental designs, and you can read
+  more about it in the [Design Documentation]{@tutorial Writing-a-Design}.
 
 A complete list of types can be found in the [type documentation]{@link types},
 but most of them are only used in the
@@ -102,14 +107,37 @@ objects:
       ... {properties not included here}
 ```
 
-The `Variable` type lets you specify a value which can be used in
-the protocol steps -- this is a good idea if you need
-the value multiple times in the protocol steps but expect to change it in the
-future.
-
-The `Design` type facilitates complex experimental designs, and you can read
-more about it in the [Design Documentation]{@tutorial Writing-a-Design}.
 
 # Steps
 
-CONTINUE
+The `steps` property specifies the actions to be taken.  Normally, this is
+a numbered list of commands, such as this example of sealing and shaking
+a plate:
+
+```yaml
+steps:
+  1:
+    command: sealer.sealPlate
+    object: plate1
+  2:
+    command: shaker.shakePlate
+    object: plate1
+```
+
+A *command* is indicated by a `command` property, such as the `sealer.sealPlate`
+and `shaker.shakePlate` commands above.
+Besides the `command` property, you will need to specify additional properties
+to tell the command exactly what to do.  In the above example, the line
+`object: plate1` tells the command to act on `plate1`.
+
+The 
+Structure of command names
+List of available commands
+
+A step is either a command or a numbered list of sub-steps.
+
+
+
+Numbered sub-steps
+
+`description`, `data`
