@@ -1,0 +1,1272 @@
+/**
+ * Namespace for the commands available in Roboliq protocols.
+ * @namespace commands
+ * @version v1 
+ */
+
+
+/**
+ *  * The `absorbanceReader` commands specify actions using equipment for absorbance readouts.
+ * 
+ *
+ * @namespace absorbanceReader
+ * @memberof commands
+ **/
+
+
+/**
+ * Measure the absorbance of a plate.
+ * 
+ * @typedef absorbanceReader.measurePlate
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property  [program] - Program parameters
+ * @property {string} [programFile] - Program filename
+ * @property  [programData] - Program data
+ * @property {string} [outputFile] - Filename for output (deprecated, use `output.writeTo`)
+ * @property {string} [outputDataset] - Name of dataset to which the measurements values will be appended. (deprecated, use `output.appendTo`)
+ * @property  [output] - Output definition for where and how to save the measurements
+ * @property {Plate} object - Plate identifier
+ * @property {Site} [site] - Site identifier in reader
+ * @property {SiteOrStay} [destinationAfter] - Site to move the plate to after measurement
+ */
+
+
+
+
+/**
+ *  * The `centrifuge` commands specify actions using centrifuge equipment.
+ * 
+ *
+ * @namespace centrifuge
+ * @memberof commands
+ **/
+
+
+/**
+ * Centrifuge using two plate
+ * 
+ * @typedef centrifuge.centrifuge2
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property  program - Program for centrifuging
+ * @property {Plate} object1 - Plate identifier 1
+ * @property {Plate} object2 - Plate identifier 2
+ * @property {Site} [site1] - Location identifier for the centrifugation site of object1
+ * @property {Site} [site2] - Location identifier for the centrifugation site of object2
+ * @property {SiteOrStay} [destinationAfter1] - Location identifier for where object1 should be placed after centrifugation
+ * @property {SiteOrStay} [destinationAfter2] - Location identifier for where object2 should be placed after centrifugation
+ * @example
+ * This will centrifuge 2 plates at 3000rpm for 2 minutes at 25°C:
+ * ```
+ * {
+ *   "command": "centrifuge.centrifuge2",
+ *   "object1": "plate1",
+ *   "object2": "plate2",
+ *   "program": {
+ *     "rpm": 3000,
+ *     "duration": "2 minutes",
+ *     "temperature": "25 degC"
+ *   }
+ * }
+ * ```
+ * 
+ */
+
+
+
+/**
+ * Insert up to two plates into the centrifuge.
+ * 
+ * @typedef centrifuge.insertPlates2
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {Plate} [object1] - Plate identifier 1
+ * @property {Plate} [object2] - Plate identifier 2
+ * @property {Site} [site1] - Location identifier for the centrifugation site of object1
+ * @property {Site} [site2] - Location identifier for the centrifugation site of object2
+ * @example
+ * This will insert two plates into the centrifuge:
+ * ```
+ * {
+ *   "command": "centrifuge.insertPlates2",
+ *   "object1": "plate1",
+ *   "object2": "plate2",
+ * }
+ * ```
+ * 
+ */
+
+
+
+
+/**
+ *  * The `equipment` commands specify generic actions such as 'run' and 'open'
+ * that may apply to various types of equipment.
+ * 
+ *
+ * @namespace equipment
+ * @memberof commands
+ **/
+
+
+/**
+ * Run the given equipment.
+ * 
+ * This is a generic command, and any addition parameters may be passed that are required by the target equipment.
+ * 
+ * 
+ * @typedef equipment._run
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+/**
+ * Open the given equipment.
+ * 
+ * This is a generic command that expands to a sub-command named `equipment.open|${agent}|${equipment}`. That command should be defined in your configuration for your lab.
+ * 
+ * The handler should return effects indicating that the equipment is open.
+ * 
+ * 
+ * @typedef equipment.open
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+/**
+ * Open an equipment site.
+ * This command assumes that only one equipment site can be open at a time.
+ * 
+ * This is a generic command that expands to a sub-command named
+ * `equipment.openSite|${agent}|${equipment}`.
+ * That command should be defined in your configuration for your lab.
+ * 
+ * The handler should return effects indicating that the equipment is open,
+ * the given site is open, and all other equipment sites are closed.
+ * 
+ * 
+ * @typedef equipment.openSite
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {Site} site - Site identifier
+ */
+
+
+
+/**
+ * Close the given equipment.
+ * 
+ * This is a generic command that expands to a sub-command named
+ * `equipment.close|${agent}|${equipment}`.
+ * That command should be defined in your lab configuration.
+ * 
+ * The handler should return effects indicating the the equipment is closed
+ * and all of its sites are closed.
+ * 
+ * 
+ * @typedef equipment.close
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+/**
+ * Start the given equipment.
+ * 
+ * This is a generic command that expands to a sub-command named
+ * `equipment.start|${agent}|${equipment}`.
+ * That command should be defined in your configuration for your lab.
+ * Any addition parameters may be passed that are required by the target equipment.
+ * 
+ * The handler returns effects indicating that the equipment is running.
+ * 
+ * 
+ * @typedef equipment.start
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+/**
+ * Stop the given equipment.
+ * 
+ * This is a generic command that expands to a sub-command named
+ * `equipment.stop|${agent}|${equipment}`.
+ * That command should be defined in your configuration for your lab.
+ * Any addition parameters may be passed that are required by the target equipment.
+ * 
+ * The handler returns effects indicating that the equipment is not running.
+ * 
+ * 
+ * @typedef equipment.stop
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+
+/**
+ *  * The `experiment` module is for working with experimental designs.
+ * Currently there is only one command, `experiment.run`.
+ * 
+ *
+ * @namespace experiment
+ * @memberof commands
+ **/
+
+
+/**
+ * Run an experiment based on a Design or the currently available `DATA` object.
+ * This command will performs its sub-steps for every selected group of items in the experiment array."
+ * 
+ * 
+ * @typedef experiment.forEachGroup
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Design} [design] - An experimental design to use
+ * @property {array|string} groupBy - The factor(s) to group by
+ * @property {array|string} [distinctBy] - The factor(s) to distinguish row by
+ * @property {array|string} [orderBy] - The factor(s) to order by
+ * @property {Duration} [durationTotal] - The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+ * @property {Duration} [durationGroup] - The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+ * @property {Duration} [interleave] - The time offset for interleaving each group
+ * @property {array} [timers] - Timers that should be used
+ * @property {integer} [startTimerAfterStep] - The duration timer will be started after this step rather than from the beginning, if specified
+ * @property {object} [steps] - The sequence of commands to perform for each set of factor values.
+ */
+
+
+
+/**
+ * Run an experiment based on a Design or the currently available `DATA` object.
+ * This command will performs its sub-steps for every item in the experiment array, placing the item's values in SCOPE."
+ * 
+ * 
+ * @typedef experiment.forEachRow
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Design} [design] - An experimental design to use
+ * @property {array|string} [distinctBy] - The factor(s) to distinguish row by
+ * @property {array|string} [orderBy] - The factor(s) to order by
+ * @property {Duration} [durationTotal] - The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+ * @property {Duration} [durationRow] - The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+ * @property {Duration} [interleave] - The time offset for interleaving each group
+ * @property {array} [timers] - Timers that should be used
+ * @property {object} [steps] - The sequence of commands to perform for each set of factor values.
+ */
+
+
+
+
+/**
+ *  * The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
+ * 
+ *
+ * @namespace fluorescenceReader
+ * @memberof commands
+ **/
+
+
+/**
+ * Measure the fluorescence of a plate.
+ * 
+ * @typedef fluorescenceReader.measurePlate
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property  [program] - Program parameters
+ * @property {string} [programFile] - Program filename
+ * @property  [programData] - Program data
+ * @property {string} [outputFile] - Filename for output
+ * @property {Plate} object - Plate identifier
+ * @property {Site} [site] - Site identifier in reader
+ * @property {SiteOrStay} [destinationAfter] - Site to move the plate to after measurement
+ */
+
+
+
+
+/**
+ *  * The `incubator` commands specify actions using incubator equipment.
+ * 
+ *
+ * @namespace incubator
+ * @memberof commands
+ **/
+
+
+/**
+ * Incubate the given plates
+ * 
+ * @typedef incubator.incubatePlates
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property  program - Program for incubation
+ * @property {array} plates - List of plates to incubate
+ * @property {array} [sites] - Internal sites to put the plates on
+ * @property {array} [destinationAfters] - Location identifier for where the plates should be placed after incubation
+ * @example
+ * This will incubate 2 plates at 300rpm for 2 minutes at 25°C:
+ * ```
+ * {
+ *   "command": "incubator.incubatePlates",
+ *   "plates": ["plate1", "plate2"],
+ *   "program": {
+ *     "rpm": 300,
+ *     "duration": "2 minutes",
+ *     "temperature": "25 degC"
+ *   }
+ * }
+ * ```
+ * 
+ */
+
+
+
+/**
+ * Insert up to two plates into the incubator.
+ * 
+ * @typedef incubator.insertPlates
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {array} [plates] - List of plates to incubate
+ * @property {array} [sites] - Internal sites to put the plates on
+ * @example
+ * This will insert two plates into the incubator:
+ * ```
+ * {
+ *   "command": "incubator.insertPlates",
+ *   "plates": ["plate1", "plate2"]
+ * }
+ * ```
+ * 
+ */
+
+
+
+/**
+ * Run the incubator with the given program
+ * 
+ * @typedef incubator.run
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {object} program - Program for shaking and incubating
+ * @property {array} plates - List of plates to incubate
+ * @property {array} [sites] - Internal sites to put the plates on
+ * @property {array} [destinationAfters] - Location identifier for where the plates should be placed after incubation
+ * @example
+ * This will incubate 2 plates at 300rpm for 2 minutes at 25°C:
+ * ```
+ * {
+ *   "command": "incubator.incubatePlates",
+ *   "plates": ["plate1", "plate2"],
+ *   "program": {
+ *     "rpm": 300,
+ *     "duration": "2 minutes",
+ *     "temperature": "25 degC"
+ *   }
+ * }
+ * ```
+ * 
+ */
+
+
+
+
+/**
+ *  * The `pipetter` commands specify actions using pipetting equipment.
+ * 
+ *
+ * @namespace pipetter
+ * @memberof commands
+ **/
+
+
+/**
+ * Parameters for mixing in higher-level commands like pipetter._PipetteItem.
+ * 
+ * @typedef pipetter._MixSpec
+ * @memberof commands
+ * @property {integer} count - Number of times to aspirate and re-dispense
+ * @property {Volume} volume - Amount to aspirate, either as a fraction or absolute volume
+ */
+
+
+
+/**
+ * Parameters for pipette items.
+ * 
+ * @typedef pipetter._AspirateItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} syringe - Syringe identifier
+ * @property {Well} source - Source specifier
+ * @property {Volume} volume - Volume
+ */
+
+
+
+/**
+ * Parameters for pipette items.
+ * 
+ * @typedef pipetter._DispenseItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} syringe - Syringe identifier
+ * @property {Well} destination - Destination specifier
+ * @property {Volume} volume - Volume
+ */
+
+
+
+/**
+ * Parameters for low-level pipetter._measureVolume items.
+ * 
+ * @typedef pipetter._MeasureVolumeItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} syringe - Syringe identifier
+ * @property {Well} well - Well specifier
+ */
+
+
+
+/**
+ * Parameters for pipetter.measureVolume items.
+ * 
+ * @typedef pipetter.MeasureItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} [syringe] - Syringe identifier
+ * @property {Well} [well] - Well specifier
+ * @property {pipetter.CleaningIntensity} [cleanAfter] - intensity of cleaning required after this item.
+ */
+
+
+
+/**
+ * Parameters for mixing with pipetter.
+ * 
+ * @typedef pipetter._MixItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} syringe - Syringe identifier
+ * @property {Well} well - Well to mix
+ * @property {integer} [count] - Number of times to aspirate and re-dispense
+ * @property {Volume} [volume] - Volume
+ * @property {string} [program] - Program identifier
+ */
+
+
+
+/**
+ * Intensity of cleaning.
+ * 
+ * The enum lists the intensities in increase order.
+ * 
+ * 
+ * @typedef pipetter.CleaningIntensity
+ * @memberof commands
+ */
+
+
+
+/**
+ * Parameters for low-level pipette items.
+ * 
+ * @typedef pipetter._PipetteItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} syringe - Syringe identifier
+ * @property {Well} [source] - Source specifier
+ * @property {Well} [destination] - Destination specifier
+ * @property {Volume} volume - Volume
+ * @property {pipetter._MixSpec} [sourceMixing] - Parameters for mixing the source prior to aspiration
+ * @property {pipetter._MixSpec} [destinationMixing] - Parameters for mixing the destination after dispense
+ * @property {string} [tipModel] - Tip model identifier, in order to use a specific tip model
+ */
+
+
+
+/**
+ * Parameters for pipette items.
+ * 
+ * @typedef pipetter.PipetteItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} [syringe] - Syringe identifier
+ * @property {Source} [source] - Source specifier
+ * @property {Well} [destination] - Destination specifier
+ * @property {Volume} [volume] - Volume
+ * @property {object} [volumeCalibrated] - Calculate a calibrated volume
+ * @property {Volume} [volumeTotal] - Volume that the well should be brought up to.
+ * @property  [layer] - A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list.
+ * @property {pipetter.CleaningIntensity} [cleanAfter] - intensity of cleaning required after this item.
+ * @property {boolean|pipetter.MixSpec} [sourceMixing] - Parameters for mixing the source prior to aspiration
+ * @property {boolean|pipetter.MixSpec} [destinationMixing] - Parameters for mixing the destination after dispense
+ */
+
+
+
+/**
+ * Parameters for low-level puncture items.
+ * 
+ * @typedef pipetter._PunctureItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} syringe - Syringe identifier
+ * @property {Well} well - Well specifier
+ * @property {Length} distance - Distance for puncturing
+ */
+
+
+
+/**
+ * Parameters for puncture items.
+ * 
+ * @typedef pipetter.PunctureItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} [syringe] - Syringe identifier
+ * @property {Well} [well] - Well specifier
+ * @property {Length} [distance] - Distance for puncturing
+ * @property {pipetter.CleaningIntensity} [cleanAfter] - intensity of cleaning required after this item.
+ */
+
+
+
+/**
+ * Parameters for a dilution series.
+ * 
+ * @typedef pipetter.DilutionItem
+ * @memberof commands
+ * @property {number|Syringe} [syringe] - Syringe identifier
+ * @property {Source} [source] - Source specifier
+ * @property {Wells} destinations - Destination wells
+ * @property {Volume} [volume] - Volume
+ */
+
+
+
+/**
+ * Parameters for mixing with pipetter.
+ * 
+ * @typedef pipetter.MixItem
+ * @memberof commands
+ * @property {number|nameOfSyringe} [syringe] - Syringe identifier
+ * @property {Well} [well] - Well to mix
+ * @property {integer} [count] - Number of times to aspirate and re-dispense
+ * @property {Volume|number} [amount] - Amount to aspirate, either as a fraction or absolute volume
+ * @property {string} [program] - Program identifier
+ */
+
+
+
+/**
+ * Parameters for mixing (used in higher-level commands like pipetter.pipette and pipetter.pipetteDilutionSeries).
+ * 
+ * @typedef pipetter.MixSpec
+ * @memberof commands
+ * @property {integer} [count] - Number of times to aspirate and re-dispense
+ * @property {Volume|number} [amount] - Amount to aspirate, either as a fraction or absolute volume
+ * @property {string} [program] - Program identifier
+ */
+
+
+
+/**
+ * Aspirate liquids from sources into syringes.
+ * 
+ * @typedef pipetter._aspirate
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {string} program - Program identifier
+ * @property {array} [items] - Data about what should be aspirated from where
+ */
+
+
+
+/**
+ * Dispense liquids from sryinges into destinations.
+ * 
+ * @typedef pipetter._dispense
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {string} program - Program identifier
+ * @property {array} [items] - Data about what should be dispensed where
+ */
+
+
+
+/**
+ * Measure well volume using pipetter tips.
+ * 
+ * @typedef pipetter._measureVolume
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {string} [program] - Program identifier
+ * @property {array} items - List of parameters for individual wells
+ * @property  [output] - Output definition for where and how to save the measurements
+ */
+
+
+
+/**
+ * Mix liquids by aspirating and re-dispensing.
+ * 
+ * @typedef pipetter._mix
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {string} program - Program identifier
+ * @property  [itemDefaults] - Default values for items
+ * @property {array} [items] - Data about mixing
+ */
+
+
+
+/**
+ * Pipette liquids from sources to destinations.
+ * 
+ * @typedef pipetter._pipette
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {string} program - Program identifier
+ * @property {string} [sourceProgram] - Program identifier for aspirating from source, if it should differ from 'program'
+ * @property {array} [items] - Data about what should be pipetted where
+ * @property {pipetter._MixSpec} [sourceMixing] - Parameters for mixing the source prior to aspiration
+ * @property {pipetter._MixSpec} [destinationMixing] - Parameters for mixing the destination after dispense
+ */
+
+
+
+/**
+ * Puncture the seal on a plate using pipetter tips.
+ * 
+ * @typedef pipetter._punctureSeal
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {array} items - List of parameters for individual punctures
+ */
+
+
+
+/**
+ * Clean the pipetter tips.
+ * 
+ * @typedef pipetter._washTips
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {name|object} program - Program identifier
+ * @property {array} syringes - List of syringe identifiers
+ * @property {pipetter.CleaningIntensity} intensity - Intensity of the cleaning
+ */
+
+
+
+/**
+ * Clean the pipetter tips.
+ * 
+ * @typedef pipetter.cleanTips
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {string} [program] - Program identifier
+ * @property {array} [items] - List of which syringes to clean at which intensity
+ * @property {array} [syringes] - Optional list of syringes to serve as default for missing syringes in items list
+ * @property {pipetter.CleaningIntensity} [intensity] - Optional intensity to serve as default intensity for missing intensities in items list
+ */
+
+
+
+/**
+ * Measure well volume using pipetter tips.
+ * 
+ * @typedef pipetter.measureVolume
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {array} [items] - List of parameters for individual wells to measure
+ * @property {Plate} [wellLabware] - Labware for wells
+ * @property {Wells} [wells] - Specifier for well(s) to measure, if missing from items
+ * @property {array} [syringes] - Specifier for syringe(s) to use, if missing from items
+ * @property {string} [clean] - Intensity of cleaning
+ * @property {string} [cleanBegin] - intensity of cleaning before the first puncture.
+ * @property {string} [cleanBetween] - Intensity of cleaning between wells.
+ * @property {string} [cleanEnd] - Intensity of cleaning after the last puncture.
+ * @property {string} [tipModel] - Tip model identifier, in order to use a specific tip model
+ * @property  [output] - Output definition for where and how to save the measurements
+ */
+
+
+
+/**
+ * Mix well contents by aspirating and re-dispensing.
+ * 
+ * @typedef pipetter.mix
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {string} [program] - Program identifier
+ * @property {array} [items] - Data about which wells to mix and how to mix them
+ * @property {Plate} [wellLabware] - Labware for wells
+ * @property {Wells} [wells] - Specifier for well(s) to mix, if missing from items
+ * @property {integer} [counts] - Number of times to aspirate, if missing from items
+ * @property {Volume|number} [amounts] - Amount to aspirate, either as a fraction or absolute volume, if missing from items
+ * @property {array} [syringes] - Specifier for syringe(s) to use, if missing from items
+ * @property {string} [clean] - Intensity of cleaning
+ * @property {string} [cleanBegin] - intensity of first cleaning at beginning of pipetting, before first aspiration.
+ * @property {string} [cleanBetween] - Intensity of cleaning between different liquids.
+ * @property {string} [cleanBetweenSameSource] - Intensity of cleaning between transfers of the same liquid.
+ * @property {string} [cleanEnd] - Intensity of cleaning after the last dispense.
+ */
+
+
+
+/**
+ * Pipette liquids from sources to destinations.
+ * 
+ * @typedef pipetter.pipette
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {string} [program] - Program identifier
+ * @property {string} [sourceProgram] - Program identifier for aspirating from source, if it should differ from 'program'
+ * @property {array} [items] - Data about what should be pipetted where
+ * @property {Plate} [sourceLabware] - Labware for source wells
+ * @property {Plate} [destinationLabware] - Labware for source wells
+ * @property {Sources} [sources] - Specifier for source(s) to aspirate from, if missing from items
+ * @property {Wells} [destinations] - Specifier for destination(s) to despense to, if missing from items
+ * @property {Volumes} [volumes] - Volume(s) to pipette, if missing from items
+ * @property {array} [syringes] - Specifier for syringe(s) to use, if missing from items
+ * @property {string} [clean] - Intensity of cleaning
+ * @property {string} [cleanBegin] - intensity of first cleaning at beginning of pipetting, before first aspiration.
+ * @property {string} [cleanBetween] - Intensity of cleaning between different liquids.
+ * @property {string} [cleanBetweenSameSource] - Intensity of cleaning between transfers of the same liquid.
+ * @property {string} [cleanEnd] - Intensity of cleaning after the last dispense.
+ * @property {boolean|pipetter.MixSpec} [sourceMixing] - Parameters for mixing the source wells with pipetter before aspirating
+ * @property {boolean|pipetter.MixSpec} [destinationMixing] - Parameters for mixing the destination after dispense
+ * @property {string} [tipModel] - Tip model identifier, in order to use a specific tip model
+ */
+
+
+
+/**
+ * Puncture the seal on a plate using pipetter tips.
+ * 
+ * @typedef pipetter.punctureSeal
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {array} [items] - List of parameters for individual punctures
+ * @property {Wells} [wells] - Specifier for well(s) to puncture, if missing from items
+ * @property {array} [syringes] - Specifier for syringe(s) to use, if missing from items
+ * @property {Length|array} [distances] - Distance for puncturing
+ * @property {string} [clean] - Intensity of cleaning
+ * @property {string} [cleanBegin] - intensity of cleaning before the first puncture.
+ * @property {string} [cleanBetween] - Intensity of cleaning between wells.
+ * @property {string} [cleanEnd] - Intensity of cleaning after the last puncture.
+ * @property {string} [tipModel] - Tip model identifier, in order to use a specific tip model
+ */
+
+
+
+/**
+ * Pipette a dilution series.
+ * 
+ * First the diluent is distributed to the destination wells (if diluent is specified).
+ * Then the source is transfered to the first destination well of each item (if source is specified -- otherwise the first destination well is assumed to be already prepared).
+ * Then aliquots are serially transfered from the first destination well to the next, and so on for each item.
+ * In general, mixing should be performed after each dilution dispense, and perhaps also before the first aspriation -- this can be specified how ???
+ * 
+ * 
+ * @typedef pipetter.pipetteDilutionSeries
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {string} [program] - Program identifier
+ * @property {number} [dilutionFactor] - Dilution factor by which each subsequent well is diluted
+ * @property  [dilutionMethod] - How to dilution -- `begin`: distribute diluent to destination wells first (default); `before`: add diluent right before transfering aliquot; `after`: add diluent right after transfering aliquot; `source`: dilute the well that the aliquot will be extracted from.
+ * @property {string} [lastWellHandling] - How to handle the last well in a series
+ * @property {array} items - Array of dilution items
+ * @property {Source} [diluent] - Diluent to be used in dilution
+ * @property {Plate} [sourceLabware] - Labware for source wells
+ * @property {Plate} [destinationLabware] - Labware for source wells
+ * @property {Volume} [volume] - Final volume of dilution wells (with the possible exception of the last well, see parameter `lastWellHandling`)
+ * @property {string} [cleanBegin] - Intensity of first cleaning at beginning of pipetting, before first aspiration.
+ * @property {string} [cleanEnd] - Intensity of cleaning after the last dispense.
+ * @property  [sourceParams] - Extra parameters for pipetting the source
+ * @property  [diluentParams] - Extra parameters for pipetting the diluent
+ * @property  [dilutionParams] - Extra parameters for pipetting the diluted aliquots
+ */
+
+
+
+/**
+ * Pipette the given mixtures into the given destinations.
+ * 
+ * @typedef pipetter.pipetteMixtures
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {string} [program] - Program identifier
+ * @property {array} mixtures - Array of arrays, where each sub-array is a list of components to be mixed into a destination well
+ * @property {Plate} [sourceLabware] - Labware for source wells
+ * @property {Plate} [destinationLabware] - Labware for source wells
+ * @property {Wells} [destinations] - Destination specifier
+ * @property {array} [order] - Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
+ */
+
+
+
+
+/**
+ *  * The `scale` commands specify actions using weight scale equipment.
+ * 
+ *
+ * @namespace scale
+ * @memberof commands
+ **/
+
+
+/**
+ * Program for scale.
+ * 
+ * @typedef scale.ScaleProgram
+ * @memberof commands
+ */
+
+
+
+/**
+ * Weight an object
+ * 
+ * @typedef scale.weigh
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {scale.ScaleProgram} [program] - Program for shaking
+ * @property {Plate} object - Plate identifier
+ * @property {Site} [site] - Site identifier on scale
+ * @property {SiteOrStay} [destinationAfter] - Site to move the plate to after this command
+ */
+
+
+
+
+/**
+ *  * The `sealer` commands specify actions using sealing equipment.
+ * 
+ *
+ * @namespace sealer
+ * @memberof commands
+ **/
+
+
+/**
+ * Seal a plate.
+ * 
+ * @typedef sealer.sealPlate
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {string} [program] - Program identifier for sealing
+ * @property {Plate} object - Plate identifier
+ * @property {Site} [site] - Site identifier of sealer
+ * @property {number} [count] - Number of times to seal (defaults to 1)
+ * @property {SiteOrStay} [destinationAfter] - Site to move the plate to after this command
+ */
+
+
+
+
+/**
+ *  * The `shaker` commands specify actions using shaker equipment.
+ * 
+ *
+ * @namespace shaker
+ * @memberof commands
+ **/
+
+
+/**
+ * Program for shaker.
+ * 
+ * @typedef shaker.ShakerProgram
+ * @memberof commands
+ * @property  [amplitude] - Amplitude
+ * @property {Duration} duration - Duration of shaking
+ * @property {number} [rpm] - Rotations per minute (RPM)
+ */
+
+
+
+/**
+ * Shake a plate.
+ * 
+ * @typedef shaker.shakePlate
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {shaker.ShakerProgram} program - Program for shaking
+ * @property {Plate} object - Plate identifier
+ * @property {Site} [site] - Site identifier on shaker
+ * @property {SiteOrStay} [destinationAfter] - Site to move the plate to after this command
+ */
+
+
+
+/**
+ * Run the shaker.
+ * 
+ * @typedef shaker.run
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {shaker.ShakerProgram} program - Program for shaking
+ */
+
+
+
+
+/**
+ *  * The `system` commands specify several general, high-level actions that are
+ * not specific to any particular type of equipment.
+ * 
+ *
+ * @namespace system
+ * @memberof commands
+ **/
+
+
+/**
+ * Include the value as a description in the generated script
+ * 
+ * @typedef system._description
+ * @memberof commands
+ * @property {string} [text] - Description text
+ */
+
+
+
+/**
+ * A trouble-shooting function to echo something
+ * 
+ * @typedef system._echo
+ * @memberof commands
+ * @property {string} [name] - Name of echoed thing
+ * @property  [value] - Thing to echo
+ */
+
+
+
+/**
+ * Call a template function.
+ * 
+ * The template function should be an object of type `Template` with a property `template` holding either a Mustache template string or an object whose properties may be Mustache template strings. The template will be expanded using the values passed in the `params` property.
+ * 
+ * @typedef system.call
+ * @memberof commands
+ * @property {Object} name - Name of the template function.
+ * @property {object} [params] - Parameters to pass to the template function.
+ */
+
+
+
+/**
+ * Output the value as a description to the generated script
+ * 
+ * @typedef system.description
+ * @memberof commands
+ * @property  [value] - Value to use as description
+ */
+
+
+
+/**
+ * A trouble-shooting function to echo a variable or text
+ * 
+ * @typedef system.echo
+ * @memberof commands
+ * @property  [value] - Value to echo
+ */
+
+
+
+/**
+ * Conditionally execute steps depending on a conditional test.
+ * 
+ * @typedef system.if
+ * @memberof commands
+ * @property {boolean} test - A boolean value; if true, the `then` steps are executed.
+ * @property {object} [then] - The sequence of steps to perform if the test is true.
+ * @property {object} [else] - The sequence of steps to perform if the test is false.
+ */
+
+
+
+/**
+ * Repeat the given command a given number of times.
+ * 
+ * @typedef system.repeat
+ * @memberof commands
+ * @property {integer} count - The number of times to repeat.
+ * @property {object} [steps] - The sequence of commands to repeat.
+ * @property {string} [variableName] - If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).
+ */
+
+
+
+/**
+ * Perform a run-time check to test whether execution should exit the current loop
+ * 
+ * @typedef system.runtimeExitLoop
+ * @memberof commands
+ * @property  testType - The type of code to execute to determine whether to break; a JSON truthy value should be returned.
+ * @property {string} test - The code to execute at runtime that will test whether to exit.
+ */
+
+
+
+/**
+ * Handle steps which require runtime variables
+ * 
+ * @typedef system.runtimeLoadVariables
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {string} varset - Name of the variable set to load
+ * @property {array} variables - Array of variables to load from 'varset'
+ */
+
+
+
+/**
+ * Handle steps which require runtime variables
+ * 
+ * @typedef system.runtimeSteps
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {string} varset - Name of the variable set to load
+ * @property {array} variables - Array of variables to load from 'varset'
+ * @property {array|object} steps - Steps to compile at runtime
+ */
+
+
+
+
+/**
+ *  * The `timer` commands specify actions using timer equipment.
+ * 
+ *
+ * @namespace timer
+ * @memberof commands
+ **/
+
+
+/**
+ * Sleep for a given duration using a specific timer.
+ * 
+ * Handler should return `effects` that the timer is not running.
+ * 
+ * 
+ * @typedef timer._sleep
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {Duration} duration - Duration to sleep
+ * @property {boolean} [stop] - Whether to stop the timer after waiting, or let it continue
+ */
+
+
+
+/**
+ * Start the given timer.
+ * 
+ * Handler should return `effects` that the timer is running.
+ * 
+ * 
+ * @typedef timer._start
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+/**
+ * Stop the given timer.
+ * 
+ * Handler should return `effects` that the timer is not running.
+ * 
+ * 
+ * @typedef timer._stop
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ */
+
+
+
+/**
+ * Wait until the given timer has reacher the given elapsed time.
+ * 
+ * Handler should:
+ * 
+ * - expect that the timer (identified by the `equipment` parameter) is running
+ * - return `effects` that the timer is not running
+ * 
+ * 
+ * @typedef timer._wait
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {Duration} till - Number of seconds to wait till from the time the timer was started
+ * @property {boolean} stop - Whether to stop the timer after waiting, or let it continue
+ */
+
+
+
+/**
+ * A control construct to perform the given sub-steps and then wait
+ * until a certain amount of time has elapsed since the beginning of this command.
+ * 
+ * 
+ * @typedef timer.doAndWait
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {Duration} duration - Duration that this command should last
+ * @property {object|array} steps - Sub-steps to perform
+ */
+
+
+
+/**
+ * Sleep for a given duration.
+ * 
+ * @typedef timer.sleep
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {Duration} duration - Duration to sleep
+ */
+
+
+
+/**
+ * Start a timer.
+ * 
+ * If no parameters are supplied, a timer will be automatically chosen.
+ * 
+ * 
+ * @typedef timer.start
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ */
+
+
+
+/**
+ * Stop a running a timer.
+ * 
+ * If only one timer is running, this command can be called without any parameters.
+ * Otherwise, the equipment identifier must be supplied.
+ * 
+ * 
+ * @typedef timer.stop
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ */
+
+
+
+/**
+ * Wait until the given timer has reacher the given elapsed time.
+ * 
+ * 
+ * @typedef timer.wait
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {Duration} till - Time that the timer should reach before continuing with the next step
+ * @property {boolean} stop - Whether to stop the timer after waiting, or let it continue
+ */
+
+
+
+
+/**
+ *  * The `transporter` commands specify actions using equipment to transport
+ * labware from one location to another.
+ * 
+ *
+ * @namespace transporter
+ * @memberof commands
+ **/
+
+
+/**
+ * Transport a plate to a destination.
+ * 
+ * Handler should return `effects` with the plate's new location.
+ * 
+ * 
+ * @typedef transporter._movePlate
+ * @memberof commands
+ * @property {Agent} agent - Agent identifier
+ * @property {Equipment} equipment - Equipment identifier
+ * @property {name} [program] - Program identifier for transport
+ * @property {Plate} object - Plate identifier
+ * @property {Site} destination - Site to move the plate to
+ */
+
+
+
+/**
+ * Perform steps, then make sure that the given labware is stored to the
+ * locations before the steps.
+ * 
+ * 
+ * @typedef transporter.doThenRestoreLocation
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {array} objects - Plate identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {name} [program] - Program identifier for transport
+ * @property {object|array} [steps] - Sub-steps to perform
+ */
+
+
+
+/**
+ * Transport a plate to a destination.
+ * 
+ * 
+ * @typedef transporter.movePlate
+ * @memberof commands
+ * @property {Agent} [agent] - Agent identifier
+ * @property {Equipment} [equipment] - Equipment identifier
+ * @property {name} [program] - Program identifier for transport
+ * @property {Plate} object - Plate identifier
+ * @property {Site} destination - Site to move the plate to
+ */
+

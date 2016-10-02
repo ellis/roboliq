@@ -50,21 +50,32 @@ function toMarkdown(pair) {
 }
 
 /**
+ * Take a string, split it on all newlines, prepend each newline with " * ", and then rejoin.
+ * @param {string} s - string to indent
+ * @return {string} - string indented by " * "
+ */
+function indentJsdocComment(s) {
+	return s.split("\n").map(s => " * "+s).join("\n");
+}
+
+/**
  * Convert a name/schema pair to jsdoc text.
  * @param {array} pair - [name, schema]
+ * @param {boolean} isCommand - true if pair is a command, in which case the `memberOf` field is handled differently.
  * @return A markdown string.
  */
-function toJsdoc(pair) {
+function typeToJsdoc(pair, isCommand = false) {
 	const [name, o] = pair;
 	//console.log({name, o})
 	const s = _.flattenDeep([
 		o.description ? [o.description, ""] : [],
 		`@typedef ${name}`,
-		"@memberof types",
+		//(isCommand) ? `@memberof commands.${_.initial(name.split(".")).join(".")}`: "@memberof types",
+		(isCommand) ? `@memberof commands`: "@memberof types",
 		_.map(o.properties, (p, pName) => {
 			const isRequired = _.includes(o.required, pName);
 			const nameText = (isRequired) ? pName : `[${pName}]`;
-			const typeText = (p.type) ? `{${_.flatten([p.type]).join("|")}}` : "";
+			const typeText = (p.type) ? `{${_.flatten([p.type]).join("|").replace(/ /g, "")}}` : "";
 			const descriptionText = (p.description) ? `- ${p.description}` : "";
 			return `@property ${typeText} ${nameText} ${descriptionText}`;
 		}),
@@ -74,6 +85,22 @@ function toJsdoc(pair) {
 		]
 	]).join('\n').split("\n").map(s => " * "+s).join("\n");
 	return "/**\n" + s + "\n */\n\n";
+}
+
+/**
+ * Convert a name/schema pair to markdown text.
+ * @param {array} pair - [name, schema]
+ * @return A markdown string.
+ */
+function commandToJsdoc(pair) {
+	const [name, o] = pair;
+	//console.log({name, o})
+	if (o.module) {
+		return `\n/**\n * ${indentJsdocComment(o.module)}\n *\n * @namespace ${name}\n * @memberof commands\n **/\n`;
+	}
+	else {
+		return typeToJsdoc(pair, true);
+	}
 }
 
 // All files in the schema/ directory
@@ -94,5 +121,9 @@ const commandSchemasText = _.map(commandSchemas, toMarkdown).join('\n\n');
 fs.writeFileSync(__dirname+"/../tutorials/Commands.md", commandSchemasText);
 
 // Generate documentation for object types
-const generatedTypesText = "/**\n * Namespace for the object types available in Roboliq.\n * @namespace types\n * @version v1 \n */\n\n" + _.map(objectSchemas, toJsdoc).join('\n\n');
+const generatedTypesText = "/**\n * Namespace for the object types available in Roboliq protocols.\n * @namespace types\n * @version v1 \n */\n\n" + _.map(objectSchemas, x => typeToJsdoc(x)).join('\n\n');
 fs.writeFileSync(__dirname+"/generatedTypes.js", generatedTypesText);
+
+// Generate documentation for commands
+const generatedCommandsText = "/**\n * Namespace for the commands available in Roboliq protocols.\n * @namespace commands\n * @version v1 \n */\n\n" + _.map(commandSchemas, commandToJsdoc).join('\n\n');
+fs.writeFileSync(__dirname+"/generatedCommands.js", generatedCommandsText);

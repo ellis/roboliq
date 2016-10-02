@@ -51,3 +51,7 @@ To generate the HTML documentation:
 ```{sh}
 npm run jsdoc
 ```
+
+# Links
+
+Documentation for the Evoware compiler can be found [here](./evoware/index.html)

@@ -1,5 +1,5 @@
 /**
- * Namespace for the ``absorbanceReader`` commands.
+ * Namespace for the object types available in Roboliq protocols.
  * @namespace types
  * @version v1 
  */
