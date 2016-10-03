@@ -55,7 +55,7 @@ function toMarkdown(pair) {
  * @return {string} - string indented by " * "
  */
 function indentJsdocComment(s) {
-	return s.split("\n").map(s => " * "+s).join("\n");
+	return s.trim().split("\n").map(s => " * "+s).join("\n");
 }
 
 /**
@@ -69,9 +69,9 @@ function typeToJsdoc(pair, isCommand = false) {
 	//console.log({name, o})
 	const s = _.flattenDeep([
 		o.description ? [o.description, ""] : [],
-		`@typedef ${name}`,
-		//(isCommand) ? `@memberof commands.${_.initial(name.split(".")).join(".")}`: "@memberof types",
-		(isCommand) ? `@memberof commands`: "@memberof types",
+		(isCommand) ? `@typedef "${name}"` : `@class ${name}`,
+		(isCommand) ? `@memberof ${_.initial(name.split(".")).join(".")}` : [],
+		//(isCommand) ? `@memberof commands`: "@memberof types",
 		_.map(o.properties, (p, pName) => {
 			const isRequired = _.includes(o.required, pName);
 			const nameText = (isRequired) ? pName : `[${pName}]`;
@@ -83,7 +83,7 @@ function typeToJsdoc(pair, isCommand = false) {
 			"@example",
 			o.example
 		]
-	]).join('\n').split("\n").map(s => " * "+s).join("\n");
+	]).join('\n').trim().split("\n").map(s => " * "+s).join("\n");
 	return "/**\n" + s + "\n */\n\n";
 }
 
@@ -96,7 +96,7 @@ function commandToJsdoc(pair) {
 	const [name, o] = pair;
 	//console.log({name, o})
 	if (o.module) {
-		return `\n/**\n * ${indentJsdocComment(o.module)}\n *\n * @namespace ${name}\n * @memberof commands\n **/\n`;
+		return `\n/**\n${indentJsdocComment(o.module)}\n *\n * @module ${name}\n */\n`;
 	}
 	else {
 		return typeToJsdoc(pair, true);
@@ -122,8 +122,8 @@ fs.writeFileSync(__dirname+"/../tutorials/Commands.md", commandSchemasText);
 
 // Generate documentation for object types
 const generatedTypesText = "/**\n * Namespace for the object types available in Roboliq protocols.\n * @namespace types\n * @version v1 \n */\n\n" + _.map(objectSchemas, x => typeToJsdoc(x)).join('\n\n');
-fs.writeFileSync(__dirname+"/generatedTypes.js", generatedTypesText);
+fs.writeFileSync(__dirname+"/../generated/types.jsdoc", generatedTypesText);
 
 // Generate documentation for commands
 const generatedCommandsText = "/**\n * Namespace for the commands available in Roboliq protocols.\n * @namespace commands\n * @version v1 \n */\n\n" + _.map(commandSchemas, commandToJsdoc).join('\n\n');
-fs.writeFileSync(__dirname+"/generatedCommands.js", generatedCommandsText);
+fs.writeFileSync(__dirname+"/../generated/commands.jsdoc", generatedCommandsText);

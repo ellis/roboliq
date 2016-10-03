@@ -7,11 +7,10 @@
 /**
  * Reader equipment.
  * 
- * @typedef Reader
- * @memberof types
+ * @class Reader
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -19,8 +18,7 @@
 /**
  * Centrifuge equipment.
  * 
- * @typedef Centrifuge
- * @memberof types
+ * @class Centrifuge
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
@@ -32,7 +30,6 @@
  * 	"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
  * }
  * ```
- * 
  */
 
 
@@ -40,8 +37,7 @@
 /**
  * Incubator equipment.
  * 
- * @typedef Incubator
- * @memberof types
+ * @class Incubator
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
@@ -53,7 +49,6 @@
  *   "sitesInternal": ["ourlab.luigi.site.BOX_1", "ourlab.luigi.site.BOX_2", "ourlab.luigi.site.BOX_3", "ourlab.luigi.site.BOX_4", "ourlab.luigi.site.BOX_5", "ourlab.luigi.site.BOX_6", "ourlab.luigi.site.BOX_7", "ourlab.luigi.site.BOX_8"],
  * }
  * ```
- * 
  */
 
 
@@ -61,11 +56,10 @@
 /**
  * Pipetting equipment.
  * 
- * @typedef Pipetter
- * @memberof types
+ * @class Pipetter
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -73,13 +67,12 @@
 /**
  * Pipetting syringe.
  * 
- * @typedef Syringe
- * @memberof types
+ * @class Syringe
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
  * @property {string} [tipModel] - Tip model identifier
- * @property {string} [tipModelPermanent] 
+ * @property {string} [tipModelPermanent]
  */
 
 
@@ -87,11 +80,10 @@
 /**
  * An agent that can execute commands.
  * 
- * @typedef Agent
- * @memberof types
+ * @class Agent
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -99,11 +91,10 @@
 /**
  * Specification of an experimental design.
  * 
- * @typedef Design
- * @memberof types
+ * @class Design
  * @property  type 
  * @property {object} [conditions] 
- * @property {array} [actions] 
+ * @property {array} [actions]
  */
 
 
@@ -111,12 +102,11 @@
 /**
  * Liquid substance.
  * 
- * @typedef Liquid
- * @memberof types
+ * @class Liquid
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
- * @property {array} [wells] 
+ * @property {array} [wells]
  */
 
 
@@ -124,14 +114,13 @@
 /**
  * Plate labware.
  * 
- * @typedef Plate
- * @memberof types
+ * @class Plate
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
  * @property {PlateModel} [model] 
  * @property {Site} [location] 
- * @property {object|array} [contents] 
+ * @property {object|array} [contents]
  */
 
 
@@ -139,13 +128,12 @@
 /**
  * Model for plate labware.
  * 
- * @typedef PlateModel
- * @memberof types
+ * @class PlateModel
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
  * @property {integer} rows 
- * @property {integer} columns 
+ * @property {integer} columns
  */
 
 
@@ -153,11 +141,10 @@
 /**
  * Represents a bench site where labware can placed.
  * 
- * @typedef Site
- * @memberof types
+ * @class Site
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -165,12 +152,11 @@
 /**
  * A template object, used by the `system.call` command.
  * 
- * @typedef Template
- * @memberof types
+ * @class Template
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
- * @property  [template] 
+ * @property  [template]
  */
 
 
@@ -178,12 +164,11 @@
 /**
  * User-defined variable.
  * 
- * @typedef Variable
- * @memberof types
+ * @class Variable
  * @property  type 
  * @property {string} [description] 
  * @property {string} [label] 
- * @property  [value] 
+ * @property  [value]
  */
 
 
@@ -191,11 +176,10 @@
 /**
  * Scale equipment.
  * 
- * @typedef Scale
- * @memberof types
+ * @class Scale
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -203,11 +187,10 @@
 /**
  * Sealing equipment.
  * 
- * @typedef Sealer
- * @memberof types
+ * @class Sealer
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -215,11 +198,10 @@
 /**
  * Shaker equipment.
  * 
- * @typedef Shaker
- * @memberof types
+ * @class Shaker
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -227,11 +209,10 @@
 /**
  * Timer equipment.
  * 
- * @typedef Timer
- * @memberof types
+ * @class Timer
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
 
@@ -239,10 +220,9 @@
 /**
  * Labware transporter equipment.
  * 
- * @typedef Transporter
- * @memberof types
+ * @class Transporter
  * @property  type 
  * @property {string} [description] 
- * @property {string} [label] 
+ * @property {string} [label]
  */
 
