@@ -1,10 +1,4 @@
 /**
- * Namespace for the ``absorbanceReader`` commands.
- * @namespace absorbanceReader
- * @version v1
- */
-
-/**
  * Absorbance Reader commands module.
  * @module commands/absorbanceReader
  * @return {Protocol}
@@ -24,20 +18,6 @@ var misc = require('../misc.js');
  * @static
  */
 var commandHandlers = {
-	/**
-	 * Measure the absorbance of a plate.
-	 *
-	 * @typedef measurePlate
-	 * @memberof absorbanceReader
-	 * @property {string} command - "absorbanceReader.measurePlate"
-	 * @property {string} [agent] - Agent identifier
-	 * @property {string} [equipment] - Equipment identifier
-	 * @property {Object} program - Program object for measurement
-	 * @property {string} outputFile - Filename for output
-	 * @property {string} object - Plate identifier
-	 * @property {string} [site] - Site identifier in reader
-	 * @property {string} [destinationAfter] - Site to move the plate to after measurement
-	 */
 	"absorbanceReader.measurePlate": function(params, parsed, data) {
 		//console.log(JSON.stringify(parsed));
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');

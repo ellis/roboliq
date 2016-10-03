@@ -1,0 +1,32 @@
+{
+	"tags": {
+		"allowUnknownTags": true
+	},
+	"source": {
+		"include": ["src/evoware"],
+		"exclude": ["node_modules", "src/HTN"],
+		"includePattern": ".+\\.js(doc)?$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"plugins": ["plugins/markdown"],
+	"templates": {
+		"cleverLinks": false,
+		"monospaceLinks": false,
+		"default": {
+			"outputSourceFiles": true
+		},
+		"systemName"      : "Roboliq Evoware",
+		"footer"          : "",
+		"copyright"       : "Roboliq Copyright © 2016 Ellis Whitehead",
+		"navType"         : "vertical",
+		"theme"           : "cerulean",
+		"linenums"        : true,
+		"collapseSymbols" : false,
+		"inverseNav"      : true,
+		"outputSourceFiles": true
+	},
+	"opts": {
+		"destination": "./out/evoware",
+		"template": "node_modules/ink-docstrap/template"
+	}
+}

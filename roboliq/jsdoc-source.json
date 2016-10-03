@@ -1,0 +1,31 @@
+{
+	"tags": {
+		"allowUnknownTags": true
+	},
+	"source": {
+		"include": ["src"],
+		"exclude": ["node_modules", "src/evoware", "src/HTN"],
+		"includePattern": ".+\\.js(doc)?$",
+		"excludePattern": "(^|\\/|\\\\)_"
+	},
+	"plugins": ["plugins/markdown"],
+	"templates": {
+		"cleverLinks": false,
+		"monospaceLinks": false,
+		"default": {
+			"outputSourceFiles": true
+		},
+		"systemName"      : "Roboliq Source",
+		"footer"          : "",
+		"copyright"       : "Roboliq Copyright © 2016 Ellis Whitehead",
+		"navType"         : "vertical",
+		"theme"           : "cerulean",
+		"linenums"        : true,
+		"collapseSymbols" : false,
+		"inverseNav"      : true,
+		"outputSourceFiles": true
+	},
+	"opts": {
+		"template": "node_modules/ink-docstrap/template"
+	}
+}
