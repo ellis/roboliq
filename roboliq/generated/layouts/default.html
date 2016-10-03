@@ -31,7 +31,34 @@
 	{{{ contents }}}
 
 	{{#each collections.commands}}
-	{{data}}
+		{{#each data}}
+			<h3>{{@key}}</h3>
+			<div class="command">
+				{{description}}
+
+				{{#if properties}}
+				Properties:
+
+				<table>
+					<tr><th>Name</th><th>Type</th><th>Argument</th><th>Description</th></tr>
+					{{#each properties}}
+					<tr>
+						<td>{{@key}}</td>
+						<td>{{type}}</td>
+						<td>...</td>
+						<td>{{description}}</td>
+					</tr>
+					{{/each}}
+				</table>
+				{{/if}}
+
+				{{#if example}}
+					Example:
+
+					<code>{{example}}</code>
+				{{/if}}
+			</div>
+		{{/each}}
 	{{/each}}
 
 </body>

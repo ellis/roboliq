@@ -1,0 +1,28 @@
+fluorescenceReader:
+  module: |
+    The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
+
+Reader:
+  description: Reader equipment.
+  properties:
+    type: {enum: [Reader]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
+fluorescenceReader.measurePlate:
+  description: "Measure the fluorescence of a plate."
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program:
+      description: "Program parameters"
+      properties:
+        wells: {description: "Array of wells to read", type: "Wells"}
+    programFile: {description: "Program filename", type: "string"}
+    programData: {description: "Program data"}
+    outputFile: {description: "Filename for output", type: "string"}
+    object: {description: "Plate identifier", type: "Plate"}
+    site: {description: "Site identifier in reader", type: "Site"}
+    destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}
+  required: ["object"]

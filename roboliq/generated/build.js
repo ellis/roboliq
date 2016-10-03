@@ -30,6 +30,7 @@ metalsmith(__dirname)
 		_forEach(files, function(file, filename) {
 			if (path.extname(filename).toLowerCase() === ".yaml") {
 				file.data = YAML.parse(file.contents.toString("utf8"));
+				
 			}
 		});
 		done();

@@ -1,0 +1,72 @@
+system:
+  module: |
+    The `system` commands specify several general, high-level actions that are
+    not specific to any particular type of equipment.
+
+system._description:
+  description: "Include the value as a description in the generated script"
+  properties:
+    text: {description: "Description text", type: string}
+
+system._echo:
+  description: "A trouble-shooting function to echo something"
+  properties:
+    name: {description: "Name of echoed thing", type: string}
+    value: {description: "Thing to echo"}
+
+system.call:
+  description: "Call a template function.\n\nThe template function should be an object of type `Template` with a property `template` holding either a Mustache template string or an object whose properties may be Mustache template strings. The template will be expanded using the values passed in the `params` property."
+  properties:
+    name: {description: "Name of the template function.", type: "Object"}
+    params: {description: "Parameters to pass to the template function.", type: "object"}
+  required: ["name"]
+
+system.description:
+  description: "Output the value as a description to the generated script"
+  properties:
+    value: {description: "Value to use as description"}
+
+system.echo:
+  description: "A trouble-shooting function to echo a variable or text"
+  properties:
+    value: {description: "Value to echo"}
+
+system.if:
+  description: "Conditionally execute steps depending on a conditional test."
+  properties:
+    test: {description: "A boolean value; if true, the `then` steps are executed.", type: "boolean"}
+    then: {description: "The sequence of steps to perform if the test is true.", type: "object"}
+    else: {description: "The sequence of steps to perform if the test is false.", type: "object"}
+  required: ["test"]
+
+system.repeat:
+  description: "Repeat the given command a given number of times."
+  properties:
+    count: {description: "The number of times to repeat.", type: "integer"}
+    steps: {description: "The sequence of commands to repeat.", type: "object"}
+    variableName: {description: "If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).", type: string}
+  required: ["count"]
+
+system.runtimeExitLoop:
+  description: "Perform a run-time check to test whether execution should exit the current loop"
+  properties:
+    testType: {description: "The type of code to execute to determine whether to break; a JSON truthy value should be returned.", enum: [nodejs, R]}
+    test: {description: "The code to execute at runtime that will test whether to exit.", type: string}
+  required: [testType, test]
+
+system.runtimeLoadVariables:
+  description: "Handle steps which require runtime variables"
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    varset: {description: "Name of the variable set to load", type: string}
+    variables: {description: "Array of variables to load from 'varset'", type: array, items: {type: string}}
+  required: [varset, variables]
+
+system.runtimeSteps:
+  description: "Handle steps which require runtime variables"
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    varset: {description: "Name of the variable set to load", type: string}
+    variables: {description: "Array of variables to load from 'varset'", type: array, items: {type: string}}
+    steps: {description: "Steps to compile at runtime", type: [array, object]}
+  required: [varset, variables, steps]
