@@ -6,22 +6,25 @@ The `absorbanceReader` commands specify actions using equipment for absorbance r
 
 ### `absorbanceReader.measurePlate`
 
-Measure the absorbance of a plate.
+{.command} Measure the absorbance of a plate.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]` -- Program parameters
-* `[programFile]: string` -- Program filename
-* `[programData]` -- Program data
-* `[outputFile]: string` -- Filename for output (deprecated, use `output.writeTo`)
-* `[outputDataset]: string` -- Name of dataset to which the measurements values will be appended. (deprecated, use `output.appendTo`)
-* `[output]` -- Output definition for where and how to save the measurements
-* `object: Plate` -- Plate identifier
-* `[site]: Site` -- Site identifier in reader
-* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after measurement
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] |  | *optional* | Program parameters
+[programFile] | string | *optional* | Program filename
+[programData] |  | *optional* | Program data
+[outputFile] | string | *optional* | Filename for output (deprecated, use `output.writeTo`)
+[outputDataset] | string | *optional* | Name of dataset to which the measurements values will be appended. (deprecated, use `output.appendTo`)
+[output] |  | *optional* | Output definition for where and how to save the measurements
+object | Plate |  | Plate identifier
+[site] | Site | *optional* | Site identifier in reader
+[destinationAfter] | SiteOrStay | *optional* | Site to move the plate to after measurement
 
+</P>
 
 ## <a name="centrifuge"></a>centrifuge
 
@@ -34,15 +37,17 @@ Centrifuge using two plate
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `program` -- Program for centrifuging
-* `object1: Plate` -- Plate identifier 1
-* `object2: Plate` -- Plate identifier 2
-* `[site1]: Site` -- Location identifier for the centrifugation site of object1
-* `[site2]: Site` -- Location identifier for the centrifugation site of object2
-* `[destinationAfter1]: SiteOrStay` -- Location identifier for where object1 should be placed after centrifugation
-* `[destinationAfter2]: SiteOrStay` -- Location identifier for where object2 should be placed after centrifugation
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+program |  |  | Program for centrifuging
+object1 | Plate |  | Plate identifier 1
+object2 | Plate |  | Plate identifier 2
+[site1] | Site | *optional* | Location identifier for the centrifugation site of object1
+[site2] | Site | *optional* | Location identifier for the centrifugation site of object2
+[destinationAfter1] | SiteOrStay | *optional* | Location identifier for where object1 should be placed after centrifugation
+[destinationAfter2] | SiteOrStay | *optional* | Location identifier for where object2 should be placed after centrifugation
 
 Example:
 
@@ -68,12 +73,14 @@ Insert up to two plates into the centrifuge.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[object1]: Plate` -- Plate identifier 1
-* `[object2]: Plate` -- Plate identifier 2
-* `[site1]: Site` -- Location identifier for the centrifugation site of object1
-* `[site2]: Site` -- Location identifier for the centrifugation site of object2
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[object1] | Plate | *optional* | Plate identifier 1
+[object2] | Plate | *optional* | Plate identifier 2
+[site1] | Site | *optional* | Location identifier for the centrifugation site of object1
+[site2] | Site | *optional* | Location identifier for the centrifugation site of object2
 
 Example:
 
@@ -104,8 +111,10 @@ This is a generic command, and any addition parameters may be passed that are re
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 ### `equipment.open`
 
@@ -118,8 +127,10 @@ The handler should return effects indicating that the equipment is open.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 ### `equipment.openSite`
 
@@ -136,9 +147,11 @@ the given site is open, and all other equipment sites are closed.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `site: Site` -- Site identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+site | Site |  | Site identifier
 
 ### `equipment.close`
 
@@ -154,8 +167,10 @@ and all of its sites are closed.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 ### `equipment.start`
 
@@ -171,8 +186,10 @@ The handler returns effects indicating that the equipment is running.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 ### `equipment.stop`
 
@@ -188,8 +205,10 @@ The handler returns effects indicating that the equipment is not running.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 
 ## <a name="experiment"></a>experiment
@@ -206,17 +225,19 @@ This command will performs its sub-steps for every selected group of items in th
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[design]: Design` -- An experimental design to use
-* `groupBy: array,string` -- The factor(s) to group by
-* `[distinctBy]: array,string` -- The factor(s) to distinguish row by
-* `[orderBy]: array,string` -- The factor(s) to order by
-* `[durationTotal]: Duration` -- The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
-* `[durationGroup]: Duration` -- The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
-* `[interleave]: Duration` -- The time offset for interleaving each group
-* `[timers]: array` -- Timers that should be used
-* `[startTimerAfterStep]: integer` -- The duration timer will be started after this step rather than from the beginning, if specified
-* `[steps]: object` -- The sequence of commands to perform for each set of factor values.
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[design] | Design | *optional* | An experimental design to use
+groupBy | array,string |  | The factor(s) to group by
+[distinctBy] | array,string | *optional* | The factor(s) to distinguish row by
+[orderBy] | array,string | *optional* | The factor(s) to order by
+[durationTotal] | Duration | *optional* | The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+[durationGroup] | Duration | *optional* | The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+[interleave] | Duration | *optional* | The time offset for interleaving each group
+[timers] | array | *optional* | Timers that should be used
+[startTimerAfterStep] | integer | *optional* | The duration timer will be started after this step rather than from the beginning, if specified
+[steps] | object | *optional* | The sequence of commands to perform for each set of factor values.
 
 ### `experiment.forEachRow`
 
@@ -226,15 +247,17 @@ This command will performs its sub-steps for every item in the experiment array,
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[design]: Design` -- An experimental design to use
-* `[distinctBy]: array,string` -- The factor(s) to distinguish row by
-* `[orderBy]: array,string` -- The factor(s) to order by
-* `[durationTotal]: Duration` -- The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
-* `[durationRow]: Duration` -- The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
-* `[interleave]: Duration` -- The time offset for interleaving each group
-* `[timers]: array` -- Timers that should be used
-* `[steps]: object` -- The sequence of commands to perform for each set of factor values.
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[design] | Design | *optional* | An experimental design to use
+[distinctBy] | array,string | *optional* | The factor(s) to distinguish row by
+[orderBy] | array,string | *optional* | The factor(s) to order by
+[durationTotal] | Duration | *optional* | The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+[durationRow] | Duration | *optional* | The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.
+[interleave] | Duration | *optional* | The time offset for interleaving each group
+[timers] | array | *optional* | Timers that should be used
+[steps] | object | *optional* | The sequence of commands to perform for each set of factor values.
 
 
 ## <a name="fluorescenceReader"></a>fluorescenceReader
@@ -248,15 +271,17 @@ Measure the fluorescence of a plate.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]` -- Program parameters
-* `[programFile]: string` -- Program filename
-* `[programData]` -- Program data
-* `[outputFile]: string` -- Filename for output
-* `object: Plate` -- Plate identifier
-* `[site]: Site` -- Site identifier in reader
-* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after measurement
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] |  | *optional* | Program parameters
+[programFile] | string | *optional* | Program filename
+[programData] |  | *optional* | Program data
+[outputFile] | string | *optional* | Filename for output
+object | Plate |  | Plate identifier
+[site] | Site | *optional* | Site identifier in reader
+[destinationAfter] | SiteOrStay | *optional* | Site to move the plate to after measurement
 
 
 ## <a name="incubator"></a>incubator
@@ -270,12 +295,14 @@ Incubate the given plates
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `program` -- Program for incubation
-* `plates: array` -- List of plates to incubate
-* `[sites]: array` -- Internal sites to put the plates on
-* `[destinationAfters]: array` -- Location identifier for where the plates should be placed after incubation
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+program |  |  | Program for incubation
+plates | array |  | List of plates to incubate
+[sites] | array | *optional* | Internal sites to put the plates on
+[destinationAfters] | array | *optional* | Location identifier for where the plates should be placed after incubation
 
 Example:
 
@@ -300,10 +327,12 @@ Insert up to two plates into the incubator.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[plates]: array` -- List of plates to incubate
-* `[sites]: array` -- Internal sites to put the plates on
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[plates] | array | *optional* | List of plates to incubate
+[sites] | array | *optional* | Internal sites to put the plates on
 
 Example:
 
@@ -323,12 +352,14 @@ Run the incubator with the given program
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `program: object` -- Program for shaking and incubating
-* `plates: array` -- List of plates to incubate
-* `[sites]: array` -- Internal sites to put the plates on
-* `[destinationAfters]: array` -- Location identifier for where the plates should be placed after incubation
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+program | object |  | Program for shaking and incubating
+plates | array |  | List of plates to incubate
+[sites] | array | *optional* | Internal sites to put the plates on
+[destinationAfters] | array | *optional* | Location identifier for where the plates should be placed after incubation
 
 Example:
 
@@ -359,8 +390,10 @@ Parameters for mixing in higher-level commands like pipetter._PipetteItem.
 
 Properties:
 
-* `count: integer` -- Number of times to aspirate and re-dispense
-* `volume: Volume` -- Amount to aspirate, either as a fraction or absolute volume
+Name | Type | Argument | Description
+-----|------|----------|------------
+count | integer |  | Number of times to aspirate and re-dispense
+volume | Volume |  | Amount to aspirate, either as a fraction or absolute volume
 
 ### `pipetter._AspirateItem`
 
@@ -368,9 +401,11 @@ Parameters for pipette items.
 
 Properties:
 
-* `syringe: number,nameOf Syringe` -- Syringe identifier
-* `source: Well` -- Source specifier
-* `volume: Volume` -- Volume
+Name | Type | Argument | Description
+-----|------|----------|------------
+syringe | number,nameOf Syringe |  | Syringe identifier
+source | Well |  | Source specifier
+volume | Volume |  | Volume
 
 ### `pipetter._DispenseItem`
 
@@ -378,9 +413,11 @@ Parameters for pipette items.
 
 Properties:
 
-* `syringe: number,nameOf Syringe` -- Syringe identifier
-* `destination: Well` -- Destination specifier
-* `volume: Volume` -- Volume
+Name | Type | Argument | Description
+-----|------|----------|------------
+syringe | number,nameOf Syringe |  | Syringe identifier
+destination | Well |  | Destination specifier
+volume | Volume |  | Volume
 
 ### `pipetter._MeasureVolumeItem`
 
@@ -388,8 +425,10 @@ Parameters for low-level pipetter._measureVolume items.
 
 Properties:
 
-* `syringe: number,nameOf Syringe` -- Syringe identifier
-* `well: Well` -- Well specifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+syringe | number,nameOf Syringe |  | Syringe identifier
+well | Well |  | Well specifier
 
 ### `pipetter.MeasureItem`
 
@@ -397,9 +436,11 @@ Parameters for pipetter.measureVolume items.
 
 Properties:
 
-* `[syringe]: number,nameOf Syringe` -- Syringe identifier
-* `[well]: Well` -- Well specifier
-* `[cleanAfter]: pipetter.CleaningIntensity` -- intensity of cleaning required after this item.
+Name | Type | Argument | Description
+-----|------|----------|------------
+[syringe] | number,nameOf Syringe | *optional* | Syringe identifier
+[well] | Well | *optional* | Well specifier
+[cleanAfter] | pipetter.CleaningIntensity | *optional* | intensity of cleaning required after this item.
 
 ### `pipetter._MixItem`
 
@@ -407,11 +448,13 @@ Parameters for mixing with pipetter.
 
 Properties:
 
-* `syringe: number,nameOf Syringe` -- Syringe identifier
-* `well: Well` -- Well to mix
-* `[count]: integer` -- Number of times to aspirate and re-dispense
-* `[volume]: Volume` -- Volume
-* `[program]: string` -- Program identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+syringe | number,nameOf Syringe |  | Syringe identifier
+well | Well |  | Well to mix
+[count] | integer | *optional* | Number of times to aspirate and re-dispense
+[volume] | Volume | *optional* | Volume
+[program] | string | *optional* | Program identifier
 
 ### `pipetter.CleaningIntensity`
 
@@ -422,6 +465,8 @@ The enum lists the intensities in increase order.
 
 Properties:
 
+Name | Type | Argument | Description
+-----|------|----------|------------
 
 ### `pipetter._PipetteItem`
 
@@ -429,13 +474,15 @@ Parameters for low-level pipette items.
 
 Properties:
 
-* `syringe: number,nameOf Syringe` -- Syringe identifier
-* `[source]: Well` -- Source specifier
-* `[destination]: Well` -- Destination specifier
-* `volume: Volume` -- Volume
-* `[sourceMixing]: pipetter._MixSpec` -- Parameters for mixing the source prior to aspiration
-* `[destinationMixing]: pipetter._MixSpec` -- Parameters for mixing the destination after dispense
-* `[tipModel]: string` -- Tip model identifier, in order to use a specific tip model
+Name | Type | Argument | Description
+-----|------|----------|------------
+syringe | number,nameOf Syringe |  | Syringe identifier
+[source] | Well | *optional* | Source specifier
+[destination] | Well | *optional* | Destination specifier
+volume | Volume |  | Volume
+[sourceMixing] | pipetter._MixSpec | *optional* | Parameters for mixing the source prior to aspiration
+[destinationMixing] | pipetter._MixSpec | *optional* | Parameters for mixing the destination after dispense
+[tipModel] | string | *optional* | Tip model identifier, in order to use a specific tip model
 
 ### `pipetter.PipetteItem`
 
@@ -443,16 +490,18 @@ Parameters for pipette items.
 
 Properties:
 
-* `[syringe]: number,nameOf Syringe` -- Syringe identifier
-* `[source]: Source` -- Source specifier
-* `[destination]: Well` -- Destination specifier
-* `[volume]: Volume` -- Volume
-* `[volumeCalibrated]: object` -- Calculate a calibrated volume
-* `[volumeTotal]: Volume` -- Volume that the well should be brought up to.
-* `[layer]` -- A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list.
-* `[cleanAfter]: pipetter.CleaningIntensity` -- intensity of cleaning required after this item.
-* `[sourceMixing]: boolean,pipetter.MixSpec` -- Parameters for mixing the source prior to aspiration
-* `[destinationMixing]: boolean,pipetter.MixSpec` -- Parameters for mixing the destination after dispense
+Name | Type | Argument | Description
+-----|------|----------|------------
+[syringe] | number,nameOf Syringe | *optional* | Syringe identifier
+[source] | Source | *optional* | Source specifier
+[destination] | Well | *optional* | Destination specifier
+[volume] | Volume | *optional* | Volume
+[volumeCalibrated] | object | *optional* | Calculate a calibrated volume
+[volumeTotal] | Volume | *optional* | Volume that the well should be brought up to.
+[layer] |  | *optional* | A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list.
+[cleanAfter] | pipetter.CleaningIntensity | *optional* | intensity of cleaning required after this item.
+[sourceMixing] | boolean,pipetter.MixSpec | *optional* | Parameters for mixing the source prior to aspiration
+[destinationMixing] | boolean,pipetter.MixSpec | *optional* | Parameters for mixing the destination after dispense
 
 ### `pipetter._PunctureItem`
 
@@ -460,9 +509,11 @@ Parameters for low-level puncture items.
 
 Properties:
 
-* `syringe: number,nameOf Syringe` -- Syringe identifier
-* `well: Well` -- Well specifier
-* `distance: Length` -- Distance for puncturing
+Name | Type | Argument | Description
+-----|------|----------|------------
+syringe | number,nameOf Syringe |  | Syringe identifier
+well | Well |  | Well specifier
+distance | Length |  | Distance for puncturing
 
 ### `pipetter.PunctureItem`
 
@@ -470,10 +521,12 @@ Parameters for puncture items.
 
 Properties:
 
-* `[syringe]: number,nameOf Syringe` -- Syringe identifier
-* `[well]: Well` -- Well specifier
-* `[distance]: Length` -- Distance for puncturing
-* `[cleanAfter]: pipetter.CleaningIntensity` -- intensity of cleaning required after this item.
+Name | Type | Argument | Description
+-----|------|----------|------------
+[syringe] | number,nameOf Syringe | *optional* | Syringe identifier
+[well] | Well | *optional* | Well specifier
+[distance] | Length | *optional* | Distance for puncturing
+[cleanAfter] | pipetter.CleaningIntensity | *optional* | intensity of cleaning required after this item.
 
 ### `pipetter.DilutionItem`
 
@@ -481,10 +534,12 @@ Parameters for a dilution series.
 
 Properties:
 
-* `[syringe]: number,Syringe` -- Syringe identifier
-* `[source]: Source` -- Source specifier
-* `destinations: Wells` -- Destination wells
-* `[volume]: Volume` -- Volume
+Name | Type | Argument | Description
+-----|------|----------|------------
+[syringe] | number,Syringe | *optional* | Syringe identifier
+[source] | Source | *optional* | Source specifier
+destinations | Wells |  | Destination wells
+[volume] | Volume | *optional* | Volume
 
 ### `pipetter.MixItem`
 
@@ -492,11 +547,13 @@ Parameters for mixing with pipetter.
 
 Properties:
 
-* `[syringe]: number,nameOf Syringe` -- Syringe identifier
-* `[well]: Well` -- Well to mix
-* `[count]: integer` -- Number of times to aspirate and re-dispense
-* `[amount]: Volume,number` -- Amount to aspirate, either as a fraction or absolute volume
-* `[program]: string` -- Program identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+[syringe] | number,nameOf Syringe | *optional* | Syringe identifier
+[well] | Well | *optional* | Well to mix
+[count] | integer | *optional* | Number of times to aspirate and re-dispense
+[amount] | Volume,number | *optional* | Amount to aspirate, either as a fraction or absolute volume
+[program] | string | *optional* | Program identifier
 
 ### `pipetter.MixSpec`
 
@@ -504,9 +561,11 @@ Parameters for mixing (used in higher-level commands like pipetter.pipette and p
 
 Properties:
 
-* `[count]: integer` -- Number of times to aspirate and re-dispense
-* `[amount]: Volume,number` -- Amount to aspirate, either as a fraction or absolute volume
-* `[program]: string` -- Program identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+[count] | integer | *optional* | Number of times to aspirate and re-dispense
+[amount] | Volume,number | *optional* | Amount to aspirate, either as a fraction or absolute volume
+[program] | string | *optional* | Program identifier
 
 ### `pipetter._aspirate`
 
@@ -514,10 +573,12 @@ Aspirate liquids from sources into syringes.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `program: string` -- Program identifier
-* `[items]: array` -- Data about what should be aspirated from where
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+program | string |  | Program identifier
+[items] | array | *optional* | Data about what should be aspirated from where
 
 ### `pipetter._dispense`
 
@@ -525,10 +586,12 @@ Dispense liquids from sryinges into destinations.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `program: string` -- Program identifier
-* `[items]: array` -- Data about what should be dispensed where
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+program | string |  | Program identifier
+[items] | array | *optional* | Data about what should be dispensed where
 
 ### `pipetter._measureVolume`
 
@@ -536,11 +599,13 @@ Measure well volume using pipetter tips.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier
-* `items: array` -- List of parameters for individual wells
-* `[output]` -- Output definition for where and how to save the measurements
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+[program] | string | *optional* | Program identifier
+items | array |  | List of parameters for individual wells
+[output] |  | *optional* | Output definition for where and how to save the measurements
 
 ### `pipetter._mix`
 
@@ -548,11 +613,13 @@ Mix liquids by aspirating and re-dispensing.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `program: string` -- Program identifier
-* `[itemDefaults]` -- Default values for items
-* `[items]: array` -- Data about mixing
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+program | string |  | Program identifier
+[itemDefaults] |  | *optional* | Default values for items
+[items] | array | *optional* | Data about mixing
 
 ### `pipetter._pipette`
 
@@ -560,13 +627,15 @@ Pipette liquids from sources to destinations.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `program: string` -- Program identifier
-* `[sourceProgram]: string` -- Program identifier for aspirating from source, if it should differ from 'program'
-* `[items]: array` -- Data about what should be pipetted where
-* `[sourceMixing]: pipetter._MixSpec` -- Parameters for mixing the source prior to aspiration
-* `[destinationMixing]: pipetter._MixSpec` -- Parameters for mixing the destination after dispense
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+program | string |  | Program identifier
+[sourceProgram] | string | *optional* | Program identifier for aspirating from source, if it should differ from 'program'
+[items] | array | *optional* | Data about what should be pipetted where
+[sourceMixing] | pipetter._MixSpec | *optional* | Parameters for mixing the source prior to aspiration
+[destinationMixing] | pipetter._MixSpec | *optional* | Parameters for mixing the destination after dispense
 
 ### `pipetter._punctureSeal`
 
@@ -574,9 +643,11 @@ Puncture the seal on a plate using pipetter tips.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `items: array` -- List of parameters for individual punctures
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+items | array |  | List of parameters for individual punctures
 
 ### `pipetter._washTips`
 
@@ -584,11 +655,13 @@ Clean the pipetter tips.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `program: name,object` -- Program identifier
-* `syringes: array` -- List of syringe identifiers
-* `intensity: pipetter.CleaningIntensity` -- Intensity of the cleaning
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+program | name,object |  | Program identifier
+syringes | array |  | List of syringe identifiers
+intensity | pipetter.CleaningIntensity |  | Intensity of the cleaning
 
 ### `pipetter.cleanTips`
 
@@ -596,12 +669,14 @@ Clean the pipetter tips.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier
-* `[items]: array` -- List of which syringes to clean at which intensity
-* `[syringes]: array` -- Optional list of syringes to serve as default for missing syringes in items list
-* `[intensity]: pipetter.CleaningIntensity` -- Optional intensity to serve as default intensity for missing intensities in items list
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | string | *optional* | Program identifier
+[items] | array | *optional* | List of which syringes to clean at which intensity
+[syringes] | array | *optional* | Optional list of syringes to serve as default for missing syringes in items list
+[intensity] | pipetter.CleaningIntensity | *optional* | Optional intensity to serve as default intensity for missing intensities in items list
 
 ### `pipetter.measureVolume`
 
@@ -609,18 +684,20 @@ Measure well volume using pipetter tips.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[items]: array` -- List of parameters for individual wells to measure
-* `[wellLabware]: Plate` -- Labware for wells
-* `[wells]: Wells` -- Specifier for well(s) to measure, if missing from items
-* `[syringes]: array` -- Specifier for syringe(s) to use, if missing from items
-* `[clean]: string` -- Intensity of cleaning
-* `[cleanBegin]: string` -- intensity of cleaning before the first puncture.
-* `[cleanBetween]: string` -- Intensity of cleaning between wells.
-* `[cleanEnd]: string` -- Intensity of cleaning after the last puncture.
-* `[tipModel]: string` -- Tip model identifier, in order to use a specific tip model
-* `[output]` -- Output definition for where and how to save the measurements
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[items] | array | *optional* | List of parameters for individual wells to measure
+[wellLabware] | Plate | *optional* | Labware for wells
+[wells] | Wells | *optional* | Specifier for well(s) to measure, if missing from items
+[syringes] | array | *optional* | Specifier for syringe(s) to use, if missing from items
+[clean] | string | *optional* | Intensity of cleaning
+[cleanBegin] | string | *optional* | intensity of cleaning before the first puncture.
+[cleanBetween] | string | *optional* | Intensity of cleaning between wells.
+[cleanEnd] | string | *optional* | Intensity of cleaning after the last puncture.
+[tipModel] | string | *optional* | Tip model identifier, in order to use a specific tip model
+[output] |  | *optional* | Output definition for where and how to save the measurements
 
 ### `pipetter.mix`
 
@@ -628,20 +705,22 @@ Mix well contents by aspirating and re-dispensing.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier
-* `[items]: array` -- Data about which wells to mix and how to mix them
-* `[wellLabware]: Plate` -- Labware for wells
-* `[wells]: Wells` -- Specifier for well(s) to mix, if missing from items
-* `[counts]: integer` -- Number of times to aspirate, if missing from items
-* `[amounts]: Volume,number` -- Amount to aspirate, either as a fraction or absolute volume, if missing from items
-* `[syringes]: array` -- Specifier for syringe(s) to use, if missing from items
-* `[clean]: string` -- Intensity of cleaning
-* `[cleanBegin]: string` -- intensity of first cleaning at beginning of pipetting, before first aspiration.
-* `[cleanBetween]: string` -- Intensity of cleaning between different liquids.
-* `[cleanBetweenSameSource]: string` -- Intensity of cleaning between transfers of the same liquid.
-* `[cleanEnd]: string` -- Intensity of cleaning after the last dispense.
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | string | *optional* | Program identifier
+[items] | array | *optional* | Data about which wells to mix and how to mix them
+[wellLabware] | Plate | *optional* | Labware for wells
+[wells] | Wells | *optional* | Specifier for well(s) to mix, if missing from items
+[counts] | integer | *optional* | Number of times to aspirate, if missing from items
+[amounts] | Volume,number | *optional* | Amount to aspirate, either as a fraction or absolute volume, if missing from items
+[syringes] | array | *optional* | Specifier for syringe(s) to use, if missing from items
+[clean] | string | *optional* | Intensity of cleaning
+[cleanBegin] | string | *optional* | intensity of first cleaning at beginning of pipetting, before first aspiration.
+[cleanBetween] | string | *optional* | Intensity of cleaning between different liquids.
+[cleanBetweenSameSource] | string | *optional* | Intensity of cleaning between transfers of the same liquid.
+[cleanEnd] | string | *optional* | Intensity of cleaning after the last dispense.
 
 ### `pipetter.pipette`
 
@@ -649,25 +728,27 @@ Pipette liquids from sources to destinations.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier
-* `[sourceProgram]: string` -- Program identifier for aspirating from source, if it should differ from 'program'
-* `[items]: array` -- Data about what should be pipetted where
-* `[sourceLabware]: Plate` -- Labware for source wells
-* `[destinationLabware]: Plate` -- Labware for source wells
-* `[sources]: Sources` -- Specifier for source(s) to aspirate from, if missing from items
-* `[destinations]: Wells` -- Specifier for destination(s) to despense to, if missing from items
-* `[volumes]: Volumes` -- Volume(s) to pipette, if missing from items
-* `[syringes]: array` -- Specifier for syringe(s) to use, if missing from items
-* `[clean]: string` -- Intensity of cleaning
-* `[cleanBegin]: string` -- intensity of first cleaning at beginning of pipetting, before first aspiration.
-* `[cleanBetween]: string` -- Intensity of cleaning between different liquids.
-* `[cleanBetweenSameSource]: string` -- Intensity of cleaning between transfers of the same liquid.
-* `[cleanEnd]: string` -- Intensity of cleaning after the last dispense.
-* `[sourceMixing]: boolean,pipetter.MixSpec` -- Parameters for mixing the source wells with pipetter before aspirating
-* `[destinationMixing]: boolean,pipetter.MixSpec` -- Parameters for mixing the destination after dispense
-* `[tipModel]: string` -- Tip model identifier, in order to use a specific tip model
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | string | *optional* | Program identifier
+[sourceProgram] | string | *optional* | Program identifier for aspirating from source, if it should differ from 'program'
+[items] | array | *optional* | Data about what should be pipetted where
+[sourceLabware] | Plate | *optional* | Labware for source wells
+[destinationLabware] | Plate | *optional* | Labware for source wells
+[sources] | Sources | *optional* | Specifier for source(s) to aspirate from, if missing from items
+[destinations] | Wells | *optional* | Specifier for destination(s) to despense to, if missing from items
+[volumes] | Volumes | *optional* | Volume(s) to pipette, if missing from items
+[syringes] | array | *optional* | Specifier for syringe(s) to use, if missing from items
+[clean] | string | *optional* | Intensity of cleaning
+[cleanBegin] | string | *optional* | intensity of first cleaning at beginning of pipetting, before first aspiration.
+[cleanBetween] | string | *optional* | Intensity of cleaning between different liquids.
+[cleanBetweenSameSource] | string | *optional* | Intensity of cleaning between transfers of the same liquid.
+[cleanEnd] | string | *optional* | Intensity of cleaning after the last dispense.
+[sourceMixing] | boolean,pipetter.MixSpec | *optional* | Parameters for mixing the source wells with pipetter before aspirating
+[destinationMixing] | boolean,pipetter.MixSpec | *optional* | Parameters for mixing the destination after dispense
+[tipModel] | string | *optional* | Tip model identifier, in order to use a specific tip model
 
 ### `pipetter.punctureSeal`
 
@@ -675,17 +756,19 @@ Puncture the seal on a plate using pipetter tips.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[items]: array` -- List of parameters for individual punctures
-* `[wells]: Wells` -- Specifier for well(s) to puncture, if missing from items
-* `[syringes]: array` -- Specifier for syringe(s) to use, if missing from items
-* `[distances]: Length,array` -- Distance for puncturing
-* `[clean]: string` -- Intensity of cleaning
-* `[cleanBegin]: string` -- intensity of cleaning before the first puncture.
-* `[cleanBetween]: string` -- Intensity of cleaning between wells.
-* `[cleanEnd]: string` -- Intensity of cleaning after the last puncture.
-* `[tipModel]: string` -- Tip model identifier, in order to use a specific tip model
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[items] | array | *optional* | List of parameters for individual punctures
+[wells] | Wells | *optional* | Specifier for well(s) to puncture, if missing from items
+[syringes] | array | *optional* | Specifier for syringe(s) to use, if missing from items
+[distances] | Length,array | *optional* | Distance for puncturing
+[clean] | string | *optional* | Intensity of cleaning
+[cleanBegin] | string | *optional* | intensity of cleaning before the first puncture.
+[cleanBetween] | string | *optional* | Intensity of cleaning between wells.
+[cleanEnd] | string | *optional* | Intensity of cleaning after the last puncture.
+[tipModel] | string | *optional* | Tip model identifier, in order to use a specific tip model
 
 ### `pipetter.pipetteDilutionSeries`
 
@@ -699,22 +782,24 @@ In general, mixing should be performed after each dilution dispense, and perhaps
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier
-* `[dilutionFactor]: number` -- Dilution factor by which each subsequent well is diluted
-* `[dilutionMethod]` -- How to dilution -- `begin`: distribute diluent to destination wells first (default); `before`: add diluent right before transfering aliquot; `after`: add diluent right after transfering aliquot; `source`: dilute the well that the aliquot will be extracted from.
-* `[lastWellHandling]: string` -- How to handle the last well in a series
-* `items: array` -- Array of dilution items
-* `[diluent]: Source` -- Diluent to be used in dilution
-* `[sourceLabware]: Plate` -- Labware for source wells
-* `[destinationLabware]: Plate` -- Labware for source wells
-* `[volume]: Volume` -- Final volume of dilution wells (with the possible exception of the last well, see parameter `lastWellHandling`)
-* `[cleanBegin]: string` -- Intensity of first cleaning at beginning of pipetting, before first aspiration.
-* `[cleanEnd]: string` -- Intensity of cleaning after the last dispense.
-* `[sourceParams]` -- Extra parameters for pipetting the source
-* `[diluentParams]` -- Extra parameters for pipetting the diluent
-* `[dilutionParams]` -- Extra parameters for pipetting the diluted aliquots
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | string | *optional* | Program identifier
+[dilutionFactor] | number | *optional* | Dilution factor by which each subsequent well is diluted
+[dilutionMethod] |  | *optional* | How to dilution -- `begin`: distribute diluent to destination wells first (default); `before`: add diluent right before transfering aliquot; `after`: add diluent right after transfering aliquot; `source`: dilute the well that the aliquot will be extracted from.
+[lastWellHandling] | string | *optional* | How to handle the last well in a series
+items | array |  | Array of dilution items
+[diluent] | Source | *optional* | Diluent to be used in dilution
+[sourceLabware] | Plate | *optional* | Labware for source wells
+[destinationLabware] | Plate | *optional* | Labware for source wells
+[volume] | Volume | *optional* | Final volume of dilution wells (with the possible exception of the last well, see parameter `lastWellHandling`)
+[cleanBegin] | string | *optional* | Intensity of first cleaning at beginning of pipetting, before first aspiration.
+[cleanEnd] | string | *optional* | Intensity of cleaning after the last dispense.
+[sourceParams] |  | *optional* | Extra parameters for pipetting the source
+[diluentParams] |  | *optional* | Extra parameters for pipetting the diluent
+[dilutionParams] |  | *optional* | Extra parameters for pipetting the diluted aliquots
 
 ### `pipetter.pipetteMixtures`
 
@@ -722,14 +807,16 @@ Pipette the given mixtures into the given destinations.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier
-* `mixtures: array` -- Array of arrays, where each sub-array is a list of components to be mixed into a destination well
-* `[sourceLabware]: Plate` -- Labware for source wells
-* `[destinationLabware]: Plate` -- Labware for source wells
-* `[destinations]: Wells` -- Destination specifier
-* `[order]: array` -- Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | string | *optional* | Program identifier
+mixtures | array |  | Array of arrays, where each sub-array is a list of components to be mixed into a destination well
+[sourceLabware] | Plate | *optional* | Labware for source wells
+[destinationLabware] | Plate | *optional* | Labware for source wells
+[destinations] | Wells | *optional* | Destination specifier
+[order] | array | *optional* | Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.
 
 
 ## <a name="scale"></a>scale
@@ -743,6 +830,8 @@ Program for scale.
 
 Properties:
 
+Name | Type | Argument | Description
+-----|------|----------|------------
 
 ### `scale.weigh`
 
@@ -750,12 +839,14 @@ Weight an object
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: scale.ScaleProgram` -- Program for shaking
-* `object: Plate` -- Plate identifier
-* `[site]: Site` -- Site identifier on scale
-* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after this command
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | scale.ScaleProgram | *optional* | Program for shaking
+object | Plate |  | Plate identifier
+[site] | Site | *optional* | Site identifier on scale
+[destinationAfter] | SiteOrStay | *optional* | Site to move the plate to after this command
 
 
 ## <a name="sealer"></a>sealer
@@ -769,13 +860,15 @@ Seal a plate.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: string` -- Program identifier for sealing
-* `object: Plate` -- Plate identifier
-* `[site]: Site` -- Site identifier of sealer
-* `[count]: number` -- Number of times to seal (defaults to 1)
-* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after this command
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | string | *optional* | Program identifier for sealing
+object | Plate |  | Plate identifier
+[site] | Site | *optional* | Site identifier of sealer
+[count] | number | *optional* | Number of times to seal (defaults to 1)
+[destinationAfter] | SiteOrStay | *optional* | Site to move the plate to after this command
 
 
 ## <a name="shaker"></a>shaker
@@ -789,9 +882,11 @@ Program for shaker.
 
 Properties:
 
-* `[amplitude]` -- Amplitude
-* `duration: Duration` -- Duration of shaking
-* `[rpm]: number` -- Rotations per minute (RPM)
+Name | Type | Argument | Description
+-----|------|----------|------------
+[amplitude] |  | *optional* | Amplitude
+duration | Duration |  | Duration of shaking
+[rpm] | number | *optional* | Rotations per minute (RPM)
 
 ### `shaker.shakePlate`
 
@@ -799,12 +894,14 @@ Shake a plate.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `program: shaker.ShakerProgram` -- Program for shaking
-* `object: Plate` -- Plate identifier
-* `[site]: Site` -- Site identifier on shaker
-* `[destinationAfter]: SiteOrStay` -- Site to move the plate to after this command
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+program | shaker.ShakerProgram |  | Program for shaking
+object | Plate |  | Plate identifier
+[site] | Site | *optional* | Site identifier on shaker
+[destinationAfter] | SiteOrStay | *optional* | Site to move the plate to after this command
 
 ### `shaker.run`
 
@@ -812,9 +909,11 @@ Run the shaker.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `program: shaker.ShakerProgram` -- Program for shaking
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+program | shaker.ShakerProgram |  | Program for shaking
 
 
 ## <a name="system"></a>system
@@ -829,7 +928,9 @@ Include the value as a description in the generated script
 
 Properties:
 
-* `[text]: string` -- Description text
+Name | Type | Argument | Description
+-----|------|----------|------------
+[text] | string | *optional* | Description text
 
 ### `system._echo`
 
@@ -837,8 +938,10 @@ A trouble-shooting function to echo something
 
 Properties:
 
-* `[name]: string` -- Name of echoed thing
-* `[value]` -- Thing to echo
+Name | Type | Argument | Description
+-----|------|----------|------------
+[name] | string | *optional* | Name of echoed thing
+[value] |  | *optional* | Thing to echo
 
 ### `system.call`
 
@@ -848,8 +951,10 @@ The template function should be an object of type `Template` with a property `te
 
 Properties:
 
-* `name: Object` -- Name of the template function.
-* `[params]: object` -- Parameters to pass to the template function.
+Name | Type | Argument | Description
+-----|------|----------|------------
+name | Object |  | Name of the template function.
+[params] | object | *optional* | Parameters to pass to the template function.
 
 ### `system.description`
 
@@ -857,7 +962,9 @@ Output the value as a description to the generated script
 
 Properties:
 
-* `[value]` -- Value to use as description
+Name | Type | Argument | Description
+-----|------|----------|------------
+[value] |  | *optional* | Value to use as description
 
 ### `system.echo`
 
@@ -865,7 +972,9 @@ A trouble-shooting function to echo a variable or text
 
 Properties:
 
-* `[value]` -- Value to echo
+Name | Type | Argument | Description
+-----|------|----------|------------
+[value] |  | *optional* | Value to echo
 
 ### `system.if`
 
@@ -873,9 +982,11 @@ Conditionally execute steps depending on a conditional test.
 
 Properties:
 
-* `test: boolean` -- A boolean value; if true, the `then` steps are executed.
-* `[then]: object` -- The sequence of steps to perform if the test is true.
-* `[else]: object` -- The sequence of steps to perform if the test is false.
+Name | Type | Argument | Description
+-----|------|----------|------------
+test | boolean |  | A boolean value; if true, the `then` steps are executed.
+[then] | object | *optional* | The sequence of steps to perform if the test is true.
+[else] | object | *optional* | The sequence of steps to perform if the test is false.
 
 ### `system.repeat`
 
@@ -883,9 +994,11 @@ Repeat the given command a given number of times.
 
 Properties:
 
-* `count: integer` -- The number of times to repeat.
-* `[steps]: object` -- The sequence of commands to repeat.
-* `[variableName]: string` -- If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).
+Name | Type | Argument | Description
+-----|------|----------|------------
+count | integer |  | The number of times to repeat.
+[steps] | object | *optional* | The sequence of commands to repeat.
+[variableName] | string | *optional* | If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).
 
 ### `system.runtimeExitLoop`
 
@@ -893,8 +1006,10 @@ Perform a run-time check to test whether execution should exit the current loop
 
 Properties:
 
-* `testType` -- The type of code to execute to determine whether to break; a JSON truthy value should be returned.
-* `test: string` -- The code to execute at runtime that will test whether to exit.
+Name | Type | Argument | Description
+-----|------|----------|------------
+testType |  |  | The type of code to execute to determine whether to break; a JSON truthy value should be returned.
+test | string |  | The code to execute at runtime that will test whether to exit.
 
 ### `system.runtimeLoadVariables`
 
@@ -902,9 +1017,11 @@ Handle steps which require runtime variables
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `varset: string` -- Name of the variable set to load
-* `variables: array` -- Array of variables to load from 'varset'
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+varset | string |  | Name of the variable set to load
+variables | array |  | Array of variables to load from 'varset'
 
 ### `system.runtimeSteps`
 
@@ -912,10 +1029,12 @@ Handle steps which require runtime variables
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `varset: string` -- Name of the variable set to load
-* `variables: array` -- Array of variables to load from 'varset'
-* `steps: array,object` -- Steps to compile at runtime
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+varset | string |  | Name of the variable set to load
+variables | array |  | Array of variables to load from 'varset'
+steps | array,object |  | Steps to compile at runtime
 
 
 ## <a name="timer"></a>timer
@@ -932,10 +1051,12 @@ Handler should return `effects` that the timer is not running.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `duration: Duration` -- Duration to sleep
-* `[stop]: boolean` -- Whether to stop the timer after waiting, or let it continue
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+duration | Duration |  | Duration to sleep
+[stop] | boolean | *optional* | Whether to stop the timer after waiting, or let it continue
 
 ### `timer._start`
 
@@ -946,8 +1067,10 @@ Handler should return `effects` that the timer is running.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 ### `timer._stop`
 
@@ -958,8 +1081,10 @@ Handler should return `effects` that the timer is not running.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
 
 ### `timer._wait`
 
@@ -973,10 +1098,12 @@ Handler should:
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `till: Duration` -- Number of seconds to wait till from the time the timer was started
-* `stop: boolean` -- Whether to stop the timer after waiting, or let it continue
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+till | Duration |  | Number of seconds to wait till from the time the timer was started
+stop | boolean |  | Whether to stop the timer after waiting, or let it continue
 
 ### `timer.doAndWait`
 
@@ -986,10 +1113,12 @@ until a certain amount of time has elapsed since the beginning of this command.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `duration: Duration` -- Duration that this command should last
-* `steps: object,array` -- Sub-steps to perform
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+duration | Duration |  | Duration that this command should last
+steps | object,array |  | Sub-steps to perform
 
 ### `timer.sleep`
 
@@ -997,9 +1126,11 @@ Sleep for a given duration.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `duration: Duration` -- Duration to sleep
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+duration | Duration |  | Duration to sleep
 
 ### `timer.start`
 
@@ -1010,8 +1141,10 @@ If no parameters are supplied, a timer will be automatically chosen.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
 
 ### `timer.stop`
 
@@ -1023,8 +1156,10 @@ Otherwise, the equipment identifier must be supplied.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
 
 ### `timer.wait`
 
@@ -1033,10 +1168,12 @@ Wait until the given timer has reacher the given elapsed time.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `till: Duration` -- Time that the timer should reach before continuing with the next step
-* `stop: boolean` -- Whether to stop the timer after waiting, or let it continue
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+till | Duration |  | Time that the timer should reach before continuing with the next step
+stop | boolean |  | Whether to stop the timer after waiting, or let it continue
 
 
 ## <a name="transporter"></a>transporter
@@ -1054,11 +1191,13 @@ Handler should return `effects` with the plate's new location.
 
 Properties:
 
-* `agent: Agent` -- Agent identifier
-* `equipment: Equipment` -- Equipment identifier
-* `[program]: name` -- Program identifier for transport
-* `object: Plate` -- Plate identifier
-* `destination: Site` -- Site to move the plate to
+Name | Type | Argument | Description
+-----|------|----------|------------
+agent | Agent |  | Agent identifier
+equipment | Equipment |  | Equipment identifier
+[program] | name | *optional* | Program identifier for transport
+object | Plate |  | Plate identifier
+destination | Site |  | Site to move the plate to
 
 ### `transporter.doThenRestoreLocation`
 
@@ -1068,11 +1207,13 @@ locations before the steps.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `objects: array` -- Plate identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: name` -- Program identifier for transport
-* `[steps]: object,array` -- Sub-steps to perform
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+objects | array |  | Plate identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | name | *optional* | Program identifier for transport
+[steps] | object,array | *optional* | Sub-steps to perform
 
 ### `transporter.movePlate`
 
@@ -1081,8 +1222,10 @@ Transport a plate to a destination.
 
 Properties:
 
-* `[agent]: Agent` -- Agent identifier
-* `[equipment]: Equipment` -- Equipment identifier
-* `[program]: name` -- Program identifier for transport
-* `object: Plate` -- Plate identifier
-* `destination: Site` -- Site to move the plate to
+Name | Type | Argument | Description
+-----|------|----------|------------
+[agent] | Agent | *optional* | Agent identifier
+[equipment] | Equipment | *optional* | Equipment identifier
+[program] | name | *optional* | Program identifier for transport
+object | Plate |  | Plate identifier
+destination | Site |  | Site to move the plate to

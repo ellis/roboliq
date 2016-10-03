@@ -31,12 +31,15 @@ function toMarkdown(pair) {
 			o.description ? [o.description, ""] : [],
 			"Properties:",
 			"",
+			"Name | Type | Argument | Description",
+			"-----|------|----------|------------",
 			_.map(o.properties, (p, pName) => {
 				const isRequired = _.includes(o.required, pName);
-				const nameText = (isRequired) ? pName : `[${pName}]`;
-				const nameTypeText = (p.type) ? `${nameText}: ${p.type}` : nameText;
-				const descriptionText = p.description || "";
-				return `* \`${nameTypeText}\` -- ${descriptionText}`;
+				// const nameText = (isRequired) ? pName : `[${pName}]`;
+				// const nameTypeText = (p.type) ? `${nameText}: ${p.type}` : nameText;
+				// const descriptionText = p.description || "";
+				// return `* \`${nameTypeText}\` -- ${descriptionText}`;
+				return `${pName} | ${p.type || ""} | ${(isRequired) ? "" : "*optional*"} | ${p.description || ""}`;
 			}),
 			(_.isEmpty(o.example)) ? [] : [
 				"",
@@ -119,6 +122,7 @@ fs.writeFileSync(__dirname+"/../tutorials/Object_Types.md", objectSchemasText);
 // Generate documentation for commands
 const commandSchemasText = _.map(commandSchemas, toMarkdown).join('\n\n');
 fs.writeFileSync(__dirname+"/../tutorials/Commands.md", commandSchemasText);
+fs.writeFileSync(__dirname+"/../generated/content/commands.md", commandSchemasText);
 
 // Generate documentation for object types
 const generatedTypesText = "/**\n * Namespace for the object types available in Roboliq protocols.\n * @namespace types\n * @version v1 \n */\n\n" + _.map(objectSchemas, x => typeToJsdoc(x)).join('\n\n');

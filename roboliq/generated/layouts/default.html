@@ -1,7 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta charset="utf-8">
 	<title>{{title}}</title>
+	<style>
+	h2 {
+		margin-top: 1em;
+		padding-top: 1em;
+		background-color: #ddd;
+	}
+	.command {
+		display: block;
+		margin-left: 2em;
+	}
+	</style>
 </head>
 <body>
 
@@ -17,6 +29,10 @@
 
 	<h1>{{title}}</h1>
 	{{{ contents }}}
+
+	{{#each collections.commands}}
+	{{data}}
+	{{/each}}
 
 </body>
 </html>

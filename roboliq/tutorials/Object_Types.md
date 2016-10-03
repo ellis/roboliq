@@ -4,9 +4,11 @@ Reader equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Centrifuge`
 
@@ -14,10 +16,12 @@ Centrifuge equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `sitesInternal: array` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+sitesInternal | array |  | undefined
 
 Example:
 
@@ -36,10 +40,12 @@ Incubator equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `sitesInternal: array` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+sitesInternal | array |  | undefined
 
 Example:
 
@@ -58,9 +64,11 @@ Pipetting equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Syringe`
 
@@ -68,11 +76,13 @@ Pipetting syringe.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[tipModel]: string` -- Tip model identifier
-* `[tipModelPermanent]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+[tipModel] | string | *optional* | Tip model identifier
+[tipModelPermanent] | string | *optional* | undefined
 
 ### `Agent`
 
@@ -80,9 +90,11 @@ An agent that can execute commands.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Design`
 
@@ -90,9 +102,11 @@ Specification of an experimental design.
 
 Properties:
 
-* `type` -- 
-* `[conditions]: object` -- 
-* `[actions]: array` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[conditions] | object | *optional* | undefined
+[actions] | array | *optional* | undefined
 
 ### `Liquid`
 
@@ -100,10 +114,12 @@ Liquid substance.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[wells]: array` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+[wells] | array | *optional* | undefined
 
 ### `Plate`
 
@@ -111,12 +127,14 @@ Plate labware.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[model]: PlateModel` -- 
-* `[location]: Site` -- 
-* `[contents]: object,array` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+[model] | PlateModel | *optional* | undefined
+[location] | Site | *optional* | undefined
+[contents] | object,array | *optional* | undefined
 
 ### `PlateModel`
 
@@ -124,11 +142,13 @@ Model for plate labware.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `rows: integer` -- 
-* `columns: integer` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+rows | integer |  | undefined
+columns | integer |  | undefined
 
 ### `Site`
 
@@ -136,9 +156,11 @@ Represents a bench site where labware can placed.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Template`
 
@@ -146,10 +168,12 @@ A template object, used by the `system.call` command.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[template]` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+[template] |  | *optional* | undefined
 
 ### `Variable`
 
@@ -157,10 +181,12 @@ User-defined variable.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
-* `[value]` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
+[value] |  | *optional* | undefined
 
 ### `Scale`
 
@@ -168,9 +194,11 @@ Scale equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Sealer`
 
@@ -178,9 +206,11 @@ Sealing equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Shaker`
 
@@ -188,9 +218,11 @@ Shaker equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Timer`
 
@@ -198,9 +230,11 @@ Timer equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined
 
 ### `Transporter`
 
@@ -208,6 +242,8 @@ Labware transporter equipment.
 
 Properties:
 
-* `type` -- 
-* `[description]: string` -- 
-* `[label]: string` -- 
+Name | Type | Argument | Description
+-----|------|----------|------------
+type |  |  | undefined
+[description] | string | *optional* | undefined
+[label] | string | *optional* | undefined

@@ -12,12 +12,14 @@
   "license": "ISC",
   "dependencies": {
     "handlebars": "^4.0.5",
+    "lodash": "^4.16.2",
     "metalsmith": "^2.2.0",
     "metalsmith-assets": "^0.1.0",
     "metalsmith-collections": "^0.7.0",
     "metalsmith-in-place": "^1.4.4",
     "metalsmith-layouts": "^1.6.5",
-    "metalsmith-markdown": "^0.2.1"
+    "metalsmith-markdown": "^0.2.1",
+    "yamljs": "^0.2.8"
   },
   "devDependencies": {
     "babel-cli": "^6.4.0",
