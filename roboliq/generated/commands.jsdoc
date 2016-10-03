@@ -16,7 +16,6 @@
  * Measure the absorbance of a plate.
  * 
  * @typedef "absorbanceReader.measurePlate"
- * @memberof absorbanceReader
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property  [program] - Program parameters
@@ -44,7 +43,6 @@
  * Centrifuge using two plate
  * 
  * @typedef "centrifuge.centrifuge2"
- * @memberof centrifuge
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property  program - Program for centrifuging
@@ -76,7 +74,6 @@
  * Insert up to two plates into the centrifuge.
  * 
  * @typedef "centrifuge.insertPlates2"
- * @memberof centrifuge
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {Plate} [object1] - Plate identifier 1
@@ -112,7 +109,6 @@
  * 
  * 
  * @typedef "equipment._run"
- * @memberof equipment
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -128,7 +124,6 @@
  * 
  * 
  * @typedef "equipment.open"
- * @memberof equipment
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -148,7 +143,6 @@
  * 
  * 
  * @typedef "equipment.openSite"
- * @memberof equipment
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {Site} site - Site identifier
@@ -168,7 +162,6 @@
  * 
  * 
  * @typedef "equipment.close"
- * @memberof equipment
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -187,7 +180,6 @@
  * 
  * 
  * @typedef "equipment.start"
- * @memberof equipment
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -206,7 +198,6 @@
  * 
  * 
  * @typedef "equipment.stop"
- * @memberof equipment
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -228,7 +219,6 @@
  * 
  * 
  * @typedef "experiment.forEachGroup"
- * @memberof experiment
  * @property {Agent} [agent] - Agent identifier
  * @property {Design} [design] - An experimental design to use
  * @property {array|string} groupBy - The factor(s) to group by
@@ -250,7 +240,6 @@
  * 
  * 
  * @typedef "experiment.forEachRow"
- * @memberof experiment
  * @property {Agent} [agent] - Agent identifier
  * @property {Design} [design] - An experimental design to use
  * @property {array|string} [distinctBy] - The factor(s) to distinguish row by
@@ -276,7 +265,6 @@
  * Measure the fluorescence of a plate.
  * 
  * @typedef "fluorescenceReader.measurePlate"
- * @memberof fluorescenceReader
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property  [program] - Program parameters
@@ -302,7 +290,6 @@
  * Incubate the given plates
  * 
  * @typedef "incubator.incubatePlates"
- * @memberof incubator
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property  program - Program for incubation
@@ -330,7 +317,6 @@
  * Insert up to two plates into the incubator.
  * 
  * @typedef "incubator.insertPlates"
- * @memberof incubator
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {array} [plates] - List of plates to incubate
@@ -351,7 +337,6 @@
  * Run the incubator with the given program
  * 
  * @typedef "incubator.run"
- * @memberof incubator
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {object} program - Program for shaking and incubating
@@ -387,7 +372,6 @@
  * Parameters for mixing in higher-level commands like pipetter._PipetteItem.
  * 
  * @typedef "pipetter._MixSpec"
- * @memberof pipetter
  * @property {integer} count - Number of times to aspirate and re-dispense
  * @property {Volume} volume - Amount to aspirate, either as a fraction or absolute volume
  */
@@ -398,7 +382,6 @@
  * Parameters for pipette items.
  * 
  * @typedef "pipetter._AspirateItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} syringe - Syringe identifier
  * @property {Well} source - Source specifier
  * @property {Volume} volume - Volume
@@ -410,7 +393,6 @@
  * Parameters for pipette items.
  * 
  * @typedef "pipetter._DispenseItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} syringe - Syringe identifier
  * @property {Well} destination - Destination specifier
  * @property {Volume} volume - Volume
@@ -422,7 +404,6 @@
  * Parameters for low-level pipetter._measureVolume items.
  * 
  * @typedef "pipetter._MeasureVolumeItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} syringe - Syringe identifier
  * @property {Well} well - Well specifier
  */
@@ -433,7 +414,6 @@
  * Parameters for pipetter.measureVolume items.
  * 
  * @typedef "pipetter.MeasureItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} [syringe] - Syringe identifier
  * @property {Well} [well] - Well specifier
  * @property {pipetter.CleaningIntensity} [cleanAfter] - intensity of cleaning required after this item.
@@ -445,7 +425,6 @@
  * Parameters for mixing with pipetter.
  * 
  * @typedef "pipetter._MixItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} syringe - Syringe identifier
  * @property {Well} well - Well to mix
  * @property {integer} [count] - Number of times to aspirate and re-dispense
@@ -462,7 +441,6 @@
  * 
  * 
  * @typedef "pipetter.CleaningIntensity"
- * @memberof pipetter
  */
 
 
@@ -471,7 +449,6 @@
  * Parameters for low-level pipette items.
  * 
  * @typedef "pipetter._PipetteItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} syringe - Syringe identifier
  * @property {Well} [source] - Source specifier
  * @property {Well} [destination] - Destination specifier
@@ -487,7 +464,6 @@
  * Parameters for pipette items.
  * 
  * @typedef "pipetter.PipetteItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} [syringe] - Syringe identifier
  * @property {Source} [source] - Source specifier
  * @property {Well} [destination] - Destination specifier
@@ -506,7 +482,6 @@
  * Parameters for low-level puncture items.
  * 
  * @typedef "pipetter._PunctureItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} syringe - Syringe identifier
  * @property {Well} well - Well specifier
  * @property {Length} distance - Distance for puncturing
@@ -518,7 +493,6 @@
  * Parameters for puncture items.
  * 
  * @typedef "pipetter.PunctureItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} [syringe] - Syringe identifier
  * @property {Well} [well] - Well specifier
  * @property {Length} [distance] - Distance for puncturing
@@ -531,7 +505,6 @@
  * Parameters for a dilution series.
  * 
  * @typedef "pipetter.DilutionItem"
- * @memberof pipetter
  * @property {number|Syringe} [syringe] - Syringe identifier
  * @property {Source} [source] - Source specifier
  * @property {Wells} destinations - Destination wells
@@ -544,7 +517,6 @@
  * Parameters for mixing with pipetter.
  * 
  * @typedef "pipetter.MixItem"
- * @memberof pipetter
  * @property {number|nameOfSyringe} [syringe] - Syringe identifier
  * @property {Well} [well] - Well to mix
  * @property {integer} [count] - Number of times to aspirate and re-dispense
@@ -558,7 +530,6 @@
  * Parameters for mixing (used in higher-level commands like pipetter.pipette and pipetter.pipetteDilutionSeries).
  * 
  * @typedef "pipetter.MixSpec"
- * @memberof pipetter
  * @property {integer} [count] - Number of times to aspirate and re-dispense
  * @property {Volume|number} [amount] - Amount to aspirate, either as a fraction or absolute volume
  * @property {string} [program] - Program identifier
@@ -570,7 +541,6 @@
  * Aspirate liquids from sources into syringes.
  * 
  * @typedef "pipetter._aspirate"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {string} program - Program identifier
@@ -583,7 +553,6 @@
  * Dispense liquids from sryinges into destinations.
  * 
  * @typedef "pipetter._dispense"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {string} program - Program identifier
@@ -596,7 +565,6 @@
  * Measure well volume using pipetter tips.
  * 
  * @typedef "pipetter._measureVolume"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {string} [program] - Program identifier
@@ -610,7 +578,6 @@
  * Mix liquids by aspirating and re-dispensing.
  * 
  * @typedef "pipetter._mix"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {string} program - Program identifier
@@ -624,7 +591,6 @@
  * Pipette liquids from sources to destinations.
  * 
  * @typedef "pipetter._pipette"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {string} program - Program identifier
@@ -640,7 +606,6 @@
  * Puncture the seal on a plate using pipetter tips.
  * 
  * @typedef "pipetter._punctureSeal"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {array} items - List of parameters for individual punctures
@@ -652,7 +617,6 @@
  * Clean the pipetter tips.
  * 
  * @typedef "pipetter._washTips"
- * @memberof pipetter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {name|object} program - Program identifier
@@ -666,7 +630,6 @@
  * Clean the pipetter tips.
  * 
  * @typedef "pipetter.cleanTips"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {string} [program] - Program identifier
@@ -681,7 +644,6 @@
  * Measure well volume using pipetter tips.
  * 
  * @typedef "pipetter.measureVolume"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {array} [items] - List of parameters for individual wells to measure
@@ -702,7 +664,6 @@
  * Mix well contents by aspirating and re-dispensing.
  * 
  * @typedef "pipetter.mix"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {string} [program] - Program identifier
@@ -725,7 +686,6 @@
  * Pipette liquids from sources to destinations.
  * 
  * @typedef "pipetter.pipette"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {string} [program] - Program identifier
@@ -753,7 +713,6 @@
  * Puncture the seal on a plate using pipetter tips.
  * 
  * @typedef "pipetter.punctureSeal"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {array} [items] - List of parameters for individual punctures
@@ -779,7 +738,6 @@
  * 
  * 
  * @typedef "pipetter.pipetteDilutionSeries"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {string} [program] - Program identifier
@@ -804,7 +762,6 @@
  * Pipette the given mixtures into the given destinations.
  * 
  * @typedef "pipetter.pipetteMixtures"
- * @memberof pipetter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {string} [program] - Program identifier
@@ -829,7 +786,6 @@
  * Program for scale.
  * 
  * @typedef "scale.ScaleProgram"
- * @memberof scale
  */
 
 
@@ -838,7 +794,6 @@
  * Weight an object
  * 
  * @typedef "scale.weigh"
- * @memberof scale
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {scale.ScaleProgram} [program] - Program for shaking
@@ -861,7 +816,6 @@
  * Seal a plate.
  * 
  * @typedef "sealer.sealPlate"
- * @memberof sealer
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {string} [program] - Program identifier for sealing
@@ -885,7 +839,6 @@
  * Program for shaker.
  * 
  * @typedef "shaker.ShakerProgram"
- * @memberof shaker
  * @property  [amplitude] - Amplitude
  * @property {Duration} duration - Duration of shaking
  * @property {number} [rpm] - Rotations per minute (RPM)
@@ -897,7 +850,6 @@
  * Shake a plate.
  * 
  * @typedef "shaker.shakePlate"
- * @memberof shaker
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {shaker.ShakerProgram} program - Program for shaking
@@ -912,7 +864,6 @@
  * Run the shaker.
  * 
  * @typedef "shaker.run"
- * @memberof shaker
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {shaker.ShakerProgram} program - Program for shaking
@@ -933,7 +884,6 @@
  * Include the value as a description in the generated script
  * 
  * @typedef "system._description"
- * @memberof system
  * @property {string} [text] - Description text
  */
 
@@ -943,7 +893,6 @@
  * A trouble-shooting function to echo something
  * 
  * @typedef "system._echo"
- * @memberof system
  * @property {string} [name] - Name of echoed thing
  * @property  [value] - Thing to echo
  */
@@ -956,7 +905,6 @@
  * The template function should be an object of type `Template` with a property `template` holding either a Mustache template string or an object whose properties may be Mustache template strings. The template will be expanded using the values passed in the `params` property.
  * 
  * @typedef "system.call"
- * @memberof system
  * @property {Object} name - Name of the template function.
  * @property {object} [params] - Parameters to pass to the template function.
  */
@@ -967,7 +915,6 @@
  * Output the value as a description to the generated script
  * 
  * @typedef "system.description"
- * @memberof system
  * @property  [value] - Value to use as description
  */
 
@@ -977,7 +924,6 @@
  * A trouble-shooting function to echo a variable or text
  * 
  * @typedef "system.echo"
- * @memberof system
  * @property  [value] - Value to echo
  */
 
@@ -987,7 +933,6 @@
  * Conditionally execute steps depending on a conditional test.
  * 
  * @typedef "system.if"
- * @memberof system
  * @property {boolean} test - A boolean value; if true, the `then` steps are executed.
  * @property {object} [then] - The sequence of steps to perform if the test is true.
  * @property {object} [else] - The sequence of steps to perform if the test is false.
@@ -999,7 +944,6 @@
  * Repeat the given command a given number of times.
  * 
  * @typedef "system.repeat"
- * @memberof system
  * @property {integer} count - The number of times to repeat.
  * @property {object} [steps] - The sequence of commands to repeat.
  * @property {string} [variableName] - If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).
@@ -1011,7 +955,6 @@
  * Perform a run-time check to test whether execution should exit the current loop
  * 
  * @typedef "system.runtimeExitLoop"
- * @memberof system
  * @property  testType - The type of code to execute to determine whether to break; a JSON truthy value should be returned.
  * @property {string} test - The code to execute at runtime that will test whether to exit.
  */
@@ -1022,7 +965,6 @@
  * Handle steps which require runtime variables
  * 
  * @typedef "system.runtimeLoadVariables"
- * @memberof system
  * @property {Agent} [agent] - Agent identifier
  * @property {string} varset - Name of the variable set to load
  * @property {array} variables - Array of variables to load from 'varset'
@@ -1034,7 +976,6 @@
  * Handle steps which require runtime variables
  * 
  * @typedef "system.runtimeSteps"
- * @memberof system
  * @property {Agent} [agent] - Agent identifier
  * @property {string} varset - Name of the variable set to load
  * @property {array} variables - Array of variables to load from 'varset'
@@ -1058,7 +999,6 @@
  * 
  * 
  * @typedef "timer._sleep"
- * @memberof timer
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {Duration} duration - Duration to sleep
@@ -1074,7 +1014,6 @@
  * 
  * 
  * @typedef "timer._start"
- * @memberof timer
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -1088,7 +1027,6 @@
  * 
  * 
  * @typedef "timer._stop"
- * @memberof timer
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  */
@@ -1105,7 +1043,6 @@
  * 
  * 
  * @typedef "timer._wait"
- * @memberof timer
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {Duration} till - Number of seconds to wait till from the time the timer was started
@@ -1120,7 +1057,6 @@
  * 
  * 
  * @typedef "timer.doAndWait"
- * @memberof timer
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {Duration} duration - Duration that this command should last
@@ -1133,7 +1069,6 @@
  * Sleep for a given duration.
  * 
  * @typedef "timer.sleep"
- * @memberof timer
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {Duration} duration - Duration to sleep
@@ -1148,7 +1083,6 @@
  * 
  * 
  * @typedef "timer.start"
- * @memberof timer
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  */
@@ -1163,7 +1097,6 @@
  * 
  * 
  * @typedef "timer.stop"
- * @memberof timer
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  */
@@ -1175,7 +1108,6 @@
  * 
  * 
  * @typedef "timer.wait"
- * @memberof timer
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {Duration} till - Time that the timer should reach before continuing with the next step
@@ -1200,7 +1132,6 @@
  * 
  * 
  * @typedef "transporter._movePlate"
- * @memberof transporter
  * @property {Agent} agent - Agent identifier
  * @property {Equipment} equipment - Equipment identifier
  * @property {name} [program] - Program identifier for transport
@@ -1216,7 +1147,6 @@
  * 
  * 
  * @typedef "transporter.doThenRestoreLocation"
- * @memberof transporter
  * @property {Agent} [agent] - Agent identifier
  * @property {array} objects - Plate identifier
  * @property {Equipment} [equipment] - Equipment identifier
@@ -1231,7 +1161,6 @@
  * 
  * 
  * @typedef "transporter.movePlate"
- * @memberof transporter
  * @property {Agent} [agent] - Agent identifier
  * @property {Equipment} [equipment] - Equipment identifier
  * @property {name} [program] - Program identifier for transport

@@ -70,7 +70,7 @@ function typeToJsdoc(pair, isCommand = false) {
 	const s = _.flattenDeep([
 		o.description ? [o.description, ""] : [],
 		(isCommand) ? `@typedef "${name}"` : `@class ${name}`,
-		(isCommand) ? `@memberof ${_.initial(name.split(".")).join(".")}` : [],
+		//(isCommand) ? `@memberof ${_.initial(name.split(".")).join(".")}` : [],
 		//(isCommand) ? `@memberof commands`: "@memberof types",
 		_.map(o.properties, (p, pName) => {
 			const isRequired = _.includes(o.required, pName);

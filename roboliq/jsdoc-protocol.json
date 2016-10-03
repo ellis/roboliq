@@ -24,7 +24,6 @@
 		"search": true
 	},
 	"opts": {
-		"destination": "./out/protocol",
-		"template": "node_modules/ink-docstrap/template"
+		"destination": "./out/protocol"
 	}
 }
