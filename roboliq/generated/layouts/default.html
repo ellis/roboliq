@@ -1,75 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<title>{{title}}</title>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-	<style>
-html, body {
-  height: 100%;
-}
-
-/* Main view, move content down due to fixed navbar. */
-.main-wrapper {
-	height: 100%;
-	width: 100%;
-	position: absolute;
-	top: 0px;
-	left: 0px;
-	padding-top: 50px;
-}
-
-/* Container for a sidebar. */
-.sidebar-container {
-	height: 100%;
-	position: fixed;
-    padding: 0px;
-    margin-top: -50px;
-    padding-top: 50px;
-	border-right: 1px solid #ddd;
-
-}
-
-.sidebar-header {
-	position: relative;
-	padding: 15px;
-	border-bottom: 1px solid #ddd;
-}
-
-/* Scrollable sidebar. */
-.sidebar {
-    height: 85%;
-	position: relative;
-	overflow-y: scroll;
-}
-
-.main-view {
-	height: 100%;
-	overflow: auto;
-	position: relative;
-	padding: 0px;
-}
-
-h2 {
-	margin-top: 1em;
-	padding-top: 1em;
-	background-color: #ddd;
-}
-.command {
-	display: block;
-	margin-left: 2em;
-}
-	</style>
+	{{> meta}}
 </head>
 <body>
 
 	<nav class="navbar navbar-inverse">
-			<div class="container-fluid">
-				<a href="index.html">Home</a>
-				<a href="protocols.html">Protocols</a>
-				<a href="configurations.html">Configurations</a>
-				<a href="api.html">API</a>
-			</div>
+		{{> header}}
 	</nav>
 
 	<div class="container">

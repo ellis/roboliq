@@ -3,8 +3,9 @@ const path = require('path');
 const YAML = require('yamljs');
 
 const metalsmith = require('metalsmith');
-const markdown = require('metalsmith-markdown');
 const collections = require('metalsmith-collections');
+const markdown = require('metalsmith-markdown');
+const metallic = require('metalsmith-metallic'); // code syntax highlighting
 const assets = require('metalsmith-assets');
 const inplace = require('metalsmith-in-place');
 const layouts = require('metalsmith-layouts');
@@ -30,7 +31,7 @@ metalsmith(__dirname)
 		_forEach(files, function(file, filename) {
 			if (path.extname(filename).toLowerCase() === ".yaml") {
 				file.data = YAML.parse(file.contents.toString("utf8"));
-				
+
 			}
 		});
 		done();
@@ -41,6 +42,7 @@ metalsmith(__dirname)
 		gfm: true,
 		tables: true
 	}))
+	.use(metallic())
 	.use(inplace(templateConfig))
 	.use(layouts(templateConfig))
 	.use(assets({source: "assets"}))

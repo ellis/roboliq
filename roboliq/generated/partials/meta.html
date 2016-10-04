@@ -1,0 +1,67 @@
+<meta charset="utf-8">
+<title>{{title}}</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/yaml.min.js"></script>
+<style>
+html, body {
+height: 100%;
+}
+
+/* Main view, move content down due to fixed navbar. */
+.main-wrapper {
+height: 100%;
+width: 100%;
+position: absolute;
+top: 0px;
+left: 0px;
+padding-top: 50px;
+}
+
+/* Container for a sidebar. */
+.sidebar-container {
+height: 100%;
+position: fixed;
+padding: 0px;
+margin-top: -50px;
+padding-top: 50px;
+border-right: 1px solid #ddd;
+
+}
+
+.sidebar-header {
+position: relative;
+padding: 15px;
+border-bottom: 1px solid #ddd;
+}
+
+/* Scrollable sidebar. */
+.sidebar {
+height: 85%;
+position: relative;
+overflow-y: scroll;
+}
+
+.main-view {
+height: 100%;
+overflow: auto;
+position: relative;
+padding: 0px;
+}
+
+.amain {
+color: white;
+font-weight: bold;
+margin: 0 2em;
+}
+h2 {
+margin-top: 1em;
+padding-top: 1em;
+background-color: #ddd;
+}
+.command {
+display: block;
+margin-left: 2em;
+}
+</style>
