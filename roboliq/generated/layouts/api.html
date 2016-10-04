@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>{{title}}</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<style>
+html, body {
+  height: 100%;
+}
+
+/* Main view, move content down due to fixed navbar. */
+.main-wrapper {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	padding-top: 50px;
+}
+
+/* Container for a sidebar. */
+.sidebar-container {
+	height: 100%;
+	position: fixed;
+    padding: 0px;
+    margin-top: -50px;
+    padding-top: 50px;
+	border-right: 1px solid #ddd;
+
+}
+
+.sidebar-header {
+	position: relative;
+	padding: 15px;
+	border-bottom: 1px solid #ddd;
+}
+
+/* Scrollable sidebar. */
+.sidebar {
+    height: 85%;
+	position: relative;
+	overflow-y: scroll;
+}
+
+.main-view {
+	height: 100%;
+	overflow: auto;
+	position: relative;
+	padding: 0px;
+}
+
+h2 {
+	margin-top: 1em;
+	padding-top: 1em;
+	background-color: #ddd;
+}
+.command {
+	display: block;
+	margin-left: 2em;
+}
+	</style>
+</head>
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+			<div class="container-fluid">
+				<a href="index.html">Home</a>
+				<a href="protocols.html">Protocols</a>
+				<a href="configurations.html">Configurations</a>
+				<a href="api.html">API</a>
+			</div>
+	</nav>
+
+	<div class="main-wrapper">
+			<div class="sidebar-container col-xs-3">
+					<!--div class="sidebar-header">
+							<form class="form-inline">
+									<input type="text" name="search" class="form-control" placeholder="Search"/>
+							</form>
+					</div-->
+					<div class="sidebar">
+							<nav>
+								{{#each collections.commands}}
+									<ul class="nav nav-stacked nav-pills">
+									{{#each data}}
+										<li><a href="#_{{@key}}">{{@key}}</a></li>
+									{{/each}}
+									</ul>
+								{{/each}}
+							</nav>
+					</div>
+			</div>
+			<div class="container main-view col-xs-9 pull-right">
+				<div class="row col-xs-9">
+					<h1>{{title}}</h1>
+					{{{ contents }}}
+
+					{{#each collections.commands}}
+						{{#each data}}
+							<h3 id="_{{@key}}">{{@key}}</h3>
+							<div class="command">
+								{{description}}
+
+								{{#if properties}}
+								Properties:
+
+								<table>
+									<tr><th>Name</th><th>Type</th><th>Argument</th><th>Description</th></tr>
+									{{#each properties}}
+									<tr>
+										<td>{{@key}}</td>
+										<td>{{type}}</td>
+										<td>...</td>
+										<td>{{description}}</td>
+									</tr>
+									{{/each}}
+								</table>
+								{{/if}}
+
+								{{#if example}}
+									Example:
+
+									<code>{{example}}</code>
+								{{/if}}
+							</div>
+						{{/each}}
+					{{/each}}
+				</div>
+			</div>
+
+	</div>
+
+</body>
+</html>
