@@ -2,6 +2,14 @@
 
 # Documentations TODOS
 
+* [ ] distribution documentation
+	* [ ] src/roboliq/README.md
+		* [ ] Getting Started
+			* [ ] a protocol that doesn't require any configuration or backend
+			* [ ] a protocol with a minimal configuration
+			* [ ] a protocol with a backend
+			* [ ] a protocol compiled for Evoware
+			* [ ] running the server and getting the data during execution of an Evoware script
 - [ ] user documentation (see <http://usejsdoc.org/about-tutorials.html>)
 	- [x] Commands.md: Add general documentation to each command namespace
 	- [ ] Commands.md: add examples for each command
