@@ -51,7 +51,7 @@ the `roboliq` subdirectory.  (This may be a bit confusing, because the entire
 Roboliq project is probably in a folder named `roboliq` -- you need to navigate
 to the `roboliq` subfolder within that folder.)
 
-5) Run Roboliq, passing `test1.yaml` as input:
+5) Run Roboliq from the terminal, passing `test1.yaml` as input:
 
     ```sh
     npm start $PROTOCOLS/test1.yaml
@@ -59,16 +59,36 @@ to the `roboliq` subfolder within that folder.)
 
     whereby you'll need to substitute `$PROTOCOLS` with the path to your
     protocols folder created in step 1.
+    If there were no errors, you can now find a file named `test1.out.json` in
+    your protocols folder.  The output file contains a lot of information:
+    in addition to your script, it also contains the core configuration data
+    that comes with Roboliq by default.  If you open the file, you can find
+    a `steps` property which looks like this:
 
+    ```json
+    "steps": {
+    	"1": {
+    		"command": "system._echo",
+    		"value": "Hello, World!"
+    	},
+    	"command": "system.echo",
+    	"value": "Hello, World!"
+    }
+    ```
 
-	"steps": {
-		"1": {
-			"command": "system._echo",
-			"value": "Hello, World!"
-		},
-		"command": "system.echo",
-		"value": "Hello, World!"
-	},
+    You can see a substep with the command `system._echo`.  Commands that
+    begin with and underscore are "final" instructions that
+    will be passed the the backend without further processing.
+    It may be confusing that the original command (`system.echo`) and its
+    properties appear *after* the subcommand, but this is just an artifact of
+    how JavaScript always prints numeric properties first in JSON data.
+
+6) Let's run the same command again, but this time we'll put the output in its
+    proper folder, which you created in step 2.  Run this from the terminal:
+
+    ```sh
+    npm start -- $PROTOCOLS/test1.yaml -O $COMPILED
+    ```
 
 Let's assume that you have already configured Roboliq for your lab, and you
 are ready to write and run your first experiment.  (But beware: configuring
