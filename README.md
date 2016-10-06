@@ -12,9 +12,9 @@ can also be added.
 
 The important sub-directories are:
 
-* `roboliq`: the source code for processing protocols and making sure they are complete
-* `roboliq/src/evoware`: the source code for the Tecan Evoware backend
-* `runtime-server`: the source code for a server which handles logging and measurements while experiments are running
+* `roboliq-processor`: the source code for processing protocols and making sure they are complete
+* `roboliq-processor/src/evoware`: the source code for the Tecan Evoware backend
+* `roboliq-runtime-cli`: the source code for a command line utility that handles logging and measurements while experiments are running
 
 # Getting started
 
@@ -47,9 +47,7 @@ We'll test a simple protocol to show you how to run the software.
     ```
 
 4) To run Roboliq, you'll first need to open a terminal window and navigate to
-the `roboliq` subdirectory.  (This may be a bit confusing, because the entire
-Roboliq project is probably in a folder named `roboliq` -- you need to navigate
-to the `roboliq` subfolder within that folder.)
+the `roboliq-processor` subdirectory.
 
 5) Run Roboliq from the terminal, passing `test1.yaml` as input:
 
@@ -83,12 +81,24 @@ to the `roboliq` subfolder within that folder.)
     properties appear *after* the subcommand, but this is just an artifact of
     how JavaScript always prints numeric properties first in JSON data.
 
+    An important difference between `system.echo` and `system._echo` is that
+    `system.echo` is a higher level command that can handles variables,
+    whereas `system._echo` just takes the value verbatim.
+
 6) Let's run the same command again, but this time we'll put the output in its
     proper folder, which you created in step 2.  Run this from the terminal:
 
     ```sh
-    npm start -- $PROTOCOLS/test1.yaml -O $COMPILED
+    npm start -- $PROTOCOLS/test1.yaml -P $COMPILED
     ```
+
+    This will automatically create a subfolder named `test1` and it will save
+    the file `test1.out.json` in that folder.
+    It's important to have a separate folder for each experiment in order to
+    properly organize measured data for each experimental run.
+
+CONTINUE
+
 
 Let's assume that you have already configured Roboliq for your lab, and you
 are ready to write and run your first experiment.  (But beware: configuring

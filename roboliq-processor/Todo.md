@@ -49,3 +49,4 @@
 	- [ ] misc.js
 	- [ ] commands...
 	- [ ] document roboliq's extensions to JSON Schema (types, 'module')
+- [ ] sort through `notes`, `doc`, and `old` directories
