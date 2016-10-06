@@ -18,8 +18,9 @@ The important sub-directories are:
 
 # Getting started
 
-Let's get started with Roboliq by starting with the most basic of protocols and
-then building up from there.  We'll walk through these steps:
+Let's get started with Roboliq with a hands-on walk through.
+We'll begin with the most basic of protocols and
+build up from there as follows:
 
 * a protocol that doesn't require any configuration or backend
 * a protocol with a minimal configuration
@@ -29,12 +30,45 @@ then building up from there.  We'll walk through these steps:
 
 ## The simplest protocol
 
-We'll test a simple protocol to make sure that roboliq 
-To get you up and running with Roboliq
+We'll test a simple protocol to show you how to run the software.
 
-TODO STEPS:
-* [ ] 
+1) Create a new folder that will contains your protocols.
 
+2) Create a new folder that will contain the compiled versions of your protocols.
+
+3) Copy this code into a file named `test1.yaml`:
+
+    ```yaml
+    roboliq: v1
+    description: test that doesn't require configuration
+    steps:
+      command: system.echo
+      text: Hello, World!
+    ```
+
+4) To run Roboliq, you'll first need to open a terminal window and navigate to
+the `roboliq` subdirectory.  (This may be a bit confusing, because the entire
+Roboliq project is probably in a folder named `roboliq` -- you need to navigate
+to the `roboliq` subfolder within that folder.)
+
+5) Run Roboliq, passing `test1.yaml` as input:
+
+    ```sh
+    npm start $PROTOCOLS/test1.yaml
+    ```
+
+    whereby you'll need to substitute `$PROTOCOLS` with the path to your
+    protocols folder created in step 1.
+
+
+	"steps": {
+		"1": {
+			"command": "system._echo",
+			"value": "Hello, World!"
+		},
+		"command": "system.echo",
+		"value": "Hello, World!"
+	},
 
 Let's assume that you have already configured Roboliq for your lab, and you
 are ready to write and run your first experiment.  (But beware: configuring

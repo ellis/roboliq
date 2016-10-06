@@ -27,7 +27,7 @@ describe('commands/shaker', function() {
 					}
 				}
 			});
-			const result = roboliq.run(["-o", "", "-T"], protocol);
+			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				"1": {

@@ -47,7 +47,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
 			//console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});

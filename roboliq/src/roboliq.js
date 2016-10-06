@@ -92,7 +92,7 @@ const nomnom = require('nomnom').options({
 	ourlab: {
 		full: 'ourlab',
 		flag: true,
-		default: true,
+		default: false,
 		help: "automatically load config/ourlab.js"
 	},
 	output: {

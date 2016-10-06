@@ -25,7 +25,7 @@ describe('commands/fluorescenceReader', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'))
 			should.deepEqual(result.protocol.errors, {});
 			should.deepEqual(result.protocol.warnings, {});
