@@ -221,11 +221,14 @@ function loadProtocol(a, b, url, filecache) {
 	var imported = _.cloneDeep(protocolEmpty);
 	if (b.imports) {
 		var urls = _.map(_.flatten([b.imports]), function(imp) {
-			//console.log("paths:", path.dirname(url), imp, path.join(path.dirname(url), imp))
-			return "./" + path.posix.join(path.dirname(url), imp);
+			// console.log("paths:", path.dirname(url), imp, path.join(path.dirname(url), imp))
+			const path1 = path.posix.join(path.dirname(url), imp);
+			const path2 = (_.startsWith(path1, "/")) ? path1 : `./${path1}`;
+			//console.log({url, absolutePath, relativePath, __dirname})
+			return path2;
 		});
 		var protocols2 = _.map(urls, function(url2) {
-			//console.log("url:", url2)
+			// console.log("url:", url2)
 			var protocol2 = loadUrlContent(url2, filecache);
 			return loadProtocol(protocolEmpty, protocol2, url2, filecache);
 		});
@@ -742,7 +745,7 @@ function _run(opts, userProtocol) {
 	// but if --no-ourlab is specified, make sure that config/roboliq.js gets loaded.
 	const urls = _.uniq(_.compact(
 		_.compact([
-			(opts.ourlab) ? 'src/config/ourlab.js' : 'src/config/roboliq.js'
+			(opts.ourlab) ? __dirname+'/config/ourlab.js' : __dirname+'/config/roboliq.js'
 		]).concat(opts.infiles)
 	));
 	if (opts.debug) {
@@ -1214,4 +1217,8 @@ function _run(opts, userProtocol) {
 module.exports = {
 	run,
 	runWithOpts,
+}
+
+if (require.main === module) {
+	run();
 }

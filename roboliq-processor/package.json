@@ -36,7 +36,8 @@
     "should": "^8.1.1"
   },
   "scripts": {
-    "build": "babel src -d dist",
+    "clean": "rm -rf dist",
+    "build": "babel src --out-dir dist && cp -ar src/schemas dist/",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json; jsdoc -r -c jsdoc-protocol.json",

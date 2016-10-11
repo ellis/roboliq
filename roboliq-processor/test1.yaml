@@ -1,0 +1,5 @@
+roboliq: v1
+description: test that doesn't require configuration
+steps:
+  command: system.echo
+  value: Hello, World!

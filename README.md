@@ -1,16 +1,15 @@
 # Roboliq
 
-Roboliq aim to make it easier to use liquid handling robots for automation
+Roboliq aims to make it easier to use liquid handling robots for automation
 in biological laboratories.
 
-It provides a format for writing protocols in a portable manner (so that
-they can be used in other labs too!) and for compiling such protocols
-for execution by a liquid handling robot.
+It lets you write protocols that are portable between labs,
+and it compiles the protocols for execution by liquid handling robots.
 
 The only supported backend is for Tecan Evoware robots, but other backends
 can also be added.
 
-The important sub-directories are:
+The important sub-directories of this repository are:
 
 * `roboliq-processor`: the source code for processing protocols and making sure they are complete
 * `roboliq-processor/src/evoware`: the source code for the Tecan Evoware backend
@@ -18,17 +17,17 @@ The important sub-directories are:
 
 # Getting started
 
-Let's get started with Roboliq with a hands-on walk through.
-We'll begin with the most basic of protocols and
+Let's get started with a hands-on walk through.
+We'll begin with a very basic protocol and
 build up from there as follows:
 
-* a protocol that doesn't require any configuration or backend
-* a protocol with a minimal configuration
-* a protocol with a backend
-* a protocol compiled for Evoware
-* running the server and getting the data during execution of an Evoware script
+1. a protocol that doesn't require any configuration or backend
+2. a protocol with a minimal configuration
+3. a protocol with a backend
+4. a protocol compiled for Evoware
+5. running the server and getting the data during execution of an Evoware script
 
-## The simplest protocol
+## 1. The simplest protocol
 
 We'll test a simple protocol to show you how to run the software.
 
@@ -97,7 +96,15 @@ the `roboliq-processor` subdirectory.
     It's important to have a separate folder for each experiment in order to
     properly organize measured data for each experimental run.
 
+Now you know how to run the software and write a basic protocol.
+Let's continue to the next step, where we'll see how to create a basic
+robot configuration file.
+
+
+## 2. A protocol with a minimal configuration
+
 CONTINUE
+TODO: build the software using babel so that it runs faster!
 
 
 Let's assume that you have already configured Roboliq for your lab, and you
@@ -117,7 +124,7 @@ objects:                                   # the set of materials used in this p
     type: Plate                            # which is a type of plate
     model: ourlab.???                      # whose model is defined in the configuration as "ourlab.???"
     location: ourlab.robot1.site.P1        # which the user should place at the location "P1", as defined in the configuration
-  liquidLabware1:                          # 
+  liquidLabware1:                          #
     type: Plate
     model: ourlab.???
     location: ourlab.robot1.site.P2
@@ -138,4 +145,4 @@ steps:
     object: plate1
 ```
 
-Copy that content into a file 
+Copy that content into a file
