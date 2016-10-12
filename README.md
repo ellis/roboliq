@@ -103,6 +103,28 @@ robot configuration file.
 
 ## 2. A protocol with a minimal configuration
 
+PROBLEM:
+
+* should we automatically load roboliq config?  even if another config is specified?
+* how shall we specify which lab config to load?  Command line?  Config file?
+* if the lab's config file is in a completely different directory, how shall it load the roboliq config?
+* consider adapting ourlab.js to run with plain node, without babel
+* how can we run `npm i roboliq` and have it make the binaries available?
+
+Approach:
+* create a new directory
+* install roboliq by something like `npm i roboliq`
+* create an ENV file that tells where to find the config file (or which ones to load)
+* create a config file
+* config file should load roboliq/evoware modules via a non-relative path
+* somehow run roboliq from that directory (I'm just not sure whether the config's `require`s will work)
+
+TODO:
+
+* [x] figure out how to get npm to babel-compile the code when I run `npm install ~/src/roboliq/roboliq-processor`
+* [ ] figure out how to conveniently load `require(roboliq-processor)`
+* [ ] make separate project roboliq-tecan-evoware?
+
 CONTINUE
 TODO: build the software using babel so that it runs faster!
 

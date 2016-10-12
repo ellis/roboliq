@@ -1,5 +1,5 @@
 {
-  "name": "roboliq",
+  "name": "roboliq-processor",
   "version": "0.0.1",
   "description": "Roboliq JavaScript library",
   "dependencies": {
@@ -36,8 +36,9 @@
     "should": "^8.1.1"
   },
   "scripts": {
+    "prepublish": "npm run compile",
     "clean": "rm -rf dist",
-    "build": "babel src --out-dir dist && cp -ar src/schemas dist/",
+    "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json; jsdoc -r -c jsdoc-protocol.json",
