@@ -35,6 +35,10 @@
     "pegjs": "~0.8.0",
     "should": "^8.1.1"
   },
+  "main": "dist/roboliq.js",
+  "bin": {
+    "roboliq-processor": "dist/main.js"
+  },
   "scripts": {
     "prepublish": "npm run compile",
     "clean": "rm -rf dist",
@@ -43,8 +47,8 @@
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json; jsdoc -r -c jsdoc-protocol.json",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
-    "roboliq": "babel-node -- src/main.js",
-    "start": "babel-node -- src/main.js",
+    "roboliq": "babel-node -- src/roboliq.js",
+    "start": "babel-node -- src/roboliq.js",
     "evoware": "babel-node -- src/evoware/EvowareMain.js"
   },
   "author": "Ellis Whitehead",

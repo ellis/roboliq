@@ -573,10 +573,13 @@ function run(argv, userProtocol) {
 	var opts = nomnom.parse(argv);
 	if (_.isEmpty(opts.infiles) && !userProtocol) {
 		console.log(nomnom.getUsage());
-		process.exit(0);
+		if (require.main === module) {
+			process.exit(0);
+		}
 	}
-
-	return runWithOpts(opts, userProtocol);
+	else {
+		return runWithOpts(opts, userProtocol);
+	}
 }
 
 /**
