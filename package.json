@@ -2,10 +2,12 @@
   "name": "roboliq-software",
   "version": "0.0.1",
   "description": "Roboliq Software System for automating liquid handling robots",
-  "dependencies": { },
-  "devDependencies": { },
+  "dependencies": {
+    "roboliq-processor": "file:roboliq-processor"
+  },
+  "devDependencies": {},
   "scripts": {
-    "all-install": "cd roboliq && npm i && cd ../roboliq-runtime-cli && npm i"
+    "processor": "roboliq-processor"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"

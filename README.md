@@ -15,6 +15,18 @@ The important sub-directories of this repository are:
 * `roboliq-processor/src/evoware`: the source code for the Tecan Evoware backend
 * `roboliq-runtime-cli`: the source code for a command line utility that handles logging and measurements while experiments are running
 
+# Installation
+
+This guide assumes that you have some familiarity with using the command line terminal.
+
+* Install [`nodejs`](https://nodejs.org/en/download/), which lets you execute
+  Javascript programs.
+* If you're using Microsoft Windows, install the [cygwin terminal](https://cygwin.com/install.html),
+  which will be used for typing in commands.
+* Copy the Roboliq repository to your computer.
+* Open the terminal, navigate to the directory where you copied the Roboliq
+  repository, and run `npm install` to download Roboliq's software requirements.
+
 # Getting started
 
 Let's get started with a hands-on walk through.
@@ -31,11 +43,8 @@ build up from there as follows:
 
 We'll test a simple protocol to show you how to run the software.
 
-1) Create a new folder that will contains your protocols.
-
-2) Create a new folder that will contain the compiled versions of your protocols.
-
-3) Copy this code into a file named `test1.yaml`:
+1) Navigate to the `protocols` subdirectory and copy this code into a file
+  named `walkthrough1.yaml` (or copy the file `walkthrough1-sample.yaml`):
 
     ```yaml
     roboliq: v1
@@ -45,19 +54,16 @@ We'll test a simple protocol to show you how to run the software.
       text: Hello, World!
     ```
 
-4) To run Roboliq, you'll first need to open a terminal window and navigate to
-the `roboliq-processor` subdirectory.
+2) Open the terminal, and navigate to the directory where you copied the Roboliq repository.
 
-5) Run Roboliq from the terminal, passing `test1.yaml` as input:
+3) Run Roboliq from the terminal, passing `test1.yaml` as input:
 
     ```sh
-    npm start $PROTOCOLS/test1.yaml
+    npm run processor -- protocols/walkthrough1.yaml
     ```
 
-    whereby you'll need to substitute `$PROTOCOLS` with the path to your
-    protocols folder created in step 1.
-    If there were no errors, you can now find a file named `test1.out.json` in
-    your protocols folder.  The output file contains a lot of information:
+    If there were no errors, you can now find a file named `protocols/walkthrough1.out.json`.
+    The output file contains a lot of information:
     in addition to your script, it also contains the core configuration data
     that comes with Roboliq by default.  If you open the file, you can find
     a `steps` property which looks like this:
@@ -84,16 +90,16 @@ the `roboliq-processor` subdirectory.
     `system.echo` is a higher level command that can handles variables,
     whereas `system._echo` just takes the value verbatim.
 
-6) Let's run the same command again, but this time we'll put the output in its
-    proper folder, which you created in step 2.  Run this from the terminal:
+6) Run the command above again, but this time add the `-P compiled` argument
+    to put the output in a separate `compiled` folder.  
 
     ```sh
-    npm start -- $PROTOCOLS/test1.yaml -P $COMPILED
+    npm run processor -- protocols/walkthrough1.yaml -P compiled/
     ```
 
-    This will automatically create a subfolder named `test1` and it will save
-    the file `test1.out.json` in that folder.
-    It's important to have a separate folder for each experiment in order to
+    This will automatically create a subfolder named `compiled/walkthrough1` and it will save
+    the file `compiled/walkthrough1/walkthrough1.out.json`.
+    It's important to have a separate folder for every experiment in order to
     properly organize measured data for each experimental run.
 
 Now you know how to run the software and write a basic protocol.
@@ -102,6 +108,65 @@ robot configuration file.
 
 
 ## 2. A protocol with a minimal configuration
+
+The robot configuration file lets you specify the capabilities of a robot.
+Let's start building up such a file.
+
+```javascript
+module.exports = {
+  "roboliq": "v1",
+  "imports": ["//config/roboliq.js"],
+  "objects": {
+		"ourlab": {
+			"type": "Namespace",
+			"mario": {
+				"type": "Namespace",
+				"roma1": {
+					"type": "Transporter",
+				},
+        "liha": {
+					"type": "Pipetter",
+					"syringe": {
+						"1": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+							"row": 1
+						},
+						"2": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+							"row": 2
+						},
+						"3": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+							"row": 3
+						},
+						"4": {
+							"type": "Syringe",
+							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
+							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
+							"row": 4
+						}
+					},
+					"tipModel": {
+						"tipModel1000": {"type": "TipModel", "programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true}
+					},
+					"tipModelToSyringes": {
+						"ourlab.mario.liha.tipModel.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"]
+					}
+				},
+        "site": {
+					"type": "Namespace",
+          "P1": { "type": "Site" },
+          "P2": { "type": "Site" },
+          "P3": { "type": "Site" }
+        }
+};
+```
 
 PROBLEM:
 
@@ -122,11 +187,14 @@ Approach:
 TODO:
 
 * [x] figure out how to get npm to babel-compile the code when I run `npm install ~/src/roboliq/roboliq-processor`
-* [ ] figure out how to conveniently load `require(roboliq-processor)`
+* [x] figure out how to conveniently load `require(roboliq-processor)`
+* [x] build the software using babel so that it runs faster
+* [ ] create sample ENV file in root of project
+* [ ] figure out tutorial for the user, whereby he creates `protocols`, `config`, and `compiled` sub-directories
+    * [ ] put sample files in those directories?  add them to .gitignore, or copy the samples from another directory.
 * [ ] make separate project roboliq-tecan-evoware?
 
 CONTINUE
-TODO: build the software using babel so that it runs faster!
 
 
 Let's assume that you have already configured Roboliq for your lab, and you
