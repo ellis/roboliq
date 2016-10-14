@@ -111,11 +111,113 @@ robot configuration file.
 
 The robot configuration file lets you specify the capabilities of a robot.
 Let's start building up such a file.
+This task can be quite technical and complicated.
 
 ```javascript
 module.exports = {
   "roboliq": "v1",
-  "imports": ["//config/roboliq.js"],
+  "objects": {
+		"ourlab": {
+			"type": "Namespace",
+			"mario": {
+				"type": "Namespace",
+        "controller": {
+          "type": "Agent"
+        },
+				"transporter1": {
+					"type": "Transporter",
+				},
+        "site": {
+					"type": "Namespace",
+          "P1": { "type": "Site" },
+          "P2": { "type": "Site" }
+        }
+      },
+      "model": {
+				"type": "Namespace",
+				"plateModel_96well": {
+					"type": "PlateModel",
+					"label": "96 well plate",
+					"rows": 8,
+					"columns": 12
+				}
+      },
+      "predicates": [
+        {"isSiteModel": {"model": "ourlab.mario.model.siteModel_1"}},
+        {"stackable": {"below": "ourlab.mario.model.siteModel_1", "above": "ourlab.mario.model.plateModel_96well"}},
+        {"siteModel": {"site": "ourlab.mario.site.P1", "siteModel": "ourlab.mario.model.siteModel_1"}},
+        {"siteModel": {"site": "ourlab.mario.site.P2", "siteModel": "ourlab.mario.model.siteModel_1"}},
+        {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P2"}},
+				{"transporter.canAgentEquipmentProgramSites": {
+						"agent": "ourlab.mario.controller",
+						"equipment": "ourlab.mario.transporter1",
+            "program": "Narrow",
+						"siteClique": "ourlab.mario.siteClique1"
+				}}
+      ]
+    }
+  }
+};
+```
+
+Now write a script to verify that we can move a plate between two bench sites.
+Save this file as `protocols/walkthrough2a.yaml` or use the file `protocols/walkthrough2a-sample.yaml`.
+
+```yaml
+roboliq: v1
+description: Move plate from site P1 to P2
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96well
+    location: ourlab.mario.site.P1
+steps:
+  command: transporter.movePlate
+  object: plate1
+  destination: ourlab.mario.site.P2
+```
+
+PROBLEM2:
+
+* compiling with babel doens't work well, because it leaves away the .yaml and .json files
+* in particular, transporterLogic.json doesn't get copied.
+* maybe we can use webpack instead of just babel?
+
+TODO:
+
+* [ ] try to use webpack on roboliq-processor
+
+PROBLEM:
+
+* should we automatically load roboliq config?  even if another config is specified?
+* how shall we specify which lab config to load?  Command line?  Config file?
+* if the lab's config file is in a completely different directory, how shall it load the roboliq config?
+* consider adapting ourlab.js to run with plain node, without babel
+* how can we run `npm i roboliq` and have it make the binaries available?
+
+Approach:
+* create a new directory
+* install roboliq by something like `npm i roboliq`
+* create an ENV file that tells where to find the config file (or which ones to load)
+* create a config file
+* config file should load roboliq/evoware modules via a non-relative path
+* somehow run roboliq from that directory (I'm just not sure whether the config's `require`s will work)
+
+TODO:
+
+* [x] figure out how to get npm to babel-compile the code when I run `npm install ~/src/roboliq/roboliq-processor`
+* [x] figure out how to conveniently load `require(roboliq-processor)`
+* [x] build the software using babel so that it runs faster
+* [ ] create sample ENV file in root of project
+* [ ] figure out tutorial for the user, whereby he creates `protocols`, `config`, and `compiled` sub-directories
+    * [ ] put sample files in those directories?  add them to .gitignore, or copy the samples from another directory.
+* [ ] make separate project roboliq-tecan-evoware?
+
+
+
+```javascript
+module.exports = {
+  "roboliq": "v1",
   "objects": {
 		"ourlab": {
 			"type": "Namespace",
@@ -165,34 +267,27 @@ module.exports = {
           "P2": { "type": "Site" },
           "P3": { "type": "Site" }
         }
+      }.
+      "model": {
+				"type": "Namespace",
+				"plateModel_48_flower": {
+					"type": "PlateModel",
+					"label": "48 flower-well plate",
+					"rows": 6,
+					"columns": 8,
+					"evowareName": "Ellis 48 Flower Plate"
+				}
+      },
+      "predicates": {
+        sites,
+        transporter,
+        syringes,
+        pipetter sites
+      }
+    }
+  }
 };
 ```
-
-PROBLEM:
-
-* should we automatically load roboliq config?  even if another config is specified?
-* how shall we specify which lab config to load?  Command line?  Config file?
-* if the lab's config file is in a completely different directory, how shall it load the roboliq config?
-* consider adapting ourlab.js to run with plain node, without babel
-* how can we run `npm i roboliq` and have it make the binaries available?
-
-Approach:
-* create a new directory
-* install roboliq by something like `npm i roboliq`
-* create an ENV file that tells where to find the config file (or which ones to load)
-* create a config file
-* config file should load roboliq/evoware modules via a non-relative path
-* somehow run roboliq from that directory (I'm just not sure whether the config's `require`s will work)
-
-TODO:
-
-* [x] figure out how to get npm to babel-compile the code when I run `npm install ~/src/roboliq/roboliq-processor`
-* [x] figure out how to conveniently load `require(roboliq-processor)`
-* [x] build the software using babel so that it runs faster
-* [ ] create sample ENV file in root of project
-* [ ] figure out tutorial for the user, whereby he creates `protocols`, `config`, and `compiled` sub-directories
-    * [ ] put sample files in those directories?  add them to .gitignore, or copy the samples from another directory.
-* [ ] make separate project roboliq-tecan-evoware?
 
 CONTINUE
 

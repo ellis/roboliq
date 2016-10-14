@@ -541,7 +541,7 @@ function validateProtocol1(protocol, o, path) {
 		const doit = () => {
 			//console.log({name, value, fullName})
 			if (name !== 'type' && name !== "DATA" && name !== "SCOPE") {
-				assert(!_.isEmpty(value.type), "Missing `type` property.");
+				assert(!_.isEmpty(value.type), "Missing `type` property: "+JSON.stringify(value));
 				if (value.type === "Namespace") {
 					validateProtocol1(protocol, value, path.concat(name));
 				}

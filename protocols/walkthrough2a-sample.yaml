@@ -1,0 +1,11 @@
+roboliq: v1
+description: Move plate from site P1 to P2
+objects:
+  plate1:
+    type: Plate
+    model: ourlab.model.plateModel_96well
+    location: ourlab.mario.site.P1
+steps:
+  command: transporter.movePlate
+  object: plate1
+  destination: ourlab.mario.site.P2

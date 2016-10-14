@@ -27,3 +27,4 @@ roboliq.log*
 .DS_Store
 node_modules
 *.log
+compiled
