@@ -36,18 +36,20 @@
     "mocha": "^2.3.4",
     "pegjs": "~0.8.0",
     "should": "^8.1.1",
+    "to-fast-properties": "^1.0.2",
     "webpack": "^1.13.2",
     "yaml-loader": "^0.4.0"
   },
   "main": "dist/roboliq.js",
   "bin": {
-    "roboliq-processor": "roboliq-processor.sh"
+    "roboliq-processor": "dist/main.sh"
   },
   "scripts": {
-    "prepublish": "npm run compile && npm run webpack",
+    "prepublish": "npm run metalsmith",
     "clean": "rm -rf dist",
     "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
     "webpack": "webpack",
+    "metalsmith": "babel-node --harmony build.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json; jsdoc -r -c jsdoc-protocol.json",

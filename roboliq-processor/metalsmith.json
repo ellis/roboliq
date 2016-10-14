@@ -1,0 +1,11 @@
+{
+  "plugins": {
+    "metalsmith-babel": {
+      "presets": [
+        "es2015"
+      ]
+      "modules": "common",
+      "comments": true
+    }
+  }
+}
