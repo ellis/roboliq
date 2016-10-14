@@ -29,10 +29,11 @@ module.exports = {
     }
   },
   "predicates": [
-    {"isSiteModel": {"model": "ourlab.mario.model.siteModel_1"}},
-    {"stackable": {"below": "ourlab.mario.model.siteModel_1", "above": "ourlab.mario.model.plateModel_96well"}},
-    {"siteModel": {"site": "ourlab.mario.site.P1", "siteModel": "ourlab.mario.model.siteModel_1"}},
-    {"siteModel": {"site": "ourlab.mario.site.P2", "siteModel": "ourlab.mario.model.siteModel_1"}},
+    {"isSiteModel": {"model": "ourlab.mario.siteModel_1"}},
+    {"stackable": {"below": "ourlab.mario.siteModel_1", "above": "ourlab.model.plateModel_96well"}},
+    {"siteModel": {"site": "ourlab.mario.site.P1", "siteModel": "ourlab.mario.siteModel_1"}},
+    {"siteModel": {"site": "ourlab.mario.site.P2", "siteModel": "ourlab.mario.siteModel_1"}},
+    {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P1"}},
     {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P2"}},
 		{"transporter.canAgentEquipmentProgramSites": {
 				"agent": "ourlab.mario.controller",

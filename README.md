@@ -141,22 +141,23 @@ module.exports = {
 					"rows": 8,
 					"columns": 12
 				}
-      },
-      "predicates": [
-        {"isSiteModel": {"model": "ourlab.mario.model.siteModel_1"}},
-        {"stackable": {"below": "ourlab.mario.model.siteModel_1", "above": "ourlab.mario.model.plateModel_96well"}},
-        {"siteModel": {"site": "ourlab.mario.site.P1", "siteModel": "ourlab.mario.model.siteModel_1"}},
-        {"siteModel": {"site": "ourlab.mario.site.P2", "siteModel": "ourlab.mario.model.siteModel_1"}},
-        {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P2"}},
-				{"transporter.canAgentEquipmentProgramSites": {
-						"agent": "ourlab.mario.controller",
-						"equipment": "ourlab.mario.transporter1",
-            "program": "Narrow",
-						"siteClique": "ourlab.mario.siteClique1"
-				}}
-      ]
+      }
     }
-  }
+  },
+  "predicates": [
+    {"isSiteModel": {"model": "ourlab.mario.siteModel_1"}},
+    {"stackable": {"below": "ourlab.mario.siteModel_1", "above": "ourlab.model.plateModel_96well"}},
+    {"siteModel": {"site": "ourlab.mario.site.P1", "siteModel": "ourlab.mario.siteModel_1"}},
+    {"siteModel": {"site": "ourlab.mario.site.P2", "siteModel": "ourlab.mario.siteModel_1"}},
+    {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P1"}},
+    {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P2"}},
+		{"transporter.canAgentEquipmentProgramSites": {
+				"agent": "ourlab.mario.controller",
+				"equipment": "ourlab.mario.transporter1",
+        "program": "Narrow",
+				"siteClique": "ourlab.mario.siteClique1"
+		}}
+  ]
 };
 ```
 
@@ -175,6 +176,18 @@ steps:
   command: transporter.movePlate
   object: plate1
   destination: ourlab.mario.site.P2
+```
+
+Process the script by running this command from the terminal:
+
+```bash
+npm run processor -- config/walkthrough2a.js protocols/walkthrough2a.yaml
+```
+
+Or if you just want to run the sample files which are already present:
+
+```bash
+npm run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml
 ```
 
 PROBLEM2:
