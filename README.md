@@ -70,12 +70,12 @@ We'll test a simple protocol to show you how to run the software.
 
     ```json
     "steps": {
-    	"1": {
-    		"command": "system._echo",
-    		"value": "Hello, World!"
-    	},
-    	"command": "system.echo",
-    	"value": "Hello, World!"
+      "1": {
+        "command": "system._echo",
+        "value": "Hello, World!"
+      },
+      "command": "system.echo",
+      "value": "Hello, World!"
     }
     ```
 
@@ -110,58 +110,110 @@ robot configuration file.
 ## 2. A protocol with a minimal configuration
 
 The robot configuration file lets you specify the capabilities of a robot.
-Let's start building up such a file.
-This task can be quite technical and complicated.
+Let's start building such a configuration -- this task can be quite technical
+and complicated, so we'll keep it basic here.
+
+We will write the robot configuration in JavaScript; this way, we can later
+use helper function that will simplify configuring some of the equipment.
+Please copy the code below to a file named `config/walkthrough2a-config.js`
 
 ```javascript
+// This variable lets us export our configuration to Roboliq
 module.exports = {
+  // The targetted version of Roboliq
   "roboliq": "v1",
+  // The configuration objects
   "objects": {
-		"ourlab": {
-			"type": "Namespace",
-			"mario": {
-				"type": "Namespace",
+    // The top namespace for things in "our lab"
+    "ourlab": {
+      "type": "Namespace",
+      // The namespace for things on our robot "mario"
+      "mario": {
+        "type": "Namespace",
+        // An object to represent Mario's controller software
+        // An `Agent` object executes instructions, such as operating equipment.
         "controller": {
           "type": "Agent"
         },
-				"transporter1": {
-					"type": "Transporter",
-				},
+        // The robot's "arm", used for moving labware
+        "transporter1": {
+          "type": "Transporter",
+        },
+        // The namespace for mario's "sites" -- i.e., where it can place the
+        // labware.  In this case, we have just two sites, named P1 and P2.
         "site": {
-					"type": "Namespace",
+          "type": "Namespace",
           "P1": { "type": "Site" },
           "P2": { "type": "Site" }
         }
       },
+      // Namespace for labware models in our lab
       "model": {
-				"type": "Namespace",
-				"plateModel_96well": {
-					"type": "PlateModel",
-					"label": "96 well plate",
-					"rows": 8,
-					"columns": 12
-				}
+        "type": "Namespace",
+        // A 96-well plate model with 8 rows and 12 columns
+        "plateModel_96well": {
+          "type": "PlateModel",
+          "label": "96 well plate",
+          "rows": 8,
+          "columns": 12
+        }
       }
     }
   },
+  // The logical predicates for our configuration (see explanation in text below)
   "predicates": [
+    // -----------------
+    // Transporter logic
+    // -----------------
+    // Declare a site model siteModel_1
     {"isSiteModel": {"model": "ourlab.mario.siteModel_1"}},
+    // Our 96-well plate can be placed on top of siteModel_1
     {"stackable": {"below": "ourlab.mario.siteModel_1", "above": "ourlab.model.plateModel_96well"}},
+    // Both sites, P1 and P2, are assigned to siteModel_1
     {"siteModel": {"site": "ourlab.mario.site.P1", "siteModel": "ourlab.mario.siteModel_1"}},
     {"siteModel": {"site": "ourlab.mario.site.P2", "siteModel": "ourlab.mario.siteModel_1"}},
+    // The list of sites that we can move labware between directly (i.e. without needing to go through an intermediate site)
     {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P1"}},
     {"siteCliqueSite": {"siteClique": "ourlab.mario.siteClique1", "site": "ourlab.mario.site.P2"}},
-		{"transporter.canAgentEquipmentProgramSites": {
-				"agent": "ourlab.mario.controller",
-				"equipment": "ourlab.mario.transporter1",
+    // Let Roboliq know that mario's controller can use transporter1 to move
+    // labware around on siteClique1.
+    // The `program` property provides an additional specification for how the
+    // transporter should move or grip the labware (not always necessary)
+    {"transporter.canAgentEquipmentProgramSites": {
+        "agent": "ourlab.mario.controller",
+        "equipment": "ourlab.mario.transporter1",
         "program": "Narrow",
-				"siteClique": "ourlab.mario.siteClique1"
-		}}
+        "siteClique": "ourlab.mario.siteClique1"
+    }}
   ]
 };
 ```
 
-Now write a script to verify that we can move a plate between two bench sites.
+The logic for labware transportation is somewhat complex -- to understand it,
+you'll need to know the following concepts:
+
+* site: a location where the transporter can place labware
+* site model: basically a list of labware that a site can accept; since some
+  sites will accept the same set of labware, they can share the same "site model".
+* stackable: this mean that one thing can be placed on top of another thing.
+  In particular, it specified which labware models can go on top of which
+  site models.
+* site clique: a set of sites that that permit direct movement of labware
+  among all members of the clique.
+  This concept is a bit tricky.  A simple robot configuration might just have
+  a single clique that includes all of its sites.  But more complex configuration
+  may need to prohibit some movements.
+  For example, we might have sites on the left of the bench and sites on the
+  right, which are partially blocked by equipment in the middle.  If each side
+  of the bench has its own transporter arm and there is a single site in the middle
+  that both arms can reach, then we could define two clicks: the left clique
+  would contain all sites on the left plus the middle site, and the right clique
+  would contain all sites on the right plus the middle site.  This would ensure
+  that Roboliq never generates instructions to directly move a plate from the
+  left side to the right side, but rather first navigates through the middle
+  site.
+
+Now write a script to verify that we can move a plate between the two bench sites.
 Save this file as `protocols/walkthrough2a.yaml` or use the file `protocols/walkthrough2a-sample.yaml`.
 
 ```yaml
@@ -190,15 +242,8 @@ Or if you just want to run the sample files which are already present:
 npm run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml
 ```
 
-PROBLEM2:
+CONTINUE
 
-* compiling with babel doens't work well, because it leaves away the .yaml and .json files
-* in particular, transporterLogic.json doesn't get copied.
-* maybe we can use webpack instead of just babel?
-
-TODO:
-
-* [ ] try to use webpack on roboliq-processor
 
 PROBLEM:
 
@@ -228,79 +273,9 @@ TODO:
 
 
 
-```javascript
-module.exports = {
-  "roboliq": "v1",
-  "objects": {
-		"ourlab": {
-			"type": "Namespace",
-			"mario": {
-				"type": "Namespace",
-				"roma1": {
-					"type": "Transporter",
-				},
-        "liha": {
-					"type": "Pipetter",
-					"syringe": {
-						"1": {
-							"type": "Syringe",
-							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-							"row": 1
-						},
-						"2": {
-							"type": "Syringe",
-							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-							"row": 2
-						},
-						"3": {
-							"type": "Syringe",
-							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-							"row": 3
-						},
-						"4": {
-							"type": "Syringe",
-							"tipModel": "ourlab.mario.liha.tipModel.tipModel1000",
-							"tipModelPermanent": "ourlab.mario.liha.tipModel.tipModel1000",
-							"row": 4
-						}
-					},
-					"tipModel": {
-						"tipModel1000": {"type": "TipModel", "programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true}
-					},
-					"tipModelToSyringes": {
-						"ourlab.mario.liha.tipModel.tipModel1000": ["ourlab.mario.liha.syringe.1", "ourlab.mario.liha.syringe.2", "ourlab.mario.liha.syringe.3", "ourlab.mario.liha.syringe.4"]
-					}
-				},
-        "site": {
-					"type": "Namespace",
-          "P1": { "type": "Site" },
-          "P2": { "type": "Site" },
-          "P3": { "type": "Site" }
-        }
-      }.
-      "model": {
-				"type": "Namespace",
-				"plateModel_48_flower": {
-					"type": "PlateModel",
-					"label": "48 flower-well plate",
-					"rows": 6,
-					"columns": 8,
-					"evowareName": "Ellis 48 Flower Plate"
-				}
-      },
-      "predicates": {
-        sites,
-        transporter,
-        syringes,
-        pipetter sites
-      }
-    }
-  }
-};
-```
+
+
+
 
 CONTINUE
 
