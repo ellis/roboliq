@@ -233,13 +233,13 @@ steps:
 Process the script by running this command from the terminal:
 
 ```bash
-npm run processor -- config/walkthrough2a.js protocols/walkthrough2a.yaml
+npm run processor -- config/walkthrough2a.js protocols/walkthrough2a.yaml -P compiled/
 ```
 
 Or if you just want to run the sample files which are already present:
 
 ```bash
-npm run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml
+npm run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml -P compiled/
 ```
 
 CONTINUE
