@@ -1,0 +1,99 @@
+roboliq: v1
+description: |
+  Measure the accuracy and precision of 150ul dispenses with tip 1.
+  Weigh 3 tubes.
+  Dispenses 150ul 9 times into a 1500ul tube, weigh, then repeat 3 times.
+
+objects:
+  tubes:
+    type: Plate
+    description: eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(C01 down F01)
+
+steps:
+  1:
+    "@SCOPE":
+      tube: tubes(C5)
+    1:
+      command: pipetter.pipette
+      sources: water
+      volumes: 150ul
+      items:
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      clean: light
+      cleanBetweenSameSource: flush
+      syringes: [1]
+    2:
+      command: evoware._userPrompt
+      agent: ourlab.mario.evoware
+      text: "Weight tube"
+      beep: 3
+  2:
+    "@SCOPE":
+      tube: tubes(B5)
+    1:
+      command: pipetter.pipette
+      sources: water
+      volumes: 150ul
+      items:
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      clean: light
+      cleanBetweenSameSource: flush
+      syringes: [1]
+      program: Roboliq_Water_Air_1000
+    2:
+      command: evoware._userPrompt
+      agent: ourlab.mario.evoware
+      text: "Weight tube"
+      beep: 3
+  3:
+    "@SCOPE":
+      tube: tubes(A5)
+    1:
+      command: pipetter.pipette
+      sources: water
+      volumes: 150ul
+      items:
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      - destination: $tube
+      clean: light
+      cleanBetweenSameSource: flush
+      syringes: [1]
+      program: Roboliq_Water_Air_1000
+    2:
+      command: evoware._userPrompt
+      agent: ourlab.mario.evoware
+      text: "Weight tube"
+      beep: 3
