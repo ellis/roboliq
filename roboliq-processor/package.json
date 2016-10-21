@@ -39,7 +39,8 @@
   },
   "main": "dist/roboliq.js",
   "bin": {
-    "roboliq-processor": "dist/main.sh"
+    "roboliq-processor": "dist/main.sh",
+    "roboliq-design": "dist/designMain.sh"
   },
   "scripts": {
     "prepublish": "npm run metalsmith",

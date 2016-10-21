@@ -1,0 +1,71 @@
+roboliq: v1
+description: |
+  Measure the accuracy and precision of 150ul dispenses with tip 1.
+  Weigh 3 tubes.
+  Dispenses 150ul 9 times into a 1500ul tube, weigh, then repeat 3 times.
+
+objects:
+  tubes:
+    type: Plate
+    description: eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(C01 down F01)
+
+  design1:
+    type: Design
+    conditions:
+      program: Roboliq_Water_Air_1000
+      syringe: 1
+      well: 3, 15, 500, 1000
+      combo*:
+      - volume: 150ul
+        count*: 9
+      - volume: 16ul
+        count*: 9
+      - volume: 450ul
+        count*: 3
+      - volume: 15ul
+        count*: 9
+      - volume: 7ul
+        count*: 25
+      - volume: 3ul
+        count*: 36
+      replicate*: 2
+      well=allocateWells:
+        sameBy: combo
+        rows: 4
+        columns: 5
+
+steps:
+  data: design1
+  1:
+    command: experiment.forEachGroup
+    groupBy: combo
+    steps:
+      description: "`Volume {{$volume}}, count {{$count}}, replicate {{$replicate}}`"
+      1:
+        command: pipetter.pipette
+        program: $program
+        sources: water
+        volumes: $volume
+        destinationPlate: tubes
+        items:
+          "#data":
+            template:
+              destination: $well
+        clean: light
+        cleanBetweenSameSource: flush
+        syringes: [$syringe]
+      2:
+        command: evoware._userPrompt
+        agent: ourlab.mario.evoware
+        text: "Weight tube"
+        beep: 3
