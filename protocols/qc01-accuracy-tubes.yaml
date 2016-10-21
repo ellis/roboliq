@@ -24,43 +24,45 @@ objects:
     conditions:
       program: Roboliq_Water_Air_1000
       syringe: 1
-      well: 3, 15, 500, 1000
       combo*:
-      - volume: 150ul
-        count*: 9
+      # - volume: 150ul
+      #   count*: 9
       - volume: 16ul
         count*: 9
       - volume: 450ul
         count*: 3
-      - volume: 15ul
-        count*: 9
-      - volume: 7ul
-        count*: 25
-      - volume: 3ul
-        count*: 36
+      # - volume: 15ul
+      #   count*: 9
+      # - volume: 7ul
+      #   count*: 25
+      # - volume: 3ul
+      #   count*: 36
       replicate*: 2
       well=allocateWells:
-        sameBy: combo
+        sameBy: [combo, replicate]
+        wells: C01 down to B02
         rows: 4
         columns: 5
+    orderBy: [combo, replicate]
 
 steps:
-  data: design1
+  data: {source: design1}
   1:
     command: experiment.forEachGroup
-    groupBy: combo
+    groupBy: [combo, replicate]
     steps:
       description: "`Volume {{$volume}}, count {{$count}}, replicate {{$replicate}}`"
       1:
         command: pipetter.pipette
         program: $program
         sources: water
-        volumes: $volume
-        destinationPlate: tubes
+        #volumes: 200ul
+        destinationLabware: tubes
         items:
           "#data":
             template:
               destination: $well
+              volume: $volume
         clean: light
         cleanBetweenSameSource: flush
         syringes: [$syringe]

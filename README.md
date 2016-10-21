@@ -244,6 +244,16 @@ npm run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-samp
 
 CONTINUE
 
+> ERROR:
+>
+>	Running this with babel-node from the roboliq-processor directory works:
+>
+>	`npm start -- -T --progress src/config/ourlab.js ../protocols/qc01-accuracy-tubes.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bss e-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware`
+>
+>	But from the root directory, this doesn't work:
+>
+>	`npm run processor -- -T --progress roboliq-processor/dist/config/ourlab.js protocols/qc01-accuracy-tubes.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware testdata/bsse-mario/Carrie r.cfg,testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware`
+
 
 PROBLEM:
 
