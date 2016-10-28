@@ -39,8 +39,8 @@ absorbanceReader.measurePlate:
       description: "Output definition for where and how to save the measurements"
       properties:
         joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
-        writeTo: {description: "Filename to write measured to as JSON", type: "string"}
-        appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"}
+        writeTo: {description: "Filename to write measurements to as JSON", type: "string"}
+        appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"}
         userValues: {description: "User-specificed values that should be included in the output table", type: object}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}

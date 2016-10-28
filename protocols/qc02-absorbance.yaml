@@ -1,58 +1,74 @@
 roboliq: v1
 description: |
-  Measure the accuracy and precision of 150ul dispenses with tip 1.
-  Weigh 3 tubes.
-  Dispenses 150ul 9 times into a 1500ul tube, weigh, then repeat 3 times.
+  1. Measure the reader error at various dye concentrations
+  2. Measure the impact of well volume (i.e. meniscus shape) on the absorbance readout
+  3. Measure variance of empty well absorbance within and between plates
+
+  Three analysis will be performed:
+
+    part1/2/3, empty/nonempty, dyeVoluem, waterVolume, replicate
 
 objects:
   plate1:
     type: Plate
     description: for finding reader error
-    model: ourlab.model.plateModel_...
+    model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P2
   plate2:
     type: Plate
     description: for finding meniscus parameters
-    model: ourlab.model.plateModel_...
+    model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  waterLabware:
+  dyeLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
-    contents: [Infinity l, water]
-  water:
+    contents: [Infinity l, dye]
+  dye:
     type: Liquid
-    wells: waterLabware(C01 down F01)
+    wells: dyeLabware(C01 down F01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
 
   design1:
     type: Design
     conditions:
-      program: Roboliq_Water_Air_1000
-      syringe: 1
-      combo*:
-      # - volume: 150ul
-      #   count*: 9
-      - volume: 16ul
-        count*: 9
-      - volume: 450ul
-        count*: 3
-      # - volume: 15ul
-      #   count*: 9
-      # - volume: 7ul
-      #   count*: 25
-      # - volume: 3ul
-      #   count*: 36
-      replicate*: 2
-      well=allocateWells:
-        sameBy: [combo, replicate]
-        wells: C01 down to B02
-        rows: 4
-        columns: 5
-    orderBy: [combo, replicate]
+      part:
+      - plate: plate1
+        well*=allocateWells:
+          rows: 8
+          columns: 12
+        source=:
+          order: reshuffle
+          values: [water, dye]
+        fullVolume: 250 ul
+        dyeVolume=calculate: '(source == "dye") ? 16ul : 0ul'
+        waterVolume=calculate: "fullVolume - dyeVolume"
+      -
+      -
+  # design1b:
+  #   type: Design
+  #   conditions:
+  #     stage*:
+  #       empty
 
 steps:
-  data: {source: design1}
   1:
+    description: Part 1: measure reader error
+    1:
+      command: absorbanceReader.measurePlate
+      object: $plate
+      program:
+        excitationWavelength: 480nm
+      output:
+        #joinKey: well
+        appendTo: measurements
+        userValues:
+
+  1:
+    data: {source: design1}
+
     command: experiment.forEachGroup
     groupBy: [combo, replicate]
     steps:
