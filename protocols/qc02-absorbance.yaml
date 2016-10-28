@@ -34,19 +34,58 @@ objects:
   design1:
     type: Design
     conditions:
-      part:
-      - plate: plate1
-        well*=allocateWells:
-          rows: 8
-          columns: 12
-        source=:
-          order: reshuffle
-          values: [water, dye]
-        fullVolume: 250 ul
-        dyeVolume=calculate: '(source == "dye") ? 16ul : 0ul'
-        waterVolume=calculate: "fullVolume - dyeVolume"
-      -
-      -
+      plate*: [plate1, plate2, plate3]
+      well*=allocateWells:
+        rows: 4
+        columns: 1
+      stage: 1
+      shake: 0
+      replicate: 1
+      state: empty
+      fullVolume: 0 ul
+      dyeVolume: 0 ul
+      waterVolume: 0 ul
+      =case:
+        cases:
+          - where: 'plate == "plate1"'
+            conditions:
+              state*:
+                empty:
+                  stage: 1
+                  replicate*: 3
+                nonempty:
+                  stage: 2
+                  fullVolume: 250 ul
+                  dyeVolume=:
+                    order: reshuffle
+                    values: [0 ul, 16 ul]
+                  waterVolume=calculate: "fullVolume - dyeVolume"
+                  shake*: [0, 1, 2, 3]
+                  replicate*: 3
+          - conditions:
+              stage: 1
+              state: empty
+              replicate: 1
+    orderBy: [plate, stage, shake, replicate]
+      # part:
+      # - plate: plate1
+      #   source=:
+      #     order: reshuffle
+      #     values: [water, dye]
+      #   fullVolume: 250 ul
+      #   dyeVolume=calculate: '(source == "dye") ? 16ul : 0ul'
+      #   waterVolume=calculate: "fullVolume - dyeVolume"
+      # - plate: plate2
+      #   well*=allocateWells:
+      #     rows: 4
+      #     columns: 1
+      #   source=:
+      #     order: reshuffle
+      #     values: [water, dye]
+      #   fullVolume*: [25 ul, 250 ul]
+      #   dyeVolume=calculate: '(source == "dye") ? 16ul : 0ul'
+      #   waterVolume=calculate: "fullVolume - dyeVolume"
+      # - plate: plate3
   # design1b:
   #   type: Design
   #   conditions:
