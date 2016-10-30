@@ -1,0 +1,168 @@
+roboliq: v1
+description: |
+  Measure the reader error at various dye concentrations and well volumes.
+
+variables:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+
+objects:
+  plate1:
+    type: Plate
+    description: for finding reader error
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  plate2:
+    type: Plate
+    description: for finding meniscus parameters
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  # dyeLabware:
+  #   type: Plate
+  #   model: ourlab.model.troughModel_100ml
+  #   location: ourlab.mario.site.R6
+  #   contents: [Infinity l, dye]
+  # dye:
+  #   type: Liquid
+  #   wells: dyeLabware(C01 down F01)
+  tubes:
+    type: Plate
+    description: eppendorf tubes for dye
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  dye01:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~0.1
+    wells: tubes(A01)
+  dye05:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~0.5
+    wells: tubes(B01)
+  dye10:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~1.0
+    wells: tubes(C01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+  plateDesign1:
+    type: Design
+    conditions:
+      plate*: [plate1]
+      totalVolumeIndex*: 12
+      totalVolume=calculate: 'totalVolumeIndex * (25ul)'
+      source*: [water, dye01, dye05, dye10]
+      volume: 16 ul
+      replicate*: 2
+      id=range:
+        order: shuffle
+      well=allocateWells:
+        orderBy: id
+        rows: 8
+        columns: 12
+        values: [0 ul, 16 ul]
+      waterVolume=calculate: "totalVolume - volume"
+    orderBy: id
+
+  readerDesign1:
+    type: Design
+    conditions:
+      plate*: [plate1]
+      stage*:
+      - state: empty
+        shake: 0
+        replicate*: 3
+      - state: filled
+        shake: 0
+        replicate*: 3
+      - state: shaker
+        shake*: 3
+        replicate*: 3
+
+steps:
+  data: {source: readerDesign1}
+  1:
+    description: "Read empty wells"
+    command: transporter.doThenRestoreLocation
+    equipment: ourlab.mario.roma2
+    objects: [plate1]
+    steps:
+      1:
+        description: "Put plate in reader"
+        command: transporter.movePlate
+        equipment: ourlab.mario.roma2
+        object: $plate
+        destination: ourlab.mario.site.READER
+      2:
+        data: {where: 'state == "empty"'}
+        command: experiment.forEachRow
+        steps:
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: $^excitationWavelength
+          output:
+            #joinKey: well
+            appendTo: measurements
+  2:
+    description: "Dispense first aliquot of dye or water"
+    data: {source: plateDesign1}
+    command: pipetter.pipette
+    destinationLabware: $plate
+    items:
+      "#data":
+        template:
+          source: $source
+          destination: $well
+          volume: $volume
+    clean: thorough
+    cleanBetween: flush
+  3:
+    description: "Dispense water to top off the wells"
+    data: {source: plateDesign1}
+    command: pipetter.pipette
+    source: water
+    destinationLabware: $plate
+    items:
+      "#data":
+        template:
+          destination: $well
+          volume: $waterVolume
+    clean: none
+    cleanEnd: thorough
+  4:
+    description: "Read filled wells"
+    command: transporter.doThenRestoreLocation
+    equipment: ourlab.mario.roma2
+    objects: [plate1]
+    steps:
+      1:
+        description: "Put plate in reader"
+        command: transporter.movePlate
+        equipment: ourlab.mario.roma2
+        object: $plate
+        destination: ourlab.mario.site.READER
+      2:
+        description: "Read filled wells"
+        data: {where: 'state == "filled"'}
+        command: experiment.forEachRow
+        steps:
+          data: {source: plateDesign1}
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: $^excitationWavelength
+          output:
+            joinKey: well
+            appendTo: measurements
+  5:
+    description: "Shake plate and read again"
+    data: {where: 'state == "shaker"'}
+    command: experiment.forEachGroup
+    groupBy: shake
+    steps:
+      1:
+        command: shaker.shakePlate
+        object: $plate

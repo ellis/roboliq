@@ -6,10 +6,10 @@ objects:
       combo*:
       - volume: 16ul
         count*: 9
-        replicate*: 2
+        replicate*: 3
       - volume: 150ul
         count*: 9
-        replicate*: 2
+        replicate*: 3
       - volume: 450ul
         count*: 3
-        replicate*: 2
+        replicate*: 3

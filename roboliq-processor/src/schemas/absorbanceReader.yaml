@@ -18,11 +18,11 @@ absorbanceReader.measurePlate:
     program:
       description: "Program parameters"
       properties:
-        # shakerProgram:
-        #   description: Program for shaker.
-        #   properties:
-        #     rpm: {description: Rotations per minute (RPM), type: number}
-        #     duration: {description: "Duration of shaking", type: Duration}
+        shakerProgram:
+          description: Program for shaker.
+          properties:
+            rpm: {description: Rotations per minute (RPM), type: number}
+            duration: {description: "Duration of shaking", type: Duration}
         excitationWavelength: {description: "Excitation wavelength", type: Length}
         excitationBandwidth: {description: "Excitation bandwidth", type: Length}
         excitationWavelengthMin: {description: "Minimum excitation wavelength for a scan", type: Length}

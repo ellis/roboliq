@@ -54,7 +54,8 @@
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
     "roboliq": "babel-node -- src/roboliq.js",
     "start": "babel-node -- src/roboliq.js",
-    "evoware": "babel-node -- src/evoware/EvowareMain.js"
+    "evoware": "babel-node -- src/evoware/EvowareMain.js",
+		"design": "babel-node -- src/designMain.js"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"
