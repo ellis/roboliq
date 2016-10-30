@@ -31,16 +31,10 @@ objects:
         count*: 25
       - volume: 15ul
         count*: 9
-      - volume: 16ul
-        count*: 9
-      - volume: 150ul
-        count*: 9
-      - volume: 450ul
-        count*: 3
       replicate*: 2
       well=allocateWells:
         sameBy: [combo, replicate]
-        wells: C01 down to B02
+        wells: A01 down to D05
         rows: 4
         columns: 5
     orderBy: [combo, replicate]

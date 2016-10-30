@@ -52,10 +52,14 @@ objects:
     type: Design
     conditions:
       plate*: [plate1]
+      totalVolumeIndex*: 12
+      totalVolume=calculate: 'totalVolumeIndex * (25ul)'
+      source*: [water, dye01, dye05, dye10]
+      replicate*: 2
       well*=allocateWells:
         rows: 8
         columns: 12
-      fullVolume: 250 ul
+      waterVolume
       dyeVolume=:
         order: reshuffle
         values: [0 ul, 16 ul]
