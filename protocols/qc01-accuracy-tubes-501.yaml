@@ -1,0 +1,15 @@
+roboliq: v1
+imports: qc01-accuracy-tubes-template.yaml
+objects:
+  design1:
+    conditions:
+      combo*:
+      - volume: 501ul
+        count*: 2
+        replicate*: 3
+      - volume: 700ul
+        count*: 2
+        replicate*: 3
+      - volume: 950ul
+        count*: 1
+        replicate*: 3

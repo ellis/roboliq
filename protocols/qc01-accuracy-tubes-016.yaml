@@ -4,12 +4,12 @@ objects:
   design1:
     conditions:
       combo*:
-      - volume: 3ul
-        count*: 36
-        replicate*: 2
-      - volume: 7ul
-        count*: 25
-        replicate*: 2
-      - volume: 15ul
+      - volume: 16ul
         count*: 9
+        replicate*: 2
+      - volume: 150ul
+        count*: 9
+        replicate*: 2
+      - volume: 450ul
+        count*: 3
         replicate*: 2

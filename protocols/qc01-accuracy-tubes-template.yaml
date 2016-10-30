@@ -1,0 +1,65 @@
+roboliq: v1
+description: |
+  Measure the accuracy and precision of dispenses with tip 1.
+
+  Protocol:
+
+  * weight all tubes twice
+  * for each volume and replicate:
+    * dispense volumes several times into tube
+    * weight tube twice
+
+objects:
+  tubes:
+    type: Plate
+    description: eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(C01 down F01)
+
+  design1:
+    type: Design
+    conditions:
+      program: Roboliq_Water_Air_1000
+      syringe: 1
+      combo*: []
+      well=allocateWells:
+        sameBy: [combo, replicate]
+        wells: A01 down to D05
+        rows: 4
+        columns: 5
+    orderBy: [combo, replicate]
+
+steps:
+  data: {source: design1}
+  1:
+    command: experiment.forEachGroup
+    groupBy: [combo, replicate]
+    steps:
+      description: "`Volume {{$volume}}, count {{$count}}, replicate {{$replicate}}`"
+      1:
+        command: pipetter.pipette
+        program: $program
+        sources: water
+        #volumes: 200ul
+        destinationLabware: tubes
+        items:
+          "#data":
+            template:
+              destination: $well
+              volume: $volume
+        clean: light
+        cleanBetweenSameSource: flush
+        syringes: [$syringe]
+      2:
+        command: evoware._userPrompt
+        agent: ourlab.mario.evoware
+        text: "Weight tube"
+        beep: 3
