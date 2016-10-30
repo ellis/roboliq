@@ -513,6 +513,10 @@ function dereferenceVariable(data, name) {
 		}
 	}
 	else {
+		// Handle Variable reference
+		else if (_.startsWith(name, "$^")) {
+			name = _. CONTINUE
+		}
 		// Handle SCOPE abbreviation
 		if (_.startsWith(name, "$"))
 			name = "SCOPE."+name.substr(1);
