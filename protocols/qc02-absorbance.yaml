@@ -19,25 +19,60 @@ objects:
     description: for finding meniscus parameters
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  dyeLabware:
+  # dyeLabware:
+  #   type: Plate
+  #   model: ourlab.model.troughModel_100ml
+  #   location: ourlab.mario.site.R6
+  #   contents: [Infinity l, dye]
+  # dye:
+  #   type: Liquid
+  #   wells: dyeLabware(C01 down F01)
+  tubes:
     type: Plate
-    model: ourlab.model.troughModel_100ml
-    location: ourlab.mario.site.R6
-    contents: [Infinity l, dye]
-  dye:
+    description: eppendorf tubes for dye
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  dye01:
     type: Liquid
-    wells: dyeLabware(C01 down F01)
+    description: dye with concentration such that 16ul => ~0.1
+    wells: tubes(A01)
+  dye05:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~0.5
+    wells: tubes(B01)
+  dye10:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~1.0
+    wells: tubes(C01)
   water:
     type: Variable
     value: ourlab.mario.systemLiquid
 
-  design1:
+  plateDesign1:
+    type: Design
+    conditions:
+      plate*: [plate1]
+      well*=allocateWells:
+        rows: 8
+        columns: 12
+      fullVolume: 250 ul
+      dyeVolume=:
+        order: reshuffle
+        values: [0 ul, 16 ul]
+      waterVolume=calculate: "fullVolume - dyeVolume"
+      totalVolume=calculate: "dyeVolume + waterVolume"
+      .dyeSourceCase=case:
+        cases:
+          - where: 'dyeVolume > (0 ul)'
+            conditions:
+              dyeSource=:
+                order: reshuffle
+                values: [dye01, dye05, dye10]
+
+  readerDesign1:
     type: Design
     conditions:
       plate*: [plate1, plate2, plate3]
-      well*=allocateWells:
-        rows: 4
-        columns: 1
       stage: 1
       shake: 0
       replicate: 1
@@ -45,6 +80,7 @@ objects:
       fullVolume: 0 ul
       dyeVolume: 0 ul
       waterVolume: 0 ul
+      totalVolume: 0 ul
       =case:
         cases:
           - where: 'plate == "plate1"'
@@ -55,13 +91,18 @@ objects:
                   replicate*: 3
                 nonempty:
                   stage: 2
-                  fullVolume: 250 ul
-                  dyeVolume=:
-                    order: reshuffle
-                    values: [0 ul, 16 ul]
-                  waterVolume=calculate: "fullVolume - dyeVolume"
                   shake*: [0, 1, 2, 3]
                   replicate*: 3
+          - where: 'plate == "plate2"'
+            conditions:
+              state*:
+                empty:
+                  stage: 1
+                  replicate: 1
+                nonempty:
+                  stage: 2
+                  layer*: 3
+                  totalVolume=calculate: '(25 ul) * layer'
           - conditions:
               stage: 1
               state: empty
