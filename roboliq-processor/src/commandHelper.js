@@ -98,6 +98,11 @@ function substituteDeep(x, data, SCOPE, DATA) {
 			x2 = Design.calculate(expr, SCOPE);
 			// console.log({x2, expr})
 		}
+		// Variable substitution
+		else if (_.startsWith(x, "$@")) {
+			const propertyName = x.substr(2);
+			x2 = _.get(data.objects, [propertyName, "value"], x);
+		}
 		// SCOPE substitution
 		else if (_.startsWith(x, "$")) {
 			const propertyName = x.substr(1);
@@ -203,9 +208,12 @@ function processParamsBySchema(result, path, params, schema, data) {
 		if (type === "name") {
 			// Normally, we don't want to process "name" parameters at all, but we
 			// still need to dereference "$"-scope variables
-			const value1 = (_.startsWith(value0, "$"))
-				? _.get(data.objects.SCOPE, value0.substring(1), value0)
-				: value0;
+			const value1
+				= (_.startsWith(value0, "$@"))
+						? _.get(data.objects, value0.substring(2), value0)
+					: (_.startsWith(value0, "$"))
+						? _.get(data.objects.SCOPE, value0.substring(1), value0)
+						: value0;
 			if (!_.isUndefined(value1)) {
 				_.set(result.value, path1, value1);
 			}
@@ -514,15 +522,18 @@ function dereferenceVariable(data, name) {
 	}
 	else {
 		// Handle Variable reference
-		else if (_.startsWith(name, "$^")) {
-			name = _. CONTINUE
+		if (_.startsWith(name, "$@")) {
+			// console.log({name})
+			name = name.substr(2);
 		}
 		// Handle SCOPE abbreviation
-		if (_.startsWith(name, "$"))
+		else if (_.startsWith(name, "$")) {
 			name = "SCOPE."+name.substr(1);
+		}
 
 		while (_.has(data.objects, name)) {
 			const value = g(data, name);
+			// console.log({value})
 			if (!_.startsWith(name, "SCOPE.") && !_.startsWith(name, "DATA.")) {
 				result.objectName = name;
 			}

@@ -239,6 +239,13 @@ function loadProtocol(a, b, url, filecache) {
 		_.merge(filecache, b.files)
 	}
 
+	// Add variables to `objects`
+	if (b.variables) {
+		_.forEach(b.variables, (value, key) => {
+			b.objects[key] = _.merge({}, {type: "Variable"}, value);
+		});
+	}
+
 	// Create a clone keeping only valid protocol properties.
 	var c = _.cloneDeep(_.pick(b,
 		"description",
@@ -569,6 +576,18 @@ function validateProtocol1(protocol, o, path) {
 }
 
 function run(argv, userProtocol) {
+	argv = argv || process.argv.slice(2);
+
+	if (fs.existsSync("roboliq-processor.yaml")) {
+		const env = yaml.load("roboliq-processor.yaml");
+		if (env.preload) {
+			argv = env.preload.concat(argv);
+		}
+		if (env.args) {
+			argv = env.args.concat(argv);
+		}
+	}
+
 	// Validate the command line arguments
 	var opts = nomnom.parse(argv);
 	if (_.isEmpty(opts.infiles) && !userProtocol) {

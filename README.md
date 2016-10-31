@@ -334,3 +334,15 @@ Copy that content into a file
 
 * [ ] BUG: Compiling qc01-accuracy-tubes-003.yaml with dist crashes, whereas running with babel-node works
 * [ ] BUG: transporter.doThenRestoreLocation: can't use `$scopeVariable` in `objects` array
+* [ ] Variable references:
+	* SCOPE: should contain parameters, variables, data rows
+	* Referencing:
+		* `$`: substitute in scope variable
+		* `$*`: dereference twice (consider `$$`)
+		* `$$`: column array from current data table (consider `$#`)
+		* `$@`: dereference variable in `objects`
+		* `$&`: dereference a parameter value
+		* `${${@myvar}.somevalue}`
+		* `${@myvar.somevalue}`
+		* "$`...`": calculation
+		* template substitution with ticks

@@ -12,12 +12,12 @@ objects:
     type: Plate
     description: for finding reader error
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P2
-  plate2:
-    type: Plate
-    description: for finding meniscus parameters
-    model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
+  # plate2:
+  #   type: Plate
+  #   description: for finding meniscus parameters
+  #   model: ourlab.model.plateModel_96_round_transparent_nunc
+  #   location: ourlab.mario.site.P3
   # dyeLabware:
   #   type: Plate
   #   model: ourlab.model.troughModel_100ml
@@ -102,7 +102,7 @@ steps:
           command: absorbanceReader.measurePlate
           object: $plate
           program:
-            excitationWavelength: $^excitationWavelength
+            excitationWavelength: $@excitationWavelength
           output:
             #joinKey: well
             appendTo: measurements
@@ -123,7 +123,7 @@ steps:
     description: "Dispense water to top off the wells"
     data: {source: plateDesign1}
     command: pipetter.pipette
-    source: water
+    sources: water
     destinationLabware: $plate
     items:
       "#data":
@@ -153,7 +153,7 @@ steps:
           command: absorbanceReader.measurePlate
           object: $plate
           program:
-            excitationWavelength: $^excitationWavelength
+            excitationWavelength: $@excitationWavelength
           output:
             joinKey: well
             appendTo: measurements
@@ -165,4 +165,6 @@ steps:
     steps:
       1:
         command: shaker.shakePlate
+        program:
+          duration: 1 minute
         object: $plate

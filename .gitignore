@@ -28,3 +28,4 @@ roboliq.log*
 node_modules
 *.log
 compiled
+roboliq-processor.yaml
