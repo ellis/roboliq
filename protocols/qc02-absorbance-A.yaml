@@ -2,6 +2,14 @@ roboliq: v1
 description: |
   Measure the reader error at various dye concentrations and well volumes.
 
+  OrangeG 8g/L calculations at 250ul well volume:
+
+  * 50 ul / 2^5 = 1.43
+  * 0.9152/ul
+  * For 16ul dye01 to be ~0.1: 0.9152*16 / 0.1 = 146x dilution
+  * For 16ul dye05 to be ~0.5: 0.9152*16 / 0.5 = 29x dilution
+  * For 16ul dye10 to be ~1.0: 0.9152*16 / 1.0 = 15x dilution
+
 variables:
   excitationWavelength:
     description: excitation wavelength to read absorbance
