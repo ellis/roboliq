@@ -63,7 +63,7 @@ objects:
       totalVolume=calculate: 'totalVolumeIndex * (25ul)'
       source*: [water, dye01, dye05, dye10]
       volume: 16 ul
-      replicate*: 2
+      .replicate*: 2
       id=range:
         order: shuffle
       well=allocateWells:
@@ -81,13 +81,13 @@ objects:
       stage*:
       - state: empty
         shake: 0
-        replicate*: 3
+        measurement*: 3
       - state: filled
         shake: 0
-        replicate*: 3
+        measurement*: 3
       - state: shaker
         shake*: 3
-        replicate*: 3
+        measurement*: 3
 
 steps:
   data: {source: readerDesign1}
@@ -118,6 +118,7 @@ steps:
     description: "Dispense first aliquot of dye or water"
     data: {source: plateDesign1}
     command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
     destinationLabware: $plate
     items:
       "#data":
@@ -131,6 +132,7 @@ steps:
     description: "Dispense water to top off the wells"
     data: {source: plateDesign1}
     command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
     sources: water
     destinationLabware: $plate
     items:
@@ -176,3 +178,31 @@ steps:
         program:
           duration: 1 minute
         object: $plate
+      2:
+        description: "Re-read wells after shaking"
+        command: transporter.doThenRestoreLocation
+        equipment: ourlab.mario.roma2
+        objects: [plate1]
+        steps:
+          1:
+            description: "Put plate in reader"
+            command: transporter.movePlate
+            equipment: ourlab.mario.roma2
+            object: $plate
+            destination: ourlab.mario.site.READER
+          2:
+            description: "Read multiple times"
+            command: experiment.forEachRow
+            steps:
+              data: {source: plateDesign1}
+              command: absorbanceReader.measurePlate
+              object: $plate
+              program:
+                excitationWavelength: $@excitationWavelength
+              output:
+                joinKey: well
+                appendTo: measurements
+              userValues:
+                state: $state
+                shake: $shake
+                measurement: $measurement

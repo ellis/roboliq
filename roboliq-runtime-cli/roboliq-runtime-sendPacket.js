@@ -29,9 +29,9 @@ function sendPacket(packet, opts) {
 		console.log(data)
 	});
 
-	socket.on('disconnect', function() {
-		process.exit(0);
-	});
+	socket.on('disconnect', function() { console.log("DONE"); process.exit(0); });
+	socket.on('connect_error', function() { console.log("CONNECT ERROR"); process.exit(-1); });
+	socket.on('connect_timeout', function() { console.log("CONNECT TIMEOUT"); process.exit(-1); });
 }
 
 module.exports = sendPacket;

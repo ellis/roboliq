@@ -358,6 +358,8 @@ var commandHandlers = {
 			const command = _.merge({}, {
 				command: "transporter.movePlate",
 				agent: parsed.objectName.agent,
+				equipment: parsed.objectName.equipment,
+				program: parsed.value.program,
 				object: labwareName,
 				destination: parsed.value.objects[i].location
 			});

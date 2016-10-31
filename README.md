@@ -334,7 +334,7 @@ Copy that content into a file
 
 * [ ] BUG: Compiling qc01-accuracy-tubes-003.yaml with dist crashes, whereas running with babel-node works
 * [ ] BUG: transporter.doThenRestoreLocation: can't use `$scopeVariable` in `objects` array
-* [ ] BUG: transporter.doThenRestoreLocation: `equipment` wasn't used when transferring plate back to original position
+* [?] BUG: transporter.doThenRestoreLocation: `equipment` wasn't used when transferring plate back to original position
 * [ ] Variable references:
 	* SCOPE: should contain parameters, variables, data rows
 	* Referencing:
@@ -347,3 +347,5 @@ Copy that content into a file
 		* `${@myvar.somevalue}`
 		* "$`...`": calculation
 		* template substitution with ticks
+* [ ] allow for setting command defaults:
+	* `commandDefaults: [{command: "transporter.*", equipment: "ourlab.mario.roma2"}]`
