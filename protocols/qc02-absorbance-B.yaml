@@ -1,0 +1,125 @@
+roboliq: v1
+description: |
+  Measure the impact of well volume (i.e. meniscus shape) on the absorbance readout.
+
+  * Measure empty plate
+  * Dispense 16ul dye to half of wells
+  * For v in 25ul to 300ul in 25ul steps:
+      * fill wells with water to volume v
+      * read plate
+
+variables:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+
+objects:
+  plate2:
+    type: Plate
+    description: for finding meniscus parameters
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  # dyeLabware:
+  #   type: Plate
+  #   model: ourlab.model.troughModel_100ml
+  #   location: ourlab.mario.site.R6
+  #   contents: [Infinity l, dye]
+  # dye:
+  #   type: Liquid
+  #   wells: dyeLabware(C01 down F01)
+  tubes:
+    type: Plate
+    description: eppendorf tubes for dye
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  dye01:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~0.1
+    wells: tubes(A01)
+  dye05:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~0.5
+    wells: tubes(B01)
+  dye10:
+    type: Liquid
+    description: dye with concentration such that 16ul => ~1.0
+    wells: tubes(C01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+  plateDesign2:
+    type: Design
+    conditions:
+      plate*: [plate2]
+      well*=allocateWells:
+        rows: 8
+        columns: 12
+      dyeVolume=:
+        values: [0 ul, 16 ul]
+        order: reshuffle
+      waterVolume1=calculate: "(25 ul) - dyeVolume"
+
+  readerDesign2:
+    type: Design
+    conditions:
+      plate: plate2
+      totalVolume*=range:
+        from: 25
+        till: 300
+        step: 25
+        units: ul
+      dispenseVolume=calculate: '(totalVolume == (25 ul)) ? (25 ul - 16 ul) : (25 ul)'
+
+steps:
+  1:
+    description: Read absorbance of empty wells
+    command: absorbanceReader.measurePlate
+    object: plate2
+    program:
+      excitationWavelength: $@excitationWavelength
+    output:
+      appendTo: measurements
+      userValues:
+        totalVolume: 0 ul
+      simulate: "random(0.02, 0.04)"
+
+  2:
+    data: {source: plateDesign2}
+    description: Dispense dye
+    command: pipetter.pipette
+    sources: dye05
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$dyeVolume
+    clean: thorough
+    cleanBetween: none
+
+  3:
+    data: {source: readerDesign2}
+    description: Fill wells in layers with water and read absorbance
+    command: experiment.forEachRow
+    steps:
+      description: "`Volume {{$totalVolume}}`"
+      1:
+        description: Dispense water
+        command: pipetter.pipette
+        sources: water
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $dispenseVolume
+        clean: none
+        cleanAfter: flush
+      2:
+        data: {source: plateDesign2}
+        description: Read plate
+        command: absorbanceReader.measurePlate
+        object: plate2
+        program:
+          excitationWavelength: $@excitationWavelength
+        output:
+          appendTo: measurements
+          joinKey: well
+          userValues:
+            totalVolume: $totalVolume
+          simulate: "random(0.4, 0.6) * totalVolume / (250ul)"
