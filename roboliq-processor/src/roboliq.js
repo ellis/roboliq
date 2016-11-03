@@ -1033,7 +1033,8 @@ function _run(opts, userProtocol) {
 			accesses: [],
 			files: filecache,
 			protocol,
-			path: prefix
+			path: prefix,
+			simulatedOutput: protocol.simulatedOutput || {}
 		};
 		try {
 			//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
@@ -1103,6 +1104,12 @@ function _run(opts, userProtocol) {
 		// If the command has reports
 		if (!_.isEmpty(result.reports)) {
 			_.set(protocol, ["reports", id], result.reports);
+		}
+		// If the command has simulated output
+		if (!_.isEmpty(result.simulatedOutput)) {
+			_.forEach(simulatedOutput, (value, key) => {
+				_.set(protocol, ["simulatedOutput", key], value);
+			});
 		}
 	}
 

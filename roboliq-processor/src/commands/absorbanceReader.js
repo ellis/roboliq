@@ -11,6 +11,7 @@ import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
+import wellsParser from '../parsers/wellsParser.js';
 
 
 /**
@@ -45,7 +46,7 @@ var commandHandlers = {
 		const program = _.merge({}, parsed.orig.program, {
 			wells: (parsed.value.program || {}).wells
 		});
-		// Handle deprecated values
+		// Handle deprecated parameter names
 		const output = _.merge({}, parsed.orig.output, {
 			joinKey: _.get(parsed.orig, "program.wellDesignFactor"),
 			userValues: _.get(parsed.orig, "program.userValues"),
@@ -76,6 +77,21 @@ var commandHandlers = {
 				destination: destinationAfter
 			}
 		];
+
+		let simulatedOutput;
+		if (parsed.value.output.simulate) {
+			const labwareModelName = parsed.value.object.model; // REFACTOR: above this is called `model`
+			const labwareModel = _.get(data.objects, labwareModelName);
+			const wells0 = (_.has(parsed.value, ["program", "wells"]))
+				? commandHelper.asArray(parsed.value.program.wells)
+				: (_.has(parsed.value, ["program", "output", "joinKey"]))
+					? commandHelper.getDesignFactor(parsed.value.output.joinKey, data.objects.DATA)
+					: wellsParser.parse(`${parsed.objectName.object}(all)`, data.objects);
+			const wells = _.map(wells0, x => _.includes(x, "(")))
+			CONTINUE
+			console.log({wells})
+		}
+
 		return {
 			expansion: expansion
 		};
