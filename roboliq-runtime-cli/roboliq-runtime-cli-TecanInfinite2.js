@@ -97,7 +97,7 @@ if (!_.isEmpty(appendTo) && !_.isEmpty(table)) {
 	fs.appendFileSync(appendToFile, contents);
 
 	// HACK to copy data to shared drive
-	if (true) {
+	if (fs.existsSync("Y:\\Projects\\Roboliq")) {
 		const hackDir = path.join("Y:\\Projects\\Roboliq\\labdata", scriptBase, runId);
 		console.log({hackDir})
 		mkdirp.sync(hackDir);

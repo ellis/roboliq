@@ -19,14 +19,6 @@ objects:
     description: for finding meniscus parameters
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  # dyeLabware:
-  #   type: Plate
-  #   model: ourlab.model.troughModel_100ml
-  #   location: ourlab.mario.site.R6
-  #   contents: [Infinity l, dye]
-  # dye:
-  #   type: Liquid
-  #   wells: dyeLabware(C01 down F01)
   tubes:
     type: Plate
     description: eppendorf tubes for dye

@@ -9,6 +9,8 @@ const metallic = require('metalsmith-metallic'); // code syntax highlighting
 const assets = require('metalsmith-assets');
 const inplace = require('metalsmith-in-place');
 const layouts = require('metalsmith-layouts');
+const handlebars = require('handlebars');
+const marked = require('marked');
 
 const templateConfig = {
 	engine: 'handlebars',
@@ -17,6 +19,16 @@ const templateConfig = {
 	default: 'default.html',
 	pattern: '**/*.html'
 };
+
+handlebars.registerHelper('md', function(text) {
+	if (text) {
+		var html = marked(text);
+		return new handlebars.SafeString(html);
+	}
+	else {
+		return "";
+	}
+});
 
 metalsmith(__dirname)
 	.source("content")
@@ -31,7 +43,6 @@ metalsmith(__dirname)
 		_forEach(files, function(file, filename) {
 			if (path.extname(filename).toLowerCase() === ".yaml") {
 				file.data = YAML.parse(file.contents.toString("utf8"));
-
 			}
 		});
 		done();

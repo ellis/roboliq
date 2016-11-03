@@ -16,7 +16,7 @@
 									<input type="text" name="search" class="form-control" placeholder="Search"/>
 							</form>
 					</div-->
-					<div class="sidebar">
+					<div class="sidebar" style="height: 100%; margin: .5em">
 							<nav>
 								{{#each collections.commands}}
 									<ul class="nav nav-stacked nav-pills">
@@ -29,11 +29,12 @@
 									{{/each}}
 									</ul>
 								{{/each}}
+								<br/><br/>
 							</nav>
 					</div>
 			</div>
 			<div class="container main-view col-xs-9 pull-right">
-				<div class="row col-xs-9">
+				<div style="padding: .75em">
 					<h1>{{title}}</h1>
 					{{{ contents }}}
 
@@ -41,24 +42,32 @@
 						{{#each data}}
 							{{#if module}}
 								<h2 id="_{{@key}}">{{@key}}</h2>
-								{{module}}
+								{{md module}}
 							{{else}}
 								<h3 id="_{{@key}}">{{@key}}</h3>
 								<div class="command">
-									{{description}}
+									{{md description}}
 
 									{{#if properties}}
-									Properties:
+									<p style="margin-top: 1em">Properties:</p>
 
-									<table>
+									<table class="table table-striped table-hover table-condensed">
 										<tr><th>Name</th><th>Type</th><th>Argument</th><th>Description</th></tr>
 										{{#each properties}}
-										<tr>
-											<td>{{@key}}</td>
-											<td>{{type}}</td>
-											<td>...</td>
-											<td>{{description}}</td>
-										</tr>
+											<tr>
+												<td>{{@key}}</td>
+												<td>{{type}}</td>
+												<td>...</td>
+												<td>{{md description}}</td>
+											</tr>
+											{{#each properties}}
+												<tr>
+													<td>&nbsp;&nbsp;{{@key}}</td>
+													<td>{{type}}</td>
+													<td>...</td>
+													<td>{{md description}}</td>
+												</tr>
+											{{/each}}
 										{{/each}}
 									</table>
 									{{/if}}
@@ -66,7 +75,7 @@
 									{{#if example}}
 										Example:
 
-										<code>{{example}}</code>
+										{{md example}}
 									{{/if}}
 								</div>
 							{{/if}}
