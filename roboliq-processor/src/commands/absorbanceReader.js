@@ -7,8 +7,10 @@
 
 var _ = require('lodash');
 var jmespath = require('jmespath');
+import math from 'mathjs';
 import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
+const Design = require('../design.js');
 var expect = require('../expect.js');
 var misc = require('../misc.js');
 import wellsParser from '../parsers/wellsParser.js';
@@ -79,22 +81,45 @@ var commandHandlers = {
 		];
 
 		let simulatedOutput;
-		if (parsed.value.output.simulate) {
+		if (_.has(parsed.value, ["output", "simulated"])) {
 			const labwareModelName = parsed.value.object.model; // REFACTOR: above this is called `model`
 			const labwareModel = _.get(data.objects, labwareModelName);
+			const joinKey = _.get(parsed.value, ["program", "output", "joinKey"]);
+			const userValues = _.get(parsed.value, ["program", "output", "userValues"], {});
+
 			const wells0 = (_.has(parsed.value, ["program", "wells"]))
 				? commandHelper.asArray(parsed.value.program.wells)
-				: (_.has(parsed.value, ["program", "output", "joinKey"]))
-					? commandHelper.getDesignFactor(parsed.value.output.joinKey, data.objects.DATA)
+				: (!_.isUndefined(joinKey))
+					? commandHelper.getDesignFactor(joinKey, data.objects.DATA)
 					: wellsParser.parse(`${parsed.objectName.object}(all)`, data.objects);
-			const wells = _.map(wells0, x => _.includes(x, "(")))
-			CONTINUE
+			const wells = _.uniq(_.map(wells0, x => x.replace(/.*\(([^)]*)\)/, "$1")));
 			console.log({wells})
+
+			const common = (_.isEmpty(joinKey)) ? Design.getCommonValues(data.objects.DATA) : {};
+			const rows = _.map(wells, well => {
+				const row0 = (!_.isUndefined(joinKey))
+					? _.find(data.objects.DATA, row => (row[joinKey].replace(/.*\(([^)]*)\)/, "$1") === well)) || {}
+					: common;
+				console.log({row0})
+				console.log({simulated: parsed.value.output.simulated})
+				const value = math.eval(parsed.value.output.simulated, row0);
+				const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row0, userValues, {well, value_type: "absorbance", value});
+				console.log({row})
+				return row;
+			});
 		}
 
-		return {
-			expansion: expansion
-		};
+		const result = {expansion};
+		if (simulatedOutput) {
+			if (_.has(parsed.value, ["output", "writeTo"])) {
+				_.set(result, ["simulatedOutput", parsed.value.output.writeTo+".json"], simulatedOutput);
+			}
+			if (_.has(parsed.value, ["output", "appendTo"])) {
+				_.set(result, ["simulatedOutput", parsed.value.output.appendTo+".jsonl"], _.get(data, ["simulatedOutput", parsed.value.output.appendTo+".jsonl"], []).concat(simulatedOutput));
+			}
+		}
+		console.log({result})
+		return result;
 	},
 };
 

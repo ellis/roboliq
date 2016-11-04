@@ -74,7 +74,7 @@ steps:
       appendTo: measurements
       userValues:
         totalVolume: 0 ul
-      simulate: "random(0.02, 0.04)"
+      simulated: "random(number(0.02), number(0.04))"
 
   2:
     data: {source: plateDesign2}
@@ -114,4 +114,4 @@ steps:
           joinKey: well
           userValues:
             totalVolume: $totalVolume
-          simulate: "random(0.4, 0.6) * totalVolume / (250ul)"
+          simulated: "random(number(0.4), number(0.6)) * totalVolume / (250ul)"

@@ -1,7 +1,28 @@
 # Todos
 
+# paper2 Todos
+
+* [ ] generate simulated measurement outputs
+* [ ] save simulated measurement outputs if the '-P' option is given
+
+# Todos for Charlotte
+
+* [ ] create Roboliq package for Atom
+	* [ ] compile script using config data
+	* [ ] display errors
+	* [ ] display warnings
+	* [ ] display designs
+	* [ ] display compilation progress
+	* [ ] display various infos about the final script (info that can be formatted as Markdown reasonably well)
+* [ ] troubleshoot protocol processing using bablified code
+* [ ] use bablified code to run roboliq-runtime-cli, so it executes faster
+* [ ] improve error handling/display
+* [ ] at beginning of script, display notice to user about what should be on the bench, wait for user to confirm
+
 # Documentations TODOS
 
+* [ ] generated: separate pages for Commands and Types
+* [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] distribution documentation
 	* [ ] src/roboliq/README.md
 		* [ ] Getting Started

@@ -1107,7 +1107,7 @@ function _run(opts, userProtocol) {
 		}
 		// If the command has simulated output
 		if (!_.isEmpty(result.simulatedOutput)) {
-			_.forEach(simulatedOutput, (value, key) => {
+			_.forEach(result.simulatedOutput, (value, key) => {
 				_.set(protocol, ["simulatedOutput", key], value);
 			});
 		}
