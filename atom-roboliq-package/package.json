@@ -1,0 +1,16 @@
+{
+  "name": "atom-roboliq",
+  "main": "./lib/main.js",
+  "version": "0.1.0",
+  "description": "IDE plugin for Roboliq",
+  "keywords": [
+    "liquid-handling robot", "automation"
+  ],
+  "repository": "https://github.com/ellis/roboliq",
+  "license": "GPL3",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+  }
+}
