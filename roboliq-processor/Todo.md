@@ -12,11 +12,16 @@
     * [ ] run analysis along-side execution
     * [ ] display analysis during execution
 * [?] script for absorbance C
-* [?] run script for absorbance A
+* [.] run script for absorbance A
 * [ ] run script for absorbance B
 * [ ] run script for absorbance C
-* [ ] script for unintended dilution
+* [ ] analysis for absorbance A
+* [.] analysis for absorbance B
+* [ ] analysis for absorbance C
+* [ ] analysis for absorbance (all together)
+* [x] script for unintended dilution
 * [ ] run script for unintended dilution
+* [ ] analysis for unintended dilution
 * [ ] script for evaporation
 * [ ] run script for evaporation
 * [ ] script for z-level
