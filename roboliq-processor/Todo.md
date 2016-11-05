@@ -2,8 +2,16 @@
 
 # paper2 Todos
 
-* [ ] generate simulated measurement outputs
+* [x] generate simulated measurement outputs
+* [x] test on empty wells
+* [x] submit bug reports to mathjs
+* [x] test on wells using plateDesign2
 * [ ] save simulated measurement outputs if the '-P' option is given
+* [ ] write analysis using the simulated measurements
+* [ ] figure out how to associate and copy R files to the '-P' directory
+* [ ] figure out how to run analysis during execution
+* [ ] figure out how to display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)
+* [ ] save designs if the '-P' option is given (as json,md,csv?)?
 
 # Todos for Charlotte
 
@@ -14,6 +22,7 @@
 	* [ ] display designs
 	* [ ] display compilation progress
 	* [ ] display various infos about the final script (info that can be formatted as Markdown reasonably well)
+	* [ ] possibly try to handle real-time log while the script is executing
 * [ ] troubleshoot protocol processing using bablified code
 * [ ] use bablified code to run roboliq-runtime-cli, so it executes faster
 * [ ] improve error handling/display

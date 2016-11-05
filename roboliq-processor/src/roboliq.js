@@ -1152,12 +1152,15 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "warnings", "errors")
+			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "simulatedOutput", "warnings", "errors")
 		);
 		// Handle protocol.COMPILER
 		if (!_.isEmpty(protocol.COMPILER)) {
 			output.COMPILER = _.pick(protocol.COMPILER, "resumeStepId", "suspendStepId");
 		}
+		// console.log("SIMULATED OUTPUT")
+		// console.log(JSON.stringify(protocol.simulatedOutput))
+		// process.exit(-1);
 
 		const tables = {
 			labware: [],

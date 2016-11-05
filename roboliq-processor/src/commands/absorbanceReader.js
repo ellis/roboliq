@@ -84,8 +84,8 @@ var commandHandlers = {
 		if (_.has(parsed.value, ["output", "simulated"])) {
 			const labwareModelName = parsed.value.object.model; // REFACTOR: above this is called `model`
 			const labwareModel = _.get(data.objects, labwareModelName);
-			const joinKey = _.get(parsed.value, ["program", "output", "joinKey"]);
-			const userValues = _.get(parsed.value, ["program", "output", "userValues"], {});
+			const joinKey = _.get(parsed.value, ["output", "joinKey"]);
+			const userValues = _.get(parsed.value, ["output", "userValues"], {});
 
 			const wells0 = (_.has(parsed.value, ["program", "wells"]))
 				? commandHelper.asArray(parsed.value.program.wells)
@@ -93,18 +93,21 @@ var commandHandlers = {
 					? commandHelper.getDesignFactor(joinKey, data.objects.DATA)
 					: wellsParser.parse(`${parsed.objectName.object}(all)`, data.objects);
 			const wells = _.uniq(_.map(wells0, x => x.replace(/.*\(([^)]*)\)/, "$1")));
-			console.log({wells})
+			// console.log({wells})
 
+			// console.log({joinKey})
 			const common = (_.isEmpty(joinKey)) ? Design.getCommonValues(data.objects.DATA) : {};
-			const rows = _.map(wells, well => {
+			// console.log({common})
+			// console.log("DATA:\n"+JSON.stringify(data.objects.DATA))
+			simulatedOutput = _.map(wells, well => {
 				const row0 = (!_.isUndefined(joinKey))
 					? _.find(data.objects.DATA, row => (row[joinKey].replace(/.*\(([^)]*)\)/, "$1") === well)) || {}
 					: common;
-				console.log({row0})
-				console.log({simulated: parsed.value.output.simulated})
-				const value = math.eval(parsed.value.output.simulated, row0);
-				const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row0, userValues, {well, value_type: "absorbance", value});
-				console.log({row})
+				const row1 = _.merge({}, data.objects.SCOPE, row0);
+				// console.log({row0, row1, simulated: parsed.value.output.simulated})
+				const value = Design.calculate(parsed.value.output.simulated, row1);
+				const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row1, userValues, {well, value_type: "absorbance", value});
+				// console.log({row})
 				return row;
 			});
 		}
@@ -118,7 +121,7 @@ var commandHandlers = {
 				_.set(result, ["simulatedOutput", parsed.value.output.appendTo+".jsonl"], _.get(data, ["simulatedOutput", parsed.value.output.appendTo+".jsonl"], []).concat(simulatedOutput));
 			}
 		}
-		console.log({result})
+		// console.log("RESULTS:\n"+JSON.stringify(result))
 		return result;
 	},
 };

@@ -1032,7 +1032,7 @@ function assign_allocatePlates_initGroup(rows, rowIndexes) {
 }
 
 /**
- * Calculate `expr` using variables in `row`, with optinoal `action` object specifying `units` and/or `decimals`
+ * Calculate `expr` using variables in `row`, with optional `action` object specifying `units` and/or `decimals`
  */
 export function calculate(expr, row, action = {}) {
 	const scope = _.mapValues(row, x => {

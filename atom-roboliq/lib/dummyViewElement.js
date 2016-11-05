@@ -1,5 +1,7 @@
+'use babel';
+
 export default class DummyViewElement {
-  constructor (state) {
+  constructor(state = {content: "dummy text"}) {
     this.data = state;
     this.element = document.createElement('div');
     this.message = document.createElement('span');
