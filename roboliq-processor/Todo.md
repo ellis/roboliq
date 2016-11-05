@@ -7,6 +7,7 @@
 * [x] submit bug reports to mathjs
 * [x] test on wells using plateDesign2
 * [x] save simulated measurement outputs if the '-P' option is given
+* [x] absorbanceReader: add `output.units` option that convert columns to plain numbers in the given units
 * [ ] write analysis using the simulated measurements
 * [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] figure out how to run analysis during execution

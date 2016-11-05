@@ -110,6 +110,19 @@ var commandHandlers = {
 				// console.log({row})
 				return row;
 			});
+
+			if (_.has(parsed.value, ["output", "units"])) {
+				_.forEach(simulatedOutput, row => {
+					_.forEach(parsed.value.output.units, (units, key) => {
+						if (_.has(row, key)) {
+							// console.log(row)
+							// console.log({key, units, value: row[key]});
+							// console.log({a: math.eval(row[key])})
+							row[key] = math.eval(row[key]).toNumber(units);
+						}
+					});
+				});
+			}
 		}
 
 		const result = {expansion};

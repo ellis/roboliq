@@ -43,6 +43,7 @@ absorbanceReader.measurePlate:
         appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"}
         userValues: {description: "User-specificed values that should be included in the output table", type: object}
         simulated: {description: "An expression to evaluate with mathjs", type: string}
+        units: {description: "Map of factor names to unit type; converts the factor values to plain number in the given units."}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}
