@@ -46,6 +46,7 @@
     "prepublish": "npm run metalsmith",
     "clean": "rm -rf dist",
     "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
+	"design": "babel -- src/designMain.js",
     "webpack": "webpack",
     "metalsmith": "babel-node --harmony build.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",

@@ -63,6 +63,7 @@ Steps might be:
 * [ ] use bablified code to run roboliq-runtime-cli, so it executes faster
 * [ ] improve error handling/display
 * [ ] at beginning of script, display notice to user about what should be on the bench, wait for user to confirm
+* [ ] change from '#data' to 'data()'
 
 # Documentations TODOS
 

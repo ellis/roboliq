@@ -11,6 +11,12 @@ description: |
       * measure absorbance of source and destination wells
       * repeat the process for 3 dilutions per volume
 
+  OrangeG 8g/L calculations to achive 250ul => ~2:
+
+  * 50 ul / 2^5 = 1.43
+  * 0.9152/ul
+  * For 250ul dye to be 2: 0.9152*250 / 2 = 114x dilution (I'll use our 100x dilution)
+
 variables:
   excitationWavelength:
     description: excitation wavelength to read absorbance
@@ -35,10 +41,10 @@ objects:
     type: Variable
     value: ourlab.mario.systemLiquid
 
-# well,step,stageName,dyeVolume,waterVolume,dilutionFactor
+# well,step,stage,dyeVolume,waterVolume,dilutionFactor
 # A01,control,0,0,
 # 1,1,A02,fill,A02,250,3,9,27,250,1
-# origId,seqId,well,stageName,orig,step,role,volume,count,totalTransfer,dyeVolume,dilutionFactor
+# origId,seqId,well,stage,orig,step,role,volume,count,totalTransfer,dyeVolume,dilutionFactor
 # 1,1,A02,dilution,A02,1,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
 # 1,2,A03,dilution,A02,1,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
 # 1,2,A03,dilution,A02,2,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
@@ -51,7 +57,11 @@ objects:
     description: |
       * 4 control wells to be filled with water to 250ul
     conditions:
+      stage: dilute
       volume*: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+      count=calculate: '(volume == (150 ul)) ? 1 : 9'
+      transferTotal=calculate: 'volume * count'
+      totalVolume: 250 ul
       syringe*: 4
       origId=range: {}
       seqId*: 4
@@ -63,87 +73,153 @@ objects:
       .=concat:
         groupBy: [plate]
         conditions:
-          stageName: control
+          stage: control
+          totalVolume: 250 ul
           seqId*: 4
-      # stageA*:
-      # - stageName: control
-      #   replicate*: 4
-      #   dyeVolume: 0 ul
-      # well=allocateWells:
-      #   wells: "A01 right H12"
-      #   rows: 8
-      #   columns: 12
-      #   groupBy: plate
-        #count=calculate: '(volume == (150 ul)) ? 1 : 9'
+      wellId=range: {}
+      srcId=calculate: '(seqId == 1) ? 0 : wellId - 1'
+      well=allocateWells:
+        wells: "A01 right H12"
+        rows: 8
+        columns: 12
+        groupBy: plate
+      .caseA=case:
+        - where: 'stage == "dilute" and seqId == 1'
+          conditions:
+            stage*:
+              fill:
+                role: dst
+                seqId=calculate: "seqId - 1"
+              dilute:
+                role: src
+        - where: 'stage == "dilute" and seqId == 4'
+          conditions:
+            role: dst
+            seqId=calculate: "seqId - 1"
+        - where: 'stage == "dilute"'
+          conditions:
+            role*:
+              dst:
+                seqId=calculate: 'seqId - 1'
+              src: {}
+      .caseB=case:
+        - where: 'stage == "fill" or stage == "dilute"'
+          conditions:
+            conc=calculate: '(transferTotal/totalVolume)^seqId'
+      .caseC=case:
+        - where: 'stage == "dilute"'
+          conditions:
+            waterVolume=calculate: '(role == "src") ? transferTotal : totalVolume - transferTotal'
 
 steps:
-  1:
-    description: Read absorbance of empty wells
-    command: absorbanceReader.measurePlate
-    object: plate2
-    program:
-      excitationWavelength: $@excitationWavelength
-    output:
-      appendTo: measurements
-      userValues:
-        plate: plate2
-        dyeVolume: 0 ul
-        totalVolume: 0 ul
-      simulated: "random(number(0.02), number(0.04))"
-      units:
-        dyeVolume: ul
-        totalVolume: ul
+  data: {source: design1}
+  command: experiment.forEachGroup
+  groupBy: plate
+  steps:
+    description: "`Plate {{$plate}}`"
+    1:
+      description: Read absorbance of empty wells
+      command: absorbanceReader.measurePlate
+      object: $plate
+      program:
+        excitationWavelength: $@excitationWavelength
+        wells:
+          "#data":
+            value: well
+            unique: true
+      output:
+        appendTo: measurements
+        userValues:
+          totalVolume: 0
+        simulated: "random(number(0.04), number(0.06))"
 
-  2:
-    data: {source: plateDesign2}
-    description: Dispense dye
-    command: pipetter.pipette
-    sources: dye05
-    destinationLabware: $plate
-    destinations: $$well
-    volumes: $$dyeVolume
-    clean: thorough
-    cleanBetween: none
-
-  3:
-    data: {source: plateDesign2}
-    description: Dispense dye
-    command: pipetter.pipette
-    sources: water
-    destinationLabware: $plate
-    destinations: $$well
-    volumes: $$waterVolume1
-    clean: none
-    cleanAfter: flush
-
-  4:
-    data: {source: readerDesign2}
-    description: Fill wells in layers with water and read absorbance
-    command: experiment.forEachRow
-    steps:
-      description: "`Volume {{$totalVolume}}`"
+    2:
+      data: {where: 'stage == "control"'}
+      description: Handle control wells
       1:
-        description: Dispense water
+        description: Fill control wells with water
         command: pipetter.pipette
         sources: water
         destinationLabware: $plate
         destinations: $$well
-        volumes: $dispenseVolume
-        clean: none
-        cleanAfter: flush
+        volumes: $totalVolume
+        clean: light
+        cleanBetween: none
       2:
-        data: {source: plateDesign2}
-        description: Read plate
+        description: Read absorbance of control wells
         command: absorbanceReader.measurePlate
-        object: plate2
+        object: $plate
         program:
           excitationWavelength: $@excitationWavelength
         output:
-          appendTo: measurements
           joinKey: well
-          userValues:
-            totalVolume: $totalVolume
-          simulated: "(dyeVolume > (0ul)) ? bignumber(random(number(0.4), number(0.6))) * totalVolume / (250ul) : bignumber(random(number(0.02), number(0.04)))"
+          appendTo: measurements
           units:
-            dyeVolume: ul
             totalVolume: ul
+          simulated: "random(number(0.02), number(0.04))"
+
+    3:
+      data: {where: 'stage == "fill"'}
+      1:
+        description: Dispense initial dye aliquots
+        command: pipetter.pipette
+        sources: dye
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $totalVolume
+        clean: flush
+      2:
+        description: Read absorbance of control wells
+        command: absorbanceReader.measurePlate
+        object: $plate
+        program:
+          excitationWavelength: $@excitationWavelength
+        output:
+          joinKey: well
+          appendTo: measurements
+          units:
+            totalVolume: ul
+          simulated: "random(number(1.9), number(2.1))"
+
+    4:
+      data: {where: 'stage == "dilute"'}
+      description: "Perform dilutions"
+      command: experiment.forEachGroup
+      groupBy: seqId
+      steps:
+        description: "Dilution step {{$seqId}}"
+        1:
+          description: "Transfer dye to next well"
+          command: pipetter.pipette
+          sourceLabware: $plate
+          sources:
+            "#data":
+              where: 'role == "src"'
+              value: well
+          destinationLabware: $plate
+          destinations:
+            "#data":
+              where: 'role == "dst"'
+              value: well
+          volumes: $$volume
+          clean: flush
+        2:
+          description: "Fill wells to {{$totalVolume}}"
+          command: pipetter.pipette
+          sources: water
+          destinationLabware: $plate
+          destinations: $$well
+          volumes: $$waterVolume
+          clean: flush
+        3:
+          description: Read absorbance of control wells
+          command: absorbanceReader.measurePlate
+          object: $plate
+          program:
+            excitationWavelength: $@excitationWavelength
+          output:
+            joinKey: well
+            appendTo: measurements
+            units:
+              totalVolume: ul
+            simulated: "bignumber(random(number(1.9), number(2.1))) * conc"
