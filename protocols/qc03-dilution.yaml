@@ -90,6 +90,7 @@ objects:
               fill:
                 role: dst
                 seqId=calculate: "seqId - 1"
+                conc: 1
               dilute:
                 role: src
         - where: 'stage == "dilute" and seqId == 4'
@@ -103,13 +104,16 @@ objects:
                 seqId=calculate: 'seqId - 1'
               src: {}
       .caseB=case:
-        - where: 'stage == "fill" or stage == "dilute"'
-          conditions:
-            conc=calculate: '(transferTotal/totalVolume)^seqId'
-      .caseC=case:
         - where: 'stage == "dilute"'
           conditions:
             waterVolume=calculate: '(role == "src") ? transferTotal : totalVolume - transferTotal'
+            .caseC=case:
+              - where: 'role == "dst"'
+                conditions:
+                  conc=calculate: '(transferTotal/totalVolume)^seqId'
+              - where: 'role == "src"'
+                conditions:
+                  conc=calculate: '(transferTotal/totalVolume)^(seqId - 1) * (1 - transferTotal / totalVolume)'
 
 steps:
   data: {source: design1}
@@ -187,7 +191,7 @@ steps:
       command: experiment.forEachGroup
       groupBy: seqId
       steps:
-        description: "Dilution step {{$seqId}}"
+        description: "`Dilution step {{$seqId}}`"
         1:
           description: "Transfer dye to next well"
           command: pipetter.pipette
@@ -201,7 +205,10 @@ steps:
             "#data":
               where: 'role == "dst"'
               value: well
-          volumes: $$volume
+          volumes:
+            "#data":
+              where: 'role == "dst"'
+              value: volume
           clean: flush
         2:
           description: "Fill wells to {{$totalVolume}}"

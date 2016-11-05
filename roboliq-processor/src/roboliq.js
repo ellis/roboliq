@@ -1266,7 +1266,7 @@ function _run(opts, userProtocol) {
 
 		// Get tables for all designs
 		const designs = misc.getObjectsOfType(protocol.objects, "Design");
-		const designTables = _.mapValues(designs, Design.flattenDesign);
+		const designTables = _.mapValues(designs, design => Design.flattenDesign(design));
 		if (!_.isEmpty(designTables))
 			tables.designs = designTables;
 
