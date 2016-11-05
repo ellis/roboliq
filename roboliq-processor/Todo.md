@@ -6,7 +6,7 @@
 * [x] test on empty wells
 * [x] submit bug reports to mathjs
 * [x] test on wells using plateDesign2
-* [ ] save simulated measurement outputs if the '-P' option is given
+* [x] save simulated measurement outputs if the '-P' option is given
 * [ ] write analysis using the simulated measurements
 * [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] figure out how to run analysis during execution

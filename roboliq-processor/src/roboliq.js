@@ -699,9 +699,38 @@ function runWithOpts(opts, userProtocol) {
 			if (!opts.quiet) {
 				console.log("output written to: "+outpath);
 			}
+
+			// Write output protocol
 			mkdirp.sync(path.dirname(outpath));
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 
+			// Write simulatedOutput IF parentDir was specified
+			// console.log({a: !_.isEmpty(result.output.simulatedOutput), b: opts.parentDir})
+			if (!_.isEmpty(result.output.simulatedOutput) && opts.parentDir) {
+				const simulatedDir = path.join(dir, "simulated");
+				// console.log({simulatedDir})
+				mkdirp.sync(simulatedDir);
+				_.forEach(result.output.simulatedOutput, (value, filename) => {
+					const simulatedFile = path.join(simulatedDir, filename);
+					// console.log({filename, simulatedFile})
+					if (!opts.quiet) {
+						console.log("saving simulated output: "+simulatedFile);
+					}
+					const ext = path.extname(simulatedFile);
+					if (ext === ".json") {
+						fs.writeFileSync(simulatedFile, JSON.stringify(value, null, "\t")+"\n");
+					}
+					else if (ext === ".jsonl") {
+						const contents = value.map(x => JSON.stringify(x)).join("\n") + "\n";
+						fs.writeFileSync(simulatedFile, contents);
+					}
+					else {
+						fs.writeFileSync(simulatedFile, value);
+					}
+				});
+			}
+
+			// Write dump data (2016-11-05 ELLIS: What's this for??)
 			if (result.dump) {
 				const dumppath = path.join(path.dirname(output), `${result.dump.COMPILER.resumeStepId}.dump.json`);
 				if (!opts.quiet) {
@@ -710,6 +739,7 @@ function runWithOpts(opts, userProtocol) {
 				fs.writeFileSync(dumppath, JSON.stringify(result.dump, null, '\t')+"\n");
 			}
 
+			// Send through the Evoware compiler
 			if (opts.evoware) {
 				const evowareArgs = _.clone(opts.evoware.split(","));
 				assert(evowareArgs.length >= 3, "at least three arguments must be passed to --evoware options: carrier file, table file, and one or more agent names");
