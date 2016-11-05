@@ -644,6 +644,41 @@ describe('design', () => {
 			);
 		});
 
+		it("should handle concat() without groupBy", () => {
+			should.deepEqual(
+				expandConditions({
+					"i*": [1,2,3],
+					".=concat": {
+						conditions: {
+							j: 1
+						}
+					}
+				}),
+				[
+					{i: 1}, {i: 2}, {i: 3}, {j: 1}
+				]
+			)
+		});
+
+		it.only("should handle concat() with groupBy", () => {
+			should.deepEqual(
+				expandConditions({
+					"i*": 2,
+					"j*": 2,
+					".=concat": {
+						groupBy: "i",
+						conditions: {
+							"k=calculate": "i * 2"
+						}
+					}
+				}),
+				[
+					{i: 1, j: 1}, {i: 1, j: 2}, {i: 2, j: 1}, {i: 2, j: 2},
+					{i: 1, k: 2}, {i: 2, k: 4}
+				]
+			)
+		});
+
 		it("should support allocateWells() with sameBy", () => {
 			should.deepEqual(
 				expandConditions({

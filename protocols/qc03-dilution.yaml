@@ -1,0 +1,149 @@
+roboliq: v1
+description: |
+  Find the amount of unintended dilution taking place in the fixed tips.
+
+  * Measure empty plate
+  * Fill a few control wells with 250ul water and read their absorbance.
+  * for v in 3ul, 7ul, 15ul, 16ul, and 150ul:
+      * each tip dispenses 250ul into a well
+      * transfer v to next empty well n times (where n = 1 for 150ul, 9 for other volumes)
+      * fill source and destination wells to 250ul
+      * measure absorbance of source and destination wells
+      * repeat the process for 3 dilutions per volume
+
+variables:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+
+objects:
+  plate1:
+    type: Plate
+    description: for finding meniscus parameters
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  tubes:
+    type: Plate
+    description: eppendorf tubes for dye
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  dye:
+    type: Liquid
+    description: dye with concentration such that 250ul => 2
+    wells: tubes(A01)
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+
+# well,step,stageName,dyeVolume,waterVolume,dilutionFactor
+# A01,control,0,0,
+# 1,1,A02,fill,A02,250,3,9,27,250,1
+# origId,seqId,well,stageName,orig,step,role,volume,count,totalTransfer,dyeVolume,dilutionFactor
+# 1,1,A02,dilution,A02,1,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
+# 1,2,A03,dilution,A02,1,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
+# 1,2,A03,dilution,A02,2,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
+# 1,3,A04,dilution,A02,2,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
+# 1,3,A04,dilution,A02,3,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
+# 1,4,A05,dilution,A02,3,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
+
+  design1:
+    type: Design
+    description: |
+      * 4 control wells to be filled with water to 250ul
+    conditions:
+      volume*: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+      syringe*: 4
+      origId=range: {}
+      seqId*: 4
+      plate=allocatePlates:
+        plates: [plate1]
+        groupBy: [origId]
+        wellsPerPlate: 92
+      # we need to add 4 control wells for each plate
+      .=concat:
+        groupBy: [plate]
+        conditions:
+          stageName: control
+          seqId*: 4
+      # stageA*:
+      # - stageName: control
+      #   replicate*: 4
+      #   dyeVolume: 0 ul
+      # well=allocateWells:
+      #   wells: "A01 right H12"
+      #   rows: 8
+      #   columns: 12
+      #   groupBy: plate
+        #count=calculate: '(volume == (150 ul)) ? 1 : 9'
+
+steps:
+  1:
+    description: Read absorbance of empty wells
+    command: absorbanceReader.measurePlate
+    object: plate2
+    program:
+      excitationWavelength: $@excitationWavelength
+    output:
+      appendTo: measurements
+      userValues:
+        plate: plate2
+        dyeVolume: 0 ul
+        totalVolume: 0 ul
+      simulated: "random(number(0.02), number(0.04))"
+      units:
+        dyeVolume: ul
+        totalVolume: ul
+
+  2:
+    data: {source: plateDesign2}
+    description: Dispense dye
+    command: pipetter.pipette
+    sources: dye05
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$dyeVolume
+    clean: thorough
+    cleanBetween: none
+
+  3:
+    data: {source: plateDesign2}
+    description: Dispense dye
+    command: pipetter.pipette
+    sources: water
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$waterVolume1
+    clean: none
+    cleanAfter: flush
+
+  4:
+    data: {source: readerDesign2}
+    description: Fill wells in layers with water and read absorbance
+    command: experiment.forEachRow
+    steps:
+      description: "`Volume {{$totalVolume}}`"
+      1:
+        description: Dispense water
+        command: pipetter.pipette
+        sources: water
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $dispenseVolume
+        clean: none
+        cleanAfter: flush
+      2:
+        data: {source: plateDesign2}
+        description: Read plate
+        command: absorbanceReader.measurePlate
+        object: plate2
+        program:
+          excitationWavelength: $@excitationWavelength
+        output:
+          appendTo: measurements
+          joinKey: well
+          userValues:
+            totalVolume: $totalVolume
+          simulated: "(dyeVolume > (0ul)) ? bignumber(random(number(0.4), number(0.6))) * totalVolume / (250ul) : bignumber(random(number(0.02), number(0.04)))"
+          units:
+            dyeVolume: ul
+            totalVolume: ul

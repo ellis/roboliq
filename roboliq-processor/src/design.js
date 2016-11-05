@@ -78,12 +78,12 @@ export function printRows(rows, hideRedundancies = false) {
  * Turn a design specification into a design table.
  * @param {object} design - the design specification.
  */
-export function flattenDesign(design) {
+export function flattenDesign(design, randomEngine) {
 	if (_.isEmpty(design)) {
 		return [];
 	}
 
-	const randomEngine = Random.engines.mt19937();
+	randomEngine = randomEngine || Random.engines.mt19937();
 	if (_.isNumber(design.randomSeed)) {
 		randomEngine.seed(design.randomSeed);
 	}
@@ -91,14 +91,33 @@ export function flattenDesign(design) {
 		randomEngine.autoSeed();
 	}
 
-	const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
-	const conditionsRows = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine, design.initialRows));
-	let rows;
-	if (conditionsRows.length == 1) {
-		rows = conditionsRows[0];
+	let children;
+	if (_.isArray(design.children)) {
+		children = design.children.map(child => flattenDesign(child, randomEngine));
 	}
 	else {
-		rows = _.merge.apply(_, [[]].concat(conditionsRows));
+		const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
+		children = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine, design.initialRows));
+	}
+
+	// _.forEach(design.operations || [], op => {
+	// 	switch (op.op) {
+	// 		case "merge":
+	//
+	// 			break;
+	// 		default:
+	// 			assert(false, "Unrecognized operation: "+JSON.stringify(op));
+	// 	}
+	// })
+	// 	children
+	// }
+
+	let rows;
+	if (children.length == 1) {
+		rows = children[0];
+	}
+	else {
+		rows = _.merge.apply(_, [[]].concat(children));
 	}
 
 	if (design.where) {
@@ -811,6 +830,40 @@ const actionHandlers = {
 	"calculateWell": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculateWell_next(action, {}));
 	},
+	"concat": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		if (DEBUG) {
+			console.log(`=concat: ${name}=${JSON.stringify(action)}`);
+			console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
+			console.log(` rowIndexes: ${JSON.stringify(rowIndexes)}\n ${JSON.stringify(rows)}`)
+			assertNoDuplicates(otherRowIndexes);
+			assertNoDuplicates(otherRowIndexes.concat([rowIndexes]));
+		}
+
+		// find groups (either from `groupBy` or just use everything in rowIndexes)
+		const groupBy = _.isArray(action.groupBy)
+			? action.groupBy
+			: _.isEmpty(action.groupBy)
+				? [] : [action.groupBy];
+		const rowIndexesGroups = (!_.isEmpty(groupBy))
+			? query_groupBy(rows, rowIndexes, groupBy)
+			: [_.clone(rowIndexes)];
+
+		// for each group, create a temporary row with the group variables and then expand the conditions on that row
+		for (let i = 0; i < rowIndexesGroups.length; i++) {
+			// create a temporary row with the group variables
+			const rowIndexesGroup = rowIndexesGroups[i];
+			const row0 = (_.isEmpty(groupBy)) ? {} : _.pick(rows[rowIndexesGroup[0]], groupBy);
+			const rows2 = [row0];
+			const rowIndexes2 = [0];
+			// console.log({groupBy, rowIndexesGroup, row0})
+			// expand the conditions on that row
+			expandRowsByObject(rows2, rowIndexes2, [], action.conditions, randomEngine);
+			// Add the rows back to the original table
+			rows.push(...rows2);
+			rowIndexes.push(..._.range(rowIndexes.length, rowIndexes.length + rows2.length));
+		}
+		return undefined;
+	},
 	"range": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		const action2 = _.cloneDeep(action);
 		_.defaults(action2, {from: 1, step: 1});
@@ -820,9 +873,9 @@ const actionHandlers = {
 		const action2 = _.isString(action) ? ({column: action, n: 1}) : _.cloneDeep(action);
 		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_rotateColumn_initGroup);
 	},
-	"sample": {
-
-	}
+	// "sample": {
+	//
+	// }
 }
 
 function assign(rows, rowIndexes, otherRowIndexes, name, action, randomEngine, next, initGroup) {

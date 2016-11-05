@@ -11,7 +11,7 @@
     * [x] generate sample measurement files for analysis
     * [ ] run analysis along-side execution
     * [ ] display analysis during execution
-* [ ] script for absorbance C
+* [?] script for absorbance C
 * [?] run script for absorbance A
 * [ ] run script for absorbance B
 * [ ] run script for absorbance C
