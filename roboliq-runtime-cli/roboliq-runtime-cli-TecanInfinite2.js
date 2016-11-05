@@ -54,6 +54,7 @@ const step = _.get(protocol.steps, stepId);
 const joinKey = _.get(step, "output.joinKey", _.get(step, "program.wellDesignFactor"));
 const userValues = _.get(step, "output.userValues", _.get(step, "program.userValues"));
 const appendTo = _.get(step, "output.appendTo", _.get(step, "outputDataset"));
+const outputUnits = _.get(step, "output.units");
 const objectName = step.object;
 // console.log(factors);
 // console.log({joinKey, appendTo})
@@ -85,6 +86,23 @@ else {
 	table = result.table.map(measurementRow => {
 		// console.log(measurementRow)
 		return _.merge({RUNID: runId, object: objectName}, common, userValues, measurementRow);
+	});
+}
+
+// Convert quantities with units to plain numbers
+if (outputUnits) {
+	_.forEach(table, row => {
+		_.forEach(outputUnits, (units, key) => {
+			if (_.has(row, key)) {
+				// console.log(row)
+				// console.log({key, units, value: row[key]});
+				// console.log({a: math.eval(row[key])})
+				try {
+					row[key] = math.eval(row[key]).toNumber(units);
+				}
+				catch (e) { }
+			}
+		});
 	});
 }
 

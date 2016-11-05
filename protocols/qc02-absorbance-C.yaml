@@ -1,0 +1,43 @@
+roboliq: v1
+description: |
+  Measure the impact of well volume (i.e. meniscus shape) on the absorbance readout.
+
+  * Measure empty plate
+  * Dispense 16ul dye to half of wells
+  * For v in 25ul to 300ul in 25ul steps:
+      * fill wells with water to volume v
+      * read plate
+
+variables:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+
+objects:
+  plate3:
+    type: Plate
+    description: for finding meniscus parameters
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+
+  readerDesign3:
+    type: Design
+    conditions:
+      plate*: [plate3]
+
+steps:
+  data: {source: readerDesign3}
+  description: Fill wells in layers with water and read absorbance
+  command: experiment.forEachRow
+  steps:
+    description: "`Read absorbance of empty wells on {{$plate}}`"
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: $@excitationWavelength
+    output:
+      appendTo: measurements
+      userValues:
+        dyeVolume: 0
+        totalVolume: 0
+      simulated: "random(number(0.02), number(0.04))"

@@ -2,13 +2,48 @@
 
 # paper2 Todos
 
+* [x] scripts for weight experiments
+* [ ] run weight experiment A (ran it, but need to make changes!)
+* [?] run weight experiment B
+* [x] run weight experiment C
+* [x] script for absorbance A
+* [x] script for absorbance B
+    * [x] generate sample measurement files for analysis
+    * [ ] run analysis along-side execution
+    * [ ] display analysis during execution
+* [ ] script for absorbance C
+* [?] run script for absorbance A
+* [ ] run script for absorbance B
+* [ ] run script for absorbance C
+* [ ] script for unintended dilution
+* [ ] run script for unintended dilution
+* [ ] script for evaporation
+* [ ] run script for evaporation
+* [ ] script for z-level
+* [ ] run script for z-level
+* [ ] need to provide the R script for analysis along-side the protocol
+
+maybe use metalsmith or something simpler (handlerbars with partials, assembler) to generate the html page,
+such that it can be built up incrementally as the experiment progresses.
+It should also have also have an auto-reloader when the files update, or maybe better would be to trigger Atom IDE to reload it
+so that we don't need an extra server running, which could get complicated when executing multiple scripts one after the other.
+Steps might be:
+
+* run R script to output CSVs, jpgs, maybe even text
+* run a static site generator to create the output HTML
+* trigger Atom to load/reload the HTML?
+
+
 * [x] generate simulated measurement outputs
 * [x] test on empty wells
 * [x] submit bug reports to mathjs
 * [x] test on wells using plateDesign2
 * [x] save simulated measurement outputs if the '-P' option is given
 * [x] absorbanceReader: add `output.units` option that convert columns to plain numbers in the given units
-* [ ] write analysis using the simulated measurements
+* [x] qc02-absorbance-B: write analysis using the simulated measurements
+* [ ] maybe add a '-S' option for subdirs, so that some scripts can be grouped together and have a common directory for analysis files (e.g. all the qc scripts go in subdir 'qc' of the parentDir)
+* [ ] qc02-absorbance-A: write analysis (possibly using the simulated measurements)
+* [ ] qc02-absorbance: write analysis that combines data from all the qc02-absorbance measurements
 * [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] figure out how to run analysis during execution
 * [ ] figure out how to display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)

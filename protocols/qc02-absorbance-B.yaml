@@ -74,6 +74,7 @@ steps:
     output:
       appendTo: measurements
       userValues:
+        plate: plate2
         dyeVolume: 0 ul
         totalVolume: 0 ul
       simulated: "random(number(0.02), number(0.04))"
