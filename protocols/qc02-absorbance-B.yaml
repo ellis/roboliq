@@ -86,6 +86,7 @@ steps:
     data: {source: plateDesign2}
     description: Dispense dye
     command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
     sources: dye05
     destinationLabware: $plate
     destinations: $$well
@@ -95,8 +96,9 @@ steps:
 
   3:
     data: {source: plateDesign2}
-    description: Dispense dye
+    description: Fill to 25ul with water
     command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
     sources: water
     destinationLabware: $plate
     destinations: $$well
@@ -113,6 +115,7 @@ steps:
       1:
         description: Dispense water
         command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: $plate
         destinations: $$well

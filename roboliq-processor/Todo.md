@@ -6,26 +6,46 @@
 * [ ] run weight experiment A (ran it, but need to make changes!)
 * [?] run weight experiment B
 * [x] run weight experiment C
-* [x] script for absorbance A
-* [x] script for absorbance B
-    * [x] generate sample measurement files for analysis
-    * [ ] run analysis along-side execution
-    * [ ] display analysis during execution
-* [?] script for absorbance C
-* [.] run script for absorbance A
-* [ ] run script for absorbance B
-* [ ] run script for absorbance C
-* [ ] analysis for absorbance A
-* [.] analysis for absorbance B
-* [ ] analysis for absorbance C
-* [ ] analysis for absorbance (all together)
-* [x] script for unintended dilution
-* [ ] run script for unintended dilution
-* [ ] analysis for unintended dilution
+* [ ] qc02-absorbance
+	* [ ] qc02-absorbance-A
+		* [x] write script
+		* [ ] write analysis
+		* [x] run script
+		* [ ] run analysis
+	* [ ] qc02-absorbance-B
+		* [x] write script
+		* [x] write analysis
+		* [1] run script
+		* [ ] run analysis
+	* [ ] qc02-absorbance-C
+		* [x] write script
+		* [2] write analysis
+		* [3] run script
+		* [ ] run analysis
+	* [ ] write overall analysis
+	* [ ] run overall analysis
+* [ ] unintended dilution
+	* [x] write script
+	* [ ] write analysis
+	* [ ] run script
+	* [ ] run analysis
+* [ ] accuracy and precision via absorbance
+	* [ ] write script
+	* [ ] write analysis
+	* [ ] run script
+	* [ ] run analysis
 * [ ] script for evaporation
-* [ ] run script for evaporation
+	* [ ] write script
+	* [ ] write analysis
+	* [ ] run script
+	* [ ] run analysis
 * [ ] script for z-level
-* [ ] run script for z-level
+	* [4] write script
+	* [5] write analysis
+	* [ ] run script
+	* [ ] run analysis
+* [ ] run analysis along-side execution
+* [ ] display analysis during execution
 * [ ] need to provide the R script for analysis along-side the protocol
 
 maybe use metalsmith or something simpler (handlerbars with partials, assembler) to generate the html page,
@@ -69,6 +89,7 @@ Steps might be:
 * [ ] improve error handling/display
 * [ ] at beginning of script, display notice to user about what should be on the bench, wait for user to confirm
 * [ ] change from '#data' to 'data()'
+* [ ] request VB code from the automated liquid class optimization people
 
 # Documentations TODOS
 

@@ -30,9 +30,9 @@ objects:
     location: ourlab.mario.site.P3
   tubes:
     type: Plate
-    description: eppendorf tubes for dye
-    model: ourlab.model.tubeHolderModel_1500ul
-    location: ourlab.mario.site.T3
+    description: trough for dye
+    model: ourlab.model.TROUGH
+    location: ourlab.mario.site.R6
   dye:
     type: Liquid
     description: dye with concentration such that 250ul => 2
@@ -143,6 +143,7 @@ steps:
       1:
         description: Fill control wells with water
         command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: $plate
         destinations: $$well
@@ -213,6 +214,7 @@ steps:
         2:
           description: "Fill wells to {{$totalVolume}}"
           command: pipetter.pipette
+          program: Roboliq_Water_Air_1000
           sources: water
           destinationLabware: $plate
           destinations: $$well
