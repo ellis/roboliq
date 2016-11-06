@@ -50,6 +50,7 @@
 var _ = require('lodash');
 var assert = require('assert');
 var fs = require('fs');
+import handlebars from 'handlebars';
 var jiff = require('jiff');
 var jsonfile = require('jsonfile');
 import mkdirp from 'mkdirp';
@@ -716,33 +717,12 @@ function runWithOpts(opts, userProtocol) {
 
 			// Write extra files if parentDir or outputDir was specified
 			// console.log({a: !_.isEmpty(result.output.simulatedOutput), b: opts.parentDir})
-			if (!_.isEmpty(result.output.simulatedOutput) && (opts.parentDir || opts.outputDir)) {
-				const simulatedDir = path.join(dir, "simulated");
-				// console.log({simulatedDir})
-				mkdirp.sync(simulatedDir);
-				_.forEach(result.output.simulatedOutput, (value, filename) => {
-					const simulatedFile = path.join(simulatedDir, filename);
-					// console.log({filename, simulatedFile})
-					if (!opts.quiet) {
-						console.log("saving simulated output: "+simulatedFile);
-					}
-					const ext = path.extname(simulatedFile);
-					if (ext === ".json") {
-						fs.writeFileSync(simulatedFile, JSON.stringify(value, null, "\t")+"\n");
-					}
-					else if (ext === ".jsonl") {
-						const contents = value.map(x => JSON.stringify(x)).join("\n") + "\n";
-						fs.writeFileSync(simulatedFile, contents);
-					}
-					else {
-						fs.writeFileSync(simulatedFile, value);
-					}
-				});
+			if (opts.parentDir || opts.outputDir) {
+				if (!_.isEmpty(result.output.simulatedOutput)) {
+					writeSimulatedOutput(opts, dir, result);
+				}
 
-				// Write HTML
-				CONTINUE
-				const
-
+				writeHtml(opts, dir, result);
 			}
 
 			// Write dump data (2016-11-05 ELLIS: What's this for??)
@@ -771,6 +751,43 @@ function runWithOpts(opts, userProtocol) {
 
 	return result;
 }
+
+function writeSimulatedOutput(opts, dir, result) {
+	const simulatedDir = path.join(dir, "simulated");
+	// console.log({simulatedDir})
+	mkdirp.sync(simulatedDir);
+	_.forEach(result.output.simulatedOutput, (value, filename) => {
+		const simulatedFile = path.join(simulatedDir, filename);
+		// console.log({filename, simulatedFile})
+		if (!opts.quiet) {
+			console.log("saving simulated output: "+simulatedFile);
+		}
+		const ext = path.extname(simulatedFile);
+		if (ext === ".json") {
+			fs.writeFileSync(simulatedFile, JSON.stringify(value, null, "\t")+"\n");
+		}
+		else if (ext === ".jsonl") {
+			const contents = value.map(x => JSON.stringify(x)).join("\n") + "\n";
+			fs.writeFileSync(simulatedFile, contents);
+		}
+		else {
+			fs.writeFileSync(simulatedFile, value);
+		}
+	});
+}
+
+function writeHtml(opts, dir, result) {
+	const source = fs.readFileSync(__dirname + "/html/index.html", "utf8");
+	const template = handlebars.compile(source);
+  const html = template(result.output);
+
+	const filename = path.join(dir, "index.html");
+	if (!opts.quiet) {
+		console.log("saving HTML output: "+filename);
+	}
+	fs.writeFileSync(filename, html);
+}
+
 
 /**
  * Process the protocol(s) given by the command line options and an optional

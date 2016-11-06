@@ -1,0 +1,62 @@
+---
+title: "qc02-B"
+author: "Ellis Whitehead"
+date: '2016-11-05'
+output: html_document
+---
+
+# Setup
+
+```{r libraries,echo=F}
+suppressMessages(library(dplyr))
+suppressMessages(library(MASS)) # for rlm
+suppressMessages(library(GGally))
+suppressMessages(library(ggplot2))
+suppressMessages(library(jsonlite))
+library(knitr)
+library(parsedate)
+#library(rlm)
+library(roboliq2)
+select = dplyr::select
+```
+
+```{r constants,echo=F}
+# Density of water at 22C [g/ul]
+densityOfWater = 0.0009977735
+```
+
+```{r data}
+scriptdir = "."
+rundir = "simulated"
+df0 = stream_in(file(file.path(scriptdir, rundir, "measurements.jsonl")), verbose=F)
+
+ggplot(df0, aes(x=totalVolume, y=value, color=factor(dyeVolume))) + geom_point() + labs(title="plate2 absorbance") + scale_color_discrete(guide=F)
+ggsave("plate2.jpg")
+```
+
+# Calculation 1
+
+Calculate $\bar{\alpha}_r(m, V)$.
+
+* Find the average absorbance of dye-less wells at each volume
+* For each measurement of a dye well, calculate $da = a - a_0(V)$, where a_0 is the average dye-less absorbance for the well volume $V$.
+* For each well, calculate the ratios of $da(V) / da(250)$
+* For each $V$, calculate the average ratio
+
+```{r alpha_r}
+# Find the average absorbance of dye-less wells at each volume
+df_a0 = df0 %>% filter(totalVolume > 0 & dyeVolume == 0) %>% group_by(totalVolume) %>% summarize(a0 = mean(value))
+
+# For each measurement of a dye well, calculate $da = a - a_0(V)$, where a_0 is the average dye-less absorbance for the well volume $V$.
+df_da = df0 %>% filter(dyeVolume > 0) %>% left_join(df_a0, by="totalVolume") %>% mutate(da = value - a0)
+
+# For each well, calculate the ratios of $da(V) / da(250)$
+df_ratio = df_da %>% mutate(ratio = da / da[totalVolume == 250])
+
+# For each $V$, calculate the average ratio
+df_alpha_r = df_ratio %>% group_by(totalVolume) %>% summarize(alpha_r = mean(ratio))
+
+ggplot(df_alpha_r, aes(x=totalVolume, y=alpha_r)) + geom_line()
+
+write.csv(df_alpha_r, "alpha_r.csv", row.names = F)
+```

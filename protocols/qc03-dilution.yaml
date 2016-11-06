@@ -31,7 +31,7 @@ objects:
   tubes:
     type: Plate
     description: trough for dye
-    model: ourlab.model.TROUGH
+    model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
   dye:
     type: Liquid

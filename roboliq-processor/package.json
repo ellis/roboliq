@@ -5,6 +5,7 @@
   "dependencies": {
     "commander": "^2.9.0",
     "docdash": "^0.4.0",
+    "handlebars": "^4.0.5",
     "iconv-lite": "^0.4.13",
     "immutable": "^3.7.6",
     "javascript-natural-sort": "~0.7.1",
@@ -46,7 +47,7 @@
     "prepublish": "npm run metalsmith",
     "clean": "rm -rf dist",
     "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
-	"design": "babel -- src/designMain.js",
+    "design": "babel-node -- src/designMain.js",
     "webpack": "webpack",
     "metalsmith": "babel-node --harmony build.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
@@ -55,8 +56,7 @@
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
     "roboliq": "babel-node -- src/roboliq.js",
     "start": "babel-node -- src/roboliq.js",
-    "evoware": "babel-node -- src/evoware/EvowareMain.js",
-    "design": "babel-node -- src/designMain.js"
+    "evoware": "babel-node -- src/evoware/EvowareMain.js"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"
