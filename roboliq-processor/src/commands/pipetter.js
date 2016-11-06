@@ -491,7 +491,7 @@ function pipette(params, parsed, data, options={}) {
 	// console.log({syringeToCleanValue})
 	_.forEach(syringeToCleanValue, function (value, syringe) {
 		const intensity = parsed.value.cleanEnd || parsed.value.clean || "thorough";
-		assert(intensityToValue.hasOwnProperty(intensity));
+		assert(intensityToValue.hasOwnProperty(intensity), "unknown clean intensity: "+intensity);
 		let intensityValue = intensityToValue[intensity];
 		if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 			intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);

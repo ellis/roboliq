@@ -19,7 +19,7 @@
 		* [ ] run analysis
 	* [ ] qc02-absorbance-C
 		* [x] write script
-		* [ ] write analysis
+		* [.] write analysis
 		* [3] run script
 		* [ ] run analysis
 	* [ ] write overall analysis
