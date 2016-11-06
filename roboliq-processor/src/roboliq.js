@@ -136,6 +136,12 @@ const nomnom = require('nomnom').options({
 		flag: true,
 		help: "suppress printing of information, erros, and warning"
 	},
+	subdir: {
+		abbr: 'S',
+		full: 'subdir',
+		help: "specify an extra subdirectory beneath the parent directory; for use when grouping several protocols together.",
+		metavar: 'DIR'
+	},
 	throw: {
 		abbr: 'T',
 		flag: true,
@@ -692,9 +698,13 @@ function runWithOpts(opts, userProtocol) {
 			var inpath = _.last(opts.infiles);
 			var basename = path.basename(inpath, path.extname(inpath));
 			var dir
-				= (opts.outputDir) ? opts.outputDir
-				: (opts.parentDir) ? path.join(opts.parentDir, basename)
-				: path.dirname(inpath);
+				= (opts.outputDir)
+				? opts.outputDir
+				: (opts.parentDir)
+					? (opts.subdir)
+						? path.join(opts.parentDir, opts.subdir, basename)
+						: path.join(opts.parentDir, basename)
+					: path.dirname(inpath);
 			var outpath = opts.output || path.join(dir, basename+".out.json");
 			if (!opts.quiet) {
 				console.log("output written to: "+outpath);
@@ -706,8 +716,7 @@ function runWithOpts(opts, userProtocol) {
 
 			// Write extra files if parentDir or outputDir was specified
 			// console.log({a: !_.isEmpty(result.output.simulatedOutput), b: opts.parentDir})
-			if (!_.isEmpty(result.output.simulatedOutput) && opts.parentDir) {
-				// Write simulatedOutput IF parentDir was specified
+			if (!_.isEmpty(result.output.simulatedOutput) && (opts.parentDir || opts.outputDir)) {
 				const simulatedDir = path.join(dir, "simulated");
 				// console.log({simulatedDir})
 				mkdirp.sync(simulatedDir);
