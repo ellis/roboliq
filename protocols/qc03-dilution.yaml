@@ -47,11 +47,17 @@ objects:
       * 4 control wells to be filled with water to 250ul
     conditions:
       stage: dilute
+      liquidClass*: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000]
       volume*: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+      #volume*: [16 ul]
       count=calculate: '(volume == (150 ul)) ? 1 : 9'
       transferTotal=calculate: 'volume * count'
       totalVolume: 250 ul
-      syringe*: 4
+      replicate*: 2
+      syringe=:
+        values: [1,2,3,4]
+        order: reshuffle
+      #syringe*: 1
       origId=range: {}
       seqId*: 4
       plate=allocatePlates:
@@ -187,25 +193,33 @@ steps:
       steps:
         description: "`Dilution step {{$seqId}}`"
         1:
-          description: "Transfer dye to next well"
-          command: pipetter.pipette
-          sourceLabware: $plate
-          sources:
-            "#data":
-              where: 'role == "src"'
-              value: well
-          destinationLabware: $plate
-          destinations:
-            "#data":
-              where: 'role == "dst"'
-              value: well
-          volumes:
-            "#data":
-              where: 'role == "dst"'
-              value: volume
-          clean: flush
+          command: experiment.forEachGroup
+          groupBy: origId
+          steps:
+            description: "`Transfer {{$volume}}, {{$count}} times`"
+            command: system.repeat
+            count: $count
+            variableName: i
+            steps:
+              description: "`Transfer dye to next well (substep {{$i}} of {{$count}})`"
+              command: pipetter.pipette
+              sourceLabware: $plate
+              sources:
+                "#data":
+                  where: 'role == "src"'
+                  value: well
+              destinationLabware: $plate
+              destinations:
+                "#data":
+                  where: 'role == "dst"'
+                  value: well
+              volumes:
+                "#data":
+                  where: 'role == "dst"'
+                  value: volume
+              clean: flush
         2:
-          description: "Fill wells to {{$totalVolume}}"
+          description: "`Fill wells to {{$totalVolume}}`"
           command: pipetter.pipette
           program: Roboliq_Water_Air_1000
           sources: water
