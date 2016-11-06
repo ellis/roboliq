@@ -704,9 +704,10 @@ function runWithOpts(opts, userProtocol) {
 			mkdirp.sync(path.dirname(outpath));
 			fs.writeFileSync(outpath, JSON.stringify(result.output, null, '\t')+"\n");
 
-			// Write simulatedOutput IF parentDir was specified
+			// Write extra files if parentDir or outputDir was specified
 			// console.log({a: !_.isEmpty(result.output.simulatedOutput), b: opts.parentDir})
 			if (!_.isEmpty(result.output.simulatedOutput) && opts.parentDir) {
+				// Write simulatedOutput IF parentDir was specified
 				const simulatedDir = path.join(dir, "simulated");
 				// console.log({simulatedDir})
 				mkdirp.sync(simulatedDir);
@@ -728,6 +729,11 @@ function runWithOpts(opts, userProtocol) {
 						fs.writeFileSync(simulatedFile, value);
 					}
 				});
+
+				// Write HTML
+				CONTINUE
+				const
+
 			}
 
 			// Write dump data (2016-11-05 ELLIS: What's this for??)
