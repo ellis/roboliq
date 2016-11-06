@@ -143,3 +143,7 @@ Steps might be:
 	- [ ] commands...
 	- [ ] document roboliq's extensions to JSON Schema (types, 'module')
 - [ ] sort through `notes`, `doc`, and `old` directories
+
+# Bugs
+
+* [ ] in qc02-absorbance-B.yaml, step 4, if we don't include the extra '1' substep, `Volume {{$totalVolume}}` throws and error

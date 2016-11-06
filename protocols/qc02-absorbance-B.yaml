@@ -8,6 +8,12 @@ description: |
       * fill wells with water to volume v
       * read plate
 
+  Dye dilutions of OrangeG 8g/L required:
+
+  * 50 ul / 2^5 = 1.43
+  * 0.9152/ul
+  * For 16ul dye05 to be ~0.5: 0.9152*16 / 0.5 = 29x dilution
+
 variables:
   excitationWavelength:
     description: excitation wavelength to read absorbance
@@ -24,18 +30,10 @@ objects:
     description: eppendorf tubes for dye
     model: ourlab.model.tubeHolderModel_1500ul
     location: ourlab.mario.site.T3
-  dye01:
-    type: Liquid
-    description: dye with concentration such that 16ul => ~0.1
-    wells: tubes(A01)
   dye05:
     type: Liquid
     description: dye with concentration such that 16ul => ~0.5
     wells: tubes(B01)
-  dye10:
-    type: Liquid
-    description: dye with concentration such that 16ul => ~1.0
-    wells: tubes(C01)
   water:
     type: Variable
     value: ourlab.mario.systemLiquid
@@ -96,7 +94,7 @@ steps:
 
   3:
     data: {source: plateDesign2}
-    description: Fill to 25ul with water
+    description: Dispense the same water volumes in control wells
     command: pipetter.pipette
     program: Roboliq_Water_Air_1000
     sources: water
@@ -113,28 +111,29 @@ steps:
     steps:
       description: "`Volume {{$totalVolume}}`"
       1:
-        description: Dispense water
-        command: pipetter.pipette
-        program: Roboliq_Water_Air_1000
-        sources: water
-        destinationLabware: $plate
-        destinations: $$well
-        volumes: $dispenseVolume
-        clean: none
-        cleanAfter: flush
-      2:
         data: {source: plateDesign2}
-        description: Read plate
-        command: absorbanceReader.measurePlate
-        object: plate2
-        program:
-          excitationWavelength: $@excitationWavelength
-        output:
-          appendTo: measurements
-          joinKey: well
-          userValues:
-            totalVolume: $totalVolume
-          simulated: "(dyeVolume > (0ul)) ? bignumber(random(number(0.4), number(0.6))) * totalVolume / (250ul) : bignumber(random(number(0.02), number(0.04)))"
-          units:
-            dyeVolume: ul
-            totalVolume: ul
+        1:
+          description: Dispense water
+          command: pipetter.pipette
+          program: Roboliq_Water_Air_1000
+          sources: water
+          destinationLabware: $plate
+          destinations: $$well
+          volumes: $dispenseVolume
+          clean: none
+          cleanAfter: flush
+        2:
+          description: Read plate
+          command: absorbanceReader.measurePlate
+          object: plate2
+          program:
+            excitationWavelength: $@excitationWavelength
+          output:
+            appendTo: measurements
+            joinKey: well
+            userValues:
+              totalVolume: $totalVolume
+            simulated: "(dyeVolume > (0ul)) ? bignumber(random(number(0.4), number(0.6))) * totalVolume / (250ul) : bignumber(random(number(0.02), number(0.04)))"
+            units:
+              dyeVolume: ul
+              totalVolume: ul
