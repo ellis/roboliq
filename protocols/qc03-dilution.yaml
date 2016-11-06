@@ -36,7 +36,7 @@ objects:
   dye:
     type: Liquid
     description: dye with concentration such that 250ul measures somewhere between 1 and 2
-    wells: dyeLabware(A01)
+    wells: dyeLabware(C01 down F01)
   water:
     type: Variable
     value: ourlab.mario.systemLiquid
@@ -53,7 +53,7 @@ objects:
       count=calculate: '(volume == 3ul) ? 9 : (volume == 7ul) ? 4 : (volume == 15ul or volume == 16ul) ? 2 : 1'
       transferTotal=calculate: 'volume * count'
       totalVolume: 250 ul
-      replicate*: 2
+      replicate*: 3
       group=range: {}
       plate=allocatePlates:
         plates: [plate1]
@@ -66,13 +66,17 @@ objects:
         groupBy: row
       col=calculate: 'idB * 2 - 1'
       syringe=calculate: '((row - 1) % 4) + 1'
-      prefill: false
       stage*:
-        fill: {}
+        fill:
+          dyeVolume=calculate: 'totalVolume'
+          waterVolume: 0 ul
         src:
-          waterVolume=calculate: transferTotal
+          dyeVolume=calculate: 'totalVolume - transferTotal'
+          waterVolume=calculate: 'transferTotal'
+          prefill: false
         dst:
           col=calculate: 'col + 1'
+          dyeVolume=calculate: 'transferTotal'
           waterVolume=calculate: 'totalVolume - transferTotal'
           prefill=calculate: 'liquidClass == "Roboliq_Water_Wet_1000"'
       # we need to add 4 control wells for each plate
@@ -81,9 +85,11 @@ objects:
         conditions:
           stage: control
           totalVolume: 250 ul
-          replicate*: 4
+          replicate*: 3
           col: 12
-          row=calculate: '8 - (4 - replicate)'
+          row=calculate: '8 - (3 - replicate)'
+          dyeVolume: 0 ul
+          waterVolume=calculate: 'totalVolume'
       well=calculateWell:
         row: row
         column: col
@@ -140,7 +146,10 @@ steps:
           joinKey: well
           appendTo: measurements
           units:
+            volume: ul
             totalVolume: ul
+            dyeVolume: ul
+            waterVolume: ul
           simulated: "random(number(0.02), number(0.04))"
 
     3:
@@ -165,6 +174,8 @@ steps:
           appendTo: measurements
           units:
             volume: ul
+            dyeVolume: ul
+            waterVolume: ul
             totalVolume: ul
           simulated: "random(number(1.99), number(2.01))"
 
@@ -184,9 +195,9 @@ steps:
         cleanEnd: thorough
       2:
         command: experiment.forEachGroup
-        groupBy: step
+        groupBy: [step, liquidClass]
         steps:
-          description: "`Transfer step {{$step}}`"
+          description: "`Transfer step {{$step}} using {{$liquidClass}}`"
           command: pipetter.pipette
           program: $liquidClass
           sourceLabware: $plate
@@ -228,4 +239,6 @@ steps:
           units:
             volume: ul
             totalVolume: ul
-          simulated: 'bignumber(random(number(1.99), number(2.01))) * ((stage == "src") ? 1 : 0.9)'
+            dyeVolume: ul
+            waterVolume: ul
+          simulated: 'bignumber(random(number(1.99), number(2.01))) * (dyeVolume / totalVolume) * ((stage == "src") ? 1 : 0.9)'
