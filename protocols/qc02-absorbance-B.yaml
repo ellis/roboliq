@@ -102,7 +102,7 @@ steps:
     destinations: $$well
     volumes: $$waterVolume1
     clean: none
-    cleanAfter: flush
+    cleanEnd: flush
 
   4:
     data: {source: readerDesign2}
@@ -121,7 +121,7 @@ steps:
           destinations: $$well
           volumes: $dispenseVolume
           clean: none
-          cleanAfter: flush
+          cleanEnd: flush
         2:
           description: Read plate
           command: absorbanceReader.measurePlate

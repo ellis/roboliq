@@ -15,11 +15,11 @@
 	* [ ] qc02-absorbance-B
 		* [x] write script
 		* [x] write analysis
-		* [1] run script
+		* [x] run script
 		* [ ] run analysis
 	* [ ] qc02-absorbance-C
 		* [x] write script
-		* [2] write analysis
+		* [ ] write analysis
 		* [3] run script
 		* [ ] run analysis
 	* [ ] write overall analysis
@@ -27,7 +27,7 @@
 * [ ] unintended dilution
 	* [x] write script
 	* [ ] write analysis
-	* [ ] run script
+	* [2] run script
 	* [ ] run analysis
 * [ ] accuracy and precision via absorbance
 	* [ ] write script
@@ -41,8 +41,8 @@
 	* [ ] run analysis
 * [ ] script for z-level
 	* [4] write script
-	* [5] write analysis
-	* [ ] run script
+	* [ ] write analysis
+	* [5] run script
 	* [ ] run analysis
 * [ ] run analysis along-side execution
 * [ ] display analysis during execution
@@ -88,6 +88,9 @@ Steps might be:
 * [ ] use bablified code to run roboliq-runtime-cli, so it executes faster
 * [ ] improve error handling/display
 * [ ] at beginning of script, display notice to user about what should be on the bench, wait for user to confirm
+	* [ ] generate HTML file like qc02-abosrbance-B.html
+	* [ ] open HTML at beginning of script
+	* [ ] wait for user to confirm
 * [ ] change from '#data' to 'data()'
 * [ ] request VB code from the automated liquid class optimization people
 
