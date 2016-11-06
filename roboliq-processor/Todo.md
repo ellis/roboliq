@@ -26,8 +26,8 @@
 	* [ ] run overall analysis
 * [ ] unintended dilution
 	* [x] write script
-	* [ ] write analysis
-	* [2] run script
+	* [1] write analysis
+	* [.] run script
 	* [ ] run analysis
 * [ ] accuracy and precision via absorbance
 	* [ ] write script
@@ -40,13 +40,14 @@
 	* [ ] run script
 	* [ ] run analysis
 * [ ] script for z-level
-	* [4] write script
+	* [2] write script
 	* [ ] write analysis
 	* [5] run script
 	* [ ] run analysis
+* [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] run analysis along-side execution
-* [ ] display analysis during execution
-* [ ] need to provide the R script for analysis along-side the protocol
+* [ ] display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)
+* [ ] save designs if the '-P' option is given (as json,md,csv?)?
 
 maybe use metalsmith or something simpler (handlerbars with partials, assembler) to generate the html page,
 such that it can be built up incrementally as the experiment progresses.
@@ -57,22 +58,6 @@ Steps might be:
 * run R script to output CSVs, jpgs, maybe even text
 * run a static site generator to create the output HTML
 * trigger Atom to load/reload the HTML?
-
-
-* [x] generate simulated measurement outputs
-* [x] test on empty wells
-* [x] submit bug reports to mathjs
-* [x] test on wells using plateDesign2
-* [x] save simulated measurement outputs if the '-P' option is given
-* [x] absorbanceReader: add `output.units` option that convert columns to plain numbers in the given units
-* [x] qc02-absorbance-B: write analysis using the simulated measurements
-* [ ] maybe add a '-S' option for subdirs, so that some scripts can be grouped together and have a common directory for analysis files (e.g. all the qc scripts go in subdir 'qc' of the parentDir)
-* [ ] qc02-absorbance-A: write analysis (possibly using the simulated measurements)
-* [ ] qc02-absorbance: write analysis that combines data from all the qc02-absorbance measurements
-* [ ] figure out how to associate and copy R files to the '-P' directory
-* [ ] figure out how to run analysis during execution
-* [ ] figure out how to display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)
-* [ ] save designs if the '-P' option is given (as json,md,csv?)?
 
 # Todos for Charlotte
 
@@ -88,7 +73,15 @@ Steps might be:
 * [ ] use bablified code to run roboliq-runtime-cli, so it executes faster
 * [ ] improve error handling/display
 * [ ] at beginning of script, display notice to user about what should be on the bench, wait for user to confirm
-	* [ ] generate HTML file like qc02-abosrbance-B.html
+	* [x] generate HTML file like qc02-abosrbance-B.html
+	* [ ] improve HTML
+		* [ ] name
+		* [ ] date
+		* [ ] proper table styling
+		* [ ] sort order of stuff
+		* [ ] proper table for well contents
+		* [ ] tables for designs
+		* [ ] script?
 	* [ ] open HTML at beginning of script
 	* [ ] wait for user to confirm
 * [ ] change from '#data' to 'data()'

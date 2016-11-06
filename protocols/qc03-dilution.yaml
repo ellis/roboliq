@@ -41,17 +41,6 @@ objects:
     type: Variable
     value: ourlab.mario.systemLiquid
 
-# well,step,stage,dyeVolume,waterVolume,dilutionFactor
-# A01,control,0,0,
-# 1,1,A02,fill,A02,250,3,9,27,250,1
-# origId,seqId,well,stage,orig,step,role,volume,count,totalTransfer,dyeVolume,dilutionFactor
-# 1,1,A02,dilution,A02,1,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
-# 1,2,A03,dilution,A02,1,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
-# 1,2,A03,dilution,A02,2,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
-# 1,3,A04,dilution,A02,2,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
-# 1,3,A04,dilution,A02,3,src,3,9,27,dyeVolume0-totalTransfer,dyeVolume/250
-# 1,4,A05,dilution,A02,3,dst,3,9,27,dilutionFactor0*27,dyeVolume/250
-
   design1:
     type: Design
     description: |
@@ -91,6 +80,7 @@ objects:
                 role: dst
                 seqId=calculate: "seqId - 1"
                 conc: 1
+                dilutionMult: 0
               dilute:
                 role: src
         - where: 'stage == "dilute" and seqId == 4'
@@ -111,9 +101,11 @@ objects:
               - where: 'role == "dst"'
                 conditions:
                   conc=calculate: '(transferTotal/totalVolume)^seqId'
+                  dilutionMult=calculate: 'seqId'
               - where: 'role == "src"'
                 conditions:
                   conc=calculate: '(transferTotal/totalVolume)^(seqId - 1) * (1 - transferTotal / totalVolume)'
+                  dilutionMult=calculate: 'seqId - 1'
 
 steps:
   data: {source: design1}
@@ -183,8 +175,9 @@ steps:
           joinKey: well
           appendTo: measurements
           units:
+            volume: ul
             totalVolume: ul
-          simulated: "random(number(1.9), number(2.1))"
+          simulated: "random(number(1.99), number(2.01))"
 
     4:
       data: {where: 'stage == "dilute"'}
@@ -230,5 +223,6 @@ steps:
             joinKey: well
             appendTo: measurements
             units:
+              volume: ul
               totalVolume: ul
-            simulated: "bignumber(random(number(1.9), number(2.1))) * conc"
+            simulated: 'bignumber(random(number(1.99), number(2.01))) * conc * (0.9^dilutionMult)'

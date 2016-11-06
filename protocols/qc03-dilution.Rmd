@@ -1,0 +1,60 @@
+---
+title: "qc03"
+author: "Ellis Whitehead"
+date: '2016-11-05'
+output: html_document
+---
+
+# Setup
+
+```{r libraries,echo=F}
+suppressMessages(library(dplyr))
+suppressMessages(library(MASS)) # for rlm
+suppressMessages(library(GGally))
+suppressMessages(library(ggplot2))
+suppressMessages(library(jsonlite))
+library(knitr)
+library(parsedate)
+#library(rlm)
+library(roboliq2)
+select = dplyr::select
+```
+
+```{r constants,echo=F}
+# Density of water at 22C [g/ul]
+densityOfWater = 0.0009977735
+```
+
+```{r data}
+scriptdir = "."
+rundir = "simulated"
+df0 = stream_in(file(file.path(scriptdir, rundir, "measurements.jsonl")), verbose=F)
+
+ggplot(df0, aes(x=conc, y=value)) + geom_point() + labs(title="absorbance")
+```
+
+# Calculation
+
+```{r}
+a0 = mean(subset(df0, stage == "control")$value)
+
+df = df0 %>% filter(origId == 1)
+df = df0 %>% filter(origId == 20)
+calcDilutions = function(df) {
+  a = df$value
+  data.frame(
+    volume = df$volume[1],
+    count = df$count[1],
+    plate = df$plate[1],
+    syringe = df$syringe[1],
+    well0 = df$well[1],
+    step = 1:3,
+    a_removed = c(a[1] - a[2], a[3] - a[4], a[5] - a[6])
+  ) %>% mutate(
+    dilution = c(a[3] / a_removed[1], a[5] / a_removed[2], a[7] / a_removed[3])
+  )
+}
+dfDilutions = df0 %>% filter(!is.na(origId)) %>% group_by(origId) %>% do(calcDilutions(.))
+
+dfDilutions %>% group_by(volume) %>% arrange(volume) %>% summarize(dilution = mean(dilution))
+```
