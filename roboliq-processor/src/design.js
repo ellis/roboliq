@@ -827,6 +827,12 @@ const actionHandlers = {
 		const action2 = _.isString(action) ? {} : action;
 		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculate_next(expr, action2));
 	},
+	"calculateColumn": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculateColumn_next(action, {}));
+	},
+	"calculateRow": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
+		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculateRow_next(action, {}));
+	},
 	"calculateWell": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculateWell_next(action, {}));
 	},
@@ -1163,6 +1169,34 @@ function assign_calculate_next(expr, action) {
 
 		this.nextIndex++;
 		return [this.nextIndex, valueText];
+	}
+}
+
+function assign_calculateColumn_next(expr, action) {
+	return function(nestedRows, rowIndex) {
+		const row0 = nestedRows[rowIndex];
+		const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+		// Build the scope for evaluating the math expression from the current data row
+
+		const valueText = _.get(row, expr, expr);
+		const [r, c] = wellsParser.locationTextToRowCol(valueText);
+
+		this.nextIndex++;
+		return [this.nextIndex, c];
+	}
+}
+
+function assign_calculateRow_next(expr, action) {
+	return function(nestedRows, rowIndex) {
+		const row0 = nestedRows[rowIndex];
+		const row = (_.isArray(row0)) ? _.head(_.flattenDeep(row0)) : row0;
+		// Build the scope for evaluating the math expression from the current data row
+
+		const valueText = _.get(row, expr, expr);
+		const [r, c] = wellsParser.locationTextToRowCol(valueText);
+
+		this.nextIndex++;
+		return [this.nextIndex, r];
 	}
 }
 

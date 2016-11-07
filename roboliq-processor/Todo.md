@@ -12,23 +12,24 @@
 		* [ ] write analysis
 		* [x] run script
 		* [ ] run analysis
-	* [ ] qc02-absorbance-B
+	* [x] qc02-absorbance-B
 		* [x] write script
 		* [x] write analysis
 		* [x] run script
-		* [ ] run analysis
+		* [x] run analysis
 	* [ ] qc02-absorbance-C
 		* [x] write script
 		* [.] write analysis
-		* [3] run script
+		* [.] run script
 		* [ ] run analysis
 	* [ ] write overall analysis
 	* [ ] run overall analysis
-* [ ] unintended dilution
+* [ ] qc03-dilution: unintended dilution
 	* [x] write script
-	* [1] write analysis
-	* [.] run script
-	* [ ] run analysis
+	* [x] write analysis
+	* [x] run script
+	* [x] run analysis
+	* [ ] fix reader bug (missed absorbance of diluted wells A11 block E12) and re-run
 * [ ] accuracy and precision via absorbance
 	* [ ] write script
 	* [ ] write analysis
@@ -142,5 +143,12 @@ Steps might be:
 
 # Bugs
 
+* [ ] absorbanceReader: 'output.units' not handled in TecanInfinite2.js
+* [ ] absorbanceReader: For a full plate minus F11 down H11, A11 cross E12 get skipped in the reader!
 * [ ] in qc02-absorbance-B.yaml, step 4, if we don't include the extra '1' substep, `Volume {{$totalVolume}}` throws and error
+* [ ] qc05-zlevel: need to automatically include variables for DETECTED_VOLUME_? in the evoware script
+
+# Todos
+
 * [ ] replace usage of mustache with handlebars
+* [ ] designTest: unit test for calculateRow

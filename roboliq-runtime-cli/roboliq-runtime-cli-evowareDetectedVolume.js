@@ -153,18 +153,8 @@ function step2() {
 		});
 	}
 
-	// Save the JSON file
-	if (!_isEmpty(output.writeTo)) {
-		const filename = path.join(runDir, `${prefix}${output.writeTo}.json`);
-		fs.writeFileSync(filename, JSON.stringify(table, null, '\t'));
-	}
-
-	if (!_isEmpty(output.appendTo)) {
-		const filename = path.join(runDir, `${output.appendTo}.jsonl`);
-		const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
-		console.log(contents)
-		fs.appendFileSync(filename, contents);
-	}
+	measurementHelpers.handleOutputWriteTo(output, table, runDir, prefix);
+	measurementHelpers.handleOutputAppendTo(output, table, runDir);
 
 	process.exit(0);
 }

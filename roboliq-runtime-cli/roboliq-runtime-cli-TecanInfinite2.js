@@ -89,42 +89,12 @@ else {
 	});
 }
 
-// Convert quantities with units to plain numbers
-if (outputUnits) {
-	_.forEach(table, row => {
-		_.forEach(outputUnits, (units, key) => {
-			if (_.has(row, key)) {
-				// console.log(row)
-				// console.log({key, units, value: row[key]});
-				// console.log({a: math.eval(row[key])})
-				try {
-					row[key] = math.eval(row[key]).toNumber(units);
-				}
-				catch (e) { }
-			}
-		});
-	});
-}
+measurementHelpers.handleOutputUnits(output, table);
 
 // Save the JSON file
 fs.writeFileSync(jsonFile, JSON.stringify(table, null, '\t'));
 
-if (!_.isEmpty(appendTo) && !_.isEmpty(table)) {
-	const appendToFile = path.join(runDir, appendTo+".jsonl");
-	const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
-	fs.appendFileSync(appendToFile, contents);
-
-	// HACK to copy data to shared drive
-	if (fs.existsSync("Y:\\Projects\\Roboliq")) {
-		const hackDir = path.join("Y:\\Projects\\Roboliq\\labdata", scriptBase, runId);
-		console.log({hackDir})
-		mkdirp.sync(hackDir);
-		const hackFile = path.join(hackDir, appendTo+".jsonl");
-		console.log("writing duplicate file to: "+hackFile)
-		const contents = table.map(s => JSON.stringify(s)).join("\n") + "\n";
-		fs.appendFileSync(hackFile, contents);
-	}
-}
+measurementHelpers.handleOutputAppendTo(output, table, runDir);
 
 console.log("done")
 //

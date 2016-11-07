@@ -20,6 +20,7 @@ const expect = require('../expect.js');
 const misc = require('../misc.js');
 const groupingMethods = require('./pipetter/groupingMethods.js');
 const pipetterUtils = require('./pipetter/pipetterUtils.js');
+import * as simulatedHelpers from './simulatedHelpers.js';
 const sourceMethods = require('./pipetter/sourceMethods.js');
 const wellsParser = require('../parsers/wellsParser.js');
 import * as WellContents from '../WellContents.js';
@@ -800,12 +801,20 @@ const commandHandlers = {
 	"pipetter._measureVolume": function(params, parsed, data) {
 		// console.log("pipetter._punctureSeal: "+JSON.stringify(parsed, null, '\t'))
 		const effects = pipetterUtils.getEffects_pipette(parsed, data);
-		return {
+
+		const result = {
 			effects,
 			reports: (_.isEmpty(data.objects.DATA)) ? undefined : {
 				measurementFactors: data.objects.DATA
 			}
 		};
+
+		if (_.has(parsed.value, ["output", "simulated"])) {
+			const wells = parsed.value.items.map(item => item.well);
+			simulatedHelpers.simulatedByWells(parsed, data, wells, result);
+		}
+
+		return result;
 	},
 	"pipetter._mix": function(params, parsed, data) {
 		// console.log("pipetter._mix: "+JSON.stringify(parsed, null, '\t'))
@@ -959,6 +968,8 @@ const commandHandlers = {
 		_.forEach(result.expansion, step => {
 			if (step.command === "pipetter._pipette") {
 				step.command = "pipetter._measureVolume";
+				if (parsed.orig.output)
+					step.output = _.clone(parsed.orig.output);
 			}
 		});
 
