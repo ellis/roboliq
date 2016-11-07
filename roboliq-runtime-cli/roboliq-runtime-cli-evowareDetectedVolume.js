@@ -18,6 +18,7 @@ var _trim = require('lodash/trim');
 // var sendPacket = require('./roboliq-runtime-sendPacket.js');
 
 var designHelper = require('./src/designHelper.js');
+var measurementHelpers = require('./src/measurementHelpers.js');
 
 opts
 	.version("1.0")

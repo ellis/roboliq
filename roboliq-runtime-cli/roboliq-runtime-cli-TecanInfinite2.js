@@ -9,6 +9,7 @@ var path = require('path');
 // console.log("D")
 import processXml from './src/formats/TecanInfinite.js';
 import designHelper from './src/designHelper.js';
+var measurementHelpers = require('./src/measurementHelpers.js');
 // console.log("E")
 
 opts
