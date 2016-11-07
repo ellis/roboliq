@@ -41,11 +41,11 @@
 	* [ ] write analysis
 	* [ ] run script
 	* [ ] run analysis
-* [ ] script for z-level
+* [x] script for z-level
 	* [x] write script
-	* [ ] write analysis
-	* [.] run script
-	* [ ] run analysis
+	* [x] write analysis
+	* [x] run script
+	* [x] run analysis
 * [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] trigger analysis during execution after measurements
 * [ ] display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)

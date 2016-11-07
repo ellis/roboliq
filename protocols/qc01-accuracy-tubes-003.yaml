@@ -5,11 +5,11 @@ objects:
     conditions:
       combo*:
       - volume: 3ul
-        count*: 36
-        replicate*: 2
+        count*: 10
+        replicate*: 5
       - volume: 7ul
-        count*: 25
-        replicate*: 2
+        count*: 10
+        replicate*: 4
       - volume: 15ul
         count*: 9
         replicate*: 2
