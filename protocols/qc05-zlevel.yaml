@@ -13,6 +13,10 @@ description: |
     * using that same tip, measure zlevel twice
     * move the plate to other bench positions and repeat the measurements
 
+evowareCompiler:
+  timing: false
+  retractTips: false
+
 variables:
   liquidClass:
     description: Liquid class to test with
@@ -113,7 +117,7 @@ steps:
         output:
           joinKey: well
           appendTo: measurements
-          simulated: 'unit(max(0, volume/(1ul) - 30 + bignumber(random(number(1)))), "ul")'
+          simulated: 'max(0, volume/(1ul) - 30 + bignumber(random(number(1))))'
           units:
             volume: ul
 
@@ -154,6 +158,6 @@ steps:
           output:
             joinKey: well
             appendTo: measurements
-            simulated: 'unit(max(0, volume/(1ul) - 30 + bignumber(random(number(1)))), "ul")'
+            simulated: 'max(0, volume/(1ul) - 30 + bignumber(random(number(1))))'
             units:
               volume: ul

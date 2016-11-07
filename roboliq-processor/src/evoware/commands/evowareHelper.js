@@ -71,6 +71,18 @@ export function createUserPromptLine(text, beep = 0, autoclose = -1) {
 }
 
 /**
+ * Create the Evoware token to prompt the user.
+ * @param  {string} text - text to show the user
+ * @param  {numeric} beep - 0: none, 1: beep once, 2: beep three times, 3: beep every 3 seconds
+ * @param  {numeric} autoclose - number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)
+ */
+export function createVariableLine(name, value) {
+	const min = "1.000000";
+	const max = "10.000000";
+	return `Variable(${name},"${value}",0,"",0,${min},${max},${(_.isNumber(value) ? 0 : 1)},2,0,0);`;
+}
+
+/**
  * Put double-quotes around a string, if it doesn't already have them.
  * @param  {string} s - any input string
  * @return {string} string with outer double-quotes.

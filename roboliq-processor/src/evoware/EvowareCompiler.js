@@ -20,6 +20,7 @@ const commandHandlers = {
 	"evoware._facts": evoware._facts,
 	"evoware._raw": evoware._raw,
 	"evoware._userPrompt": evoware._userPrompt,
+	"evoware._variable": evoware._variable,
 	"pipetter._aspirate": pipetter._aspirate,
 	"pipetter._dispense": pipetter._dispense,
 	"pipetter._measureVolume": pipetter._measureVolume,
@@ -42,15 +43,24 @@ const commandHandlers = {
  * @param  {object} table - table object (see EvowareTableFile.load)
  * @param  {roboliq:Protocol} protocol
  * @param  {array} agents - string array of agent names that this script should generate script(s) for
- * @param  {object} options - an optional map of options; set timing=false to avoid outputting time-logging instructions
+ * @param  {object} options - an optional map of options; e.g. set timing=false to avoid outputting time-logging instructions
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
 export function compile(table, protocol, agents, options = {}) {
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
-	const results = compileStep(table, protocol, agents, [], objects, [], options);
+	const evowareVariables = {}
+	const results = compileStep(table, protocol, agents, [], objects, evowareVariables, [], options);
 
+	// Prepend variables
+	// console.log({evowareVariables})
+	const variableList = _.reverse(_.sortBy(_.toPairs(evowareVariables), x => x[0]));
+	// console.log({variableList})
+	_.forEach(variableList, ([name, value]) => {
+		// console.log({name, value, line: evowareHelper.createVariableLine(name, value)})
+		results.unshift({line: evowareHelper.createVariableLine(name, value)});
+	});
 	// Prepend token to call 'initRun'
 	results.unshift({line: evowareHelper.createExecuteLine(options.variables.ROBOLIQ, ["initRun", options.variables.SCRIPTFILE], true)});
 	// Append token to reset the last moved ROMA
@@ -65,9 +75,9 @@ export function compile(table, protocol, agents, options = {}) {
 	return [{table, lines, tokenTree: results}];
 }
 
-export function compileStep(table, protocol, agents, path, objects, loopEndStack = [], options = {}) {
+export function compileStep(table, protocol, agents, path, objects, evowareVariables, loopEndStack = [], options = {}) {
 	try {
-		const results = compileStepSub(table, protocol, agents, path, objects, loopEndStack, options);
+		const results = compileStepSub(table, protocol, agents, path, objects, evowareVariables, loopEndStack, options);
 		return results;
 	} catch (e) {
 		console.log("ERROR: "+path.join("."));
@@ -78,7 +88,7 @@ export function compileStep(table, protocol, agents, path, objects, loopEndStack
 	return [];
 }
 
-function compileStepSub(table, protocol, agents, path, objects, loopEndStack, options) {
+function compileStepSub(table, protocol, agents, path, objects, evowareVariables, loopEndStack, options) {
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}
@@ -140,7 +150,7 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 
 		// Try to expand the substeps
 		for (const key of keys) {
-			const result1 = compileStep(table, protocol, agents, path.concat(key), objects, loopEndStack2, options);
+			const result1 = compileStep(table, protocol, agents, path.concat(key), objects, evowareVariables, loopEndStack2, options);
 			// Possibly check whether we need a loop label
 			if (isLoop && !needLoopLabel) {
 				const result2 = _.flattenDeep(result1);
@@ -166,7 +176,8 @@ function compileStepSub(table, protocol, agents, path, objects, loopEndStack, op
 			//files: filecache,
 			protocol,
 			path,
-			loopEndStack
+			loopEndStack,
+			evowareVariables
 		};
 		// Parse command options
 		const schema = protocol.schemas[step.command];

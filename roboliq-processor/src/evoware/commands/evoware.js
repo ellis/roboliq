@@ -43,3 +43,8 @@ export function _userPrompt(params, parsed, data) {
 	const line = evowareHelper.createUserPromptLine(parsed.orig.text, parsed.orig.beep, parsed.orig.autoclose);
 	return [{line}];
 }
+
+export function _variable(params, parsed, data) {
+	const line = evowareHelper.createVariableLine(parsed.orig.name, parsed.orig.value);
+	return [{line}];
+}

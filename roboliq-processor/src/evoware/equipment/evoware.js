@@ -175,7 +175,16 @@ module.exports = {
 				autoclose: {description: "number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)", type: "integer"}
 			},
 			required: ["text"]
-		}
+		},
+		"evoware._variable": {
+			description: "Set an Evoware variable",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				name: {description: "Variable name", type: "string"},
+				value: {description: "Variable value", type: ["string", "number"]}
+			},
+			required: ["name", "value"]
+		},
 	}),
 	/**
 	 * Return command handlers for low-level evoware instructions.

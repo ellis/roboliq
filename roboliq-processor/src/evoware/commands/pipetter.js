@@ -388,7 +388,7 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 		}
 
 		// destinationMixing
-		if (func === "Dispense") {
+		else if (func === "Dispense") {
 			const mixTuples = (parsed.value.destinationMixing)
 				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
 			if (!_.isEmpty(mixTuples)) {
@@ -399,10 +399,16 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 			}
 		}
 
-		if (func === "Detect_Liquid") {
+		else if (func === "Detect_Liquid") {
 			// console.log({tuples})
 			// console.log({well: _.first(tuples).well})
-			const l = tuples.map(tuple => [tuple.syringeRow, tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~DETECTED_VOLUME_${tuple.syringeRow}~`].join(","))
+			const l = tuples.map(tuple => {
+				// Indicate to EvowareCompiler that we need to create this variable at the top of the script
+				const variable = `DETECTED_VOLUME_${tuple.syringeRow}`;
+				data.evowareVariables[variable] = 0;
+				// Parameters for the call to ROBOLIQ
+				return [tuple.syringeRow, tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~${variable}~`].join(",");
+			});
 			// console.log({l})
 			const args = ["evowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(l);
 			const lines2 = [{line: evowareHelper.createExecuteLine("${ROBOLIQ}", args, true)}];
