@@ -2,6 +2,7 @@
 
 # paper2 Todos
 
+* [ ] process 'output.units' in TecanInfinite2.js
 * [x] scripts for weight experiments
 * [ ] run weight experiment A (ran it, but need to make changes!)
 * [?] run weight experiment B
