@@ -1069,23 +1069,64 @@ function assign_allocatePlates_initGroup(rows, rowIndexes) {
 	if (_.isUndefined(this.wellsUsed))
 		this.wellsUsed = 0;
 
-	assert(rowIndexes.length <= action.wellsPerPlate, "too many positions in group for plate to accomodate");
+	// If the wells on the plate should be segmented by some grouping
+	if (action.groupBy) {
+		assert(rowIndexes.length <= action.wellsPerPlate, `too many positions in group for plate to accomodate: ${rowIndexes.length} rows, ${action.wellsPerPlate} wells per plate`);
 
-	if (this.wellsUsed + rowIndexes.length <= action.wellsPerPlate) {
-		this.wellsUsed += rowIndexes.length;
+		// If they fit on the current plate:
+		if (this.wellsUsed + rowIndexes.length <= action.wellsPerPlate) {
+			this.wellsUsed += rowIndexes.length;
+		}
+		// Otherwise, skip to next plate
+		else {
+			this.plateIndex++;
+			assert(this.plateIndex < action.plates.length, `require more plates than the ${action.plates.length} supplied: ${action.plates.join(", ")}`);
+			this.wellsUsed = rowIndexes.length;
+		}
+
+		// TODO: allow for rotating plates for each group rather than assigning each plate until its full
+		// console.log()
+		// console.log({this})
+
+		this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
+		// console.log({this_action_values: this.action.values});
 	}
 	else {
-		this.plateIndex++;
-		assert(this.plateIndex < action.plates.length, `require more plates than the ${action.plates.length} supplied: ${action.plates.join(", ")}`);
-		this.wellsUsed = rowIndexes.length;
+		// assert(rowIndexes.length <= action.plates.length * action.wellsPerPlate, `too many row for plates to accomodate: ${rowIndexes.length} rows, ${action.wellsPerPlate} wells per plate, ${action.plates.length} plates`);
+
+		// If all the rows can be assigned to the current plate:
+		if (this.wellsUsed + rowIndexes.length <= action.wellsPerPlate) {
+			this.wellsUsed += rowIndexes.length;
+			this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
+		}
+		// Otherwise, just allocate each plate until its full
+		else {
+			this.action.values = Array(rowIndexes.length);
+
+			let i = 0;
+			while (i < rowIndexes.length) {
+				const n = Math.min(rowIndexes.length - i, action.wellsPerPlate - this.wellsUsed);
+				if (n == 0) {
+					this.plateIndex++;
+					assert(this.plateIndex < action.plates.length, `require more plates than the ${action.plates.length} supplied: ${action.plates.join(", ")}`);
+					this.wellsUsed = 0;
+				}
+				else {
+					for (let j = 0; j < n; j++) {
+						this.action.values[i + j] = action.plates[this.plateIndex];
+					}
+					this.wellsUsed += n;
+				}
+				i += n;
+			}
+		}
+
+		// TODO: allow for rotating plates for each group rather than assigning each plate until its full
+		// console.log()
+		// console.log({this})
+
+		// console.log({this_action_values: this.action.values});
 	}
-
-	// TODO: allow for rotating plates for each group rather than assigning each plate until its full
-	// console.log()
-	// console.log({this})
-
-	this.action.values = _.fill(Array(rowIndexes.length), action.plates[this.plateIndex]);
-	// console.log({this_action_values: this.action.values});
 
 	this.defaultInitGroup(rows, rowIndexes);
 }

@@ -30,7 +30,7 @@ function handleDesign(design, opts) {
 		const DATA = [];
 		design = misc.handleDirectiveDeep(design, data);
 		design = commandHelper.substituteDeep(design, data, SCOPE, DATA);
-		console.log(JSON.stringify(design, null, '\t'))
+		// console.log(JSON.stringify(design, null, '\t'))
 	}
 	const table = Design.flattenDesign(design);
 	Design.printRows(table);

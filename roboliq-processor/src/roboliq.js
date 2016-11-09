@@ -246,12 +246,14 @@ function loadProtocol(a, b, url, filecache) {
 		_.merge(filecache, b.files)
 	}
 
+	/*
 	// Add variables to `objects`
+	// TODO: Remove this in favor of  (ellis 2016-11-09)
 	if (b.variables) {
 		_.forEach(b.variables, (value, key) => {
 			b.objects[key] = _.merge({}, {type: "Variable"}, value);
 		});
-	}
+	}*/
 
 	// Add parameters to `objects.PARAMS`
 	if (b.parameters) {
@@ -297,35 +299,48 @@ function loadProtocol(a, b, url, filecache) {
 	};
 	// Handle directives for predicates
 	var l = [
-		'predicates',
+		'predicates'
 	];
 	_.forEach(l, function(key) {
+		// console.log({key, c: c[key]})
 		misc.mutateDeep(c[key], function(x) { return misc.handleDirective(x, data); });
 	});
 
-	// Handle file nodes, resolve path relative to current directory, add to "files" key of protocol
+	// Deep mutation for two modifications:
+	// 1. Handle file nodes, resolve path relative to current directory, add to "files" key of protocol
+	// 2. Substitute parameter values
 	misc.mutateDeep(c, function(x) {
 		//console.log("x: "+x)
-		// Return filename relative to current directory
-		if (_.isString(x) && (_.startsWith(x, "./") || _.startsWith(x, "../"))) {
-			var filename = "./" + path.posix.join(path.dirname(url), x);
-			// If the file hasn't been loaded yet:
-			if (!filecache.hasOwnProperty(filename)) {
-				try {
-					var filedata = fs.readFileSync(filename);
-					filecache[filename] = filedata;
-					//console.log("filename: "+filename);
-					//console.log(filedata);
-					//console.log(filedata.toString('utf8'))
-				} catch (e) {
-					c.errors[url] = [`could not load file (${filename})`, e.toString()];
+		if (_.isString(x)) {
+			// Return filename relative to current directory
+			if (_.startsWith(x, "./") || _.startsWith(x, "../")) {
+				var filename = "./" + path.posix.join(path.dirname(url), x);
+				// If the file hasn't been loaded yet:
+				if (!filecache.hasOwnProperty(filename)) {
+					try {
+						var filedata = fs.readFileSync(filename);
+						filecache[filename] = filedata;
+						//console.log("filename: "+filename);
+						//console.log(filedata);
+						//console.log(filedata.toString('utf8'))
+					} catch (e) {
+						c.errors[url] = [`could not load file (${filename})`, e.toString()];
+					}
 				}
+				return filename;
 			}
-			return filename;
+			// Substitute parameter value
+			else if (_.startsWith(x, "$#")) {
+				// HACK: modified from misc.handleDirective
+				const key = x.substr(2);
+				const value = _.get(c, ["parameters", key, "value"]) || _.get(imported, ["parameters", key, "value"]);
+				if (_.isUndefined(value)) {
+					throw new Error("undefined parameter value: "+spec);
+				}
+				return value;
+			}
 		}
-		else {
-			return x;
-		}
+		return x;
 	});
 
 	// Merge in the imports
@@ -557,7 +572,7 @@ function validateProtocol1(protocol, o, path) {
 		const fullName = path2.join(".");
 		const doit = () => {
 			//console.log({name, value, fullName})
-			if (name !== 'type' && name !== "DATA" && name !== "SCOPE") {
+			if (name !== 'type' && name !== "DATA" && name !== "SCOPE" && name !== "PARAMS") {
 				assert(!_.isEmpty(value.type), "Missing `type` property: "+JSON.stringify(value));
 				if (value.type === "Namespace") {
 					validateProtocol1(protocol, value, path.concat(name));
@@ -1203,6 +1218,8 @@ function _run(opts, userProtocol) {
 			console.log();
 			console.log(`Design "${name}":`);
 			// console.log(JSON.stringify(design, null, '\t'))
+			design = misc.handleDirectiveDeep(design, protocol);
+			design = commandHelper.substituteDeep(design, protocol, {}, []);
 			const rows = Design.flattenDesign(design);
 			Design.printRows(rows);
 		});

@@ -98,6 +98,7 @@ function directive_destinationWells(spec, data) {
 }
 
 function directive_for(spec, data) {
+	// console.log({spec})
 	expect.paramsRequired(spec, ['factors', 'output']);
 	var views = directive_factorialCols(spec.factors, data);
 	//console.log("views:", views);

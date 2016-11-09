@@ -1054,7 +1054,7 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 				table = source;
 			}
 			else if (source.type === "Design") {
-				design = substituteDeep(source, data, SCOPE, DATA);
+				const design = substituteDeep(source, data, SCOPE, DATA);
 				table = Design.flattenDesign(design);
 			}
 			else {

@@ -53,7 +53,7 @@ function getObjectsValue(key, objects, effects, prefix) {
 			var objectName = _.take(l, i + 1).join('.');
 			if (prefix) objectName = prefix + '.' + objectName;
 			var message = "value `"+objectName+"`: undefined";
-			console.log({key, objects})
+			// console.log({key, objects})
 			//console.log("objects:", objects)
 			//console.log(message);
 			throw new Error(message);//{name: "ProcessingError", errors: [message]};
@@ -109,6 +109,7 @@ function getObjectsOfType(objects, types, prefix) {
  * @return {Any} Return the object, or if it was a directive, the results of the directive handler.
  */
 function handleDirective(spec, data) {
+	// console.log(`handleDirective: `+JSON.stringify(spec))
 	// console.log("data1: "+JSON.stringify(data));
 	const directiveHandlers = data.directiveHandlers || (data.protocol || {}).directiveHandlers;
 	if (_.isPlainObject(spec)) {
@@ -119,9 +120,11 @@ function handleDirective(spec, data) {
 				= (_.startsWith(key0, "#")) ? key0.substr(1)
 				: (_.endsWith(key0, "()")) ? key0.substr(0, key0.length - 2)
 				: undefined;
+			// console.log({key0, key})
 			if (key) {
 				if (directiveHandlers.hasOwnProperty(key)) {
-					var spec2 = spec[key];
+					var spec2 = spec[key0];
+					// console.log({spec2, handler: directiveHandlers[key]})
 					var spec3 = (_.isPlainObject(spec2))
 						? _.omit(spec2, 'override')
 						: spec2;
