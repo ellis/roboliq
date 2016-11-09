@@ -125,6 +125,23 @@ steps:
   steps:
     description: "`Plate {{$plate}}`"
     1:
+      description: Read absorbance of empty wells
+      command: absorbanceReader.measurePlate
+      object: $plate
+      program:
+        excitationWavelength: $#excitationWavelength
+      output:
+        joinKey: well
+        appendTo: measurements
+        userValues:
+          stage: empty
+        units:
+          totalVolume: ul
+          dyeVolume: ul
+          waterVolume: ul
+        simulated: "(waterFirst) ? random(number(0.03), number(0.04)) : random(number(0.04), number(0.06))"
+
+    2:
       data: {where: 'waterFirst'}
       description: Pre-distribute water to wells that don't require dry-contact
       command: pipetter.pipette
@@ -136,8 +153,8 @@ steps:
       clean: light
       cleanBetween: none
 
-    2:
-      description: Read absorbance of empty wells
+    3:
+      description: Read absorbance of wells after adding water
       command: absorbanceReader.measurePlate
       object: $plate
       program:
@@ -153,7 +170,7 @@ steps:
           waterVolume: ul
         simulated: "(waterFirst) ? random(number(0.03), number(0.04)) : random(number(0.04), number(0.06))"
 
-    3:
+    4:
       description: Distribute dye
       command: pipetter.pipette
       program: $$liquidClass
@@ -164,7 +181,7 @@ steps:
       clean: light
       cleanBetween: flush
 
-    4:
+    5:
       data: {where: 'not waterFirst'}
       description: Post-distribute water
       command: pipetter.pipette
@@ -176,7 +193,7 @@ steps:
       clean: light
       cleanBetween: none
 
-    5:
+    6:
       description: Read absorbance of empty wells
       command: absorbanceReader.measurePlate
       object: $plate
@@ -191,4 +208,4 @@ steps:
           totalVolume: ul
           dyeVolume: ul
           waterVolume: ul
-        simulated: 'bignumber(random(number(0.03), number(0.04))) + (dyeVolume / ul) * ((dyeSource == "dye03") ? 0.0333 : 0.333)'
+        simulated: 'bignumber(random(number(0.03), number(0.04))) + (dyeVolume / ul) * ((dyeSource == "dye03") ? 0.0333 : 0.00333)'
