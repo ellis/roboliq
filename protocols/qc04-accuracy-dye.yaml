@@ -85,11 +85,10 @@ objects:
     conditions:
       totalVolume: $#standardWellVolume
       role: test
-      syringe*: $#testSyringes
+      replicate*: 3
       liquidClass*: $#testLiquidClasses
       dyeVolume*: $#standardVolumes
-      waterVolume=calculate: 'totalVolume - dyeVolume'
-      replicate*: 3
+      syringe*: $#testSyringes
       plate=allocatePlates:
         plates: [plate1, plate2, plate3]
         wellsPerPlate: ${96 - 3 - 3 * standardWellVolume.length}
@@ -100,83 +99,24 @@ objects:
           role*:
             control:
               replicate*: 3
+              liquidClass: $#standardLiquidClass
+              dyeVolume: 0 ul
               syringe=:
                 values: $#testSyringes
                 order: reshuffle
-              liquidClass: $#standardLiquidClass
-              dyeVolume: 0 ul
-              waterVolume: $#standardWellVolume
             standard:
-              syringe: $#standardSyringe
+              replicate*: 3
               liquidClass: $#standardLiquidClass
               dyeVolume*: $#standardVolumes
-              waterVolume=calculate: 'totalVolume - dyeVolume'
-              replicate*: 3
-      idA=range:
-        groupBy: syringe
-        order: reshuffle
-      wellId=range:
-        orderBy: [idA, syringe]
-        transpose: true
+              syringe: $#standardSyringe
+      waterVolume=calculate: 'totalVolume - dyeVolume'
       well=allocateWells:
         groupBy: plate
-        orderBy: wellId
         rows: 8
         columns: 12
       dyeSource=calculate: '(dyeVolume < 30 ul) ? "dye03" : "dye30"'
       waterFirst=calculate: '(liquidClass == "Roboliq_Water_Dry_1000") ? false : true'
-    orderBy: [plate, wellId]
-
-  # designX:
-  #   type: Design
-  #   randomSeed: 123
-  #   conditions:
-  #     plate=allocatePlates:
-  #       plates: [plate1]
-  #       groupBy: [origId]
-  #       wellsPerPlate: 92
-  #     part: 1
-  #     site: ourlab.mario.site.P3
-  #     volume*=range:
-  #       from: 0
-  #       till: 300
-  #       step: 10
-  #       units: ul
-  #     volRep*: 2
-  #     =concat:
-  #       conditions:
-  #         part: 2
-  #         site: ourlab.mario.site.P3
-  #         volume: 150 ul
-  #         syringe*: 4
-  #     wellID=range: {}
-  #     well=allocateWells:
-  #       rows: 8
-  #       columns: 12
-  #       order: shuffle
-  #     row=calculateRow: well
-  #     col=calculateColumn: well
-  #     =case:
-  #       - where: 'part == 1'
-  #         conditions:
-  #           stage*:
-  #             fill:
-  #               syringe=calculate: '((row - 1) % 4) + 1'
-  #             measure:
-  #               .*: 4
-  #               syringe=:
-  #                 groupBy: well
-  #                 values: [1,2,3,4]
-  #                 order: shuffle
-  #               syringeRep*: 2
-  #       - where: 'part == 2'
-  #         conditions:
-  #           stage*:
-  #             fill:
-  #             measure:
-  #               site*: [ourlab.mario.site.P2, ourlab.mario.site.P3, ourlab.mario.site.P4, ourlab.mario.site.P5, ourlab.mario.site.P6, ourlab.mario.site.P7, ourlab.mario.site.P8]
-  #               syringeRep*: 2
-  #   orderBy: [part, stage, site, col, row]
+    orderBy: [plate]
 
 steps:
   data: {source: design1}
@@ -225,6 +165,18 @@ steps:
       cleanBetween: flush
 
     4:
+      data: {where: 'not waterFirst'}
+      description: Post-distribute water
+      command: pipetter.pipette
+      program: $#standardLiquidClass
+      sources: water
+      destinationLabware: $plate
+      destinations: $$well
+      volumes: $$waterVolume
+      clean: light
+      cleanBetween: none
+
+    5:
       description: Read absorbance of empty wells
       command: absorbanceReader.measurePlate
       object: $plate

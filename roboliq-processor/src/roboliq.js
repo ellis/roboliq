@@ -29,6 +29,7 @@
  * @property {Object} alternatives - ???
  */
 
+Error.stackTraceLimit = Infinity;
 /**
  * Well contents.
  *
@@ -1318,7 +1319,11 @@ function _run(opts, userProtocol) {
 
 		// Get tables for all designs
 		const designs = misc.getObjectsOfType(protocol.objects, "Design");
-		const designTables = _.mapValues(designs, design => Design.flattenDesign(design));
+		const designTables = _.mapValues(designs, design => {
+			design = misc.handleDirectiveDeep(design, protocol);
+			design = commandHelper.substituteDeep(design, protocol, {}, []);
+			return Design.flattenDesign(design);
+		});
 		if (!_.isEmpty(designTables))
 			tables.designs = designTables;
 
