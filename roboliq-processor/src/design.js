@@ -871,7 +871,7 @@ const actionHandlers = {
 		return undefined;
 	},
 	"range": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
-		const action2 = _.cloneDeep(action);
+		const action2 = _.cloneDeep(_.isNull(action) ? {} : action);
 		_.defaults(action2, {from: 1, step: 1});
 		return assign(rows, rowIndexes, otherRowIndexes, name, action2, randomEngine, undefined, assign_range_initGroup);
 	},

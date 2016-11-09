@@ -74,6 +74,12 @@ objects:
     randomSeed: 123
     conditions:
       totalVolume: $#standardWellVolume
+      syringeCount: ${testSyringes.length}
+      role: test
+      syringe*: $#testSyringes
+      dyeVolume*: $#standardVolumes
+      waterVolume=calculate: 'totalVolume - dyeVolume'
+      replicate*: 3
       plate=allocatePlates:
         plates: [plate1, plate2]
         wellsPerPlate: ${96 - 3 - 3 * standardWellVolume.length}
@@ -84,6 +90,9 @@ objects:
           role*:
             control:
               replicate*: 3
+              syringe=:
+                values: $#testSyringes
+                order: reshuffle
               dyeVolume: 0 ul
               waterVolume: $#standardWellVolume
             standard:
@@ -91,13 +100,19 @@ objects:
               dyeVolume*: $#standardVolumes
               waterVolume=calculate: 'totalVolume - dyeVolume'
               replicate*: 3
-            test:
-              syringe*: $#testSyringes
-              dyeVolume*: $#standardVolumes
-              waterVolume=calculate: 'totalVolume - dyeVolume'
-              replicate*: 3
+      idA=range:
+        groupBy: syringe
+        order: reshuffle
+      wellId=range:
+        orderBy: [idA, syringe]
+        transpose: true
+      well=allocateWells:
+        groupBy: plate
+        orderBy: wellId
+        rows: 8
+        columns: 12
       # dyeSource
-
+    orderBy: [plate, wellId]
 
   designX:
     type: Design
