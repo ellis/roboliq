@@ -289,7 +289,7 @@ pipetter.pipette:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: [string, array], items: {type: string}}
+    program: {description: "Program identifier", type: [array, string], items: {type: string}}
     sourceProgram: {description: "Program identifier for aspirating from source, if it should differ from 'program'", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter.PipetteItem}}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}

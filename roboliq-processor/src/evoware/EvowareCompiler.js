@@ -5,6 +5,7 @@
  */
 import _ from 'lodash';
 import naturalSort from 'javascript-natural-sort';
+import path from 'path';
 import M from '../Medley.js';
 import commandHelper from '../commandHelper.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
@@ -71,6 +72,10 @@ export function compile(table, protocol, agents, options = {}) {
 	if (_.some(lines, line => line.indexOf(options.variables.TEMPDIR) >= 0)) {
 		lines.unshift(evowareHelper.createExecuteLine("cmd", ["/c", "mkdir", options.variables.TEMPDIR], true));
 	}
+
+	// Prepend token to open HTML
+	lines.unshift(evowareHelper.createUserPromptLine("Please check the bench setup and then confirm this dialog when you're done"));
+	lines.unshift(evowareHelper.createExecuteLine("chrome", [path.dirname(options.variables.SCRIPTFILE)+"/index.html"], false));
 
 	return [{table, lines, tokenTree: results}];
 }
