@@ -113,43 +113,68 @@ function handleDirective(spec, data) {
 	const directiveHandlers = data.directiveHandlers || (data.protocol || {}).directiveHandlers;
 	if (_.isPlainObject(spec)) {
 		const keys = _.keys(spec);
-		if (keys.length === 1 && _.startsWith(keys[0], "#")) {
-			const key = keys[0];
-			if (directiveHandlers.hasOwnProperty(key)) {
-				var spec2 = spec[key];
-				var spec3 = (_.isPlainObject(spec2))
-					? _.omit(spec2, 'override')
-					: spec2;
-				const result = {
-					x: directiveHandlers[key](spec3, data)
-				};
-				if (spec2.hasOwnProperty('override')) {
-					//console.log({result0: result.x})
-					_.merge(result, {x: spec2.override});
-					//console.log({result1: result.x})
+		if (keys.length === 1) {
+			const key0 = keys[0];
+			const key
+				= (_.startsWith(key0, "#")) ? key0.substr(1)
+				: (_.endsWith(key0, "()")) ? key0.substr(0, key0.length - 2)
+				: undefined;
+			if (key) {
+				if (directiveHandlers.hasOwnProperty(key)) {
+					var spec2 = spec[key];
+					var spec3 = (_.isPlainObject(spec2))
+						? _.omit(spec2, 'override')
+						: spec2;
+					const result = {
+						x: directiveHandlers[key](spec3, data)
+					};
+					if (spec2.hasOwnProperty('override')) {
+						//console.log({result0: result.x})
+						_.merge(result, {x: spec2.override});
+						//console.log({result1: result.x})
+					}
+					return result.x;
 				}
-				return result.x;
-			}
-			else {
-				throw new Error("unknown directive: "+key);
+				else {
+					throw new Error("unknown directive: "+key);
+				}
 			}
 		}
 	}
-	else if (_.isString(spec) && _.startsWith(spec, "#")) {
-		var hash2 = spec.indexOf('#', 1);
-		if (hash2 > 0) {
-			const key = spec.substr(0, hash2);
-			if (directiveHandlers.hasOwnProperty(key)) {
-				var spec2 = spec.substr(hash2 + 1);
-				var spec3 = handleDirective(spec2, data);
-				const result = directiveHandlers[key](spec3, data);
-				if (spec.hasOwnProperty('override')) {
-					_.merge(result, spec.override);
+	else if (_.isString(spec)) {
+	 	// Inline directives
+		if (_.startsWith(spec, "#")) {
+			var hash2 = spec.indexOf('#', 1);
+			if (hash2 > 0) {
+				const key = spec.substr(0, hash2);
+				if (directiveHandlers.hasOwnProperty(key)) {
+					var spec2 = spec.substr(hash2 + 1);
+					var spec3 = handleDirective(spec2, data);
+					const result = directiveHandlers[key](spec3, data);
+					if (spec.hasOwnProperty('override')) {
+						_.merge(result, spec.override);
+					}
+					return result;
 				}
-				return result;
+				else {
+					throw new Error("unknown directive: "+spec);
+				}
+			}
+		}
+		// Protocol parameters
+		else if (_.startsWith(spec, "$#")) {
+			const key = spec.substr(2);
+			if (_.has(data.objects.PARAMS, key)) {
+				const result = data.objects.PARAMS[key];
+				if (!_.isUndefined(result)) {
+					return result;
+				}
+				else {
+					throw new Error("undefined parameter value: "+spec);
+				}
 			}
 			else {
-				throw new Error("unknown directive: "+spec);
+				throw new Error("undefined parameter: "+spec);
 			}
 		}
 	}

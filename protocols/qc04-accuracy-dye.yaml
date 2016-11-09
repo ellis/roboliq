@@ -1,0 +1,229 @@
+roboliq: v1
+description: |
+  Estimate the accuracy and precision of pipetting using a dye-based assay.
+  This protocol can test multiple liquid classes and volumes.
+
+
+
+evowareCompiler:
+  timing: false
+  retractTips: false
+
+parameters:
+  standardLiquidClass:
+    description: Liquid class for the standard wells
+    value: Roboliq_Water_Air_1000
+  standardSyringe:
+    description: Syringe to use for the standard wells
+    value: 1
+  standardVolumes:
+    description: The volumes for the standard wells
+    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+  standardWellVolume:
+    description: The volume we want to fill wells to when comparing absorbance
+    value: 250 ul
+  testVolumes:
+    description: The volumes to test (parameter $v$)
+    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+  testLiquidClasses:
+    description: The liquid classes to test (parameter $p$)
+    value: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000, Roboliq_Water_Wet_1000]
+  testLabwareModel:
+    description: The labware model to test (parameter $m$)
+    value: ourlab.model.plateModel_96_round_transparent_nunc
+  testSyringes:
+    description: The syringes to test
+    value: [1,2,3,4]
+
+objects:
+  plate1:
+    type: Plate
+    description: dye plate
+    model: $@testLabwareModel
+    location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    description: dye plate
+    model: $@testLabwareModel
+    location: ourlab.mario.site.P2
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+  dyeLabware03:
+    type: Plate
+    description: trough for dye
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dye03]
+  dye03:
+    type: Liquid
+    description: dye with concentration such that 3ul measures somewhere between 0.1 and 0.2
+    wells: dyeLabware03(C01 down F01)
+  dyeLabware30:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye30]
+  dye30:
+    type: Liquid
+    description: dye with concentration such that 30ul measures about 0.1
+    wells: dyeLabware30(C01 down F01)
+
+  design1:
+    type: Design
+    randomSeed: 123
+    conditions:
+      totalVolume: $#standardWellVolume
+      plate=allocatePlates:
+        plates: [plate1, plate2]
+        wellsPerPlate: ${96 - 3 - 3 * standardWellVolume.length}
+      # we need to add 4 control wells for each plate, plus standard wells
+      .=concat:
+        groupBy: [totalVolume, plate]
+        conditions:
+          role*:
+            control:
+              replicate*: 3
+              dyeVolume: 0 ul
+              waterVolume: $#standardWellVolume
+            standard:
+              syringe: $#standardSyringe
+              dyeVolume*: $#standardVolumes
+              waterVolume=calculate: 'totalVolume - dyeVolume'
+              replicate*: 3
+            test:
+              syringe*: $#testSyringes
+              dyeVolume*: $#standardVolumes
+              waterVolume=calculate: 'totalVolume - dyeVolume'
+              replicate*: 3
+      # dyeSource
+
+
+  designX:
+    type: Design
+    randomSeed: 123
+    conditions:
+      plate=allocatePlates:
+        plates: [plate1]
+        groupBy: [origId]
+        wellsPerPlate: 92
+      part: 1
+      site: ourlab.mario.site.P3
+      volume*=range:
+        from: 0
+        till: 300
+        step: 10
+        units: ul
+      volRep*: 2
+      =concat:
+        conditions:
+          part: 2
+          site: ourlab.mario.site.P3
+          volume: 150 ul
+          syringe*: 4
+      wellID=range: {}
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        order: shuffle
+      row=calculateRow: well
+      col=calculateColumn: well
+      =case:
+        - where: 'part == 1'
+          conditions:
+            stage*:
+              fill:
+                syringe=calculate: '((row - 1) % 4) + 1'
+              measure:
+                .*: 4
+                syringe=:
+                  groupBy: well
+                  values: [1,2,3,4]
+                  order: shuffle
+                syringeRep*: 2
+        - where: 'part == 2'
+          conditions:
+            stage*:
+              fill:
+              measure:
+                site*: [ourlab.mario.site.P2, ourlab.mario.site.P3, ourlab.mario.site.P4, ourlab.mario.site.P5, ourlab.mario.site.P6, ourlab.mario.site.P7, ourlab.mario.site.P8]
+                syringeRep*: 2
+    orderBy: [part, stage, site, col, row]
+
+steps:
+  data: {source: design1}
+  1:
+    data: {where: 'part == 1'}
+    description: "Part 1: measure z-level at various volumes"
+    1:
+      data: {where: 'stage == "fill"'}
+      description: "Distribute water aliquots"
+      command: pipetter.pipette
+      program: $@liquidClass
+      sources: water
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: $$volume
+      syringes: $$syringe
+      clean: thorough
+      cleanBetween: flush
+    2:
+      data: {where: 'stage == "measure"'}
+      description: "Measure z-levels"
+      command: experiment.forEachGroup
+      groupBy: well
+      steps:
+        description: "`Measure {{$well}} with {{$volume}}`"
+        command: pipetter.measureVolume
+        program: $@liquidClass
+        wellLabware: plate1
+        wells: $$well
+        syringes: $$syringe
+        clean: none
+        output:
+          joinKey: well
+          appendTo: measurements
+          simulated: 'max(0, volume/(1ul) - 30 + bignumber(random(number(1))))'
+          units:
+            volume: ul
+
+  2:
+    data: {where: 'part == 2'}
+    description: "Part 2: measure z-level at various sites"
+    1:
+      data: {where: 'stage == "fill"'}
+      description: "Distribute water aliquots"
+      command: pipetter.pipette
+      program: $@liquidClass
+      sources: water
+      destinationLabware: plate1
+      destinations: $$well
+      volumes: $$volume
+      syringes: $$syringe
+      clean: thorough
+      cleanBetween: flush
+    2:
+      data: {where: 'stage == "measure"'}
+      description: "Measure z-levels"
+      command: experiment.forEachGroup
+      groupBy: site
+      steps:
+        1:
+          description: "`Move plate to {{$site}}`"
+          command: transporter.movePlate
+          object: plate1
+          destination: $site
+        2:
+          description: "`Measure z-levels`"
+          command: pipetter.measureVolume
+          program: $@liquidClass
+          wellLabware: plate1
+          wells: $$well
+          syringes: $$syringe
+          clean: none
+          output:
+            joinKey: well
+            appendTo: measurements
+            simulated: 'max(0, volume/(1ul) - 30 + bignumber(random(number(1))))'
+            units:
+              volume: ul

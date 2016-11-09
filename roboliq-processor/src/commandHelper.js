@@ -90,7 +90,24 @@ function substituteDeep(x, data, SCOPE, DATA) {
 				// console.log({map: _(DATA).map(propertyName).value()});
 			}
 		}
-		// Calculation
+		// Javascript
+		else if (_.startsWith(x, "${") && _.endsWith(x, "}")) {
+			const safeEval = require('safe-eval');
+			const code = x.substr(2, x.length - 3);
+			const scope = _.defaults({}, SCOPE, data.objects.PARAMS);
+			// console.log({code, scope})
+			x2 = safeEval(code, scope);
+		}
+		// Mathjs calculation
+		else if (x.length > 2 && _.startsWith(x, "$(") && _.endsWith(x, ")")) {
+			const expr = x.substr(2, x.length - 3);
+			// console.log({expr})
+			const context = _.defaults({}, SCOPE, data.objects.PARAMS)
+			// console.log({expr, context})
+			x2 = Design.calculate(expr, context);
+			// console.log({x2, expr})
+		}
+		// Mathjs calculation (deprecated)
 		else if (x.length > 2 && _.startsWith(x, "$`") && _.endsWith(x, "`")) {
 			const expr = x.substr(2, x.length - 3);
 			// console.log({expr})
@@ -1037,7 +1054,8 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 				table = source;
 			}
 			else if (source.type === "Design") {
-				table = Design.flattenDesign(source);
+				design = substituteDeep(source, data, SCOPE, DATA);
+				table = Design.flattenDesign(design);
 			}
 			else {
 				assert(false, "unrecognized data source: "+JSON.stringify(dataInfo.source)+" -> "+JSON.stringify(source));

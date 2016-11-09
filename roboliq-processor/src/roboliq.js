@@ -253,10 +253,18 @@ function loadProtocol(a, b, url, filecache) {
 		});
 	}
 
+	// Add parameters to `objects.PARAMS`
+	if (b.parameters) {
+		_.forEach(b.parameters, (value, key) => {
+			_.set(b.objects, ["PARAMS", key], value.value);
+		});
+	}
+
 	// Create a clone keeping only valid protocol properties.
 	var c = _.cloneDeep(_.pick(b,
 		"description",
 		"config",
+		"parameters",
 		"objects",
 		"steps",
 		"effects",
@@ -528,11 +536,6 @@ function postProcessProtocol_variables(protocol) {
 				const value = expandDirectives(calculate);
 				obj.value = value;
 			}
-			/*// HACK: force processing of type Design -- but maybe this should be done in the appropriate command instead
-			else if (obj.type === "Design") {
-				const table = Design.flattenDesign(obj);
-				obj.value = table;
-			}*/
 		});
 	});
 }
@@ -1214,7 +1217,7 @@ function _run(opts, userProtocol) {
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "description", "config", "objects", "schemas", "steps", "effects", "reports", "simulatedOutput", "warnings", "errors")
+			_.pick(protocol, "description", "config", "parameters", "objects", "schemas", "steps", "effects", "reports", "simulatedOutput", "warnings", "errors")
 		);
 		// Handle protocol.COMPILER
 		if (!_.isEmpty(protocol.COMPILER)) {

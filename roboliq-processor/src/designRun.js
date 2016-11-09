@@ -2,7 +2,9 @@ import _ from 'lodash';
 import jsonfile from 'jsonfile';
 import path from 'path';
 import yaml from 'yamljs';
+import commandHelper from './commandHelper.js';
 import * as Design from './design.js';
+import misc from './misc.js';
 
 const commander = require('commander')
 	.version("1.0")
@@ -16,8 +18,19 @@ const commander = require('commander')
 	);
 
 function handleDesign(design, opts) {
+	let protocol;
 	if (opts.path) {
+		protocol = design;
 		design = _.get(design, opts.path);
+	}
+	if (protocol) {
+		const parameters = _.get(protocol, "parameters", {});
+		const data = {protocol, objects: {PARAMS: _.mapValues(parameters, value => value.value)}};
+		const SCOPE = {};
+		const DATA = [];
+		design = misc.handleDirectiveDeep(design, data);
+		design = commandHelper.substituteDeep(design, data, SCOPE, DATA);
+		console.log(JSON.stringify(design, null, '\t'))
 	}
 	const table = Design.flattenDesign(design);
 	Design.printRows(table);
