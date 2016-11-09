@@ -279,12 +279,12 @@ module.exports = {
 			const outputFile0 = _.get(parsed.value, "output.writeTo") || parsed.value.outputFile || parsed.value.measurementType+".xml";
 			const outputFile = (path.win32.isAbsolute(outputFile0))
 				? outputFile0
-				: "${TEMPDIR}\\" + path.win32.basename(outputFile0);
+				: "%{TEMPDIR}\\" + path.win32.basename(outputFile0);
 			const value = outputFile + "|" + programData;
-			const args = ["TecanInfinite", "${SCRIPTFILE}", data.path.join("."), outputFile];
+			const args = ["TecanInfinite", "%{SCRIPTFILE}", data.path.join("."), outputFile];
 			const expansion = [
 				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
-				makeEvowareExecute(parsed.objectName.agent, "${ROBOLIQ}", args, true)
+				makeEvowareExecute(parsed.objectName.agent, "%{ROBOLIQ}", args, true)
 			];
 			return {
 				expansion,

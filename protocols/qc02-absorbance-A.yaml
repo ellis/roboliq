@@ -10,7 +10,7 @@ description: |
   * For 16ul dye05 to be ~0.5: 0.9152*16 / 0.5 = 29x dilution
   * For 16ul dye10 to be ~1.0: 0.9152*16 / 1.0 = 15x dilution
 
-variables:
+parameters:
   excitationWavelength:
     description: excitation wavelength to read absorbance
     value: 480nm
@@ -110,7 +110,7 @@ steps:
           command: absorbanceReader.measurePlate
           object: $plate
           program:
-            excitationWavelength: $@excitationWavelength
+            excitationWavelength: $#excitationWavelength
           output:
             #joinKey: well
             appendTo: measurements
@@ -163,7 +163,7 @@ steps:
           command: absorbanceReader.measurePlate
           object: $plate
           program:
-            excitationWavelength: $@excitationWavelength
+            excitationWavelength: $#excitationWavelength
           output:
             joinKey: well
             appendTo: measurements
@@ -198,7 +198,7 @@ steps:
               command: absorbanceReader.measurePlate
               object: $plate
               program:
-                excitationWavelength: $@excitationWavelength
+                excitationWavelength: $#excitationWavelength
               output:
                 joinKey: well
                 appendTo: measurements

@@ -17,7 +17,7 @@ evowareCompiler:
   timing: false
   retractTips: false
 
-variables:
+parameters:
   liquidClass:
     description: Liquid class to test with
     value: Roboliq_Water_Air_1000

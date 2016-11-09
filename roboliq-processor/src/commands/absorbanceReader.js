@@ -90,8 +90,8 @@ var commandHandlers = {
 			// 3) all wells on labware
 			const wells = (_.has(parsed.value, ["program", "wells"]))
 				? commandHelper.asArray(parsed.value.program.wells)
-				: (!_.isUndefined(joinKey))
-					? commandHelper.getDesignFactor(joinKey, data.objects.DATA)
+				: (!_.isUndefined(output.joinKey))
+					? commandHelper.getDesignFactor(output.joinKey, data.objects.DATA)
 					: wellsParser.parse(`${parsed.objectName.object}(all)`, data.objects);
 			// console.log({wells})
 			simulatedHelpers.simulatedByWells(parsed, data, wells, result);

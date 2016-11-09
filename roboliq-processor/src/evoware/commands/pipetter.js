@@ -410,8 +410,8 @@ function handleGroup(parsed, data, group, groupTypeToFunc) {
 				return [tuple.syringeRow, tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~${variable}~`].join(",");
 			});
 			// console.log({l})
-			const args = ["evowareDetectedVolume", "${SCRIPTFILE}", data.path.join(".")].concat(l);
-			const lines2 = [{line: evowareHelper.createExecuteLine("${ROBOLIQ}", args, true)}];
+			const args = ["evowareDetectedVolume", "%{SCRIPTFILE}", data.path.join(".")].concat(l);
+			const lines2 = [{line: evowareHelper.createExecuteLine("%{ROBOLIQ}", args, true)}];
 			lines = lines.concat(lines2);
 		}
 

@@ -97,6 +97,7 @@ pipetter.PipetteItem:
     volume: {description: Volume, type: Volume}
     volumeCalibrated: {description: "Calculate a calibrated volume", type: object}
     volumeTotal: {description: "Volume that the well should be brought up to.", type: Volume}
+    program: {description: "Program identifier", type: "string"}
     layer: {description: "A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list."}
     cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: [boolean, pipetter.MixSpec]}
@@ -288,7 +289,7 @@ pipetter.pipette:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "string"}
+    program: {description: "Program identifier", type: [string, array], items: {type: string}}
     sourceProgram: {description: "Program identifier for aspirating from source, if it should differ from 'program'", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter.PipetteItem}}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}

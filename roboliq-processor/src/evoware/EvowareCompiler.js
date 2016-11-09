@@ -212,10 +212,10 @@ function compileStepSub(table, protocol, agents, path, objects, evowareVariables
 		// console.log({options, timing: _.get(options, "timing", true)})
 		if (generatedCommandLines && _.get(options, "timing", true) === true) {
 			const agent = _.get(objects, step.agent);
-			const exePath = "${ROBOLIQ}";//options.variables.ROBOLIQ;
+			const exePath = "%{ROBOLIQ}";//options.variables.ROBOLIQ;
 			// console.log({agent})
-			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", stepId, "--script", "${SCRIPTFILE}"], false)});
-			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", stepId, "--script", "${SCRIPTFILE}"], false)});
+			results.unshift({line: evowareHelper.createExecuteLine(exePath, ["begin", "--step", stepId, "--script", "%{SCRIPTFILE}"], false)});
+			results.push({line: evowareHelper.createExecuteLine(exePath, ["end", "--step", stepId, "--script", "%{SCRIPTFILE}"], false)});
 			generatedTimingLogs = true;
 		}
 
@@ -265,10 +265,10 @@ function substitutePathVariables(results, options) {
 		else {
 			let line = results[i].line;
 			if (line) {
-				line = line.replace("${ROBOLIQ}", options.variables.ROBOLIQ);
-				line = line.replace("${SCRIPTFILE}", options.variables.SCRIPTFILE);
-				line = line.replace("${SCRIPTDIR}", options.variables.SCRIPTDIR);
-				line = line.replace("${TEMPDIR}", options.variables.TEMPDIR);
+				line = line.replace("%{ROBOLIQ}", options.variables.ROBOLIQ);
+				line = line.replace("%{SCRIPTFILE}", options.variables.SCRIPTFILE);
+				line = line.replace("%{SCRIPTDIR}", options.variables.SCRIPTDIR);
+				line = line.replace("%{TEMPDIR}", options.variables.TEMPDIR);
 				results[i].line = line;
 			}
 		}

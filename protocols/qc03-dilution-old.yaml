@@ -17,7 +17,7 @@ description: |
   * 0.9152/ul
   * For 250ul dye to be 2: 0.9152*250 / 2 = 114x dilution (I'll use our 100x dilution)
 
-variables:
+parameters:
   excitationWavelength:
     description: excitation wavelength to read absorbance
     value: 480nm
@@ -124,7 +124,7 @@ steps:
       command: absorbanceReader.measurePlate
       object: $plate
       program:
-        excitationWavelength: $@excitationWavelength
+        excitationWavelength: $#excitationWavelength
         wells:
           "#data":
             value: well
@@ -153,7 +153,7 @@ steps:
         command: absorbanceReader.measurePlate
         object: $plate
         program:
-          excitationWavelength: $@excitationWavelength
+          excitationWavelength: $#excitationWavelength
         output:
           joinKey: well
           appendTo: measurements
@@ -176,7 +176,7 @@ steps:
         command: absorbanceReader.measurePlate
         object: $plate
         program:
-          excitationWavelength: $@excitationWavelength
+          excitationWavelength: $#excitationWavelength
         output:
           joinKey: well
           appendTo: measurements
@@ -232,7 +232,7 @@ steps:
           command: absorbanceReader.measurePlate
           object: $plate
           program:
-            excitationWavelength: $@excitationWavelength
+            excitationWavelength: $#excitationWavelength
           output:
             joinKey: well
             appendTo: measurements
