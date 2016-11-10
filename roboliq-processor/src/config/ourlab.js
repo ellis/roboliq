@@ -510,6 +510,15 @@ module.exports = {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.sealer",
 				"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
+				"model": "ourlab.model.plateModel_96_round_transparent_nunc",
+				"site": "ourlab.mario.site.ROBOSEAL"
+			}
+		},
+		{
+			"sealer.canAgentEquipmentProgramModelSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.sealer",
+				"program": "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 				"model": "ourlab.model.plateModel_96_square_transparent_nunc",
 				"site": "ourlab.mario.site.ROBOSEAL"
 			}

@@ -50,7 +50,7 @@ We'll test a simple protocol to show you how to run the software.
 
 2. Open the terminal, and navigate to the directory where you copied the Roboliq repository.
 
-3. Run Roboliq from the terminal, passing `test1.yaml` as input:
+3. Run Roboliq from the terminal, passing `walkthrough1.yaml` as input:
   what do you think
 
   ```sh
@@ -243,7 +243,7 @@ Now we'll run a protocol on the real robot (named mario).
 In our lab, mario has already been configured.
 
 For this example, we'll simply dispense water into each well of a 96-well
-plate, seal it, and shake it.  Write a script like this:
+plate, seal it, and shake it.  Create a new file `~/Desktop/Ellis/roboliq/charlotte01.yaml` and write a script like this:
 
 ```yaml
 roboliq: v1                                # version of Roboliq being used
@@ -255,7 +255,7 @@ objects:                                   # the set of materials used in this p
   plate1:                                  # an object named "plate1"
     type: Plate                            # which is a type of plate
     model: ourlab.model.plateModel_96_round_transparent_nunc  # whose model is defined in the configuration file "ourlab.js"
-    location: ourlab.mario.site.P1         # which the user should place at the location "P1"
+    location: ourlab.mario.site.P3         # which the user should place at the location "P1"
   waterLabware:
     type: Plate
     model: ourlab.model.troughModel_100ml
@@ -267,7 +267,7 @@ objects:                                   # the set of materials used in this p
 steps:
   1:
     command: pipetter.pipette
-    sources: liquid1
+    sources: water
     destinations: plate1(all)
     volumes: 40 ul
     cleanBetween: none
@@ -275,11 +275,18 @@ steps:
     command: sealer.sealPlate
     object: plate1
   3:
-    command: shake.shakePlate
+    command: shaker.shakePlate
     object: plate1
+    program:
+      duration: 10 seconds
 ```
 
+Make sure your in the directory `~/Desktop/Ellis/roboliq/roboliq-processor`,
+and run the command:
 
+```sh
+npm start -- ../protocols/charlotte01.yaml
+```
 
 
 # Sudirectories of the repository
