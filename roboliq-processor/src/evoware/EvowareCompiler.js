@@ -215,7 +215,7 @@ function compileStepSub(table, protocol, agents, path, objects, evowareVariables
 
 		// Possibly wrap the instructions in calls to pathToRoboliqRuntimeCli in order to check timing
 		// console.log({options, timing: _.get(options, "timing", true)})
-		if (generatedCommandLines && _.get(options, "timing", true) === true) {
+		if (generatedCommandLines && _.get(options, "timing", false) === true) {
 			const agent = _.get(objects, step.agent);
 			const exePath = "%{ROBOLIQ}";//options.variables.ROBOLIQ;
 			// console.log({agent})

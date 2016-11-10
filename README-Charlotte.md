@@ -243,32 +243,34 @@ Now we'll run a protocol on the real robot (named mario).
 In our lab, mario has already been configured.
 
 For this example, we'll simply dispense water into each well of a 96-well
-plate, seal it, and shake it.  The script could look like this.
+plate, seal it, and shake it.  Write a script like this:
 
 ```yaml
 roboliq: v1                                # version of Roboliq being used
-# description of this protocol;the bar symbol (|) allows for multi-line text
+# description of this protocol; the pipe symbol ()|) allows for multi-line text
 description: |
   Dispense a liquid into each well of a
   96-well plate, seal it, and shake it.
 objects:                                   # the set of materials used in this protocol
   plate1:                                  # an object named "plate1"
     type: Plate                            # which is a type of plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc                      # whose model is defined in the configuration as "ourlab.???"
-    location: ourlab.robot1.site.P1        # which the user should place at the location "P1", as defined in the configuration
-  liquidLabware1:                          #
+    model: ourlab.model.plateModel_96_round_transparent_nunc  # whose model is defined in the configuration file "ourlab.js"
+    location: ourlab.mario.site.P1         # which the user should place at the location "P1"
+  waterLabware:
     type: Plate
-    model: ourlab.???
-    location: ourlab.robot1.site.P2
-  liquid1:
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
     type: Liquid
-    wells: liquidLabware1(A01 down D01)
+    wells: waterLabware(A01 down D01)
 steps:
   1:
     command: pipetter.pipette
     sources: liquid1
     destinations: plate1(all)
-    volumes: 40ul
+    volumes: 40 ul
+    cleanBetween: none
   2:
     command: sealer.sealPlate
     object: plate1
@@ -277,7 +279,7 @@ steps:
     object: plate1
 ```
 
-Copy that content into a file
+
 
 
 # Sudirectories of the repository
