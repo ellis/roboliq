@@ -9,12 +9,6 @@ and it compiles the protocols for execution by liquid handling robots.
 The only supported backend is for Tecan Evoware robots, but other backends
 can also be added.
 
-The important sub-directories of this repository are:
-
-* `roboliq-processor`: the source code for processing protocols and making sure they are complete
-* `roboliq-processor/src/evoware`: the source code for the Tecan Evoware backend
-* `roboliq-runtime-cli`: the source code for a command line utility that handles logging and measurements while experiments are running
-
 # Installation
 
 This guide assumes that you have some familiarity with using the command line terminal.
@@ -330,22 +324,11 @@ steps:
 
 Copy that content into a file
 
-# TODO
 
-* [ ] BUG: Compiling qc01-accuracy-tubes-003.yaml with dist crashes, whereas running with babel-node works
-* [ ] BUG: transporter.doThenRestoreLocation: can't use `$scopeVariable` in `objects` array
-* [?] BUG: transporter.doThenRestoreLocation: `equipment` wasn't used when transferring plate back to original position
-* [ ] Variable references:
-	* SCOPE: should contain parameters, variables, data rows
-	* Referencing:
-		* `$`: substitute in scope variable
-		* `$*`: dereference twice (consider `$$`)
-		* `$$`: column array from current data table (consider `$#`)
-		* `$@`: dereference variable in `objects`
-		* `$&`: dereference a parameter value
-		* `${${@myvar}.somevalue}`
-		* `${@myvar.somevalue}`
-		* "$`...`": calculation
-		* template substitution with ticks
-* [ ] allow for setting command defaults:
-	* `commandDefaults: [{command: "transporter.*", equipment: "ourlab.mario.roma2"}]`
+# Sudirectories of the repository
+
+The important sub-directories of this repository are:
+
+* `roboliq-processor`: the source code for processing protocols and making sure they are complete
+* `roboliq-processor/src/evoware`: the source code for the Tecan Evoware backend
+* `roboliq-runtime-cli`: the source code for a command line utility that handles logging and measurements while experiments are running

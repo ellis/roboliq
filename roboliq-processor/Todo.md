@@ -4,6 +4,7 @@
 
 * [ ] process 'output.units' in TecanInfinite2.js
 * [ ] qc01-accuracy
+	* [ ] have roboliq ask for weight measurements and save them, rather than doing all this stuff manually
 	* [ ] qc01-accuracy-003
 		* [?] write script
 		* [ ] run script
@@ -54,7 +55,6 @@
 	* [x] write analysis
 	* [x] run script
 	* [x] run analysis
-* [ ] have roboliq ask for weight measurements and save them, rather than doing all this stuff manually
 * [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] trigger analysis during execution after measurements
 * [ ] display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)
@@ -120,6 +120,8 @@ See misc.js:renderTemplateString, since another convention is used there
 
 * [ ] generated: separate pages for Commands and Types
 * [ ] generated: sort in alphabetical order, but put low-level things later
+* [ ] document the directives
+* [ ] document variable substitution
 * [ ] distribution documentation
 	* [ ] src/roboliq/README.md
 		* [ ] Getting Started
@@ -175,8 +177,25 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] absorbanceReader: 'output.units' not handled in TecanInfinite2.js
 * [ ] absorbanceReader: For a full plate minus F11 down H11, A11 cross E12 get skipped in the reader!
 * [ ] in qc02-absorbance-B.yaml, step 4, if we don't include the extra '1' substep, `Volume {{$totalVolume}}` throws and error
+* [ ] BUG: Compiling qc01-accuracy-tubes-003.yaml with dist crashes, whereas running with babel-node works
+* [ ] BUG: transporter.doThenRestoreLocation: can't use `$scopeVariable` in `objects` array
+* [?] BUG: transporter.doThenRestoreLocation: `equipment` wasn't used when transferring plate back to original position
 
 # Todos
 
 * [ ] replace usage of mustache with handlebars
 * [ ] designTest: unit test for calculateRow
+* [ ] Variable references:
+* SCOPE: should contain parameters, variables, data rows
+* Referencing:
+	* `$`: substitute in scope variable
+	* `$*`: dereference twice (consider `$$`)
+	* `$$`: column array from current data table (consider `$#`)
+	* `$@`: dereference variable in `objects`
+	* `$&`: dereference a parameter value
+	* `${${@myvar}.somevalue}`
+	* `${@myvar.somevalue}`
+	* "$`...`": calculation
+	* template substitution with ticks
+* [ ] allow for setting command defaults:
+	* `commandDefaults: [{command: "transporter.*", equipment: "ourlab.mario.roma2"}]`
