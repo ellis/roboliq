@@ -50,8 +50,9 @@ We'll test a simple protocol to show you how to run the software.
 
 2. Open the terminal, and navigate to the directory where you copied the Roboliq repository.
 
+  ``cd ~/Desktop/Ellis/roboliq/``
+
 3. Run Roboliq from the terminal, passing `walkthrough1.yaml` as input:
-  what do you think
 
   ```sh
   npm run processor -- protocols/walkthrough1.yaml

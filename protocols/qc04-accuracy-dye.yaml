@@ -195,7 +195,7 @@ steps:
       cleanBetween: none
 
     6:
-      description: Read absorbance of empty wells
+      description: Read absorbance of filled wells
       command: absorbanceReader.measurePlate
       object: $plate
       program:
