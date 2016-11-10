@@ -61,6 +61,7 @@ var yaml = require('yamljs');
 import commandHelper from './commandHelper.js';
 var expect = require('./expect.js');
 var misc = require('./misc.js');
+import stripUndefined from './stripUndefined.js';
 import * as WellContents from './WellContents.js';
 var wellsParser = require('./parsers/wellsParser.js');
 import * as Design from './design.js';
@@ -1129,6 +1130,7 @@ function _run(opts, userProtocol) {
 			//console.log("A")
 			//console.log(handler)
 			result = handler(params, parsed, data) || {};
+			result = stripUndefined(result);
 			//console.log("B")
 			//console.log("result: "+JSON.stringify(result))
 		} catch (e) {

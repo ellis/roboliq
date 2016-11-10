@@ -50,6 +50,7 @@ var commandHandlers = {
 			wells: (parsed.value.program || {}).wells
 		});
 		// Handle deprecated parameter names
+		TODO: should create a mergeR function that would be similar to stripUndefined(_.merge(x))
 		const output = _.merge({}, parsed.orig.output, {
 			joinKey: _.get(parsed.orig, "program.wellDesignFactor"),
 			userValues: _.get(parsed.orig, "program.userValues"),
@@ -80,6 +81,7 @@ var commandHandlers = {
 				destination: destinationAfter
 			}
 		];
+		console.log({expansion1output: expansion[1].output})
 
 		const result = {expansion};
 
