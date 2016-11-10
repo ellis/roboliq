@@ -237,61 +237,24 @@ Or if you just want to run the sample files which are already present:
 npm run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml -P compiled/
 ```
 
-CONTINUE
+## 3. A BSSE protocol for mario
 
+Now we'll run a protocol on the real robot (named mario).
+In our lab, mario has already been configured.
 
-
-PROBLEM:
-
-* should we automatically load roboliq config?  even if another config is specified?
-* how shall we specify which lab config to load?  Command line?  Config file?
-* if the lab's config file is in a completely different directory, how shall it load the roboliq config?
-* consider adapting ourlab.js to run with plain node, without babel
-* how can we run `npm i roboliq` and have it make the binaries available?
-
-Approach:
-* create a new directory
-* install roboliq by something like `npm i roboliq`
-* create an ENV file that tells where to find the config file (or which ones to load)
-* create a config file
-* config file should load roboliq/evoware modules via a non-relative path
-* somehow run roboliq from that directory (I'm just not sure whether the config's `require`s will work)
-
-TODO:
-
-* [x] figure out how to get npm to babel-compile the code when I run `npm install ~/src/roboliq/roboliq-processor`
-* [x] figure out how to conveniently load `require(roboliq-processor)`
-* [x] build the software using babel so that it runs faster
-* [ ] create sample ENV file in root of project
-* [ ] figure out tutorial for the user, whereby he creates `protocols`, `config`, and `compiled` sub-directories
-    * [ ] put sample files in those directories?  add them to .gitignore, or copy the samples from another directory.
-* [ ] make separate project roboliq-tecan-evoware?
-
-
-
-
-
-
-
-CONTINUE
-
-
-Let's assume that you have already configured Roboliq for your lab, and you
-are ready to write and run your first experiment.  (But beware: configuring
-a lab is a very complicated step, which is discussed in the next section).
-
-For this example, we'll simply dispense a liquid into each well of a 384-well
+For this example, we'll simply dispense water into each well of a 96-well
 plate, seal it, and shake it.  The script could look like this.
 
 ```yaml
 roboliq: v1                                # version of Roboliq being used
-description: |                             # description of this protocol;the bar symbol (|) allows for multi-line text
+# description of this protocol;the bar symbol (|) allows for multi-line text
+description: |
   Dispense a liquid into each well of a
-  384-well plate, seal it, and shake it.
+  96-well plate, seal it, and shake it.
 objects:                                   # the set of materials used in this protocol
   plate1:                                  # an object named "plate1"
     type: Plate                            # which is a type of plate
-    model: ourlab.???                      # whose model is defined in the configuration as "ourlab.???"
+    model: ourlab.model.plateModel_96_round_transparent_nunc                      # whose model is defined in the configuration as "ourlab.???"
     location: ourlab.robot1.site.P1        # which the user should place at the location "P1", as defined in the configuration
   liquidLabware1:                          #
     type: Plate

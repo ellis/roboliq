@@ -181,21 +181,31 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] BUG: transporter.doThenRestoreLocation: can't use `$scopeVariable` in `objects` array
 * [?] BUG: transporter.doThenRestoreLocation: `equipment` wasn't used when transferring plate back to original position
 
+> ERROR:
+>
+>	Running this with babel-node from the roboliq-processor directory works:
+>
+>	`npm start -- -T --progress src/config/ourlab.js ../protocols/qc01-accuracy-tubes.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bss e-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware`
+>
+>	But from the root directory, this doesn't work:
+>
+>	`npm run processor -- -T --progress roboliq-processor/dist/config/ourlab.js protocols/qc01-accuracy-tubes.yaml --print-designs -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware testdata/bsse-mario/Carrie r.cfg,testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware`
+
 # Todos
 
 * [ ] replace usage of mustache with handlebars
 * [ ] designTest: unit test for calculateRow
 * [ ] Variable references:
-* SCOPE: should contain parameters, variables, data rows
-* Referencing:
-	* `$`: substitute in scope variable
-	* `$*`: dereference twice (consider `$$`)
-	* `$$`: column array from current data table (consider `$#`)
-	* `$@`: dereference variable in `objects`
-	* `$&`: dereference a parameter value
-	* `${${@myvar}.somevalue}`
-	* `${@myvar.somevalue}`
-	* "$`...`": calculation
-	* template substitution with ticks
+	* SCOPE: should contain parameters, variables, data rows
+	* Referencing:
+		* `$`: substitute in scope variable
+		* `$*`: dereference twice (consider `$$`)
+		* `$$`: column array from current data table (consider `$#`)
+		* `$@`: dereference variable in `objects`
+		* `$&`: dereference a parameter value
+		* `${${@myvar}.somevalue}`
+		* `${@myvar.somevalue}`
+		* "$`...`": calculation
+		* template substitution with ticks
 * [ ] allow for setting command defaults:
 	* `commandDefaults: [{command: "transporter.*", equipment: "ourlab.mario.roma2"}]`
