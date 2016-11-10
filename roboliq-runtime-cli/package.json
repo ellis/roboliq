@@ -26,6 +26,7 @@
     "immutable": "3.7.6",
     "jsonfile": "^2.3.0",
     "lodash": "^4.6.1",
+    "mathjs": "^3.7.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.13.0",
     "redux": "3.3.1",

@@ -2,7 +2,13 @@
 
 const _ = require('lodash');
 const fs = require('fs');
+const math = require('mathjs');
 const path = require('path');
+
+math.config({
+	number: 'BigNumber', // Default type of number
+	precision: 64        // Number of significant digits for BigNumbers
+});
 
 /**
  * Convert quantities with units to plain numbers
@@ -14,12 +20,15 @@ function handleOutputUnits(output, table) {
 				if (_.has(row, key)) {
 					// console.log(row)
 					// console.log({key, units, value: row[key]});
-					// console.log({a: math.eval(row[key])})
 					try {
-						row[key] = math.eval(row[key]).toNumber(units);
+						const x = math.eval(row[key]);
+						const n = x.toNumber(units);
+						// console.log({x, n})
+						row[key] = n;
 						row[key+"_units"] = units;
+						// console.log({new: row[key]})
 					}
-					catch (e) { }
+					catch (e) { console.log(e.toString()); }
 				}
 			});
 		});

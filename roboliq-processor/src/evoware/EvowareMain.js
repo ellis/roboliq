@@ -68,10 +68,11 @@ function run(opts) {
 				const agentConfig = _.get(protocol.objects, agents[0].split(".").concat(["config"]), {});
 				const options = {
 					variables: {
+						BROWSER: agentConfig.BROWSER,
 						ROBOLIQ: agentConfig.ROBOLIQ,
-						TEMPDIR: agentConfig.TEMPDIR,
 						SCRIPTFILE: scriptFile,
-						SCRIPTDIR: scriptDir
+						SCRIPTDIR: scriptDir,
+						TEMPDIR: agentConfig.TEMPDIR,
 					},
 				};
 

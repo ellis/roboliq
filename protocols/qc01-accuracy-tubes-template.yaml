@@ -9,6 +9,11 @@ description: |
     * dispense volumes several times into tube
     * weight tube twice
 
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
 objects:
   tubes:
     type: Plate

@@ -52,6 +52,7 @@ if (opts.rename) {
 const protocol = require(scriptFile);
 const factors = _.get(protocol.reports, [stepId, "measurementFactors"]);
 const step = _.get(protocol.steps, stepId);
+const output = _.get(step, "output", {});
 const joinKey = _.get(step, "output.joinKey", _.get(step, "program.wellDesignFactor"));
 const userValues = _.get(step, "output.userValues", _.get(step, "program.userValues"));
 const appendTo = _.get(step, "output.appendTo", _.get(step, "outputDataset"));
@@ -90,6 +91,7 @@ else {
 	});
 }
 
+// console.log({output})
 measurementHelpers.handleOutputUnits(output, table);
 
 // Save the JSON file

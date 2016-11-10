@@ -3,9 +3,10 @@ description: |
   Estimate the accuracy and precision of pipetting using a dye-based assay.
   This protocol can test multiple liquid classes and volumes.
 
-evowareCompiler:
-  timing: false
-  retractTips: false
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
 
 parameters:
   excitationWavelength:

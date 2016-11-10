@@ -2,7 +2,7 @@
 
 # paper2 Todos
 
-* [ ] process 'output.units' in TecanInfinite2.js
+* [x] process 'output.units' in TecanInfinite2.js
 * [ ] qc01-accuracy
 	* [ ] have roboliq ask for weight measurements and save them, rather than doing all this stuff manually
 	* [ ] qc01-accuracy-003
@@ -40,10 +40,10 @@
 	* [x] run script
 	* [x] run analysis
 	* [ ] fix reader bug (missed absorbance of diluted wells A11 block E12) and re-run
-* [ ] accuracy and precision via absorbance
-	* [1] write script
-	* [2] write analysis
-	* [3] run script
+* [ ] qc04-accuracy-dye
+	* [x] write script
+	* [.] write analysis
+	* [x] run script
 	* [ ] run analysis
 * [ ] script for evaporation
 	* [ ] write script
@@ -111,9 +111,9 @@ See misc.js:renderTemplateString, since another convention is used there
 		* [ ] proper table for well contents
 		* [ ] tables for designs
 		* [ ] script?
-	* [1] open HTML at beginning of script
-	* [2] wait for user to confirm
-* [3] change from '#data' to 'data()'
+	* [x] open HTML at beginning of script
+	* [x] wait for user to confirm
+* [?] change from '#data' to 'data()'
 * [ ] request VB code from the automated liquid class optimization people
 
 # Documentations TODOS
