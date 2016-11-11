@@ -99,7 +99,7 @@ function substituteDeep(x, data, SCOPE, DATA) {
 			x2 = safeEval(code, scope);
 		}
 		// Mathjs calculation
-		else if (x.length > 2 && _.startsWith(x, "$(") && _.endsWith(x, ")")) {
+		else if (_.startsWith(x, "$(") && _.endsWith(x, ")")) {
 			const expr = x.substr(2, x.length - 3);
 			// console.log({expr})
 			const context = _.defaults({}, SCOPE, data.objects.PARAMS)
@@ -184,9 +184,10 @@ function substituteDeep(x, data, SCOPE, DATA) {
  * @return {object} the parsed parameters, if successfully parsed.
  */
 function parseParams(params, data, schema) {
+	const substituted = substituteDeep(params, data, data.objects.SCOPE, data.objects.DATA);
 	//console.log("SCOPE: "+JSON.stringify(data.objects.SCOPE, null, '\t'))
-	const result = {orig: params, value: {}, objectName: {}, unknown: []};
-	processParamsBySchema(result, [], params, schema, data);
+	const result = {orig: substituted, value: {}, objectName: {}, unknown: []};
+	processParamsBySchema(result, [], substituted, schema, data);
 	if (_.isEmpty(result.unknown)) {
 		delete result.unknown;
 	}

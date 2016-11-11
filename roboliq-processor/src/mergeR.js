@@ -44,6 +44,7 @@ function mergeR() {
 			}
 		}
 	}
+	return result;
 }
 
 module.exports = {

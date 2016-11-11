@@ -57,6 +57,7 @@ var commandHandlers = {
 			writeTo: _.get(parsed.orig, "outputFile"),
 			appendTo: _.get(parsed.orig, "outputDataset"),
 		});
+		console.log({output})
 
 		var expansion = [
 			(params2.site === location0) ? null : {

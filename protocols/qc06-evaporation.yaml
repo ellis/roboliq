@@ -157,16 +157,16 @@ steps:
       data():
         where: 'plateType == 1'
         value: plate
-        unique: true
+        head: true
     sources:
       data():
         where: 'plateType == 1'
         value: well
-    destinationsLabware:
+    destinationLabware:
       data():
         where: 'plateType == 2'
         value: plate
-        unique: true
+        head: true
     destinations:
       data():
         where: 'plateType == 1'
@@ -196,7 +196,7 @@ steps:
     clean: flush
 
   6:
-    data: {where: 'plateType == 2 and (role == "refA" or role == "refB"'}
+    data: {where: 'plateType == 2 and (role == "refA" or role == "refB")'}
     description: transfer half of that volume to other empty wells on the destination plate
     command: pipetter.pipette
     sourceLabware: $plate
@@ -220,8 +220,7 @@ steps:
     items:
       data():
         template:
-          destinationLabware: $plate
-          destination: $well
+          destination: `{{$plate}}({{$well}})`
     volumes: $(measureVolume - extractVolume)
     clean: none
     cleanEnd: light
