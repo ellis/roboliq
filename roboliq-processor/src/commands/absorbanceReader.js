@@ -12,6 +12,7 @@ import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
 const Design = require('../design.js');
 var expect = require('../expect.js');
+import {mergeR} from '../mergeR.js';
 var misc = require('../misc.js');
 import * as simulatedHelpers from './simulatedHelpers.js';
 import wellsParser from '../parsers/wellsParser.js';
@@ -50,8 +51,7 @@ var commandHandlers = {
 			wells: (parsed.value.program || {}).wells
 		});
 		// Handle deprecated parameter names
-		TODO: should create a mergeR function that would be similar to stripUndefined(_.merge(x))
-		const output = _.merge({}, parsed.orig.output, {
+		const output = mergeR({}, parsed.orig.output, {
 			joinKey: _.get(parsed.orig, "program.wellDesignFactor"),
 			userValues: _.get(parsed.orig, "program.userValues"),
 			writeTo: _.get(parsed.orig, "outputFile"),

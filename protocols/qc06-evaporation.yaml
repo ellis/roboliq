@@ -32,6 +32,30 @@ parameters:
     value: [1,2,3,4]
 
 objects:
+  plate1:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P2
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+  dyeLabware:
+    type: Plate
+    description: trough for dye
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    description: dye with concentration such that 3ul measures somewhere between 0.1 and 0.2
+    wells: dyeLabware(C01 down F01)
+
   # design1:
   #   type: Design
   #   conditions:
