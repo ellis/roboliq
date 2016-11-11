@@ -1,0 +1,221 @@
+roboliq: v1
+description: |
+  Estimate evaporation rates over a plate and at different bench sites.
+
+parameters:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+  standardLiquidClass:
+    description: Liquid class for the standard wells
+    value: Roboliq_Water_Air_1000
+  standardSyringe:
+    description: Syringe to use for the standard wells
+    value: 1
+  standardVolumes:
+    description: The volumes for the standard wells
+    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+  standardWellVolume:
+    description: The volume we want to fill wells to when comparing absorbance
+    value: 250 ul
+  testVolumes:
+    description: The volumes to test (parameter $v$)
+    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+  testLiquidClasses:
+    description: The liquid classes to test (parameter $p$)
+    value: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000, Roboliq_Water_Wet_1000]
+  testLabwareModel:
+    description: The labware model to test (parameter $m$)
+    value: ourlab.model.plateModel_96_round_transparent_nunc
+  testSyringes:
+    description: The syringes to test
+    value: [1,2,3,4]
+
+objects:
+  # design1:
+  #   type: Design
+  #   conditions:
+  #     testVolume: 150 ul
+  #     sourceLabware: null
+  #     sourceWell: dye
+  #     destinationLabware: plate1
+  #     destinationWell*: [A01, B01, C01, D01]
+  #     volume=calculate: 'testVolume'
+  #     step*:
+  #       - {}
+  #       - sourceLabware=calculate: destinationLabware
+  #         sourceWell=calculate: destinationWell
+  #         destinationLabware: plate2
+  #         volume=calculate: 'volume / 2'
+  #   orderBy: [step]
+  #
+  design1:
+    type: Design
+    description: |
+      * measureVolume: volume to fill the well to before performing absorbance measurements
+      * plateType: 1 for the plate where evaporation takes place, 2 for the plate that we extract aliquots to.
+    conditions:
+      measureVolume: $#standardWellVolume
+      testVolume*: [250 ul]
+      extractVolume=calculate: 'testVolume / 2'
+      site*: ourlab.mario.site.P3
+      plate: plate1
+      role*:
+        test:
+          source: dye
+          well*=allocateWells:
+            wells: A01 down block H02 + A03 down block B10 + G03 down block H10 + A11 down block H12 + D06 down block E07
+            rows: 8
+            columns: 12
+        water:
+          source: water
+          well*=allocateWells:
+            wells: C03 down block F05 + C06 + F06 + C07 + F07 + C08 down block F10
+            rows: 8
+            columns: 12
+      plateType*:
+        - {}
+        - plate: plate2
+          dyeVolume=calculate: 'testVolume / 2'
+          .caseA=case:
+            # Change some control wells to standard wells
+            - where: 'role == "water"'
+              conditions:
+                role: [water, water, water, water, refA, refA, refA, refA, refB, refB, refB, refB, water, water, water, water, refA, refA, refA, refA, refB, refB, refB, refB, water, water, water, water]
+      #
+      #         waterVolume=calculate: 'measureVolume - dyeVolume'
+      #         well*=allocateWells:
+      #           wells: A01 down block H02 + A03 down block B10 + G03 down block H10 + A11 down block H12 + D06 down block E07
+      #           rows: 8
+      #           columns: 12
+      #       control:
+      #         well*=allocateWells:
+      #           wells: C03 down block F06 + C06 + F06 + C07 + F07 + C08 down block F10
+      #           rows: 8
+      #           columns: 12
+      #       standard:
+      #         well*=allocateWells:
+      #           wells: C03 down block F06 + C06 + F06 + C07 + F07 + C08 down block F10
+      #           rows: 8
+      #           columns: 12
+      # .caseA=case:
+      #   - where: 'source == dye'
+      #     conditions:
+      #       plate: plate2
+            # plateType: 2
+
+      row=calculateRow: well
+      col=calculateColumn: well
+    orderBy: [plate, col, row]
+steps:
+  data: {source: design1}
+  1:
+    data: {where: 'plateType == 1'}
+    description: Fill wells with water and dye
+    command: pipetter.pipette
+    sources: $$source
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$testVolume
+    clean: flush
+    cleanBegin: thorough
+
+  2:
+    description: Wait for two hours for evaporation
+    command: timer.sleep
+    duration: 2 hours
+
+  3:
+    data: {where: 'source == "dye"'}
+    description: Transfer half of the volume from the dye wells to a new plate
+    command: pipetter.pipette
+    sourceLabware:
+      data():
+        where: 'plateType == 1'
+        value: plate
+        unique: true
+    sources:
+      data():
+        where: 'plateType == 1'
+        value: well
+    destinationsLabware:
+      data():
+        where: 'plateType == 2'
+        value: plate
+        unique: true
+    destinations:
+      data():
+        where: 'plateType == 1'
+        value: well
+    volumes: $extractVolume
+    clean: flush
+
+  4:
+    data: {where: 'plateType == 2 and role == "water"'}
+    description: fill dyeless control wells
+    command: pipetter.pipette
+    sources: water
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $measureVolume
+    clean: none
+    cleanEnd: light
+
+  5:
+    data: {where: 'plateType == 2 and role == "refA"'}
+    description: dispense several replicates of the dye volume into certain empty wells of the destination plate
+    command: pipetter.pipette
+    sources: dye
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $testVolume
+    clean: flush
+
+  6:
+    data: {where: 'plateType == 2 and (role == "refA" or role == "refB"'}
+    description: transfer half of that volume to other empty wells on the destination plate
+    command: pipetter.pipette
+    sourceLabware: $plate
+    sources:
+      data():
+        where: 'role == "refA"'
+        value: well
+    destinationLabware: $plate
+    destinations:
+      data():
+        where: 'role == "refB"'
+        value: well
+    volumes: $extractVolume
+    clean: flush
+
+  7:
+    data: {where: 'role != "water"'}
+    description: top off the source and destination wells to 250ul
+    command: pipetter.pipette
+    sources: water
+    items:
+      data():
+        template:
+          destinationLabware: $plate
+          destination: $well
+    volumes: $(measureVolume - extractVolume)
+    clean: none
+    cleanEnd: light
+
+  8:
+    description: Read absorbance
+    command: experiment.forEachGroup
+    groupBy: plate
+    steps:
+      description: "`Read absorbance of {{$plate}}`"
+      command: absorbanceReader.measurePlate
+      object: $plate
+      program:
+        excitationWavelength: $#excitationWavelength
+      output:
+        joinKey: well
+        appendTo: measurements
+        units:
+          testVolume: ul
+          dyeVolumeFinal: ul
+        simulated: 'bignumber(random(number(0.03), number(0.04))) + (role == "water" ? 0 : role == "refA" ? 0.5 : role == "refB" ? 0.48 : plateType == 1 ? 0.4 : 0.56)'

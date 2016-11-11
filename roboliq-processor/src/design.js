@@ -45,7 +45,12 @@ export function printRows(rows, hideRedundancies = false) {
 			lines.push(["---"]);
 		}
 		_.forEach(group, row => {
-			const line = _.map(columns, key => _.get(row, key, "").toString());
+			// console.log(JSON.stringify(row))
+			const line = _.map(columns, key => {
+				const x1 = _.get(row, key, "");
+				const x2 = (_.isNull(x1)) ? "" : x1;
+				return x2.toString();
+			});
 			lines.push(line);
 		});
 	});
@@ -486,7 +491,7 @@ function assignRowByNamedValuesKey(nestedRows, rowIndex, otherRowIndexes, name, 
 		}
 		else {
 			// console.log("C")
-			assert(valueKeyIndex < _.size(values), "fewer values than rows: "+JSON.stringify({name, values}));
+			assert(valueKeyIndex < _.size(values), `fewer values (${_.size(values)}) than rows: `+JSON.stringify({name, values}));
 			const valueKey = (valueKeys) ? valueKeys[valueKeyIndex] : valueKeyIndex;
 			key = (valueKeys) ? valueKey : valueKey + 1;
 			item = values[valueKey];

@@ -76,7 +76,7 @@ We'll test a simple protocol to show you how to run the software.
   ```
 
   You can see a substep with the command `system._echo`.  Commands that
-  begin with and underscore are "final" instructions that
+  begin with an underscore are "final" instructions that
   will be passed the the backend without further processing.
   It may be confusing that the original command (`system.echo`) and its
   properties appear *after* the subcommand, but this is just an artifact of
