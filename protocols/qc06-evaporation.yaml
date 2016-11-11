@@ -2,6 +2,12 @@ roboliq: v1
 description: |
   Estimate evaporation rates over a plate and at different bench sites.
 
+  OrangeG 8g/L calculations to achive 125 ul => ~.5:
+
+  * 0.9152/ul
+  * For 125ul dye to be 0.5: 0.9152*125 / 0.5 = 114x dilution (I'll use our 100x dilution)
+
+
 parameters:
   excitationWavelength:
     description: excitation wavelength to read absorbance
@@ -240,5 +246,5 @@ steps:
         appendTo: measurements
         units:
           testVolume: ul
-          dyeVolumeFinal: ul
+          extractFinal: ul
         simulated: 'bignumber(random(number(0.03), number(0.04))) + (role == "water" ? 0 : role == "refA" ? 0.5 : role == "refB" ? 0.48 : plateType == 1 ? 0.4 : 0.56)'
