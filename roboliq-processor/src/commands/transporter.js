@@ -353,6 +353,7 @@ var commandHandlers = {
 		//console.log("transporter.doThenRestoreLocation("+JSON.stringify(parsed, null, '\t')+")");
 
 		const expansion = _.cloneDeep(_.values(parsed.value.steps));
+		// console.log("objects: "+JSON.stringify(parsed.value.objects))
 		for (let i = 0; i < parsed.value.objects.length; i++) {
 			const labwareName = parsed.objectName[`objects.${i}`];
 			const command = _.merge({}, {

@@ -245,6 +245,7 @@ describe('commandHelper', function() {
 				agent: "agent1",
 				equipment: "equipment1",
 				plate: "plate1",
+				// plates: "plate1",
 				site: "site1",
 				count: "number1",
 				text: "${string1}"
@@ -255,6 +256,7 @@ describe('commandHelper', function() {
 					agent: {type: "Agent"},
 					equipment: {type: "Equipment"},
 					plate: {type: "Plate"},
+					// plates: {type: "Plates"},
 					site: {type: "Site"},
 					count: {type: "number"},
 					text: {type: "string"},
@@ -270,6 +272,7 @@ describe('commandHelper', function() {
 					agent: {type: "MyAgent"},
 					equipment: {type: "MyEquipment", config: "special"},
 					plate: {type: "Plate", location: "P1"},
+					// plates: [{type: "Plate", location: "P1"}],
 					site: {type: "Site", extraData: 0},
 					count: 1,
 					text: "hello"

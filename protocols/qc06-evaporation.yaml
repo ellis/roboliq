@@ -143,6 +143,7 @@ steps:
     data: {where: 'plateType == 1'}
     description: Fill wells with water and dye
     command: pipetter.pipette
+    program: $#standardLiquidClass
     sources: $$source
     destinationLabware: $plate
     destinations: $$well
@@ -159,6 +160,7 @@ steps:
     data: {where: 'source == "dye"'}
     description: Transfer half of the volume from the dye wells to a new plate
     command: pipetter.pipette
+    program: $#standardLiquidClass
     sourceLabware:
       data():
         where: 'plateType == 1'
@@ -184,6 +186,7 @@ steps:
     data: {where: 'plateType == 2 and role == "water"'}
     description: fill dyeless control wells
     command: pipetter.pipette
+    program: $#standardLiquidClass
     sources: water
     destinationLabware: $plate
     destinations: $$well
@@ -195,6 +198,7 @@ steps:
     data: {where: 'plateType == 2 and role == "refA"'}
     description: dispense several replicates of the dye volume into certain empty wells of the destination plate
     command: pipetter.pipette
+    program: $#standardLiquidClass
     sources: dye
     destinationLabware: $plate
     destinations: $$well
@@ -205,6 +209,7 @@ steps:
     data: {where: 'plateType == 2 and (role == "refA" or role == "refB")'}
     description: transfer half of that volume to other empty wells on the destination plate
     command: pipetter.pipette
+    program: $#standardLiquidClass
     sourceLabware: $plate
     sources:
       data():
@@ -222,11 +227,12 @@ steps:
     data: {where: 'role != "water"'}
     description: top off the source and destination wells to 250ul
     command: pipetter.pipette
+    program: $#standardLiquidClass
     sources: water
     items:
       data():
         template:
-          destination: `{{$plate}}({{$well}})`
+          destination: '`{{$plate}}({{$well}})`'
     volumes: $(measureVolume - extractVolume)
     clean: none
     cleanEnd: light
@@ -238,6 +244,7 @@ steps:
     steps:
       description: "`Read absorbance of {{$plate}}`"
       command: absorbanceReader.measurePlate
+      program: $#standardLiquidClass
       object: $plate
       program:
         excitationWavelength: $#excitationWavelength

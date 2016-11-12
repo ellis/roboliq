@@ -46,8 +46,8 @@
 	* [x] run script
 	* [ ] run analysis
 * [ ] script for evaporation
-	* [ ] write script
-	* [ ] write analysis
+	* [.] write script
+	* [.] write analysis
 	* [ ] run script
 	* [ ] run analysis
 * [x] script for z-level

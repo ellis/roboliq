@@ -21,19 +21,6 @@ objects:
     description: for finding reader error
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  # plate2:
-  #   type: Plate
-  #   description: for finding meniscus parameters
-  #   model: ourlab.model.plateModel_96_round_transparent_nunc
-  #   location: ourlab.mario.site.P3
-  # dyeLabware:
-  #   type: Plate
-  #   model: ourlab.model.troughModel_100ml
-  #   location: ourlab.mario.site.R6
-  #   contents: [Infinity l, dye]
-  # dye:
-  #   type: Liquid
-  #   wells: dyeLabware(C01 down F01)
   tubes:
     type: Plate
     description: eppendorf tubes for dye
@@ -112,8 +99,12 @@ steps:
           program:
             excitationWavelength: $#excitationWavelength
           output:
-            #joinKey: well
             appendTo: measurements
+            userValues:
+              totalVolume: 0
+              volume: 0
+              waterVolume: 0
+            simulated: 'random(number(0.03), number(0.04))'
   2:
     description: "Dispense first aliquot of dye or water"
     data: {source: plateDesign1}
@@ -167,6 +158,15 @@ steps:
           output:
             joinKey: well
             appendTo: measurements
+            userValues:
+              state: $state
+              shake: $shake
+              measurement: $measurement
+            units:
+              totalVolume: ul
+              volume: ul
+              waterVolume: ul
+            simulated: 'bignumber(random(number(0.03), number(0.04))) + (source == "water" ? 0 : source == "dye01" ? 0.1 : source == "dye05" ? 0.5 : 1.0) * bignumber(random(number(0.95), number(1.05)))'
   5:
     description: "Shake plate and read again"
     data: {where: 'state == "shaker"'}
@@ -182,7 +182,7 @@ steps:
         description: "Re-read wells after shaking"
         command: transporter.doThenRestoreLocation
         equipment: ourlab.mario.roma2
-        objects: [plate1]
+        objects: [plate1] # FIXME: this should just be `$plate`
         steps:
           1:
             description: "Put plate in reader"
@@ -194,15 +194,22 @@ steps:
             description: "Read multiple times"
             command: experiment.forEachRow
             steps:
-              data: {source: plateDesign1}
-              command: absorbanceReader.measurePlate
-              object: $plate
-              program:
-                excitationWavelength: $#excitationWavelength
-              output:
-                joinKey: well
-                appendTo: measurements
-              userValues:
-                state: $state
-                shake: $shake
-                measurement: $measurement
+              description: '`{{$state}} {{$shake}} {{$measurement}}`'
+              1:
+                data: {source: plateDesign1}
+                command: absorbanceReader.measurePlate
+                object: $plate
+                program:
+                  excitationWavelength: $#excitationWavelength
+                output:
+                  joinKey: well
+                  appendTo: measurements
+                  userValues:
+                    state: $state
+                    shake: $shake
+                    measurement: $measurement
+                  units:
+                    totalVolume: ul
+                    volume: ul
+                    waterVolume: ul
+                  simulated: 'bignumber(random(number(0.03), number(0.04))) + (source == "water" ? 0 : source == "dye01" ? 0.1 : source == "dye05" ? 0.5 : 1.0) * bignumber(random(number(0.95), number(1.05))) * (1 + 0.05 * measurement)'

@@ -407,6 +407,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			return;
 		case "Length": return processLength(result, path, value, data);
 		case "Plate": return processObjectOfType(result, path, value, data, type);
+		case "Plates": return processOneOrArray(result, path, value, (result, path, x) => processObjectOfType(result, path, x, data, "Plate"));
 		case "Site": return processObjectOfType(result, path, value, data, type);
 		case "SiteOrStay": return processSiteOrStay(result, path, value, data);
 		case "Source": return processSource(result, path, value, data);
@@ -579,22 +580,22 @@ function dereferenceVariable(data, name) {
  * @param {array} path - path in the original params object
 */
 function processOneOrArray(result, path, value0, fn) {
-	//console.log("processOneOrArray:")
-	//console.log({path, value0})
+	// console.log("processOneOrArray:")
+	// console.log({path, value0})
 	// Try to process value0 as a single value, then turn it into an array
 	try {
 		_.set(result.value, path, undefined);
 		const path2 = path.concat(0);
 		fn(result, path2, value0);
-		//console.log(JSON.stringify(result));
-		//console.log(JSON.stringify(_.get(result.value, path)));
+		// console.log(JSON.stringify(result));
+		// console.log(JSON.stringify(_.get(result.value, path)));
 		const x = _.get(result.value, path2);
-		//console.log({path2, x: JSON.stringify(x)})
+		// console.log({path2, x: JSON.stringify(x)})
 		_.set(result.value, path2, x);
-		//console.log({result})
+		// console.log(JSON.stringify(result, null, '\t'))
 		return;
 	} catch (e) {
-		//console.log(e)
+		// console.log(e)
 	}
 
 	expect.truthy({paramName: path.join('.')}, _.isArray(value0), "expected an array: "+JSON.stringify(value0));
@@ -1033,7 +1034,9 @@ function stepify(steps) {
  * and return updated {DATAs, SCOPEs, foreach}.
  */
 function updateSCOPEDATA(step, data, SCOPE, DATA) {
+	// console.log("updateSCOPEDATA");
 	// console.log("data2: "+JSON.stringify(data));
+	// console.log({SCOPE})
 	if (step.hasOwnProperty("@DATA")) {
 		DATA = step["@DATA"];
 		// console.log("DATA: "+JSON.stringify(DATA))
@@ -1067,6 +1070,7 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 		const groups = Design.query(table, dataInfo);
 		// console.log("groups: "+JSON.stringify(groups))
 
+		// TODO: These two 'forEach' checks should be removed -- they are replaced by 'experiment.forEachRow' and 'experiment.forEachGroup'
 		if (dataInfo.forEach === "row") {
 			// Turn each row into its own group
 			DATAs = _(groups).flatten().map(x => [x]).value();

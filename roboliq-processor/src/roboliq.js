@@ -29,7 +29,7 @@
  * @property {Object} alternatives - ???
  */
 
-Error.stackTraceLimit = Infinity;
+//Error.stackTraceLimit = Infinity;
 /**
  * Well contents.
  *

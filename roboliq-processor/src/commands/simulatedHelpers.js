@@ -11,6 +11,7 @@ import wellsParser from '../parsers/wellsParser.js';
 
 export function simulatedByWells(parsed, data, wells0, result) {
 	// console.log(JSON.stringify(parsed, null, '\t'))
+	// console.log({SCOPE: data.objects.SCOPE})
 	let simulatedOutput;
 	if (_.has(parsed.value, ["output", "simulated"])) {
 		const joinKey = _.get(parsed.value, ["output", "joinKey"]);
