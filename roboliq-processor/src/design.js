@@ -89,12 +89,8 @@ export function flattenDesign(design, randomEngine) {
 	}
 
 	randomEngine = randomEngine || Random.engines.mt19937();
-	if (_.isNumber(design.randomSeed)) {
-		randomEngine.seed(design.randomSeed);
-	}
-	else {
-		randomEngine.autoSeed();
-	}
+	const randomSeed = _.isNumber(design.randomSeed) ? design.randomSeed : 0;
+	randomEngine.seed(randomSeed);
 
 	let children;
 	if (_.isArray(design.children)) {

@@ -14,26 +14,27 @@
 	* [x] qc01-accuracy-501
 		* [x] write script
 		* [x] run script
-	* [ ] write overall analysis
-	* [ ] run analysis
+	* [x] write overall analysis
+	* [x] run analysis
 * [ ] qc02-absorbance
-	* [ ] qc02-absorbance-A
+	* [x] qc02-absorbance-A
 		* [x] write script
-		* [ ] write analysis
+		* [x] write analysis
 		* [x] run script
-		* [ ] run analysis
+		* [x] run analysis
 	* [x] qc02-absorbance-B
 		* [x] write script
 		* [x] write analysis
 		* [x] run script
 		* [x] run analysis
-	* [ ] qc02-absorbance-C
+	* [x] qc02-absorbance-C
 		* [x] write script
-		* [.] write analysis
-		* [.] run script
-		* [ ] run analysis
-	* [ ] write overall analysis
-	* [ ] run overall analysis
+		* [x] write analysis
+		* [x] run script
+		* [x] run analysis
+	* [x] write overall analysis
+	* [x] run overall analysis
+	* [ ] re-run overall analysis after repeating qc02-absorbance-A to correct for incorrect factor data
 * [ ] qc03-dilution: unintended dilution
 	* [x] write script
 	* [x] write analysis
@@ -45,16 +46,16 @@
 	* [.] write analysis
 	* [x] run script
 	* [ ] run analysis
+* [x] qc05-zlevel
+	* [x] write script
+	* [x] write analysis
+	* [x] run script
+	* [x] run analysis
 * [ ] script for evaporation
 	* [.] write script
 	* [.] write analysis
 	* [ ] run script
 	* [ ] run analysis
-* [x] script for z-level
-	* [x] write script
-	* [x] write analysis
-	* [x] run script
-	* [x] run analysis
 * [ ] figure out how to associate and copy R files to the '-P' directory
 * [ ] trigger analysis during execution after measurements
 * [ ] display analysis during execution (complication: a single Rmd file for the whole experiment often won't work, because we don't have all measurements until the end)
@@ -180,6 +181,7 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] BUG: Compiling qc01-accuracy-tubes-003.yaml with dist crashes, whereas running with babel-node works
 * [ ] BUG: transporter.doThenRestoreLocation: can't use `$scopeVariable` in `objects` array
 * [?] BUG: transporter.doThenRestoreLocation: `equipment` wasn't used when transferring plate back to original position
+* [ ] BUG: qc02-absorbance-A: in the last 'absorbanceReader.measurePlate' command, if the command isn't made into a *numbered* substep, compilation crashes when processing 'simulated'.
 
 > ERROR:
 >

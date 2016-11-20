@@ -5,11 +5,10 @@ description: |
   * Measure empty plate
   * Fill a few control wells with 250ul water and read their absorbance.
   * for v in 3ul, 7ul, 15ul, 16ul, and 150ul:
-      * each tip dispenses 250ul into a well
+      * each tip dispenses 250ul dye into a well
       * transfer v to next empty well n times (where n = 1 for 150ul, 9 for other volumes)
       * fill source and destination wells to 250ul
       * measure absorbance of source and destination wells
-      * repeat the process for 3 dilutions per volume
 
   OrangeG 8g/L calculations to achive 250ul => ~2:
 
