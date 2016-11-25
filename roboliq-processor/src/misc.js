@@ -139,7 +139,7 @@ function handleDirective(spec, data) {
 					return result.x;
 				}
 				else {
-					throw new Error("unknown directive: "+key);
+					throw new Error("unknown directive object: "+key);
 				}
 			}
 		}
@@ -147,21 +147,20 @@ function handleDirective(spec, data) {
 	else if (_.isString(spec)) {
 	 	// Inline directives
 		if (_.startsWith(spec, "#")) {
-			var hash2 = spec.indexOf('#', 1);
-			if (hash2 > 0) {
-				const key = spec.substr(0, hash2);
-				if (directiveHandlers.hasOwnProperty(key)) {
-					var spec2 = spec.substr(hash2 + 1);
-					var spec3 = handleDirective(spec2, data);
-					const result = directiveHandlers[key](spec3, data);
-					if (spec.hasOwnProperty('override')) {
-						_.merge(result, spec.override);
-					}
-					return result;
+		 	const hash2 = spec.indexOf('#', 1);
+			const key = (hash2 > 0) ? spec.substr(1, hash2 - 1) : spec.substr(1);
+			// console.log({hash2, key})
+			if (directiveHandlers.hasOwnProperty(key)) {
+				const spec2 = (hash2 > 0) ? spec.substr(hash2 + 1) : undefined;
+				const spec3 = handleDirective(spec2, data);
+				const result = directiveHandlers[key](spec3, data);
+				if (spec.hasOwnProperty('override')) {
+					_.merge(result, spec.override);
 				}
-				else {
-					throw new Error("unknown directive: "+spec);
-				}
+				return result;
+			}
+			else {
+				throw new Error("unknown directive string: "+spec);
 			}
 		}
 		// Protocol parameters

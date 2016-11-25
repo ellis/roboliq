@@ -602,10 +602,10 @@ function validateProtocol1(protocol, o, path) {
 	}
 }
 
-function run(argv, userProtocol) {
+function run(argv, userProtocol, loadRoboliqProcessorYaml = true) {
 	argv = argv || process.argv.slice(2);
 
-	if (fs.existsSync("roboliq-processor.yaml")) {
+	if (loadRoboliqProcessorYaml && fs.existsSync("roboliq-processor.yaml")) {
 		const env = yaml.load("roboliq-processor.yaml");
 		if (env.preload) {
 			argv = env.preload.concat(argv);
@@ -706,7 +706,7 @@ function runWithOpts(opts, userProtocol) {
 			console.log(outputText);
 
 		// If compilation was suspended, crease a dumpfile for later continuation
-		if (result.protocol.COMPILER.suspend) {
+		if (_.get(result, ["protocol", "COMPILER", "suspend"])) {
 			result.dump = _.clone(result.protocol);
 			// Resume where this compilation suspended
 			result.dump.COMPILER = {

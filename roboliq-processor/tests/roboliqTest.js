@@ -48,7 +48,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
@@ -76,7 +76,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
@@ -108,7 +108,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "--file-json", "./protocol1.json:"+JSON.stringify(protocol1)], protocol2);
+			var result = roboliq.run(["--ourlab", "-o", "", "--file-json", "./protocol1.json:"+JSON.stringify(protocol1)], protocol2, false);
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
 			should.deepEqual(result.output.objects.plate1, {
@@ -145,7 +145,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "--quiet"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "--quiet"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
 			assert(_.size(result.output.errors) > 0, "should have an error due to missing steps.1.duration");
 			should.deepEqual(result.output.fillIns, {
@@ -182,7 +182,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
 			should.deepEqual(result.output.objects.plate1.location, "here");
 			should.deepEqual(result.output.objects.plate2.location, "there");
@@ -211,7 +211,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps['1'], {
 				data: {
@@ -249,7 +249,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps['1'], {
 				data: {
@@ -308,7 +308,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps, {
 				"1": {
@@ -388,7 +388,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps[1][1][1], {
 				command: "system._echo",
@@ -419,7 +419,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			// console.log("output COMPILER:\n"+JSON.stringify(result.output.COMPILER, null, '\t'));
 			// console.log("dump COMPILER:\n"+JSON.stringify(result.dump.COMPILER, null, '\t'));
@@ -485,7 +485,7 @@ describe('roboliq', function() {
 					resumeStepId: "2"
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			// console.log("COMPILER:\n"+JSON.stringify(result.output.COMPILER, null, '\t'));
 			should.deepEqual(result.output.steps, {
@@ -528,7 +528,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T", "--varset", '{"a": 3}'], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T", "--varset", '{"a": 3}'], protocol, false);
 			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			// console.log("scope:\n"+JSON.stringify(result.output.objects.SCOPE, null, '\t'));
 			should.deepEqual(result.output.steps, {
