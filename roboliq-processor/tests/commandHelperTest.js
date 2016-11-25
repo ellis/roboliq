@@ -235,8 +235,11 @@ describe('commandHelper', function() {
 					plate1: {type: "Plate", location: "P1"},
 					site1: {type: "Site", extraData: 0},
 					number1: {type: "Variable", value: 1},
-					string1: {type: "Variable", value: "hello"},
 					liquid1: {type: "Liquid", wells: ["plate1(A01)", "plate2(A02)"]},
+					string1: {type: "Variable", value: "hello1"},
+					PARAMS: {
+						string2: "hello2",
+					}
 				},
 				accesses: []
 			};
@@ -248,7 +251,8 @@ describe('commandHelper', function() {
 				// plates: "plate1",
 				site: "site1",
 				count: "number1",
-				text: "${string1}"
+				text1: "string1",
+				text2: "${string2}"
 			};
 			const schema = {
 				properties: {
@@ -259,14 +263,16 @@ describe('commandHelper', function() {
 					// plates: {type: "Plates"},
 					site: {type: "Site"},
 					count: {type: "number"},
-					text: {type: "string"},
+					text1: {type: "string"},
+					text2: {type: "string"},
 					any2: {}
 				},
 				required: ['objectName', 'agent', 'equipment', 'plate', 'site', 'count', 'text']
 			};
 			const parsed = commandHelper.parseParams(params, data, schema);
+			// console.log(JSON.stringify(parsed, null, '\t'))
 			should.deepEqual(parsed, {
-				orig: params,
+				orig: _.merge({}, params, {text2: "hello2"}), // Since $-substitution was used, the original value is replaced
 				value: {
 					objectName: "plate1",
 					agent: {type: "MyAgent"},
@@ -275,17 +281,19 @@ describe('commandHelper', function() {
 					// plates: [{type: "Plate", location: "P1"}],
 					site: {type: "Site", extraData: 0},
 					count: 1,
-					text: "hello"
+					text1: "hello1",
+					text2: "hello2"
 				},
 				objectName: {
 					agent: "agent1",
 					equipment: "equipment1",
 					plate: "plate1",
 					site: "site1",
+					text1: "string1",
 					count: "number1",
 				}
 			});
-			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'site1', "number1", "string1.type", "string1.value"]);
+			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'site1', "number1", "string1"]);
 		});
 
 		it('should work with defaults', function() {

@@ -97,6 +97,7 @@ function substituteDeep(x, data, SCOPE, DATA) {
 			const scope = _.defaults({}, SCOPE, data.objects.PARAMS);
 			// console.log({code, scope})
 			x2 = safeEval(code, scope);
+			// console.log({x2})
 		}
 		// Mathjs calculation
 		else if (_.startsWith(x, "$(") && _.endsWith(x, ")")) {
