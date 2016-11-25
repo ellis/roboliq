@@ -48,6 +48,8 @@ const commandHandlers = {
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
 export function compile(table, protocol, agents, options = {}) {
+	// console.log(`compile:`)
+	// console.log({options})
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
@@ -81,6 +83,8 @@ export function compile(table, protocol, agents, options = {}) {
 }
 
 export function compileStep(table, protocol, agents, path, objects, evowareVariables, loopEndStack = [], options = {}) {
+	// console.log(`compileStep: ${path.join(".")}`)
+	// console.log({options})
 	try {
 		const results = compileStepSub(table, protocol, agents, path, objects, evowareVariables, loopEndStack, options);
 		return results;
@@ -94,12 +98,13 @@ export function compileStep(table, protocol, agents, path, objects, evowareVaria
 }
 
 function compileStepSub(table, protocol, agents, path, objects, evowareVariables, loopEndStack, options) {
+	// console.log(`compileStepSub: ${path.join(".")}`)
+	// console.log({options})
 	if (_.isUndefined(objects)) {
 		objects = _.cloneDeep(protocol.objects);
 	}
 
 	const stepId = path.join(".");
-	// console.log(`compileStep: ${path.join(".")}`)
 	//console.log({steps: protocol.steps})
 	const step = (_.isEmpty(path)) ? protocol.steps : _.get(protocol.steps, path);
 	// console.log({step})

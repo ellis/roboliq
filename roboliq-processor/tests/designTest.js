@@ -660,7 +660,7 @@ describe('design', () => {
 			)
 		});
 
-		it.only("should handle concat() with groupBy", () => {
+		it("should handle concat() with groupBy", () => {
 			should.deepEqual(
 				expandConditions({
 					"i*": 2,
