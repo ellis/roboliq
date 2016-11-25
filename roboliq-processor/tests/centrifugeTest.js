@@ -38,7 +38,7 @@ describe('commands/centrifgue', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 
 			should.deepEqual(result.output.steps[1],
@@ -300,7 +300,7 @@ describe('commands/centrifgue', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1],
 				{
@@ -365,7 +365,7 @@ describe('commands/centrifgue', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1],
 				{
@@ -431,7 +431,7 @@ describe('commands/centrifgue', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps[1],
 				{

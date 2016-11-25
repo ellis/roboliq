@@ -52,7 +52,7 @@ describe('experiment', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				"1": {
@@ -111,7 +111,7 @@ describe('experiment', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				"1": {
@@ -163,7 +163,7 @@ describe('experiment', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				"1": {
@@ -244,7 +244,7 @@ describe('experiment', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
 			should.deepEqual(result.output.steps["1"], {
 				"1": {
@@ -348,7 +348,7 @@ describe('experiment', function() {
 		// 			}
 		// 		}
 		// 	});
-		// 	var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+		// 	var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 		// 	//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
 		// 	should.deepEqual(result.output.steps["1"], {
 		// 		command: "experiment.forEachGroup",
@@ -396,7 +396,7 @@ describe('experiment', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
 			should.deepEqual(result.output.steps["1"], {
 				command: "experiment.forEachRow",

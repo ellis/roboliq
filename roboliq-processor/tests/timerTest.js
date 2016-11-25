@@ -32,7 +32,7 @@ describe('timer', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			should.deepEqual(result.output.steps[1][1], {
 				command: "timer._sleep",
 				agent: "robot1",
@@ -51,7 +51,7 @@ describe('timer', function() {
 					}
 				}
 			});
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			should.deepEqual(result.output.steps[1][1], {
 				command: "timer._start",
 				agent: "robot1",
@@ -72,7 +72,7 @@ describe('timer', function() {
 			protocol.predicates = protocol.predicates.concat([
 				{running: {equipment: "timer2"}}
 			]);
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			should.deepEqual(result.output.steps[1][1], {
 				command: "timer._stop",
 				agent: "robot1",
@@ -112,24 +112,24 @@ describe('timer', function() {
 
 		it('should start a time, perform sub-steps, then wait', function () {
 			var protocol = _.merge({}, protocol0, protocol1);
-			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol);
+			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			should.deepEqual(result.output.steps[1], expected1);
 		});
 		it('should support different time units', function () {
 			var protocol2 = _.merge({}, protocol0, protocol1, {steps: {1: {duration: "0.5h"}}});
 			var expected2 = _.merge({}, expected1, {duration: "0.5h"});
-			var result2 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol2);
+			var result2 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol2, false);
 			should.deepEqual(result2.output.steps[1], expected2);
 
 			var protocol3 = _.merge({}, protocol0, protocol1, {steps: {1: {duration: "30minutes"}}});
 			var expected3 = _.merge({}, expected1, {duration: "30minutes"});
-			var result3 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol3);
+			var result3 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol3, false);
 			should.deepEqual(result3.output.steps[1], expected3);
 		});
 		it('should handle specification of explicit timer equipment', function () {
 			var protocol2 = _.merge({}, protocol0, protocol1, {steps: {1: {equipment: "timer1"}}});
 			var expected2 = _.merge({}, expected1, {equipment: "timer1"});
-			var result2 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol2);
+			var result2 = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol2, false);
 			should.deepEqual(result2.output.steps[1], expected2);
 		});
 	});

@@ -26,7 +26,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'));
 			//console.log(JSON.stringify(result.output.effects, null, '\t'));
 			should.deepEqual(result.output.errors, {});
@@ -193,7 +193,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps[1][1], {
 				"command": "pipetter._pipette",
@@ -403,7 +403,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			should.deepEqual(result.output.steps[1][1], {
 				"command": "pipetter._pipette",
 				"agent": "ourlab.mario.evoware",
@@ -465,7 +465,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			should.deepEqual(result.output.effects, {
 				"1.1": {
 					"ourlab.mario.systemLiquidLabware.contents": [
@@ -531,7 +531,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			var result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.effects, {
 				"1.1": {
@@ -617,7 +617,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			//console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps[1], {
 				"1": {
@@ -889,7 +889,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(_.pick(result.output.steps[1], "1", "2", "3"), {
 				"1": {
@@ -989,7 +989,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps[1][1], {
 				"command": "pipetter._pipette",
@@ -1058,17 +1058,17 @@ describe('pipetter', function() {
 					]
 				}
 			};
-			const result1 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result1 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result1.output.steps, null, '\t'));
 			should.deepEqual(_.pick(result1.output.steps[1], [1, 2, 3]), expected);
 
 			protocol.steps[1].destinationMixing = true;
-			const result2 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result2 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result2.output.steps, null, '\t'));
 			should.deepEqual(_.pick(result2.output.steps[1], [1, 2, 3]), expected);
 
 			protocol.steps[1].destinationMixing = false;
-			const result3 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result3 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result3.output.steps, null, '\t'));
 			should.deepEqual(result3.output.steps[1][1].items, expected[1].items.map(x => _.omit(x, "destinationMixing")));
 		});
@@ -1118,17 +1118,17 @@ describe('pipetter', function() {
 					]
 				},
 			};
-			const result1 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result1 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result1.output.steps, null, '\t'));
 			should.deepEqual(_.pick(result1.output.steps[1], [1, 2, 3]), expected);
 
 			protocol.steps[1].sourceMixing = true;
-			const result2 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result2 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result2.output.steps, null, '\t'));
 			should.deepEqual(_.pick(result2.output.steps[1], [1, 2, 3]), expected);
 
 			protocol.steps[1].sourceMixing = false;
-			const result3 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result3 = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result3.output.steps, null, '\t'));
 			should.deepEqual(result3.output.steps[1][1].items, expected[1].items.map(x => _.omit(x, "sourceMixing")));
 		});
@@ -1175,7 +1175,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log(JSON.stringify(result.output.steps[1][1], null, '\t'));
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				"command": "pipetter._pipette",

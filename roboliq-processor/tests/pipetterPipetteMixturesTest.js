@@ -58,7 +58,7 @@ describe('pipetter', function() {
 		};
 		it("should pipette 2D mixture array to destination wells", function() {
 			const protocol = protocolA;
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			// console.log(JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",
@@ -74,7 +74,7 @@ describe('pipetter', function() {
 		});
 		it("should pipette mixtures to destination wells", function() {
 			const protocol = protocolB;
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",
 				clean: 'none',
@@ -88,7 +88,7 @@ describe('pipetter', function() {
 		});
 		it("should pipette mixtures to destination wells, with destinationLabware specified separately", function() {
 			const protocol = protocolC;
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",
 				clean: 'none',
@@ -105,7 +105,7 @@ describe('pipetter', function() {
 			const protocol = _.merge({}, protocolA, {
 				steps: {"1": {order: ["destination"]}}
 			});
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",
 				clean: 'none',
@@ -146,7 +146,7 @@ describe('pipetter', function() {
 					{destination: "plate1(A02)", sources: [{source: 'source1', absorbance: 1.0}, {source: 'source2'}], volume: "175ul"},
 				],
 			};
-			const result = roboliq.run(["--ourlab", "-o", ""], protocol);
+			const result = roboliq.run(["--ourlab", "-o", ""], protocol, false);
 			console.log(JSON.stringify(result.output.steps[1][1], null, '\t'));
 			should.deepEqual(_.omit(result.output.steps[1][1], "1"), {
 				command: "pipetter.pipette",

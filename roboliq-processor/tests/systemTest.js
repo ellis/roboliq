@@ -24,7 +24,7 @@ describe('system', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				1: {
@@ -57,7 +57,7 @@ describe('system', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			should.deepEqual(result.output.steps[1], {
 				command: "system.if",
 				test: true,
@@ -87,7 +87,7 @@ describe('system', function() {
 					}
 				}
 			};
-			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			should.deepEqual(result.output.steps[1], {
 				command: "system.if",
 				test: true,
@@ -118,7 +118,7 @@ describe('system', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			should.deepEqual(result.output.steps[1], {
 				command: "system.repeat",
 				count: 2,
@@ -139,7 +139,7 @@ describe('system', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			should.deepEqual(result.output.steps[1], {
 				command: "system.repeat",
 				count: 2,
@@ -165,7 +165,7 @@ describe('system', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol);
+			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result.output, null, '\t'));
 			should.deepEqual(_.pick(result.output.steps[1], ["1", "2"]), {
 				1: {1: {comment: "empty"}, 2: {command: "system.runtimeExitLoop", testType: "R", test: "cat('true')"}},
