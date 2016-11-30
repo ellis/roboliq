@@ -167,7 +167,7 @@ steps:
               totalVolume: ul
               volume: ul
               waterVolume: ul
-            simulated: 'bignumber(random(number(0.03), number(0.04))) + (source == "water" ? 0 : source == "dye01" ? 0.1 : source == "dye05" ? 0.5 : 1.0) * bignumber(random(number(0.95), number(1.05)))'
+            simulated: 'bignumber(random(number(0.03), number(0.04))) + (source == "water" ? 0 : source == "dye01" ? 0.1 : source == "dye05" ? 0.5 : 1.0) * bignumber(random(number(0.95), number(1.05))) * (totalVolume/(250ul))^(1/4)'
   5:
     description: "Shake plate and read again"
     data: {where: 'state == "shaker"'}
@@ -213,4 +213,4 @@ steps:
                     totalVolume: ul
                     volume: ul
                     waterVolume: ul
-                  simulated: 'bignumber(random(number(0.03), number(0.04))) + (source == "water" ? 0 : source == "dye01" ? 0.1 : source == "dye05" ? 0.5 : 1.0) * bignumber(random(number(0.95), number(1.05))) * (1 + 0.05 * measurement)'
+                  simulated: 'bignumber(random(number(0.03), number(0.04))) + (source == "water" ? 0 : source == "dye01" ? 0.1 : source == "dye05" ? 0.5 : 1.0) * bignumber(random(number(0.95), number(1.05))) * (1 + 0.05 * measurement) * (totalVolume/(250ul))^(1/4)'
