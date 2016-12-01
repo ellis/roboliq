@@ -59,7 +59,7 @@ objects:
         rows: 8
         columns: 12
         values: [0 ul, 16 ul]
-      waterVolume=calculate: "totalVolume - volume"
+      waterVolume=calculate: '(source == "water") ? totalVolume : totalVolume - volume'
     orderBy: id
 
   readerDesign1:
@@ -107,17 +107,14 @@ steps:
               waterVolume: 0
             simulated: 'random(number(0.03), number(0.04))'
   2:
-    description: "Dispense first aliquot of dye or water"
-    data: {source: plateDesign1}
+    description: "Dispense dye aliquots"
+    data: {source: plateDesign1, where: 'source != "water"'}
     command: pipetter.pipette
     program: Roboliq_Water_Air_1000
+    sources: $$source
     destinationLabware: $plate
-    items:
-      "#data":
-        template:
-          source: $source
-          destination: $well
-          volume: $volume
+    destinations: $$well
+    volume: $$volume
     clean: thorough
     cleanBetween: flush
   3:
@@ -127,11 +124,8 @@ steps:
     program: Roboliq_Water_Air_1000
     sources: water
     destinationLabware: $plate
-    items:
-      "#data":
-        template:
-          destination: $well
-          volume: $waterVolume
+    destinations: $$well
+    volume: $$waterVolume
     clean: none
     cleanEnd: thorough
   4:
