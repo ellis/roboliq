@@ -1,5 +1,12 @@
 # Todos
 
+# Get it working for colleagues
+
+* [ ] make sure `npm i` works on a clean checkout in the root directory
+* [ ] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
+* [ ] autogenerate the API when `npm i` is run from the root, link to API docs from the README
+* [ ] `npm install` instead of `npm i`
+
 # paper2 Todos
 
 * [x] process 'output.units' in TecanInfinite2.js
