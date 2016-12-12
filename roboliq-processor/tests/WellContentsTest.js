@@ -70,7 +70,7 @@ describe('WellContents', function() {
 			var contents = ["2.5 ul",["2.5 ul","systemLiquid"],["2.5 ul","systemLiquid"],["2.5 ul",["20 ul","strain1"],["80 ul","media1"]]];
 			assert.deepEqual(WellContents.flattenContents(contents), {
 				"media1": "0.6667 ul",
-				"strain1": "166.7 nl",
+				"strain1": "0.1667 ul",
 				"systemLiquid": "1.667 ul"
 			});
 		});

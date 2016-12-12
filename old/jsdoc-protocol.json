@@ -4,7 +4,7 @@
 	},
 	"source": {
 		"include": ["generated"],
-		"exclude": [],
+		"exclude": ["generated/node_modules"],
 		"includePattern": ".+\\.js(doc)?$",
 		"excludePattern": "(^|\\/|\\\\)_"
 	},

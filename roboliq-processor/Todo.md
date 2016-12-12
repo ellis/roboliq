@@ -6,6 +6,7 @@
 * [ ] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
 * [ ] autogenerate the API when `npm i` is run from the root, link to API docs from the README
 * [ ] `npm install` instead of `npm i`
+* [ ] describe in general the actions that happen by default (such as rinsing at certain times, movements that require multiple steps or opening devices)
 
 # paper2 Todos
 

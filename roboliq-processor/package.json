@@ -53,7 +53,7 @@
     "metalsmith": "babel-node --harmony build.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
-    "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json; jsdoc -r -c jsdoc-protocol.json",
+    "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
     "roboliq": "babel-node -- src/roboliq.js",
     "start": "babel-node -- src/roboliq.js",
