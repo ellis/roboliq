@@ -1,4 +1,4 @@
-import commandHelper from '../../commandHelper.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 
 module.exports = {
 	getSchemas: (agentName, equipmentName) => ({

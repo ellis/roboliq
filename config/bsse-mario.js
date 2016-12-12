@@ -15,7 +15,6 @@ const Equipment = {
 
 module.exports = {
 	roboliq: "v1",
-	imports: ["roboliq.js"],
 	objects: {
 		"ourlab": {
 			"type": "Namespace",

@@ -759,7 +759,7 @@ function runWithOpts(opts, userProtocol) {
 				const evowareArgs = _.clone(opts.evoware.split(","));
 				assert(evowareArgs.length >= 3, "at least three arguments must be passed to --evoware options: carrier file, table file, and one or more agent names");
 				// Insert
-				const evowareRun = require("./evoware/EvowareMain").run;
+				const evowareRun = require("roboliq-evoware/dist/EvowareMain").run;
 				evowareArgs.splice(2, 0, outpath);
 				if (!opts.quiet) {
 					console.log(`calling evoware: ${evowareArgs.join(" ")}`);

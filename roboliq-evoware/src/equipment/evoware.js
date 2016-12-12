@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-import commandHelper from '../../commandHelper.js';
-import expect from '../../expect.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+import expect from 'roboliq-processor/dist/expect.js';
 
 /**
  * Create an instruction for Evoware execute an external command.

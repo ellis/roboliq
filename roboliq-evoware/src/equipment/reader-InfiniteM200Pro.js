@@ -3,9 +3,9 @@ import assert from 'assert';
 import math from 'mathjs';
 import Mustache from 'mustache';
 import path from 'path';
-import commandHelper from '../../commandHelper.js';
-import expect from '../../expect.js';
-import wellsParser from '../../parsers/wellsParser.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+import expect from 'roboliq-processor/dist/expect.js';
+import wellsParser from 'roboliq-processor/dist/parsers/wellsParser.js';
 
 import {makeEvowareExecute, makeEvowareFacts} from './evoware.js';
 

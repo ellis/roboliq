@@ -8,7 +8,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "processor": "roboliq-processor"
+    "processor": "roboliq-processor",
+    "compile": "cd roboliq-processor && npm run compile && cd ../roboliq-evoware && npm run compile"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"

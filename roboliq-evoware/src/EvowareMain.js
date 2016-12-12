@@ -47,7 +47,7 @@ function run(opts) {
 	opts.agents = _.get(opts.args, 3);
 
 	if (_.isEmpty(opts.carrier)) {
-		console.log(nomnom.getUsage());
+		commander.outputHelp();
 		process.exit(0);
 	}
 	else {

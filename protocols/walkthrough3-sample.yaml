@@ -1,0 +1,34 @@
+roboliq: v1                                # version of Roboliq being used
+# description of this protocol; the pipe symbol ()|) allows for multi-line text
+description: |
+  Dispense a liquid into each well of a
+  96-well plate, seal it, and shake it.
+objects:                                   # the set of materials used in this protocol
+  plate1:                                  # an object named "plate1"
+    type: Plate                            # which is a type of plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc  # whose model is defined in the configuration file "ourlab.js"
+    location: ourlab.mario.site.P3         # which the user should place at the location "P1"
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(A01 down D01)
+steps:
+  1:
+    command: pipetter.pipette
+    sources: water
+    destinations: plate1(all)
+    volumes: 40 ul
+    cleanBetween: none
+  2:
+    command: sealer.sealPlate
+    object: plate1
+  3:
+    command: shaker.shakePlate
+    object: plate1
+    program:
+      duration: 10 seconds
+
