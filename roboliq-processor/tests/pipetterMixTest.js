@@ -53,7 +53,7 @@ describe('pipetter', function() {
 		};*/
 		it("should mix some wells", function() {
 			const protocol = protocolA;
-			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
+			const result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result.output.steps[1], null, '\t'))
 			should.deepEqual(result.output.steps[1][1].items, [
 				{ "syringe": "ourlab.mario.liha.syringe.1", "intensity": "thorough" },
@@ -100,7 +100,7 @@ describe('pipetter', function() {
 				}
 			};
 
-			const result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
+			const result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			// console.log(JSON.stringify(result.output.steps, null, '\t'))
 			// console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.steps[1][1].items, [

@@ -46,7 +46,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
@@ -110,7 +110,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
@@ -182,7 +182,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
@@ -259,7 +259,7 @@ describe('pipetter', function() {
 					}
 				}
 			};
-			var result = roboliq.run(["--ourlab", "-o", "", "-T"], protocol, false);
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result.output.effects, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.warnings, {});
