@@ -45,7 +45,7 @@
     "roboliq-design": "dist/designMain.sh"
   },
   "scripts": {
-    "prepublish": "npm run metalsmith",
+	"prepublish": "npm i --only=dev --ignore-scripts && npm run metalsmith && npm run jsdoc",
     "clean": "rm -rf dist",
     "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
     "design": "babel-node -- src/designMain.js",
@@ -60,5 +60,9 @@
     "evoware": "babel-node -- src/evoware/EvowareMain.js"
   },
   "author": "Ellis Whitehead",
-  "license": "GPL-3.0"
+  "license": "GPL-3.0",
+	  "repository": {
+	  "type": "git",
+	  "url": "git://github.com/username/repository.git"
+	}
 }

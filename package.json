@@ -7,7 +7,6 @@
   },
   "devDependencies": {},
   "scripts": {
-    "preinstall": "cd roboliq-processor && npm i",
     "processor": "roboliq-processor"
   },
   "author": "Ellis Whitehead",
