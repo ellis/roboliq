@@ -4,7 +4,7 @@
  */
 
 import _ from 'lodash';
-import commandHelper from '../../commandHelper.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 import * as evowareHelper from './evowareHelper.js';
 
 export function _execute(params, parsed, data) {

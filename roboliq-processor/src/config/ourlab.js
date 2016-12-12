@@ -1,9 +1,11 @@
-var _ = require('lodash');
-var assert = require('assert');
-var math = require('mathjs');
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-import {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} from '../evoware/equipment/evoware.js';
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const Evoware = require('../evoware/equipment/evoware.js');
+
+const {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} = Evoware;
 
 const Equipment = {
 	evoware: require('../evoware/equipment/evoware.js'),

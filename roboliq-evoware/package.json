@@ -1,7 +1,7 @@
 {
-  "name": "roboliq-processor",
+  "name": "roboliq-evoware",
   "version": "0.0.1",
-  "description": "Roboliq JavaScript library",
+  "description": "Roboliq Backend for Evoware",
   "dependencies": {
     "commander": "^2.9.0",
     "docdash": "^0.4.0",
@@ -19,6 +19,7 @@
     "mustache": "^2.1.3",
     "nomnom": "~1.8.1",
     "random-js": "~1.0.4",
+    "roboliq-processor": "file:///Users/ellisw/src/roboliq/roboliq-processor",
     "safe-eval": "^0.3.0",
     "sprintf-js": "^1.0.3",
     "stable": "^0.1.5",
@@ -45,7 +46,7 @@
     "roboliq-design": "dist/designMain.sh"
   },
   "scripts": {
-	"prepublish": "npm i --only=dev --ignore-scripts && npm run metalsmith && npm run jsdoc",
+    "prepublishX": "npm i --only=dev --ignore-scripts && npm run metalsmith && npm run jsdoc",
     "clean": "rm -rf dist",
     "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
     "design": "babel-node -- src/designMain.js",
@@ -53,7 +54,7 @@
     "metalsmith": "babel-node --harmony build.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
-    "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials",
+    "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
     "roboliq": "babel-node -- src/roboliq.js",
     "start": "babel-node -- src/roboliq.js",
@@ -61,8 +62,8 @@
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0",
-	  "repository": {
-	  "type": "git",
-	  "url": "https://git.bsse.ethz.ch/ellisw/roboliq.git"
-	}
+  "repository": {
+    "type": "git",
+    "url": "https://git.bsse.ethz.ch/ellisw/roboliq.git"
+  }
 }

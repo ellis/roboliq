@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import commandHelper from '../../commandHelper.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 
 function getMoveRomaHomeLine(romaIndex) {
 	return getRomaMoveLine(romaIndex, 2);

@@ -212,7 +212,7 @@ you'll need to know the following concepts:
 Now write a script to verify that we can move a plate between the two bench sites.
 Save this file as `protocols/walkthrough2a.yaml` or use the file `protocols/walkthrough2a-sample.yaml`.
 
-```yaml
+```{yaml}
 roboliq: v1
 description: Move plate from site P1 to P2
 objects:

@@ -1,0 +1,14 @@
+node_modules
+Session.vim
+output.json
+*.out.json
+out
+protocols/*.prot
+npm-debug.log
+commandSpecs.html
+commandSpecs.pdf
+dist
+*_BC.dat
+EvowareScripts
+lib
+bundle.js

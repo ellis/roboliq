@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
 import math from 'mathjs';
-import commandHelper from '../../commandHelper.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 import * as evowareHelper from './evowareHelper.js';
 
 export function runtimeExitLoop(params, parsed, data) {

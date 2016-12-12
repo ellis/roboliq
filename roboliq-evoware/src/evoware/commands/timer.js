@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import math from 'mathjs';
-import commandHelper from '../../commandHelper.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 
 export function _sleep(params, parsed, data) {
 	//console.log("timer._sleep: "+JSON.stringify(parsed, null, '\t'))

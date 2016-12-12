@@ -4,7 +4,7 @@ import jsonfile from 'jsonfile';
 import * as EvowareCarrierFile from '../src/evoware/EvowareCarrierFile.js';
 import * as EvowareCompiler from '../src/evoware/EvowareCompiler.js';
 import * as EvowareTableFile from '../src/evoware/EvowareTableFile.js';
-import schemas from './schemas.js';
+import schemas from '../../roboliq-processor/tests/schemas.js';
 
 const protocol0 = {
 	roboliq: "v1",
@@ -232,11 +232,12 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
-		it("should compile transporter._movePlate #2", function() {
+		// Skipping this for now, because it relies on the 'mario' configuration in our lab -- so it's not a generic test
+		it.skip("should compile transporter._movePlate #2", function() {
 			const table = {};
 			const protocol = _.merge({},
-				require(__dirname+"/../src/config/roboliq.js"),
-				require(__dirname+"/../src/config/ourlab.js"),
+				require(__dirname+"/../../roboliq-processor/src/config/roboliq.js"),
+				require(__dirname+"/../../roboliq-processor/src/config/ourlab.js"),
 				protocol0,
 				{
 					roboliq: "v1",

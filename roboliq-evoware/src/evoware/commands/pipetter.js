@@ -6,11 +6,11 @@ import _ from 'lodash';
 import assert from 'assert';
 import math from 'mathjs';
 import {sprintf} from 'sprintf-js';
-import commandHelper from '../../commandHelper.js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 import * as evowareHelper from './evowareHelper.js';
 import * as EvowareUtils from '../EvowareUtils.js';
 import * as Tokens from './tokens.js';
-import wellsParser from '../../parsers/wellsParser.js';
+import wellsParser from 'roboliq-processor/dist/parsers/wellsParser.js';
 
 export function _aspirate(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
