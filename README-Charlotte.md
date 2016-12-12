@@ -255,7 +255,7 @@ description: |
 objects:                                   # the set of materials used in this protocol
   plate1:                                  # an object named "plate1"
     type: Plate                            # which is a type of plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc  # whose model is defined in the configuration file "ourlab.js"
+    model: ourlab.model.plateModel_96_round_transparent_nunc  # whose model is defined in the configuration file "bsse-mario.js"
     location: ourlab.mario.site.P3         # which the user should place at the location "P1"
   waterLabware:
     type: Plate

@@ -92,11 +92,10 @@ const nomnom = require('nomnom').options({
 		list: true,
 		help: "Supply a JSON file on the command line in the form of 'filename:filedata'"
 	},
-	ourlab: {
-		full: 'ourlab',
+	loadRoboliqConfig: {
+		full: 'load-roboliq-config',
 		flag: true,
-		default: false,
-		help: "automatically load config/ourlab.js"
+		default: true
 	},
 	output: {
 		abbr: 'o',
@@ -845,11 +844,10 @@ function _run(opts, userProtocol) {
 		filecache[pair[0]] = data;
 	});
 
-	// Add ourlab.js config to URLs by default (it also include config/roboliq.js),
-	// but if --no-ourlab is specified, make sure that config/roboliq.js gets loaded.
+	// Add config/roboliq.js to URLs by default.
 	const urls = _.uniq(_.compact(
 		_.compact([
-			(opts.ourlab) ? __dirname+'/config/ourlab.js' : __dirname+'/config/roboliq.js'
+			(opts.loadRoboliqConfig) ? __dirname+'/config/roboliq.js' : undefined
 		]).concat(opts.infiles)
 	));
 	if (opts.debug) {

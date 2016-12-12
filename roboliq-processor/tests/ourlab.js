@@ -1,21 +1,20 @@
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
-const commandHelper = require('../commandHelper.js');
-const expect = require('../expect.js');
-const Evoware = require('../evoware/equipment/evoware.js');
+const commandHelper = require('../src/commandHelper.js');
+const expect = require('../src/expect.js');
+const Evoware = require('../../roboliq-evoware/src/equipment/evoware.js');
 
 const {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} = Evoware;
 
 const Equipment = {
-	evoware: require('../evoware/equipment/evoware.js'),
-	reader: require('../evoware/equipment/reader-InfiniteM200Pro.js'),
-	sealer: require('../evoware/equipment/sealer-Tecan.js'),
+	evoware: require('../../roboliq-evoware/src/equipment/evoware.js'),
+	reader: require('../../roboliq-evoware/src/equipment/reader-InfiniteM200Pro.js'),
+	sealer: require('../../roboliq-evoware/src/equipment/sealer-Tecan.js'),
 };
 
 module.exports = {
 	roboliq: "v1",
-	imports: ["roboliq.js"],
 	objects: {
 		"ourlab": {
 			"type": "Namespace",

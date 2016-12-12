@@ -237,7 +237,7 @@ describe('EvowareCompilerTest', function() {
 			const table = {};
 			const protocol = _.merge({},
 				require(__dirname+"/../../roboliq-processor/src/config/roboliq.js"),
-				require(__dirname+"/../../roboliq-processor/src/config/ourlab.js"),
+				require(__dirname+"/../../roboliq-processor/test/ourlab.js"),
 				protocol0,
 				{
 					roboliq: "v1",
