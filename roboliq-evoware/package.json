@@ -19,7 +19,7 @@
     "mustache": "^2.1.3",
     "nomnom": "~1.8.1",
     "random-js": "~1.0.4",
-    "roboliq-processor": "file:///Users/ellisw/src/roboliq/roboliq-processor",
+    "roboliq-processor": "../roboliq-processor",
     "safe-eval": "^0.3.0",
     "sprintf-js": "^1.0.3",
     "stable": "^0.1.5",
@@ -42,23 +42,16 @@
   },
   "main": "dist/roboliq.js",
   "bin": {
-    "roboliq-processor": "dist/main.sh",
-    "roboliq-design": "dist/designMain.sh"
+    "roboliq-evoware": "dist/main.sh"
   },
   "scripts": {
-    "prepublishX": "npm i --only=dev --ignore-scripts && npm run metalsmith && npm run jsdoc",
+    "prepublish": "npm i --only=dev --ignore-scripts && npm run compile",
     "clean": "rm -rf dist",
-    "compile": "babel src --out-dir dist && cp -ar src/schemas dist/",
-    "design": "babel-node -- src/designMain.js",
-    "webpack": "webpack",
-    "metalsmith": "babel-node --harmony build.js",
+    "compile": "node compile.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
-    "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
-    "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials; jsdoc -r -c jsdoc-evoware.json",
+    "jsdoc": "jsdoc -r -c jsdoc-evoware.json",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
-    "roboliq": "babel-node -- src/roboliq.js",
-    "start": "babel-node -- src/roboliq.js",
-    "evoware": "babel-node -- src/evoware/EvowareMain.js"
+    "start": "babel-node -- src/EvowareMain.js"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0",

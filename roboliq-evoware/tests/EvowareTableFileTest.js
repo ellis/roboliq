@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var should = require('should');
-import * as EvowareCarrierFile from '../src/evoware/EvowareCarrierFile.js';
-import * as EvowareTableFile from '../src/evoware/EvowareTableFile.js';
+import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
+import * as EvowareTableFile from '../src/EvowareTableFile.js';
 
 const table1 = {
 	"System": {

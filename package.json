@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "Roboliq Software System for automating liquid handling robots",
   "dependencies": {
-    "roboliq-processor": "file:roboliq-processor"
+    "roboliq-processor": "file:roboliq-processor",
+    "roboliq-evoware": "file:roboliq-evoware"
   },
   "devDependencies": {},
   "scripts": {

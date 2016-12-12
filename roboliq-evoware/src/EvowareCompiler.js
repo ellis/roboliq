@@ -6,7 +6,7 @@
 import _ from 'lodash';
 import naturalSort from 'javascript-natural-sort';
 import path from 'path';
-import M from '../Medley.js';
+import M from './Medley.js';
 import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 import * as EvowareTableFile from './EvowareTableFile.js';
 import * as evowareHelper from './commands/evowareHelper.js';

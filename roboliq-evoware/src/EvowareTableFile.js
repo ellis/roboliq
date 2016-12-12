@@ -9,7 +9,7 @@ import assert from 'assert';
 //import {sprintf} from 'sprintf-js';
 import * as EvowareUtils from './EvowareUtils.js';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
-import M from '../Medley.js';
+import M from './Medley.js';
 
 /**
  * Represent a hotel object in an Evoware table file

@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var should = require('should');
-import * as EvowareCarrierFile from '../src/evoware/EvowareCarrierFile.js';
+import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
 
 describe('EvowareCarrierFile', function() {
 	describe('load', function () {
