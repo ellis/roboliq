@@ -2,9 +2,10 @@
 
 # Get it working for colleagues
 
-* [ ] make sure `npm i` works on a clean checkout in the root directory
-* [ ] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
-* [ ] autogenerate the API when `npm i` is run from the root, link to API docs from the README
+* [x] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
+* [x] make sure `npm i` works on a clean checkout in the root directory
+* [ ] autogenerate the API documentation when `npm i` is run from the root, link to API docs from the README
+* [ ] try to get `npm run processor` to work from the root directory for more complex scripts
 * [ ] `npm install` instead of `npm i`
 * [ ] describe in general the actions that happen by default (such as rinsing at certain times, movements that require multiple steps or opening devices)
 
