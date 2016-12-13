@@ -122,7 +122,8 @@ plate1  water   C01          75 ul
 # Nested branching
 
 Nested branching provides a lot of power to the design specification, but it
-is also where the complexity starts.
+is also where the complexity starts.  Consider this table where two sources
+are nested in each destination, and each source has its own volume:
 
 plate | destination | source | volume | liquidClass
 ----- | ------ | ----------- | -----: | -------
@@ -132,6 +133,8 @@ plate1 | B01 | water | 50 ul | Roboliq_Water_Air_1000
 plate1 | B01 | dye | 25 ul | Roboliq_Water_Air_1000
 plate1 | C01 | water | 50 ul | Roboliq_Water_Air_1000
 plate1 | C01 | dye | 25 ul | Roboliq_Water_Air_1000
+
+This can be described in Roboliq as follows:
 
 ```yaml
 roboliq: v1
@@ -150,3 +153,42 @@ objects:
       liquidClass: Roboliq_Water_Air_1000
 ---
 ```
+
+Create a file named `design2Test.yaml` with those contents and run:
+
+```sh
+npm run design -- --path objects.design2 design2Test.yaml
+```
+
+What's happening here is:
+
+1. `plate = plate1` is assign to the first table row.
+2. three copies of the previous row are created, and a column for `destination` is added to each row, each with its own value.
+3. Two copies are made of each of the previous three rows.
+    a. For the first copy of each of the three original rows:
+        1. `source = water`
+        2. Then the conditions embedded under `water:` are applied to those rows -- in this case, `volume = 50 ul`
+    b. For the second copy of each of the three original rows:
+        1. `source = water`
+        2. Then the conditions embedded under `water:` are applied to those rows -- in this case, `volume = 25 ul`
+4. `liquidClass = Roboliq_Water_Air_1000` is assigned to all rows.
+
+
+# Advanced assignment
+
+More complex assignments are possible that allow for randomizing and changing
+the order of assignment.
+
+a | b | c
+1 | 1 |
+1 | 2 |
+1 | 3 |
+2 | 1 |
+2 | 2 |
+3 | 3 |
+
+
+
+# Functions
+
+Certain function can be applied to the
