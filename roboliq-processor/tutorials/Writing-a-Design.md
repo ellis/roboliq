@@ -154,6 +154,26 @@ objects:
 ---
 ```
 
+An alternative way of achieving the same result is:
+
+```yaml
+roboliq: v1
+objects:
+  design2:
+    type: Design
+    description: Nested example
+    conditions:
+      plate: plate1
+      destination*: [A01, B01, C01]
+      .sourceId*:
+      - source: water
+        volume: 50 ul
+      - source: dye
+        volume: 25 ul
+      liquidClass: Roboliq_Water_Air_1000
+---
+```
+
 Create a file named `design2Test.yaml` with those contents and run:
 
 ```sh
