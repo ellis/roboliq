@@ -29,6 +29,7 @@ const RoboliqPackage = {
 		// Assign a new instance of CompositeDisposable...
 		this.subscriptions = new CompositeDisposable();
 
+		/*
 		// We don't use the serialization system here because we assume
 		// that our view won't work with any data.
 		this.dummyView = new DummyViewElement(state.viewState);
@@ -37,11 +38,12 @@ const RoboliqPackage = {
 			item: this.dummyView.getElement(),
 			visible: false
 		});
+		*/
 
 		// ...and adding commands.
 		this.subscriptions.add(
 			atom.commands.add('atom-workspace', {
-				'roboliq:toggle': this.togglePackage
+				'roboliq:toggle': () => this.togglePackage()
 			})
 		);
 
@@ -56,25 +58,36 @@ const RoboliqPackage = {
 	// We destroy both the custom view and Atom's modal.
 	deactivate () {
 		this.subscriptions.dispose();
-		this.dummyView.destroy();
-		this.modal.destroy();
+		//this.dummyView.destroy();
+		//this.modal.destroy();
 	},
 
 	// To save the current package's state, this method should return
 	// an object containing all required data.
 	serialize () {
 		return {
-			viewState: this.dummyView.serialize()
+			//viewState: this.dummyView.serialize()
 		};
 	},
 
 	// Code to toggle the package state.
 	togglePackage() {
-		if (this.modal.isVisible()) {
+		console.log("togglePackage:")
+		console.log(this)
+		/*if (this.modal.isVisible()) {
 			this.modal.hide();
 		}
 		else {
 			this.modal.show();
+		}*/
+
+		const editor = atom.workspace.getActiveTextEditor();
+		if (editor) {
+			const state = {};
+			const view = new DummyViewElement(state);
+			view.getTitle = () => "Design: " + editor.getPath();
+			atom.workspace.getActivePane().addItem(view);
+			atom.workspace.getActivePane().activateItem(view);
 		}
 	}
 };
