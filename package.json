@@ -9,6 +9,7 @@
   "devDependencies": {},
   "scripts": {
     "processor": "roboliq-processor",
+    "design": "roboliq-design",
     "compile": "cd roboliq-processor && npm run compile && cd ../roboliq-evoware && npm run compile",
     "test": "cd roboliq-processor && npm test && cd ../roboliq-evoware && npm test"
   },

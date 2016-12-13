@@ -45,7 +45,7 @@
     "roboliq-design": "dist/designMain.sh"
   },
   "scripts": {
-	"prepublish": "npm i --only=dev --ignore-scripts && npm run metalsmith && npm run jsdoc",
+	"prepublish": "npm i --only=dev --ignore-scripts && npm run compile && npm run jsdoc",
     "compile": "babel-node --harmony compile.js",
     "clean": "rm -rf dist",
     "design": "babel-node -- src/designMain.js",

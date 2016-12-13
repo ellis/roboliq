@@ -1,3 +1,5 @@
+'use babel';
+
 /**
  * Functions for processing design specifications.
  * In particular, it can take concise design specifications and expand them

@@ -1,11 +1,19 @@
 'use babel';
 
+// import Design from '';
+// const Design = require('roboliq-processor/src/design.js');
+// const Temp = require('roboliq-processor/dist/stripUndefined.js');
+// const mathjs = require('mathjs');
+
 export default class DummyViewElement {
-  constructor(state = {content: "dummy text"}) {
+  constructor(state = {}) {
     this.data = state;
     this.element = document.createElement('div');
     this.message = document.createElement('span');
-    this.textNode = document.createTextNode(this.data.content);
+		//const table = Design.flattenDesign(state.design);
+		//const table = "Hello"
+    //this.textNode = document.createTextNode(JSON.stringify(table));
+    this.textNode = document.createTextNode("Hello");
 
     this.element.classList.add('your-package');
     this.message.classList.add('your-package-message');

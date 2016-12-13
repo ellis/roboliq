@@ -4,7 +4,8 @@
   "version": "0.1.0",
   "description": "IDE plugin for Roboliq",
   "keywords": [
-    "liquid-handling robot", "automation"
+    "liquid-handling robot",
+    "automation"
   ],
   "repository": "https://github.com/ellis/roboliq",
   "license": "GPL3",
@@ -12,5 +13,6 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
+    "roboliq-processor": "file:///Users/ellisw/src/roboliq/roboliq-processor"
   }
 }

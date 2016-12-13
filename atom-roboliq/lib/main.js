@@ -2,7 +2,7 @@
 
 import { CompositeDisposable } from 'atom';
 import DummyViewElement from './dummyViewElement.js';
-
+const mathjs = require('mathjs');
 
 // This is your main singleton.
 // The whole state of your package will be stored and managed here.
@@ -83,7 +83,13 @@ const RoboliqPackage = {
 
 		const editor = atom.workspace.getActiveTextEditor();
 		if (editor) {
-			const state = {};
+			const state = {
+				design: {
+					conditions: {
+						"plate*": 2
+					}
+				}
+			};
 			const view = new DummyViewElement(state);
 			view.getTitle = () => "Design: " + editor.getPath();
 			atom.workspace.getActivePane().addItem(view);
