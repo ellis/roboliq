@@ -174,6 +174,164 @@ What's happening here is:
 4. `liquidClass = Roboliq_Water_Air_1000` is assigned to all rows.
 
 
+# Advanced assignment #1
+
+```yaml
+"a*": [1, 2, 3, 4]
+"b=":
+  values: [1, 2]
+  order: "reverse"
+```
+
+```yaml
+a*: 2
+b*: 2
+```
+
+Step 0:
+
+{}
+
+Step 1':
+{a: 1}
+
+Step 1:
+[{a: 1}, {a: 2}, {a: 3}, {a: 4}]
+
+Step 2:
+[{a: 1, b: 1}, {a: 2, b: 2}, {a: 3, b: 2}, {a: 4, b: 1}]
+
+---
+
+```yaml
+a*: 2
+b*: 2
+c=:
+  values: [A, B]
+  groupBy: b
+```
+
+a1 b1
+a1 b2
+a2 b1
+a2 b2
+
+a1 b1 cA
+a2 b1 cB
+--
+a1 b2 cA
+a2 b2 cB
+
+a1 b1 cA
+a1 b2 cA
+a2 b1 cB
+a2 b2 cB
+
+```yaml
+a*: [{x: 1}, {y: 2}, {z: 3}]
+a*:
+  - x: q
+  - y: 2
+  - z: 3
+```
+
+a1 xq
+a2    y2
+a3       z3
+
+```yaml
+a*:
+  - {}
+  - y: 2
+  - {}
+```
+
+a1
+a2 y2
+a3
+
+```yaml
+steps:
+  data: {source: design1}
+  1:
+    command: pipetter.pipette
+    source: $whereItsFrom
+```
+
+# Actions
+
+* allocateWells
+* range
+* calculate
+* case
+
+```{yaml}
+replicate*: 2
+well=allocateWells:
+  rows: 8
+  columns: 12
+  order: shuffle
+```
+
+```{yaml}
+{replicate: 1, well: E05}
+{replicate: 2, well: H01}
+```
+
+```{yaml}
+a*: 2
+b*: 2
+c=range: {from: 10, step: 10}
+```
+
+a1 b1 c10
+a1 b2 c20
+a2 b1 c30
+a2 b2 c40
+
+```{yaml}
+a*: 3
+volume=calculate: '(a * 10) ul'
+more=calculate: '(50 ul) - volume'
+```
+
+```
+a1 volume:10ul more:40ul
+a2 volume:20ul more:30ul
+a3 volume:30ul more:20ul
+```
+
+```{yaml}
+a*: [10 ul, 20 ul]
+volume=calculate:
+  value: '(a * 10) ul'
+  units: l
+```
+
+```{yaml}
+a*: 3
+.volumeCase=case:
+  - where: a < 2
+    conditions:
+      volume: 10ul
+  - conditions:
+      volume: 12354 ul
+```
+
+```
+a1 volumeCase1 volume10
+a2 volumeCase2 volume12354
+a3 volumeCase2 volume12354
+```
+
+# Order values
+
+* `shuffle`
+* `reshuffle`
+* `reverse`
+* `repeat`
+
+
 # Advanced assignment
 
 More complex assignments are possible that allow for randomizing and changing

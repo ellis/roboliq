@@ -4,6 +4,7 @@
 
 * [x] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
 * [x] make sure `npm i` works on a clean checkout in the root directory
+* [ ] Protocol tutorial and Writing-a-Design: link to YAML tutorial as a pre-requisite
 * [ ] autogenerate the API documentation when `npm i` is run from the root, link to API docs from the README
 * [ ] try to get `npm run processor` to work from the root directory for more complex scripts
 * [ ] `npm install` instead of `npm i`
