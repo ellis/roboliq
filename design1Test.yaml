@@ -1,0 +1,10 @@
+roboliq: v1
+objects:
+  design1:
+    type: Design
+    description: First example
+    conditions:
+      plate: plate1
+      source: water
+      destination*: [A01, B01, C01]
+      volume: [25 ul, 50 ul, 75 ul]

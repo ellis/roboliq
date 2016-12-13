@@ -1,0 +1,15 @@
+roboliq: v1
+objects:
+  design2:
+    type: Design
+    description: Nested example
+    conditions:
+      plate: plate1
+      destination*: [A01, B01, C01]
+      source*:
+        water:
+          volume: 50 ul
+        dye:
+          volume: 25 ul
+      liquidClass: Roboliq_Water_Air_1000
+
