@@ -117,6 +117,35 @@ plate1  water   C01          75 ul
 ```
 
 
+Branches can also be specified as integers and arrays.
+If you specify an integer, it creates that many branches which are each
+given an integer index, as follows:
+
+```yaml
+roboliq: v1
+objects:
+  designInteger:
+    type: Design
+    conditions:
+      a*: 3
+      b*: 3
+```
+
+Which creates the following table:
+
+a | b
+- | -
+1|1
+1|2
+1|3
+2|1
+2|2
+2|3
+3|1
+3|2
+3|3
+
+TODO: show use of array of objects in branching.
 
 
 # Nested branching
@@ -179,6 +208,14 @@ What's happening here is:
 More complex assignments are possible that allow for randomizing and changing
 the order of assignment.
 
+```yaml
+```
+					"a*": [1, 2, 3, 4],
+					"b=": {
+						values: [1, 2],
+						order: "repeat"
+					}
+
 a | b | c
 1 | 1 |
 1 | 2 |
@@ -189,6 +226,8 @@ a | b | c
 
 
 
-# Functions
+TODO:
 
-Certain function can be applied to the
+* [ ] Functions
+* [ ] Hiding factors with `.` prefix
+* [ ] `orderBy` at end
