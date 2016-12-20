@@ -103,18 +103,6 @@ export function flattenDesign(design, randomEngine) {
 		children = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine, design.initialRows));
 	}
 
-	// _.forEach(design.operations || [], op => {
-	// 	switch (op.op) {
-	// 		case "merge":
-	//
-	// 			break;
-	// 		default:
-	// 			assert(false, "Unrecognized operation: "+JSON.stringify(op));
-	// 	}
-	// })
-	// 	children
-	// }
-
 	let rows;
 	if (children.length == 1) {
 		rows = children[0];
@@ -830,6 +818,7 @@ const actionHandlers = {
 		const action2 = _.isString(action) ? {} : action;
 		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculate_next(expr, action2));
 	},
+	// TODO: consider renaming to `calculateWellColumn`
 	"calculateColumn": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		return assign(rows, rowIndexes, otherRowIndexes, name, {}, randomEngine, assign_calculateColumn_next(action, {}));
 	},
