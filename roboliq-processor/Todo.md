@@ -9,6 +9,9 @@
 * [ ] try to get `npm run processor` to work from the root directory for more complex scripts
 * [ ] `npm install` instead of `npm i`
 * [ ] describe in general the actions that happen by default (such as rinsing at certain times, movements that require multiple steps or opening devices)
+* [ ] Writing-a-Design.md: remove `---` from the yaml files
+* [ ] remove design*Test.yaml
+* [ ] add repository field to root package.json
 
 # paper2 Todos
 
