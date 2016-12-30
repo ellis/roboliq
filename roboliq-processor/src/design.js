@@ -28,6 +28,11 @@ function locationRowColToText(row, col) {
 	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
 }
 
+/**
+ * Print a text representation of the table
+ * @param  {array}  rows - array of rows
+ * @param  {Boolean} [hideRedundancies] - suppress printing of values that haven't changed from the previous row
+ */
 export function printRows(rows, hideRedundancies = false) {
 	const data = _.flattenDeep(rows);
 
@@ -82,6 +87,47 @@ export function printRows(rows, hideRedundancies = false) {
 }
 
 /**
+ * Print a TAB-formatted representation of the table
+ * @param  {array}  rows - array of rows
+ */
+export function printTAB(rows) {
+	const hideRedundancies = false;
+	const data = _.flattenDeep(rows);
+
+	// Get column names
+	const columnMap = {};
+	_.forEach(data, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
+	const columns = _.keys(columnMap);
+	// console.log({columns})
+
+	// Convert data to array of lines (which are arrays of columns)
+	const lines = [];
+	_.forEach(data, group => {
+		if (!_.isArray(group)) {
+			group = [group];
+		}
+		else {
+			lines.push(["---"]);
+		}
+		_.forEach(group, row => {
+			// console.log(JSON.stringify(row))
+			const line = _.map(columns, key => {
+				const x1 = _.get(row, key, "");
+				const x2 = (_.isNull(x1)) ? "" : x1;
+				return x2.toString();
+			});
+			lines.push(line);
+		});
+	});
+
+	console.log(columns.join("\t"));
+	_.forEach(lines, line => {
+		const s = line.join("\t");
+		console.log(s);
+	});
+}
+
+/**
  * Turn a design specification into a design table.
  * @param {object} design - the design specification.
  */
@@ -100,15 +146,23 @@ export function flattenDesign(design, randomEngine) {
 	}
 	else {
 		const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
-		children = conditionsList.map(conditions => expandConditions(design.conditions, randomEngine, design.initialRows));
+		children = conditionsList.map(conditions => expandConditions(conditions, randomEngine, design.initialRows));
 	}
 
 	let rows;
 	if (children.length == 1) {
 		rows = children[0];
 	}
+	// If there were multiple children, we'll need to join them: either merge columns or concat rows
 	else {
-		rows = _.merge.apply(_, [[]].concat(children));
+		// console.log(JSON.stringify(children, null, '\t'))
+		const joinMethod = design.join || "concat";
+		if (joinMethod === "merge") {
+			rows = _.merge.apply(_, [[]].concat(children));
+		}
+		else {
+			rows = [].concat(...children);
+		}
 	}
 
 	if (design.where) {

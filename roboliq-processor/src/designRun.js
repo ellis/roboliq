@@ -11,6 +11,7 @@ const commander = require('commander')
 	.option("-d, --debug", "enable debugging output")
 	.option("-t, --type [type]", "specify input type (yaml, json)")
 	.option("-p, --path [path]", "path to design within an YAML or JSON object")
+	.option("-T, --outputType [type]", "specify the output type (text, tab)")
 	.arguments("<input>")
 	.description(
 		"Arguments:\n"+
@@ -33,7 +34,11 @@ function handleDesign(design, opts) {
 		// console.log(JSON.stringify(design, null, '\t'))
 	}
 	const table = Design.flattenDesign(design);
-	Design.printRows(table);
+	if (opts.outputType === "tab") {
+		Design.printTAB(table);
+	} else {
+		Design.printRows(table);
+	}
 }
 
 function run(argv) {
