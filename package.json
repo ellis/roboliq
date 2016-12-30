@@ -6,12 +6,16 @@
     "roboliq-processor": "file:roboliq-processor",
     "roboliq-evoware": "file:roboliq-evoware"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "ink-docstrap": "^1.3.0",
+    "jsdoc": "^3.4.3"
+  },
   "scripts": {
     "processor": "roboliq-processor",
     "design": "roboliq-design",
     "compile": "cd roboliq-processor && npm run compile && cd ../roboliq-evoware && npm run compile",
-    "test": "cd roboliq-processor && npm test && cd ../roboliq-evoware && npm test"
+    "test": "cd roboliq-processor && npm test && cd ../roboliq-evoware && npm test",
+    "docs": "cd roboliq-processor && npm run jsdoc && cd ../roboliq-evoware && npm run jsdoc && cd ../api-generator && npm start"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"

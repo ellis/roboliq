@@ -12,6 +12,26 @@
 * [ ] Writing-a-Design.md: remove `---` from the yaml files
 * [ ] remove design*Test.yaml
 * [ ] add repository field to root package.json
+* [ ] check out why compiling from the root didn't update `npm run design`
+* [ ] BUG: `npm run design` -- ignores random seed
+* [ ] Document functions in design.js
+
+flattenArrayAndIndexes:
+
+[{}] ; [0]
+
+a*: 2
+[{}] ; [0] =>
+	[{}, {}] ; [0,1] => [{a: 1}, {a: 2}] ; [0,1]
+[[{a: 1}, {a: 2}]] ; [0]
+[{a: 1}, {a: 2}] ; [0,1]
+
+b*: 2
+[{a: 1}, {a: 2}] ; [0,1] =>
+	[{a: 1}, {a: 1}] ; [0,1] => [{a: 1, b: 1}, {a: 1, b: 2}] ; [0,1]
+	[{a: 2}, {a: 2}] ; [0,1] => [{a: 2, b: 1}, {a: 2, b: 2}] ; [0,1]
+[[{a: 1, b: 1}, {a: 1, b: 2}], [{a: 2, b: 1}, {a: 2, b: 2}]] ; [0,1]
+[{a: 1, b: 1}, {a: 1, b: 2}, {a: 2, b: 1}, {a: 2, b: 2}] ; [0,1,2,3]
 
 # paper2 Todos
 

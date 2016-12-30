@@ -33,7 +33,7 @@ handlebars.registerHelper('md', function(text) {
 metalsmith(__dirname)
 	.source("content")
 	//.source(__dirname+"/../src/schemas")
-	.destination("dist")
+	.destination("../docs/api")
 	.use(collections({
 		commands: {
 			pattern: "schemas/*.yaml"

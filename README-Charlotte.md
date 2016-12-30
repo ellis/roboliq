@@ -1,3 +1,25 @@
+# Notes to integrate
+
+```
+flattenArrayAndIndexes:
+
+[{}] ; [0]
+
+a*: 2
+[{}] ; [0] =>
+	[{}, {}] ; [0,1] => [{a: 1}, {a: 2}] ; [0,1]
+[[{a: 1}, {a: 2}]] ; [0]
+[{a: 1}, {a: 2}] ; [0,1]
+
+b*: 2
+[{a: 1}, {a: 2}] ; [0,1] =>
+	[{a: 1}, {a: 1}] ; [0,1] => [{a: 1, b: 1}, {a: 1, b: 2}] ; [0,1]
+	[{a: 2}, {a: 2}] ; [0,1] => [{a: 2, b: 1}, {a: 2, b: 2}] ; [0,1]
+[[{a: 1, b: 1}, {a: 1, b: 2}], [{a: 2, b: 1}, {a: 2, b: 2}]] ; [0,1]
+[{a: 1, b: 1}, {a: 1, b: 2}, {a: 2, b: 1}, {a: 2, b: 2}] ; [0,1,2,3]
+```
+
+
 # Roboliq
 
 Roboliq aims to make it easier to use liquid handling robots for automation

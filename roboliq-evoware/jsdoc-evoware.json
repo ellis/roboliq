@@ -3,8 +3,8 @@
 		"allowUnknownTags": true
 	},
 	"source": {
-		"include": ["src/evoware"],
-		"exclude": ["node_modules", "src/HTN"],
+		"include": ["src"],
+		"exclude": ["node_modules"],
 		"includePattern": ".+\\.js(doc)?$",
 		"excludePattern": "(^|\\/|\\\\)_"
 	},
@@ -26,7 +26,7 @@
 		"outputSourceFiles": true
 	},
 	"opts": {
-		"destination": "./out/evoware",
+		"destination": "../docs/roboliq-evoware",
 		"template": "node_modules/ink-docstrap/template"
 	}
 }

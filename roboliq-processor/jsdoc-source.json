@@ -26,6 +26,7 @@
 		"outputSourceFiles": true
 	},
 	"opts": {
-		"template": "node_modules/ink-docstrap/template"
+		"template": "node_modules/ink-docstrap/template",
+		"destination": "../docs/roboliq-processor"
 	}
 }
