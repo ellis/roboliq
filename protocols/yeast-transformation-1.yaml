@@ -109,12 +109,7 @@ objects:
     description: PVD filter plate up to 350 ul
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_A1
-  wastePlate:
-    description: One well plate for waste
-    type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_A2
+    location: ourlab.mario.site.P3
   wastePlate:
     description: One well plate for waste
     type: Plate
@@ -124,12 +119,17 @@ objects:
     description: Empty deep well plate for cell cultures
     type: Plate
     model: ourlab.model.plateModel_96_dwp
-    location: ourlab.mario.site.T2
-  culturePlate:
+    location: ourlab.mario.site.P2
+  balancePlate:
     description: Empty deep well plate for balancing liquid
     type: Plate
     model: ourlab.model.plateModel_96_dwp
-    location: ourlab.mario.site.T2
+    location: ourlab.mario.site.P8
+  dnaPlate:
+    description: 96 well plate for DNA to be transformed
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P5
 
   design1:
     type: Design
@@ -140,7 +140,7 @@ objects:
         rows: 8
         columns: 12
       layer*:
-      - source: cells
+      - source: cellCulture
         volume: 20 ul
         clean: decontaminate
         cleanBetween: none
@@ -160,7 +160,7 @@ steps:
     groupBy: layer
     steps:
       command: pipetter.pipette
-      sources: $source
+      sources: $$source
       destinationLabware: filterPlate
       destinations: $$well
       volumes: $volume
