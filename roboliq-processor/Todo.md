@@ -15,6 +15,9 @@
 * [ ] check out why compiling from the root didn't update `npm run design`
 * [ ] BUG: `npm run design` -- ignores random seed
 * [ ] Document functions in design.js
+* [ ] roboliq.yaml: add descriptions to fields on models
+* [ ] api-generator: indicate whether properties are required or not
+* [ ] make sure that well parser documentation is somewhere findable
 
 flattenArrayAndIndexes:
 
