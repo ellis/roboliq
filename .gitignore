@@ -30,3 +30,4 @@ node_modules
 compiled
 roboliq-processor.yaml
 .Rproj.user
+docs
