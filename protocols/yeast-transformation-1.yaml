@@ -85,6 +85,10 @@ objects:
     description: Master mix with PEG, SSDNA etc. mixed together
     type: Liquid
     wells: tubeHolder15(A02)
+  dmso:
+    description: DMSO
+    type: Liquid
+    wells: tubeHolder15(A03)
   lbTrough:
     description: LB medium container
     type: Plate
@@ -136,22 +140,23 @@ objects:
     description: Mixtures for target wells
     conditions:
       i*: $#N
+      destinationLabware: filterPlate
       well=allocateWells:
         rows: 8
         columns: 12
-      layer*:
-      - source: cellCulture
-        volume: 20 ul
-        clean: decontaminate
-        cleanBetween: none
-      - source: water
-        volume: 140 ul
-        clean: flush
-        cleanBetween: none
-      - source=calculate: 'concat("dnaPlate(", well, ")")'
-        volume: 20 ul
-        clean: decontaminate
-        cleanBetween: decontaminate
+      # layer*:
+      # - source: cellCulture
+      #   volume: 20 ul
+      #   clean: decontaminate
+      #   cleanBetween: none
+      # - source: water
+      #   volume: 140 ul
+      #   clean: flush
+      #   cleanBetween: none
+      # - source=calculate: 'concat("dnaPlate(", well, ")")'
+      #   volume: 20 ul
+      #   clean: decontaminate
+      #   cleanBetween: decontaminate
 
 steps:
   1:
@@ -160,8 +165,9 @@ steps:
     groupBy: layer
     steps:
       command: pipetter.pipette
+      program: $liquidClass
       sources: $$source
-      destinationLabware: filterPlate
+      destinationLabware: $destinationLabware
       destinations: $$well
       volumes: $volume
       clean: $clean
