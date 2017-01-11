@@ -8,5 +8,19 @@ objects:
       - source: cellCulture
         volume: 350 ul
         liquidClass: Roboliq_Water_Air_1000
-        clean: decontaminate
+        cleanEnd: decontaminate
+        cleanBegin: decontaminate
         cleanBetween: none
+
+steps:
+  2:
+    data: {source: design1}
+    command: pipetter.pipette
+    program: Roboliq_Water_Air_1000
+    source: water
+    destinationLabware: balancePlate
+    destinations: $$well
+    volumes: $$volume
+    cleanBegin: none
+    cleanBetween: none
+    cleanEnd: decontaminate

@@ -7,6 +7,8 @@ objects:
       layer*:
       - source: liAc
         volume: 20 ul
-        liquidClass: Roboliq_Water_Air_1000
-        clean: decontaminate
-        cleanBetween: none
+        liquidClass: Roboliq_Water_Dry_1000
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: none
+        cleanEnd: decontaminate
+
