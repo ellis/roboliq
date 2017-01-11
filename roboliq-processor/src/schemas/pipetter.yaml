@@ -253,7 +253,7 @@ pipetter.measureVolume:
     wellLabware: {description: "Labware for wells", "type": "Plate"}
     wells: {description: "Specifier for well(s) to measure, if missing from items", type: Wells}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
     cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
@@ -278,7 +278,7 @@ pipetter.mix:
     counts: {description: "Number of times to aspirate, if missing from items", type: integer, default: 3}
     amounts: {description: "Amount to aspirate, either as a fraction or absolute volume, if missing from items", type: [Volume, number], default: 0.7}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
@@ -298,7 +298,7 @@ pipetter.pipette:
     destinations: {description: "Specifier for destination(s) to despense to, if missing from items", type: Wells}
     volumes: {description: "Volume(s) to pipette, if missing from items", type: Volumes}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
@@ -318,7 +318,7 @@ pipetter.punctureSeal:
     wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
     distances: {description: "Distance for puncturing", type: [Length, array], items: {type: Length}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
     cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
