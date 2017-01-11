@@ -564,6 +564,7 @@ function postProcessProtocol_variables(protocol) {
  * @param  {Protocol} protocol - The protocol to validate.
  */
 function validateProtocol1(protocol, o, path) {
+	// console.log({objects: protocol.objects})
 	if (_.isUndefined(o)) {
 		o = protocol.objects;
 		path = [];

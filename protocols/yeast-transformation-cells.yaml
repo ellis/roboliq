@@ -17,7 +17,7 @@ steps:
     data: {source: design1}
     command: pipetter.pipette
     program: Roboliq_Water_Air_1000
-    source: water
+    sources: water
     destinationLabware: balancePlate
     destinations: $$well
     volumes: $$volume

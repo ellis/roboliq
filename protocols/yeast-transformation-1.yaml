@@ -66,7 +66,7 @@ objects:
   ourlab:
     mario:
       site:
-        P4: null
+        # P4: null
         P4PCR: { type: "Site", evowareCarrier: "MP 3Pos Cooled 1 PCR", evowareGrid: 17, evowareSite: 1 }
   tubeHolder50:
     description: Falcon tube(s) for starting cell culture
