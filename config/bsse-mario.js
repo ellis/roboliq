@@ -554,7 +554,7 @@ module.exports = {
 			}
 		},
 		{"#for": {
-			factors: {site: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+			factors: {site: ["P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
 			output: {
 				"pipetter.canAgentEquipmentSite": {
 					"agent": "ourlab.mario.evoware",

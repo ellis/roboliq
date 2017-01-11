@@ -24,6 +24,7 @@
 * [ ] roboliq.yaml: add descriptions to fields on models
 * [ ] api-generator: indicate whether properties are required or not
 * [ ] make sure that well parser documentation is somewhere findable
+* [ ] pipetter.pipette: better error message when `sources` is mispelled as `source`
 
 flattenArrayAndIndexes:
 
