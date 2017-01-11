@@ -89,11 +89,11 @@ objects:
   masterMix:
     description: Master mix with PEG, SSDNA etc. mixed together
     type: Liquid
-    wells: tubeHolder15(A02)
+    wells: tubeHolder15(B01)
   dmso:
     description: DMSO
     type: Liquid
-    wells: tubeHolder15(A03)
+    wells: tubeHolder15(C01)
   lbTrough:
     description: LB medium container
     type: Plate
