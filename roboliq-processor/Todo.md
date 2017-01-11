@@ -9,6 +9,7 @@
 	* [ ] roboliq-evoware: create a README so that index.html isn't blank
 	* [ ] roboliq-processor: rename "Roboliq Source" to "Roboliq Processor"
 	* [ ] roboliq-processor: fix link to roboliq-evoware
+	* [ ] api: figure out why index.html is basically blank
 * [ ] try to get `npm run processor` to work from the root directory for more complex scripts
 * [ ] `npm install` instead of `npm i`
 * [ ] describe in general the actions that happen by default (such as rinsing at certain times, movements that require multiple steps or opening devices)
@@ -18,6 +19,8 @@
 * [ ] check out why compiling from the root didn't update `npm run design`
 * [ ] BUG: `npm run design` -- ignores random seed
 * [ ] Document functions in design.js
+* [ ] Document HACK & TRICKS: such as the "Plate" type for tube holders and Troughs, and setting "contents" property for troughs to treat as a single well
+* [ ] for pipetter.pipette command, if volumes are unitless, there should be a better error message
 * [ ] roboliq.yaml: add descriptions to fields on models
 * [ ] api-generator: indicate whether properties are required or not
 * [ ] make sure that well parser documentation is somewhere findable
