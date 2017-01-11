@@ -1,0 +1,12 @@
+roboliq: v1
+imports: yeast-transformation-1.yaml
+description: Dispense liac on filter plate
+objects:
+  design1:
+    conditions:
+      layer*:
+      - source: liAc
+        volume: 20 ul
+        liquidClass: Roboliq_Water_Air_1000
+        clean: decontaminate
+        cleanBetween: none

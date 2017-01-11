@@ -1,0 +1,12 @@
+roboliq: v1
+imports: yeast-transformation-1.yaml
+description: Dispense cells on filter plate
+objects:
+  design1:
+    conditions:
+      layer*:
+      - source: cellCulture
+        volume: 350 ul
+        liquidClass: Roboliq_Water_Air_1000
+        clean: decontaminate
+        cleanBetween: none

@@ -21,6 +21,9 @@
 * [ ] Document functions in design.js
 * [ ] Document HACK & TRICKS: such as the "Plate" type for tube holders and Troughs, and setting "contents" property for troughs to treat as a single well
 * [ ] for pipetter.pipette command, if volumes are unitless, there should be a better error message
+* [ ] roboliq.yaml: add descriptions to fields on models
+* [ ] api-generator: indicate whether properties are required or not
+* [ ] make sure that well parser documentation is somewhere findable
 
 flattenArrayAndIndexes:
 

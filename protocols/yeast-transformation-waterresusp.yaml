@@ -1,0 +1,23 @@
+roboliq: v1
+imports: yeast-transformation-1.yaml
+description: Dispense cells on filter plate
+objects:
+  design1:
+    conditions:
+      layer*:
+      - source: water
+        volume: 100 ul
+        liquidClass: Roboliq_Water_Air_1000
+        clean: flush
+        cleanBetween: none
+
+steps:
+  2:
+    data: {source: design1}
+    command: pipetter.mix
+    wellLabware: filterPlate
+    wells: $$well
+    counts: 5
+    amounts: 70 ul
+    clean: none
+    cleanAfter: decontaminate
