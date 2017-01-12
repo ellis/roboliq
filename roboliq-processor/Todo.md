@@ -27,6 +27,7 @@
 * [ ] make sure that well parser documentation is somewhere findable
 * [ ] pipetter.pipette: better error message when `sources` is mispelled as `source`
 * [ ] roboliq.js: validate protocol, check that initial locations are valid, e.g. no A03 on a tube holder
+* [ ] check that the initial models are valid?  E.g., we told it that T1 had the 50ml tubes, but T1 can only hold 15ml tubes
 
 flattenArrayAndIndexes:
 

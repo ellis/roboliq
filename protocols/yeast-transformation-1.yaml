@@ -62,7 +62,7 @@ config:
 parameters:
   N:
     description: number of transformations
-    value: 5
+    value: 4
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -81,7 +81,7 @@ objects:
     description: Falcon tube(s) for starting cell culture
     type: Plate
     model: ourlab.model.tubeHolderModel_50ml
-    location: ourlab.mario.site.T1
+    location: ourlab.mario.site.T2
   cellCulture:
     description: Cells to be transformed
     type: Liquid
@@ -90,7 +90,7 @@ objects:
     description: 15ul tubes
     type: Plate
     model: ourlab.model.tubeHolderModel_15ml
-    location: ourlab.mario.site.T2
+    location: ourlab.mario.site.T1
   liAc:
     description: Lithium acetate
     type: Liquid
