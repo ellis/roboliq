@@ -10,6 +10,7 @@
 	* [ ] roboliq-processor: rename "Roboliq Source" to "Roboliq Processor"
 	* [ ] roboliq-processor: fix link to roboliq-evoware
 	* [ ] api: figure out why index.html is basically blank
+	* [ ] create top-level README with links to the other modules
 * [ ] try to get `npm run processor` to work from the root directory for more complex scripts
 * [ ] `npm install` instead of `npm i`
 * [ ] describe in general the actions that happen by default (such as rinsing at certain times, movements that require multiple steps or opening devices)
@@ -25,6 +26,7 @@
 * [ ] api-generator: indicate whether properties are required or not
 * [ ] make sure that well parser documentation is somewhere findable
 * [ ] pipetter.pipette: better error message when `sources` is mispelled as `source`
+* [ ] roboliq.js: validate protocol, check that initial locations are valid, e.g. no A03 on a tube holder
 
 flattenArrayAndIndexes:
 
