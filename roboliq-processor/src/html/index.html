@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js"></script>
+</head>
+<body>
+
+<h1>{{name}}</h1>
+
+{{description}}
+
+<h2>Labware</h2>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Model</th><th>Initial Location</th><th>Final Location</th></tr>
+</thead>
+<tbody>
+{{#each tables.labware}}
+<tr>
+	<td>{{labware}}</td>
+	<td>{{type}}</td>
+	<td>{{model}}</td>
+	<td>{{locationInitial}}</td>
+	<td>{{locationFinal}}</td>
+</tr>
+{{/each}}
+</tbody>
+</table>
+
+<h2>Source Wells</h2>
+<table>
+<thead>
+<tr><th>Name</th><th>Well</th><th>Initial Volume</th><th>Final Volume</th><th>Volume Removed</th></tr>
+</thead>
+<tbody>
+{{#each tables.sourceWells}}
+<tr>
+	<td>{{source}}</td>
+	<td>{{well}}</td>
+	<td>{{volumeInitial}}</td>
+	<td>{{volumeFinal}}</td>
+	<td>{{volumeRemoved}}</td>
+</tr>
+{{/each}}
+</tbody>
+</table>
+
+<h2>Final Well Contents</h2>
+{{#each tables.wellContentsFinal}}
+{{well}}
+<ul>
+{{#each this}}<li>{{@key}}: {{this}}</li>{{/each}}
+</ul>
+{{/each}}
+</div>
+
+</body>
+</html>
