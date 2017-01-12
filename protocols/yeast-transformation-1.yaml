@@ -164,6 +164,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
+      #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush
       cleanBetween: flush

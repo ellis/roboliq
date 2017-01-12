@@ -7,7 +7,7 @@ objects:
       layer*:
       - source: masterMix
         volume: 124 ul
-        liquidClass: Roboliq_Water_Air_1000 # Change the liqudi class to really viscous!
+        liquidClass: "OV PEG Wet 1000" # Change the liqudi class to really viscous!
         cleanBetween: decontaminate
         cleanBetweenSameSource: none
         cleanEnd: decontaminate
