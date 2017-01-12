@@ -55,6 +55,10 @@ description: |
   - Incubate the plate in 30C for 4h
   - Plate x ul of each culture on agar plates
 
+config:
+  evowareCompiler:
+    checkBench: false
+
 parameters:
   N:
     description: number of transformations
