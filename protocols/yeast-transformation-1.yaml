@@ -93,11 +93,11 @@ objects:
   masterMix:
     description: Master mix with PEG, SSDNA etc. mixed together
     type: Liquid
-    wells: tubeHolder15(A02)
+    wells: tubeHolder15(B01)
   dmso:
     description: DMSO
     type: Liquid
-    wells: tubeHolder15(A03)
+    wells: tubeHolder15(C01)
   lbTrough:
     description: LB medium container
     type: Plate
@@ -123,11 +123,11 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  wastePlate:
-    description: One well plate for waste
-    type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_A2
+  # wastePlate:
+  #   description: One well plate for waste
+  #   type: Plate
+  #   model: ourlab.model.plateModel_96_round_transparent_nunc
+  #   location: ourlab.mario.site.P7
   culturePlate:
     description: Empty deep well plate for cell cultures
     type: Plate
