@@ -72,6 +72,11 @@ objects:
       site:
         # P4: null
         P4PCR: { type: "Site", evowareCarrier: "MP 3Pos Cooled 1 PCR", evowareGrid: 17, evowareSite: 1 }
+  decontaminationTrough:
+    description: Holds bleach
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R3
   tubeHolder50:
     description: Falcon tube(s) for starting cell culture
     type: Plate

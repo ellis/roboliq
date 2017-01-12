@@ -49,8 +49,9 @@ const commandHandlers = {
  */
 export function compile(table, protocol, agents, options = {}) {
 	// console.log(`compile:`)
-	// console.log({options})
+	console.log({options})
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
+	console.log({options})
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const evowareVariables = {}
