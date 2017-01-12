@@ -119,11 +119,11 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  wastePlate:
-    description: One well plate for waste
-    type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_A2
+  # wastePlate:
+  #   description: One well plate for waste
+  #   type: Plate
+  #   model: ourlab.model.plateModel_96_round_transparent_nunc
+  #   location: ourlab.mario.site.P7
   culturePlate:
     description: Empty deep well plate for cell cultures
     type: Plate
