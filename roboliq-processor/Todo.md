@@ -28,6 +28,7 @@
 * [ ] pipetter.pipette: better error message when `sources` is mispelled as `source`
 * [ ] roboliq.js: validate protocol, check that initial locations are valid, e.g. no A03 on a tube holder
 * [ ] check that the initial models are valid?  E.g., we told it that T1 had the 50ml tubes, but T1 can only hold 15ml tubes
+* [ ] document the predicates and how the logic works
 
 flattenArrayAndIndexes:
 
@@ -51,6 +52,13 @@ b*: 2
 * [ ] lid handling
 * [ ] stacking plates via lid handling
 * [ ] PCR machine
+* [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
+
+Would be nice:
+
+* [ ] tubes
+* [ ] troughs
+* [ ] print a table of labware models and sites in `bsse-mario.js`
 
 # paper2 Todos
 

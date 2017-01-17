@@ -24,6 +24,34 @@
 			],
 			"deletions": [{"location": {"labware": "?labware", "site": "?origin"}}],
 			"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
+		}},
+
+		"transporter._moveLidFromLabwareToSite": {"action": {"description": "transport lid from labware to site",
+			"task": {"transporter._moveLidFromLabwareToSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "lid": "?lid", "lidModel": "?lidModel", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"model": {"labware": "?lid", "model": "?lidModel"}},
+				{"location": {"labware": "?lid", "site": "?labware"}},
+				{"labwareHasLid": {"labware": "?labware"}},
+				{"stackableLid": {"below": "?destinationModel", "above": "?model"}},
+				{"model": {"labware": "?labware", "model": "?model"}},
+				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"siteIsOpen": {"site": "?origin"}},
+				{"siteIsOpen": {"site": "?destination"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?destinationModel", "above": "?lidModel"}},
+				{"siteIsClear": {"site": "?destination"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
+			],
+			"deletions": [
+				{"location": {"labware": "?lid", "site": "?labware"}},
+				{"labwareHasLid": {"labware": "?labware"}}
+			],
+			"additions": [
+				{"location": {"labware": "?lid", "site": "?destination"}}
+			]
 		}}
 	},
 
