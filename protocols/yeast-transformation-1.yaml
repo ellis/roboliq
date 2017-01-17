@@ -55,10 +55,14 @@ description: |
   - Incubate the plate in 30C for 4h
   - Plate x ul of each culture on agar plates
 
+config:
+  evowareCompiler:
+    checkBench: false
+
 parameters:
   N:
     description: number of transformations
-    value: 5
+    value: 4
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -68,11 +72,16 @@ objects:
       site:
         # P4: null
         P4PCR: { type: "Site", evowareCarrier: "MP 3Pos Cooled 1 PCR", evowareGrid: 17, evowareSite: 1 }
+  decontaminationTrough:
+    description: Holds bleach
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R3
   tubeHolder50:
     description: Falcon tube(s) for starting cell culture
     type: Plate
     model: ourlab.model.tubeHolderModel_50ml
-    location: ourlab.mario.site.T1
+    location: ourlab.mario.site.T2
   cellCulture:
     description: Cells to be transformed
     type: Liquid
@@ -81,7 +90,7 @@ objects:
     description: 15ul tubes
     type: Plate
     model: ourlab.model.tubeHolderModel_15ml
-    location: ourlab.mario.site.T2
+    location: ourlab.mario.site.T1
   liAc:
     description: Lithium acetate
     type: Liquid
@@ -89,11 +98,11 @@ objects:
   masterMix:
     description: Master mix with PEG, SSDNA etc. mixed together
     type: Liquid
-    wells: tubeHolder15(A02)
+    wells: tubeHolder15(B01)
   dmso:
     description: DMSO
     type: Liquid
-    wells: tubeHolder15(A03)
+    wells: tubeHolder15(C01)
   lbTrough:
     description: LB medium container
     type: Plate
@@ -119,11 +128,11 @@ objects:
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  wastePlate:
-    description: One well plate for waste
-    type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_A2
+  # wastePlate:
+  #   description: One well plate for waste
+  #   type: Plate
+  #   model: ourlab.model.plateModel_96_round_transparent_nunc
+  #   location: ourlab.mario.site.P7
   culturePlate:
     description: Empty deep well plate for cell cultures
     type: Plate
@@ -155,6 +164,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
+      #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush
       cleanBetween: flush

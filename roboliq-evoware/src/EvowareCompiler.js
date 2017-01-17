@@ -49,8 +49,9 @@ const commandHandlers = {
  */
 export function compile(table, protocol, agents, options = {}) {
 	// console.log(`compile:`)
-	// console.log({options})
+	console.log({options})
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
+	console.log({options})
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const evowareVariables = {}
@@ -76,8 +77,10 @@ export function compile(table, protocol, agents, options = {}) {
 	}
 
 	// Prepend token to open HTML
-	lines.unshift(evowareHelper.createUserPromptLine("Please check the bench setup and then confirm this dialog when you're done"));
-	lines.unshift(evowareHelper.createExecuteLine(options.variables.BROWSER, [path.dirname(options.variables.SCRIPTFILE)+"\\index.html"], false));
+	if (_.get(options, "checkBench", true)) {
+		lines.unshift(evowareHelper.createUserPromptLine("Please check the bench setup and then confirm this dialog when you're done"));
+		lines.unshift(evowareHelper.createExecuteLine(options.variables.BROWSER, [path.dirname(options.variables.SCRIPTFILE)+"\\index.html"], false));
+	}
 
 	return [{table, lines, tokenTree: results}];
 }
