@@ -45,6 +45,12 @@ b*: 2
 [[{a: 1, b: 1}, {a: 1, b: 2}], [{a: 2, b: 1}, {a: 2, b: 2}]] ; [0,1]
 [{a: 1, b: 1}, {a: 1, b: 2}, {a: 2, b: 1}, {a: 2, b: 2}] ; [0,1,2,3]
 
+# Things needed for Oskari's yeast script, part I on mario
+
+* [ ] lid handling
+* [ ] stacking plates via lid handling
+* [ ] PCR machine
+
 # paper2 Todos
 
 * [x] process 'output.units' in TecanInfinite2.js
