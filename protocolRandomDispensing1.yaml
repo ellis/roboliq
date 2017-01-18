@@ -1,0 +1,161 @@
+roboliq: v1
+description: |Random dispensing to check the volume model.
+
+parameters:
+  excitationWavelength:
+    description: excitation wavelength to red absorbance
+    value: 480nm
+
+objects:
+  plate1:
+    type: Plate
+    description: dye plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P3
+  dyeLabware03:
+    type: Plate
+    description: trough for dye
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dye]
+  dye:
+    type: Liquid
+    description: dye with a certain concentration
+    wells: dyeLabware03(C01 down F01)
+  waterLabware:
+    type: Plate
+    description: trough for water
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    description: liquid water
+    wells: waterLabware(C01 down F01)
+
+  design1:
+    type: Design
+    description: Random dispensing of volumes in a plate
+    conditions:
+      plate: plate1
+      .case1*:
+        - {wl: 0, wu: 0}
+        # - {wl: 1, wu: 3}
+        - {wl: 3, wu: 10}
+        - {wl: 10, wu: 50}
+        - {wl: 50, wu: 100}
+      waterVolume=calculate:
+        expression: 'bignumber(random(number(wl), number(wu)))'
+        decimals: 1
+        units: ul
+      .case2*:
+        - {dl: 0, du: 0}
+        # - {dl: 1, du: 3}
+        - {dl: 3, du: 10}
+        - {dl: 10, du: 50}
+        - {dl: 50, du: 100}
+      dyeVolume=calculate:
+        expression: 'bignumber(random(number(dl), number(du)))'
+        decimals: 1
+        units: ul
+      replicate*: 6
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        order: shuffle
+      .liquidClasses=:
+        values:
+          - firstLiquidClass: Roboliq_Water_Air_1000
+            secondLiquidClass: Roboliq_Water_Air_1000
+          - firstLiquidClass: Roboliq_Water_Air_1000
+            secondLiquidClass: Roboliq_Water_Dry_1000
+          - firstLiquidClass: Roboliq_Water_Dry_1000
+            secondLiquidClass: Roboliq_Water_Air_1000
+          - firstLiquidClass: Roboliq_Water_Dry_1000
+            secondLiquidClass: Roboliq_Water_Wet_1000
+        order: reshuffle
+      firstPipetting=:
+        values:
+          - firstPipetting: waterFirst
+          - firstPipetting: dyeFirst
+        order: reshuffle
+      id=range: {}
+
+steps:
+  data: {source: design1}
+  1:
+    description: Read absorbance of empty wells
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: $#excitationWavelength
+    output:
+      joinKey: well
+      appendTo: measurements
+      userValues:
+        stage: empty
+      units:
+        totalVolume: ul
+        dyeVolume: ul
+        waterVolume: ul
+
+  2:
+    data: {where: 'firstPipetting=="waterFirst" and waterVolume > (0 ul)'}
+    description: Pre-distribute water to wells that don't require dry-contact
+    description: "`a: {{$firstPipetting}}`"
+    command: pipetter.pipette
+    program: $$firstLiquidClass
+    sources: water
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$waterVolume
+    clean: light
+    cleanBetween: none
+  3:
+    data: {where: 'firstPipetting=="waterFirst"'}
+    description: Pre-distribute water to wells that don't require dry-contact
+    command: pipetter.pipette
+    program: $$secondLiquidClass
+    sources: dye
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$dyeVolume
+    clean: light
+    cleanBetween: flush
+  3:
+    data: {where: 'firstPipetting=="dyeFirst"'}
+    description: Pre-distribute water to wells that don't require dry-contact
+    command: pipetter.pipette
+    program: $$firstLiquidClass
+    sources: dye
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$dyeVolume
+    clean: light
+    cleanBetween: flush
+    cleanAfter: thorough
+  4:
+    data: {where: 'firstPipetting=="dyeFirst"'}
+    description: Pre-distribute water to wells that don't require dry-contact
+    command: pipetter.pipette
+    program: $$secondLiquidClass
+    sources: water
+    destinationLabware: $plate
+    destinations: $$well
+    volumes: $$waterVolume
+    clean: light
+    cleanBetween: none
+
+  5:
+    description: Read absorbance of wells after adding water and dye
+    command: absorbanceReader.measurePlate
+    object: $plate
+    program:
+      excitationWavelength: $#excitationWavelength
+    output:
+      joinKey: well
+      appendTo: measurements
+      units:
+        totalVolume: ul
+        dyeVolume: ul
+        waterVolume: ul
