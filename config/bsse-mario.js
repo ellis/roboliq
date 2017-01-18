@@ -383,6 +383,13 @@ module.exports = {
 					"columns": 24,
 					"evowareName": "384 Sqr Flat Trans Greiner"
 				},
+				"plateModel_96_round_filter_OV": {
+					"type": "PlateModel",
+					"label": "96 round-well white filter plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "OV 96 Well Filter Plate wLid"
+				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
 					"label": "Trough 100ml",

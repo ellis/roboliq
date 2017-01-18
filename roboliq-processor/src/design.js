@@ -813,12 +813,14 @@ const actionHandlers = {
 	"allocateWells": (_rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		const rows = action.rows;
 		const cols = action.columns;
+		const [rowFrom, colFrom] = wellsParser.locationTextToRowCol(action.from || "A01");
+		const iFrom = (colFrom - 1) * rows + (rowFrom - 1);
 		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
 		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
 		const byColumns = _.get(action, "byColumns", true);
 		const values = (action.wells)
 			? wellsParser.parse(action.wells, {}, {rows, columns: cols})
-			: _.range(rows * cols).map(i => {
+			: _.range(iFrom, rows * cols).map(i => {
 					const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
 					const s = locationRowColToText(row + 1, col + 1);
 					// console.log({row, col, s});
