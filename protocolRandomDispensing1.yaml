@@ -1,3 +1,5 @@
+# Run with:
+#  npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\CR' --evoware testdata/bsse-mario/Carrier.cfg,testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware config/bsse-mario.js protocolRandomDispensi ng1.yaml
 roboliq: v1
 description: |Random dispensing to check the volume model.
 
@@ -12,16 +14,26 @@ objects:
     description: dye plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P3
-  dyeLabware03:
+  dyeLightLabware:
     type: Plate
     description: trough for dye
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R5
-    contents: [Infinity l, dye]
-  dye:
+    contents: [Infinity l, dyeLight]
+  dyeLight:
     type: Liquid
-    description: dye with a certain concentration
-    wells: dyeLabware03(C01 down F01)
+    description: dye with a low concentration
+    wells: dyeLightLabware(C01 down F01)
+  dyeDarkLabware:
+    type: Plate
+    description: trough for dye
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R4
+    contents: [Infinity l, dyeDark]
+  dyeDark:
+    type: Liquid
+    description: dye with a high concentration
+    wells: dyeDarkLabware(C01 down F01)
   waterLabware:
     type: Plate
     description: trough for water
@@ -58,6 +70,7 @@ objects:
         expression: 'bignumber(random(number(dl), number(du)))'
         decimals: 1
         units: ul
+      dyeSource=calculate: '(dyeVolume < 20 ul) ? "dyeDark" : "dyeLight"'
       replicate*: 6
       well=allocateWells:
         rows: 8
@@ -116,25 +129,25 @@ steps:
     description: Pre-distribute water to wells that don't require dry-contact
     command: pipetter.pipette
     program: $$secondLiquidClass
-    sources: dye
+    sources: $$dyeSource
     destinationLabware: $plate
     destinations: $$well
     volumes: $$dyeVolume
     clean: light
     cleanBetween: flush
-  3:
+  4:
     data: {where: 'firstPipetting=="dyeFirst"'}
     description: Pre-distribute water to wells that don't require dry-contact
     command: pipetter.pipette
     program: $$firstLiquidClass
-    sources: dye
+    sources: $$dyeSource
     destinationLabware: $plate
     destinations: $$well
     volumes: $$dyeVolume
     clean: light
     cleanBetween: flush
     cleanAfter: thorough
-  4:
+  5:
     data: {where: 'firstPipetting=="dyeFirst"'}
     description: Pre-distribute water to wells that don't require dry-contact
     command: pipetter.pipette
@@ -146,7 +159,7 @@ steps:
     clean: light
     cleanBetween: none
 
-  5:
+  6:
     description: Read absorbance of wells after adding water and dye
     command: absorbanceReader.measurePlate
     object: $plate
