@@ -92,6 +92,9 @@ objects:
           - firstPipetting: waterFirst
           - firstPipetting: dyeFirst
         order: reshuffle
+      syringe=:
+        values: [1,2,3,4]
+        order: repeat
       id=range: {}
 
 steps:
@@ -122,6 +125,7 @@ steps:
     destinationLabware: $plate
     destinations: $$well
     volumes: $$waterVolume
+    syringes: $$syringe
     clean: light
     cleanBetween: none
   3:
@@ -133,6 +137,7 @@ steps:
     destinationLabware: $plate
     destinations: $$well
     volumes: $$dyeVolume
+    syringes: $$syringe
     clean: light
     cleanBetween: flush
   4:
@@ -144,6 +149,7 @@ steps:
     destinationLabware: $plate
     destinations: $$well
     volumes: $$dyeVolume
+    syringes: $$syringe
     clean: light
     cleanBetween: flush
     cleanAfter: thorough
@@ -156,6 +162,7 @@ steps:
     destinationLabware: $plate
     destinations: $$well
     volumes: $$waterVolume
+    syringes: $$syringe
     clean: light
     cleanBetween: none
 
