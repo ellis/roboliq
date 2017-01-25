@@ -1,5 +1,11 @@
 # Todos
 
+# Lena & Daniel
+
+* [ ] make sure that fluorescenceReader works like absorbanceReader
+* [ ] figure out how to substitute well into fluorescenceReader programFile
+* [ ] figure out simulation equation
+
 # Get it working for colleagues
 
 * [x] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`

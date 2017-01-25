@@ -1,0 +1,66 @@
+roboliq: v1
+description: |
+  We want to have an iteration per well, where the corresponding components are mixed and fluorescence intensity is measured over time before we get to the next iteration for the next well.
+
+  Q: What shall we do about piercing, since it damages the large tips?
+parameters:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480 nm
+  wells:
+    description: Which wells should we measure
+    value: A01 down D01
+  totalVolume:
+    description: desired total volume of each well
+    value: 100 ul
+
+objects:
+  plate1:
+    description: |
+      A sealed 96-well plate where each well has a solution of one unlabeled DNA.
+      (Note: some wells will have the solution of the same unlabeled DNA in order to have replicates for
+      our measurements, but in principle each well will have the same labeled DNA but different
+      unlabeled DNA)
+    type: Plate
+    model: ourlab.model.plateModel_96_???
+    location: ourlab.mario.site.DOWNHOLDER
+    sealed: true
+  plate2:
+    description: empty 384-well plate to be used for fluorescence readouts
+    type: Plate
+    model: ourlab.model.plateModel_384_square
+    location: ourlab.mario.site.P2
+
+  design1:
+    type: Design
+    conditions:
+      well*=allocateWells:
+        rows: 8
+        columns: 12
+        wells: $#wells
+
+steps:
+  1:
+    command: evoware._promptUser
+    agent: ourlab.mario.evoware
+    text: "Add total volume of labeled DNA solution needed for the whole plate (this component will be the same for all wells) in the reader injector."
+
+  2:
+    data: design1
+    command: experiment.forEachRow
+    steps:
+      1:
+        command: pipetter.pipette
+        sourceLabware: plate1
+        sources: $$well
+        destinationLabware: plate2
+        destinations: $$well
+        volumes: $#totalVolume
+      2:
+        command: fluorescenceReader.readPlate
+        object: mixPlate
+        programFile: ../roboliq-processor/protocols/tania13_ph-temp.mdfx
+        output:
+          joinKey: well
+          appendTo: measurements
+          simulated: 100

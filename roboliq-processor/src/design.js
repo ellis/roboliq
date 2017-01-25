@@ -813,19 +813,33 @@ const actionHandlers = {
 	"allocateWells": (_rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		const rows = action.rows;
 		const cols = action.columns;
-		const [rowFrom, colFrom] = wellsParser.locationTextToRowCol(action.from || "A01");
-		const iFrom = (colFrom - 1) * rows + (rowFrom - 1);
 		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
 		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
-		const byColumns = _.get(action, "byColumns", true);
-		const values = (action.wells)
-			? wellsParser.parse(action.wells, {}, {rows, columns: cols})
-			: _.range(iFrom, rows * cols).map(i => {
-					const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
-					const s = locationRowColToText(row + 1, col + 1);
-					// console.log({row, col, s});
-					return s;
-				});
+		const from0 = action.from || 1;
+		let iFrom;
+		if (_.isInteger(from0)) {
+			iFrom = from0 - 1;
+		}
+		else {
+			const [rowFrom, colFrom] = wellsParser.locationTextToRowCol(from0);
+			const iFrom = (colFrom - 1) * rows + (rowFrom - 1);
+		}
+
+		let values;
+		if (action.wells) {
+			values = wellsParser.parse(action.wells, {}, {rows, columns: cols});
+			// TODO: handle from for both cases of well name or for integer
+		}
+		else {
+			const byColumns = _.get(action, "byColumns", true);
+			values = _.range(iFrom, rows * cols).map(i => {
+				const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+				const s = locationRowColToText(row + 1, col + 1);
+				// console.log({row, col, s});
+				return s;
+			});
+		}
+
 		// console.log({values})
 		const action2 = _.cloneDeep(action);
 		action2.values = values;

@@ -375,7 +375,7 @@ module.exports = (function() {
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
-              s5 = peg$parselocation();
+              s5 = peg$parsewell();
               if (s5 !== peg$FAILED) {
                 s6 = peg$parsews();
                 if (s6 !== peg$FAILED) {
@@ -484,7 +484,7 @@ module.exports = (function() {
 
       s0 = peg$parselabwareClause();
       if (s0 === peg$FAILED) {
-        s0 = peg$parselocationClause();
+        s0 = peg$parsewellClause();
         if (s0 === peg$FAILED) {
           s0 = peg$parsesource();
         }
@@ -511,7 +511,7 @@ module.exports = (function() {
           if (s3 !== peg$FAILED) {
             s4 = peg$parsews();
             if (s4 !== peg$FAILED) {
-              s5 = peg$parselocationClauses();
+              s5 = peg$parsewellClauses();
               if (s5 !== peg$FAILED) {
                 s6 = peg$parsews();
                 if (s6 !== peg$FAILED) {
@@ -721,13 +721,13 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselocationClauses() {
+    function peg$parsewellClauses() {
       var s0, s1, s2, s3, s4, s5, s6;
 
       s0 = peg$currPos;
       s1 = [];
       s2 = peg$currPos;
-      s3 = peg$parselocationClause();
+      s3 = peg$parsewellClause();
       if (s3 !== peg$FAILED) {
         s4 = peg$parsews();
         if (s4 !== peg$FAILED) {
@@ -763,7 +763,7 @@ module.exports = (function() {
       while (s2 !== peg$FAILED) {
         s1.push(s2);
         s2 = peg$currPos;
-        s3 = peg$parselocationClause();
+        s3 = peg$parsewellClause();
         if (s3 !== peg$FAILED) {
           s4 = peg$parsews();
           if (s4 !== peg$FAILED) {
@@ -798,7 +798,7 @@ module.exports = (function() {
         }
       }
       if (s1 !== peg$FAILED) {
-        s2 = peg$parselocationClause();
+        s2 = peg$parsewellClause();
         if (s2 !== peg$FAILED) {
           peg$reportedPos = s0;
           s1 = peg$c25(s1, s2);
@@ -815,13 +815,13 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselocationClause() {
+    function peg$parsewellClause() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
-      s1 = peg$parselocationSubject();
+      s1 = peg$parsewellSubject();
       if (s1 !== peg$FAILED) {
-        s2 = peg$parselocationPhrases();
+        s2 = peg$parsewellPhrases();
         if (s2 === peg$FAILED) {
           s2 = peg$c26;
         }
@@ -841,10 +841,10 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselocationSubject() {
+    function peg$parsewellSubject() {
       var s0;
 
-      s0 = peg$parselocation();
+      s0 = peg$parsewell();
       if (s0 === peg$FAILED) {
         if (input.substr(peg$currPos, 3) === peg$c28) {
           s0 = peg$c28;
@@ -858,7 +858,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselocation() {
+    function peg$parsewell() {
       var s0, s1, s2;
 
       s0 = peg$currPos;
@@ -922,14 +922,14 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselocationPhrases() {
+    function peg$parsewellPhrases() {
       var s0, s1, s2, s3;
 
       s0 = [];
       s1 = peg$currPos;
       s2 = peg$parsespaces();
       if (s2 !== peg$FAILED) {
-        s3 = peg$parselocationPhrase();
+        s3 = peg$parsewellPhrase();
         if (s3 !== peg$FAILED) {
           peg$reportedPos = s1;
           s2 = peg$c4(s3);
@@ -947,7 +947,7 @@ module.exports = (function() {
         s1 = peg$currPos;
         s2 = peg$parsespaces();
         if (s2 !== peg$FAILED) {
-          s3 = peg$parselocationPhrase();
+          s3 = peg$parsewellPhrase();
           if (s3 !== peg$FAILED) {
             peg$reportedPos = s1;
             s2 = peg$c4(s3);
@@ -965,7 +965,7 @@ module.exports = (function() {
       return s0;
     }
 
-    function peg$parselocationPhrase() {
+    function peg$parsewellPhrase() {
       var s0, s1, s2, s3, s4, s5, s6, s7;
 
       s0 = peg$currPos;
@@ -1014,7 +1014,7 @@ module.exports = (function() {
                 s5 = peg$c26;
               }
               if (s5 !== peg$FAILED) {
-                s6 = peg$parselocation();
+                s6 = peg$parsewell();
                 if (s6 !== peg$FAILED) {
                   peg$reportedPos = s0;
                   s1 = peg$c42(s6);
@@ -1138,7 +1138,7 @@ module.exports = (function() {
                 s3 = peg$c26;
               }
               if (s3 !== peg$FAILED) {
-                s4 = peg$parselocation();
+                s4 = peg$parsewell();
                 if (s4 !== peg$FAILED) {
                   peg$reportedPos = s0;
                   s1 = peg$c46(s4);
@@ -1206,7 +1206,7 @@ module.exports = (function() {
                       s5 = peg$c26;
                     }
                     if (s5 !== peg$FAILED) {
-                      s6 = peg$parselocation();
+                      s6 = peg$parsewell();
                       if (s6 !== peg$FAILED) {
                         peg$reportedPos = s0;
                         s1 = peg$c49(s6);
@@ -1330,7 +1330,7 @@ module.exports = (function() {
                       s3 = peg$c26;
                     }
                     if (s3 !== peg$FAILED) {
-                      s4 = peg$parselocation();
+                      s4 = peg$parsewell();
                       if (s4 !== peg$FAILED) {
                         peg$reportedPos = s0;
                         s1 = peg$c51(s4);

@@ -47,7 +47,7 @@ var commandHandlers = {
 			: parsed.objectName.destinationAfter;
 
 		// Program to pass to sub-command
-		const program = _.merge({}, parsed.orig.program, {
+		const program = mergeR({}, parsed.orig.program, {
 			wells: (parsed.value.program || {}).wells
 		});
 		// Handle deprecated parameter names
@@ -82,7 +82,7 @@ var commandHandlers = {
 				destination: destinationAfter
 			}
 		];
-		console.log({expansion1output: expansion[1].output})
+		// console.log({expansion1output: expansion[1].output})
 
 		const result = {expansion};
 

@@ -1,0 +1,23 @@
+allocateWells:
+  description: |
+    Allocate wells from a plate.
+  properties:
+    wells:
+      description: |
+        Description or list of wells to allocate from; if this value is not
+        supplied, you must supply values for `rows` and `columns`.
+      type: [Wells, array]
+    rows:
+      description: Number of rows on the plate
+      type: integer
+    columns:
+      description: Number of columns on the plate
+      type: integer
+    from:
+      description: First well on plate to start allocation from
+      type: [integer, Well]
+    byColumns:
+      description: Indicates whether to allocate wells by going down columns each column in turn (default) or by row going right across each row in turn.
+      type: boolean
+      default: true
+  required: [rows, columns]
