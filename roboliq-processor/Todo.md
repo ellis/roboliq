@@ -2,7 +2,7 @@
 
 # Lena & Daniel
 
-* [ ] make sure that fluorescenceReader works like absorbanceReader
+* [x] make sure that fluorescenceReader works like absorbanceReader
 * [ ] figure out how to substitute well into fluorescenceReader programFile
 * [ ] figure out simulation equation
 

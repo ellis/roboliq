@@ -1,4 +1,5 @@
 // import mergeWith from 'lodash/mergeWith';
+import isPlainObject from 'lodash/isPlainObject';
 
 /*
 * Recursively merge properties of multiple objects (shallow copies)

@@ -21,7 +21,7 @@ describe('commands/fluorescenceReader', function() {
 					1: {
 						command: "fluorescenceReader.measurePlate",
 						object: "plate1",
-						programFile: "./protocols/tania13_ph-temp.mdfx"
+						programFile: "./protocols/tania13_ph-temp.mdfx",
 					}
 				}
 			});
@@ -108,8 +108,7 @@ describe('commands/fluorescenceReader', function() {
 						"equipment": "ourlab.mario.reader",
 						"measurementType": "fluorescence",
 						"object": "plate1",
-						"programFile": "./protocols/tania13_ph-temp.mdfx",
-						"outputFile": "1-fluorescence.xml"
+						"programFile": "./protocols/tania13_ph-temp.mdfx"
 					},
 					"3": {
 						"1": {
