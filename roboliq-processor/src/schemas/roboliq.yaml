@@ -14,6 +14,16 @@ Design:
     actions: {type: array}
   required: [type]
 
+Lid:
+  description: Lid labware
+  properties:
+    type: {enum: [Lid]}
+    description: {type: string}
+    label: {type: string}
+    model: {type: string}
+    location: {type: string}
+  required: [type]
+
 Liquid:
   description: Liquid substance.
   properties:

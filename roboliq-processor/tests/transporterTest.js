@@ -470,4 +470,39 @@ describe('transporter', function() {
 			});
 		});
 	});
+
+	describe('transporter._moveLidFromContainerToSite', function () {
+		it.only("should handle _moveLidFromContainerToSite from plate to empty site", function() {
+			var protocol = _.merge({}, protocol0, {
+				objects: {
+					plate1: {
+						hasLid: true
+					},
+					plate1Lid: {
+						type: "Lid",
+						location: "plate1"
+					}
+				},
+				steps: {
+					1: {
+						"command": "transporter._moveLidFromContainerToSite",
+						agent: "ourlab.mario.evoware",
+						equipment: "ourlab.mario.roma1",
+						program: "Narrow",
+						"object": "plate1Lid",
+						"origin": "plate1",
+						"destination": "ourlab.mario.site.P3"
+					}
+				}
+			});
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", ""], protocol, false);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.effects, {
+				1: {
+					"plate1.hasLid": false,
+					"plate1Lid.location": "ourlab.mario.site.P3"
+			});
+		});
+	});
 });

@@ -22,7 +22,23 @@ transporter._movePlate:
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Plate identifier", type: "Plate"}
     destination: {description: "Site to move the plate to", "type": "Site"}
-  required: [agent, equipment, object, destination]
+  required: [agent, equipment, program, object, destination]
+
+transporter._moveLidFromContainerToSite:
+  description: |
+    Transport a lid from a container to a destination site.
+
+    Developer notes:
+    Handler should return `effects` with the lid's new location and indicating that
+    the plate doesn't have a lid (i.e. `hasLid: false`).
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    origin: {description: "Container identifier", type: "Plate"}
+    destination: {description: "Site to move the plate to", "type": "Site"}
+  required: [agent, equipment, program, object, origin, destination]
 
 transporter.doThenRestoreLocation:
   description: |

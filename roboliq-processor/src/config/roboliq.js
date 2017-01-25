@@ -73,35 +73,29 @@ var predicates = [
 ];
 
 var objectToPredicateConverters = {
-	"Plate": function(name, object) {
-		var value = [{
-			"isLabware": {
-				"labware": name
-			}
-		}, {
-			"isPlate": {
-				"labware": name
-			}
-		}, {
-			"model": {
-				"labware": name,
-				"model": object.model
-			}
-		}, {
-			"location": {
-				"labware": name,
-				"site": object.location
-			}
-		}];
-		if (object.sealed)
-			value.push({
-				"plateIsSealed": {
-					"labware": name
-				}
-			});
+	Lid: function(name, object) {
 		return {
-			value: value
-		};
+			value: [
+				{"isLabware": {"labware": name}},
+				{"isLid": {"lid": name}},
+				{"location": { "labware": name, "site": object.location}}
+			]
+		}
+	},
+	"Plate": function(name, object) {
+		var value = [
+			{ "isLabware": { "labware": name } },
+			{ "isPlate": { "labware": name } },
+			{ "model": { "labware": name, "model": object.model } },
+			{ "location": { "labware": name, "site": object.location } }
+		];
+		if (object.sealed) {
+			value.push({ "plateIsSealed": { "labware": name } });
+		}
+		if (object.hasLid) {
+			value.push({ "plateHasLid": { "labware": name } });
+		}
+		return {value};
 	},
 	"PlateModel": function(name, object) {
 		return {

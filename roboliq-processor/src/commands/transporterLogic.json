@@ -26,15 +26,15 @@
 			"additions": [{"location": {"labware": "?labware", "site": "?destination"}}]
 		}},
 
-		"transporter._moveLidFromLabwareToSite": {"action": {"description": "transport lid from labware to site",
-			"task": {"transporter._moveLidFromLabwareToSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "lid": "?lid", "lidModel": "?lidModel", "labware": "?labware", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+		"transporter._moveLidFromContainerToSite": {"action": {"description": "transport lid from labware to site",
+			"task": {"transporter._moveLidFromContainerToSite": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "lid": "?lid", "lidModel": "?lidModel", "container": "?container", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
 			"preconditions": [
 				{"model": {"labware": "?lid", "model": "?lidModel"}},
-				{"location": {"labware": "?lid", "site": "?labware"}},
-				{"labwareHasLid": {"labware": "?labware"}},
+				{"location": {"labware": "?lid", "site": "?container"}},
+				{"labwareHasLid": {"labware": "?container"}},
 				{"stackableLid": {"below": "?destinationModel", "above": "?model"}},
-				{"model": {"labware": "?labware", "model": "?model"}},
-				{"location": {"labware": "?labware", "site": "?origin"}},
+				{"model": {"labware": "?container", "model": "?model"}},
+				{"location": {"labware": "?container", "site": "?origin"}},
 				{"siteIsOpen": {"site": "?origin"}},
 				{"siteIsOpen": {"site": "?destination"}},
 				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
@@ -46,8 +46,8 @@
 				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
 			],
 			"deletions": [
-				{"location": {"labware": "?lid", "site": "?labware"}},
-				{"labwareHasLid": {"labware": "?labware"}}
+				{"location": {"labware": "?lid", "site": "?container"}},
+				{"labwareHasLid": {"labware": "?container"}}
 			],
 			"additions": [
 				{"location": {"labware": "?lid", "site": "?destination"}}

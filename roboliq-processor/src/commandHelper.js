@@ -312,21 +312,7 @@ function processValue0BySchema(result, path, value0, schema, data) {
 		else {
 			// Try each type alternative:
 			const types = _.flatten([schema.type]);
-			// console.log({types})
-			let es = [];
-			for (const t of types) {
-				try {
-					// console.log({t, path, value0})
-					return processValue0BySchemaType(result, path, value0, schema, t, data);
-				}
-				catch (e) {
-					es.push(e);
-				}
-			}
-
-			if (!_.isEmpty(es))
-				// throw es[0];
-				throw es.join("; ");
+			return processValue0OnTypes(result, path, value0, schema, types, data);
 		}
 	}
 	/*if (!_.isEqual(value0, valuePre)) {
@@ -406,6 +392,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			// TODO: need to check a list of which types are Equipment types
 			expect.truthy({paramName: name}, _.isPlainObject(value), "expected object: "+value);
 			return;
+		case "Labware": return processValue0OnTypes(result, path, value0, schema, ["Lid", "Plate", "Trough", "Tube"], data);
 		case "Length": return processLength(result, path, value, data);
 		case "Plate": return processObjectOfType(result, path, value, data, type);
 		case "Plates": return processOneOrArray(result, path, value, (result, path, x) => processObjectOfType(result, path, x, data, "Plate"));
@@ -450,6 +437,34 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			}
 		}
 	}
+}
+
+/**
+ * A sub-function of processValue0BySchema().
+ * Try to process the value as a named type.
+ * @param  {object} result - result structure for values and objectNames
+ * @param  {array} path - path in params
+ * @param  {any} value0 - the value to process
+ * @param  {object} schema - schema
+ * @param  {array} types - a list of types to try
+ * @param  {object} data - protocol data
+ */
+function processValue0OnTypes(result, path, value0, schema, types, data) {
+	// console.log({types})
+	let es = [];
+	for (const t of types) {
+		try {
+			// console.log({t, path, value0})
+			return processValue0BySchemaType(result, path, value0, schema, t, data);
+		}
+		catch (e) {
+			es.push(e);
+		}
+	}
+
+	if (!_.isEmpty(es))
+		// throw es[0];
+		throw es.join("; ");
 }
 
 /**

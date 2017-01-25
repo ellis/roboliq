@@ -211,34 +211,141 @@ function debugMovePlateMethod(llpl, method, queryResultsAll, n) {
  */
 var commandHandlers = {
 	/**
+	 * Transport a lid from labware to site or from site to labware.
+	 *
+	 * Handler should return `effects` with the lid's new location
+	 * and set or remove labware's `hasLid` property.
+	 */
+	"transporter._moveLidFromContainerToSite": function(params, parsed, data) {
+		return {effects: {
+			[`${parsed.objectName.origin}.hasLid`]: false,
+			[`${parsed.objectName.object}.location`]: parsed.objectName.destination
+		}};
+	},
+	/**
 	 * Transport a plate to a destination.
 	 *
 	 * Handler should return `effects` with the plate's new location.
-	 *
-	 * @typedef _movePlate
-	 * @memberof transporter
-	 * @property {string} command - "transporter._movePlate"
-	 * @property {string} agent - Agent identifier
-	 * @property {string} equipment - Equipment identifier
-	 * @property {string} object - Plate identifier
-	 * @property {string} destination - Location identifier
 	 */
 	"transporter._movePlate": function(params, parsed, data) {
+		return {effects: {
+			[`${parsed.objectName.object}.location`]: parsed.objectName.destination
+		}};
+	},
+	/**
+	 * Transport a lid from a container to a destination site.
+	 */
+	"transporter.moveLidFromContainerToSite": function(params, parsed, data) {
+		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
+		const transporterLogic = require('./transporterLogic.json');
+
+		const keys = ["null", "one"];
+		const movePlateParams = makeMovePlateParams(parsed);
+
+		const shop = require('../HTN/shop.js');
+		const llpl = require('../HTN/llpl.js').create();
+		llpl.initializeDatabase(data.predicates);
+		let input0 = data.predicates;
+		let plan;
+		let errorLog = "";
+		for (let i = 0; i < keys.length; i++) {
+			const key = keys[i];
+			const method = {method: makeMovePlateMethod(parsed, movePlateParams, i)};
+			input0 = input0.concat(_.values(transporterLogic[key]));
+			input0 = input0.concat([method]);
+			if (transporterLogic.hasOwnProperty(key)) {
+				llpl.addToDatabase(transporterLogic[key]);
+			}
+			llpl.addToDatabase([method]);
+			// const fs = require('fs');
+			// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
+			const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
+			// If we didn't find a path for this method:
+			if (queryResultsAll.length === 0) {
+				const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
+				errorLog += text;
+			}
+			// If we did find a path:
+			else {
+				// console.log(`${queryResultsAll.length} path(s) found, e.g.: ${JSON.stringify(queryResultsAll[0])}`);
+				const tasks = { "tasks": { "ordered": [{ movePlate: movePlateParams }] } };
+				const input = input0.concat([tasks]);
+				var planner = shop.makePlanner(input);
+				plan = planner.plan();
+				//console.log(key, plan)
+				if (!_.isEmpty(plan)) {
+					//console.log("plan found for "+key)
+					//console.log(planner.ppPlan(plan));
+				}
+				else {
+					console.log("apparently unable to open some site or something")
+				}
+				break;
+			}
+		}
+
+		/*
+		const transporterPredicates = _(transporterLogic).values().map(x => _.values(x)).flatten().value();
+		var input0 = [].concat(data.predicates, transporterPredicates, [tasksOrdered]);
+		var input = input0;
+		//console.log(JSON.stringify(input, null, '\t'));
+
+		var shop = require('../HTN/shop.js');
+		var planner = shop.makePlanner(input);
+		var plan = planner.plan();
+		//console.log("plan:\n"+JSON.stringify(plan, null, '  '));
+		var x = planner.ppPlan(plan);
+		console.log(x);
+		*/
+
+		if (_.isEmpty(plan)) {
+			console.log(errorLog);
+			/*
+			var agentId = params.agent || "?agent";
+			var modelId = parsed.value.object.model || "?model";
+			var originId = parsed.value.object.location || "?site";
+			debug_movePlate_null(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+			debug_movePlate_one(input0, agentId, parsed.objectName.object, modelId, originId, parsed.objectName.destination);
+			for (let i = 0; i <= 3; i++) {
+				const method = makeMovePlateMethod(parsed, movePlateParams, i);
+				debugMovePlateMethod()
+			*/
+		}
+		if (_.isEmpty(plan)) {
+			const x = _.merge({}, {agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.value.object.location, destination: parsed.objectName.destination});
+			//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
+			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
+		}
+		var tasks = planner.listAndOrderTasks(plan, true);
+		//console.log("Tasks:")
+		//console.log(JSON.stringify(tasks, null, '  '));
+		var cmdList = _(tasks).map(function(task) {
+			return _(task).map(function(taskParams, taskName) {
+				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
+			}).flatten().value();
+		}).flatten().value();
+		//console.log("cmdList:")
+		//console.log(JSON.stringify(cmdList, null, '  '));
+
+		// Create the expansion object
+		var expansion = {};
+		var i = 1;
+		_.forEach(cmdList, function(cmd) {
+			expansion[i.toString()] = cmd;
+			i += 1;
+		});
+
+		// Create the effets object
 		var effects = {};
 		effects[`${parsed.objectName.object}.location`] = parsed.objectName.destination;
+
 		return {
+			expansion: expansion,
 			effects: effects
 		};
 	},
 	/**
 	 * Transport a plate to a destination.
-	 *
-	 * @typedef movePlate
-	 * @memberof transporter
-	 * @property {string} command - "transporter.movePlate"
-	 * @property {string} [agent] - Agent identifier
-	 * @property {string} object - Plate identifier
-	 * @property {string} destination - Location identifier
 	 */
 	"transporter.movePlate": function(params, parsed, data) {
 		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
@@ -385,7 +492,27 @@ var planHandlers = {
 			object: params.labware,
 			destination: params.destination
 		}];
-	}
+	},
+	"transporter._moveLidFromContainerToSite": function(params, parentParams, data) {
+		return [{
+			command: "transporter._moveLidFromContainerToSite",
+			agent: params.agent,
+			equipment: params.equipment,
+			program: params.program,
+			object: params.labware,
+			destination: params.destination
+		}];
+	},
+	"transporter._moveLidFromSiteToLabware": function(params, parentParams, data) {
+		return [{
+			command: "transporter._moveLidFromSiteToLabware",
+			agent: params.agent,
+			equipment: params.equipment,
+			program: params.program,
+			object: params.labware,
+			source: params.source
+		}];
+	},
 };
 
 module.exports = {
