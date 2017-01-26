@@ -127,23 +127,33 @@ function getTemplateAbsorbanceParams(parsed, data) {
 	}
 	// console.log({wells})
 
+	let isScan = false;
 	let excitationWavelength;
-	const isScan = (program.excitationWavelengthMin && program.excitationWavelengthMax);
-	if (isScan) {
-		const excitationWavelengthMin = program.excitationWavelengthMin.toNumber("nm");
-		const excitationWavelengthStep0 = program.excitationWavelengthStep || math.unit(2, "nm");
-		const excitationWavelengthStep = excitationWavelengthStep0.toNumber("nm");
-		const excitationWavelengthMax0 = program.excitationWavelengthMax.toNumber("nm");
-		const stepCount = Math.floor((excitationWavelengthMax0 - excitationWavelengthMin) / excitationWavelengthStep);
-		const excitationWavelengthMax = excitationWavelengthMin + excitationWavelengthStep * stepCount;
-		excitationWavelength = `${excitationWavelengthMin*10}~${excitationWavelengthMax*10}:${excitationWavelengthStep*10}`;
+	let excitationBandwidth;
+	// This will normally be true if program data was passed to the absorbanceReader command,
+	// but it may be empty if `programFileTemplate` was passed.
+	if (program.excitationWavelength) {
+		isScan = (program.excitationWavelengthMin && program.excitationWavelengthMax);
+		if (isScan) {
+			const excitationWavelengthMin = program.excitationWavelengthMin.toNumber("nm");
+			const excitationWavelengthStep0 = program.excitationWavelengthStep || math.unit(2, "nm");
+			const excitationWavelengthStep = excitationWavelengthStep0.toNumber("nm");
+			const excitationWavelengthMax0 = program.excitationWavelengthMax.toNumber("nm");
+			const stepCount = Math.floor((excitationWavelengthMax0 - excitationWavelengthMin) / excitationWavelengthStep);
+			const excitationWavelengthMax = excitationWavelengthMin + excitationWavelengthStep * stepCount;
+			excitationWavelength = `${excitationWavelengthMin*10}~${excitationWavelengthMax*10}:${excitationWavelengthStep*10}`;
+		}
+		else {
+			// console.log({program})
+			excitationWavelength = program.excitationWavelength.toNumber("nm") * 10;
+		}
+		const excitationBandwidth0 = program.excitationBandwidth || math.unit(9, "nm");
+		excitationBandwidth = excitationBandwidth0.toNumber("nm") * 10;
 	}
 	else {
-		// console.log({program})
-		excitationWavelength = program.excitationWavelength.toNumber("nm") * 10;
+		assert(parsed.value.programFileTemplate, "You must supply either `program.excitationWavelength` or `programFileTemplate`");
 	}
-	const excitationBandwidth0 = program.excitationBandwidth || math.unit(9, "nm");
-	const excitationBandwidth = excitationBandwidth0.toNumber("nm") * 10;
+
 	const params = {
 		//createdAt:	moment().format("YYYY-MM-DDTHH:mm:ss.SSSSSSS")+"Z",
 		createdAt: "2016-01-01T00:00:00.0000000Z",
@@ -204,6 +214,7 @@ module.exports = {
 						excitationWavelengthStep: {description: "Size of steps for a scan", type: "Length"}
 					}
 				},
+				programFileTemplate: {description: "Program template; well information will be substituted into the template automatically.", type: "File"},
 				programFile: {description: "Program filename", type: "File"},
 				programData: {description: "Program data"},
 				object: {description: "The labware being measured", type: "Plate"},
@@ -211,9 +222,10 @@ module.exports = {
 					description: "Output definition for where and how to save the measurements",
 					properties: {
 						joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: "string"},
-						writeTo: {description: "Filename to write measured to as JSON", type: "string"},
-						appendTo: {description: "Filename to append measured to as newline-delimited JSON", type: "string"},
-						userValues: {description: "User-specificed values that should be included in the output table", type: "object"}
+						writeTo: {description: "Filename to write measurements to as JSON", type: "string"},
+						appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"},
+						userValues: {description: "User-specificed values that should be included in the output table", type: "object"},
+						units: {description: "Map of factor names to unit type; converts the factor values to plain numbers in the given units."}
 					}
 				}
 			},
