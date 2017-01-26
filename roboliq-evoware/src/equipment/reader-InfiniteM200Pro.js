@@ -132,7 +132,7 @@ function getTemplateAbsorbanceParams(parsed, data) {
 	let excitationBandwidth;
 	// This will normally be true if program data was passed to the absorbanceReader command,
 	// but it may be empty if `programFileTemplate` was passed.
-	if (program.excitationWavelength) {
+	if (program.excitationWavelength || program.excitationWavelengthMax) {
 		isScan = (program.excitationWavelengthMin && program.excitationWavelengthMax);
 		if (isScan) {
 			const excitationWavelengthMin = program.excitationWavelengthMin.toNumber("nm");

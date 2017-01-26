@@ -333,6 +333,18 @@ module.exports = {
 			},
 			"model": {
 				"type": "Namespace",
+				// "EK 96 well Greiner Black": {
+			  //   type: "PlateModel",
+			  //   rows: 8,
+			  //   columns: 12,
+			  //   evowareName: "EK 96 well Greiner Black"
+			  // },
+			  // "EK 384 greiner flat bottom": {
+			  //   type: "PlateModel",
+			  //   rows: 16,
+			  //   columns: 24,
+			  //   evowareName: "EK 384 greiner flat bottom"
+				// },
 				"plateModel_48_flower": {
 					"type": "PlateModel",
 					"label": "48 flower-well plate",

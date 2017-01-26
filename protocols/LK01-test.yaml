@@ -15,13 +15,13 @@ parameters:
     value: 50 ul
 
 objects:
-  EK 96 well Greiner Black:
+  EK_96_well_Greiner_Black:
     type: PlateModel
     rows: 8
     columns: 12
     evowareName: EK 96 well Greiner Black
 
-  EK 384 greiner flat bottom:
+  EK_384_greiner_flat_bottom:
     type: PlateModel
     rows: 16
     columns: 24
@@ -34,13 +34,14 @@ objects:
       our measurements, but in principle each well will have the same labeled DNA but different
       unlabeled DNA)
     type: Plate
-    model: EK 96 well Greiner Black
-    location: ourlab.mario.site.P1DOWNHOLDER
+    model: EK_96_well_Greiner_Black
+    #location: ourlab.mario.site.P1DOWNHOLDER
+    location: ourlab.mario.site.P2
     sealed: true
   plate2:
     description: empty 384-well plate to be used for fluorescence readouts
     type: Plate
-    model: EK 384 greiner flat bottom
+    model: EK_384_greiner_flat_bottom
     location: ourlab.mario.site.P3
 
   design1:
@@ -53,13 +54,13 @@ objects:
 
 steps:
   1:
-    command: evoware._promptUser
+    command: evoware._userPrompt
     agent: ourlab.mario.evoware
     #text: "Add total volume of labeled DNA solution needed for the whole plate (this component will be the same for all wells) in the reader injector."
     text: "`Please add to deck: One black 384-well-MTP on Pos P3, one sealed 96-well PCR plate with First DNA on P1. One 50-ml Facon tube with >~TotalVolSecDNA~ ul of second DNA in Injector-Device.`"
 
   2:
-    data: design1
+    data: {source: design1}
     command: experiment.forEachRow
     steps:
       1:
@@ -68,13 +69,13 @@ steps:
         sourceLabware: plate1
         destinationLabware: plate2
         items:
-          source: $well
+        - source: $well
           destination: $well
           volume: $#volume1
           syringe: 5
       2:
-        command: fluorescenceReader.readPlate
-        object: mixPlate
+        command: fluorescenceReader.measurePlate
+        object: plate2
         programFile: ../roboliq-processor/protocols/tania13_ph-temp.mdfx
         program:
           wells: $$well
