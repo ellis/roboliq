@@ -4,9 +4,10 @@
 
 * [x] make sure that fluorescenceReader works like absorbanceReader
 * [x] figure out how to substitute well into fluorescenceReader programFile
-* [?] EK 384 greiner flat bottom and EK 96 well Greiner Black
+* [ ] EK 384 greiner flat bottom and EK 96 well Greiner Black
 * [ ] make sure LK01-test.yaml compiles
 * [ ] setup P1DOWNHOLDER
+* [ ] fix total volume calculation
 * [ ] test out with overriding the parameters
 * [ ] figure out simulation equation
 * [ ] extract time-series measurement data from the fluorescence reader (put it in `measurements.jsonl`)

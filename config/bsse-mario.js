@@ -39,7 +39,8 @@ module.exports = {
 					"evowareId": "ReaderNETwork",
 					"modelToPlateFile": {
 						"ourlab.model.plateModel_96_round_transparent_nunc": "NUN96ft",
-						"ourlab.model.plateModel_384_square": "Which One?"
+						"ourlab.model.plateModel_384_square": "GRE384fw",
+						"ourlab.model.EK_384_greiner_flat_bottom": "GRE384fw"
 					}
 				},
 				"roma1": {
@@ -167,7 +168,7 @@ module.exports = {
 					"HOTEL32_D8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 29 },
 					"P1DOWNHOLDER": {
 						"type": "Site",
-						"evowareCarrier": "MP 2Pos H+P Shake",
+						"evowareCarrier": "Downholder",
 						"evowareGrid": 9,
 						"evowareSite": 1
 					},
@@ -333,18 +334,18 @@ module.exports = {
 			},
 			"model": {
 				"type": "Namespace",
-				// "EK 96 well Greiner Black": {
-			  //   type: "PlateModel",
-			  //   rows: 8,
-			  //   columns: 12,
-			  //   evowareName: "EK 96 well Greiner Black"
-			  // },
-			  // "EK 384 greiner flat bottom": {
-			  //   type: "PlateModel",
-			  //   rows: 16,
-			  //   columns: 24,
-			  //   evowareName: "EK 384 greiner flat bottom"
-				// },
+				"EK_96_well_Greiner_Black": {
+			    type: "PlateModel",
+			    rows: 8,
+			    columns: 12,
+			    evowareName: "EK 96 well Greiner Black"
+			  },
+			  "EK_384_greiner_flat_bottom": {
+			    type: "PlateModel",
+			    rows: 16,
+			    columns: 24,
+			    evowareName: "EK 384 greiner flat bottom"
+				},
 				"plateModel_48_flower": {
 					"type": "PlateModel",
 					"label": "48 flower-well plate",
@@ -462,13 +463,13 @@ module.exports = {
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_short",
 			sites: ["HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "READER", "ROBOPEEL", "ROBOSEAL"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.EK_96_well_Greiner_Black", "ourlab.model.EK_384_greiner_flat_bottom"]
 		}),
 		// Bench sites that don't have any obstructions, so deep well plates can fit on them too
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_open",
 			sites: ["P1DOWNHOLDER", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp", "ourlab.model.EK_96_well_Greiner_Black", "ourlab.model.EK_384_greiner_flat_bottom"]
 		}),
 		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
 			"ourlab.mario.roma1": {
@@ -483,7 +484,7 @@ module.exports = {
 			"ourlab.mario.roma2": {
 				Narrow: [
 					[
-						"P1", "P2", "P3", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
+						/*"P1DOWNHOLDER",*/ "P2", "P3", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
 						"HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4",
 						"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
 						"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
@@ -510,7 +511,7 @@ module.exports = {
 			}};
 		}),
 		{"#for": {
-			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc"]},
+			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"]},
 			output: {
 				"absorbanceReader.canAgentEquipmentModelSite": {
 					"agent": "ourlab.mario.evoware",
@@ -521,7 +522,7 @@ module.exports = {
 			}
 		}},
 		{"#for": {
-			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc"]},
+			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"]},
 			output: {
 				"fluorescenceReader.canAgentEquipmentModelSite": {
 					"agent": "ourlab.mario.evoware",

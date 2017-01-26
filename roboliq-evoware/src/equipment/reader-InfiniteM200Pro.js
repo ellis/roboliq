@@ -264,7 +264,7 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		[`equipment.run|${agentName}|${equipmentName}`]: function(params, parsed, data) {
-			// console.log("reader-InfiniteM200Pro-equipment.run: "+JSON.stringify(parsed, null, '\t'));
+			console.log("reader-InfiniteM200Pro-equipment.run: "+JSON.stringify(parsed, null, '\t'));
 
 			const hasProgram = (parsed.value.program) ? 1 : 0;
 			const hasProgramFile = (parsed.value.programFile) ? 1 : 0;
