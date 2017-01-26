@@ -5,11 +5,13 @@
 * [x] make sure that fluorescenceReader works like absorbanceReader
 * [ ] figure out how to substitute well into fluorescenceReader programFile
 * [ ] figure out simulation equation
+* [ ] extract time-series measurement data from the fluorescence reader (put it in `measurements.jsonl`)
 
 # Get it working for colleagues
 
 * [x] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
 * [x] make sure `npm i` works on a clean checkout in the root directory
+* [ ] api-generator: pull schemas in automatically to contents/schemas (right now it contains old copies)
 * [ ] Protocol tutorial and Writing-a-Design: link to YAML tutorial as a pre-requisite
 * [ ] autogenerate the API documentation when `npm i` is run from the root, link to API docs from the README
 	* [ ] roboliq-evoware: create a README so that index.html isn't blank

@@ -60,7 +60,8 @@ steps:
         command: fluorescenceReader.readPlate
         object: mixPlate
         programFile: ../roboliq-processor/protocols/tania13_ph-temp.mdfx
+        program:
+          wells: $$well
         output:
           joinKey: well
           appendTo: measurements
-          simulated: 100
