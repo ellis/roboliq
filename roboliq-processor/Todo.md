@@ -4,6 +4,10 @@
 
 * [x] make sure that fluorescenceReader works like absorbanceReader
 * [x] figure out how to substitute well into fluorescenceReader programFile
+* [?] EK 384 greiner flat bottom and EK 96 well Greiner Black
+* [ ] make sure LK01-test.yaml compiles
+* [ ] setup P1DOWNHOLDER
+* [ ] test out with overriding the parameters
 * [ ] figure out simulation equation
 * [ ] extract time-series measurement data from the fluorescence reader (put it in `measurements.jsonl`)
 
@@ -36,6 +40,7 @@
 * [ ] pipetter.pipette: better error message when `sources` is mispelled as `source`
 * [ ] roboliq.js: validate protocol, check that initial locations are valid, e.g. no A03 on a tube holder
 * [ ] check that the initial models are valid?  E.g., we told it that T1 had the 50ml tubes, but T1 can only hold 15ml tubes
+* [ ] bsse-mario.js: let it be a function that can take configuration options for PCR holders and the P1/DOWNHOLDER
 
 flattenArrayAndIndexes:
 

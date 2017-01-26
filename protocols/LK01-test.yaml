@@ -4,17 +4,29 @@ description: |
 
   Q: What shall we do about piercing, since it damages the large tips?
 parameters:
-  excitationWavelength:
-    description: excitation wavelength to read absorbance
-    value: 480 nm
   wells:
     description: Which wells should we measure
     value: A01 down D01
-  totalVolume:
-    description: desired total volume of each well
-    value: 100 ul
+  volume1:
+    description: What is the volume in ul of the first DNA? (0 to 40 ul)
+    value: 40 ul
+  volume2:
+    description: What is the volume in ul of the second DNA (injected)? (0 to 100 ul)
+    value: 50 ul
 
 objects:
+  EK 96 well Greiner Black:
+    type: PlateModel
+    rows: 8
+    columns: 12
+    evowareName: EK 96 well Greiner Black
+
+  EK 384 greiner flat bottom:
+    type: PlateModel
+    rows: 16
+    columns: 24
+    evowareName: EK 384 greiner flat bottom
+
   plate1:
     description: |
       A sealed 96-well plate where each well has a solution of one unlabeled DNA.
@@ -22,14 +34,14 @@ objects:
       our measurements, but in principle each well will have the same labeled DNA but different
       unlabeled DNA)
     type: Plate
-    model: ourlab.model.plateModel_96_???
-    location: ourlab.mario.site.DOWNHOLDER
+    model: EK 96 well Greiner Black
+    location: ourlab.mario.site.P1DOWNHOLDER
     sealed: true
   plate2:
     description: empty 384-well plate to be used for fluorescence readouts
     type: Plate
-    model: ourlab.model.plateModel_384_square
-    location: ourlab.mario.site.P2
+    model: EK 384 greiner flat bottom
+    location: ourlab.mario.site.P3
 
   design1:
     type: Design
@@ -43,7 +55,8 @@ steps:
   1:
     command: evoware._promptUser
     agent: ourlab.mario.evoware
-    text: "Add total volume of labeled DNA solution needed for the whole plate (this component will be the same for all wells) in the reader injector."
+    #text: "Add total volume of labeled DNA solution needed for the whole plate (this component will be the same for all wells) in the reader injector."
+    text: "`Please add to deck: One black 384-well-MTP on Pos P3, one sealed 96-well PCR plate with First DNA on P1. One 50-ml Facon tube with >~TotalVolSecDNA~ ul of second DNA in Injector-Device.`"
 
   2:
     data: design1
@@ -51,11 +64,14 @@ steps:
     steps:
       1:
         command: pipetter.pipette
+        program: "Water_C_50_EK_DNA"
         sourceLabware: plate1
-        sources: $$well
         destinationLabware: plate2
-        destinations: $$well
-        volumes: $#totalVolume
+        items:
+          source: $well
+          destination: $well
+          volume: $#volume1
+          syringe: 5
       2:
         command: fluorescenceReader.readPlate
         object: mixPlate

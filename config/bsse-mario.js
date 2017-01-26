@@ -165,6 +165,12 @@ module.exports = {
 					"HOTEL32_B8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 31 },
 					"HOTEL32_C8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 30 },
 					"HOTEL32_D8": { "type": "Site", "evowareCarrier": "Shelf 32Pos Microplate", "evowareGrid": 11, "evowareSite": 29 },
+					"P1DOWNHOLDER": {
+						"type": "Site",
+						"evowareCarrier": "MP 2Pos H+P Shake",
+						"evowareGrid": 9,
+						"evowareSite": 1
+					},
 					"P2": {
 						"type": "Site",
 						"evowareCarrier": "MP 2Pos H+P Shake",
@@ -449,7 +455,7 @@ module.exports = {
 		// Bench sites that don't have any obstructions, so deep well plates can fit on them too
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_open",
-			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
+			sites: ["P1DOWNHOLDER", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
 			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
 		}),
 		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
@@ -561,7 +567,7 @@ module.exports = {
 			}
 		},
 		{"#for": {
-			factors: {site: ["P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
+			factors: {site: ["P1DOWNHOLDER", "P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
 			output: {
 				"pipetter.canAgentEquipmentSite": {
 					"agent": "ourlab.mario.evoware",
