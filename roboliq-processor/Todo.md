@@ -1,16 +1,18 @@
 # Todos
 
-# Lena & Daniel
+# Things needed for Oskari's yeast script, part 1 on mario
 
-* [x] make sure that fluorescenceReader works like absorbanceReader
-* [x] figure out how to substitute well into fluorescenceReader programFile
-* [ ] EK 384 greiner flat bottom and EK 96 well Greiner Black
-* [ ] make sure LK01-test.yaml compiles
-* [ ] setup P1DOWNHOLDER
-* [ ] fix total volume calculation
-* [ ] test out with overriding the parameters
-* [ ] figure out simulation equation
-* [ ] extract time-series measurement data from the fluorescence reader (put it in `measurements.jsonl`)
+* [ ] lid handling
+* [ ] stacking plates via lid handling
+* [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
+* [ ] PCR machine
+* [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
+
+Would be nice:
+
+* [ ] tubes
+* [ ] troughs
+* [ ] print a table of labware models and sites in `bsse-mario.js`
 
 # Get it working for colleagues
 
@@ -61,18 +63,17 @@ b*: 2
 [[{a: 1, b: 1}, {a: 1, b: 2}], [{a: 2, b: 1}, {a: 2, b: 2}]] ; [0,1]
 [{a: 1, b: 1}, {a: 1, b: 2}, {a: 2, b: 1}, {a: 2, b: 2}] ; [0,1,2,3]
 
-# Things needed for Oskari's yeast script, part I on mario
+# Lena & Daniel
 
-* [ ] lid handling
-* [ ] stacking plates via lid handling
-* [ ] PCR machine
-* [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
-
-Would be nice:
-
-* [ ] tubes
-* [ ] troughs
-* [ ] print a table of labware models and sites in `bsse-mario.js`
+* [x] make sure that fluorescenceReader works like absorbanceReader
+* [x] figure out how to substitute well into fluorescenceReader programFile
+* [x] EK 384 greiner flat bottom and EK 96 well Greiner Black
+* [x] make sure LK01-test.yaml compiles
+* [x] setup P1DOWNHOLDER
+* [ ] fix total volume calculation
+* [ ] test out with overriding the parameters
+* [ ] figure out simulation equation
+* [ ] extract time-series measurement data from the fluorescence reader (put it in `measurements.jsonl`)
 
 # paper2 Todos
 

@@ -940,4 +940,4 @@ module.exports = {
 		},
 		Equipment.reader.getPlanHandlers("ourlab.mario.evoware", "ourlab.mario.reader", "ourlab.mario.site.READER")
 	)
-}
+};

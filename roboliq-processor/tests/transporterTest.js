@@ -502,6 +502,7 @@ describe('transporter', function() {
 				1: {
 					"plate1.hasLid": false,
 					"plate1Lid.location": "ourlab.mario.site.P3"
+				}
 			});
 		});
 	});
