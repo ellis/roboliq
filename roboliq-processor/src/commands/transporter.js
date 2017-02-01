@@ -34,11 +34,12 @@ var objectToPredicateConverters = {
 
 /**
  * Take the parsed parameters passed to `transporter.moveLidFromContainerToSite`
- * and create parameters for `makeMoveLidFromContainToSiteMethod`.
+ * and create the parameter list for the task `moveLidFromContainerToSite` in `makeMoveLidFromContainerToSiteMethod()`.
  * If any of the following parameters are not specified, then they will also
  * be a part of the created parameters: agent, equipment, program
  */
 function makeMoveLidFromContainerToSiteParams(parsed) {
+	console.log("makeMoveLidFromContainerToSiteParams: "+JSON.stringify(parsed))
 	return _.merge({}, {
 		agent: (parsed.objectName.agent) ? "?agent" : undefined,
 		equipment: (parsed.objectName.equipment) ? "?equipment" : undefined,
@@ -49,13 +50,13 @@ function makeMoveLidFromContainerToSiteParams(parsed) {
 	});
 }
 
-function makeMoveLidFromContainToSiteMethod(parsed, moveLidParams, n) {
+function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
 	//console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
 	}
-	const lid = parsed.objectName.lid;
-	const lidModel = parsed.value.lid.model;
+	const lid = parsed.objectName.object;
+	const lidModel = parsed.value.object.model;
 	const container = parsed.objectName.container;
 	const model = parsed.value.container.model;
 	const origin = parsed.value.container.location;
@@ -314,11 +315,11 @@ var commandHandlers = {
 	 * Transport a lid from a container to a destination site.
 	 */
 	"transporter.moveLidFromContainerToSite": function(params, parsed, data) {
-		//console.log("transporter.movePlate("+JSON.stringify(params)+")")
+		console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
 		const transporterLogic = require('./transporterLogic.json');
 
 		const keys = ["null", "one"];
-		const movePlateParams = makeMoveLidFromContainToSiteParams(parsed);
+		const movePlateParams = makeMoveLidFromContainerToSiteParams(parsed);
 
 		const shop = require('../HTN/shop.js');
 		const llpl = require('../HTN/llpl.js').create();
@@ -328,7 +329,7 @@ var commandHandlers = {
 		let errorLog = "";
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			const method = {method: makeMoveLidFromContainToSiteMethod(parsed, movePlateParams, i)};
+			const method = {method: makeMoveLidFromContainerToSiteMethod(parsed, movePlateParams, i)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
 			input0 = input0.concat([method]);
 			if (transporterLogic.hasOwnProperty(key)) {

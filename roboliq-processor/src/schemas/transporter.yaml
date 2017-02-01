@@ -11,19 +11,6 @@ Transporter:
     label: {type: string}
   required: [type]
 
-transporter._movePlate:
-  description: |
-    Transport a plate to a destination.
-
-    Handler should return `effects` with the plate's new location.
-  properties:
-    agent: {description: "Agent identifier", type: "Agent"}
-    equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier for transport", type: "name"}
-    object: {description: "Plate identifier", type: "Plate"}
-    destination: {description: "Site to move the plate to", "type": "Site"}
-  required: [agent, equipment, program, object, destination]
-
 transporter._moveLidFromContainerToSite:
   description: |
     Transport a lid from a container to a destination site.
@@ -40,6 +27,19 @@ transporter._moveLidFromContainerToSite:
     destination: {description: "Site to move the plate to", "type": "Site"}
   required: [agent, equipment, program, object, origin, destination]
 
+transporter._movePlate:
+  description: |
+    Transport a plate to a destination.
+
+    Handler should return `effects` with the plate's new location.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Plate identifier", type: "Plate"}
+    destination: {description: "Site to move the plate to", "type": "Site"}
+  required: [agent, equipment, program, object, destination]
+
 transporter.doThenRestoreLocation:
   description: |
     Perform steps, then make sure that the given labware is stored to the
@@ -51,6 +51,18 @@ transporter.doThenRestoreLocation:
     program: {description: "Program identifier for transport", type: "name"}
     steps: {description: "Sub-steps to perform", type: [object, array]}
   required: [objects]
+
+transporter.moveLidFromContainerToSite:
+  description: |
+    Transport a plate to a destination.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    container: {description: "Container identifier", type: "Labware"}
+    destination: {description: "Site to move the plate to", "type": "Site"}
+  required: [object, destination]
 
 transporter.movePlate:
   description: |
