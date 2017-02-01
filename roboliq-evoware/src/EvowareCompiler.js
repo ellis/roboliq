@@ -49,37 +49,42 @@ const commandHandlers = {
  */
 export function compile(table, protocol, agents, options = {}) {
 	// console.log(`compile:`)
-	console.log({options})
+	// console.log({options})
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
-	console.log({options})
+	// console.log({options})
 	table = _.cloneDeep(table);
 	const objects = _.cloneDeep(protocol.objects);
 	const evowareVariables = {}
 	const results = compileStep(table, protocol, agents, [], objects, evowareVariables, [], options);
 
-	// Prepend variables
-	// console.log({evowareVariables})
-	const variableList = _.reverse(_.sortBy(_.toPairs(evowareVariables), x => x[0]));
-	// console.log({variableList})
-	_.forEach(variableList, ([name, value]) => {
-		// console.log({name, value, line: evowareHelper.createVariableLine(name, value)})
-		results.unshift({line: evowareHelper.createVariableLine(name, value)});
-	});
-	// Prepend token to call 'initRun'
-	results.unshift({line: evowareHelper.createExecuteLine(options.variables.ROBOLIQ, ["initRun", options.variables.SCRIPTFILE], true)});
-	// Append token to reset the last moved ROMA
-	results.push(transporter.moveLastRomaHome({objects}));
+	let lines = [];
+	if (!_.isEmpty(results)) {
+		// Prepend variables
+		// console.log({evowareVariables})
+		const variableList = _.reverse(_.sortBy(_.toPairs(evowareVariables), x => x[0]));
+		// console.log({variableList})
+		_.forEach(variableList, ([name, value]) => {
+			// console.log({name, value, line: evowareHelper.createVariableLine(name, value)})
+			results.unshift({line: evowareHelper.createVariableLine(name, value)});
+		});
+		// Prepend token to call 'initRun'
+		results.unshift({line: evowareHelper.createExecuteLine(options.variables.ROBOLIQ, ["initRun", options.variables.SCRIPTFILE], true)});
+		// Append token to reset the last moved ROMA
+		results.push(transporter.moveLastRomaHome({objects}));
 
-	const lines = _(results).flattenDeep().map(x => x.line).compact().value();
-	// Prepend token to create the TEMPDIR
-	if (_.some(lines, line => line.indexOf(options.variables.TEMPDIR) >= 0)) {
-		lines.unshift(evowareHelper.createExecuteLine("cmd", ["/c", "mkdir", options.variables.TEMPDIR], true));
-	}
+		lines = _(results).flattenDeep().map(x => x.line).compact().value();
+		if (!_.isEmpty(lines)) {
+			// Prepend token to create the TEMPDIR
+			if (_.some(lines, line => line.indexOf(options.variables.TEMPDIR) >= 0)) {
+				lines.unshift(evowareHelper.createExecuteLine("cmd", ["/c", "mkdir", options.variables.TEMPDIR], true));
+			}
 
-	// Prepend token to open HTML
-	if (_.get(options, "checkBench", true)) {
-		lines.unshift(evowareHelper.createUserPromptLine("Please check the bench setup and then confirm this dialog when you're done"));
-		lines.unshift(evowareHelper.createExecuteLine(options.variables.BROWSER, [path.dirname(options.variables.SCRIPTFILE)+"\\index.html"], false));
+			// Prepend token to open HTML
+			if (_.get(options, "checkBench", true)) {
+				lines.unshift(evowareHelper.createUserPromptLine("Please check the bench setup and then confirm this dialog when you're done"));
+				lines.unshift(evowareHelper.createExecuteLine(options.variables.BROWSER, [path.dirname(options.variables.SCRIPTFILE)+"\\index.html"], false));
+			}
+		}
 	}
 
 	return [{table, lines, tokenTree: results}];
@@ -217,6 +222,10 @@ function compileStepSub(table, protocol, agents, path, objects, evowareVariables
 				});
 			}
 		});
+
+		if (_.isEmpty(results)) {
+			return [];
+		}
 
 		// Check whether command produced any output lines
 		generatedCommandLines = _.find(_.flattenDeep(results), x => _.has(x, "line"));

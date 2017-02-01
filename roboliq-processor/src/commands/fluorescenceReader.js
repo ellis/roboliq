@@ -16,6 +16,7 @@ var jmespath = require('jmespath');
 import yaml from 'yamljs';
 var commandHelper = require('../commandHelper.js');
 var expect = require('../expect.js');
+import {mergeR} from '../mergeR.js';
 var misc = require('../misc.js');
 
 
@@ -61,6 +62,20 @@ var commandHandlers = {
 			: _.isUndefined(parsed.objectName.destinationAfter) ? location0
 			: parsed.objectName.destinationAfter;
 
+		// Program to pass to sub-command
+		const program = mergeR({}, parsed.orig.program, {
+			wells: (parsed.value.program || {}).wells
+		});
+		// console.log({program})
+		// Handle deprecated parameter names
+		const output = mergeR({}, parsed.orig.output, {
+			joinKey: _.get(parsed.orig, "program.wellDesignFactor"),
+			userValues: _.get(parsed.orig, "program.userValues"),
+			writeTo: _.get(parsed.orig, "outputFile"),
+			appendTo: _.get(parsed.orig, "outputDataset"),
+		});
+		// console.log({output})
+
 		var expansion = [
 			(params2.site === location0) ? null : {
 				command: "transporter.movePlate",
@@ -72,21 +87,39 @@ var commandHandlers = {
 				agent: params2.agent,
 				equipment: params2.equipment,
 				measurementType: "fluorescence",
-				program: parsed.value.program,
+				program: (_.isEmpty(program)) ? undefined : program,
+				programFileTemplate: parsed.value.programFileTemplate,
 				programFile: parsed.value.programFile,
 				programData: parsed.value.programData,
 				object: parsed.objectName.object,
-				outputFile: parsed.value.outputFile || data.path.join(".")+"-fluorescence.xml"
+				output: (_.isEmpty(output)) ? undefined : output
 			}),
-			(destinationAfter === null) ? null : {
+			(destinationAfter === null || destinationAfter === params2.site) ? null : {
 				command: "transporter.movePlate",
 				object: parsed.objectName.object,
 				destination: destinationAfter
 			}
 		];
-		return {
-			expansion: expansion
-		};
+		// console.log({expansion1output: expansion[1].output})
+
+		const result = {expansion};
+
+		if (_.has(parsed.value, ["output", "simulated"])) {
+			// Wells are chosen as follows:
+			// 1) program.wells
+			// 2) output.joinKey
+			// 3) all wells on labware
+			const wells = (_.has(parsed.value, ["program", "wells"]))
+				? commandHelper.asArray(parsed.value.program.wells)
+				: (!_.isUndefined(output.joinKey))
+					? commandHelper.getDesignFactor(output.joinKey, data.objects.DATA)
+					: wellsParser.parse(`${parsed.objectName.object}(all)`, data.objects);
+			// console.log({wells})
+			simulatedHelpers.simulatedByWells(parsed, data, wells, result);
+		}
+
+		// console.log("RESULTS:\n"+JSON.stringify(result))
+		return result;
 	},
 };
 

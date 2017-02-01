@@ -771,6 +771,25 @@ describe('design', () => {
 			);
 		});
 
+		it("should support allocateWells() with `from` property", () => {
+			should.deepEqual(
+				expandConditions({
+					"step*": 4,
+					"well=allocateWells": {
+						rows: 8,
+						columns: 12,
+						from: "G02"
+					}
+				}),
+				[
+					{step: 1, well: "G02"},
+					{step: 2, well: "H02"},
+					{step: 3, well: "A03"},
+					{step: 4, well: "B03"},
+				]
+			);
+		});
+
 		it("should support range() with groupBy and sameBy", () => {
 			should.deepEqual(
 				expandConditions({

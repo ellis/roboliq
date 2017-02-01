@@ -31,6 +31,7 @@ absorbanceReader.measurePlate:
         wells: {description: "Array of wells to read", type: "Wells"}
         wellDesignFactor: {description: "Name of design column that indicates which wells to measure (deprecated, use `output.joinKey`)", type: string}
         userValues: {description: "User-specificed values that should be included in the output table (deprecated, use `output.userValues`)", type: object}
+    programFileTemplate: {description: "Program template; well information will be substituted into the template automatically.", type: "string"}
     programFile: {description: "Program filename", type: "string"}
     programData: {description: "Program data"}
     outputFile: {description: "Filename for output (deprecated, use `output.writeTo`)", type: "string"}
@@ -43,7 +44,7 @@ absorbanceReader.measurePlate:
         appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"}
         userValues: {description: "User-specificed values that should be included in the output table", type: object}
         simulated: {description: "An expression to evaluate with mathjs", type: string}
-        units: {description: "Map of factor names to unit type; converts the factor values to plain number in the given units."}
+        units: {description: "Map of factor names to unit type; converts the factor values to plain numbers in the given units."}
     object: {description: "Plate identifier", type: "Plate"}
     site: {description: "Site identifier in reader", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}

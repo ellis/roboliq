@@ -47,7 +47,7 @@ var commandHandlers = {
 			: parsed.objectName.destinationAfter;
 
 		// Program to pass to sub-command
-		const program = _.merge({}, parsed.orig.program, {
+		const program = mergeR({}, parsed.orig.program, {
 			wells: (parsed.value.program || {}).wells
 		});
 		// Handle deprecated parameter names
@@ -57,7 +57,7 @@ var commandHandlers = {
 			writeTo: _.get(parsed.orig, "outputFile"),
 			appendTo: _.get(parsed.orig, "outputDataset"),
 		});
-		console.log({output})
+		// console.log({output})
 
 		var expansion = [
 			(params2.site === location0) ? null : {
@@ -71,6 +71,7 @@ var commandHandlers = {
 				equipment: params2.equipment,
 				measurementType: "absorbance",
 				program: (_.isEmpty(program)) ? undefined : program,
+				programFileTemplate: parsed.value.programFileTemplate,
 				programFile: parsed.value.programFile,
 				programData: parsed.value.programData,
 				object: parsed.objectName.object,
@@ -82,7 +83,7 @@ var commandHandlers = {
 				destination: destinationAfter
 			}
 		];
-		console.log({expansion1output: expansion[1].output})
+		// console.log({expansion1output: expansion[1].output})
 
 		const result = {expansion};
 

@@ -126,7 +126,7 @@ objects:
   filterPlate:
     description: PVD filter plate up to 350 ul
     type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
+    model: ourlab.model.plateModel_96_round_filter_OV
     location: ourlab.mario.site.P3
   # wastePlate:
   #   description: One well plate for waste
@@ -164,6 +164,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
+        from: E01
       #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush

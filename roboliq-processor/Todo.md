@@ -1,9 +1,22 @@
 # Todos
 
+# Lena & Daniel
+
+* [x] make sure that fluorescenceReader works like absorbanceReader
+* [x] figure out how to substitute well into fluorescenceReader programFile
+* [ ] EK 384 greiner flat bottom and EK 96 well Greiner Black
+* [ ] make sure LK01-test.yaml compiles
+* [ ] setup P1DOWNHOLDER
+* [ ] fix total volume calculation
+* [ ] test out with overriding the parameters
+* [ ] figure out simulation equation
+* [ ] extract time-series measurement data from the fluorescence reader (put it in `measurements.jsonl`)
+
 # Get it working for colleagues
 
 * [x] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
 * [x] make sure `npm i` works on a clean checkout in the root directory
+* [ ] api-generator: pull schemas in automatically to contents/schemas (right now it contains old copies)
 * [ ] Protocol tutorial and Writing-a-Design: link to YAML tutorial as a pre-requisite
 * [ ] autogenerate the API documentation when `npm i` is run from the root, link to API docs from the README
 	* [ ] roboliq-evoware: create a README so that index.html isn't blank
@@ -29,6 +42,7 @@
 * [ ] roboliq.js: validate protocol, check that initial locations are valid, e.g. no A03 on a tube holder
 * [ ] check that the initial models are valid?  E.g., we told it that T1 had the 50ml tubes, but T1 can only hold 15ml tubes
 * [ ] document the predicates and how the logic works
+* [ ] bsse-mario.js: let it be a function that can take configuration options for PCR holders and the P1/DOWNHOLDER
 
 flattenArrayAndIndexes:
 
