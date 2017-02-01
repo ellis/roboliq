@@ -472,7 +472,7 @@ describe('transporter', function() {
 	});
 
 	describe('transporter._moveLidFromContainerToSite', function () {
-		it.only("should handle _moveLidFromContainerToSite from plate to empty site", function() {
+		it("should handle _moveLidFromContainerToSite from plate to empty site", function() {
 			var protocol = _.merge({}, protocol0, {
 				objects: {
 					plate1: {
@@ -490,7 +490,7 @@ describe('transporter', function() {
 						equipment: "ourlab.mario.roma1",
 						program: "Narrow",
 						"object": "plate1Lid",
-						"origin": "plate1",
+						"container": "plate1",
 						"destination": "ourlab.mario.site.P3"
 					}
 				}

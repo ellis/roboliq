@@ -32,7 +32,6 @@
 				{"model": {"labware": "?lid", "model": "?lidModel"}},
 				{"location": {"labware": "?lid", "site": "?container"}},
 				{"labwareHasLid": {"labware": "?container"}},
-				{"stackableLid": {"below": "?destinationModel", "above": "?model"}},
 				{"model": {"labware": "?container", "model": "?model"}},
 				{"location": {"labware": "?container", "site": "?origin"}},
 				{"siteIsOpen": {"site": "?origin"}},

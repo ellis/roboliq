@@ -36,7 +36,7 @@ transporter._moveLidFromContainerToSite:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Lid identifier", type: "Labware"}
-    origin: {description: "Container identifier", type: "Plate"}
+    container: {description: "Container identifier", type: "Plate"}
     destination: {description: "Site to move the plate to", "type": "Site"}
   required: [agent, equipment, program, object, origin, destination]
 
