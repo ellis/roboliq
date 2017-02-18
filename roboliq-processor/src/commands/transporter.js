@@ -40,7 +40,7 @@ var objectToPredicateConverters = {
  */
 function makeMoveLidFromContainerToSiteParams(parsed) {
 	console.log("makeMoveLidFromContainerToSiteParams: "+JSON.stringify(parsed))
-	return _.merge({}, {
+	return _.pickBy({
 		agent: (parsed.objectName.agent) ? "?agent" : undefined,
 		equipment: (parsed.objectName.equipment) ? "?equipment" : undefined,
 		program: (parsed.objectName.program || parsed.value.program) ? "?program" : undefined,
@@ -297,7 +297,7 @@ var commandHandlers = {
 	 */
 	"transporter._moveLidFromContainerToSite": function(params, parsed, data) {
 		return {effects: {
-			[`${parsed.objectName.container}.hasLid`]: false,
+			//[`${parsed.objectName.container}.hasLid`]: false,
 			[`${parsed.objectName.object}.location`]: parsed.objectName.destination
 		}};
 	},
@@ -405,8 +405,7 @@ var commandHandlers = {
 				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
 			}).flatten().value();
 		}).flatten().value();
-		//console.log("cmdList:")
-		//console.log(JSON.stringify(cmdList, null, '  '));
+		console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
 
 		// Create the expansion object
 		var expansion = {};
@@ -580,7 +579,7 @@ var planHandlers = {
 			agent: params.agent,
 			equipment: params.equipment,
 			program: params.program,
-			lid: params.lid,
+			object: params.lid,
 			container: params.container,
 			destination: params.destination
 		}];
