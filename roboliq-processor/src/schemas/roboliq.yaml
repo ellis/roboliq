@@ -24,6 +24,14 @@ Lid:
     location: {type: string}
   required: [type]
 
+LidModel:
+  description: Model for lid labware
+  properties:
+    type: {enum: [LidModel]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 Liquid:
   description: Liquid substance.
   properties:

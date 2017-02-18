@@ -516,7 +516,7 @@ describe('transporter', function() {
 					},
 					plate1Lid: {
 						type: "Lid",
-						model: "ourlab.model.lidModel_384_square",
+						model: "ourlab.model.lidModel_standard",
 						location: "plate1",
 					}
 				},
@@ -525,7 +525,7 @@ describe('transporter', function() {
 						"command": "transporter.moveLidFromContainerToSite",
 						"object": "plate1Lid",
 						"container": "plate1",
-						"destination": "ourlab.mario.site.P3"
+						"destination": "ourlab.mario.site.P4"
 					}
 				}
 			});

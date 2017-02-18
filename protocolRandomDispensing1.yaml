@@ -1,7 +1,8 @@
 # Run with:
 #  npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\CR' --evoware testdata/bsse-mario/Carrier.cfg,testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware config/bsse-mario.js protocolRandomDispensi ng1.yaml
 roboliq: v1
-description: |Random dispensing to check the volume model.
+description: |
+  Random dispensing to check the volume model.
 
 parameters:
   excitationWavelength:

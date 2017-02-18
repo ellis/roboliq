@@ -14,10 +14,18 @@ Would be nice:
 * [ ] troughs
 * [ ] print a table of labware models and sites in `bsse-mario.js`
 
+# Next experiment with Charlotte
+
+* [ ] repeat experiment 1, but with correction of Dry=>Air dispense (and maybe also at the end fill wells to 250ul and re-read)
+* [ ] need to consider how to measure/estimate alpha_k more reliably
+* [ ] higher dye volumes
+
 # Get it working for colleagues
 
 * [x] on Charlotte's computers, `npm test` fails in `WellContents flattenContents`
 * [x] make sure `npm i` works on a clean checkout in the root directory
+* [ ] look into why the design table randomization seed is ignored when using `npm run design`
+* [ ] for update to jsdoc, see https://github.com/jsdoc3/jsdoc/issues/1185#issuecomment-279895756
 * [ ] api-generator: pull schemas in automatically to contents/schemas (right now it contains old copies)
 * [ ] Protocol tutorial and Writing-a-Design: link to YAML tutorial as a pre-requisite
 * [ ] autogenerate the API documentation when `npm i` is run from the root, link to API docs from the README

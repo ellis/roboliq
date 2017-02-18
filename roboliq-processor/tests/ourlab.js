@@ -383,6 +383,9 @@ module.exports = {
 					"columns": 24,
 					"evowareName": "384 Sqr Flat Trans Greiner"
 				},
+				"lidModel_standard": {
+					"type": "LidModel"
+				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
 					"label": "Trough 100ml",
@@ -443,7 +446,7 @@ module.exports = {
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_open",
 			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "plateModel_96_dwp"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp", "ourlab.model.lidModel_standard"]
 		}),
 		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
 			"ourlab.mario.roma1": {

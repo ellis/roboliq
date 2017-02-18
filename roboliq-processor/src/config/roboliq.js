@@ -77,10 +77,20 @@ var objectToPredicateConverters = {
 		return {
 			value: [
 				{"isLabware": {"labware": name}},
-				{"isLid": {"lid": name}},
-				{"location": { "labware": name, "site": object.location}}
+				{"isLid": {"labware": name}},
+				{"model": {"labware": name, "model": object.model}},
+				{"location": {"labware": name, "site": object.location}}
 			]
 		}
+	},
+	LidModel: function(name, object) {
+		return {
+			value: [{
+				"isModel": {
+					"model": name
+				}
+			}]
+		};
 	},
 	"Plate": function(name, object) {
 		var value = [

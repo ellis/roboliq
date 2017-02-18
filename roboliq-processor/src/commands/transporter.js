@@ -51,12 +51,12 @@ function makeMoveLidFromContainerToSiteParams(parsed) {
 }
 
 function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
-	//console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
+	console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
 	}
 	const lid = parsed.objectName.object;
-	const lidModel = parsed.value.object.model;
+	const lidModel = parsed.objectName["object.model"];
 	const container = parsed.objectName.container;
 	const model = parsed.value.container.model;
 	const origin = parsed.value.container.location;
@@ -89,7 +89,7 @@ function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
 			"preconditions": [
 				{"model": {"labware": lid, "model": lidModel}}, // TODO: Superfluous, but maybe check anyway
 				{"location": {"labware": lid, "site": container}},
-				{"labwareHasLid": {"labware": container}},
+				//{"labwareHasLid": {"labware": container}},
 				{"model": {"labware": container, "model": model}},
 				{"location": {"labware": container, "site": origin}},
 				{"siteIsOpen": {"site": origin}},
@@ -341,6 +341,8 @@ var commandHandlers = {
 			const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
 			// If we didn't find a path for this method:
 			if (queryResultsAll.length === 0) {
+				//const queryResultOne = llpl.query({stackable: {below: "?below", above: "ourlab.model.lidModel_384_square"}});
+				//console.log("queryResultOne: " +JSON.stringify(queryResultOne))
 				const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
 				errorLog += text;
 			}
@@ -391,9 +393,9 @@ var commandHandlers = {
 			*/
 		}
 		if (_.isEmpty(plan)) {
-			const x = _.merge({}, {agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.value.object.location, destination: parsed.objectName.destination});
+			const x = _.pickBy({agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.objectName["object.location"], destination: parsed.objectName.destination});
 			//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
-			return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.lid+"` on `"+parsed.objectName.container+"` from `"+misc.findObjectsValue(parsed.objectName.container+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
+			return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.object+"` on `"+parsed.objectName.container+"` from `"+misc.findObjectsValue(parsed.objectName.container+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
 		//console.log("Tasks:")

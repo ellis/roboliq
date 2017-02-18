@@ -31,7 +31,6 @@
 			"preconditions": [
 				{"model": {"labware": "?lid", "model": "?lidModel"}},
 				{"location": {"labware": "?lid", "site": "?container"}},
-				{"labwareHasLid": {"labware": "?container"}},
 				{"model": {"labware": "?container", "model": "?model"}},
 				{"location": {"labware": "?container", "site": "?origin"}},
 				{"siteIsOpen": {"site": "?origin"}},
@@ -45,8 +44,7 @@
 				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
 			],
 			"deletions": [
-				{"location": {"labware": "?lid", "site": "?container"}},
-				{"labwareHasLid": {"labware": "?container"}}
+				{"location": {"labware": "?lid", "site": "?container"}}
 			],
 			"additions": [
 				{"location": {"labware": "?lid", "site": "?destination"}}
