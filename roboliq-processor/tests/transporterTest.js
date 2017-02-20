@@ -491,7 +491,7 @@ describe('transporter', function() {
 						program: "Narrow",
 						"object": "plate1Lid",
 						"container": "plate1",
-						"destination": "ourlab.mario.site.P3"
+						"destination": "ourlab.mario.site.P4"
 					}
 				}
 			});
@@ -499,9 +499,38 @@ describe('transporter', function() {
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
 			should.deepEqual(result.output.errors, {});
 			should.deepEqual(result.output.effects, {
-				1: { "plate1Lid.location": "ourlab.mario.site.P3" },
-				"1.1": { "plate1Lid.location": "ourlab.mario.site.P3" },
-				CONTINUE: moving to P3 should not be allowed, because another plate is there... why is this allowed?
+				1: { "plate1Lid.location": "ourlab.mario.site.P4" }
+			});
+		});
+	});
+
+	describe.only('transporter.moveLidFromContainerToSite', function () {
+		it("should handle moveLidFromContainerToSite from plate to empty site", function() {
+			var protocol = _.merge({}, protocol0, {
+				objects: {
+					plate1: {
+						hasLid: true
+					},
+					plate1Lid: {
+						type: "Lid",
+						location: "plate1"
+					}
+				},
+				steps: {
+					1: {
+						"command": "transporter.moveLidFromContainerToSite",
+						"object": "plate1Lid",
+						"container": "plate1",
+						"destination": "ourlab.mario.site.P4"
+					}
+				}
+			});
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", ""], protocol, false);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.effects, {
+				1: { "plate1Lid.location": "ourlab.mario.site.P4" },
+				"1.1": { "plate1Lid.location": "ourlab.mario.site.P4" }
 			});
 		});
 	});

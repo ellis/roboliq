@@ -39,7 +39,7 @@ var objectToPredicateConverters = {
  * be a part of the created parameters: agent, equipment, program
  */
 function makeMoveLidFromContainerToSiteParams(parsed) {
-	console.log("makeMoveLidFromContainerToSiteParams: "+JSON.stringify(parsed))
+	// console.log("makeMoveLidFromContainerToSiteParams: "+JSON.stringify(parsed))
 	return _.pickBy({
 		agent: (parsed.objectName.agent) ? "?agent" : undefined,
 		equipment: (parsed.objectName.equipment) ? "?equipment" : undefined,
@@ -51,7 +51,7 @@ function makeMoveLidFromContainerToSiteParams(parsed) {
 }
 
 function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
-	console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
+	// console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
 	}
@@ -82,7 +82,7 @@ function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
 		};
 	}
 	else if (n === 1) {
-		const name = "movePlate-1";
+		const name = "moveLidFromContainerToSite-1";
 		return {
 			"description": `${name}: transport plate from origin to destination in ${n} step(s)`,
 			"task": {"moveLidFromContainerToSite": moveLidParams},
@@ -315,7 +315,7 @@ var commandHandlers = {
 	 * Transport a lid from a container to a destination site.
 	 */
 	"transporter.moveLidFromContainerToSite": function(params, parsed, data) {
-		console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
+		// console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
 		const transporterLogic = require('./transporterLogic.json');
 
 		const keys = ["null", "one"];
@@ -405,7 +405,7 @@ var commandHandlers = {
 				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
 			}).flatten().value();
 		}).flatten().value();
-		console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
+		// console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
 
 		// Create the expansion object
 		var expansion = {};
