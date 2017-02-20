@@ -504,7 +504,7 @@ describe('transporter', function() {
 		});
 	});
 
-	describe.only('transporter.moveLidFromContainerToSite', function () {
+	describe('transporter.moveLidFromContainerToSite', function () {
 		it("should handle moveLidFromContainerToSite from plate to empty site", function() {
 			var protocol = _.merge({}, protocol0, {
 				objects: {
