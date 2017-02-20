@@ -822,13 +822,14 @@ const actionHandlers = {
 		}
 		else {
 			const [rowFrom, colFrom] = wellsParser.locationTextToRowCol(from0);
-			const iFrom = (colFrom - 1) * rows + (rowFrom - 1);
+			iFrom = (colFrom - 1) * rows + (rowFrom - 1);
+			// console.log({from0, rowFrom, colFrom, rows, iFrom})
 		}
 
 		let values;
 		if (action.wells) {
 			values = wellsParser.parse(action.wells, {}, {rows, columns: cols});
-			// TODO: handle from for both cases of well name or for integer
+			// TODO: handle `from` for both cases of well name or for integer
 		}
 		else {
 			const byColumns = _.get(action, "byColumns", true);
