@@ -477,6 +477,7 @@ describe('transporter', function() {
 				objects: {
 					plate1Lid: {
 						type: "Lid",
+						model: "ourlab.model.lidModel_standard",
 						location: "plate1"
 					}
 				},
@@ -501,12 +502,13 @@ describe('transporter', function() {
 		});
 	});
 
-	describe.only('transporter._moveLidFromSiteToContainer', function () {
+	describe('transporter._moveLidFromSiteToContainer', function () {
 		it("should handle _moveLidFromSiteToContainer from plate to empty site", function() {
 			var protocol = _.merge({}, protocol0, {
 				objects: {
 					plate1Lid: {
 						type: "Lid",
+						model: "ourlab.model.lidModel_standard",
 						location: "ourlab.mario.site.P4"
 					}
 				},
@@ -531,16 +533,13 @@ describe('transporter', function() {
 		});
 	});
 
-
 	describe('transporter.moveLidFromContainerToSite', function () {
 		it("should handle moveLidFromContainerToSite from plate to empty site", function() {
 			var protocol = _.merge({}, protocol0, {
 				objects: {
-					plate1: {
-						hasLid: true
-					},
 					plate1Lid: {
 						type: "Lid",
+						model: "ourlab.model.lidModel_standard",
 						location: "plate1"
 					}
 				},
@@ -559,6 +558,35 @@ describe('transporter', function() {
 			should.deepEqual(result.output.effects, {
 				1: { "plate1Lid.location": "ourlab.mario.site.P4" },
 				"1.1": { "plate1Lid.location": "ourlab.mario.site.P4" }
+			});
+		});
+	});
+
+	describe.only('transporter.moveLidFromSiteToContainer', function () {
+		it("should handle moveLidFromSiteToContainer from plate to empty site", function() {
+			var protocol = _.merge({}, protocol0, {
+				objects: {
+					plate1Lid: {
+						type: "Lid",
+						model: "ourlab.model.lidModel_standard",
+						location: "ourlab.mario.site.P4"
+					}
+				},
+				steps: {
+					1: {
+						"command": "transporter.moveLidFromSiteToContainer",
+						"object": "plate1Lid",
+						"origin": "ourlab.mario.site.P4",
+						"container": "plate1"
+					}
+				}
+			});
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", ""], protocol, false);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.effects, {
+				1: { "plate1Lid.location": "plate1" },
+				"1.1": { "plate1Lid.location": "plate1" }
 			});
 		});
 	});

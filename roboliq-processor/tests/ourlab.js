@@ -576,6 +576,9 @@ module.exports = {
 				}
 			}
 		}},
+		// Lid stacking
+		{stackable: {below: "ourlab.model.plateModel_384_square", above: "ourlab.model.lidModel_standard"}},
+		// Timers
 		{"timer.canAgentEquipment": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.timer1",

@@ -22,7 +22,7 @@ Lid:
     label: {type: string}
     model: {type: string}
     location: {type: string}
-  required: [type]
+  required: [type, model]
 
 LidModel:
   description: Model for lid labware
@@ -50,7 +50,7 @@ Plate:
     model: {type: PlateModel}
     location: {type: Site}
     contents: {type: [object, array]}
-  required: [type]
+  required: [type, model]
 
 PlateModel:
   description: Model for plate labware.
