@@ -21,7 +21,24 @@ var predicates = [
 		}
 	},
 
-	// clear: a site is clear if no labware is on it
+	// labwareHasNoLid: a labware has no lid if no labware is on top of it
+	{
+		"<--": {
+			"labwareHasNoLid": {
+				"labware": "?labware"
+			},
+			"and": [{
+				"not": {
+					"location": {
+						"labware": "?lid",
+						"site": "?labware"
+					}
+				}
+			}]
+		}
+	},
+
+	// siteIsClear: a site is clear if no labware is on it
 	{
 		"<--": {
 			"siteIsClear": {
@@ -38,7 +55,7 @@ var predicates = [
 		}
 	},
 
-	// open: a site is open if it's not closed (FUTURE: and if it's not locked)
+	// siteIsOpen: a site is open if it's not closed (FUTURE: and if it's not locked)
 	{
 		"<--": {
 			"siteIsOpen": {

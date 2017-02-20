@@ -16,16 +16,30 @@ transporter._moveLidFromContainerToSite:
     Transport a lid from a container to a destination site.
 
     Developer notes:
-    Handler should return `effects` with the lid's new location and indicating that
-    the plate doesn't have a lid (i.e. `hasLid: false`).
+    Handler should return `effects` with the lid's new location.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Lid identifier", type: "Labware"}
     container: {description: "Container identifier", type: "Plate"}
-    destination: {description: "Site to move the plate to", "type": "Site"}
-  required: [agent, equipment, program, object, origin, destination]
+    destination: {description: "Site to move the lid to", "type": "Site"}
+  required: [agent, equipment, program, object, container, destination]
+
+transporter._moveLidFromSiteToContainer:
+  description: |
+    Transport a lid from an origin site to a labware container.
+
+    Developer notes:
+    Handler should return `effects` with the lid's new location.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    origin: {description: "Site to move the lid from", "type": "Site"}
+    container: {description: "Container to place the lid on", type: "Plate"}
+  required: [agent, equipment, program, object, origin, container]
 
 transporter._movePlate:
   description: |

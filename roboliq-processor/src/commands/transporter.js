@@ -302,6 +302,18 @@ var commandHandlers = {
 		}};
 	},
 	/**
+	 * Transport a lid from labware to site or from site to labware.
+	 *
+	 * Handler should return `effects` with the lid's new location
+	 * and set or remove labware's `hasLid` property.
+	 */
+	"transporter._moveLidFromSiteToContainer": function(params, parsed, data) {
+		return {effects: {
+			//[`${parsed.objectName.container}.hasLid`]: false,
+			[`${parsed.objectName.object}.location`]: parsed.objectName.container
+		}};
+	},
+	/**
 	 * Transport a plate to a destination.
 	 *
 	 * Handler should return `effects` with the plate's new location.

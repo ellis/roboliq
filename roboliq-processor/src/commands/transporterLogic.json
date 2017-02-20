@@ -49,6 +49,31 @@
 			"additions": [
 				{"location": {"labware": "?lid", "site": "?destination"}}
 			]
+		}},
+
+		"transporter._moveLidFromSiteToContainer": {"action": {"description": "transport lid from site to labware",
+			"task": {"transporter._moveLidFromSiteToContainer": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "lid": "?lid", "lidModel": "?lidModel", "container": "?container", "model": "?model", "origin": "?origin", "originModel": "?originModel", "destination": "?destination", "destinationModel": "?destinationModel"}},
+			"preconditions": [
+				{"model": {"labware": "?lid", "model": "?lidModel"}},
+				{"location": {"labware": "?lid", "site": "?origin"}},
+				{"model": {"labware": "?container", "model": "?model"}},
+				{"location": {"labware": "?container", "site": "?destination"}},
+				{"siteIsOpen": {"site": "?origin"}},
+				{"siteIsOpen": {"site": "?destination"}},
+				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
+				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
+				{"stackable": {"below": "?model", "above": "?lidModel"}},
+				{"labwareHasNoLid": {"site": "?container"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
+				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
+				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
+			],
+			"deletions": [
+				{"location": {"labware": "?lid", "site": "?origin"}}
+			],
+			"additions": [
+				{"location": {"labware": "?lid", "site": "?container"}}
+			]
 		}}
 	},
 

@@ -3,6 +3,12 @@
 # Things needed for Oskari's yeast script, part 1 on mario
 
 * [ ] lid handling
+	* [x] `transporter._moveLidFromContainerToSite` roboliq code
+	* [x] `transporter.moveLidFromContainerToSite` roboliq code
+	* [x] `transporter._moveLidFromSiteToContainer` roboliq code
+	* [ ] `transporter.moveLidFromSiteToContainer` roboliq code
+	* [ ] `transporter._moveLidFromContainerToSite` evoware code
+	* [ ] `transporter._moveLidFromSiteToContainer` evoware code
 * [ ] stacking plates via lid handling
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine

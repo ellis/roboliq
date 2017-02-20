@@ -475,9 +475,6 @@ describe('transporter', function() {
 		it("should handle _moveLidFromContainerToSite from plate to empty site", function() {
 			var protocol = _.merge({}, protocol0, {
 				objects: {
-					plate1: {
-						hasLid: true
-					},
 					plate1Lid: {
 						type: "Lid",
 						location: "plate1"
@@ -503,6 +500,37 @@ describe('transporter', function() {
 			});
 		});
 	});
+
+	describe.only('transporter._moveLidFromSiteToContainer', function () {
+		it("should handle _moveLidFromSiteToContainer from plate to empty site", function() {
+			var protocol = _.merge({}, protocol0, {
+				objects: {
+					plate1Lid: {
+						type: "Lid",
+						location: "ourlab.mario.site.P4"
+					}
+				},
+				steps: {
+					1: {
+						"command": "transporter._moveLidFromSiteToContainer",
+						agent: "ourlab.mario.evoware",
+						equipment: "ourlab.mario.roma1",
+						program: "Narrow",
+						"object": "plate1Lid",
+						"origin": "ourlab.mario.site.P4",
+						"container": "plate1"
+					}
+				}
+			});
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", ""], protocol, false);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'))
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.effects, {
+				1: { "plate1Lid.location": "plate1" }
+			});
+		});
+	});
+
 
 	describe('transporter.moveLidFromContainerToSite', function () {
 		it("should handle moveLidFromContainerToSite from plate to empty site", function() {
