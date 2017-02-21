@@ -63,7 +63,7 @@
 				{"siteModel": {"site": "?origin", "siteModel": "?originModel"}},
 				{"siteModel": {"site": "?destination", "siteModel": "?destinationModel"}},
 				{"stackable": {"below": "?model", "above": "?lidModel"}},
-				{"labwareHasNoLid": {"site": "?container"}},
+				{"labwareHasNoLid": {"labware": "?container"}},
 				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?origin"}},
 				{"siteCliqueSite": {"siteClique": "?siteClique1", "site": "?destination"}},
 				{"transporter.canAgentEquipmentProgramSites": {"agent": "?agent", "equipment": "?equipment", "program": "?program", "siteClique": "?siteClique1"}}
