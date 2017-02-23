@@ -34,6 +34,7 @@ const commandHandlers = {
 	"timer._sleep": timer._sleep,
 	"timer._start": timer._start,
 	"timer._wait": timer._wait,
+	"transporter._moveLidFromContainerToSite": transporter._moveLidFromContainerToSite,
 	"transporter._movePlate": transporter._movePlate
 };
 

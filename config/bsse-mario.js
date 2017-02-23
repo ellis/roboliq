@@ -501,6 +501,16 @@ module.exports = {
 				]
 			}
 		}),
+		// Lid stacking
+		_.map(
+			[
+				"ourlab.model.plateModel_96_round_transparent_nunc",
+				"ourlab.model.plateModel_96_square_transparent_nunc",
+				"ourlab.model.plateModel_384_round",
+				"ourlab.model.plateModel_384_square",
+			],
+			model => ({stackable: {below: model, above: "ourlab.model.lidModel_standard"}})
+		),
 		_.map(["ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"], function(model) {
 			return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 				"agent": "ourlab.mario.evoware",

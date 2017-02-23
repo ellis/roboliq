@@ -939,6 +939,7 @@ function fixPredicateUndefines(predicate) {
 /**
  * Lookup nested paths.
  *
+ * @example
  * This example will first lookup `object` in `params`,
  * then lookup the result in `data.objects`,
  * then get the value of `model`,

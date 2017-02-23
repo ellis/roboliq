@@ -6,10 +6,11 @@
 	* [x] `transporter._moveLidFromContainerToSite` roboliq code
 	* [x] `transporter.moveLidFromContainerToSite` roboliq code
 	* [x] `transporter._moveLidFromSiteToContainer` roboliq code
-	* [ ] `transporter.moveLidFromSiteToContainer` roboliq code
+	* [x] `transporter.moveLidFromSiteToContainer` roboliq code
 	* [ ] `transporter._moveLidFromContainerToSite` evoware code
 	* [ ] `transporter._moveLidFromSiteToContainer` evoware code
 * [ ] stacking plates via lid handling
+* [ ] get rid of `params` argument to command handlers, because its redudant
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
 * [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
@@ -18,7 +19,7 @@ Would be nice:
 
 * [ ] tubes
 * [ ] troughs
-* [ ] print a table of labware models and sites in `bsse-mario.js`
+* [ ] print a table of the labware models and sites in `bsse-mario.js`, for reference while writing a script
 
 # Next experiment with Charlotte
 
