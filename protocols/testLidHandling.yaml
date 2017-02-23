@@ -18,3 +18,8 @@ steps:
     object: plate1Lid
     container: plate1
     destination: ourlab.mario.site.P3
+  2:
+    command: transporter.moveLidFromSiteToContainer
+    object: plate1Lid
+    origin: ourlab.mario.site.P3
+    container: plate1
