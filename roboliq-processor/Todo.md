@@ -7,7 +7,7 @@
 	* [x] `transporter.moveLidFromContainerToSite` roboliq code
 	* [x] `transporter._moveLidFromSiteToContainer` roboliq code
 	* [x] `transporter.moveLidFromSiteToContainer` roboliq code
-	* [ ] `transporter._moveLidFromContainerToSite` evoware code
+	* [x] `transporter._moveLidFromContainerToSite` evoware code
 	* [ ] `transporter._moveLidFromSiteToContainer` evoware code
 * [ ] stacking plates via lid handling
 * [ ] get rid of `params` argument to command handlers, because its redudant

@@ -1,0 +1,20 @@
+roboliq: v1
+description: Test lid handling and plate stacking
+
+objects:
+  plate1:
+    type: Plate
+    description: for finding reader error
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P2
+  plate1Lid:
+    type: Lid
+    model: ourlab.model.lidModel_standard
+    location: plate1
+
+steps:
+  1:
+    command: transporter.moveLidFromContainerToSite
+    object: plate1Lid
+    container: plate1
+    destination: ourlab.mario.site.P3
