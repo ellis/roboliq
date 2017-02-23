@@ -8,9 +8,12 @@
 	* [x] `transporter._moveLidFromSiteToContainer` roboliq code
 	* [x] `transporter.moveLidFromSiteToContainer` roboliq code
 	* [x] `transporter._moveLidFromContainerToSite` evoware code
-	* [ ] `transporter._moveLidFromSiteToContainer` evoware code
-* [ ] stacking plates via lid handling
-* [ ] get rid of `params` argument to command handlers, because its redudant
+	* [x] `transporter._moveLidFromSiteToContainer` evoware code
+* [x] stacking plates via lid handling
+* [ ] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
+* [ ] get rid of `params` argument to command handlers, because its redundant
+* [ ] use evoware table file for the grid indexes, rather than using the values in the config file
+* [ ] consider adding display information to the sites, and generate an SVG of the initial bench setup
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
 * [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site

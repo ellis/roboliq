@@ -2,24 +2,64 @@ roboliq: v1
 description: Test lid handling and plate stacking
 
 objects:
-  plate1:
+  # plate1:
+  #   type: Plate
+  #   model: ourlab.model.plateModel_96_round_transparent_nunc
+  #   location: ourlab.mario.site.P2
+  # plate1Lid:
+  #   type: Lid
+  #   model: ourlab.model.lidModel_standard
+  #   location: plate1
+  wastePlate:
     type: Plate
-    description: for finding reader error
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P2
-  plate1Lid:
+    location: ourlab.mario.site.HOTEL32_C2
+  wastePlateLid:
     type: Lid
     model: ourlab.model.lidModel_standard
-    location: plate1
+    location: wastePlate
+  filterPlate:
+    description: PVD filter plate up to 350 ul
+    type: Plate
+    model: ourlab.model.plateModel_96_round_filter_OV
+    location: ourlab.mario.site.P3
 
 steps:
-  1:
+  # 1:
+  #   command: transporter.moveLidFromContainerToSite
+  #   object: plate1Lid
+  #   container: plate1
+  #   destination: ourlab.mario.site.P3
+  # 2:
+  #   command: transporter.moveLidFromSiteToContainer
+  #   object: plate1Lid
+  #   origin: ourlab.mario.site.P3
+  #   container: plate1
+  3:
+    description: "Put waste plate on bench"
+    command: transporter.movePlate
+    object: wastePlate
+    destination: ourlab.mario.site.P6
+  4:
+    description: "Remove lid from waste plate"
     command: transporter.moveLidFromContainerToSite
-    object: plate1Lid
-    container: plate1
-    destination: ourlab.mario.site.P3
-  2:
+    object: wastePlateLid
+    container: wastePlate
+    destination: ourlab.mario.site.HOTEL32_C2
+  5:
+    description: "Put lid on the filter plate"
     command: transporter.moveLidFromSiteToContainer
-    object: plate1Lid
+    object: wastePlateLid
+    origin: ourlab.mario.site.HOTEL32_C2
+    container: filterPlate
+  6:
+    description: "Put filter plate on waste plate"
+    command: transporter.moveLidFromSiteToContainer
+    object: filterPlate
     origin: ourlab.mario.site.P3
-    container: plate1
+    container: wastePlate
+  7:
+    description: "Move the stack to the centrifuge"
+    command: transporter.movePlate
+    object: wastePlate
+    destination: ourlab.mario.site.CENTRIFUGE_2
