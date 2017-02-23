@@ -199,7 +199,7 @@ module.exports = {
 					"REGRIP": {
 						"type": "Site",
 						"evowareCarrier": "ReGrip Station",
-						"evowareGrid": 62,
+						"evowareGrid": 59,
 						"evowareSite": 1
 					},
 					"ROBOPEEL": {

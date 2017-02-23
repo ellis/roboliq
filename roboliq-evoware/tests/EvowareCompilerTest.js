@@ -207,6 +207,7 @@ describe('EvowareCompilerTest', function() {
 						"command": "transporter._movePlate",
 						"agent": "robot1",
 						"equipment": "transporter1",
+						"program": "Narrow",
 						"object": "plate1",
 						"destination": "site2"
 					}
@@ -218,7 +219,7 @@ describe('EvowareCompilerTest', function() {
 			should.deepEqual(results, [
 				[
 					{
-						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,0,0,\"\",\"96-Well Plate\",\"undefined\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"1\",\"(Not defined)\",\"2\");",
+						"line": "Transfer_Rack(\"1\",\"1\",0,0,0,0,0,\"\",\"96-Well Plate\",\"Narrow\",\"\",\"\",\"Some Carrier\",\"\",\"Some Carrier\",\"1\",\"(Not defined)\",\"2\");",
 						"effects": {
 							"plate1.location": "site2",
 							"EVOWARE.romaIndexPrev": 0
@@ -903,7 +904,7 @@ describe('EvowareCompilerTest', function() {
 			const options = {timing: true, variables: {ROBOLIQ: "AAA", BROWSER: "MyBrowser.exe", SCRIPTFILE: "C:\\Here\\myscript.out.json", TEMPDIR: "C:\\Temp"}};
 			const [{lines}] = EvowareCompiler.compile(table, protocol, agents, options);
 			// console.log({lines});
-			should(lines).containEql('Execute("MyBrowser.exe .\\index.html",0,"",2);');
+			should(lines).containEql('Execute("MyBrowser.exe C:\\Here\\index.html",0,"",2);');
 			should(lines).containEql('UserPrompt("Please check the bench setup and then confirm this dialog when you\'re done",0,-1);');
 		});
 
