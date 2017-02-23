@@ -61,6 +61,34 @@ export function _moveLidFromContainerToSite(params, parsed, data) {
 }
 
 /**
+ * Handle the `transporter._moveLidFromSiteToContainer` instruction.
+ *
+ * @param  {object} params - original paramters
+ * @param  {object} parsed - parsed parameters
+ * @param  {object} data - protocol data
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
+export function _moveLidFromSiteToContainer(params, parsed, data) {
+	// console.log("_moveLidFromContainerToSite: "+JSON.stringify(parsed, null, '\t'));
+	const params2 = {
+		agent: params.agent,
+		equipment: params.equipment,
+		program: params.program,
+		object: params.container,
+		destination: parsed.value.container.location
+	};
+	// console.log("params2: "+JSON.stringify(params2, null, '\t'));
+	const parsed2 = commandHelper.parseParams(params2, data, data.protocol.schemas["transporter._movePlate"]);
+	const lidHandling = {
+		lid: parsed.objectName.object,
+		action: "cover",
+		location: parsed.objectName.origin,
+		destination: parsed.objectName.container
+	};
+	return _movePlate(params2, parsed2, data, lidHandling);
+}
+
+/**
  * Handle the `transporter._movePlate` instruction.
  *
  * @param {object} params - original paramters

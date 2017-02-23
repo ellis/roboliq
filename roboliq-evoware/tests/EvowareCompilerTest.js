@@ -241,6 +241,49 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
+			it("should compile transporter._moveLidFromSiteToContainer", function() {
+				const table = {};
+				const protocol = _.merge({}, protocol0, {
+					objects: {
+						plate1Lid: {
+							type: "Lid",
+							model: "lidModel_standard",
+							location: "site2"
+						}
+					},
+					steps: {
+						1: {
+							"command": "transporter._moveLidFromSiteToContainer",
+							"agent": "robot1",
+							"equipment": "transporter1",
+							"program": "Narrow",
+							"object": "plate1Lid",
+							"origin": "site2",
+							"container": "plate1"
+						}
+					}
+				});
+				const agents = ["robot1"];
+				const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {}, [], {timing: false});
+				//console.log(JSON.stringify(results, null, '\t'))
+				should.deepEqual(results, [
+					[
+						{
+							"line": "Transfer_Rack(\"1\",\"1\",0,1,0,0,0,\"1\",\"96-Well Plate\",\"Narrow\",\"\",\"\",\"Some Carrier\",\"Some Carrier\",\"Some Carrier\",\"1\",\"2\",\"1\");",
+							"effects": {
+								"plate1.location": "site1",
+								"plate1Lid.location": "plate1",
+								"EVOWARE.romaIndexPrev": 0
+							},
+							"tableEffects": [
+								[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ],
+								[ [ "Some Carrier", 1, 1 ], { "label": "site1", "labwareModelName": "96-Well Plate" } ]
+							]
+						}
+					]
+				]);
+			});
+
 		it("should compile transporter._movePlate #1", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
