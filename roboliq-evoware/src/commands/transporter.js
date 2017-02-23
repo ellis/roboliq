@@ -41,17 +41,21 @@ function getRomaMoveLine(romaIndex, action) {
  * @return {array} an array of objects that describe output, effects, and table effects
  */
 export function _moveLidFromContainerToSite(params, parsed, data) {
+	// console.log("_moveLidFromContainerToSite: "+JSON.stringify(parsed, null, '\t'));
 	const params2 = {
 		agent: params.agent,
 		equipment: params.equipment,
 		program: params.program,
 		object: params.container,
-		destination: parsed.objectName[`${params.container}.location`]
+		destination: parsed.value.container.location
 	};
+	// console.log("params2: "+JSON.stringify(params2, null, '\t'));
 	const parsed2 = commandHelper.parseParams(params2, data, data.protocol.schemas["transporter._movePlate"]);
 	const lidHandling = {
+		lid: parsed.objectName.object,
 		action: "remove",
-		location: params.destination
+		location: parsed.objectName.destination,
+		destination: parsed.objectName.destination
 	};
 	return _movePlate(params2, parsed2, data, lidHandling);
 }
@@ -59,19 +63,22 @@ export function _moveLidFromContainerToSite(params, parsed, data) {
 /**
  * Handle the `transporter._movePlate` instruction.
  *
- * @param  {object} params - original paramters
- * @param  {object} parsed - parsed parameters
- * @param  {object} data - protocol data
+ * @param {object} params - original paramters
+ * @param {object} parsed - parsed parameters
+ * @param {object} data - protocol data
  * @param {object} [lidHandling0] - an optional option to define lid handling - this is only used by the `_moveLidFromContainerToSite` and `_moveLidFromSiteToContainer` handlers.
+ * @param {string} [lidHandling0.lid] - name of the lid
  * @param {string} [lidHandling0.action] - should either be "remove" or "cover"
  * @param {string} [lidHandling0.location] - the site where the lid should be moved from or to
+ * @param {string} [lidHandling0.destination] - the site where the lid should be after the transfer
  * @return {array} an array of objects that describe output, effects, and table effects
  */
 export function _movePlate(params, parsed, data, lidHandling0) {
-	console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
+	// console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
 	// romaIndex: "(@equipment).evowareRoma: integer"
 	const values = commandHelper.lookupPaths({
 		romaIndex: ["@equipment", "evowareRoma"],
+		programName: ["@program"],
 		plateModelName: [["@object", "model"], "evowareName"],
 		plateOrigName: ["@object", "location"],
 		plateOrigCarrierName: [["@object", "location"], "evowareCarrier"],
@@ -114,7 +121,6 @@ export function _movePlate(params, parsed, data, lidHandling0) {
 	}
 
 	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"], values.romaIndex);
-	values.programName = parsed.value.program;
 	const bMoveBackToHome = parsed.value.evowareMoveBackToHome || false; // 1 = move back to home position
 	values.moveBackToHome = (bMoveBackToHome) ? 1 : 0;
 	//console.log(JSON.stringify(values, null, '\t'))
@@ -154,7 +160,11 @@ export function _movePlate(params, parsed, data, lidHandling0) {
 
 	items.push({
 		line,
-		effects: _.fromPairs([[`${plateName}.location`, plateDestName], [`EVOWARE.romaIndexPrev`, values.romaIndex]]),
+		effects:  _.fromPairs(_.compact([
+			[`${plateName}.location`, plateDestName],
+			(lidHandling.enabled) ? [`${lidHandling0.lid}.location`, lidHandling0.destination] : undefined,
+			[`EVOWARE.romaIndexPrev`, values.romaIndex]]
+		)),
 		tableEffects: [
 			[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
 			[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],

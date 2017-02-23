@@ -256,7 +256,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 			}
 			// If not optional, require the variable's presence:
 			else if (required) {
-				// console.log({propertyName, type, result, path, params, schema})
+				console.log({propertyName, type, result, path, params, schema})
 				expect.truthy({paramName: path1.join(".")}, false, "missing required value [CODE 106]");
 			}
 		}
