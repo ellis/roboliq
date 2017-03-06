@@ -4,7 +4,7 @@ description: |
 
   OrangeG 8g/L calculations to achive 125 ul => ~.5:
 
-  * 0.9152/ul
+  * Absorbance of stock Orange G: 0.9152/ul
   * For 125ul dye to be 0.5: 0.9152*125 / 0.5 = 114x dilution (I'll use our 100x dilution)
 
 
@@ -15,27 +15,15 @@ parameters:
   standardLiquidClass:
     description: Liquid class for the standard wells
     value: Roboliq_Water_Air_1000
-  standardSyringe:
-    description: Syringe to use for the standard wells
-    value: 1
-  standardVolumes:
-    description: The volumes for the standard wells
-    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
   standardWellVolume:
     description: The volume we want to fill wells to when comparing absorbance
     value: 250 ul
-  testVolumes:
-    description: The volumes to test (parameter $v$)
-    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
-  testLiquidClasses:
-    description: The liquid classes to test (parameter $p$)
-    value: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000, Roboliq_Water_Wet_1000]
   testLabwareModel:
     description: The labware model to test (parameter $m$)
     value: ourlab.model.plateModel_96_round_transparent_nunc
-  testSyringes:
-    description: The syringes to test
-    value: [1,2,3,4]
+  # testSyringes:
+  #   description: The syringes to test
+  #   value: [1,2,3,4]
 
 objects:
   plate1:
@@ -112,28 +100,6 @@ objects:
             - where: 'role == "water"'
               conditions:
                 role: [water, water, water, water, refA, refA, refA, refA, refB, refB, refB, refB, water, water, water, water, refA, refA, refA, refA, refB, refB, refB, refB, water, water, water, water]
-      #
-      #         waterVolume=calculate: 'measureVolume - dyeVolume'
-      #         well*=allocateWells:
-      #           wells: A01 down block H02 + A03 down block B10 + G03 down block H10 + A11 down block H12 + D06 down block E07
-      #           rows: 8
-      #           columns: 12
-      #       control:
-      #         well*=allocateWells:
-      #           wells: C03 down block F06 + C06 + F06 + C07 + F07 + C08 down block F10
-      #           rows: 8
-      #           columns: 12
-      #       standard:
-      #         well*=allocateWells:
-      #           wells: C03 down block F06 + C06 + F06 + C07 + F07 + C08 down block F10
-      #           rows: 8
-      #           columns: 12
-      # .caseA=case:
-      #   - where: 'source == dye'
-      #     conditions:
-      #       plate: plate2
-            # plateType: 2
-
       row=calculateRow: well
       col=calculateColumn: well
     orderBy: [plate, col, row]
@@ -244,7 +210,6 @@ steps:
     steps:
       description: "`Read absorbance of {{$plate}}`"
       command: absorbanceReader.measurePlate
-      program: $#standardLiquidClass
       object: $plate
       program:
         excitationWavelength: $#excitationWavelength

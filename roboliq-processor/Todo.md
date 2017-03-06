@@ -10,6 +10,7 @@
 	* [x] `transporter._moveLidFromContainerToSite` evoware code
 	* [x] `transporter._moveLidFromSiteToContainer` evoware code
 * [x] stacking plates via lid handling
+* [ ] make sure all tests succeed
 * [ ] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] use evoware table file for the grid indexes, rather than using the values in the config file
