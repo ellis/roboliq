@@ -911,9 +911,29 @@ function _run(opts, userProtocol) {
 	protocol.COMPILER.roboliqOpts = opts;
 	protocol.COMPILER.filecache = filecache;
 
-	postProcessProtocol(protocol);
-	//console.log("A")
-	validateProtocol1(protocol);
+	try {
+		postProcessProtocol(protocol);
+		//console.log("A")
+		validateProtocol1(protocol);
+	} catch(e) {
+		console.log("Error type = "+(typeof e).toString());
+		if (e.isRoboliqError) {
+			const prefix = expect.getPrefix(e.context);
+			protocol.errors["_"] = _.map(e.errors, s => prefix+s);
+		}
+		else if (_.has(e, "errors")) {
+			protocol.errors["_"] = e.errors;
+		}
+		else {
+			protocol.errors["_"] = _.compact([JSON.stringify(e), e.stack]);
+		}
+		if (opts.throw) {
+			if (_.isPlainObject(e))
+				console.log("e:\n"+JSON.stringify(e));
+			expect.rethrow(e, {stepName: id});
+		}
+		return {protocol: protocol, output: protocol};
+	}
 	//console.log("B")
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
