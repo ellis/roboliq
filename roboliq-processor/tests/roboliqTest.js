@@ -118,7 +118,7 @@ describe('roboliq', function() {
 			});
 		});
 
-		it("it should handle ?-properties in objects and steps", () => {
+		it("should handle ?-properties in objects and steps", () => {
 			var protocol = {
 				roboliq: "v1",
 				objects: {
@@ -145,7 +145,7 @@ describe('roboliq', function() {
 					}
 				}
 			};
-			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "--quiet"], protocol, false);
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "--quiet", "--debug"], protocol, false);
 			//console.log("result:\n"+JSON.stringify(result, null, '\t'));
 			assert(_.size(result.output.errors) > 0, "should have an error due to missing steps.1.duration");
 			should.deepEqual(result.output.fillIns, {
@@ -156,7 +156,7 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.objects.plate1.location, "here");
 		});
 
-		it("it should handle !-properties in objects and steps", () => {
+		it("should handle !-properties in objects and steps", () => {
 			var protocol = {
 				roboliq: "v1",
 				objects: {

@@ -291,6 +291,7 @@ function loadProtocol(a, b, url, filecache) {
 		c.fillIns = {};
 	preProcessQuestionMarks(c, c.objects, ['objects']);
 	preProcessQuestionMarks(c, c.steps, ['steps']);
+	// console.log("A: "+JSON.stringify(c.fillIns["objects.plate1.model"]))
 	preProcessExclamationMarks(c, c.objects, ['objects']);
 	preProcessExclamationMarks(c, c.steps, ['steps']);
 
@@ -350,6 +351,7 @@ function loadProtocol(a, b, url, filecache) {
 	//if (c.objects && !c.predicates)
 	//	console.log(JSON.stringify(c, null, '\t'));
 
+	// console.log("B: "+JSON.stringify(d.fillIns["objects.plate1.model"]))
 	return d;
 }
 
@@ -363,12 +365,14 @@ function loadProtocol(a, b, url, filecache) {
  * @param  {array} path
  */
 function preProcessQuestionMarks(protocol, obj, path) {
+	// console.log("preProcessQuestionMarks")
 	if (_.isPlainObject(obj)) {
 		const pairs0 = _.toPairs(obj);
 		let changed = false;
 		const pairs1 = pairs0.map(pair => {
 			const [name, value] = pair;
 			if (_.endsWith(name, "?")) {
+				// console.log("endsWith: "+name)
 				changed = true;
 				const name1 = name.slice(0, -1);
 				if (value.hasOwnProperty('value!')) {
@@ -376,6 +380,7 @@ function preProcessQuestionMarks(protocol, obj, path) {
 				}
 				else {
 					protocol.fillIns[path.concat(name1).join('.')] = value || {};
+					// console.log(`protocol.fillIns[${path.concat(name1).join('.')}] = ${JSON.stringify(value)}`)
 					return null;
 				}
 			}
@@ -658,7 +663,7 @@ function runWithOpts(opts, userProtocol) {
 			console.log(e.stack);
 		}
 		if (e.isRoboliqError) {
-			result = {}
+			result = {};
 			const errors = expect.RoboliqError.getErrors(e);
 			const path = e.path || "";
 			_.set(result, `output.errors[${path}]`, errors);
@@ -825,14 +830,6 @@ function _run(opts, userProtocol) {
 
 	const filecache = {};
 
-	// Handle fileData and fileJson options, where file data is passed on the command line.
-	function splitInlineFile(s) {
-		var i = s.indexOf(':');
-		assert(i > 0);
-		var name = "./" + path.posix.join(s.substr(0, i));
-		var data = s.substr(i + 1);
-		return [name, data];
-	}
 	_.forEach(opts.fileData, function(s) {
 		var pair = splitInlineFile(s);
 		var data = pair[1];
@@ -912,6 +909,7 @@ function _run(opts, userProtocol) {
 	// Add command line options
 	//console.log({opts})
 	protocol.COMPILER.roboliqOpts = opts;
+	protocol.COMPILER.filecache = filecache;
 
 	postProcessProtocol(protocol);
 	//console.log("A")
@@ -920,285 +918,10 @@ function _run(opts, userProtocol) {
 
 	var objectToPredicateConverters = protocol.objectToPredicateConverters;
 
-	/**
-	 * This function recurively iterates through all objects, and for each
-	 * object whose type has an entry in protocol.objectToPredicateConverters,
-	 * it generates the logical predicates and appends them to stateList.
-	 *
-	 * Mutates stateList.
-	 *
-	 * @param  {string} name - name of current object
-	 * @param  {object} o - current object
-	 * @param  {array} stateList - array of logical predicates
-	 */
-	function createStateItems(o, name = "", stateList = []) {
-		//console.log("name: "+name);
-		if (o.hasOwnProperty("type")) {
-			//console.log("type: "+o.type);
-			var type = o['type'];
-			if (objectToPredicateConverters.hasOwnProperty(type)) {
-				var result = objectToPredicateConverters[type](name, o);
-				if (result.value) {
-					stateList.push.apply(stateList, result.value);
-				}
-			}
-		}
-
-		var prefix = _.isEmpty(name) ? "" : name + ".";
-		_.forEach(o, function(value, name2) {
-			//console.log(name2, value);
-			if (_.isPlainObject(value)) {
-				createStateItems(value, prefix + name2, stateList);
-			}
-		});
-
-		return stateList;
-	}
-
-	/**
-	 * Expand the protocol's steps.
-	 * This means that commands are passed to command handlers to possibly
-	 * be expanded to lower-level sub-commands.
-	 *
-	 * Mutates protocol.
-	 *
-	 * @param  {Protocol} The protocol.
-	 * @return {object} The final state of objects.
-	 */
-	function expandProtocol(protocol) {
-		var objects0 = _.cloneDeep(protocol.objects);
-		_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
-		// If we should resume expansion at a particular step:
-		delete protocol.COMPILER.suspend;
-		// console.log({COMPILER: protocol.COMPILER})
-		if (protocol.COMPILER.resumeStepId) {
-			protocol.COMPILER.skipTo = protocol.COMPILER.resumeStepId; // HACKy...
-		}
-		expandStep(protocol, [], protocol.steps, objects0);
-		return objects0;
-	}
-
-	/**
-	 * Expand the given step by passing a command to its command handler
-	 * and recursively expanding sub-steps.
-	 *
-	 * Mutates protocol.  However, since protocol.objects should still hold the
-	 * *initial* objects after processing, rather than mutating protocol.objects
-	 * during processing, a separate `objects` variable is mutated, which
-	 * starts out as a deep copy of protocol.objects.
-	 *
-	 * @param  {Protocol} protocol - the protocol
-	 * @param  {array} prefix - array of string representing the current step ID (initially []).
-	 * @param  {object} step - the current step (initially protocol.steps).
-	 * @param  {object} objects - a mutable copy of the protocol's objects.
-	 */
-	function expandStep(protocol, prefix, step, objects, SCOPE = {}, DATA = []) {
-		// If protocol.COMPILER.suspend is set, compiling should be suspended and continued later
-		if (protocol.COMPILER.suspend) {
-			return;
-		}
-
-		//console.log("expandStep: "+prefix+JSON.stringify(step))
-		var commandHandlers = protocol.commandHandlers;
-		var id = prefix.join('.');
-		// console.log({id, RESUME: protocol.COMPILER})
-		if (opts.progress) {
-			console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
-		}
-
-		const accesses = [];
-		const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, filecache);
-		const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA(step, data0, SCOPE, DATA);
-
-		// Check for command and its handler
-		const commandName = step.command;
-		const handler = (commandName) ? commandHandlers[commandName] : undefined;
-		if (commandName && !handler) {
-			protocol.warnings[id] = ["unknown command: "+step.command];
-			return;
-		}
-
-		const step0 = _.omit(step, "data");
-		for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
-			const prefix2 = prefix.concat([groupIndex + 1]);
-			const DATA = DATAs[groupIndex];
-			const SCOPE = SCOPEs[groupIndex];
-			const data = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix2, filecache);
-			const SCOPE2 = data.objects.SCOPE;
-			const params = misc.handleDirectiveDeep(step0, data);
-
-			if (foreach) {
-				const groupKey = (groupIndex+1).toString();
-				// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
-				// then expand for each DATA in DATAs.
-				let step2;
-				if (commandName) {
-					if (protocol.schemas[commandName]) {
-						//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
-						const schema = protocol.schemas[commandName];
-						//console.log("params: "+JSON.stringify(params))
-						const parsed = commandHelper.parseParams(params, data, schema);
-						//console.log("parsed:"+JSON.stringify(parsed, null, '\t'))
-						const params2 = _.merge({}, params, parsed.value, parsed.objectName);
-						step2 = params2;
-					}
-					else {
-						step2 = params;
-					}
-				}
-				else if (params.steps) {
-					step2 = params.steps;
-				}
-
-				if (step2) {
-					expandStep(protocol, prefix2, step2, objects, SCOPE2, DATA);
-					/*// if there are substeps, then don't include the parameters again
-					const substepKeys = commandHelper.getStepKeys(step2);
-					if (!_.isEmpty(substepKeys)) {
-					}
-					if (step2.)*/
-					step[groupKey] = step2;
-				}
-			}
-			else {
-				// If we're skipping to a specific step
-				// console.log({COMPILER: protocol.COMPILER})
-				if (protocol.COMPILER.skipTo) {
-					// If the step has been reached:
-					if (protocol.COMPILER.skipTo === id) {
-						protocol.COMPILER.skipTo = undefined;
-						assert(commandName === "system.runtimeLoadVariables", "Roboliq can only resume compiling at a `system.runtimeLoadVariables` command");
-					}
-					else {
-						expandSubsteps(protocol, prefix, step, objects, SCOPE2, DATA);
-					}
-				}
-				else if (commandName === "system.runtimeLoadVariables") {
-					protocol.COMPILER.suspend = true;
-					protocol.COMPILER.suspendStepId = id;
-				}
-				else {
-					if (commandName) {
-						expandCommand(protocol, prefix, step, objects, SCOPE2, params, commandName, handler, DATA, id);
-					}
-					expandSubsteps(protocol, prefix, step, objects, SCOPE2, DATA);
-				}
-			}
-		}
-	}
-
-	function expandSubsteps(protocol, prefix, step, objects, SCOPE, DATA) {
-		// Find all sub-steps (properties that start with a digit)
-		const keys = commandHelper.getStepKeys(step);
-		// Try to expand the substeps
-		for (const key of keys) {
-			expandStep(protocol, prefix.concat(key), step[key], objects, SCOPE, DATA);
-		}
-	}
-
-	function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandName, handler, DATA, id) {
-		// Take the initial predicates and append predicates for the current state
-		// REFACTOR: this might be a time-consuming process, which could perhaps be
-		// sped up by using Immutablejs and checking which objects have changed
-		// rather than regenerating predicates for all objects.
-		const predicates = protocol.predicates.concat(createStateItems(objects));
-		let result = {};
-		const objects2 = _.merge({}, objects, {SCOPE});
-		if (!_.isUndefined(DATA))
-			objects2.DATA = DATA;
-		const data = {
-			objects: objects2,
-			predicates,
-			planHandlers: protocol.planHandlers,
-			schemas: protocol.schemas,
-			accesses: [],
-			files: filecache,
-			protocol,
-			path: prefix,
-			simulatedOutput: protocol.simulatedOutput || {}
-		};
-		try {
-			//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
-			// If a schema is given for the command, parse its parameters
-			const schema = protocol.schemas[commandName];
-			// console.log("params: "+JSON.stringify(params))
-			const parsed = (schema)
-				? commandHelper.parseParams(params, data, schema)
-				: undefined;
-			// Try to run the command handler
-			//console.log("A")
-			//console.log(handler)
-			result = handler(params, parsed, data) || {};
-			result = stripUndefined(result);
-			//console.log("B")
-			//console.log("result: "+JSON.stringify(result))
-		} catch (e) {
-			console.log("Error type = "+(typeof e).toString());
-			if (e.isRoboliqError) {
-				const prefix = expect.getPrefix(e.context);
-				result = {errors: _.map(e.errors, s => prefix+s)};
-			}
-			else if (_.has(e, "errors")) {
-				result = {errors: e.errors};
-			}
-			else {
-				result = {errors: _.compact([JSON.stringify(e), e.stack])};
-			}
-			if (opts.throw) {
-				if (_.isPlainObject(e))
-					console.log("e:\n"+JSON.stringify(e));
-				expect.rethrow(e, {stepName: id});
-			}
-		}
-		// If debugging, store the result verbatim
-		if (opts.debug)
-			protocol.cache[id] = result;
-
-		// If there were errors:
-		if (!_.isEmpty(result.errors)) {
-			protocol.errors[id] = result.errors;
-			// Abort expansion of protocol
-			return false;
-		}
-		// If there were warnings
-		if (!_.isEmpty(result.warnings)) {
-			protocol.warnings[id] = result.warnings;
-		}
-		// If the command was expanded, merge the expansion into the protocol as substeps:
-		if (!_.isEmpty(result.expansion)) {
-			// If an array was returned rather than an object, put it in the proper form
-			//console.log({expansion: result.expansion, stepified: commandHelper.stepify(result.expansion)})
-			result.expansion = commandHelper.stepify(result.expansion);
-			result.expansion = commandHelper.substituteDeep(result.expansion, data, data.objects.SCOPE, data.objects.DATA);
-			//console.log({expansion: result.expansion})
-			_.merge(step, result.expansion);
-		}
-		// If the command has effects
-		if (!_.isEmpty(result.effects)) {
-			//console.log(result.effects);
-			// Add effects to protocol's record of effects
-			protocol.effects[id] = result.effects;
-			//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
-			// Update object states
-			_.forEach(result.effects, (value, key) => _.set(objects, key, value));
-			//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
-		}
-		// If the command has reports
-		if (!_.isEmpty(result.reports)) {
-			_.set(protocol, ["reports", id], result.reports);
-		}
-		// If the command has simulated output
-		if (!_.isEmpty(result.simulatedOutput)) {
-			_.forEach(result.simulatedOutput, (value, key) => {
-				_.set(protocol, ["simulatedOutput", key], value);
-			});
-		}
-	}
-
 	// If initial processing didn't result in any errors,
 	//  expand steps and get final objects.
 	const objectsFinal = (_.isEmpty(protocol.errors))
-		? expandProtocol(protocol)
+		? expandProtocol(opts, protocol)
 		: protocol.objects;
 
 	if (opts.debug || opts.printProtocol) {
@@ -1230,13 +953,14 @@ function _run(opts, userProtocol) {
 	// If there were errors,
 	if (!_.isEmpty(protocol.errors)) {
 		//return {protocol: protocol, output: _.pick(protocol, 'errors', 'warnings')};
+		console.log("WITH ERRORS")
 		return {protocol: protocol, output: protocol};
 	}
 	// Otherwise create tables
 	else {
 		const output = _.merge(
 			{roboliq: version},
-			_.pick(protocol, "description", "config", "parameters", "objects", "schemas", "steps", "effects", "reports", "simulatedOutput", "warnings", "errors")
+			_.pick(protocol, "description", "config", "parameters", "objects", "schemas", "steps", "effects", "reports", "simulatedOutput", "warnings", "errors", "fillIns")
 		);
 		// Handle protocol.COMPILER
 		if (!_.isEmpty(protocol.COMPILER)) {
@@ -1331,6 +1055,290 @@ function _run(opts, userProtocol) {
 		output.tables = tables;
 
 		return {protocol: protocol, output: output};
+	}
+}
+
+// Handle fileData and fileJson options, where file data is passed on the command line.
+function splitInlineFile(s) {
+	var i = s.indexOf(':');
+	assert(i > 0);
+	var name = "./" + path.posix.join(s.substr(0, i));
+	var data = s.substr(i + 1);
+	return [name, data];
+}
+
+/**
+ * This function recurively iterates through all objects, and for each
+ * object whose type has an entry in protocol.objectToPredicateConverters,
+ * it generates the logical predicates and appends them to stateList.
+ *
+ * Mutates stateList.
+ *
+ * @param  {string} name - name of current object
+ * @param  {object} o - current object
+ * @param  {array} stateList - array of logical predicates
+ */
+function createStateItems(objectToPredicateConverters, o, name = "", stateList = []) {
+	//console.log("name: "+name);
+	if (o.hasOwnProperty("type")) {
+		//console.log("type: "+o.type);
+		var type = o['type'];
+		if (objectToPredicateConverters.hasOwnProperty(type)) {
+			var result = objectToPredicateConverters[type](name, o);
+			if (result.value) {
+				stateList.push.apply(stateList, result.value);
+			}
+		}
+	}
+
+	var prefix = _.isEmpty(name) ? "" : name + ".";
+	_.forEach(o, function(value, name2) {
+		//console.log(name2, value);
+		if (_.isPlainObject(value)) {
+			createStateItems(objectToPredicateConverters, value, prefix + name2, stateList);
+		}
+	});
+
+	return stateList;
+}
+
+/**
+ * Expand the protocol's steps.
+ * This means that commands are passed to command handlers to possibly
+ * be expanded to lower-level sub-commands.
+ *
+ * Mutates protocol.
+ *
+ * @param  {Protocol} The protocol.
+ * @return {object} The final state of objects.
+ */
+function expandProtocol(opts, protocol) {
+	var objects0 = _.cloneDeep(protocol.objects);
+	_.merge(protocol, {effects: {}, cache: {}, warnings: {}, errors: {}});
+	// If we should resume expansion at a particular step:
+	delete protocol.COMPILER.suspend;
+	// console.log({COMPILER: protocol.COMPILER})
+	if (protocol.COMPILER.resumeStepId) {
+		protocol.COMPILER.skipTo = protocol.COMPILER.resumeStepId; // HACKy...
+	}
+	expandStep(opts, protocol, [], protocol.steps, objects0);
+	return objects0;
+}
+
+/**
+ * Expand the given step by passing a command to its command handler
+ * and recursively expanding sub-steps.
+ *
+ * Mutates protocol.  However, since protocol.objects should still hold the
+ * *initial* objects after processing, rather than mutating protocol.objects
+ * during processing, a separate `objects` variable is mutated, which
+ * starts out as a deep copy of protocol.objects.
+ *
+ * @param  {Protocol} protocol - the protocol
+ * @param  {array} prefix - array of string representing the current step ID (initially []).
+ * @param  {object} step - the current step (initially protocol.steps).
+ * @param  {object} objects - a mutable copy of the protocol's objects.
+ */
+function expandStep(opts, protocol, prefix, step, objects, SCOPE = {}, DATA = []) {
+	// If protocol.COMPILER.suspend is set, compiling should be suspended and continued later
+	if (protocol.COMPILER.suspend) {
+		return;
+	}
+
+	//console.log("expandStep: "+prefix+JSON.stringify(step))
+	var commandHandlers = protocol.commandHandlers;
+	var id = prefix.join('.');
+	// console.log({id, RESUME: protocol.COMPILER})
+	if (opts.progress) {
+		console.log(_.compact(["step "+id, step.command, step.description]).join(": "));
+	}
+
+	const accesses = [];
+	const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, protocol.COMPILER.filecache);
+	const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA(step, data0, SCOPE, DATA);
+
+	// Check for command and its handler
+	const commandName = step.command;
+	const handler = (commandName) ? commandHandlers[commandName] : undefined;
+	if (commandName && !handler) {
+		protocol.warnings[id] = ["unknown command: "+step.command];
+		return;
+	}
+
+	const step0 = _.omit(step, "data");
+	for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
+		const prefix2 = prefix.concat([groupIndex + 1]);
+		const DATA = DATAs[groupIndex];
+		const SCOPE = SCOPEs[groupIndex];
+		const data = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix2, protocol.COMPILER.filecache);
+		const SCOPE2 = data.objects.SCOPE;
+		const params = misc.handleDirectiveDeep(step0, data);
+
+		if (foreach) {
+			const groupKey = (groupIndex+1).toString();
+			// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
+			// then expand for each DATA in DATAs.
+			let step2;
+			if (commandName) {
+				if (protocol.schemas[commandName]) {
+					//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
+					const schema = protocol.schemas[commandName];
+					//console.log("params: "+JSON.stringify(params))
+					const parsed = commandHelper.parseParams(params, data, schema);
+					//console.log("parsed:"+JSON.stringify(parsed, null, '\t'))
+					const params2 = _.merge({}, params, parsed.value, parsed.objectName);
+					step2 = params2;
+				}
+				else {
+					step2 = params;
+				}
+			}
+			else if (params.steps) {
+				step2 = params.steps;
+			}
+
+			if (step2) {
+				expandStep(opts, protocol, prefix2, step2, objects, SCOPE2, DATA);
+				/*// if there are substeps, then don't include the parameters again
+				const substepKeys = commandHelper.getStepKeys(step2);
+				if (!_.isEmpty(substepKeys)) {
+				}
+				if (step2.)*/
+				step[groupKey] = step2;
+			}
+		}
+		else {
+			// If we're skipping to a specific step
+			// console.log({COMPILER: protocol.COMPILER})
+			if (protocol.COMPILER.skipTo) {
+				// If the step has been reached:
+				if (protocol.COMPILER.skipTo === id) {
+					protocol.COMPILER.skipTo = undefined;
+					assert(commandName === "system.runtimeLoadVariables", "Roboliq can only resume compiling at a `system.runtimeLoadVariables` command");
+				}
+				else {
+					expandSubsteps(opts, protocol, prefix, step, objects, SCOPE2, DATA);
+				}
+			}
+			else if (commandName === "system.runtimeLoadVariables") {
+				protocol.COMPILER.suspend = true;
+				protocol.COMPILER.suspendStepId = id;
+			}
+			else {
+				if (commandName) {
+					expandCommand(protocol, prefix, step, objects, SCOPE2, params, commandName, handler, DATA, id);
+				}
+				expandSubsteps(opts, protocol, prefix, step, objects, SCOPE2, DATA);
+			}
+		}
+	}
+}
+
+function expandSubsteps(opts, protocol, prefix, step, objects, SCOPE, DATA) {
+	// Find all sub-steps (properties that start with a digit)
+	const keys = commandHelper.getStepKeys(step);
+	// Try to expand the substeps
+	for (const key of keys) {
+		expandStep(opts, protocol, prefix.concat(key), step[key], objects, SCOPE, DATA);
+	}
+}
+
+function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandName, handler, DATA, id) {
+	// Take the initial predicates and append predicates for the current state
+	// REFACTOR: this might be a time-consuming process, which could perhaps be
+	// sped up by using Immutablejs and checking which objects have changed
+	// rather than regenerating predicates for all objects.
+	const predicates = protocol.predicates.concat(createStateItems(protocol.objectToPredicateConverters, objects));
+	let result = {};
+	const objects2 = _.merge({}, objects, {SCOPE});
+	if (!_.isUndefined(DATA))
+		objects2.DATA = DATA;
+	const data = {
+		objects: objects2,
+		predicates,
+		planHandlers: protocol.planHandlers,
+		schemas: protocol.schemas,
+		accesses: [],
+		files: protocol.COMPILER.filecache,
+		protocol,
+		path: prefix,
+		simulatedOutput: protocol.simulatedOutput || {}
+	};
+	try {
+		//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
+		// If a schema is given for the command, parse its parameters
+		const schema = protocol.schemas[commandName];
+		// console.log("params: "+JSON.stringify(params))
+		const parsed = (schema)
+			? commandHelper.parseParams(params, data, schema)
+			: undefined;
+		// Try to run the command handler
+		//console.log("A")
+		//console.log(handler)
+		result = handler(params, parsed, data) || {};
+		result = stripUndefined(result);
+		//console.log("B")
+		//console.log("result: "+JSON.stringify(result))
+	} catch (e) {
+		console.log("Error type = "+(typeof e).toString());
+		if (e.isRoboliqError) {
+			const prefix = expect.getPrefix(e.context);
+			result = {errors: _.map(e.errors, s => prefix+s)};
+		}
+		else if (_.has(e, "errors")) {
+			result = {errors: e.errors};
+		}
+		else {
+			result = {errors: _.compact([JSON.stringify(e), e.stack])};
+		}
+		if (opts.throw) {
+			if (_.isPlainObject(e))
+				console.log("e:\n"+JSON.stringify(e));
+			expect.rethrow(e, {stepName: id});
+		}
+	}
+	// If debugging, store the result verbatim
+	if (protocol.COMPILER.roboliqOpts.debug)
+		protocol.cache[id] = result;
+
+	// If there were errors:
+	if (!_.isEmpty(result.errors)) {
+		protocol.errors[id] = result.errors;
+		// Abort expansion of protocol
+		return false;
+	}
+	// If there were warnings
+	if (!_.isEmpty(result.warnings)) {
+		protocol.warnings[id] = result.warnings;
+	}
+	// If the command was expanded, merge the expansion into the protocol as substeps:
+	if (!_.isEmpty(result.expansion)) {
+		// If an array was returned rather than an object, put it in the proper form
+		//console.log({expansion: result.expansion, stepified: commandHelper.stepify(result.expansion)})
+		result.expansion = commandHelper.stepify(result.expansion);
+		result.expansion = commandHelper.substituteDeep(result.expansion, data, data.objects.SCOPE, data.objects.DATA);
+		//console.log({expansion: result.expansion})
+		_.merge(step, result.expansion);
+	}
+	// If the command has effects
+	if (!_.isEmpty(result.effects)) {
+		//console.log(result.effects);
+		// Add effects to protocol's record of effects
+		protocol.effects[id] = result.effects;
+		//console.log("mixPlate.contents.C01 #0: "+_.get(objects, "mixPlate.contents.C01"));
+		// Update object states
+		_.forEach(result.effects, (value, key) => _.set(objects, key, value));
+		//console.log("mixPlate.contents.C01 #1: "+_.get(objects, "mixPlate.contents.C01"));
+	}
+	// If the command has reports
+	if (!_.isEmpty(result.reports)) {
+		_.set(protocol, ["reports", id], result.reports);
+	}
+	// If the command has simulated output
+	if (!_.isEmpty(result.simulatedOutput)) {
+		_.forEach(result.simulatedOutput, (value, key) => {
+			_.set(protocol, ["simulatedOutput", key], value);
+		});
 	}
 }
 
