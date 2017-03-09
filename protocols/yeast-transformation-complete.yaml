@@ -1,0 +1,257 @@
+roboliq: v1
+imports: yeast-transformation-1.yaml
+description: Dispense cells on filter plate
+objects:
+  design1:
+    conditions:
+      layer*:
+      - source: cellCulture
+        volume: 350 ul
+        liquidClass: Roboliq_Water_Air_1000
+        cleanEnd: decontaminate
+        cleanBegin: decontaminate
+        cleanBetween: none
+  design2:
+    conditions:
+      layer*:
+      - source: water
+        volume: 100 ul
+        liquidClass: Roboliq_Water_Air_1000
+        cleanBetween: none
+        cleanEnd: none
+  design3:
+    conditions:
+      layer*:
+      - source: liAc
+        volume: 20 ul
+        liquidClass: Roboliq_Water_Dry_1000
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: none
+        cleanEnd: decontaminate
+  design4:
+    conditions:
+      layer*:
+      - source: masterMix
+        volume: 124 ul
+        liquidClass: "OV PEG Wet 1000"
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: none
+        cleanEnd: decontaminate
+      - source=calculate: 'concat("dnaPlate(", well, ")")'
+        volume: 5 ul
+        liquidClass: Roboliq_Water_Air_1000
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: decontaminate
+        cleanEnd: decontaminate
+
+steps:
+    1:
+        description: Put waste plate on bench
+        command: transporter.movePlate
+        object: wastePlate
+        destination: ourlab.mario.site.P7
+    2:
+        description: Remove lid from waste plate
+        command: transporter.moveLidFromContainerToSite
+        object: wastePlateLid
+        container: wastePlate
+        destination: ourlab.mario.site.P6
+    3:
+        description: "Put filter plate on bench"
+        command: transporter.movePlate
+        object: filterPlate
+        destination: ourlab.mario.site.P3
+    4:
+        description: Add water to match the balance plate weight
+        command: pipetter.pipette
+        sources: water
+        destinations: wastePlate
+        volumes: 600 ul
+        cleanBetween: none
+    5:
+        description: Add cells on the filter plate
+        data: {source: design1}
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: water
+        destinationLabware: balancePlate
+        destinations: $$well
+        volumes: $$volume
+        cleanBegin: none
+        cleanBetween: none
+        cleanEnd: decontaminate
+    6:
+        description: Put lid on the filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        origin: ourlab.mario.site.P6
+        container: filterPlate
+    7:
+        description: Put filter plate on the waste plate
+        command: transporter.moveLidFromSiteToContainer
+        object: filterPlate
+        origin: ourlab.mario.site.P6
+        container: wastePlate
+    8:
+        command: centrifuge.insertPlates2
+        object1: balancePlate
+        site1: ourlab.mario.site.CENTRIFUGE_2
+        object2: wastePlate
+        site2: ourlab.mario.site.CENTRIFUGE_4
+    9:
+        description: Run the centrifuge to discard supernatant
+        command: centrifuge.centrifuge2,
+        object1: plate1,
+        object2: plate2,
+        program: {
+            rpm: 3000,
+            duration: 2 minutes,
+            temperature: 25 degC
+        }
+    10:
+        description: Bring waste plate back from the centrifuge
+        command: transporter.movePlate
+        object: wastePlate
+        destination: ourlab.mario.site.P7
+    11:
+        description: Bring balance plate back from the centrifuge
+        command: transporter.movePlate
+        object: balancePlate
+        destination: ourlab.mario.site.P8
+    12:
+        description: Remove filter plate from waste plate
+        command: transporter.moveLidFromContainerToSite
+        object: filterPlate
+        container: wastePlate
+        destination: ourlab.mario.site.P3
+    13:
+        description: Remove lid from filter plate
+        command: transporter.moveLidFromContainerToSite
+        object: wastePlateLid
+        container: filterPlate
+        destination: ourlab.mario.site.P6
+    14:
+        data: {source: design2}
+        command: pipetter.mix
+        wellLabware: filterPlate
+        wells: $$well
+        counts: 5
+        amounts: 70 ul
+        cleanBegin: none
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: none
+        cleanEnd: decontaminate
+    15:
+        data: {source: design2}
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: water
+        destinationLabware: balancePlate
+        destinations: $$well
+        volumes: $$volume
+        cleanBegin: none
+        cleanBetween: none
+        cleanEnd: decontaminate
+    16:
+        description: Put lid on the filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        origin: ourlab.mario.site.P6
+        container: filterPlate
+    17:
+        description: Put filter plate on the waste plate
+        command: transporter.moveLidFromSiteToContainer
+        object: filterPlate
+        origin: ourlab.mario.site.P6
+        container: wastePlate
+    18:
+        command: centrifuge.insertPlates2
+        object1: balancePlate
+        site1: ourlab.mario.site.CENTRIFUGE_2
+        object2: wastePlate
+        site2: ourlab.mario.site.CENTRIFUGE_4
+    19:
+        description: Run the centrifuge to discard supernatant
+        command: centrifuge.centrifuge2
+        object1: plate1
+        object2: plate2
+        program: {
+            rpm: 3000
+            duration: 2 minutes
+            temperature: 25 degC
+        }
+    20:
+        description: Bring waste plate back from the centrifuge
+        command: transporter.movePlate
+        object: wastePlate
+        destination: ourlab.mario.site.P7
+    21:
+        description: Bring balance plate back from the centrifuge
+        command: transporter.movePlate
+        object: balancePlate
+        destination: ourlab.mario.site.P8
+    22:
+        description: Remove filter plate from waste plate
+        command: transporter.moveLidFromContainerToSite
+        object: filterPlate
+        container: wastePlate
+        destination: ourlab.mario.site.P3
+    23:
+        description: Remove lid from filter plate
+        command: transporter.moveLidFromContainerToSite
+        object: wastePlateLid
+        container: filterPlate
+        destination: ourlab.mario.site.P6
+    24:
+        description: Move the used waste plate to the hotel
+        command: transporter.movePlate
+        object: wastePlate
+        destination: ourlab.mario.site.HOTEL32_C3
+    25:
+        description: Add lithium acetate on the cells (ToDo test)
+        data: {source: design3}
+    26:
+        description: Shake on the teleshake (ToDo)
+        command: shaker.shakePlate
+        equipment: ourlab.mario.shaker
+        program: {
+            command: shaker.ShakerProgram
+            amplitude: 1
+            rpm: 750
+            duration: 60
+        }
+        object: filterPlate
+        site: ourlab.mario.shaker
+    27:
+        description: Put DNA plate on bench
+        command: transporter.movePlate
+        object: dnaPlate
+        destination: ourlab.mario.site.P5
+    28:
+        description: Add PEG mix acetate on the cells (ToDo test)
+        data: {source: design4}
+    29:
+        description: Shake on the teleshake (ToDo)
+        command: shaker.shakePlate
+        equipment: ourlab.mario.shaker
+        program: {
+            command: shaker.ShakerProgram
+            amplitude: 1
+            rpm: 750
+            duration: 1800
+        }
+        object: filterPlate
+        site: ourlab.mario.shaker
+    30:
+        description: Put DNA plate on back
+        command: transporter.movePlate
+        object: dnaPlate
+        destination: ourlab.mario.site.D2
+    30:
+        description: Put PCR plate on the bench
+        command: transporter.movePlate
+        object: pcrPlate
+        destination: ourlab.mario.site.P4
+    # ToDo: Transfer cells directly after DMSO
+
+
