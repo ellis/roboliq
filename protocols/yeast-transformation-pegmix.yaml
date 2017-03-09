@@ -17,3 +17,15 @@ objects:
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
         cleanEnd: decontaminate
+steps:
+  2:
+    data: {source: design1}
+    command: pipetter.mix
+    wellLabware: filterPlate
+    wells: $$well
+    counts: 5
+    amounts: 70 ul
+    cleanBegin: none
+    cleanBetween: decontaminate
+    cleanBetweenSameSource: none
+    cleanEnd: decontaminate
