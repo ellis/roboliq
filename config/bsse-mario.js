@@ -40,7 +40,8 @@ module.exports = {
 					"modelToPlateFile": {
 						"ourlab.model.plateModel_96_round_transparent_nunc": "NUN96ft",
 						"ourlab.model.plateModel_384_square": "GRE384fw",
-						"ourlab.model.EK_384_greiner_flat_bottom": "GRE384fw"
+						"ourlab.model.EK_384_greiner_flat_bottom": "GRE384fw",
+						"ourlab.model.EK_96_well_Greiner_Black": "GRE96fb_chimney"
 					}
 				},
 				"roma1": {

@@ -8,13 +8,13 @@ description: |
 parameters:
   wells:
     description: Which wells should we measure
-    value: A01 down D01
+    value: A06 down H06
   volume1:
     description: What is the volume in ul of the first DNA? (0 to 40 ul)
-    value: 40 ul
+    value: 10 ul
   volume2:
     description: What is the volume in ul of the second DNA (injected)? (0 to 100 ul)
-    value: 50 ul
+    value: 190 ul
 
 objects:
   plate1:
@@ -30,7 +30,7 @@ objects:
   plate2:
     description: empty 384-well plate to be used for fluorescence readouts
     type: Plate
-    model: ourlab.model.EK_384_greiner_flat_bottom
+    model: ourlab.model.EK_96_well_Greiner_Black
     location: ourlab.mario.site.P3
 
   design1:
@@ -67,7 +67,7 @@ steps:
         description: "`Measure well {{$well}}`"
         command: fluorescenceReader.measurePlate
         object: plate2
-        programFileTemplate: ./EK01-test.mdfx
+        programFileTemplate: ./EK_ReaderScript.mdfx
         program:
           wells: $$well
         output:

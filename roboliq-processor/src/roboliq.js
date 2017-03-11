@@ -1269,6 +1269,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 	// sped up by using Immutablejs and checking which objects have changed
 	// rather than regenerating predicates for all objects.
 	const predicates = protocol.predicates.concat(createStateItems(protocol.objectToPredicateConverters, objects));
+	const opts = protocol.COMPILER.roboliqOpts || {};
 	let result = {};
 	const objects2 = _.merge({}, objects, {SCOPE});
 	if (!_.isUndefined(DATA))
