@@ -127,12 +127,16 @@ objects:
     description: PVD filter plate up to 350 ul
     type: Plate
     model: ourlab.model.plateModel_96_round_filter_OV
-    location: ourlab.mario.site.P3
-  # wastePlate:
-  #   description: One well plate for waste
-  #   type: Plate
-  #   model: ourlab.model.plateModel_96_round_transparent_nunc
-  #   location: ourlab.mario.site.P7
+    location: ourlab.mario.site.HOTEL32_D1
+  wastePlate:
+    description: One well plate for waste
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_C1
+  wastePlateLid:
+    type: Lid
+    model: ourlab.model.lidModel_standard
+    location: wastePlate
   culturePlate:
     description: Empty deep well plate for cell cultures
     type: Plate
