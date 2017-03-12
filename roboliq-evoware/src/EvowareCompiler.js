@@ -84,7 +84,7 @@ export function compile(table, protocol, agents, options = {}) {
 			// Prepend token to open HTML
 			if (_.get(options, "checkBench", true)) {
 				lines.unshift(evowareHelper.createUserPromptLine("Please check the bench setup and then confirm this dialog when you're done"));
-				lines.unshift(evowareHelper.createExecuteLine(options.variables.BROWSER, [path.dirname(options.variables.SCRIPTFILE)+"\\index.html"], false));
+				lines.unshift(evowareHelper.createExecuteLine(options.variables.BROWSER, [path.win32.dirname(options.variables.SCRIPTFILE)+"\\index.html"], false));
 			}
 		}
 	}

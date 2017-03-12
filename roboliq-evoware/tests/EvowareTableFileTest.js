@@ -191,7 +191,8 @@ describe('EvowareTableFile', function() {
 				},
 				"LI - Trough 3Pos 100ml": {
 					"3": {
-						"3": { "label": "Bleach", "labwareModelName": "Trough 25ml Max. Recovery" },
+						// "3": { "label": "Bleach", "labwareModelName": "Trough 25ml Max. Recovery" },
+						"2": { "label": "Labware7", "labwareModelName": "Trough 25ml Max. Recovery" },
 						"internal": true
 					}
 				},
@@ -325,7 +326,7 @@ describe('EvowareTableFile', function() {
 					}
 				},
 				"ReGrip Station": {
-					"62": {
+					"59": {
 						"1": {
 							"label": "umgreifen",
 							"labwareModelName": "DM Nunc stronghold"
