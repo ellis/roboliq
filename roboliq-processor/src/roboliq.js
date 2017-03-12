@@ -916,7 +916,9 @@ function _run(opts, userProtocol) {
 		//console.log("A")
 		validateProtocol1(protocol);
 	} catch(e) {
-		console.log("Error type = "+(typeof e).toString());
+		if (opts.debug || opts.throw) {
+			console.log("Error type = "+(typeof e).toString());
+		}
 		if (e.isRoboliqError) {
 			const prefix = expect.getPrefix(e.context);
 			protocol.errors["_"] = _.map(e.errors, s => prefix+s);
@@ -1301,8 +1303,14 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		//console.log("B")
 		//console.log("result: "+JSON.stringify(result))
 	} catch (e) {
-		console.log("Error type = "+(typeof e).toString());
+		// console.log("Some Error:");
+		// console.log(JSON.stringify(e, null, "\t"))
+		if (opts.debug || opts.throw) {
+			console.log("Error type = "+(typeof e).toString());
+		}
 		if (e.isRoboliqError) {
+			// console.log("RoboliqError:");
+			// console.log(JSON.stringify(e, null, "\t"))
 			const prefix = expect.getPrefix(e.context);
 			result = {errors: _.map(e.errors, s => prefix+s)};
 		}
@@ -1312,6 +1320,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		else {
 			result = {errors: _.compact([JSON.stringify(e), e.stack])};
 		}
+		console.log(`ERROR: `+result.errors.join("\n"));
 		if (opts.throw) {
 			if (_.isPlainObject(e))
 				console.log("e:\n"+JSON.stringify(e));

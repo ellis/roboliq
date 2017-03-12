@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+    <FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="2017-03-07T16:34:08.4769851Z" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+    <TecanMeasurement id="1" class="">
+        <MeasurementManualCycle id="2" number="1" type="Standard">
+            <CyclePlate id="3" file="GRE96fb_chimney" plateWithCover="False">
+                <PlateRange id="4" range="A1:A1" auto="false">
+                    <MeasurementFluoInt readingMode="Top" id="5" mode="Normal" type="" name="FluoInt" longname="" description="">
+                        <Well id="6" auto="false">
+                            <Injection id="7" command="" channels="1" volumes="95" speeds="300" refillspeeds="300" refillvolumes="400" injectionmode="StandardInjection" injectiontype="Refill" maxPacketSize="1" readtimelikedispensetime="False" />
+                            <Temperature id="8" module="PLATE" temperature="250" switch="ON" />
+                            <WaitTemperature id="9" module="PLATE" minTemperature="245" maxTemperature="255" maxWaitTimeSpan="P10675199DT2H48M5.4775807S" />
+                            <MeasurementWellKinetic id="10" loops="2" timeSpan="PT0S" maxDeviation="PT0S" duration="PT5M" useDuration="true">
+                                <Condition id="11" expression="CYCLE.CURRENT.10==5">
+                                    <Injection id="12" command="" channels="1" volumes="95" speeds="300" refillspeeds="300" refillvolumes="400" injectionmode="StandardInjection" injectiontype="Inject" maxPacketSize="1" readtimelikedispensetime="False" />
+                                </Condition>
+                                <MeasurementReading id="13" name="" refID="10" refName="KINETIC.RUN.CYCLE" beamDiameter="3000" beamGridType="Single" beamGridSize="1" beamEdgeDistance="auto">
+                                    <ReadingLabel id="14" name="Label1" scanType="ScanFixed" refID="0">
+                                        <ReadingSettings number="1" rate="25000" />
+                                        <ReadingGain type="" gain="91" optimalGainPercentage="0" automaticGain="False" mode="Manual" />
+                                        <ReadingTime integrationTime="20" lagTime="0" readDelay="0" flash="0" dark="0" excitationTime="0" />
+                                        <ReadingFilter id="15" type="Ex" wavelength="5360" bandwidth="90" attenuation="0" usage="FI" />
+                                        <ReadingFilter id="16" type="Em" wavelength="5650" bandwidth="200" attenuation="0" usage="FI" />
+                                        <ReadingZPosition mode="Manual" zPosition="20000" />
+                                    </ReadingLabel>
+                                </MeasurementReading>
+                            </MeasurementWellKinetic>
+                        </Well>
+                    </MeasurementFluoInt>
+                </PlateRange>
+            </CyclePlate>
+        </MeasurementManualCycle>
+        <MeasurementInfo id="0" description="">
+            <ScriptTemplateSettings id="0">
+                <ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+                <ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+            </ScriptTemplateSettings>
+        </MeasurementInfo>
+    </TecanMeasurement>
+</TecanFile>

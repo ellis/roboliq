@@ -11,6 +11,11 @@
 	* [x] `transporter._moveLidFromSiteToContainer` evoware code
 * [x] stacking plates via lid handling
 * [x] make sure all tests succeed
+* [ ] better error reporting for Lena's example of missing plate reader info
+* [ ] better error reporting for Oskari's scripts that are currently failing
+* [ ] improve the script documentation format
+* [ ] look at Oskari's requests in Email from 2017-03-09 (e.g. documentation)
+* [ ] experiment with `~/src/extern/ng2-json-editor` for configuration and script editing
 * [ ] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] use evoware table file for the grid indexes, rather than using the values in the config file

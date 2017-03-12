@@ -74,9 +74,11 @@ function getTemplateAbsorbanceParams(parsed, data) {
 	const labwareModel = _.get(data.objects, labwareModelName);
 	// console.log({labwareModel})
 	const modelToPlateFile = parsed.value.equipment.modelToPlateFile;
-	assert(modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
+	// assert(modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
+	expect.truthy({paramName: "equipment"}, modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
 	const plateFile = modelToPlateFile[labwareModelName];
-	assert(plateFile, `please define ${parsed.objectName.equipment}.plateFile."${labwareModelName}"`);
+	// assert(plateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile."${labwareModelName}"`);
+	expect.truthy({paramName: "equipment"}, plateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile."${labwareModelName}"`);
 
 	let wells;
 	const wells0 = (program.wells)
@@ -264,7 +266,7 @@ module.exports = {
 			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
 		},
 		[`equipment.run|${agentName}|${equipmentName}`]: function(params, parsed, data) {
-			console.log("reader-InfiniteM200Pro-equipment.run: "+JSON.stringify(parsed, null, '\t'));
+			// console.log("reader-InfiniteM200Pro-equipment.run: "+JSON.stringify(parsed, null, '\t'));
 
 			const hasProgram = (parsed.value.program) ? 1 : 0;
 			const hasProgramFile = (parsed.value.programFile) ? 1 : 0;
