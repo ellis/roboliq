@@ -29,8 +29,18 @@ Duration specified as a string.  Parsing is handled by [mathjs](http://mathjs.or
 Valid units are:
 second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia)
 
-**Examples**:
+**Example**:
 
 * `1s` = 1 second
 * `3 minutes` = 3 minutes
 * `4 h` = 4 hours
+
+### SiteOrStay
+
+When a command is performed on a plate, sometimes the plate first needs to
+be moved to the proper equipment (e.g. you might put a plate onto a shaker in
+order to shake it).  By default, the plate will be moved back to its prior
+location after the command is finished.  Such commands have a `destinationAfter`
+property with type `SiteOrStay` which can be used to override this behavior.
+Either you can specify different `Site` where the plate should be moved to after
+the command, or you can specify `"stay"` to leave the plate there.

@@ -20,7 +20,10 @@ shaker.ShakerProgram:
   required: [duration]
 
 shaker.shakePlate:
-  description: "Shake a plate."
+  description: |
+    Shake a plate.  If necessary, the plate will be transfered to the shaker
+    first.  By default, the plate will also be automatically moved back to its
+    prior location after shaking.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
@@ -40,7 +43,9 @@ shaker.shakePlate:
     ```
 
 shaker.run:
-  description: "Run the shaker."
+  description: |
+    Run the shaker.  This will simply run the given shaker program, regardless of
+    what plate is on the shaker or whether the shaker is empty.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
