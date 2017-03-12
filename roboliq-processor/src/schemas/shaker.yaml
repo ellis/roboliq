@@ -29,6 +29,15 @@ shaker.shakePlate:
     site: {description: "Site identifier on shaker", type: "Site"}
     destinationAfter: {description: "Site to move the plate to after this command", "type": "SiteOrStay"}
   required: ["program", "object"]
+  example: |
+    This will shake `plate1` for 1 minute:
+
+    ```
+    command: shaker.shakePlate
+    program:
+      duration: 1 minute
+    object: plate1
+    ```
 
 shaker.run:
   description: "Run the shaker."

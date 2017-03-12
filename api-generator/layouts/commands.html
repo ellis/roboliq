@@ -49,7 +49,7 @@
 									{{md description}}
 
 									{{#if properties}}
-									<p style="margin-top: 1em">Properties:</p>
+									<p style="margin-top: 1em"><b>Properties:</b></p>
 
 									<table class="table table-striped table-hover table-condensed">
 										<tr><th>Name</th><th>Type</th><th>Argument</th><th>Description</th></tr>
@@ -57,14 +57,14 @@
 											<tr>
 												<td>{{@key}}</td>
 												<td>{{type}}</td>
-												<td>...</td>
-												<td>{{md description}}</td>
+												<td>{{required}}</td>
+												<td>{{md description}}{{#if enum}}One of: {{enum}}{{/if}}</td>
 											</tr>
 											{{#each properties}}
 												<tr>
 													<td>&nbsp;&nbsp;{{@key}}</td>
 													<td>{{type}}</td>
-													<td>...</td>
+													<td>{{required}}</td>
 													<td>{{md description}}</td>
 												</tr>
 											{{/each}}
@@ -73,7 +73,7 @@
 									{{/if}}
 
 									{{#if example}}
-										Example:
+										<b>Example:</b>
 
 										{{md example}}
 									{{/if}}

@@ -1,4 +1,6 @@
 const _forEach = require('lodash/forEach');
+const _isArray = require('lodash/isArray');
+const _isPlainObject = require('lodash/isPlainObject');
 const path = require('path');
 const YAML = require('yamljs');
 
@@ -30,6 +32,44 @@ handlebars.registerHelper('md', function(text) {
 	}
 });
 
+function processSchemas(x) {
+	// console.log("processSchemas:")
+	if (_isPlainObject(x)) {
+		if (x.hasOwnProperty("properties") && _isPlainObject(x.properties)) {
+			// console.log("hasProperties")
+			// If properties are required, add `required=true` to them
+			if (x.hasOwnProperty("required") && _isArray(x.required)) {
+				x.required.forEach(function(name) {
+					// console.log("required: "+name)
+					if (x.properties.hasOwnProperty(name)) {
+						x.properties[name].required = "required";
+					}
+				})
+			}
+			// Add some defaults
+			if (x.properties.description && !x.properties.description.description)
+				x.properties.description.description = "Optional user description of this item";
+			if (x.properties.label && !x.properties.label.description)
+				x.properties.label.description = "Optional user label for this item";
+			if (x.properties.description && !x.properties.type.description)
+				x.properties.type.description = "Type of this object";
+			if (x.properties.type && !x.properties.type.type)
+				x.properties.type.type = "string";
+			// Recurse into properties
+			_forEach(x.properties, function(value, key) {
+				if (!value.type && value.enum)
+					value.type = "string";
+				processSchemas(value);
+			});
+		}
+		else {
+			_forEach(x, function(value, key) {
+				processSchemas(value);
+			});
+		}
+	}
+}
+
 metalsmith(__dirname)
 	.source("content")
 	//.source(__dirname+"/../src/schemas")
@@ -43,6 +83,7 @@ metalsmith(__dirname)
 		_forEach(files, function(file, filename) {
 			if (path.extname(filename).toLowerCase() === ".yaml") {
 				file.data = YAML.parse(file.contents.toString("utf8"));
+				processSchemas(file.data);
 			}
 		});
 		done();

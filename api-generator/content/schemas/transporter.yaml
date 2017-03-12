@@ -11,6 +11,36 @@ Transporter:
     label: {type: string}
   required: [type]
 
+transporter._moveLidFromContainerToSite:
+  description: |
+    Transport a lid from a container to a destination site.
+
+    Developer notes:
+    Handler should return `effects` with the lid's new location.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    container: {description: "Container identifier", type: "Plate"}
+    destination: {description: "Site to move the lid to", "type": "Site"}
+  required: [agent, equipment, program, object, container, destination]
+
+transporter._moveLidFromSiteToContainer:
+  description: |
+    Transport a lid from an origin site to a labware container.
+
+    Developer notes:
+    Handler should return `effects` with the lid's new location.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    origin: {description: "Site to move the lid from", "type": "Site"}
+    container: {description: "Container to place the lid on", type: "Plate"}
+  required: [agent, equipment, program, object, origin, container]
+
 transporter._movePlate:
   description: |
     Transport a plate to a destination.
@@ -22,7 +52,7 @@ transporter._movePlate:
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Plate identifier", type: "Plate"}
     destination: {description: "Site to move the plate to", "type": "Site"}
-  required: [agent, equipment, object, destination]
+  required: [agent, equipment, program, object, destination]
 
 transporter.doThenRestoreLocation:
   description: |
@@ -35,6 +65,30 @@ transporter.doThenRestoreLocation:
     program: {description: "Program identifier for transport", type: "name"}
     steps: {description: "Sub-steps to perform", type: [object, array]}
   required: [objects]
+
+transporter.moveLidFromContainerToSite:
+  description: |
+    Transport a plate to a destination.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    container: {description: "Container identifier", type: "Labware"}
+    destination: {description: "Site to move the lid to", "type": "Site"}
+  required: [object, destination]
+
+transporter.moveLidFromSiteToContainer:
+  description: |
+    Transport a plate to a destination.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program identifier for transport", type: "name"}
+    object: {description: "Lid identifier", type: "Labware"}
+    origin: {description: "Site to move the lid from", "type": "Site"}
+    container: {description: "Container to move the lid to", type: "Labware"}
+  required: [object, destination]
 
 transporter.movePlate:
   description: |

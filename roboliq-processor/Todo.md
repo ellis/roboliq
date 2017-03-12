@@ -12,10 +12,12 @@
 * [x] stacking plates via lid handling
 * [x] make sure all tests succeed
 * [x] better error reporting for Lena's example of missing plate reader info
-* [ ] better error reporting for Oskari's scripts that are currently failing
-	* [ ] `npm start -- --progress -P ../compiled --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/yeast-transformation-cells.yaml`
+* [x] better error reporting for Oskari's scripts that are currently failing
+	* [x] `npm start -- --progress -P ../compiled --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/yeast-transformation-cells.yaml`
 * [ ] improve the script documentation format
+	* [ ] mark required parameters
 * [ ] look at Oskari's requests in Email from 2017-03-09 (e.g. documentation)
+	* [ ] shaker: make `duration` a duration instead of a number
 * [ ] experiment with `~/src/extern/ng2-json-editor` for configuration and script editing
 * [ ] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
 * [ ] get rid of `params` argument to command handlers, because its redundant

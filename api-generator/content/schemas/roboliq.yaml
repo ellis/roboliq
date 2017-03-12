@@ -14,6 +14,24 @@ Design:
     actions: {type: array}
   required: [type]
 
+Lid:
+  description: Lid labware
+  properties:
+    type: {enum: [Lid]}
+    description: {type: string}
+    label: {type: string}
+    model: {type: string}
+    location: {type: string}
+  required: [type, model]
+
+LidModel:
+  description: Model for lid labware
+  properties:
+    type: {enum: [LidModel]}
+    description: {type: string}
+    label: {type: string}
+  required: [type]
+
 Liquid:
   description: Liquid substance.
   properties:
@@ -32,7 +50,7 @@ Plate:
     model: {type: PlateModel}
     location: {type: Site}
     contents: {type: [object, array]}
-  required: [type]
+  required: [type, model]
 
 PlateModel:
   description: Model for plate labware.

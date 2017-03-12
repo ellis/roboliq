@@ -16,8 +16,8 @@ Syringe:
     type: {enum: [Syringe]}
     description: {type: string}
     label: {type: string}
-    tipModel: {description: Tip model identifier, type: string}
-    tipModelPermanent: {type: string}
+    tipModel: {description: Tip model identifier for the tip currently on the syringe, type: string}
+    tipModelPermanent: {type: string, description: "Tip model identifier if this syringe has a permanent tip"}
   required: [type]
 
 pipetter._MixSpec:
@@ -50,7 +50,7 @@ pipetter._MeasureVolumeItem:
     well: {description: Well specifier, type: Well}
   required: [syringe, well, distance]
 
-pipetter.MeasureItem:
+pipetter.MeasureVolumeItem:
   description: Parameters for pipetter.measureVolume items.
   properties:
     syringe: {description: Syringe identifier, type: [number, nameOf Syringe]}
@@ -97,6 +97,7 @@ pipetter.PipetteItem:
     volume: {description: Volume, type: Volume}
     volumeCalibrated: {description: "Calculate a calibrated volume", type: object}
     volumeTotal: {description: "Volume that the well should be brought up to.", type: Volume}
+    program: {description: "Program identifier", type: "string"}
     layer: {description: "A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list."}
     cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: [boolean, pipetter.MixSpec]}
@@ -247,11 +248,12 @@ pipetter.measureVolume:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    items: {description: "List of parameters for individual wells to measure", "type": "array", items: {type: pipetter.PunctureItem}}
+    program: {description: "Program identifier", type: "string"}
+    items: {description: "List of parameters for individual wells to measure", "type": "array", items: {type: pipetter.MeasureVolumeItem}}
     wellLabware: {description: "Labware for wells", "type": "Plate"}
     wells: {description: "Specifier for well(s) to measure, if missing from items", type: Wells}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
     cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
@@ -276,7 +278,7 @@ pipetter.mix:
     counts: {description: "Number of times to aspirate, if missing from items", type: integer, default: 3}
     amounts: {description: "Amount to aspirate, either as a fraction or absolute volume, if missing from items", type: [Volume, number], default: 0.7}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
@@ -287,7 +289,7 @@ pipetter.pipette:
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
-    program: {description: "Program identifier", type: "string"}
+    program: {description: "Program identifier", type: [array, string], items: {type: string}}
     sourceProgram: {description: "Program identifier for aspirating from source, if it should differ from 'program'", type: "string"}
     items: {description: "Data about what should be pipetted where", "type": "array", items: {type: pipetter.PipetteItem}}
     sourceLabware: {description: "Labware for source wells", "type": "Plate"}
@@ -296,7 +298,7 @@ pipetter.pipette:
     destinations: {description: "Specifier for destination(s) to despense to, if missing from items", type: Wells}
     volumes: {description: "Volume(s) to pipette, if missing from items", type: Volumes}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
     cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
     cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
@@ -316,7 +318,7 @@ pipetter.punctureSeal:
     wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
     distances: {description: "Distance for puncturing", type: [Length, array], items: {type: Length}}
-    clean: {description: "Intensity of cleaning", type: string}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)", type: string}
     cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
     cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
     cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
@@ -335,7 +337,7 @@ pipetter.pipetteDilutionSeries:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier", type: "string"}
     dilutionFactor: {description: "Dilution factor by which each subsequent well is diluted", type: number, default: 2}
-    dilutionMethod: {description: "How to dilution -- `begin`: distribute diluent to destination wells first (default); `before`: add diluent right before transfering aliquot; `after`: add diluent right after transfering aliquot; `source`: dilute the well that the aliquot will be extracted from.", enum: [begin, before, after, source], default: begin}
+    dilutionMethod: {description: "How to dilute -- `begin`: distribute diluent to destination wells first (default); `before`: add diluent right before transfering aliquot; `after`: add diluent right after transfering aliquot; `source`: dilute the well that the aliquot will be extracted from.", enum: [begin, before, after, source], default: begin}
     lastWellHandling: {description: "How to handle the last well in a series", type: string, enum: [none, diluteOnly, diluteAndExtract], default: "diluteAndExtract"}
     items: {description: "Array of dilution items", "type": "array", items: {type: pipetter.DilutionItem}}
     diluent: {description: "Diluent to be used in dilution", type: Source}
