@@ -215,7 +215,10 @@ function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
  * Transport a lid from an origin site to a container.
  */
 function moveLidFromSiteToContainer(params, parsed, data) {
-	// console.log("transporter.moveLidFromSiteToContainer:"); console.log(JSON.stringify(parsed, null, '\t'))
+	console.log("transporter.moveLidFromSiteToContainer:"); console.log(JSON.stringify(parsed, null, '\t'));
+	if (parsed.input.originType != "Site") {
+		expect.throw({paramName: "object"}, "expected lid to be on a site; instead lid's location is "+parsed.input.origin);
+	}
 	const transporterLogic = require('./transporterLogic.json');
 
 	const keys = ["null", "one"];
@@ -302,6 +305,7 @@ function moveLidFromSiteToContainer(params, parsed, data) {
 }
 moveLidFromSiteToContainer.inputSpec = {
 	origin: "object*location",
+	originType: "object*location*type",
 	lid: "object",
 	lidModel: "object*model",
 	container: "container",
@@ -334,8 +338,8 @@ function makeMoveLidFromSiteToContainerMethod(parsed, moveLidParams, n, llpl) {
 
 	const originQuery = llpl.query({"siteModel": {"site": origin, "siteModel": "?originModel"}});
 	const destinationQuery = llpl.query({"siteModel": {"site": destination, "siteModel": "?destinationModel"}});
-	// console.log("originQuery: "+JSON.stringify(originQuery, null, '\t'))
-	// console.log("destinationQuery: "+JSON.stringify(destinationQuery, null, '\t'))
+	console.log("originQuery: "+JSON.stringify(originQuery, null, '\t'))
+	console.log("destinationQuery: "+JSON.stringify(destinationQuery, null, '\t'))
 	const originModel = originQuery[0].siteModel.siteModel;
 	const destinationModel = destinationQuery[0].siteModel.siteModel;
 

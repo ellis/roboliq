@@ -494,6 +494,11 @@ steps:
         command: transporter.movePlate
         object: dnaPlate
         destination: ourlab.mario.site.P5
+      # 3:
+      #   description: Put DNA plate on bench
+      #   command: transporter.moveLidFromContainerToSite
+      #   object: dnaPlateLid
+      #   destination: ourlab.mario.site.HOTEL32_D2
     28:
         description: Add PEG mix on the cells (ToDo test)
         data: {source: design4}
