@@ -42,7 +42,7 @@ var objectToPredicateConverters = {
  * Transport a lid from a container to a destination site.
  */
 function moveLidFromContainerToSite(params, parsed, data) {
-	console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
+	// console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
 	if (parsed.input.containerObject.type != "Plate") {
 		expect.throw({paramName: "object"}, "expected lid to be on a plate; instead lid's location is "+parsed.input.container);
 	}
