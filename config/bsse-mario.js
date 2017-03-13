@@ -458,7 +458,7 @@ module.exports = {
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_CENTRIFUGE",
 			sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp"]
 		}),
 		// short-format plate sites (non-tall labware, not for deep well plates)
 		makeSiteModelPredicates({

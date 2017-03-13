@@ -280,17 +280,32 @@ steps:
         volumes: 600 ul
         cleanBetween: none
     5:
-        description: Add cells on the filter plate
+        description: "Step: Cells"
         data: {source: design1}
-        command: pipetter.pipette
-        program: Roboliq_Water_Air_1000
-        sources: water
-        destinationLabware: balancePlate
-        destinations: $$well
-        volumes: $$volume
-        cleanBegin: none
-        cleanBetween: none
-        cleanEnd: decontaminate
+        1:
+            command: experiment.forEachGroup
+            groupBy: layer
+            steps:
+                command: pipetter.pipette
+                program: $liquidClass
+                sources: $$source
+                destinationLabware: $destinationLabware
+                destinations: $$well
+                volumes: $volume
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
+        2:
+            description: Add cells on the filter plate
+            command: pipetter.pipette
+            program: Roboliq_Water_Air_1000
+            sources: water
+            destinationLabware: balancePlate
+            destinations: $$well
+            volumes: $$volume
+            cleanBegin: none
+            cleanBetween: none
+            cleanEnd: decontaminate
     6:
         description: Put lid on the filter plate
         command: transporter.moveLidFromSiteToContainer
@@ -340,28 +355,43 @@ steps:
         object: wastePlateLid
         container: filterPlate
         destination: ourlab.mario.site.P6
+
     14:
+        description: "Step: water resuspension"
         data: {source: design2}
-        command: pipetter.mix
-        wellLabware: filterPlate
-        wells: $$well
-        counts: 5
-        amounts: 70 ul
-        cleanBegin: none
-        cleanBetween: decontaminate
-        cleanBetweenSameSource: none
-        cleanEnd: decontaminate
-    15:
-        data: {source: design2}
-        command: pipetter.pipette
-        program: Roboliq_Water_Air_1000
-        sources: water
-        destinationLabware: balancePlate
-        destinations: $$well
-        volumes: $$volume
-        cleanBegin: none
-        cleanBetween: none
-        cleanEnd: decontaminate
+        1:
+            command: experiment.forEachGroup
+            groupBy: layer
+            steps:
+                command: pipetter.pipette
+                program: $liquidClass
+                sources: $$source
+                destinationLabware: $destinationLabware
+                destinations: $$well
+                volumes: $volume
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
+        2:
+            command: pipetter.mix
+            wellLabware: filterPlate
+            wells: $$well
+            counts: 5
+            amounts: 70 ul
+            cleanBegin: none
+            cleanBetween: decontaminate
+            cleanBetweenSameSource: none
+            cleanEnd: decontaminate
+        3:
+            command: pipetter.pipette
+            program: Roboliq_Water_Air_1000
+            sources: water
+            destinationLabware: balancePlate
+            destinations: $$well
+            volumes: $$volume
+            cleanBegin: none
+            cleanBetween: none
+            cleanEnd: decontaminate
     16:
         description: Put lid on the filter plate
         command: transporter.moveLidFromSiteToContainer
@@ -419,6 +449,19 @@ steps:
     25:
         description: Add lithium acetate on the cells (ToDo test)
         data: {source: design3}
+        1:
+            command: experiment.forEachGroup
+            groupBy: layer
+            steps:
+                command: pipetter.pipette
+                program: $liquidClass
+                sources: $$source
+                destinationLabware: $destinationLabware
+                destinations: $$well
+                volumes: $volume
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
     26:
         description: Shake on the teleshake (ToDo)
         command: shaker.shakePlate
@@ -433,8 +476,31 @@ steps:
         object: dnaPlate
         destination: ourlab.mario.site.P5
     28:
-        description: Add PEG mix acetate on the cells (ToDo test)
+        description: Add PEG mix on the cells (ToDo test)
         data: {source: design4}
+        1:
+            command: experiment.forEachGroup
+            groupBy: layer
+            steps:
+                command: pipetter.pipette
+                program: $liquidClass
+                sources: $$source
+                destinationLabware: $destinationLabware
+                destinations: $$well
+                volumes: $volume
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
+        2:
+            command: pipetter.mix
+            wellLabware: filterPlate
+            wells: $$well
+            counts: 5
+            amounts: 70 ul
+            cleanBegin: none
+            cleanBetween: decontaminate
+            cleanBetweenSameSource: none
+            cleanEnd: decontaminate
     29:
         description: Shake on the teleshake (ToDo)
         command: shaker.shakePlate
