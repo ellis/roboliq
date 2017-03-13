@@ -997,20 +997,13 @@ function lookupPaths(paths, params, data) {
 }
 
 /**
- * Parse and lookup a single item from an input specification for a command handler,
- * and return the value found or raise an error.
- * @return {any} value found
+ * Parse input spec and return object with the same properties as the spec,
+ * but with values looked up.
  */
-function getInputSpecItemValue(item, params, data) {
-	if (_.isString(item.path)) {
-
-	}
-	else if (_.isArray(item.path)) {
-
-	}
-	else {
-		expect.throw({}, "path must be a string or array: "+JSON.stringify(item));
-	}
+function parseInputSpec(inputSpec, parsed, data) {
+	return _.mapValues(inputSpec, (item, key) => {
+		return lookupInputPath(item, parsed, data);
+	});
 }
 
 /**
@@ -1033,6 +1026,7 @@ function getInputSpecItemValue(item, params, data) {
  * @return {any}        [description]
  */
 function lookupInputPath(path, parsed, data) {
+	// console.log("lookupInputPath:"); console.log({path, parsed})
 	assert(_.isString(path) && !_.isEmpty(path));
 
 	// Check whether success is required
@@ -1301,6 +1295,7 @@ module.exports = {
 	getStepKeys,
 	lookupPath,
 	lookupPaths,
+	parseInputSpec,
 	_lookupInputPath: lookupInputPath,
 	parseParams,
 	queryLogic,

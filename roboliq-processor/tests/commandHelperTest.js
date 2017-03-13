@@ -746,7 +746,7 @@ describe('commandHelper', function() {
 
 	});
 
-	describe.only("_lookupInputPath", () => {
+	describe("_lookupInputPath", () => {
 		const plate1 = {
 			type: "Plate",
 			location: "site1"
@@ -807,6 +807,40 @@ describe('commandHelper', function() {
 		/*
 	  * * "?object": optionally gets parameter value.
 	  */
+	});
+
+	describe("parseInputSpec", () => {
+		const plate1 = {
+			type: "Plate",
+			location: "site1"
+		};
+		const site1 = {
+			type: "Site"
+		};
+		const data = {
+			objects: {
+				plate1,
+				site1
+			}
+		};
+		const parsed = {
+			orig: {
+				thing: "plate1"
+			},
+			objectName: {
+				thing: "plate1"
+			}
+		};
+		const inputSpec = {
+			origin: "thing*location"
+		};
+
+		it("should handle valid specifications", () => {
+			should.deepEqual(
+				commandHelper.parseInputSpec(inputSpec, parsed, data),
+				{origin: "site1"}
+			);
+		});
 	});
 
 });

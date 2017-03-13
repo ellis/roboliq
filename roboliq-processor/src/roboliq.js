@@ -1297,7 +1297,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 			: undefined;
 		// If the handler has an input specification, parse it
 		if (_.isPlainObject(handler.inputSpec)) {
-			const input = commandHelper.parseInputSpec(handler.inputSpec, params, data);
+			const input = commandHelper.parseInputSpec(handler.inputSpec, parsed, data);
 			parsed.input = input;
 		}
 		// Try to run the command handler
