@@ -337,12 +337,12 @@ steps:
         command: transporter.moveLidFromSiteToContainer
         object: filterPlate
         container: wastePlate
-    8:
-        command: centrifuge.insertPlates2
-        object1: balancePlate
-        site1: ourlab.mario.site.CENTRIFUGE_2
-        object2: wastePlate
-        site2: ourlab.mario.site.CENTRIFUGE_4
+    # 8:
+    #     command: centrifuge.insertPlates2
+    #     object1: balancePlate
+    #     site1: ourlab.mario.site.CENTRIFUGE_2
+    #     object2: wastePlate
+    #     site2: ourlab.mario.site.CENTRIFUGE_4
     9:
         description: Run the centrifuge to discard supernatant
         command: centrifuge.centrifuge2
@@ -352,16 +352,16 @@ steps:
             rpm: 3000
             duration: 2 minutes
             temperature: 25 degC
-    10:
-        description: Bring waste plate back from the centrifuge
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.P7
-    11:
-        description: Bring balance plate back from the centrifuge
-        command: transporter.movePlate
-        object: balancePlate
-        destination: ourlab.mario.site.P5
+    # 10:
+    #     description: Bring waste plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: wastePlate
+    #     destination: ourlab.mario.site.P7
+    # 11:
+    #     description: Bring balance plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: balancePlate
+    #     destination: ourlab.mario.site.P5
     12:
         description: Remove filter plate from waste plate
         command: transporter.moveLidFromContainerToSite
@@ -419,12 +419,12 @@ steps:
         command: transporter.moveLidFromSiteToContainer
         object: filterPlate
         container: wastePlate
-    18:
-        command: centrifuge.insertPlates2
-        object1: balancePlate
-        site1: ourlab.mario.site.CENTRIFUGE_2
-        object2: wastePlate
-        site2: ourlab.mario.site.CENTRIFUGE_4
+    # 18:
+    #     command: centrifuge.insertPlates2
+    #     object1: balancePlate
+    #     site1: ourlab.mario.site.CENTRIFUGE_2
+    #     object2: wastePlate
+    #     site2: ourlab.mario.site.CENTRIFUGE_4
     19:
         description: Run the centrifuge to discard supernatant
         command: centrifuge.centrifuge2
@@ -434,16 +434,16 @@ steps:
             rpm: 3000
             duration: 2 minutes
             temperature: 25 degC
-    20:
-        description: Bring waste plate back from the centrifuge
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.P7
-    21:
-        description: Bring balance plate back from the centrifuge
-        command: transporter.movePlate
-        object: balancePlate
-        destination: ourlab.mario.site.P5
+    # 20:
+    #     description: Bring waste plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: wastePlate
+    #     destination: ourlab.mario.site.P7
+    # 21:
+    #     description: Bring balance plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: balancePlate
+    #     destination: ourlab.mario.site.P5
     22:
         description: Remove filter plate from waste plate
         command: transporter.moveLidFromContainerToSite
@@ -559,7 +559,11 @@ steps:
 
     # ToDo: Transfer cells directly after DMSO
 
-# @Oskari: it's not necessary to call `centrifuge.insertPlates2` before
+# @Oskari: From Ellis 2017-03-13
+# 1) I had to move the dnaPlate to P8 and the balance plate to P5, because
+# ROMA2 isn't allowed to access sites P4, and P5, and therefore couldn't move
+# the lid from the dna plate back into the hotel.
+# 2) it's not necessary to call `centrifuge.insertPlates2` before
 # centrifugation and then removed the plates explicitly afterwards.
 # Just call `centrifuge.centrifuge2`, and Roboliq will take care of all
 # the transporation by default.
