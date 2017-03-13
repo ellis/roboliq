@@ -11,10 +11,11 @@
  * @version v1
  */
 
-var _ = require('lodash');
+const _ = require('lodash');
 import yaml from 'yamljs';
-var expect = require('../expect.js');
-var misc = require('../misc.js');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const misc = require('../misc.js');
 
 /**
  * Create predicates for objects of type = "Transporter"
@@ -50,18 +51,22 @@ function makeMoveLidFromContainerToSiteParams(parsed) {
 	});
 }
 
-function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
+function makeMoveLidFromContainerToSiteMethod(parsed, data, moveLidParams, n) {
 	// console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
+	const x = commandHelper.lookupPaths({
+		lidModel: ["@object", "model"],
+		container: ["@object", "location"],
+		model: [["@object", "location"], "model"],
+		origin: [["@object", "location"], "location"]
+	}, parsed.orig, data);
+	// console.log({x})
+	const {lidModel, container, model, origin} = x;
+	const lid = parsed.objectName.object;
+	const destination = parsed.objectName.destination;
+
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
 	}
-	const lid = parsed.objectName.object;
-	const lidModel = parsed.objectName["object.model"];
-	const container = parsed.objectName.container;
-	const model = parsed.value.container.model;
-	const origin = parsed.value.container.location;
-	const destination = parsed.objectName.destination;
-
 	const agents = makeArray("?agent", parsed.objectName.agent);
 	const equipments = makeArray("?equipment", parsed.objectName.equipment);
 	const programs = makeArray("?program", parsed.objectName.program || parsed.value.program)
@@ -129,16 +134,17 @@ function makeMoveLidFromSiteToContainerParams(parsed) {
 	});
 }
 
-function makeMoveLidFromSiteToContainerMethod(parsed, moveLidParams, n, llpl) {
+function makeMoveLidFromSiteToContainerMethod(parsed, data, moveLidParams, n, llpl) {
 	// console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
-	function makeArray(name, value) {
-		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
-	}
+	const x = commandHelper.lookupPaths({
+		origin: ["@object", "location"]
+	}, parsed.orig, data);
+	// console.log({x})
+	const {origin} = x;
 	const lid = parsed.objectName.object;
-	const lidModel = parsed.objectName["object.model"];
+	const lidModel = parsed.value.object.model;
 	const container = parsed.objectName.container;
 	const model = parsed.value.container.model;
-	const origin = parsed.objectName.origin;
 	const destination = parsed.value.container.location;
 	// console.log({lid, lidModel, container, model, origin, destination})
 
@@ -151,6 +157,9 @@ function makeMoveLidFromSiteToContainerMethod(parsed, moveLidParams, n, llpl) {
 
 	// console.log("labwareHasNoLid?: "+JSON.stringify(llpl.query({"labwareHasNoLid": {"site": container}})))
 
+	function makeArray(name, value) {
+		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
+	}
 	const agents = makeArray("?agent", parsed.objectName.agent);
 	const equipments = makeArray("?equipment", parsed.objectName.equipment);
 	const programs = makeArray("?program", parsed.objectName.program || parsed.value.program)
@@ -427,7 +436,7 @@ var commandHandlers = {
 		let errorLog = "";
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			const method = {method: makeMoveLidFromContainerToSiteMethod(parsed, movePlateParams, i)};
+			const method = {method: makeMoveLidFromContainerToSiteMethod(parsed, data, movePlateParams, i)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
 			input0 = input0.concat([method]);
 			if (transporterLogic.hasOwnProperty(key)) {
@@ -514,7 +523,7 @@ var commandHandlers = {
 		let errorLog = "";
 		for (let i = 0; i < keys.length; i++) {
 			const key = keys[i];
-			const method = {method: makeMoveLidFromSiteToContainerMethod(parsed, movePlateParams, i, llpl)};
+			const method = {method: makeMoveLidFromSiteToContainerMethod(parsed, data, movePlateParams, i, llpl)};
 			input0 = input0.concat(_.values(transporterLogic[key]));
 			input0 = input0.concat([method]);
 			if (transporterLogic.hasOwnProperty(key)) {

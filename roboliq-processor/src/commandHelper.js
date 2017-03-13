@@ -394,6 +394,7 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 			return;
 		case "Labware": return processValue0OnTypes(result, path, value0, schema, ["Lid", "Plate", "Trough", "Tube"], data);
 		case "Length": return processLength(result, path, value, data);
+		case "Lid": return processObjectOfType(result, path, value, data, type);
 		case "Plate": return processObjectOfType(result, path, value, data, type);
 		case "Plates": return processOneOrArray(result, path, value, (result, path, x) => processObjectOfType(result, path, x, data, "Plate"));
 		case "Site": return processObjectOfType(result, path, value, data, type);

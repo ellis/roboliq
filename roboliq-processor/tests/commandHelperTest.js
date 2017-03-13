@@ -232,7 +232,8 @@ describe('commandHelper', function() {
 				objects: {
 					agent1: {type: "MyAgent"},
 					equipment1: {type: "MyEquipment", config: "special"},
-					plate1: {type: "Plate", location: "P1"},
+					plate1: {type: "Plate", location: "site"},
+					lid1: {type: "Lid", location: "plate1"},
 					site1: {type: "Site", extraData: 0},
 					number1: {type: "Variable", value: 1},
 					liquid1: {type: "Liquid", wells: ["plate1(A01)", "plate2(A02)"]},
@@ -248,6 +249,7 @@ describe('commandHelper', function() {
 				agent: "agent1",
 				equipment: "equipment1",
 				plate: "plate1",
+				lid: "lid1",
 				// plates: "plate1",
 				site: "site1",
 				count: "number1",
@@ -260,6 +262,7 @@ describe('commandHelper', function() {
 					agent: {type: "Agent"},
 					equipment: {type: "Equipment"},
 					plate: {type: "Plate"},
+					lid: {type: "Labware"},
 					// plates: {type: "Plates"},
 					site: {type: "Site"},
 					count: {type: "number"},
@@ -277,7 +280,8 @@ describe('commandHelper', function() {
 					objectName: "plate1",
 					agent: {type: "MyAgent"},
 					equipment: {type: "MyEquipment", config: "special"},
-					plate: {type: "Plate", location: "P1"},
+					plate: {type: "Plate", location: "site"},
+					lid: {type: "Lid", location: "plate1"},
 					// plates: [{type: "Plate", location: "P1"}],
 					site: {type: "Site", extraData: 0},
 					count: 1,
@@ -288,12 +292,13 @@ describe('commandHelper', function() {
 					agent: "agent1",
 					equipment: "equipment1",
 					plate: "plate1",
+					lid: "lid1",
 					site: "site1",
 					text1: "string1",
 					count: "number1",
 				}
 			});
-			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'site1', "number1", "string1"]);
+			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'lid1', 'site1', "number1", "string1"]);
 		});
 
 		it('should work with defaults', function() {

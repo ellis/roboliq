@@ -73,7 +73,7 @@ function processSchemas(x) {
 metalsmith(__dirname)
 	.source("content")
 	//.source(__dirname+"/../src/schemas")
-	.destination("../docs/api")
+	.destination("../docs/protocol")
 	.use(collections({
 		commands: {
 			pattern: "schemas/*.yaml"

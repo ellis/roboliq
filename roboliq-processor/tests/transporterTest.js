@@ -547,7 +547,6 @@ describe('transporter', function() {
 					1: {
 						"command": "transporter.moveLidFromContainerToSite",
 						"object": "plate1Lid",
-						"container": "plate1",
 						"destination": "ourlab.mario.site.P4"
 					}
 				}
@@ -576,7 +575,6 @@ describe('transporter', function() {
 					1: {
 						"command": "transporter.moveLidFromSiteToContainer",
 						"object": "plate1Lid",
-						"origin": "ourlab.mario.site.P4",
 						"container": "plate1"
 					}
 				}

@@ -74,7 +74,6 @@ transporter.moveLidFromContainerToSite:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Lid identifier", type: "Labware"}
-    container: {description: "Container identifier", type: "Labware"}
     destination: {description: "Site to move the lid to", "type": "Site"}
   required: [object, destination]
 
@@ -86,7 +85,6 @@ transporter.moveLidFromSiteToContainer:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Lid identifier", type: "Labware"}
-    origin: {description: "Site to move the lid from", "type": "Site"}
     container: {description: "Container to move the lid to", type: "Labware"}
   required: [object, destination]
 
