@@ -53,7 +53,7 @@
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc-source.json --readme README.md --tutorials tutorials",
     "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
-    "roboliq": "babel-node -- src/roboliq.js",
+    "processor": "babel-node -- src/roboliq.js",
     "start": "babel-node -- src/roboliq.js"
   },
   "author": "Ellis Whitehead",

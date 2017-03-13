@@ -86,7 +86,7 @@ transporter.moveLidFromSiteToContainer:
     program: {description: "Program identifier for transport", type: "name"}
     object: {description: "Lid identifier", type: "Labware"}
     container: {description: "Container to move the lid to", type: "Labware"}
-  required: [object, destination]
+  required: [object, container]
 
 transporter.movePlate:
   description: |

@@ -336,7 +336,6 @@ steps:
         description: Put filter plate on the waste plate
         command: transporter.moveLidFromSiteToContainer
         object: filterPlate
-        origin: ourlab.mario.site.P6
         container: wastePlate
     8:
         command: centrifuge.insertPlates2
@@ -414,13 +413,11 @@ steps:
         description: Put lid on the filter plate
         command: transporter.moveLidFromSiteToContainer
         object: wastePlateLid
-        origin: ourlab.mario.site.P6
         container: filterPlate
     17:
         description: Put filter plate on the waste plate
         command: transporter.moveLidFromSiteToContainer
         object: filterPlate
-        origin: ourlab.mario.site.P6
         container: wastePlate
     18:
         command: centrifuge.insertPlates2
@@ -451,13 +448,11 @@ steps:
         description: Remove filter plate from waste plate
         command: transporter.moveLidFromContainerToSite
         object: filterPlate
-        container: wastePlate
         destination: ourlab.mario.site.P3
     23:
         description: Remove lid from filter plate
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
-        container: filterPlate
         destination: ourlab.mario.site.P6
     24:
         description: Move the used waste plate to the hotel
@@ -529,7 +524,7 @@ steps:
         description: Put lid on DNA plate
         command: transporter.moveLidFromSiteToContainer
         object: dnaPlateLid
-        destination: dnaPlate
+        container: dnaPlate
     30:
         description: Put DNA plate on back
         command: transporter.movePlate
