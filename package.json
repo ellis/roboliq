@@ -4,7 +4,8 @@
   "description": "Roboliq Software System for automating liquid handling robots",
   "dependencies": {
     "roboliq-processor": "file:roboliq-processor",
-    "roboliq-evoware": "file:roboliq-evoware"
+    "roboliq-evoware": "file:roboliq-evoware",
+		"api-generator": "file:roboliq-evoware"
   },
   "devDependencies": {
     "ink-docstrap": "^1.3.0",

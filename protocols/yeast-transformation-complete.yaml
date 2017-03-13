@@ -103,11 +103,10 @@ steps:
         command: centrifuge.centrifuge2,
         object1: plate1,
         object2: plate2,
-        program: {
-            rpm: 3000,
-            duration: 2 minutes,
+        program:
+            rpm: 3000
+            duration: 2 minutes
             temperature: 25 degC
-        }
     10:
         description: Bring waste plate back from the centrifuge
         command: transporter.movePlate
@@ -175,11 +174,10 @@ steps:
         command: centrifuge.centrifuge2
         object1: plate1
         object2: plate2
-        program: {
+        program:
             rpm: 3000
             duration: 2 minutes
             temperature: 25 degC
-        }
     20:
         description: Bring waste plate back from the centrifuge
         command: transporter.movePlate
@@ -214,12 +212,11 @@ steps:
         description: Shake on the teleshake (ToDo)
         command: shaker.shakePlate
         equipment: ourlab.mario.shaker
-        program: {
+        program:
             command: shaker.ShakerProgram
             amplitude: 1
             rpm: 750
             duration: 60
-        }
         object: filterPlate
         site: ourlab.mario.shaker
     27:
@@ -234,12 +231,11 @@ steps:
         description: Shake on the teleshake (ToDo)
         command: shaker.shakePlate
         equipment: ourlab.mario.shaker
-        program: {
+        program:
             command: shaker.ShakerProgram
             amplitude: 1
             rpm: 750
             duration: 1800
-        }
         object: filterPlate
         site: ourlab.mario.shaker
     30:
@@ -253,5 +249,3 @@ steps:
         object: pcrPlate
         destination: ourlab.mario.site.P4
     # ToDo: Transfer cells directly after DMSO
-
-

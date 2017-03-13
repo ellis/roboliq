@@ -174,20 +174,56 @@ objects:
       cleanEnd: flush
       cleanBetween: flush
       cleanBetweenSameSource: none
-      # layer*:
-      # - source: cellCulture
-      #   volume: 20 ul
-      #   clean: decontaminate
-      #   cleanBetween: none
-      # - source: water
-      #   volume: 140 ul
-      #   clean: flush
-      #   cleanBetween: none
-      # - source=calculate: 'concat("dnaPlate(", well, ")")'
-      #   volume: 20 ul
-      #   clean: decontaminate
-      #   cleanBetween: decontaminate
 
+
+  design2:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+
+  design3:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+
+  design4:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+          
 steps:
   1:
     data: {source: design1}

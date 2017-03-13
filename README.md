@@ -20,6 +20,10 @@ This guide assumes that you have some familiarity with using the command line te
 * Copy the Roboliq repository to your computer.
 * Open the terminal, navigate to the directory where you copied the Roboliq
   repository, and run `npm install` to download Roboliq's software requirements.
+* To generate the documentations, run `npm run docs`.  You can then find the
+	documentation in the `docs` subfolder with three sub-subfolders: `protocol`,
+	`roboliq-evoware`, and `roboliq-processor`.  In each of those, you can open
+	the `index.html` file.
 
 # Getting started
 
