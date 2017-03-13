@@ -42,7 +42,7 @@ var objectToPredicateConverters = {
  * Transport a lid from a container to a destination site.
  */
 function moveLidFromContainerToSite(params, parsed, data) {
-	// console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
+	console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
 	if (parsed.input.containerObject.type != "Plate") {
 		expect.throw({paramName: "object"}, "expected lid to be on a plate; instead lid's location is "+parsed.input.container);
 	}
@@ -97,9 +97,8 @@ function moveLidFromContainerToSite(params, parsed, data) {
 
 	if (_.isEmpty(plan)) {
 		console.log(errorLog);
-		const x = _.pickBy({agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.objectName["object.location"], destination: parsed.objectName.destination});
 		//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
-		return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.object+"` on `"+parsed.objectName.container+"` from `"+misc.findObjectsValue(parsed.objectName.container+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
+		return {errors: [`unable to find a transportation path for lid ${parsed.input.object} on ${parsed.input.container} from ${parsed.input.origin} to ${parsed.input.destination}`]};
 	}
 	var tasks = planner.listAndOrderTasks(plan, true);
 	//console.log("Tasks:")

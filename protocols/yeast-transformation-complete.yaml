@@ -278,283 +278,283 @@ objects:
         liquidClass: Roboliq_Water_Air_1000
 
 steps:
-    1:
-        description: Put waste plate on bench
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.P7
-    2:
-        description: Remove lid from waste plate
-        command: transporter.moveLidFromContainerToSite
-        object: wastePlateLid
-        destination: ourlab.mario.site.P6
-    3:
-        description: "Put filter plate on bench"
-        command: transporter.movePlate
-        object: filterPlate
-        destination: ourlab.mario.site.P3
-    4:
-        description: Add water to match the balance plate weight
-        command: pipetter.pipette
-        sources: water
-        destinations: wastePlate(D6)
-        volumes: 600 ul
-        cleanBetween: none
-    5:
-        description: "Step: Cells"
-        data: {source: design1}
-        1:
-            command: experiment.forEachGroup
-            groupBy: layer
-            steps:
-                command: pipetter.pipette
-                program: $liquidClass
-                sources: $$source
-                destinationLabware: $destinationLabware
-                destinations: $$well
-                volumes: $volume
-                cleanBegin: $cleanBegin
-                cleanEnd: $cleanEnd
-                cleanBetween: $cleanBetween
-        2:
-            description: Add cells on the filter plate
-            command: pipetter.pipette
-            program: Roboliq_Water_Air_1000
-            sources: water
-            destinationLabware: balancePlate
-            destinations: $$well
-            volumes: $$volume
-            cleanBegin: none
-            cleanBetween: none
-            cleanEnd: decontaminate
-    6:
-        description: Put lid on the filter plate
-        command: transporter.moveLidFromSiteToContainer
-        object: wastePlateLid
-        container: filterPlate
-    7:
-        description: Put filter plate on the waste plate
-        command: transporter.moveLidFromSiteToContainer
-        object: filterPlate
-        container: wastePlate
-    8:
-        command: centrifuge.insertPlates2
-        object1: balancePlate
-        site1: ourlab.mario.site.CENTRIFUGE_2
-        object2: wastePlate
-        site2: ourlab.mario.site.CENTRIFUGE_4
-    9:
-        description: Run the centrifuge to discard supernatant
-        command: centrifuge.centrifuge2
-        object1: balancePlate
-        object2: wastePlate
-        program:
-            rpm: 3000
-            duration: 2 minutes
-            temperature: 25 degC
-    10:
-        description: Bring waste plate back from the centrifuge
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.P7
-    11:
-        description: Bring balance plate back from the centrifuge
-        command: transporter.movePlate
-        object: balancePlate
-        destination: ourlab.mario.site.P8
-    12:
-        description: Remove filter plate from waste plate
-        command: transporter.moveLidFromContainerToSite
-        object: filterPlate
-        destination: ourlab.mario.site.P3
-    13:
-        description: Remove lid from filter plate
-        command: transporter.moveLidFromContainerToSite
-        object: wastePlateLid
-        destination: ourlab.mario.site.P6
-
-    14:
-        description: "Step: water resuspension"
-        data: {source: design2}
-        1:
-            command: experiment.forEachGroup
-            groupBy: layer
-            steps:
-                command: pipetter.pipette
-                program: $liquidClass
-                sources: $$source
-                destinationLabware: $destinationLabware
-                destinations: $$well
-                volumes: $volume
-                cleanBegin: $cleanBegin
-                cleanEnd: $cleanEnd
-                cleanBetween: $cleanBetween
-        2:
-            command: pipetter.mix
-            wellLabware: filterPlate
-            wells: $$well
-            counts: 5
-            amounts: 70 ul
-            cleanBegin: none
-            cleanBetween: decontaminate
-            cleanBetweenSameSource: none
-            cleanEnd: decontaminate
-        3:
-            command: pipetter.pipette
-            program: Roboliq_Water_Air_1000
-            sources: water
-            destinationLabware: balancePlate
-            destinations: $$well
-            volumes: $$volume
-            cleanBegin: none
-            cleanBetween: none
-            cleanEnd: decontaminate
-    16:
-        description: Put lid on the filter plate
-        command: transporter.moveLidFromSiteToContainer
-        object: wastePlateLid
-        container: filterPlate
-    17:
-        description: Put filter plate on the waste plate
-        command: transporter.moveLidFromSiteToContainer
-        object: filterPlate
-        container: wastePlate
-    18:
-        command: centrifuge.insertPlates2
-        object1: balancePlate
-        site1: ourlab.mario.site.CENTRIFUGE_2
-        object2: wastePlate
-        site2: ourlab.mario.site.CENTRIFUGE_4
-    19:
-        description: Run the centrifuge to discard supernatant
-        command: centrifuge.centrifuge2
-        object1: balancePlate
-        object2: wastePlate
-        program:
-            rpm: 3000
-            duration: 2 minutes
-            temperature: 25 degC
-    20:
-        description: Bring waste plate back from the centrifuge
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.P7
-    21:
-        description: Bring balance plate back from the centrifuge
-        command: transporter.movePlate
-        object: balancePlate
-        destination: ourlab.mario.site.P8
-    22:
-        description: Remove filter plate from waste plate
-        command: transporter.moveLidFromContainerToSite
-        object: filterPlate
-        destination: ourlab.mario.site.P3
-    23:
-        description: Remove lid from filter plate
-        command: transporter.moveLidFromContainerToSite
-        object: wastePlateLid
-        destination: ourlab.mario.site.P6
-    24:
-        description: Move the used waste plate to the hotel
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.HOTEL32_C3
-    25:
-        description: Add lithium acetate on the cells (ToDo test)
-        data: {source: design3}
-        1:
-            command: experiment.forEachGroup
-            groupBy: layer
-            steps:
-                command: pipetter.pipette
-                program: $liquidClass
-                sources: $$source
-                destinationLabware: $destinationLabware
-                destinations: $$well
-                volumes: $volume
-                cleanBegin: $cleanBegin
-                cleanEnd: $cleanEnd
-                cleanBetween: $cleanBetween
-    26:
-        description: Shake on the teleshake (ToDo)
-        command: shaker.shakePlate
-        program:
-            command: shaker.ShakerProgram
-            rpm: 750
-            duration: 60s
-        object: filterPlate
-    27:
-      1:
-        description: Put PCR plate on bench
-        command: transporter.movePlate
-        object: pcrPlate
-        destination: ourlab.mario.site.P4PCR
+    # 1:
+    #     description: Put waste plate on bench
+    #     command: transporter.movePlate
+    #     object: wastePlate
+    #     destination: ourlab.mario.site.P7
+    # 2:
+    #     description: Remove lid from waste plate
+    #     command: transporter.moveLidFromContainerToSite
+    #     object: wastePlateLid
+    #     destination: ourlab.mario.site.P6
+    # 3:
+    #     description: "Put filter plate on bench"
+    #     command: transporter.movePlate
+    #     object: filterPlate
+    #     destination: ourlab.mario.site.P3
+    # 4:
+    #     description: Add water to match the balance plate weight
+    #     command: pipetter.pipette
+    #     sources: water
+    #     destinations: wastePlate(D6)
+    #     volumes: 600 ul
+    #     cleanBetween: none
+    # 5:
+    #     description: "Step: Cells"
+    #     data: {source: design1}
+    #     1:
+    #         command: experiment.forEachGroup
+    #         groupBy: layer
+    #         steps:
+    #             command: pipetter.pipette
+    #             program: $liquidClass
+    #             sources: $$source
+    #             destinationLabware: $destinationLabware
+    #             destinations: $$well
+    #             volumes: $volume
+    #             cleanBegin: $cleanBegin
+    #             cleanEnd: $cleanEnd
+    #             cleanBetween: $cleanBetween
+    #     2:
+    #         description: Add cells on the filter plate
+    #         command: pipetter.pipette
+    #         program: Roboliq_Water_Air_1000
+    #         sources: water
+    #         destinationLabware: balancePlate
+    #         destinations: $$well
+    #         volumes: $$volume
+    #         cleanBegin: none
+    #         cleanBetween: none
+    #         cleanEnd: decontaminate
+    # 6:
+    #     description: Put lid on the filter plate
+    #     command: transporter.moveLidFromSiteToContainer
+    #     object: wastePlateLid
+    #     container: filterPlate
+    # 7:
+    #     description: Put filter plate on the waste plate
+    #     command: transporter.moveLidFromSiteToContainer
+    #     object: filterPlate
+    #     container: wastePlate
+    # 8:
+    #     command: centrifuge.insertPlates2
+    #     object1: balancePlate
+    #     site1: ourlab.mario.site.CENTRIFUGE_2
+    #     object2: wastePlate
+    #     site2: ourlab.mario.site.CENTRIFUGE_4
+    # 9:
+    #     description: Run the centrifuge to discard supernatant
+    #     command: centrifuge.centrifuge2
+    #     object1: balancePlate
+    #     object2: wastePlate
+    #     program:
+    #         rpm: 3000
+    #         duration: 2 minutes
+    #         temperature: 25 degC
+    # 10:
+    #     description: Bring waste plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: wastePlate
+    #     destination: ourlab.mario.site.P7
+    # 11:
+    #     description: Bring balance plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: balancePlate
+    #     destination: ourlab.mario.site.P8
+    # 12:
+    #     description: Remove filter plate from waste plate
+    #     command: transporter.moveLidFromContainerToSite
+    #     object: filterPlate
+    #     destination: ourlab.mario.site.P3
+    # 13:
+    #     description: Remove lid from filter plate
+    #     command: transporter.moveLidFromContainerToSite
+    #     object: wastePlateLid
+    #     destination: ourlab.mario.site.P6
+    #
+    # 14:
+    #     description: "Step: water resuspension"
+    #     data: {source: design2}
+    #     1:
+    #         command: experiment.forEachGroup
+    #         groupBy: layer
+    #         steps:
+    #             command: pipetter.pipette
+    #             program: $liquidClass
+    #             sources: $$source
+    #             destinationLabware: $destinationLabware
+    #             destinations: $$well
+    #             volumes: $volume
+    #             cleanBegin: $cleanBegin
+    #             cleanEnd: $cleanEnd
+    #             cleanBetween: $cleanBetween
+    #     2:
+    #         command: pipetter.mix
+    #         wellLabware: filterPlate
+    #         wells: $$well
+    #         counts: 5
+    #         amounts: 70 ul
+    #         cleanBegin: none
+    #         cleanBetween: decontaminate
+    #         cleanBetweenSameSource: none
+    #         cleanEnd: decontaminate
+    #     3:
+    #         command: pipetter.pipette
+    #         program: Roboliq_Water_Air_1000
+    #         sources: water
+    #         destinationLabware: balancePlate
+    #         destinations: $$well
+    #         volumes: $$volume
+    #         cleanBegin: none
+    #         cleanBetween: none
+    #         cleanEnd: decontaminate
+    # 16:
+    #     description: Put lid on the filter plate
+    #     command: transporter.moveLidFromSiteToContainer
+    #     object: wastePlateLid
+    #     container: filterPlate
+    # 17:
+    #     description: Put filter plate on the waste plate
+    #     command: transporter.moveLidFromSiteToContainer
+    #     object: filterPlate
+    #     container: wastePlate
+    # 18:
+    #     command: centrifuge.insertPlates2
+    #     object1: balancePlate
+    #     site1: ourlab.mario.site.CENTRIFUGE_2
+    #     object2: wastePlate
+    #     site2: ourlab.mario.site.CENTRIFUGE_4
+    # 19:
+    #     description: Run the centrifuge to discard supernatant
+    #     command: centrifuge.centrifuge2
+    #     object1: balancePlate
+    #     object2: wastePlate
+    #     program:
+    #         rpm: 3000
+    #         duration: 2 minutes
+    #         temperature: 25 degC
+    # 20:
+    #     description: Bring waste plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: wastePlate
+    #     destination: ourlab.mario.site.P7
+    # 21:
+    #     description: Bring balance plate back from the centrifuge
+    #     command: transporter.movePlate
+    #     object: balancePlate
+    #     destination: ourlab.mario.site.P8
+    # 22:
+    #     description: Remove filter plate from waste plate
+    #     command: transporter.moveLidFromContainerToSite
+    #     object: filterPlate
+    #     destination: ourlab.mario.site.P3
+    # 23:
+    #     description: Remove lid from filter plate
+    #     command: transporter.moveLidFromContainerToSite
+    #     object: wastePlateLid
+    #     destination: ourlab.mario.site.P6
+    # 24:
+    #     description: Move the used waste plate to the hotel
+    #     command: transporter.movePlate
+    #     object: wastePlate
+    #     destination: ourlab.mario.site.HOTEL32_C3
+    # 25:
+    #     description: Add lithium acetate on the cells (ToDo test)
+    #     data: {source: design3}
+    #     1:
+    #         command: experiment.forEachGroup
+    #         groupBy: layer
+    #         steps:
+    #             command: pipetter.pipette
+    #             program: $liquidClass
+    #             sources: $$source
+    #             destinationLabware: $destinationLabware
+    #             destinations: $$well
+    #             volumes: $volume
+    #             cleanBegin: $cleanBegin
+    #             cleanEnd: $cleanEnd
+    #             cleanBetween: $cleanBetween
+    # 26:
+    #     description: Shake on the teleshake (ToDo)
+    #     command: shaker.shakePlate
+    #     program:
+    #         command: shaker.ShakerProgram
+    #         rpm: 750
+    #         duration: 60s
+    #     object: filterPlate
+    # 27:
+    #   1:
+    #     description: Put PCR plate on bench
+    #     command: transporter.movePlate
+    #     object: pcrPlate
+    #     destination: ourlab.mario.site.P4PCR
       2:
         description: Put DNA plate on bench
         command: transporter.movePlate
         object: dnaPlate
         destination: ourlab.mario.site.P5
-      # 3:
-      #   description: Put DNA plate on bench
-      #   command: transporter.moveLidFromContainerToSite
-      #   object: dnaPlateLid
-      #   destination: ourlab.mario.site.HOTEL32_D2
-    28:
-        description: Add PEG mix on the cells (ToDo test)
-        data: {source: design4}
-        1:
-            command: experiment.forEachGroup
-            groupBy: layer
-            steps:
-                command: pipetter.pipette
-                program: $liquidClass
-                sources: $$source
-                destinationLabware: $destinationLabware
-                destinations: $$well
-                volumes: $volume
-                cleanBegin: $cleanBegin
-                cleanEnd: $cleanEnd
-                cleanBetween: $cleanBetween
-        2:
-            command: pipetter.mix
-            wellLabware: filterPlate
-            wells: $$well
-            counts: 5
-            amounts: 70 ul
-            cleanBegin: none
-            cleanBetween: decontaminate
-            cleanBetweenSameSource: none
-            cleanEnd: decontaminate
-    29:
-        description: Put lid on DNA plate
-        command: transporter.moveLidFromSiteToContainer
+      3:
+        description: Put DNA plate on bench
+        command: transporter.moveLidFromContainerToSite
         object: dnaPlateLid
-        container: dnaPlate
-    30:
-        description: Put DNA plate on back
-        command: transporter.movePlate
-        object: dnaPlate
-        destination: ourlab.mario.site.HOTEL32_D2
-    31:
-        description: Add DMSO on the cells
-        data: {source: design5}
-        command: experiment.forEachGroup
-        groupBy: layer
-        steps:
-            command: pipetter.pipette
-            program: $liquidClass
-            sources: $$source
-            destinationLabware: $destinationLabware
-            destinations: $$well
-            volumes: $volume
-            cleanBegin: $cleanBegin
-            cleanEnd: $cleanEnd
-            cleanBetween: $cleanBetween
-
-    32: # MOve later
-        description: Put PCR plate back
-        command: transporter.movePlate
-        object: pcrPlate
-        destination: ourlab.mario.site.HOTEL32_C2
-
-    # ToDo: Transfer cells directly after DMSO
+        destination: ourlab.mario.site.P3 # HOTEL32_D2
+    # 28:
+    #     description: Add PEG mix on the cells (ToDo test)
+    #     data: {source: design4}
+    #     1:
+    #         command: experiment.forEachGroup
+    #         groupBy: layer
+    #         steps:
+    #             command: pipetter.pipette
+    #             program: $liquidClass
+    #             sources: $$source
+    #             destinationLabware: $destinationLabware
+    #             destinations: $$well
+    #             volumes: $volume
+    #             cleanBegin: $cleanBegin
+    #             cleanEnd: $cleanEnd
+    #             cleanBetween: $cleanBetween
+    #     2:
+    #         command: pipetter.mix
+    #         wellLabware: filterPlate
+    #         wells: $$well
+    #         counts: 5
+    #         amounts: 70 ul
+    #         cleanBegin: none
+    #         cleanBetween: decontaminate
+    #         cleanBetweenSameSource: none
+    #         cleanEnd: decontaminate
+    # 29:
+    #     description: Put lid on DNA plate
+    #     command: transporter.moveLidFromSiteToContainer
+    #     object: dnaPlateLid
+    #     container: dnaPlate
+    # 30:
+    #     description: Put DNA plate on back
+    #     command: transporter.movePlate
+    #     object: dnaPlate
+    #     destination: ourlab.mario.site.HOTEL32_D2
+    # 31:
+    #     description: Add DMSO on the cells
+    #     data: {source: design5}
+    #     command: experiment.forEachGroup
+    #     groupBy: layer
+    #     steps:
+    #         command: pipetter.pipette
+    #         program: $liquidClass
+    #         sources: $$source
+    #         destinationLabware: $destinationLabware
+    #         destinations: $$well
+    #         volumes: $volume
+    #         cleanBegin: $cleanBegin
+    #         cleanEnd: $cleanEnd
+    #         cleanBetween: $cleanBetween
+    #
+    # 32: # MOve later
+    #     description: Put PCR plate back
+    #     command: transporter.movePlate
+    #     object: pcrPlate
+    #     destination: ourlab.mario.site.HOTEL32_C2
+    #
+    # # ToDo: Transfer cells directly after DMSO
