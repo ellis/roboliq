@@ -562,7 +562,7 @@ describe('transporter', function() {
 	});
 
 	describe('transporter.moveLidFromSiteToContainer', function () {
-		it("should handle moveLidFromSiteToContainer from plate to empty site", function() {
+		it.only("should handle moveLidFromSiteToContainer from plate to empty site", function() {
 			var protocol = _.merge({}, protocol0, {
 				objects: {
 					plate1Lid: {

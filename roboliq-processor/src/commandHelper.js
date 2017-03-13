@@ -997,6 +997,89 @@ function lookupPaths(paths, params, data) {
 }
 
 /**
+ * Parse and lookup a single item from an input specification for a command handler,
+ * and return the value found or raise an error.
+ * @return {any} value found
+ */
+function getInputSpecItemValue(item, params, data) {
+	if (_.isString(item.path)) {
+
+	}
+	else if (_.isArray(item.path)) {
+
+	}
+	else {
+		expect.throw({}, "path must be a string or array: "+JSON.stringify(item));
+	}
+}
+
+/**
+ * Lookup nested paths.
+ *
+ * @example
+ *
+ * * "object": gets parameter value.
+ * * "?object": optionally gets parameter value.
+ * * "object*": looks up object.
+ * * "object*location": looks up object, gets `location` property.
+ * * "object*location*": looks up object, gets `location` property, looks up location.
+ * * "object*location*type": looks up object, looks up its `location` property, gets type property.
+ * * "something**": double de-reference
+ * * "object*(someName)": looks up object, gets someName value, gets object's property with that value. (this is not currently implemented)
+  *
+ * @param  {array} path   [description]
+ * @param  {object} parsed [description]
+ * @param  {object} data   [description]
+ * @return {any}        [description]
+ */
+function lookupInputPath(path, parsed, data) {
+	assert(_.isString(path) && !_.isEmpty(path));
+
+	// Check whether success is required
+	let required = true;
+	if (path[0] == "?") {
+		required = false;
+		path = path.substring(1);
+	}
+
+	const elems = _.filter(path.split(/([*])/), s => !_.isEmpty(s));
+	console.log({elems});
+
+	let current;
+	try {
+		for (let i = 0; i < elems.length; i++) {
+			const elem = elems[i];
+			if (elem == "*") {
+				current = lookupInputPath_dereference(current, data);
+			}
+			else {
+				if (_.isUndefined(current)) {
+					current = parsed.objectName[elem] || parsed.orig[elem];
+				}
+				else {
+					current = _.get(current, elem);
+				}
+			}
+			assert(current, `${elem} not found in path ${path}`);
+		}
+	} catch (e) {
+		if (!required)
+			return undefined;
+		throw e;
+	}
+
+	return current;
+}
+
+function lookupInputPath_dereference(current, data) {
+	assert(_.isString(current), "cannot dereference: "+JSON.stringify({path, i, elem, current}));
+	const result = {value: {}, objectName: {}};
+	const path2 = []; // FIXME: figure out a sensible path in case of errors
+	const current2 = lookupValue0(result, path2, current, data);
+	return current2;
+}
+
+/**
  * Return array of step keys in order.
  * Any keys that begin with a number will be included,
  * and they will be sorted in natural order.
@@ -1218,6 +1301,7 @@ module.exports = {
 	getStepKeys,
 	lookupPath,
 	lookupPaths,
+	lookupInputPath,
 	parseParams,
 	queryLogic,
 	// setDefaultInArrayOfObjects,

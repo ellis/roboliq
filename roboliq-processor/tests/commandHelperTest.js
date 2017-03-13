@@ -746,4 +746,42 @@ describe('commandHelper', function() {
 
 	});
 
+	describe.only("lookupInputPath", () => {
+		const data = {
+			objects: {
+				plate1: {
+					type: "Plate",
+					location: "site1"
+				},
+				site1: {
+					type: "Site"
+				}
+			}
+		};
+		const parsed = {
+			orig: {
+				thing: "plate1"
+			},
+			objectName: {
+				thing: "plate1"
+			}
+		};
+		it("should handle 'thing'", () => {
+			should.deepEqual(
+				commandHelper.lookupInputPath("thing", parsed, data),
+				"plate1"
+			);
+		});
+		/*
+		* * "object": gets parameter value.
+	  * * "?object": optionally gets parameter value.
+	  * * "object*": looks up object.
+	  * * "object*location": looks up object, gets `location` property.
+	  * * "object*location*": looks up object, gets `location` property, looks up location.
+	  * * "object*location*type": looks up object, looks up its `location` property, gets type property.
+	  * * "something**": double de-reference
+	  * * "object*(someName)": looks up object, gets someName value, gets object's property with that value. (this is not currently implemented)
+	  */
+	});
+
 });
