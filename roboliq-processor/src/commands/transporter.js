@@ -33,6 +33,107 @@ var objectToPredicateConverters = {
 	},
 };
 
+
+
+
+
+
+/**
+ * Transport a lid from a container to a destination site.
+ */
+function moveLidFromContainerToSite(params, parsed, data) {
+	// console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
+	const transporterLogic = require('./transporterLogic.json');
+
+	const keys = ["null", "one"];
+	const movePlateParams = makeMoveLidFromContainerToSiteParams(parsed);
+
+	const shop = require('../HTN/shop.js');
+	const llpl = require('../HTN/llpl.js').create();
+	llpl.initializeDatabase(data.predicates);
+	let input0 = data.predicates;
+	let plan;
+	let errorLog = "";
+	for (let i = 0; i < keys.length; i++) {
+		const key = keys[i];
+		const method = {method: makeMoveLidFromContainerToSiteMethod(parsed, movePlateParams, i)};
+		input0 = input0.concat(_.values(transporterLogic[key]));
+		input0 = input0.concat([method]);
+		if (transporterLogic.hasOwnProperty(key)) {
+			llpl.addToDatabase(transporterLogic[key]);
+		}
+		llpl.addToDatabase([method]);
+		// const fs = require('fs');
+		// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
+		const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
+		// If we didn't find a path for this method:
+		if (queryResultsAll.length === 0) {
+			//const queryResultOne = llpl.query({stackable: {below: "?below", above: "ourlab.model.lidModel_384_square"}});
+			//console.log("queryResultOne: " +JSON.stringify(queryResultOne))
+			const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
+			errorLog += text;
+		}
+		// If we did find a path:
+		else {
+			// console.log(`${queryResultsAll.length} path(s) found, e.g.: ${JSON.stringify(queryResultsAll[0])}`);
+			const tasks = { "tasks": { "ordered": [{ moveLidFromContainerToSite: movePlateParams }] } };
+			const input = input0.concat([tasks]);
+			var planner = shop.makePlanner(input);
+			plan = planner.plan();
+			//console.log(key, plan)
+			if (!_.isEmpty(plan)) {
+				//console.log("plan found for "+key)
+				//console.log(planner.ppPlan(plan));
+			}
+			else {
+				console.log("apparently unable to open some site or something")
+			}
+			break;
+		}
+	}
+
+	if (_.isEmpty(plan)) {
+		console.log(errorLog);
+		const x = _.pickBy({agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.objectName["object.location"], destination: parsed.objectName.destination});
+		//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
+		return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.object+"` on `"+parsed.objectName.container+"` from `"+misc.findObjectsValue(parsed.objectName.container+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
+	}
+	var tasks = planner.listAndOrderTasks(plan, true);
+	//console.log("Tasks:")
+	//console.log(JSON.stringify(tasks, null, '  '));
+	var cmdList = _(tasks).map(function(task) {
+		return _(task).map(function(taskParams, taskName) {
+			return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
+		}).flatten().value();
+	}).flatten().value();
+	// console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
+
+	// Create the expansion object
+	var expansion = {};
+	var i = 1;
+	_.forEach(cmdList, function(cmd) {
+		expansion[i.toString()] = cmd;
+		i += 1;
+	});
+
+	// Create the effets object
+	var effects = {};
+	effects[`${parsed.objectName.object}.location`] = parsed.objectName.destination;
+
+	return {
+		expansion: expansion,
+		effects: effects
+	};
+}
+moveLidFromContainerToSite.inputSpec = {
+	lid: "object",
+	lidModel: "object*model",
+	container: "object*location",
+	model: "object*location*model",
+	origin: "object*location*location",
+	destination: "destination"
+};
+
 /**
  * Take the parsed parameters passed to `transporter.moveLidFromContainerToSite`
  * and create the parameter list for the task `moveLidFromContainerToSite` in `makeMoveLidFromContainerToSiteMethod()`.
@@ -51,18 +152,9 @@ function makeMoveLidFromContainerToSiteParams(parsed) {
 	});
 }
 
-function makeMoveLidFromContainerToSiteMethod(parsed, data, moveLidParams, n) {
+function makeMoveLidFromContainerToSiteMethod(parsed, moveLidParams, n) {
 	// console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
-	const x = commandHelper.lookupPaths({
-		lidModel: ["@object", "model"],
-		container: ["@object", "location"],
-		model: [["@object", "location"], "model"],
-		origin: [["@object", "location"], "location"]
-	}, parsed.orig, data);
-	// console.log({x})
-	const {lidModel, container, model, origin} = x;
-	const lid = parsed.objectName.object;
-	const destination = parsed.objectName.destination;
+	const {lid, lidModel, container, model, origin, destination} = parsed.input;
 
 	function makeArray(name, value) {
 		return _.map(_.range(n), i => (_.isUndefined(value)) ? name+(i+1) : value);
@@ -116,6 +208,107 @@ function makeMoveLidFromContainerToSiteMethod(parsed, data, moveLidParams, n) {
 	assert(false);
 }
 
+
+
+
+/**
+ * Transport a lid from an origin site to a container.
+ */
+function moveLidFromSiteToContainer(params, parsed, data) {
+	// console.log("transporter.moveLidFromSiteToContainer:"); console.log(JSON.stringify(parsed, null, '\t'))
+	const transporterLogic = require('./transporterLogic.json');
+
+	const keys = ["null", "one"];
+	const movePlateParams = makeMoveLidFromSiteToContainerParams(parsed);
+
+	const shop = require('../HTN/shop.js');
+	const llpl = require('../HTN/llpl.js').create();
+	llpl.initializeDatabase(data.predicates);
+	let input0 = data.predicates;
+	let plan;
+	let errorLog = "";
+	for (let i = 0; i < keys.length; i++) {
+		const key = keys[i];
+		const method = {method: makeMoveLidFromSiteToContainerMethod(parsed, movePlateParams, i, llpl)};
+		input0 = input0.concat(_.values(transporterLogic[key]));
+		input0 = input0.concat([method]);
+		if (transporterLogic.hasOwnProperty(key)) {
+			llpl.addToDatabase(transporterLogic[key]);
+		}
+		llpl.addToDatabase([method]);
+		// const fs = require('fs');
+		// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
+		const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
+		// If we didn't find a path for this method:
+		if (queryResultsAll.length === 0) {
+			//const queryResultOne = llpl.query({stackable: {below: "?below", above: "ourlab.model.lidModel_384_square"}});
+			//console.log("queryResultOne: " +JSON.stringify(queryResultOne))
+			const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
+			errorLog += text;
+		}
+		// If we did find a path:
+		else {
+			// console.log(`${queryResultsAll.length} path(s) found, e.g.: ${JSON.stringify(queryResultsAll[0])}`);
+			const tasks = { "tasks": { "ordered": [{ moveLidFromSiteToContainer: movePlateParams }] } };
+			const input = input0.concat([tasks]);
+			var planner = shop.makePlanner(input);
+			plan = planner.plan();
+			//console.log(key, plan)
+			if (!_.isEmpty(plan)) {
+				//console.log("plan found for "+key)
+				//console.log(planner.ppPlan(plan));
+			}
+			else {
+				console.log("apparently unable to open some site or something")
+			}
+			break;
+		}
+	}
+
+	if (_.isEmpty(plan)) {
+		console.log(errorLog);
+		const x = _.pickBy({agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.objectName["object.location"], destination: parsed.objectName.destination});
+		//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
+		return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.object+"` from `"+parsed.objectName.origin+"` to `"+parsed.objectName.container+"` at `"+parsed.value.container.location+"`", JSON.stringify(x)]};
+	}
+	var tasks = planner.listAndOrderTasks(plan, true);
+	//console.log("Tasks:")
+	//console.log(JSON.stringify(tasks, null, '  '));
+	var cmdList = _(tasks).map(function(task) {
+		return _(task).map(function(taskParams, taskName) {
+			return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
+		}).flatten().value();
+	}).flatten().value();
+	// console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
+
+	// Create the expansion object
+	var expansion = {};
+	var i = 1;
+	_.forEach(cmdList, function(cmd) {
+		expansion[i.toString()] = cmd;
+		i += 1;
+	});
+
+	// Create the effets object
+	var effects = {};
+	effects[`${parsed.objectName.object}.location`] = parsed.objectName.container;
+	// console.log("expansion: "+JSON.stringify(expansion, null, '\t'))
+	// console.log("effects: "+JSON.stringify(effects, null, '\t'))
+
+	return {
+		expansion: expansion,
+		effects: effects
+	};
+}
+moveLidFromSiteToContainer.inputSpec = {
+	origin: "object*location",
+	lid: "object",
+	lidModel: "object*model",
+	container: "container",
+	model: "container*model",
+	destination: "container*location"
+};
+
 /**
  * Take the parsed parameters passed to `transporter.moveLidFromSiteToContainer`
  * and create the parameter list for the task `moveLidFromSiteToContainer` in `makeMoveLidFromSiteToContainerMethod()`.
@@ -134,18 +327,9 @@ function makeMoveLidFromSiteToContainerParams(parsed) {
 	});
 }
 
-function makeMoveLidFromSiteToContainerMethod(parsed, data, moveLidParams, n, llpl) {
+function makeMoveLidFromSiteToContainerMethod(parsed, moveLidParams, n, llpl) {
 	// console.log("makeMoveLidFromContainToSiteMethod: "+JSON.stringify(parsed, null, '\t'));
-	const x = commandHelper.lookupPaths({
-		origin: ["@object", "location"]
-	}, parsed.orig, data);
-	// console.log({x})
-	const {origin} = x;
-	const lid = parsed.objectName.object;
-	const lidModel = parsed.value.object.model;
-	const container = parsed.objectName.container;
-	const model = parsed.value.container.model;
-	const destination = parsed.value.container.location;
+	const {origin, lid, lidModel, container, model, destination} = parsed.input;
 	// console.log({lid, lidModel, container, model, origin, destination})
 
 	const originQuery = llpl.query({"siteModel": {"site": origin, "siteModel": "?originModel"}});
@@ -418,182 +602,8 @@ var commandHandlers = {
 			[`${parsed.objectName.object}.location`]: parsed.objectName.destination
 		}};
 	},
-	/**
-	 * Transport a lid from a container to a destination site.
-	 */
-	"transporter.moveLidFromContainerToSite": function(params, parsed, data) {
-		// console.log("transporter.moveLidFromContainerToSite:"); console.log(JSON.stringify(parsed, null, '\t'))
-		const transporterLogic = require('./transporterLogic.json');
-
-		const keys = ["null", "one"];
-		const movePlateParams = makeMoveLidFromContainerToSiteParams(parsed);
-
-		const shop = require('../HTN/shop.js');
-		const llpl = require('../HTN/llpl.js').create();
-		llpl.initializeDatabase(data.predicates);
-		let input0 = data.predicates;
-		let plan;
-		let errorLog = "";
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-			const method = {method: makeMoveLidFromContainerToSiteMethod(parsed, data, movePlateParams, i)};
-			input0 = input0.concat(_.values(transporterLogic[key]));
-			input0 = input0.concat([method]);
-			if (transporterLogic.hasOwnProperty(key)) {
-				llpl.addToDatabase(transporterLogic[key]);
-			}
-			llpl.addToDatabase([method]);
-			// const fs = require('fs');
-			// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
-			const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
-			// If we didn't find a path for this method:
-			if (queryResultsAll.length === 0) {
-				//const queryResultOne = llpl.query({stackable: {below: "?below", above: "ourlab.model.lidModel_384_square"}});
-				//console.log("queryResultOne: " +JSON.stringify(queryResultOne))
-				const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
-				errorLog += text;
-			}
-			// If we did find a path:
-			else {
-				// console.log(`${queryResultsAll.length} path(s) found, e.g.: ${JSON.stringify(queryResultsAll[0])}`);
-				const tasks = { "tasks": { "ordered": [{ moveLidFromContainerToSite: movePlateParams }] } };
-				const input = input0.concat([tasks]);
-				var planner = shop.makePlanner(input);
-				plan = planner.plan();
-				//console.log(key, plan)
-				if (!_.isEmpty(plan)) {
-					//console.log("plan found for "+key)
-					//console.log(planner.ppPlan(plan));
-				}
-				else {
-					console.log("apparently unable to open some site or something")
-				}
-				break;
-			}
-		}
-
-		if (_.isEmpty(plan)) {
-			console.log(errorLog);
-			const x = _.pickBy({agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.objectName["object.location"], destination: parsed.objectName.destination});
-			//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
-			return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.object+"` on `"+parsed.objectName.container+"` from `"+misc.findObjectsValue(parsed.objectName.container+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
-		}
-		var tasks = planner.listAndOrderTasks(plan, true);
-		//console.log("Tasks:")
-		//console.log(JSON.stringify(tasks, null, '  '));
-		var cmdList = _(tasks).map(function(task) {
-			return _(task).map(function(taskParams, taskName) {
-				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
-			}).flatten().value();
-		}).flatten().value();
-		// console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
-
-		// Create the expansion object
-		var expansion = {};
-		var i = 1;
-		_.forEach(cmdList, function(cmd) {
-			expansion[i.toString()] = cmd;
-			i += 1;
-		});
-
-		// Create the effets object
-		var effects = {};
-		effects[`${parsed.objectName.object}.location`] = parsed.objectName.destination;
-
-		return {
-			expansion: expansion,
-			effects: effects
-		};
-	},
-	/**
-	 * Transport a lid from a container to a destination site.
-	 */
-	"transporter.moveLidFromSiteToContainer": function(params, parsed, data) {
-		// console.log("transporter.moveLidFromSiteToContainer:"); console.log(JSON.stringify(parsed, null, '\t'))
-		const transporterLogic = require('./transporterLogic.json');
-
-		const keys = ["null", "one"];
-		const movePlateParams = makeMoveLidFromSiteToContainerParams(parsed);
-
-		const shop = require('../HTN/shop.js');
-		const llpl = require('../HTN/llpl.js').create();
-		llpl.initializeDatabase(data.predicates);
-		let input0 = data.predicates;
-		let plan;
-		let errorLog = "";
-		for (let i = 0; i < keys.length; i++) {
-			const key = keys[i];
-			const method = {method: makeMoveLidFromSiteToContainerMethod(parsed, data, movePlateParams, i, llpl)};
-			input0 = input0.concat(_.values(transporterLogic[key]));
-			input0 = input0.concat([method]);
-			if (transporterLogic.hasOwnProperty(key)) {
-				llpl.addToDatabase(transporterLogic[key]);
-			}
-			llpl.addToDatabase([method]);
-			// const fs = require('fs');
-			// fs.writeFileSync("a.json", JSON.stringify(llpl.database, null, '\t'));
-			const queryResultsAll = queryMovePlateMethod(llpl, method.method, i);
-			// If we didn't find a path for this method:
-			if (queryResultsAll.length === 0) {
-				//const queryResultOne = llpl.query({stackable: {below: "?below", above: "ourlab.model.lidModel_384_square"}});
-				//console.log("queryResultOne: " +JSON.stringify(queryResultOne))
-				const text = debugMovePlateMethod(llpl, method.method, queryResultsAll, i);
-				errorLog += text;
-			}
-			// If we did find a path:
-			else {
-				// console.log(`${queryResultsAll.length} path(s) found, e.g.: ${JSON.stringify(queryResultsAll[0])}`);
-				const tasks = { "tasks": { "ordered": [{ moveLidFromSiteToContainer: movePlateParams }] } };
-				const input = input0.concat([tasks]);
-				var planner = shop.makePlanner(input);
-				plan = planner.plan();
-				//console.log(key, plan)
-				if (!_.isEmpty(plan)) {
-					//console.log("plan found for "+key)
-					//console.log(planner.ppPlan(plan));
-				}
-				else {
-					console.log("apparently unable to open some site or something")
-				}
-				break;
-			}
-		}
-
-		if (_.isEmpty(plan)) {
-			console.log(errorLog);
-			const x = _.pickBy({agent: parsed.objectName.agent, equipment: parsed.objectName.equipment, program: parsed.objectName.program || parsed.value.program, model: parsed.value.object.model, origin: parsed.objectName["object.location"], destination: parsed.objectName.destination});
-			//console.log("transporter.movePlate: "+JSON.stringify(parsed, null, '\t'))
-			return {errors: ["unable to find a transportation path for lid `"+parsed.objectName.object+"` from `"+parsed.objectName.origin+"` to `"+parsed.objectName.container+"` at `"+parsed.value.container.location+"`", JSON.stringify(x)]};
-		}
-		var tasks = planner.listAndOrderTasks(plan, true);
-		//console.log("Tasks:")
-		//console.log(JSON.stringify(tasks, null, '  '));
-		var cmdList = _(tasks).map(function(task) {
-			return _(task).map(function(taskParams, taskName) {
-				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
-			}).flatten().value();
-		}).flatten().value();
-		// console.log("cmdList: "+JSON.stringify(cmdList, null, '  '));
-
-		// Create the expansion object
-		var expansion = {};
-		var i = 1;
-		_.forEach(cmdList, function(cmd) {
-			expansion[i.toString()] = cmd;
-			i += 1;
-		});
-
-		// Create the effets object
-		var effects = {};
-		effects[`${parsed.objectName.object}.location`] = parsed.objectName.container;
-		// console.log("expansion: "+JSON.stringify(expansion, null, '\t'))
-		// console.log("effects: "+JSON.stringify(effects, null, '\t'))
-
-		return {
-			expansion: expansion,
-			effects: effects
-		};
-	},
+	"transporter.moveLidFromContainerToSite": moveLidFromContainerToSite,
+	"transporter.moveLidFromSiteToContainer": moveLidFromSiteToContainer,
 	/**
 	 * Transport a plate to a destination.
 	 */
