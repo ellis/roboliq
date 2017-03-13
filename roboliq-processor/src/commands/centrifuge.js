@@ -61,8 +61,6 @@ var commandHandlers = {
 
 		var object1 = parsed.value.object1;
 		var object2 = parsed.value.object2;
-		if (object1.model != object2.model)
-			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
 
 		var query0 = {
 			"centrifuge.canAgentEquipmentModelSite1Site2": {
@@ -184,11 +182,16 @@ var commandHandlers = {
 			},
 		];
 
+		const warnings = (object1.model != object2.model)
+				? ["object1 and object2 are of different labware models; this may be problematic for centrifugation."]
+				: [];
+
 		//console.log("centrifuge2 expansion:")
 		//console.log(JSON.stringify(expansion, null, '\t'))
 		return {
-			expansion: expansion,
-			alternatives: alternatives
+			expansion,
+			alternatives,
+			warnings
 		};
 	},
 	"centrifuge.insertPlates2": function(params, parsed, data) {
@@ -205,10 +208,7 @@ var commandHandlers = {
 		var object1 = parsed.value.object1;
 		var object2 = parsed.value.object2;
 
-		if (object1 && object2 && object1.model !== object2.model)
-			return {errors: ["object1 and object2 must have the same model for centrifugation."]};
 		const model = (object1) ? object1.model : object2.model;
-		expect.truthy({}, model, "object1 or object2 must have a `model` value");
 
 		var query0 = {
 			"centrifuge.canAgentEquipmentModelSite1Site2": {
@@ -276,10 +276,11 @@ var commandHandlers = {
 			],
 		];
 
-		return {
-			expansion: expansion,
-			alternatives: alternatives
-		};
+		const warnings = (object1.model != object2.model)
+				? ["object1 and object2 are of different labware models; this may be problematic for centrifugation."]
+				: [];
+
+		return { expansion, alternatives, warnings };
 	}
 };
 

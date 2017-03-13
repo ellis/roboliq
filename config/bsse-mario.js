@@ -515,7 +515,7 @@ module.exports = {
 		),
 		// Plate stacking
 		{stackable: {below: "ourlab.model.plateModel_96_round_transparent_nunc", above: "ourlab.model.plateModel_96_round_filter_OV"}},
-		_.map(["ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc"], function(model) {
+		_.map(["ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_dwp"], function(model) {
 			return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.centrifuge",

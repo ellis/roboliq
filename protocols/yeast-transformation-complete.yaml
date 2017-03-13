@@ -1,9 +1,178 @@
 roboliq: v1
-imports: yeast-transformation-1.yaml
-description: Dispense cells on filter plate
+description: |
+  Yeast transformation with lithium acetate and plasmid DNA
+
+  Input information:
+
+  - N: number of transformations
+  - X: amount of liquid plated (ul)
+
+  Starting resources:
+
+  - Cell culture tube
+  - LiAc
+  - Master mix
+  - DNA to transform on a microtitier/PCR plate
+  - LB container
+  - Slightly dried agar plates with an antibiotic
+  - PVD filter plate
+  - Waste plate (see Test waste plate)
+
+  Protocol:
+
+  - Pipet 350 ul into N wells on a PVD filter plate
+  - Stack PVD filter plate on waste plate
+  - Prepare a counter weight either by pipetting same volumes on identical plates or having a DW plate
+  - Move the balance to the centrifuge
+  - Move the stack to centrifuge
+  - Run a suitable time and rpm (see Test centrifugation)
+  - Move the stack out
+  - Move the balance out
+  - Move the filter plate on an empty site
+  - Resuspend the pellet on the filter plate into 300 ul water (or max volume)
+  - Move the plate on top of the stack
+  - Fill the balance with water matching to the added volume
+  - Move the stack to the centrifuge
+  - Move the balance to the centrifuge
+  - Run a suitable time and rpm
+  - Move the stack out
+  - Move the balance out
+  - Move the filter plate on an empty site
+  - Resuspend the cells with LiAc (is the volume high enough?)
+  - Cover with a lid
+  - Incubate 30 min in RT
+  - Meanwhile, apply viscous master mix on a PCR plate (see Test pipetting the viscous liquids)
+  - Add the DNA from the plate to the PCR plate
+  - Uncover the filter plate
+  - Add the incubated cells on the PCR plate with MM
+  - Move the PCR plate in a thermocycler
+  - Heat shock in a thermocycler for 30 mins
+  - Meanwhile, pipet 0.8 ml of LB on a deep well plate
+  - Move the plate out of the thermocycler
+  - Transfer each transformation (200 ul) on the deep well plate
+  - Move the deep well plate into the
+  - Move the deep well plate in the shaker incubator
+  - Incubate the plate in 30C for 4h
+  - Plate x ul of each culture on agar plates
+
+config:
+  evowareCompiler:
+    checkBench: false
+
+parameters:
+  N:
+    description: number of transformations
+    value: 4
+  X:
+    description: amount of liquid plated (ul)
+    value: 200 ul
 objects:
+  ourlab:
+    mario:
+      site:
+        # P4: null
+        P4PCR: { type: "Site", evowareCarrier: "MP 3Pos Cooled 1 PCR", evowareGrid: 17, evowareSite: 1 }
+  decontaminationTrough:
+    description: Holds bleach
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R3
+  tubeHolder50:
+    description: Falcon tube(s) for starting cell culture
+    type: Plate
+    model: ourlab.model.tubeHolderModel_50ml
+    location: ourlab.mario.site.T2
+  cellCulture:
+    description: Cells to be transformed
+    type: Liquid
+    wells: tubeHolder50(A01)
+  tubeHolder15:
+    description: 15ul tubes
+    type: Plate
+    model: ourlab.model.tubeHolderModel_15ml
+    location: ourlab.mario.site.T1
+  liAc:
+    description: Lithium acetate
+    type: Liquid
+    wells: tubeHolder15(A01)
+  masterMix:
+    description: Master mix with PEG, SSDNA etc. mixed together
+    type: Liquid
+    wells: tubeHolder15(B01)
+  dmso:
+    description: DMSO
+    type: Liquid
+    wells: tubeHolder15(C01)
+  lbTrough:
+    description: LB medium container
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity ul, lb]
+  lb:
+    description: LB medium
+    type: Liquid
+    wells: lbTrough(all)
+  waterTrough:
+    description: Sterile water container
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity ul, water]
+  water:
+    description: Sterile water
+    type: Liquid
+    wells: waterTrough(all)
+  filterPlate:
+    description: PVD filter plate up to 350 ul
+    type: Plate
+    model: ourlab.model.plateModel_96_round_filter_OV
+    location: ourlab.mario.site.HOTEL32_D1
+  wastePlate:
+    description: One well plate for waste
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.HOTEL32_C1
+  wastePlateLid:
+    type: Lid
+    model: ourlab.model.lidModel_standard
+    location: wastePlate
+  culturePlate:
+    description: Empty deep well plate for cell cultures
+    type: Plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.mario.site.P2
+  balancePlate:
+    description: Empty deep well plate for balancing liquid
+    type: Plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.mario.site.P8
+  dnaPlate:
+    description: 96 well plate for DNA to be transformed
+    type: Plate
+    model: ourlab.model.plateModel_96_round_transparent_nunc
+    location: ourlab.mario.site.P5
+  pcrPlate:
+    description: 96 well PCR plate
+    type: Plate
+    model: ourlab.model.plateModel_96_pcr
+    location: ourlab.mario.site.P4PCR
+
   design1:
+    type: Design
+    description: Mixtures for target wells
     conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
       layer*:
       - source: cellCulture
         volume: 350 ul
@@ -11,16 +180,44 @@ objects:
         cleanEnd: decontaminate
         cleanBegin: decontaminate
         cleanBetween: none
+
   design2:
+    type: Design
+    description: Mixtures for target wells
     conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
       layer*:
       - source: water
         volume: 100 ul
         liquidClass: Roboliq_Water_Air_1000
         cleanBetween: none
         cleanEnd: none
+
   design3:
+    type: Design
+    description: Mixtures for target wells
     conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
       layer*:
       - source: liAc
         volume: 20 ul
@@ -28,8 +225,22 @@ objects:
         cleanBetween: decontaminate
         cleanBetweenSameSource: none
         cleanEnd: decontaminate
+
   design4:
+    type: Design
+    description: Mixtures for target wells
     conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      #well: [A01, B01, C01, D01]
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
       layer*:
       - source: masterMix
         volume: 124 ul
@@ -65,7 +276,7 @@ steps:
         description: Add water to match the balance plate weight
         command: pipetter.pipette
         sources: water
-        destinations: wastePlate
+        destinations: wastePlate(D6)
         volumes: 600 ul
         cleanBetween: none
     5:
@@ -100,9 +311,9 @@ steps:
         site2: ourlab.mario.site.CENTRIFUGE_4
     9:
         description: Run the centrifuge to discard supernatant
-        command: centrifuge.centrifuge2,
-        object1: plate1,
-        object2: plate2,
+        command: centrifuge.centrifuge2
+        object1: balancePlate
+        object2: wastePlate
         program:
             rpm: 3000
             duration: 2 minutes
@@ -172,8 +383,8 @@ steps:
     19:
         description: Run the centrifuge to discard supernatant
         command: centrifuge.centrifuge2
-        object1: plate1
-        object2: plate2
+        object1: balancePlate
+        object2: wastePlate
         program:
             rpm: 3000
             duration: 2 minutes
@@ -211,14 +422,11 @@ steps:
     26:
         description: Shake on the teleshake (ToDo)
         command: shaker.shakePlate
-        equipment: ourlab.mario.shaker
         program:
             command: shaker.ShakerProgram
-            amplitude: 1
             rpm: 750
-            duration: 60
+            duration: 60s
         object: filterPlate
-        site: ourlab.mario.shaker
     27:
         description: Put DNA plate on bench
         command: transporter.movePlate
@@ -230,19 +438,16 @@ steps:
     29:
         description: Shake on the teleshake (ToDo)
         command: shaker.shakePlate
-        equipment: ourlab.mario.shaker
         program:
             command: shaker.ShakerProgram
-            amplitude: 1
             rpm: 750
-            duration: 1800
+            duration: 30 minute
         object: filterPlate
-        site: ourlab.mario.shaker
     30:
         description: Put DNA plate on back
         command: transporter.movePlate
         object: dnaPlate
-        destination: ourlab.mario.site.D2
+        destination: ourlab.mario.site.HOTEL32_D2
     30:
         description: Put PCR plate on the bench
         command: transporter.movePlate

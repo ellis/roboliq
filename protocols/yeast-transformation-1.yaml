@@ -223,19 +223,19 @@ objects:
       cleanEnd: flush
       cleanBetween: flush
       cleanBetweenSameSource: none
-          
+
 steps:
-  1:
-    data: {source: design1}
-    command: experiment.forEachGroup
-    groupBy: layer
-    steps:
-      command: pipetter.pipette
-      program: $liquidClass
-      sources: $$source
-      destinationLabware: $destinationLabware
-      destinations: $$well
-      volumes: $volume
-      cleanBegin: $cleanBegin
-      cleanEnd: $cleanEnd
-      cleanBetween: $cleanBetween
+  # 1:
+  #   data: {source: design1}
+  #   command: experiment.forEachGroup
+  #   groupBy: layer
+  #   steps:
+  #     command: pipetter.pipette
+  #     program: $liquidClass
+  #     sources: $$source
+  #     destinationLabware: $destinationLabware
+  #     destinations: $$well
+  #     volumes: $volume
+  #     cleanBegin: $cleanBegin
+  #     cleanEnd: $cleanEnd
+  #     cleanBetween: $cleanBetween

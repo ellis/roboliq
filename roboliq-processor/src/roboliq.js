@@ -681,12 +681,26 @@ function runWithOpts(opts, userProtocol) {
 			if (!_.isEmpty(result.output.errors)) {
 				console.log();
 				console.log("Errors:");
-				_.forEach(result.output.errors, function(err, id) {
-					if (id)
-						console.log(id+": "+err.toString());
-					else
-						console.log(err.toString());
-				});
+
+				if (_.isPlainObject(result.output.errors)) {
+					// Find all sub-steps (properties that start with a digit)
+					var keys = _.keys(result.output.errors);
+					// Sort them in "natural" order
+					keys.sort(naturalSort);
+
+					_.forEach(keys, key => {
+						const err = result.output.errors[key];
+						console.log(key+": "+err.toString());
+					});
+				}
+				else {
+					_.forEach(result.output.errors, function(err, id) {
+						if (id)
+							console.log(id+": "+err.toString());
+						else
+							console.log(err.toString());
+					});
+				}
 			}
 
 			// Print warnings, if any:
