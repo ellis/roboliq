@@ -1043,13 +1043,14 @@ function lookupInputPath(path, parsed, data) {
 	}
 
 	const elems = _.filter(path.split(/([*])/), s => !_.isEmpty(s));
-	console.log({elems});
+	// console.log({elems});
 
 	let current;
 	try {
 		for (let i = 0; i < elems.length; i++) {
 			const elem = elems[i];
 			if (elem == "*") {
+				assert(_.isString(current), "cannot dereference: "+JSON.stringify({path, i, elem, current}));
 				current = lookupInputPath_dereference(current, data);
 			}
 			else {
@@ -1072,7 +1073,6 @@ function lookupInputPath(path, parsed, data) {
 }
 
 function lookupInputPath_dereference(current, data) {
-	assert(_.isString(current), "cannot dereference: "+JSON.stringify({path, i, elem, current}));
 	const result = {value: {}, objectName: {}};
 	const path2 = []; // FIXME: figure out a sensible path in case of errors
 	const current2 = lookupValue0(result, path2, current, data);
@@ -1301,7 +1301,7 @@ module.exports = {
 	getStepKeys,
 	lookupPath,
 	lookupPaths,
-	lookupInputPath,
+	_lookupInputPath: lookupInputPath,
 	parseParams,
 	queryLogic,
 	// setDefaultInArrayOfObjects,

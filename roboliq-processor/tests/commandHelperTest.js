@@ -746,16 +746,18 @@ describe('commandHelper', function() {
 
 	});
 
-	describe.only("lookupInputPath", () => {
+	describe.only("_lookupInputPath", () => {
+		const plate1 = {
+			type: "Plate",
+			location: "site1"
+		};
+		const site1 = {
+			type: "Site"
+		};
 		const data = {
 			objects: {
-				plate1: {
-					type: "Plate",
-					location: "site1"
-				},
-				site1: {
-					type: "Site"
-				}
+				plate1,
+				site1
 			}
 		};
 		const parsed = {
@@ -766,21 +768,44 @@ describe('commandHelper', function() {
 				thing: "plate1"
 			}
 		};
+
 		it("should handle 'thing'", () => {
 			should.deepEqual(
-				commandHelper.lookupInputPath("thing", parsed, data),
+				commandHelper._lookupInputPath("thing", parsed, data),
 				"plate1"
 			);
 		});
+
+		it("should handle 'thing*'", () => {
+			should.deepEqual(
+				commandHelper._lookupInputPath("thing*", parsed, data),
+				plate1
+			);
+		});
+
+		it("should handle 'thing*location'", () => {
+			should.deepEqual(
+				commandHelper._lookupInputPath("thing*location", parsed, data),
+				"site1"
+			);
+		});
+
+		it("should handle 'thing*location*'", () => {
+			should.deepEqual(
+				commandHelper._lookupInputPath("thing*location*", parsed, data),
+				site1
+			);
+		});
+
+		it("should handle '?thingX'", () => {
+			should.deepEqual(
+				commandHelper._lookupInputPath("?thingX", parsed, data),
+				undefined
+			);
+		});
+
 		/*
-		* * "object": gets parameter value.
 	  * * "?object": optionally gets parameter value.
-	  * * "object*": looks up object.
-	  * * "object*location": looks up object, gets `location` property.
-	  * * "object*location*": looks up object, gets `location` property, looks up location.
-	  * * "object*location*type": looks up object, looks up its `location` property, gets type property.
-	  * * "something**": double de-reference
-	  * * "object*(someName)": looks up object, gets someName value, gets object's property with that value. (this is not currently implemented)
 	  */
 	});
 
