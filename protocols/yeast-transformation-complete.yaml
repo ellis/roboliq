@@ -151,12 +151,16 @@ objects:
     description: 96 well plate for DNA to be transformed
     type: Plate
     model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.P5
+    location: ourlab.mario.site.HOTEL32_D2
+  dnaPlateLid:
+    type: Lid
+    model: ourlab.model.lidModel_standard
+    location: dnaPlate
   pcrPlate:
     description: 96 well PCR plate
     type: Plate
     model: ourlab.model.plateModel_96_pcr
-    location: ourlab.mario.site.P4PCR
+    location: ourlab.mario.site.HOTEL32_C2
 
   design1:
     type: Design
@@ -254,6 +258,24 @@ objects:
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
         cleanEnd: decontaminate
+  design5:
+    type: Design
+    description: Add DMSO
+    conditions:
+      i*: $#N
+      destinationLabware: pcrPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+      layer*:
+      - source: dmso
+        volume: 14 ul
+        liquidClass: Roboliq_Water_Air_1000
 
 steps:
     1:
@@ -265,7 +287,6 @@ steps:
         description: Remove lid from waste plate
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
-        container: wastePlate
         destination: ourlab.mario.site.P6
     3:
         description: "Put filter plate on bench"
@@ -310,7 +331,6 @@ steps:
         description: Put lid on the filter plate
         command: transporter.moveLidFromSiteToContainer
         object: wastePlateLid
-        origin: ourlab.mario.site.P6
         container: filterPlate
     7:
         description: Put filter plate on the waste plate
@@ -347,13 +367,11 @@ steps:
         description: Remove filter plate from waste plate
         command: transporter.moveLidFromContainerToSite
         object: filterPlate
-        container: wastePlate
         destination: ourlab.mario.site.P3
     13:
         description: Remove lid from filter plate
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
-        container: filterPlate
         destination: ourlab.mario.site.P6
 
     14:
@@ -471,6 +489,12 @@ steps:
             duration: 60s
         object: filterPlate
     27:
+      1:
+        description: Put PCR plate on bench
+        command: transporter.movePlate
+        object: pcrPlate
+        destination: ourlab.mario.site.P4PCR
+      2:
         description: Put DNA plate on bench
         command: transporter.movePlate
         object: dnaPlate
@@ -502,21 +526,35 @@ steps:
             cleanBetweenSameSource: none
             cleanEnd: decontaminate
     29:
-        description: Shake on the teleshake (ToDo)
-        command: shaker.shakePlate
-        program:
-            command: shaker.ShakerProgram
-            rpm: 750
-            duration: 30 minute
-        object: filterPlate
+        description: Put lid on DNA plate
+        command: transporter.moveLidFromSiteToContainer
+        object: dnaPlateLid
+        destination: dnaPlate
     30:
         description: Put DNA plate on back
         command: transporter.movePlate
         object: dnaPlate
         destination: ourlab.mario.site.HOTEL32_D2
-    30:
-        description: Put PCR plate on the bench
+    31:
+        description: Add DMSO on the cells
+        data: {source: design5}
+        command: experiment.forEachGroup
+        groupBy: layer
+        steps:
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: $$source
+            destinationLabware: $destinationLabware
+            destinations: $$well
+            volumes: $volume
+            cleanBegin: $cleanBegin
+            cleanEnd: $cleanEnd
+            cleanBetween: $cleanBetween
+
+    32: # MOve later
+        description: Put PCR plate back
         command: transporter.movePlate
         object: pcrPlate
-        destination: ourlab.mario.site.P4
+        destination: ourlab.mario.site.HOTEL32_C2
+
     # ToDo: Transfer cells directly after DMSO
