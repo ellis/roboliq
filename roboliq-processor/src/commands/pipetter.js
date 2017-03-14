@@ -413,7 +413,7 @@ function pipette(params, parsed, data, options={}) {
 			const intensity = (!isSameSource)
 				? item.cleanBefore || parsed.value.cleanBetween || parsed.value.clean || "thorough"
 				: item.cleanBefore || parsed.value.cleanBetweenSameSource || parsed.value.cleanBetween || parsed.value.clean || "thorough";
-			assert(intensityToValue.hasOwnProperty(intensity));
+			expect.truthy({}, intensityToValue.hasOwnProperty(intensity), `unrecognized intensity value: ${intensity}`);
 			let intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))
 				intensityValue = Math.max(syringeToCleanAfterValue[syringe], intensityValue);

@@ -2,7 +2,7 @@
 
 # Things needed for Oskari's yeast script, part 1 on mario
 
-* [ ] lid handling
+* [x] lid handling
 	* [x] `transporter._moveLidFromContainerToSite` roboliq code
 	* [x] `transporter.moveLidFromContainerToSite` roboliq code
 	* [x] `transporter._moveLidFromSiteToContainer` roboliq code
@@ -17,16 +17,14 @@
 * [x] improve the script documentation format
 	* [x] mark required parameters
 * [x] look at Oskari's requests in Email from 2017-03-09 (e.g. documentation)
-* [?] move 'api-generator' output to `docs/protocol`
+* [x] move 'api-generator' output to `docs/protocol`
 * [x] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
 * [ ] get rid of `params` argument to command handlers, because its redundant
-* [ ] use evoware table file for the grid indexes, rather than using the values in the config file
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
 * [ ] consider adding display information to the sites, and generate an SVG of the initial bench setup
 * [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
-* [ ] experiment with `~/src/extern/ng2-json-editor` for configuration and script editing
-* [ ] when errors are in the protocol, open a browser window at the beginning of the ESC file to show the errors
+* [ ] in `yeast-transformation-complete`, why is the labware information not generated for the centrifuge site (we had to manually put the labware onto the centrifuge in the table file)?
 
 Would be nice:
 
@@ -39,6 +37,12 @@ Would be nice:
 * [ ] repeat experiment 1, but with correction of Dry=>Air dispense (and maybe also at the end fill wells to 250ul and re-read)
 * [ ] need to consider how to measure/estimate alpha_k more reliably
 * [ ] higher dye volumes
+
+# For Lena
+
+* [ ] use evoware table file for the grid indexes, rather than using the values in the config file
+* [ ] experiment with `~/src/extern/ng2-json-editor` for configuration and script editing
+* [ ] when errors are in the protocol, open a browser window at the beginning of the ESC file to show the errors
 
 # Get it working for colleagues
 
