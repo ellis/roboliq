@@ -13,7 +13,7 @@ description: |
   - LiAc
   - Master mix
   - DNA to transform on a microtitier/PCR plate
-  - LB container
+  - YPD container
   - Slightly dried agar plates with an antibiotic
   - PVD filter plate
   - Waste plate (see Test waste plate)
@@ -47,7 +47,7 @@ description: |
   - Add the incubated cells on the PCR plate with MM
   - Move the PCR plate in a thermocycler
   - Heat shock in a thermocycler for 30 mins
-  - Meanwhile, pipet 0.8 ml of LB on a deep well plate
+  - Meanwhile, pipet 0.2 ml of YPD on a deep well plate
   - Move the plate out of the thermocycler
   - Transfer each transformation (200 ul) on the deep well plate
   - Move the deep well plate into the
@@ -63,6 +63,9 @@ parameters:
   N:
     description: number of transformations
     value: 4
+  F:
+    description: first usable free well
+    value: E01
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -103,16 +106,16 @@ objects:
     description: DMSO
     type: Liquid
     wells: tubeHolder15(C01)
-  lbTrough:
-    description: LB medium container
+  ypdTrough:
+    description: YPD medium container
     type: Plate
     model: ourlab.model.troughModel_100ml
     location: ourlab.mario.site.R6
-    contents: [Infinity ul, lb]
-  lb:
-    description: LB medium
+    contents: [Infinity ul, ypd]
+  ypd:
+    description: YPD medium
     type: Liquid
-    wells: lbTrough(all)
+    wells: ypdTrough(all)
   waterTrough:
     description: Sterile water container
     type: Plate
@@ -140,7 +143,7 @@ objects:
   culturePlate:
     description: Empty deep well plate for cell cultures
     type: Plate
-    model: ourlab.model.plateModel_96_dwp
+    model: ourlab.model.plateModel_96_round_transparent_nunc
     location: ourlab.mario.site.P2
   balancePlate:
     description: Empty deep well plate for balancing liquid
@@ -171,7 +174,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
-        from: E01
+        from: $#F
       #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush
@@ -194,7 +197,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
-        from: E01
+        from: $#F
       #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush
@@ -216,7 +219,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
-        from: E01
+        from: $#F
       #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush
@@ -239,7 +242,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
-        from: E01
+        from: $#F
       #well: [A01, B01, C01, D01]
       cleanBegin: none
       cleanEnd: flush
@@ -267,7 +270,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
-        from: E01
+        from: $#F
       cleanBegin: none
       cleanEnd: flush
       cleanBetween: flush
@@ -285,7 +288,7 @@ objects:
       well=allocateWells:
         rows: 8
         columns: 12
-        from: E01
+        from: $#F
       cleanBegin: none
       cleanEnd: flush
       cleanBetween: flush
@@ -293,6 +296,41 @@ objects:
       layer*:
       - source=calculate: 'concat("filterPlate(", well, ")")'
         volume: 130 ul
+        liquidClass: Roboliq_Water_Air_1000 # Change the liqud class to really viscous!
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: decontaminate
+        cleanEnd: decontaminate
+  design7:
+    type: Design
+    description: Add YPD on the culture plate
+    conditions:
+      i*: $#N
+      destinationLabware: culturePlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: $#F
+      layer*:
+      - source: ypd
+        volume: 200 ul
+        liquidClass: Roboliq_Water_Air_1000:
+  design8:
+    type: Design
+    description: Transfer cells from PCR plate to culture plate with YPD
+    conditions:
+      i*: $#N
+      destinationLabware: culturePlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: $#F
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+      layer*:
+      - source=calculate: 'concat("pcrPlate(", well, ")")'
+        volume: 144 ul
         liquidClass: Roboliq_Water_Air_1000 # Change the liqud class to really viscous!
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
@@ -479,7 +517,7 @@ steps:
         description: Move the used waste plate to the hotel
         command: transporter.movePlate
         object: wastePlate
-        destination: ourlab.mario.site.HOTEL32_C3
+        destination: ourlab.mario.site.HOTEL32_C1
     25:
         description: Add lithium acetate on the cells (ToDo test)
         data: {source: design3}
@@ -600,16 +638,73 @@ steps:
             cleanBegin: $cleanBegin
             cleanEnd: $cleanEnd
             cleanBetween: $cleanBetween
-    # Seal here
-
-    # 32: # MOve later
-    #     description: Put PCR plate back
-    #     command: transporter.movePlate
-    #     object: pcrPlate
-    #     destination: ourlab.mario.site.HOTEL32_C2
-
     36:
+        description: Cover filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        container: filterPlate
+    37:
+        description: Bring used filter plate back to hotel
+        command: transporter.movePlate
+        object: dnaPlate
+        destination: ourlab.mario.site.HOTEL32_D1
+    38:
+        description: Add YPD on the culture plate
+        data: {source: design7}
+        command: experiment.forEachGroup
+        groupBy: layer
+        steps:
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: $$source
+            destinationLabware: $destinationLabware
+            destinations: $$well
+            volumes: $volume
+            cleanBegin: $cleanBegin
+            cleanEnd: $cleanEnd
+            cleanBetween: $cleanBetween
+    39:
+        description: Heat shock protocol on a thermocycler
         command: evoware._subroutine
         filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_heatschok_20170314.esc"
+    40:
+        description: Transfer cells on the culture plate
+        data: {source: design8}
+        command: experiment.forEachGroup
+        groupBy: layer
+        steps:
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: $$source
+            destinationLabware: $destinationLabware
+            destinations: $$well
+            volumes: $volume
+            cleanBegin: $cleanBegin
+            cleanEnd: $cleanEnd
+            cleanBetween: $cleanBetween
+    41:
+        description: Mix the cells
+        data: {source: design1}
+        command: pipetter.mix
+        wellLabware: culturePlate
+        wells: $$well
+        counts: 5
+        amounts: 100 ul
+        cleanBegin: none
+        cleanBetween: decontaminate
+        cleanEnd: decontaminate
+    42:
+        description: Put PCR plate back
+        command: transporter.movePlate
+        object: pcrPlate
+        destination: ourlab.mario.site.HOTEL32_C2
+    43:
+        description: Decontamination protocol on a thermocycler, 20mins
+        command: evoware._subroutine
+        filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_tbot_decon_20170314.esc"
+    32:
+        description: Incubate for 220 minutes
+        command: timer.sleep
+        duration: 220 minutes
 
     # ToDo: Transfer cells directly after DMSO
