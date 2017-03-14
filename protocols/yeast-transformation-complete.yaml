@@ -579,6 +579,7 @@ steps:
                 cleanEnd: $cleanEnd
                 cleanBetween: $cleanBetween
         2:
+            data: {where: 'layer == 1'}
             command: pipetter.mix
             wellLabware: filterPlate
             wells: $$well

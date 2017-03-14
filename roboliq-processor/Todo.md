@@ -22,6 +22,7 @@
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
+* [ ] generate documentation for evoware commands
 * [ ] consider adding display information to the sites, and generate an SVG of the initial bench setup
 * [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
 * [ ] in `yeast-transformation-complete`, why is the labware information not generated for the centrifuge site (we had to manually put the labware onto the centrifuge in the table file)?
@@ -40,8 +41,8 @@ Would be nice:
 
 # For Lena
 
-* [ ] use evoware table file for the grid indexes, rather than using the values in the config file
 * [ ] experiment with `~/src/extern/ng2-json-editor` for configuration and script editing
+* [ ] use evoware table file for the grid indexes, rather than using the values in the config file
 * [ ] when errors are in the protocol, open a browser window at the beginning of the ESC file to show the errors
 
 # Get it working for colleagues
