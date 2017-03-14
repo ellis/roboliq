@@ -561,14 +561,10 @@ steps:
         command: transporter.movePlate
         object: dnaPlate
         destination: ourlab.mario.site.HOTEL32_D2
-    32: # Onlz incubation for 30 minutes
-        description: Shake on the teleshake
-        command: shaker.shakePlate
-        program:
-            command: shaker.ShakerProgram
-            rpm: 0
-            duration: 1800s
-        object: filterPlate
+    32:
+        description: Incubate for 30 minutes
+        command: timer.sleep
+        duration: 30 minutes
     33:
       description: Uncover the filter plate
       command: transporter.moveLidFromContainerToSite
@@ -617,19 +613,3 @@ steps:
         filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_heatschok_20170314.esc"
 
     # ToDo: Transfer cells directly after DMSO
-
-# TODOS:
-#
-# * [x] call subroutine
-# * [ ] wait for 30 minutes
-# * [x]
-# * [ ] change thermocycler program
-
-# @Oskari: From Ellis 2017-03-13
-# 1) I had to move the dnaPlate to P8 and the balance plate to P5, because
-# ROMA2 isn't allowed to access sites P4, and P5, and therefore couldn't move
-# the lid from the dna plate back into the hotel.
-# 2) it's not necessary to call `centrifuge.insertPlates2` before
-# centrifugation and then removed the plates explicitly afterwards.
-# Just call `centrifuge.centrifuge2`, and Roboliq will take care of all
-# the transporation by default.
