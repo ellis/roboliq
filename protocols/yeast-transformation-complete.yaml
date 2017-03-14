@@ -310,10 +310,14 @@ objects:
         rows: 8
         columns: 12
         from: $#F
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
       layer*:
       - source: ypd
         volume: 200 ul
-        liquidClass: Roboliq_Water_Air_1000:
+        liquidClass: Roboliq_Water_Air_1000
   design8:
     type: Design
     description: Transfer cells from PCR plate to culture plate with YPD
