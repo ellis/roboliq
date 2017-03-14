@@ -62,10 +62,10 @@ config:
 parameters:
   N:
     description: number of transformations
-    value: 4
+    value: 8
   F:
     description: first usable free well
-    value: E01
+    value: A01
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -706,7 +706,7 @@ steps:
         description: Decontamination protocol on a thermocycler, 20mins
         command: evoware._subroutine
         filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_tbot_decon_20170314.esc"
-    32:
+    44:
         description: Incubate for 220 minutes
         command: timer.sleep
         duration: 220 minutes
