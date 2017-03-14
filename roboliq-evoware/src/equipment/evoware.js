@@ -166,6 +166,14 @@ module.exports = {
 			},
 			required: ["commands"]
 		},
+		"evoware._subroutine": {
+			description: "An Evoware 'Subroutine' command",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				filename: {type: "string", description: "The filename of the subroutine file to call"}
+			},
+			required: ["filename"]
+		},
 		"evoware._userPrompt": {
 			description: "An Evoware UserPrompt command",
 			properties: {
@@ -194,6 +202,7 @@ module.exports = {
 		"evoware._execute": function(params, parsed, data) {},
 		"evoware._facts": function(params, parsed, data) {},
 		"evoware._raw": function(params, parsed, data) {},
+		"evoware._subroutine": function(params, parsed, data) {},
 		"evoware._userPrompt": function(params, parsed, data) {},
 	}),
 };

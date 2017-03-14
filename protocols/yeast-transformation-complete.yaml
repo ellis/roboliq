@@ -276,6 +276,27 @@ objects:
       - source: dmso
         volume: 14 ul
         liquidClass: Roboliq_Water_Air_1000
+  design6:
+    type: Design
+    description: Transfer cells from filter plate to PCR plate
+    conditions:
+      i*: $#N
+      destinationLabware: pcrPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: E01
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+      layer*:
+      - source=calculate: 'concat("filterPlate(", well, ")")'
+        volume: 130 ul
+        liquidClass: Roboliq_Water_Air_1000 # Change the liqud class to really viscous!
+        cleanBetween: decontaminate
+        cleanBetweenSameSource: decontaminate
+        cleanEnd: decontaminate
 
 steps:
     1:
@@ -476,7 +497,7 @@ steps:
                 cleanEnd: $cleanEnd
                 cleanBetween: $cleanBetween
     26:
-        description: Shake on the teleshake (ToDo)
+        description: Shake on the teleshake
         command: shaker.shakePlate
         program:
             command: shaker.ShakerProgram
@@ -495,12 +516,12 @@ steps:
         object: dnaPlate
         destination: ourlab.mario.site.P8
       3:
-        description: Put DNA plate on bench
+        description: Unccover the DNA plate
         command: transporter.moveLidFromContainerToSite
         object: dnaPlateLid
         destination: ourlab.mario.site.HOTEL32_D2
     28:
-        description: Add PEG mix on the cells (ToDo test)
+        description: Add PEG mix on the cells and resuspend
         data: {source: design4}
         1:
             command: experiment.forEachGroup
@@ -526,17 +547,35 @@ steps:
             cleanBetweenSameSource: none
             cleanEnd: decontaminate
     29:
+        description: Put lid on filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        container: filterPlate
+    30:
         description: Put lid on DNA plate
         command: transporter.moveLidFromSiteToContainer
         object: dnaPlateLid
         container: dnaPlate
-    30:
+    31:
         description: Put DNA plate on back
         command: transporter.movePlate
         object: dnaPlate
         destination: ourlab.mario.site.HOTEL32_D2
-    31:
-        description: Add DMSO on the cells
+    32: # Onlz incubation for 30 minutes
+        description: Shake on the teleshake
+        command: shaker.shakePlate
+        program:
+            command: shaker.ShakerProgram
+            rpm: 0
+            duration: 1800s
+        object: filterPlate
+    33:
+      description: Uncover the filter plate
+      command: transporter.moveLidFromContainerToSite
+      object: wastePlateLid
+      destination: ourlab.mario.site.P6
+    34:
+        description: Add DMSO on the emptz PCR plate
         data: {source: design5}
         command: experiment.forEachGroup
         groupBy: layer
@@ -550,14 +589,41 @@ steps:
             cleanBegin: $cleanBegin
             cleanEnd: $cleanEnd
             cleanBetween: $cleanBetween
+    35:
+        description: Transfer cells from filter plate to PCR plate with DMSO
+        data: {source: design6}
+        command: experiment.forEachGroup
+        groupBy: layer
+        steps:
+            command: pipetter.pipette
+            program: $liquidClass
+            sources: $$source
+            destinationLabware: $destinationLabware
+            destinations: $$well
+            volumes: $volume
+            cleanBegin: $cleanBegin
+            cleanEnd: $cleanEnd
+            cleanBetween: $cleanBetween
+    # Seal here
 
-    32: # MOve later
-        description: Put PCR plate back
-        command: transporter.movePlate
-        object: pcrPlate
-        destination: ourlab.mario.site.HOTEL32_C2
+    # 32: # MOve later
+    #     description: Put PCR plate back
+    #     command: transporter.movePlate
+    #     object: pcrPlate
+    #     destination: ourlab.mario.site.HOTEL32_C2
+
+    36:
+        command: evoware._subroutine
+        filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_heatschok_20170314.esc"
 
     # ToDo: Transfer cells directly after DMSO
+
+# TODOS:
+#
+# * [x] call subroutine
+# * [ ] wait for 30 minutes
+# * [x]
+# * [ ] change thermocycler program
 
 # @Oskari: From Ellis 2017-03-13
 # 1) I had to move the dnaPlate to P8 and the balance plate to P5, because

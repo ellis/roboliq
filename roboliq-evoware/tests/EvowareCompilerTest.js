@@ -179,6 +179,27 @@ describe('EvowareCompilerTest', function() {
 			]);
 		});
 
+		it("should compile evoware._subroutine", function() {
+			const table = {};
+			const protocol = _.merge({}, protocol0, {
+				roboliq: "v1",
+				steps: {
+					1: {
+						"command": "evoware._subroutine",
+						"agent": "robot1",
+						"filename": "C:\\SomePath\\ToEnlightenment.esc"
+					}
+				}
+			});
+			const agents = ["robot1"];
+			const results = EvowareCompiler.compileStep(table, protocol, agents, [], undefined, {}, [], {timing: false});
+			should.deepEqual(results, [
+				[{
+					line: 'Subroutine("C:\\SomePath\\ToEnlightenment.esc",0);'
+				}]
+			]);
+		});
+
 		it("should compile evoware._userPrompt", function() {
 			const table = {};
 			const protocol = _.merge({}, protocol0, {
