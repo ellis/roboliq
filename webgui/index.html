@@ -9,8 +9,81 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
 	<script src="./example_protocol_output.js"></script>
+<script type="text/plain">
+TODOS:
+* [x] property order: required, properties with values, optional values, extra values
+* [ ] dont put quotes around type, model, location, etc
+* [ ] process markdown description
+* [ ] put optional properties in italics
+* [ ] add info mouse-over with info for each property
+* [ ] add reference link so that user can click through to object definitions
+* [ ] columns
+* [ ] let user set property values by entering in JSON
+* [ ] drop-downs and autocompletes for setting property values
+</script>
+<style>
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+.l-wrap {
+  max-width: 1140px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.three-col-grid .grid-item {
+  width: 33.33333%;
+  float: left;
+}
+
+.three-col-grid:after {
+  display: table;
+  clear: both;
+  content: '';
+}
+
+.grid-item {
+  width: calc((100% - 20px * 3) / 3);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.column {
+  width: calc((100% - 20px * 12) / 12);
+  height: 80px;
+  margin-right: 10px;
+  margin-left: 10px;
+  background: rgba(0, 0, 255, 0.25);
+  float: left;
+}
+	col-md-2 {
+
+	}
+</style>
 </head>
 <body>
+	<div class="fixed-gutter-grid">
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+	</div>
 	<div id="root"></div>
 
 <script type="text/babel">
@@ -51,10 +124,44 @@ const ProtocolObject = ({
 	state,
 	value,
 	valueKey
+}) => {
+	const schema = _.get(state.protocol, ["schemas", value.type], {});
+	const keysInRequired = schema.required || [];
+	const keysInObject = _.keys(value) || [];
+	const keysInSchema = _.keys(schema.properties) || [];
+	const keys = _.uniq(_.flatten([keysInRequired, _.intersection(keysInObject, keysInSchema), keysInSchema, keysInObject]));
+	const type = value.type;
+
+	return <div>
+		<h3>{valueKey}</h3>
+		<div style={{marginLeft: "1em"}}>
+		{
+			_.map(keys, key => <ProtocolObjectProperty key={key} state={state} schema={schema} propertyName={key} propertyValue={_.get(value, key)} propertySchema={_.get(schema, ["properties", key])}/>)
+		}
+		</div>
+	</div>
+};
+
+const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, propertySchema}) => {
+	const style = _.includes(schema.required, propertyName)
+		? {} : {fontStyle: "italic"};
+	return <div>
+		<span style={style}>{propertyName}</span>: {JSON.stringify(propertyValue)}
+	</div>
+}
+
+const protocolObjectHandlers = {
+	Plate: ({state, value, valueKey}) => (<div>
+
+	</div>)
+};
+
+const ProtocolObject_Plate = ({
+	state,
+	value,
+	valueKey
 }) => (
 	<div>
-		<h3>{valueKey}</h3>
-		{JSON.stringify(value)}
 	</div>
 )
 
