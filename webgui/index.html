@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Roboliq</title>
+	<script src="https://unpkg.com/react@15/dist/react.js"></script>
+	<script src="https://unpkg.com/react-dom@15/dist/react-dom.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+	<script src="./example_protocol_output.js"></script>
+</head>
+<body>
+	<div id="root"></div>
+
+<script type="text/babel">
+const actionHandler = (state = {protocol}, action) => {
+	switch (action.type) {
+		case "INCREMENT":
+			return state + 1;
+		case "DECREMENT":
+			return state - 1;
+		default:
+			return state;
+	}
+}
+
+const Protocol = ({
+	state,
+	onIncrement,
+	onDecrement
+}) => (
+	<div>
+		<h1>roboliq version {state.protocol.roboliq}</h1>
+		<ProtocolObjects state={state}/>
+		<button onClick={onIncrement}>+</button>
+		<button onClick={onDecrement}>-</button>
+	</div>
+);
+
+const ProtocolObjects = ({
+	state
+}) => (
+	<div>
+		<h2>Objects</h2>
+		{_.map(state.protocol.objects, (value, key) => <ProtocolObject key={key} state={state} value={value} valueKey={key}/>)}
+	</div>
+);
+
+const ProtocolObject = ({
+	state,
+	value,
+	valueKey
+}) => (
+	<div>
+		<h3>{valueKey}</h3>
+		{JSON.stringify(value)}
+	</div>
+)
+
+const {createStore} = Redux;
+const store = createStore(actionHandler);
+const render = () => {
+	ReactDOM.render(
+		<Protocol
+			state={store.getState()}
+			onIncrement={() => store.dispatch({type: "INCREMENT"})}
+			onDecrement={() => store.dispatch({type: "DECREMENT"})}
+		/>,
+		document.getElementById("root")
+	);
+}
+store.subscribe(render);
+render();
+
+</script>
+</body>
+</html>
