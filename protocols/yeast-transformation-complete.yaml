@@ -106,26 +106,26 @@ objects:
     description: DMSO
     type: Liquid
     wells: tubeHolder15(C01)
-  ypdTrough:
-    description: YPD medium container
-    type: Plate
-    model: ourlab.model.troughModel_100ml
-    location: ourlab.mario.site.R6
-    contents: [Infinity ul, ypd]
-  ypd:
-    description: YPD medium
-    type: Liquid
-    wells: ypdTrough(all)
-  waterTrough:
-    description: Sterile water container
-    type: Plate
-    model: ourlab.model.troughModel_100ml
-    location: ourlab.mario.site.R5
-    contents: [Infinity ul, water]
+  #ypdTrough:
+  #  description: YPD medium container
+  #  type: Plate
+  #  model: ourlab.model.troughModel_100ml
+  #  location: ourlab.mario.site.R6
+  #  contents: [Infinity ul, ypd]
+  #waterTrough:
+  #  description: Sterile water container
+  #  type: Plate
+  #  model: ourlab.model.troughModel_100ml
+  #  location: ourlab.mario.site.R5
+  #  contents: [Infinity ul, water]
   water:
     description: Sterile water
     type: Liquid
-    wells: waterTrough(all)
+    wells: tubeHolder15(D01)
+  ypd:
+    description: YPD medium
+    type: Liquid
+    wells: tubeHolder15(E01)
   filterPlate:
     description: PVD filter plate up to 350 ul
     type: Plate
@@ -256,7 +256,7 @@ objects:
         cleanBetweenSameSource: none
         cleanEnd: decontaminate
       - source=calculate: 'concat("dnaPlate(", well, ")")'
-        volume: 5 ul
+        volume: 10 ul
         liquidClass: Roboliq_Water_Air_1000
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
@@ -295,7 +295,7 @@ objects:
       cleanBetweenSameSource: none
       layer*:
       - source=calculate: 'concat("filterPlate(", well, ")")'
-        volume: 130 ul
+        volume: 185 ul
         liquidClass: Roboliq_Water_Air_1000 # Change the liqud class to really viscous!
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
@@ -334,7 +334,7 @@ objects:
       cleanBetweenSameSource: none
       layer*:
       - source=calculate: 'concat("pcrPlate(", well, ")")'
-        volume: 144 ul
+        volume: 200 ul
         liquidClass: Roboliq_Water_Air_1000 # Change the liqud class to really viscous!
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
@@ -452,6 +452,7 @@ steps:
                 cleanBegin: $cleanBegin
                 cleanEnd: $cleanEnd
                 cleanBetween: $cleanBetween
+                cleanBetweenSameSource: none
         2:
             command: pipetter.mix
             wellLabware: filterPlate
@@ -529,8 +530,8 @@ steps:
             command: experiment.forEachGroup
             groupBy: layer
             steps:
-                command: pipetter.pipette
-                program: $liquidClass
+                command: pipetter.pipe7 n 0.
+
                 sources: $$source
                 destinationLabware: $destinationLabware
                 destinations: $$well
@@ -579,6 +580,7 @@ steps:
                 cleanEnd: $cleanEnd
                 cleanBetween: $cleanBetween
         2:
+            data: {where: 'layer == 1'}
             command: pipetter.mix
             wellLabware: filterPlate
             wells: $$well
@@ -650,7 +652,7 @@ steps:
     37:
         description: Bring used filter plate back to hotel
         command: transporter.movePlate
-        object: dnaPlate
+        object: filterPlate
         destination: ourlab.mario.site.HOTEL32_D1
     38:
         description: Add YPD on the culture plate
