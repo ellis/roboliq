@@ -12,14 +12,19 @@
 <script type="text/plain">
 TODOS:
 * [x] property order: required, properties with values, optional values, extra values
-* [ ] dont put quotes around type, model, location, etc
+* [x] put optional properties in italics
+* [x] columns
 * [ ] process markdown description
-* [ ] put optional properties in italics
 * [ ] add info mouse-over with info for each property
+* [ ] dont put quotes around type, model, location, etc
 * [ ] add reference link so that user can click through to object definitions
-* [ ] columns
 * [ ] let user set property values by entering in JSON
 * [ ] drop-downs and autocompletes for setting property values
+* [ ] handle type=Namespace with recursion
+* [ ] display steps
+* [ ] handle recusion into command properties and substeps
+* [ ] handle display of Designs
+* [ ] expand and collapse branches
 </script>
 <style>
 html {
@@ -38,19 +43,40 @@ html {
   margin-left: auto;
 }
 
-.three-col-grid .grid-item {
+/*.three-col-grid .grid-item {
   width: 33.33333%;
   float: left;
 }
-
-.three-col-grid:after {
+*/
+.row:after {
   display: table;
   clear: both;
   content: '';
 }
 
-.grid-item {
-  width: calc((100% - 20px * 3) / 3);
+.col-md-1 {
+	width: calc((100% - 20px * 12) * 4 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.col-md-2 {
+	width: calc((100% - 20px * 12) * 2 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.col-md-4 {
+  width: calc((100% - 20px * 12) * 4 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.col-md-10 {
+  width: calc((100% - 20px * 12) * 10 / 12);
   margin-right: 10px;
   margin-left: 10px;
   float: left;
@@ -64,9 +90,6 @@ html {
   background: rgba(0, 0, 255, 0.25);
   float: left;
 }
-	col-md-2 {
-
-	}
 </style>
 </head>
 <body>
@@ -143,10 +166,11 @@ const ProtocolObject = ({
 };
 
 const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, propertySchema}) => {
-	const style = _.includes(schema.required, propertyName)
-		? {} : {fontStyle: "italic"};
-	return <div>
-		<span style={style}>{propertyName}</span>: {JSON.stringify(propertyValue)}
+	const style =
+		{textAlign: "right", fontStyle: _.includes(schema.required, propertyName) ? undefined : "italic"};
+	return <div className="row">
+		<div className="col-md-2" style={style}>{propertyName}:</div>
+		<div className="col-md-10">{JSON.stringify(propertyValue)}</div>
 	</div>
 }
 
