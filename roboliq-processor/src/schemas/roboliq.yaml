@@ -2,8 +2,8 @@ Agent:
   description: An agent that can execute commands.
   properties:
     type: {enum: [Agent]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 Design:
@@ -18,8 +18,8 @@ Lid:
   description: Lid labware
   properties:
     type: {enum: [Lid]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     model: {type: string}
     location: {type: string}
   required: [type, model]
@@ -28,16 +28,16 @@ LidModel:
   description: Model for lid labware
   properties:
     type: {enum: [LidModel]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 Liquid:
   description: Liquid substance.
   properties:
     type: {enum: [Liquid]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     wells: {type: array}
   required: [type]
 
@@ -45,8 +45,8 @@ Plate:
   description: Plate labware.
   properties:
     type: {enum: [Plate]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     model: {type: PlateModel}
     location: {type: Site}
     contents: {type: [object, array]}
@@ -56,8 +56,8 @@ PlateModel:
   description: Model for plate labware.
   properties:
     type: {enum: [PlateModel]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     rows: {type: integer}
     columns: {type: integer}
   required: [type, rows, columns]
@@ -66,16 +66,16 @@ Site:
   description: Represents a bench site where labware can placed.
   properties:
     type: {enum: [Site]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 Template:
   description: A template object, used by the `system.call` command.
   properties:
     type: {enum: [Template]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     template: {}
   required: [type]
 
@@ -83,7 +83,7 @@ Variable:
   description: User-defined variable.
   properties:
     type: {enum: [Variable]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     value: {}
   required: [type]

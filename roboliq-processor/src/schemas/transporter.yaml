@@ -7,8 +7,8 @@ Transporter:
   description: Labware transporter equipment.
   properties:
     type: {enum: [Transporter]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 transporter._moveLidFromContainerToSite:

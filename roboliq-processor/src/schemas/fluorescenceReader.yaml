@@ -6,8 +6,8 @@ Reader:
   description: Reader equipment.
   properties:
     type: {enum: [Reader]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 fluorescenceReader.measurePlate:

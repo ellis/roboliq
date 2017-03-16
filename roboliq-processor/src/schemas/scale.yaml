@@ -6,8 +6,8 @@ Scale:
   description: Scale equipment.
   properties:
     type: {enum: [Scale]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 scale.ScaleProgram:
