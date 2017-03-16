@@ -9,6 +9,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/yamljs/0.2.8/yaml.js"></script>
 	<script src="./example_protocol_output.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
 <script type="text/plain">
@@ -17,7 +18,7 @@ TODOS:
 * [x] put optional properties in italics
 * [x] columns
 * [x] process markdown description
-* [ ] add info mouse-over with info for each property
+* [x] add info mouse-over with info for each property
 * [ ] dont put quotes around type, model, location, etc
 * [ ] add reference link so that user can click through to object definitions
 * [ ] let user set property values by entering in JSON
@@ -103,11 +104,11 @@ html {
 .tooltip .tooltiptext {
     visibility: hidden;
     /*width: 120px;*/
-    background-color: black;
-    color: #fff;
+    background-color: #ccc;
+    color: black;
     text-align: left;
     border-radius: 6px;
-    padding: 5px 0;
+    padding: .5em;
     position: absolute;
     z-index: 1;
     top: -5px;
@@ -122,7 +123,7 @@ html {
     margin-top: -5px;
     border-width: 5px;
     border-style: solid;
-    border-color: transparent black transparent transparent;
+    border-color: transparent #ccc transparent transparent;
 }
 .tooltip:hover .tooltiptext {
     visibility: visible;
@@ -213,19 +214,29 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 		color: (isDefined) ? "#690" : "red",
 		fontStyle: (isExtra) ? "italic" : undefined
 	};
+
+	// Property name
+	const propertyNameSpan0 = <span style={style}>{propertyName}:</span>;
+	const propertyNameSpan = (isDefined && !_.isEmpty(propertySchema))
+		? <span className="tooltip">
+				{propertyNameSpan0}
+				<span className="tooltiptext"><pre>{YAML.stringify(propertySchema, 3, 2)}</pre></span>
+			</span>
+		: propertyNameSpan0;
+	const hasPropertyNameTooltip = isDefined;
+
+	// Property value
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
 	const valueElem = (_.isNil(propertyValue))
 		? undefined
 		: (valueHandler)
 			? valueHandler(propertyValue, propertySchema)
 			: JSON.stringify(propertyValue);
+
+	// All together
 	return <div className="row">
 		<div className="col-md-2" style={{textAlign: "right"}}>
-			<span style={style}>{propertyName}:</span>
-			<small className="tooltip">
-				<i className="fa fa-question-circle-o" style={{color: "#690", visibility: (isExtra) ? "hidden" : undefined}}></i>
-				<span className="tooltiptext"><pre>{JSON.stringify(propertySchema, null, '  ')}</pre></span>
-			</small>
+			{propertyNameSpan}
 		</div>
 		<div className="col-md-10">{valueElem}</div>
 	</div>
