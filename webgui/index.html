@@ -8,13 +8,14 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.js"></script>
 	<script src="./example_protocol_output.js"></script>
 <script type="text/plain">
 TODOS:
 * [x] property order: required, properties with values, optional values, extra values
 * [x] put optional properties in italics
 * [x] columns
-* [ ] process markdown description
+* [x] process markdown description
 * [ ] add info mouse-over with info for each property
 * [ ] dont put quotes around type, model, location, etc
 * [ ] add reference link so that user can click through to object definitions
@@ -165,13 +166,26 @@ const ProtocolObject = ({
 	</div>
 };
 
-const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, propertySchema}) => {
+const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, propertySchema = {}}) => {
 	const style =
 		{textAlign: "right", fontStyle: _.includes(schema.required, propertyName) ? undefined : "italic"};
+	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
+	const valueElem = (_.isNil(propertyValue))
+		? undefined
+		: (valueHandler)
+			? valueHandler(propertyValue, propertySchema)
+			: JSON.stringify(propertyValue);
 	return <div className="row">
 		<div className="col-md-2" style={style}>{propertyName}:</div>
-		<div className="col-md-10">{JSON.stringify(propertyValue)}</div>
+		<div className="col-md-10">{valueElem}</div>
 	</div>
+}
+
+const markdown = window.markdownit();
+const protocolObjectPropertyHandlers = {
+	markdown: (value) => {
+		return <span dangerouslySetInnerHTML={{__html: markdown.renderInline(value)}}/>
+	}
 }
 
 const protocolObjectHandlers = {
