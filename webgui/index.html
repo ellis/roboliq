@@ -19,8 +19,10 @@ TODOS:
 * [x] columns
 * [x] process markdown description
 * [x] add info mouse-over with info for each property
-* [ ] dont put quotes around type, model, location, etc
-* [ ] add reference link so that user can click through to object definitions
+* [x] handle `type` property: no tooltip on property, tooltip on value showing the YAML of the type
+* [ ] on properties that reference an object, print the object name without quotes, and have tooltip showing the objects YAML declaration
+* [ ] Plate.location: change type to 'name'
+* [ ] Lid.location: why is it displayed with orange markdown highlighting?
 * [ ] let user set property values by entering in JSON
 * [ ] drop-downs and autocompletes for setting property values
 * [ ] handle type=Namespace with recursion
@@ -28,6 +30,8 @@ TODOS:
 * [ ] handle recusion into command properties and substeps
 * [ ] handle display of Designs
 * [ ] expand and collapse branches
+* [ ] dont display non-required properties if their value is empty?
+* [ ] add reference link so that user can click through to object definitions
 </script>
 <style>
 html {
@@ -217,7 +221,7 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 
 	// Property name
 	const propertyNameSpan0 = <span style={style}>{propertyName}:</span>;
-	const propertyNameSpan = (isDefined && !_.isEmpty(propertySchema))
+	const propertyNameSpan = (isDefined && !_.isEmpty(propertySchema) && propertyName != "type")
 		? <span className="tooltip">
 				{propertyNameSpan0}
 				<span className="tooltiptext"><pre>{YAML.stringify(propertySchema, 3, 2)}</pre></span>
@@ -227,11 +231,15 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 
 	// Property value
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
-	const valueElem = (_.isNil(propertyValue))
-		? undefined
-		: (valueHandler)
-			? valueHandler(propertyValue, propertySchema)
-			: JSON.stringify(propertyValue);
+	const valueElem
+		= (_.isNil(propertyValue)) ? undefined
+		: (propertyName == "type") ?
+			<span className="tooltip">
+				{propertyValue}
+				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocol", "schemas", propertyValue], {}), 10, 2)}</pre></span>
+			</span>
+		: (valueHandler) ? valueHandler(propertyValue, propertySchema)
+		: JSON.stringify(propertyValue);
 
 	// All together
 	return <div className="row">
