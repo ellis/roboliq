@@ -232,13 +232,23 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 	// Property value
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
 	const valueElem
+		// Empty value
 		= (_.isNil(propertyValue)) ? undefined
+		// `type` property
 		: (propertyName == "type") ?
 			<span className="tooltip">
 				{propertyValue}
 				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocol", "schemas", propertyValue], {}), 10, 2)}</pre></span>
 			</span>
+		// property references an object
+		: (_.isPlainObject(propertySchema) && /^[A-Z]/.test(propertySchema.type) && _.isString(propertyValue)) ?
+			<span className="tooltip">
+				<span style={{color: "#07a"}}>{propertyValue}</span>
+				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, "protocol.objects."+propertyValue, {}), 10, 2)}</pre></span>
+			</span>
+		// we have a handler for the value
 		: (valueHandler) ? valueHandler(propertyValue, propertySchema)
+		// otherwise
 		: JSON.stringify(propertyValue);
 
 	// All together
