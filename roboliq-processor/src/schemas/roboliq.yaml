@@ -10,6 +10,7 @@ Design:
   description: Specification of an experimental design.
   properties:
     type: {enum: [Design]}
+    description: {type: markdown}
     conditions: {type: object}
     actions: {type: array}
   required: [type]

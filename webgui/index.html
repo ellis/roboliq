@@ -10,6 +10,7 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.js"></script>
 	<script src="./example_protocol_output.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
 <script type="text/plain">
 TODOS:
 * [x] property order: required, properties with values, optional values, extra values
@@ -91,6 +92,41 @@ html {
   background: rgba(0, 0, 255, 0.25);
   float: left;
 }
+
+/* Tooltip container - from https://www.w3schools.com/css/css_tooltip.asp */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    /*width: 120px;*/
+    background-color: black;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 110%;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 1em;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent black transparent transparent;
+}
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
 </style>
 </head>
 <body>
@@ -153,7 +189,8 @@ const ProtocolObject = ({
 	const keysInRequired = schema.required || [];
 	const keysInObject = _.keys(value) || [];
 	const keysInSchema = _.keys(schema.properties) || [];
-	const keys = _.uniq(_.flatten([keysInRequired, _.intersection(keysInObject, keysInSchema), keysInSchema, keysInObject]));
+	const keysFirst = _.filter(keysInSchema, key => _.includes(keysInRequired, key) || value.hasOwnProperty(key));
+	const keys = _.uniq(_.flatten([keysFirst, keysInSchema, keysInObject]));
 	const type = value.type;
 
 	return <div>
@@ -167,8 +204,15 @@ const ProtocolObject = ({
 };
 
 const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, propertySchema = {}}) => {
-	const style =
-		{textAlign: "right", fontStyle: _.includes(schema.required, propertyName) ? undefined : "italic"};
+	const isRequired = _.includes(schema.required, propertyName);
+	const isDefined = (schema.properties || {}).hasOwnProperty(propertyName);
+	const isDeclared = !_.isNil(propertyValue);
+	const isExtra = (isDeclared && !isDefined);
+	const style = {
+		fontWeight: (isRequired) ? "bold" : undefined,
+		color: (isDefined) ? "#690" : "red",
+		fontStyle: (isExtra) ? "italic" : undefined
+	};
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
 	const valueElem = (_.isNil(propertyValue))
 		? undefined
@@ -176,7 +220,13 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 			? valueHandler(propertyValue, propertySchema)
 			: JSON.stringify(propertyValue);
 	return <div className="row">
-		<div className="col-md-2" style={style}>{propertyName}:</div>
+		<div className="col-md-2" style={{textAlign: "right"}}>
+			<span style={style}>{propertyName}:</span>
+			<small className="tooltip">
+				<i className="fa fa-question-circle-o" style={{color: "#690", visibility: (isExtra) ? "hidden" : undefined}}></i>
+				<span className="tooltiptext"><pre>{JSON.stringify(propertySchema, null, '  ')}</pre></span>
+			</small>
+		</div>
 		<div className="col-md-10">{valueElem}</div>
 	</div>
 }
@@ -184,7 +234,10 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 const markdown = window.markdownit();
 const protocolObjectPropertyHandlers = {
 	markdown: (value) => {
-		return <span dangerouslySetInnerHTML={{__html: markdown.renderInline(value)}}/>
+		return <span style={{color: "#e90"}} dangerouslySetInnerHTML={{__html: markdown.renderInline(value)}}/>
+	},
+	string: (value) => {
+		return <span style={{color: "#e90"}}>{value}</span>
 	}
 }
 
