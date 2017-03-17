@@ -20,14 +20,16 @@ TODOS:
 * [x] process markdown description
 * [x] add info mouse-over with info for each property
 * [x] handle `type` property: no tooltip on property, tooltip on value showing the YAML of the type
-* [ ] on properties that reference an object, print the object name without quotes, and have tooltip showing the objects YAML declaration
-* [ ] Plate.location: change type to 'name'
-* [ ] Lid.location: why is it displayed with orange markdown highlighting?
+* [x] on properties that reference an object, print the object name without quotes, and have tooltip showing the objects YAML declaration
 * [ ] let user set property values by entering in JSON
-* [ ] drop-downs and autocompletes for setting property values
-* [ ] handle type=Namespace with recursion
 * [ ] display steps
 * [ ] handle recusion into command properties and substeps
+* [ ] Lid.location: change type to [Site, Plate]
+* [ ] Plate.contents: give it a proper type
+* [ ] Liquid.wells: give it a proper type
+* [ ] bad references: highlight in red
+* [ ] drop-downs and autocompletes for setting property values
+* [ ] handle type=Namespace with recursion
 * [ ] handle display of Designs
 * [ ] expand and collapse branches
 * [ ] dont display non-required properties if their value is empty?
@@ -181,12 +183,13 @@ const ProtocolObjects = ({
 }) => (
 	<div>
 		<h2>Objects</h2>
-		{_.map(state.protocol.objects, (value, key) => <ProtocolObject key={key} state={state} value={value} valueKey={key}/>)}
+		{_.map(state.protocol.objects, (value, key) => <ProtocolObject key={key} state={state} path={["objects"]} value={value} valueKey={key}/>)}
 	</div>
 );
 
 const ProtocolObject = ({
 	state,
+	path,
 	value,
 	valueKey
 }) => {
@@ -202,13 +205,14 @@ const ProtocolObject = ({
 		<h3>{valueKey}</h3>
 		<div style={{marginLeft: "1em"}}>
 		{
-			_.map(keys, key => <ProtocolObjectProperty key={key} state={state} schema={schema} propertyName={key} propertyValue={_.get(value, key)} propertySchema={_.get(schema, ["properties", key])}/>)
+			_.map(keys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={_.get(value, key)} propertySchema={_.get(schema, ["properties", key])}/>)
 		}
 		</div>
 	</div>
 };
 
-const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, propertySchema = {}}) => {
+const ProtocolObjectProperty = (props) => {
+	const {state, path, schema, propertyName, propertyValue, propertySchema = {}} = props;
 	const isRequired = _.includes(schema.required, propertyName);
 	const isDefined = (schema.properties || {}).hasOwnProperty(propertyName);
 	const isDeclared = !_.isNil(propertyValue);
@@ -229,6 +233,18 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 		: propertyNameSpan0;
 	const hasPropertyNameTooltip = isDefined;
 
+	const propertyValueElem = makeProtocolObjectPropertyElem(props);
+
+	// All together
+	return <div className="row">
+		<div className="col-md-2" style={{textAlign: "right"}}>
+			{propertyNameSpan}
+		</div>
+		<div className="col-md-10">{propertyValueElem}</div>
+	</div>;
+}
+
+const makeProtocolObjectPropertyElem = ({state, path, schema, propertyName, propertyValue, propertySchema = {}}) => {
 	// Property value
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
 	const valueElem
@@ -250,14 +266,7 @@ const ProtocolObjectProperty = ({state, schema, propertyName, propertyValue, pro
 		: (valueHandler) ? valueHandler(propertyValue, propertySchema)
 		// otherwise
 		: JSON.stringify(propertyValue);
-
-	// All together
-	return <div className="row">
-		<div className="col-md-2" style={{textAlign: "right"}}>
-			{propertyNameSpan}
-		</div>
-		<div className="col-md-10">{valueElem}</div>
-	</div>
+	return valueElem;
 }
 
 const markdown = window.markdownit();
@@ -270,20 +279,20 @@ const protocolObjectPropertyHandlers = {
 	}
 }
 
-const protocolObjectHandlers = {
-	Plate: ({state, value, valueKey}) => (<div>
-
-	</div>)
-};
-
-const ProtocolObject_Plate = ({
-	state,
-	value,
-	valueKey
-}) => (
-	<div>
-	</div>
-)
+// const protocolObjectHandlers = {
+// 	Plate: ({state, value, valueKey}) => (<div>
+//
+// 	</div>)
+// };
+//
+// const ProtocolObject_Plate = ({
+// 	state,
+// 	value,
+// 	valueKey
+// }) => (
+// 	<div>
+// 	</div>
+// )
 
 const {createStore} = Redux;
 const store = createStore(actionHandler);
