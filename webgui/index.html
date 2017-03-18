@@ -22,6 +22,11 @@ TODOS:
 * [x] handle `type` property: no tooltip on property, tooltip on value showing the YAML of the type
 * [x] on properties that reference an object, print the object name without quotes, and have tooltip showing the objects YAML declaration
 * [ ] let user set property values by entering in JSON
+	* [x] create JsonEditor
+	* [ ] JsonEditor: cancel button
+	* [ ] let user edit markdown property values
+	* [ ] let user set missing property values
+	* [ ] after opening the editor, set the cursor focus
 * [ ] display steps
 * [ ] handle recusion into command properties and substeps
 * [ ] Lid.location: change type to [Site, Plate]
@@ -155,11 +160,14 @@ html {
 
 <script type="text/babel">
 const actionHandler = (state = {protocol}, action) => {
+	console.log("actionHandler: "+JSON.stringify(action));
 	switch (action.type) {
-		case "INCREMENT":
-			return state + 1;
-		case "DECREMENT":
-			return state - 1;
+		case "EDIT":
+			const state2 = _.set(_.cloneDeep(state), "editing", action.path);
+			console.log({editing: state2.editing})
+			return state2;
+		case "SET":
+			return _.set(_.cloneDeep(state), ["protocol"].concat(action.path), action.value);
 		default:
 			return state;
 	}
@@ -167,32 +175,25 @@ const actionHandler = (state = {protocol}, action) => {
 
 const Protocol = ({
 	state,
-	onIncrement,
-	onDecrement
+	onEdit,
+	onSetProperty
 }) => (
 	<div>
 		<h1>roboliq version {state.protocol.roboliq}</h1>
-		<ProtocolObjects state={state}/>
-		<button onClick={onIncrement}>+</button>
-		<button onClick={onDecrement}>-</button>
+		<ProtocolObjects state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 	</div>
 );
 
-const ProtocolObjects = ({
-	state
-}) => (
+const ProtocolObjects = (props) => (
 	<div>
 		<h2>Objects</h2>
-		{_.map(state.protocol.objects, (value, key) => <ProtocolObject key={key} state={state} path={["objects"]} value={value} valueKey={key}/>)}
+		{_.map(props.state.protocol.objects, (value, key) => <ProtocolObject key={key} state={props.state} path={["objects", key]} value={value} valueKey={key} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)}
 	</div>
 );
 
-const ProtocolObject = ({
-	state,
-	path,
-	value,
-	valueKey
-}) => {
+const ProtocolObject = (props) => {
+	const {state, path, value, valueKey} = props;
+	// console.log("onSetProperty type: "+(typeof _.keys(props.onSetProperty)))
 	const schema = _.get(state.protocol, ["schemas", value.type], {});
 	const keysInRequired = schema.required || [];
 	const keysInObject = _.keys(value) || [];
@@ -205,7 +206,7 @@ const ProtocolObject = ({
 		<h3>{valueKey}</h3>
 		<div style={{marginLeft: "1em"}}>
 		{
-			_.map(keys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={_.get(value, key)} propertySchema={_.get(schema, ["properties", key])}/>)
+			_.map(keys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={_.get(value, key)} propertySchema={_.get(schema, ["properties", key])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
 		}
 		</div>
 	</div>
@@ -244,7 +245,15 @@ const ProtocolObjectProperty = (props) => {
 	</div>;
 }
 
-const makeProtocolObjectPropertyElem = ({state, path, schema, propertyName, propertyValue, propertySchema = {}}) => {
+const makeProtocolObjectPropertyElem = (props) => {
+	//if (props.state.editing) console.log("editing "+props.state.editing.join(".")+" / "+props.path.join(".")+" :"+_.isEqual(props.state.editing, props.path))
+	return (_.isEqual(props.state.editing, props.path))
+		? makeProtocolObjectPropertyElemRW(props)
+		: makeProtocolObjectPropertyElemRO(props);
+}
+
+const makeProtocolObjectPropertyElemRO = (props) => {
+	const {state, path, schema, propertyName, propertyValue, propertySchema = {}} = props;
 	// Property value
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
 	const valueElem
@@ -253,20 +262,55 @@ const makeProtocolObjectPropertyElem = ({state, path, schema, propertyName, prop
 		// `type` property
 		: (propertyName == "type") ?
 			<span className="tooltip">
-				{propertyValue}
+				<span onClick={() => props.onEdit(path)}>{propertyValue}</span>
 				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocol", "schemas", propertyValue], {}), 10, 2)}</pre></span>
 			</span>
 		// property references an object
 		: (_.isPlainObject(propertySchema) && /^[A-Z]/.test(propertySchema.type) && _.isString(propertyValue)) ?
 			<span className="tooltip">
-				<span style={{color: "#07a"}}>{propertyValue}</span>
+				<span style={{color: "#07a"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
 				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, "protocol.objects."+propertyValue, {}), 10, 2)}</pre></span>
 			</span>
 		// we have a handler for the value
 		: (valueHandler) ? valueHandler(propertyValue, propertySchema)
 		// otherwise
-		: JSON.stringify(propertyValue);
+		: <span onClick={() => props.onEdit(path)}>{JSON.stringify(propertyValue)}</span>;
 	return valueElem;
+}
+
+const makeProtocolObjectPropertyElemRW = (props) => {
+	return <JsonEditor path={props.path} value={props.propertyValue} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+}
+
+class JsonEditor extends React.Component {
+	constructor(props) {
+		console.log("ProtocolObject keys: "+_.keys(props))
+		super(props);
+		this.state = {
+			value: JSON.stringify(props.value, null, "\t")
+		};
+
+		this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	render() {
+		return <div>
+			<textarea cols="80" rows="10" value={this.state.value} onChange={this.handleChange}/>
+			<button onClick={this.handleSubmit}>Save</button>
+		</div>;
+	}
+
+	handleChange(event) {
+		this.setState({value: event.target.value});
+	}
+
+	handleSubmit(event) {
+		const value = JSON.parse(this.state.value);
+		this.props.onSetProperty(this.props.path, value);
+		this.props.onEdit(undefined);
+    event.preventDefault();
+  }
 }
 
 const markdown = window.markdownit();
@@ -300,8 +344,8 @@ const render = () => {
 	ReactDOM.render(
 		<Protocol
 			state={store.getState()}
-			onIncrement={() => store.dispatch({type: "INCREMENT"})}
-			onDecrement={() => store.dispatch({type: "DECREMENT"})}
+			onEdit={(path) => store.dispatch({type: "EDIT", path})}
+			onSetProperty={(path, value) => store.dispatch({type: "SET", path, value})}
 		/>,
 		document.getElementById("root")
 	);
