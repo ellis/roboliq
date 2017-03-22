@@ -6,8 +6,8 @@ Sealer:
   description: Sealing equipment.
   properties:
     type: {enum: [Sealer]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 sealer.sealPlate:

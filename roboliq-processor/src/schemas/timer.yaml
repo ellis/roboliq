@@ -6,8 +6,8 @@ Timer:
   description: Timer equipment.
   properties:
     type: {enum: [Timer]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 timer._sleep:

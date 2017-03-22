@@ -6,16 +6,16 @@ Pipetter:
   description: Pipetting equipment.
   properties:
     type: {enum: [Pipetter]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 Syringe:
   description: Pipetting syringe.
   properties:
     type: {enum: [Syringe]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     tipModel: {description: Tip model identifier for the tip currently on the syringe, type: string}
     tipModelPermanent: {type: string, description: "Tip model identifier if this syringe has a permanent tip"}
   required: [type]

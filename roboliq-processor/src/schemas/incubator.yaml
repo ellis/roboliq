@@ -6,8 +6,8 @@ Incubator:
   description: Incubator equipment.
   properties:
     type: {enum: [Incubator]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     sitesInternal: {type: array, items: {type: Site}}
   required: [type, sitesInternal]
   example: |

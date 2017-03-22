@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Roboliq</title>
+	<script src="https://unpkg.com/react@15/dist/react.js"></script>
+	<script src="https://unpkg.com/react-dom@15/dist/react-dom.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.6.0/redux.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/yamljs/0.2.8/yaml.js"></script>
+	<script src="./example_protocol_output.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css"/>
+<script type="text/plain">
+TODOS:
+* [x] property order: required, properties with values, optional values, extra values
+* [x] put optional properties in italics
+* [x] columns
+* [x] process markdown description
+* [x] add info mouse-over with info for each property
+* [x] handle `type` property: no tooltip on property, tooltip on value showing the YAML of the type
+* [x] on properties that reference an object, print the object name without quotes, and have tooltip showing the objects YAML declaration
+* [x] create JsonEditor
+* [ ] display steps
+* [ ] test with three separate protocols: base (all config and base protocols), user (the one that should be edited), merged
+* [ ] JsonEditor:
+	* [ ] JsonEditor: cancel button
+	* [ ] let user edit markdown property values
+	* [ ] let user set missing property values
+	* [ ] after opening the editor, set the cursor focus
+* [ ] handle recusion into command properties and substeps
+* [ ] let user add objects
+* [ ] let user add steps
+* [ ] Lid.location: change type to [Site, Plate]
+* [ ] Plate.contents: give it a proper type
+* [ ] Liquid.wells: give it a proper type
+* [ ] bad references: highlight in red
+* [ ] drop-downs and autocompletes for setting property values
+* [ ] handle type=Namespace with recursion
+* [ ] handle display of Designs
+* [ ] expand and collapse branches
+* [ ] dont display non-required properties if their value is empty?
+* [ ] add reference link so that user can click through to object definitions
+</script>
+<style>
+html {
+	box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+	box-sizing: inherit;
+}
+
+.l-wrap {
+  max-width: 1140px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/*.three-col-grid .grid-item {
+  width: 33.33333%;
+  float: left;
+}
+*/
+.row:after {
+  display: table;
+  clear: both;
+  content: '';
+}
+
+.col-md-1 {
+	width: calc((100% - 20px * 12) * 4 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.col-md-2 {
+	width: calc((100% - 20px * 12) * 2 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.col-md-4 {
+  width: calc((100% - 20px * 12) * 4 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.col-md-10 {
+  width: calc((100% - 20px * 12) * 10 / 12);
+  margin-right: 10px;
+  margin-left: 10px;
+  float: left;
+}
+
+.column {
+  width: calc((100% - 20px * 12) / 12);
+  height: 80px;
+  margin-right: 10px;
+  margin-left: 10px;
+  background: rgba(0, 0, 255, 0.25);
+  float: left;
+}
+
+/* Tooltip container - from https://www.w3schools.com/css/css_tooltip.asp */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    /*width: 120px;*/
+    background-color: #ccc;
+    color: black;
+    text-align: left;
+    border-radius: 6px;
+    padding: .5em;
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 110%;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 1em;
+    right: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent #ccc transparent transparent;
+}
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+</style>
+</head>
+<body>
+	<div class="fixed-gutter-grid">
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+		<div class="column"></div>
+	</div>
+	<div id="root"></div>
+
+<script type="text/babel">
+const actionHandler = (state = {protocol}, action) => {
+	console.log("actionHandler: "+JSON.stringify(action));
+	switch (action.type) {
+		case "EDIT":
+			const state2 = _.set(_.cloneDeep(state), "editing", action.path);
+			console.log({editing: state2.editing})
+			return state2;
+		case "SET":
+			return _.set(_.cloneDeep(state), ["protocol"].concat(action.path), action.value);
+		default:
+			return state;
+	}
+}
+
+const Protocol = ({
+	state,
+	onEdit,
+	onSetProperty
+}) => (
+	<div>
+		<h1>roboliq version {state.protocol.roboliq}</h1>
+		<ProtocolObjects state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
+		<ProtocolSteps state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
+	</div>
+);
+
+//
+// Protocol objects
+//
+
+const ProtocolObjects = (props) => (
+	<div>
+		<h2>Objects</h2>
+		{_.map(props.state.protocol.objects, (value, key) => <ProtocolObject key={key} state={props.state} path={["objects", key]} value={value} valueKey={key} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)}
+	</div>
+);
+
+const ProtocolObject = (props) => {
+	const {state, path, value, valueKey} = props;
+	// console.log("onSetProperty type: "+(typeof _.keys(props.onSetProperty)))
+	const schema = _.get(state.protocol, ["schemas", value.type], {});
+	const keysInRequired = schema.required || [];
+	const keysInObject = _.keys(value) || [];
+	const keysInSchema = _.keys(schema.properties) || [];
+	const keysFirst = _.filter(keysInSchema, key => _.includes(keysInRequired, key) || value.hasOwnProperty(key));
+	const keys = _.uniq(_.flatten([keysFirst, keysInSchema, keysInObject]));
+	const type = value.type;
+
+	return <div>
+		<h3>{valueKey}</h3>
+		<div style={{marginLeft: "1em"}}>
+		{
+			_.map(keys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={_.get(value, key)} propertySchema={_.get(schema, ["properties", key])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
+		}
+		</div>
+	</div>
+};
+
+const ProtocolObjectProperty = (props) => {
+	const {state, path, schema, propertyName, propertyValue, propertySchema = {}} = props;
+	const isRequired = _.includes(schema.required, propertyName);
+	const isDefined = (schema.properties || {}).hasOwnProperty(propertyName);
+	const isDeclared = !_.isNil(propertyValue);
+	const isExtra = (isDeclared && !isDefined);
+	const style = {
+		fontWeight: (isRequired) ? "bold" : undefined,
+		color: (isDefined) ? "#690" : "red",
+		fontStyle: (isExtra) ? "italic" : undefined
+	};
+
+	// Property name
+	const propertyNameSpan0 = <span style={style}>{propertyName}:</span>;
+	const propertyNameSpan = (isDefined && !_.isEmpty(propertySchema) && propertyName != "type")
+		? <span className="tooltip">
+				{propertyNameSpan0}
+				<span className="tooltiptext"><pre>{YAML.stringify(propertySchema, 3, 2)}</pre></span>
+			</span>
+		: propertyNameSpan0;
+	const hasPropertyNameTooltip = isDefined;
+
+	const propertyValueElem = makeProtocolObjectPropertyElem(props);
+
+	// All together
+	return <div className="row">
+		<div className="col-md-2" style={{textAlign: "right"}}>
+			{propertyNameSpan}
+		</div>
+		<div className="col-md-10">{propertyValueElem}</div>
+	</div>;
+}
+
+const makeProtocolObjectPropertyElem = (props) => {
+	//if (props.state.editing) console.log("editing "+props.state.editing.join(".")+" / "+props.path.join(".")+" :"+_.isEqual(props.state.editing, props.path))
+	return (_.isEqual(props.state.editing, props.path))
+		? makeProtocolObjectPropertyElemRW(props)
+		: makeProtocolObjectPropertyElemRO(props);
+}
+
+const makeProtocolObjectPropertyElemRO = (props) => {
+	const {state, path, schema, propertyName, propertyValue, propertySchema = {}} = props;
+	// Property value
+	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
+	if (propertyName == "steps") {
+		console.log({path})
+	}
+	const valueElem
+		// Empty value
+		= (_.isNil(propertyValue)) ? undefined
+		// `type` property
+		: (propertyName == "type" || propertyName == "command") ?
+			<span className="tooltip">
+				<span style={{fontWeight: "bold"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
+				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocol", "schemas", propertyValue], {}), 10, 2)}</pre></span>
+			</span>
+		// property references an object
+		: (_.isPlainObject(propertySchema) && /^[A-Z]/.test(propertySchema.type) && _.isString(propertyValue)) ?
+			<span className="tooltip">
+				<span style={{color: "#07a"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
+				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, "protocol.objects."+propertyValue, {}), 10, 2)}</pre></span>
+			</span>
+		// Steps
+		: (propertyName == "steps") ?
+			<ProtocolStep state={props.state} path={path} step={propertyValue} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+		// we have a handler for the value
+		: (valueHandler) ? valueHandler(propertyValue, propertySchema, path, props)
+		// otherwise
+		: <span onClick={() => props.onEdit(path)}>{JSON.stringify(propertyValue)}</span>;
+	return valueElem;
+}
+
+const makeProtocolObjectPropertyElemRW = (props) => {
+	return <JsonEditor path={props.path} value={props.propertyValue} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+}
+
+class JsonEditor extends React.Component {
+	constructor(props) {
+		console.log("ProtocolObject keys: "+_.keys(props))
+		super(props);
+		this.state = {
+			value: JSON.stringify(props.value, null, "\t")
+		};
+
+		this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	render() {
+		return <div>
+			<textarea cols="80" rows="10" value={this.state.value} onChange={this.handleChange}/>
+			<button onClick={this.handleSubmit}>Save</button>
+		</div>;
+	}
+
+	handleChange(event) {
+		this.setState({value: event.target.value});
+	}
+
+	handleSubmit(event) {
+		const value = JSON.parse(this.state.value);
+		this.props.onSetProperty(this.props.path, value);
+		this.props.onEdit(undefined);
+    event.preventDefault();
+  }
+}
+
+const markdown = window.markdownit();
+const protocolObjectPropertyHandlers = {
+	markdown: (value) => {
+		return <span style={{color: "#e90"}} dangerouslySetInnerHTML={{__html: markdown.renderInline(value)}}/>
+	},
+	string: (value) => {
+		return <span style={{color: "#e90"}}>{value}</span>
+	},
+}
+
+
+//
+// Protocol steps
+//
+
+const ProtocolSteps = (props) => {
+	return <div>
+		<h2>Steps</h2>
+		<ProtocolStep state={props.state} path={["steps"]} step={props.state.protocol.steps} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+	</div>
+};
+
+const stepSchemaGeneric = {
+	properties: {
+		description: {type: "markdown"},
+		data: {type: "object"},
+		command: {type: "string"}
+	}
+};
+
+const ProtocolStep = (props) => {
+	const {state, path, step} = props;
+	// console.log("path: "+path.join("."))
+
+	const stepKeys = _.keys(step);
+	const alphaKeys = _.filter(stepKeys, key => /^[A-Za-z]/.test(key));
+	const commandKeys = _.difference(alphaKeys, ["command", "data", "description"]);
+	const substepKeys = _.filter(stepKeys, key => /^[0-9]/.test(key));
+
+	// console.log("onSetProperty type: "+(typeof _.keys(props.onSetProperty)))
+	const schema = _.get(state.protocol, ["schemas", step.command], {});
+	const keysInRequired = schema.required || [];
+	const keysInStep = stepKeys;
+	const keysInSchema = _.keys(schema.properties) || [];
+	const keysFirst = _.filter(keysInSchema, key => _.includes(keysInRequired, key) || step.hasOwnProperty(key));
+	const keys = _.uniq(_.flatten([keysFirst, keysInSchema, keysInStep]));
+
+	return <div>
+		<h3>{path.join(".")}</h3>
+		<div style={{marginLeft: "1em"}}>
+		{_.map(["description", "data", "command"], key => (!_.isEmpty(step[key]))
+			? <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={stepSchemaGeneric} propertyName={key} propertyValue={step[key]} propertySchema={stepSchemaGeneric.properties[key]} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+			: undefined
+		)}
+		{
+			_.map(commandKeys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={step[key]} propertySchema={_.get(schema, ["properties", key])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
+		}
+		{
+			_.map(substepKeys, key => <ProtocolStep key={key} state={props.state} path={path.concat(key)} step={step[key]} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
+		}
+		</div>
+	</div>
+};
+
+// const protocolObjectHandlers = {
+// 	Plate: ({state, value, valueKey}) => (<div>
+//
+// 	</div>)
+// };
+//
+// const ProtocolObject_Plate = ({
+// 	state,
+// 	value,
+// 	valueKey
+// }) => (
+// 	<div>
+// 	</div>
+// )
+
+const {createStore} = Redux;
+const store = createStore(actionHandler);
+const render = () => {
+	ReactDOM.render(
+		<Protocol
+			state={store.getState()}
+			onEdit={(path) => store.dispatch({type: "EDIT", path})}
+			onSetProperty={(path, value) => store.dispatch({type: "SET", path, value})}
+		/>,
+		document.getElementById("root")
+	);
+}
+store.subscribe(render);
+render();
+
+</script>
+</body>
+</html>

@@ -6,8 +6,8 @@ Centrifuge:
   description: Centrifuge equipment.
   properties:
     type: {enum: [Centrifuge]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
     sitesInternal: {type: array, items: {type: Site}}
   required: [type, sitesInternal]
   example: |

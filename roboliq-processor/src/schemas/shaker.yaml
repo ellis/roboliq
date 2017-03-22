@@ -6,8 +6,8 @@ Shaker:
   description: Shaker equipment.
   properties:
     type: {enum: [Shaker]}
-    description: {type: string}
-    label: {type: string}
+    description: {type: markdown}
+    label: {type: markdown}
   required: [type]
 
 shaker.ShakerProgram:
