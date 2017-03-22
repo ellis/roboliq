@@ -21,14 +21,17 @@ TODOS:
 * [x] add info mouse-over with info for each property
 * [x] handle `type` property: no tooltip on property, tooltip on value showing the YAML of the type
 * [x] on properties that reference an object, print the object name without quotes, and have tooltip showing the objects YAML declaration
-* [ ] let user set property values by entering in JSON
-	* [x] create JsonEditor
+* [x] create JsonEditor
+* [ ] display steps
+* [ ] test with three separate protocols: base (all config and base protocols), user (the one that should be edited), merged
+* [ ] JsonEditor:
 	* [ ] JsonEditor: cancel button
 	* [ ] let user edit markdown property values
 	* [ ] let user set missing property values
 	* [ ] after opening the editor, set the cursor focus
-* [ ] display steps
 * [ ] handle recusion into command properties and substeps
+* [ ] let user add objects
+* [ ] let user add steps
 * [ ] Lid.location: change type to [Site, Plate]
 * [ ] Plate.contents: give it a proper type
 * [ ] Liquid.wells: give it a proper type
@@ -181,8 +184,13 @@ const Protocol = ({
 	<div>
 		<h1>roboliq version {state.protocol.roboliq}</h1>
 		<ProtocolObjects state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
+		<ProtocolSteps state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 	</div>
 );
+
+//
+// Protocol objects
+//
 
 const ProtocolObjects = (props) => (
 	<div>
@@ -256,13 +264,16 @@ const makeProtocolObjectPropertyElemRO = (props) => {
 	const {state, path, schema, propertyName, propertyValue, propertySchema = {}} = props;
 	// Property value
 	const valueHandler = protocolObjectPropertyHandlers[propertySchema.type];
+	if (propertyName == "steps") {
+		console.log({path})
+	}
 	const valueElem
 		// Empty value
 		= (_.isNil(propertyValue)) ? undefined
 		// `type` property
-		: (propertyName == "type") ?
+		: (propertyName == "type" || propertyName == "command") ?
 			<span className="tooltip">
-				<span onClick={() => props.onEdit(path)}>{propertyValue}</span>
+				<span style={{fontWeight: "bold"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
 				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocol", "schemas", propertyValue], {}), 10, 2)}</pre></span>
 			</span>
 		// property references an object
@@ -271,8 +282,11 @@ const makeProtocolObjectPropertyElemRO = (props) => {
 				<span style={{color: "#07a"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
 				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, "protocol.objects."+propertyValue, {}), 10, 2)}</pre></span>
 			</span>
+		// Steps
+		: (propertyName == "steps") ?
+			<ProtocolStep state={props.state} path={path} step={propertyValue} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
 		// we have a handler for the value
-		: (valueHandler) ? valueHandler(propertyValue, propertySchema)
+		: (valueHandler) ? valueHandler(propertyValue, propertySchema, path, props)
 		// otherwise
 		: <span onClick={() => props.onEdit(path)}>{JSON.stringify(propertyValue)}</span>;
 	return valueElem;
@@ -320,8 +334,62 @@ const protocolObjectPropertyHandlers = {
 	},
 	string: (value) => {
 		return <span style={{color: "#e90"}}>{value}</span>
-	}
+	},
 }
+
+
+//
+// Protocol steps
+//
+
+const ProtocolSteps = (props) => {
+	return <div>
+		<h2>Steps</h2>
+		<ProtocolStep state={props.state} path={["steps"]} step={props.state.protocol.steps} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+	</div>
+};
+
+const stepSchemaGeneric = {
+	properties: {
+		description: {type: "markdown"},
+		data: {type: "object"},
+		command: {type: "string"}
+	}
+};
+
+const ProtocolStep = (props) => {
+	const {state, path, step} = props;
+	// console.log("path: "+path.join("."))
+
+	const stepKeys = _.keys(step);
+	const alphaKeys = _.filter(stepKeys, key => /^[A-Za-z]/.test(key));
+	const commandKeys = _.difference(alphaKeys, ["command", "data", "description"]);
+	const substepKeys = _.filter(stepKeys, key => /^[0-9]/.test(key));
+
+	// console.log("onSetProperty type: "+(typeof _.keys(props.onSetProperty)))
+	const schema = _.get(state.protocol, ["schemas", step.command], {});
+	const keysInRequired = schema.required || [];
+	const keysInStep = stepKeys;
+	const keysInSchema = _.keys(schema.properties) || [];
+	const keysFirst = _.filter(keysInSchema, key => _.includes(keysInRequired, key) || step.hasOwnProperty(key));
+	const keys = _.uniq(_.flatten([keysFirst, keysInSchema, keysInStep]));
+
+	return <div>
+		<h3>{path.join(".")}</h3>
+		<div style={{marginLeft: "1em"}}>
+		{_.map(["description", "data", "command"], key => (!_.isEmpty(step[key]))
+			? <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={stepSchemaGeneric} propertyName={key} propertyValue={step[key]} propertySchema={stepSchemaGeneric.properties[key]} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+			: undefined
+		)}
+		{
+			_.map(commandKeys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={step[key]} propertySchema={_.get(schema, ["properties", key])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
+		}
+		{
+			_.map(substepKeys, key => <ProtocolStep key={key} state={props.state} path={path.concat(key)} step={step[key]} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
+		}
+		</div>
+	</div>
+};
 
 // const protocolObjectHandlers = {
 // 	Plate: ({state, value, valueKey}) => (<div>
