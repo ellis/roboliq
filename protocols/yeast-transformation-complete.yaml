@@ -65,7 +65,7 @@ parameters:
     value: 8
   F:
     description: first usable free well
-    value: A02
+    value: A04
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -327,7 +327,7 @@ steps:
         object: wastePlateLid
         destination: ourlab.mario.site.P6
     3:
-        description: "Put filter plate on bench"
+        description: Put filter plate on bench
         command: transporter.movePlate
         object: filterPlate
         destination: ourlab.mario.site.P3
@@ -387,8 +387,8 @@ steps:
         object1: balancePlate
         object2: wastePlate
         program:
-            rpm: 3000
-            duration: 2 minutes
+            rpm: 1500
+            duration: 3 minutes
             temperature: 25 degC
     # 10:
     #     description: Bring waste plate back from the centrifuge
@@ -470,8 +470,8 @@ steps:
         object1: balancePlate
         object2: wastePlate
         program:
-            rpm: 3000
-            duration: 2 minutes
+            rpm: 1500
+            duration: 3 minutes
             temperature: 25 degC
     # 20:
     #     description: Bring waste plate back from the centrifuge
