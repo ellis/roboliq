@@ -261,45 +261,20 @@ objects:
         cleanBetween: decontaminate
         cleanBetweenSameSource: decontaminate
         cleanEnd: decontaminate
-  design5:
-    type: Design
-    description: Add DMSO
-    conditions:
-      i*: $#N
-      destinationLabware: pcrPlate
-      well=allocateWells:
-        rows: 8
-        columns: 12
-        from: $#F
-      cleanBegin: none
-      cleanEnd: flush
-      cleanBetween: flush
-      cleanBetweenSameSource: none
-      layer*:
-      - source: dmso
-        volume: 14 ul
-        liquidClass: Roboliq_Water_Air_1000
+
   design6:
     type: Design
-    description: Transfer cells from filter plate to PCR plate
+    description: Transfer DMSO to cells and then cells from filter plate to PCR plate
     conditions:
       i*: $#N
-      destinationLabware: pcrPlate
       well=allocateWells:
         rows: 8
         columns: 12
         from: $#F
-      cleanBegin: none
-      cleanEnd: flush
-      cleanBetween: flush
-      cleanBetweenSameSource: none
-      layer*:
-      - source=calculate: 'concat("filterPlate(", well, ")")'
-        volume: 185 ul
-        liquidClass: Roboliq_Water_Air_1000 # Change the liqud class to really viscous!
-        cleanBetween: decontaminate
-        cleanBetweenSameSource: decontaminate
-        cleanEnd: decontaminate
+      group=calculate: '1 + floor((i - 1) / 4)' # Assign the same `group` value to every four wells
+      volumeDmso: 14 ul
+      volume: 185 ul
+
   design7:
     type: Design
     description: Add YPD on the culture plate
@@ -614,36 +589,30 @@ steps:
       command: transporter.moveLidFromContainerToSite
       object: wastePlateLid
       destination: ourlab.mario.site.P6
-    34:
-        description: Add DMSO on the emptz PCR plate
-        data: {source: design5}
-        command: experiment.forEachGroup
-        groupBy: layer
-        steps:
-            command: pipetter.pipette
-            program: $liquidClass
-            sources: $$source
-            destinationLabware: $destinationLabware
-            destinations: $$well
-            volumes: $volume
-            cleanBegin: $cleanBegin
-            cleanEnd: $cleanEnd
-            cleanBetween: $cleanBetween
     35:
-        description: Transfer cells from filter plate to PCR plate with DMSO
+        description: Add DMSO to cells then transfer them from filter plate to PCR plate
         data: {source: design6}
         command: experiment.forEachGroup
-        groupBy: layer
+        groupBy: group
         steps:
-            command: pipetter.pipette
-            program: $liquidClass
-            sources: $$source
-            destinationLabware: $destinationLabware
-            destinations: $$well
-            volumes: $volume
-            cleanBegin: $cleanBegin
-            cleanEnd: $cleanEnd
-            cleanBetween: $cleanBetween
+            1:
+                command: pipetter.pipette
+                program: Roboliq_Water_Air_1000
+                sources: dmso
+                destinationLabware: filterPlate
+                destinations: $$well
+                volumes: $volumeDmso
+                clean: none
+            2:
+                command: pipetter.pipette
+                program: Roboliq_Water_Air_1000
+                sourceLabware: filterPlate
+                sources: $$well
+                destinationLabware: pcrPlate
+                destinations: $$well
+                volumes: $volume
+                clean: none
+                cleanEnd: decontaminate
     36:
         description: Cover filter plate
         command: transporter.moveLidFromSiteToContainer
