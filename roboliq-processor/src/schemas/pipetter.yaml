@@ -308,22 +308,6 @@ pipetter.pipette:
     tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
   required: []
 
-pipetter.punctureSeal:
-  description: Puncture the seal on a plate using pipetter tips.
-  properties:
-    agent: {description: "Agent identifier", type: "Agent"}
-    equipment: {description: "Equipment identifier", type: "Equipment"}
-    # program: {description: "Program identifier", type: "string"}
-    items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter.PunctureItem}}
-    wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
-    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
-    distances: {description: "Distance for puncturing", type: [Length, array], items: {type: Length}}
-    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)", type: string}
-    cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
-    cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
-    cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
-    tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
-
 pipetter.pipetteDilutionSeries:
   description: |
     Pipette a dilution series.
@@ -367,3 +351,19 @@ pipetter.pipetteMixtures:
       items:
         enum: ["index", "destination"]
   required: [mixtures]
+
+pipetter.punctureSeal:
+  description: Puncture the seal on a plate using pipetter tips.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    # program: {description: "Program identifier", type: "string"}
+    items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter.PunctureItem}}
+    wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
+    syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
+    distances: {description: "Distance for puncturing", type: [Length, array], items: {type: Length}}
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)", type: string}
+    cleanBegin: {description: "intensity of cleaning before the first puncture.", type: string}
+    cleanBetween: {description: "Intensity of cleaning between wells.", type: string}
+    cleanEnd: {description: "Intensity of cleaning after the last puncture.", type: string}
+    tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}

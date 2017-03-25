@@ -49,10 +49,26 @@ steps:
     text: "`Please add to deck: One black 384-well-MTP on Pos P3, one sealed 96-well PCR plate with First DNA on P1. One 50-ml Facon tube with >TotalVolSecDNA ul of second DNA in Injector-Device.`"
 
   2:
+    command: pipetter.cleanTips
+    syriges: [7, 8]
+    intensity: thorough
+
+  3:
     data: {source: design1}
     command: experiment.forEachRow
     steps:
       1:
+        description: "`Pipette well {{$well}}`"
+        command: pipetter.punctureSeal
+        program: "Water_C_50_EK_DNA"
+        wellLabware: plate1
+        items:
+        - well: $well
+          distance: 3mm
+          syringe: 7
+        cleanBegin: none
+        cleanEnd: thorough
+      2:
         description: "`Pipette well {{$well}}`"
         command: pipetter.pipette
         program: "Water_C_50_EK_DNA"
@@ -63,7 +79,7 @@ steps:
           destination: $well
           volume: $#volume1
           syringe: 8
-      2:
+      3:
         description: "`Measure well {{$well}}`"
         command: fluorescenceReader.measurePlate
         object: plate2
@@ -73,3 +89,8 @@ steps:
         output:
           joinKey: well
           appendTo: measurements
+
+# Quesitons:
+# * [ ] When should the tips be cleaned, and how thoroughly?
+# * [ ] pipetter.punctureSeal: add paramter `wellLabware`
+# * [ ] what distance should we puncture into the well?
