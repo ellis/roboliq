@@ -1,5 +1,17 @@
 # Todos
 
+# Electron GUI
+
+* [ ] handle separate protocolBase, protocol, protocolComplete
+	* [ ] load Oskari's YAML file as `protocol` and example_protocol_output.json as `protocolComplete`
+	* [ ] Protocol.jsx: only display objects in `protocol`
+	* [ ] Protocol.jsx: only display steps in `protocol`
+* [ ] main.js: load config protocols using roboliq lib
+* [ ] main.js: compile protocols to and load `protocolComplete`
+* [ ] let user add an object
+	* [ ] dropdown list for user to select a type
+* [ ] let user add a step
+
 # Things needed for Oskari's yeast script, part 1 on mario
 
 * [x] lid handling
