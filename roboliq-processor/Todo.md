@@ -14,6 +14,9 @@
 	* [x] display parameters
 	* [ ] design1
 	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
+* [ ] add [Cancel] button to JsonEditor
+* [ ] make JsonEditor a YamlEditor
+* [ ] send edits back to main.js to save
 * [ ] main.js: load config protocols using roboliq lib
 * [ ] main.js: compile protocols to and load `protocolComplete`
 * [ ] let user add an object
