@@ -15,10 +15,46 @@ const Protocol = ({
 	<div>
 		<h1>roboliq version {_.get(state, ["protocols", "main", "roboliq"], "UNKNOWN")}</h1>
 		<div dangerouslySetInnerHTML={{__html: markdown.render(_.get(state, ["protocols", "main", "description"], ""))}}/>
+		<ProtocolParameters state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 		<ProtocolObjects state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 		<ProtocolSteps state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 	</div>
 );
+
+//
+// Protocol parameters
+//
+
+const ProtocolParameters = (props) => {
+	const path = ["parameters"];
+	const schema = {
+		properties: {
+			description: {type: "markdown"},
+			value: {description: "value of the parameter"}
+		}
+	};
+
+	const paramElems = _.map(_.get(props.state, ["protocols", "main", "parameters"]), (paramObject, paramName) => {
+		// console.log({paramName, paramObject});
+		return <div key={paramName}>
+			<h3>{paramName}</h3>
+			<div style={{marginLeft: "1em"}}>
+			{_.map(["description", "value"], (key) => {
+				const value = paramObject[key];
+				const path2 = ["parameters", paramName, key];
+				const propertySchema = schema.properties[key];
+				// console.log({key, path2, value, propertySchema})
+				return <ProtocolObjectProperty key={key} state={props.state} path={path2} schema={_.clone(schema)} propertyName={key} propertyValue={value} propertySchema={propertySchema} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>;
+			})}
+			</div>
+		</div>;
+	});
+
+	return <div>
+		<h2>Parameters</h2>
+		{paramElems}
+	</div>;
+}
 
 //
 // Protocol objects
@@ -54,6 +90,7 @@ const ProtocolObject = (props) => {
 
 const ProtocolObjectProperty = (props) => {
 	const {state, path, schema, propertyName, propertyValue, propertySchema = {}} = props;
+	// console.log({props})
 	const isRequired = _.includes(schema.required, propertyName);
 	const isDefined = (schema.properties || {}).hasOwnProperty(propertyName);
 	const isDeclared = !_.isNil(propertyValue);
@@ -66,6 +103,7 @@ const ProtocolObjectProperty = (props) => {
 
 	// Property name
 	const propertyNameSpan0 = <span style={style}>{propertyName}:</span>;
+	// console.log({propertySchema})
 	const propertyNameSpan = (isDefined && !_.isEmpty(propertySchema) && propertyName != "type")
 		? <span className="tooltip">
 				{propertyNameSpan0}
@@ -99,6 +137,7 @@ const makeProtocolObjectPropertyElemRO = (props) => {
 	if (propertyName == "steps") {
 		console.log({path})
 	}
+	console.log({propertyName, propertyValue, path})
 	const valueElem
 		// Empty value
 		= (_.isNil(propertyValue)) ? undefined
@@ -120,7 +159,7 @@ const makeProtocolObjectPropertyElemRO = (props) => {
 		// we have a handler for the value
 		: (valueHandler) ? valueHandler(propertyValue, propertySchema, path, props)
 		// otherwise
-		: <span onClick={() => props.onEdit(path)}>{JSON.stringify(propertyValue)}</span>;
+		: <div className="yaml" onClick={() => props.onEdit(path)}>{YAML.stringify(propertyValue || "", 3, 2)}</div>;
 	return valueElem;
 }
 

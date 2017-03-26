@@ -10,7 +10,8 @@
 	* [x] remove everything up to last "step" in path before displaying step ID
 * [ ] load Lena's script and make sure it displays OK
 	* [x] display protocol description
-	* [ ] output YAML instead of JSON for unknown values
+	* [x] output YAML instead of JSON for unknown values
+	* [x] display parameters
 	* [ ] design1
 	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
 * [ ] main.js: load config protocols using roboliq lib
