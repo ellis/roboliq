@@ -17,6 +17,7 @@
     "commander": "^2.9.0",
     "ent": "^2.2.0",
     "immutable": "^3.8.1",
+    "jsonfile": "^2.4.0",
     "lodash": "^4.13.1",
     "markdown-it": "^8.3.1",
     "mathjs": "^3.2.1",

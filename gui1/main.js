@@ -1,7 +1,9 @@
 const _ = require('lodash');
 const assert = require('assert');
 const fs = require('fs');
+const jsonfile = require('jsonfile');
 const path = require('path');
+const yaml = require('yamljs');
 
 const electron = require('electron')
 // Module to control application life.
@@ -59,8 +61,24 @@ app.on('activate', function () {
 
 const ipc = require('electron').ipcMain
 
-ipc.on("loadProtocol", (event, {filename}) => {
-	console.log("filename: "+filename);
-	const protocol = require(filename);
-	event.sender.send("loadProtocol", protocol);
+ipc.on("loadProtocols", (event, filenames) => {
+	console.log("filenames: "+JSON.stringify(filenames));
+	const result = {filenames: {}, protocols: {}};
+	const mainFilename = filenames.main;
+	const outputFilename = filenames.output;
+
+	function load(label, url) {
+		let content;
+		if (path.extname(url) === ".yaml")
+			content = yaml.load(url);
+		else if (path.extname(url) === ".json")
+			content = jsonfile.readFileSync(url);
+		result.filenames[label] = url;
+		result.protocols[label] = content;
+	}
+
+	if (mainFilename) load("main", mainFilename);
+	if (outputFilename) load("output", outputFilename);
+
+	event.sender.send("loadProtocols", result);
 });

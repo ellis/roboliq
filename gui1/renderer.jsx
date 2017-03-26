@@ -19,10 +19,10 @@ import Protocol from './views/Protocol.jsx';
 
 const ipc = require('electron').ipcRenderer;
 
-ipc.on("loadProtocol", function (event, protocol) {
-	console.log("loadProtocol:");
-	console.log({protocol});
-	store.dispatch({type: 'SET_PROTOCOL', value: protocol});
+ipc.on("loadProtocols", function (event, result) {
+	console.log("loadProtocols:");
+	console.log({result});
+	store.dispatch({type: 'SET_PROTOCOLS', filenames: result.filenames, protocols: result.protocols});
 });
 
 const { createStore } = Redux;
@@ -59,4 +59,4 @@ function render() {
 store.subscribe(render);
 render();
 
-ipc.send("loadProtocol", {filename: "./example_protocol_output.json"});
+ipc.send("loadProtocols", {main: "../protocols/yeast-transformation-temp.yaml", output: "./example_protocol_output.json"});

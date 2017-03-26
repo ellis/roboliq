@@ -8,10 +8,8 @@ import {Map, List, fromJS, toJS} from 'immutable';
 // import {scoreProduct} from '../amazon/scoreFuncs.js';
 
 const state0 = fromJS({
-	configFilenames: [],
-	protocolFilename: "./example_protocol_output.json",
-	protocolBase: {},
-	protocol: {},
+	filenames: {},
+	protocols: {},
 	editing: null
 });
 
@@ -19,15 +17,22 @@ function reducer(state = state0, action) {
 	console.log({action})
 	let state1 = state;
 	switch (action.type) {
-		case "SET_CONFIG_FILENAMES":
-			state1 = state.setIn(["configFilenames"], fromJS(action.value));
+		// case "SET_CONFIG_FILENAMES":
+		// 	state1 = state.setIn(["configFilenames"], fromJS(action.value));
+		// 	return state1;
+		case "SET_PROTOCOL_FILENAMES":
+			state1 = state
+				.setIn(["filenames"], fromJS(action.filenames))
+				.deleteIn(["protocols"]);
 			return state1;
-		case "SET_PROTOCOL_FILENAME":
-			state1 = state.setIn(["protocolFilename"], fromJS(action.value));
+		case "SET_PROTOCOLS":
+			state1 = state
+				.setIn(["filenames"], fromJS(action.filenames))
+				.setIn(["protocols"], fromJS(action.protocols));
 			return state1;
-		case "SET_PROTOCOL":
-			state1 = state.setIn(["protocol"], fromJS(action.value));
-			return state1;
+		// case "SET_PROTOCOL_COMPLETE":
+		// 	state1 = state.setIn(["protocolComplete"], fromJS(action.value));
+		// 	return state1;
 		case "EDIT":
 			state1 = state.setIn(["editing"], fromJS(action.path));
 			console.log({editing: state1.editing});

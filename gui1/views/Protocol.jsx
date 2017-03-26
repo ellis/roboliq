@@ -13,7 +13,7 @@ const Protocol = ({
 	onSetProperty
 }) => (
 	<div>
-		<h1>roboliq version {state.protocol.roboliq}</h1>
+		<h1>roboliq version {_.get(state, ["protocols", "main", "roboliq"], "UNKNOWN")}</h1>
 		<ProtocolObjects state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 		<ProtocolSteps state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 	</div>
@@ -26,14 +26,14 @@ const Protocol = ({
 const ProtocolObjects = (props) => (
 	<div>
 		<h2>Objects</h2>
-		{_.map(props.state.protocol.objects, (value, key) => <ProtocolObject key={key} state={props.state} path={["objects", key]} value={value} valueKey={key} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)}
+		{_.map(_.get(props.state, ["protocols", "main", "objects"]), (value, key) => <ProtocolObject key={key} state={props.state} path={["objects", key]} value={value} valueKey={key} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)}
 	</div>
 );
 
 const ProtocolObject = (props) => {
 	const {state, path, value, valueKey} = props;
 	// console.log("onSetProperty type: "+(typeof _.keys(props.onSetProperty)))
-	const schema = _.get(state.protocol, ["schemas", value.type], {});
+	const schema = _.get(state, ["protocols", "output", "schemas", value.type], {});
 	const keysInRequired = schema.required || [];
 	const keysInObject = _.keys(value) || [];
 	const keysInSchema = _.keys(schema.properties) || [];
@@ -105,13 +105,13 @@ const makeProtocolObjectPropertyElemRO = (props) => {
 		: (propertyName == "type" || propertyName == "command") ?
 			<span className="tooltip">
 				<span style={{fontWeight: "bold"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
-				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocol", "schemas", propertyValue], {}), 10, 2)}</pre></span>
+				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, ["protocols", "output", "schemas", propertyValue], {}), 10, 2)}</pre></span>
 			</span>
 		// property references an object
 		: (_.isPlainObject(propertySchema) && /^[A-Z]/.test(propertySchema.type) && _.isString(propertyValue)) ?
 			<span className="tooltip">
 				<span style={{color: "#07a"}} onClick={() => props.onEdit(path)}>{propertyValue}</span>
-				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, "protocol.objects."+propertyValue, {}), 10, 2)}</pre></span>
+				<span className="tooltiptext"><pre>{YAML.stringify(_.get(state, "protocols.output.objects."+propertyValue, {}), 10, 2)}</pre></span>
 			</span>
 		// Steps
 		: (propertyName == "steps") ?
@@ -175,7 +175,7 @@ const protocolObjectPropertyHandlers = {
 const ProtocolSteps = (props) => {
 	return <div>
 		<h2>Steps</h2>
-		<ProtocolStep state={props.state} path={["steps"]} step={props.state.protocol.steps} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+		<ProtocolStep state={props.state} path={["steps"]} step={_.get(props.state, ["protocols", "main", "steps"])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
 	</div>
 };
 
@@ -197,12 +197,12 @@ const ProtocolStep = (props) => {
 	}
 
 	const stepKeys = _.keys(step);
-	const alphaKeys = _.filter(stepKeys, key => /^[A-Za-z]/.test(key));
-	const commandKeys = _.difference(alphaKeys, ["command", "data", "description"]);
-	const substepKeys = _.filter(stepKeys, key => /^[0-9]/.test(key));
+	const substepKeys = _.filter(stepKeys, key => /^[0-9]/.test(key)); // all keys beginning with a digit, thus representing a sub-step.
+	const otherKeys = _.difference(stepKeys, substepKeys); // all other keys
+	const paramKeys = _.difference(otherKeys, ["command", "data", "description"]); // parameters to the command
 
 	// console.log("onSetProperty type: "+(typeof _.keys(props.onSetProperty)))
-	const schema = _.get(state.protocol, ["schemas", step.command], {});
+	const schema = _.get(state, ["protocols", "output", "schemas", step.command], {});
 	const keysInRequired = schema.required || [];
 	const keysInStep = stepKeys;
 	const keysInSchema = _.keys(schema.properties) || [];
@@ -217,7 +217,7 @@ const ProtocolStep = (props) => {
 			: undefined
 		)}
 		{
-			_.map(commandKeys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={step[key]} propertySchema={_.get(schema, ["properties", key])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
+			_.map(paramKeys, key => <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={schema} propertyName={key} propertyValue={step[key]} propertySchema={_.get(schema, ["properties", key])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
 		}
 		{
 			_.map(substepKeys, key => <ProtocolStep key={key} state={props.state} path={path.concat(key)} step={step[key]} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>)
