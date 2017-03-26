@@ -61,13 +61,13 @@ steps:
         description: "`Pipette well {{$well}}`"
         command: pipetter.punctureSeal
         # program: "Water_C_50_EK_DNA"
-        wellLabware: plate1
+        #wellLabware: plate1
         items:
-        - well: $well
+        - well: "`plate1({{$well}})`"
           distance: 3mm
           syringe: 7
-        cleanBegin: none
-        cleanEnd: thorough
+        clean: none
+        #cleanEnd: thorough
       2:
         description: "`Pipette well {{$well}}`"
         command: pipetter.pipette
