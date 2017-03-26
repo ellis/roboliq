@@ -1,5 +1,10 @@
 # Run with:
+#
 # 'C:\Users\localadmin\Desktop\Ellis\roboliq\node_modules\.bin\roboliq-processor' --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\EK' --evoware 'C:\ProgramData\Tecan\EVOware\database\Carrier.cfg,C:\ProgramData\Tecan\EVOware\database\wt_templates\NewLayout_Feb2015.ewt,ourlab.mario.evoware' 'C:\Users\localadmin\Desktop\Ellis\roboliq\config\bsse-mario.js' EK01-test.yaml
+#
+# or from mac:
+#
+# npm run processor -- --progress -P compiled --evoware testdata/bsse-mario/Carrier.cfg,testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware config/bsse-mario.js protocols/EK01-test.yaml
 roboliq: v1
 description: |
   We want to have an iteration per well, where the corresponding components are mixed and fluorescence intensity is measured over time before we get to the next iteration for the next well.
@@ -57,18 +62,34 @@ steps:
     data: {source: design1}
     command: experiment.forEachRow
     steps:
+      # 1:
+      #   description: "`Pipette well {{$well}}`"
+      #   command: pipetter.punctureSeal
+      #   # program: "Water_C_50_EK_DNA"
+      #   #wellLabware: plate1
+      #   items:
+      #   - well: "`plate1({{$well}})`"
+      #     distance: 3mm
+      #     syringe: 7
+      #   clean: none
+      #   #cleanEnd: thorough
       1:
-        description: "`Pipette well {{$well}}`"
-        command: pipetter.punctureSeal
-        # program: "Water_C_50_EK_DNA"
-        #wellLabware: plate1
+        description: "`Aspirate a small volume in order to puncture the seal`"
+        command: pipetter._aspirate
+        agent: ourlab.mario.evoware
+        equipment: ourlab.mario.liha
+        program: "Water_C_50_EK_DNA"
         items:
-        - well: "`plate1({{$well}})`"
-          distance: 3mm
-          syringe: 7
-        clean: none
-        #cleanEnd: thorough
+          - syringe: 8
+            source: "`plate1({{$well}})`"
+            volume: 1 ul
+
       2:
+        command: pipetter.cleanTips
+        syringes: [ourlab.mario.liha.syringe.8]
+        intensity: thorough
+
+      3:
         description: "`Pipette well {{$well}}`"
         command: pipetter.pipette
         program: "Water_C_50_EK_DNA"
@@ -79,7 +100,7 @@ steps:
           destination: $well
           volume: $#volume1
           syringe: 8
-      3:
+      4:
         description: "`Measure well {{$well}}`"
         command: fluorescenceReader.measurePlate
         object: plate2

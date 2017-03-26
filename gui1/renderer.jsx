@@ -60,4 +60,5 @@ store.subscribe(render);
 render();
 
 //ipc.send("loadProtocols", {main: "../protocols/yeast-transformation-temp.yaml", output: "./example_protocol_output.json"});
-ipc.send("loadProtocols", {main: "../protocols/EK01-test.yaml", output: "../compiled/EK01-test/EK01-test.out.json"});
+// ipc.send("loadProtocols", {main: "../protocols/EK01-test.yaml", output: "../compiled/EK01-test/EK01-test.out.json"});
+ipc.send("loadProtocols", {main: "../compiled/EK01-test/EK01-test.out.json", output: "../compiled/EK01-test/EK01-test.out.json"});
