@@ -14,6 +14,7 @@ const Protocol = ({
 }) => (
 	<div>
 		<h1>roboliq version {_.get(state, ["protocols", "main", "roboliq"], "UNKNOWN")}</h1>
+		<div dangerouslySetInnerHTML={{__html: markdown.render(_.get(state, ["protocols", "main", "description"], ""))}}/>
 		<ProtocolObjects state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 		<ProtocolSteps state={state} onEdit={onEdit} onSetProperty={onSetProperty}/>
 	</div>

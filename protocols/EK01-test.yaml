@@ -50,7 +50,7 @@ steps:
 
   2:
     command: pipetter.cleanTips
-    syriges: [7, 8]
+    syringes: [ourlab.mario.liha.syringe.7, ourlab.mario.liha.syringe.8]
     intensity: thorough
 
   3:
@@ -60,7 +60,7 @@ steps:
       1:
         description: "`Pipette well {{$well}}`"
         command: pipetter.punctureSeal
-        program: "Water_C_50_EK_DNA"
+        # program: "Water_C_50_EK_DNA"
         wellLabware: plate1
         items:
         - well: $well

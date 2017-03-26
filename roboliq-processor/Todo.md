@@ -2,14 +2,17 @@
 
 # Electron GUI
 
-* [ ] handle separate protocolBase, protocol, protocolComplete
+* [x] handle separate protocolBase, protocol, protocolComplete
 	* [x] load Oskari's YAML file as `protocol` and example_protocol_output.json as `protocolComplete`
 	* [x] Protocol.jsx: only display objects in `protocol`
 	* [x] Protocol.jsx: only display steps in `protocol`
 	* [x] fix schema in step 35 so that 'groupBy' is not displayed in red
 	* [x] remove everything up to last "step" in path before displaying step ID
 * [ ] load Lena's script and make sure it displays OK
+	* [x] display protocol description
+	* [ ] output YAML instead of JSON for unknown values
 	* [ ] design1
+	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
 * [ ] main.js: load config protocols using roboliq lib
 * [ ] main.js: compile protocols to and load `protocolComplete`
 * [ ] let user add an object

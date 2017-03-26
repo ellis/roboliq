@@ -359,6 +359,7 @@ pipetter.punctureSeal:
     equipment: {description: "Equipment identifier", type: "Equipment"}
     # program: {description: "Program identifier", type: "string"}
     items: {description: "List of parameters for individual punctures", "type": "array", items: {type: pipetter.PunctureItem}}
+    wellLabware: {description: "Labware for wells", "type": "Plate"}
     wells: {description: "Specifier for well(s) to puncture, if missing from items", type: Wells}
     syringes: {description: "Specifier for syringe(s) to use, if missing from items", type: array, items: {type: [number, nameOf Syringe]}}
     distances: {description: "Distance for puncturing", type: [Length, array], items: {type: Length}}

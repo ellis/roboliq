@@ -51,6 +51,7 @@ Plate:
     model: {type: PlateModel}
     location: {type: Site}
     contents: {type: [object, array]}
+    sealed: {type: boolean, description: "Indicated whether the plate is sealed"}
   required: [type, model]
 
 PlateModel:
