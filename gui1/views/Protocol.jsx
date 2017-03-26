@@ -209,8 +209,11 @@ const ProtocolStep = (props) => {
 	const keysFirst = _.filter(keysInSchema, key => _.includes(keysInRequired, key) || step.hasOwnProperty(key));
 	const keys = _.uniq(_.flatten([keysFirst, keysInSchema, keysInStep]));
 
+	const iStepLast = _.lastIndexOf(path, "steps");
+	const displayPath = _.drop(path, iStepLast + 1);
+
 	return <div>
-		<h3>{path.join(".")}</h3>
+		<h3>{displayPath.join(".")}</h3>
 		<div style={{marginLeft: "1em"}}>
 		{_.map(["description", "data", "command"], key => (!_.isEmpty(step[key]))
 			? <ProtocolObjectProperty key={key} state={state} path={path.concat(key)} schema={stepSchemaGeneric} propertyName={key} propertyValue={step[key]} propertySchema={stepSchemaGeneric.properties[key]} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>

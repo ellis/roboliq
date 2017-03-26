@@ -7,7 +7,7 @@
 	* [x] Protocol.jsx: only display objects in `protocol`
 	* [x] Protocol.jsx: only display steps in `protocol`
 	* [x] fix schema in step 35 so that 'groupBy' is not displayed in red
-	* [ ] remove everything up to last "step" in path before displaying step ID
+	* [x] remove everything up to last "step" in path before displaying step ID
 * [ ] load Lena's script and make sure it displays OK
 	* [ ] design1
 * [ ] main.js: load config protocols using roboliq lib
