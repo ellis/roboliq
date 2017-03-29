@@ -505,8 +505,8 @@ steps:
             command: experiment.forEachGroup
             groupBy: layer
             steps:
-                command: pipetter.pipe7 n 0.
-
+                command: pipetter.pipette
+                program: $liquidClass
                 sources: $$source
                 destinationLabware: $destinationLabware
                 destinations: $$well
@@ -681,5 +681,3 @@ steps:
         description: Incubate for 220 minutes
         command: timer.sleep
         duration: 220 minutes
-
-    # ToDo: Transfer cells directly after DMSO
