@@ -426,7 +426,7 @@ steps:
         steps:
             1:
                 command: pipetter.pipette
-                source: peg
+                sources: peg
                 volumes: 100 ul
                 program: "OV PEG Wet 1000"
                 cleanBegin: decontaminate
@@ -437,7 +437,7 @@ steps:
                 destinations: $$well
             2:
                 command: pipetter.pipette
-                source=calculate: 'concat("dnaPlate(", well, ")")'
+                sources=calculate: 'concat("dnaPlate(", well, ")")'
                 volumes: 10 ul
                 program: Roboliq_Water_Air_1000
                 cleanBegin: none
@@ -498,9 +498,9 @@ steps:
         description: Transfer cells from PCR plate back to filter plate
         command: pipetter.pipette
         program: "OV PEG Wet 1000"
-        sourceLabware: 'pcrPlate'
+        sourceLabware: pcrPlate
         sources=calculate: $$wells
-        destinationLabware: $destinationLabware
+        destinationLabware: filterPlate
         destinations: $$wells
         volumes: 250 ul
         cleanBegin: decontaminate
