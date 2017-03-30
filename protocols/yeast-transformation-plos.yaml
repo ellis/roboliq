@@ -65,7 +65,7 @@ parameters:
     value: 8
   F:
     description: first usable free well
-    value: A04
+    value: A05
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -274,7 +274,7 @@ steps:
                 cleanEnd: $cleanEnd
                 cleanBetween: $cleanBetween
         2:
-            description: Add cells on the filter plate
+            description: Add equal amount of water on the balance plate
             command: pipetter.pipette
             program: Roboliq_Water_Air_1000
             sources: water
@@ -380,11 +380,6 @@ steps:
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
         destination: ourlab.mario.site.P6
-    24:
-        description: Move the used waste plate to the hotel
-        command: transporter.movePlate
-        object: wastePlate
-        destination: ourlab.mario.site.HOTEL32_C1
     25:
         description: Add transformation mix on the cells (50ul LiAc, ssDNA etc.)
         data: {source: design3}
@@ -517,6 +512,16 @@ steps:
         cleanBetween: none
         cleanEnd: flush
     37:
+        description: Put lid on the filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        container: filterPlate
+    38:
+        description: Put filter plate on the waste plate
+        command: transporter.moveLidFromSiteToContainer
+        object: filterPlate
+        container: wastePlate
+    39:
         description: Run the centrifuge to discard supernatant
         command: centrifuge.centrifuge2
         object1: balancePlate
@@ -525,7 +530,17 @@ steps:
             rpm: 800
             duration: 5 minutes
             temperature: 25 degC
-    38:
+    40:
+        description: Remove filter plate from waste plate
+        command: transporter.moveLidFromContainerToSite
+        object: filterPlate
+        destination: ourlab.mario.site.P3
+    41:
+        description: Remove lid from filter plate
+        command: transporter.moveLidFromContainerToSite
+        object: wastePlateLid
+        destination: ourlab.mario.site.P6
+    42:
         description: Add YPD on the filter plate
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
@@ -539,7 +554,7 @@ steps:
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
-    41:
+    43:
         description: Mix the cells
         data: {source: design1}
         command: pipetter.mix
@@ -550,16 +565,16 @@ steps:
         cleanBegin: none
         cleanBetween: decontaminate
         cleanEnd: decontaminate
-    42:
+    44:
         description: Put PCR plate back
         command: transporter.movePlate
         object: pcrPlate
         destination: ourlab.mario.site.HOTEL32_C2
-    43:
+    45:
         description: Decontamination protocol on a thermocycler, 20mins
         command: evoware._subroutine
         filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_tbot_decon_20170314.esc"
-    44:
+    46:
         description: Incubate for 220 minutes
         command: timer.sleep
         duration: 220 minutes
