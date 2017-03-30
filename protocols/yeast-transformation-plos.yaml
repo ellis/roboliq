@@ -153,6 +153,16 @@ objects:
     model: ourlab.model.plateModel_96_pcr
     location: ourlab.mario.site.HOTEL32_C2
 
+  design0:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: $#F
+
   design1:
     type: Design
     description: Mixtures for target wells
@@ -235,6 +245,7 @@ objects:
       volumeTransfer: 200 ul
 
 steps:
+    data: {source: design0}
     1:
         description: Put waste plate on bench
         command: transporter.movePlate

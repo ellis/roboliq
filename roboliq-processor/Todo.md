@@ -19,6 +19,7 @@
 * [ ] add [Cancel] button to JsonEditor
 * [ ] make JsonEditor a YamlEditor
 * [ ] send edits back to main.js to save
+* [ ] main.js: command line for setting the protocols to be loaded
 * [ ] main.js: load config protocols using roboliq lib
 * [ ] main.js: compile protocols to and load `protocolComplete`
 * [ ] let user add an object
@@ -44,6 +45,7 @@
 * [x] look at Oskari's requests in Email from 2017-03-09 (e.g. documentation)
 * [x] move 'api-generator' output to `docs/protocol`
 * [x] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
+* [ ] figure out why 'npm i' sometimes has EPERM rename permission errors on Windows
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
