@@ -557,10 +557,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations=allocateWells:
-            rows: 8
-            columns: 12
-            from: $#F
+        destinations: $$well
         volumes: 200 ul
         cleanBegin: decontaminate
         cleanEnd: flush
