@@ -14,6 +14,8 @@
 	* [x] display parameters
 	* [ ] design1
 	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
+* [ ] EK01-test.yaml: look into why light washing of small tips doesn't work (it's probably not configured)
+* [ ] EK01-test.yaml: make a `pipetter.discard` or `pipetter.aspirate` command
 * [ ] add [Cancel] button to JsonEditor
 * [ ] make JsonEditor a YamlEditor
 * [ ] send edits back to main.js to save

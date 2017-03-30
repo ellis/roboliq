@@ -223,7 +223,6 @@ objects:
     description: Add PEG and DNA on filter plate
     conditions:
       i*: $#N
-      destinationLabware: filterPlate
       well=allocateWells:
         rows: 8
         columns: 12
@@ -427,25 +426,26 @@ steps:
             1:
                 command: pipetter.pipette
                 sources: peg
+                destinationLabware: filterPlate
+                destinations: $$well
                 volumes: 100 ul
                 program: "OV PEG Wet 1000"
                 cleanBegin: decontaminate
                 cleanBetween: none
                 cleanBetweenSameSource: none
                 cleanEnd: none
-                destinationLabware: $destinationLabware
-                destinations: $$well
             2:
                 command: pipetter.pipette
-                sources=calculate: 'concat("dnaPlate(", well, ")")'
+                sourceLabware: dnaPlate
+                sources: $$well
+                destinationLabware: filterPlate
+                destinations: $$well
                 volumes: 10 ul
                 program: Roboliq_Water_Air_1000
                 cleanBegin: none
                 cleanBetween: none
                 cleanBetweenSameSource: none
                 cleanEnd: none
-                destinationLabware: $destinationLabware
-                destinations: $$well
             3:
                 command: pipetter.pipette
                 program: "OV PEG Wet 1000"
