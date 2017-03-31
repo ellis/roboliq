@@ -206,28 +206,6 @@ objects:
         cleanBetween: none
         cleanEnd: none
 
-  design3:
-    type: Design
-    description: Add transformation mix on filter plate
-    conditions:
-      i*: $#N
-      destinationLabware: filterPlate
-      well=allocateWells:
-        rows: 8
-        columns: 12
-        from: $#F
-      cleanBegin: none
-      cleanEnd: flush
-      cleanBetween: flush
-      cleanBetweenSameSource: none
-      layer*:
-      - source: trafoMix
-        volume: 40 ul
-        liquidClass: Roboliq_Water_Dry_1000
-        cleanBetween: decontaminate
-        cleanBetweenSameSource: none
-        cleanEnd: decontaminate
-
   design4:
     type: Design
     description: Add PEG and DNA on filter plate
@@ -391,91 +369,97 @@ steps:
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
         destination: ourlab.mario.site.P6
-    25:
-        description: Add transformation mix on the cells (50ul LiAc, ssDNA etc.)
-        data: {source: design3}
-        1:
-            command: experiment.forEachGroup
-            groupBy: layer
-            steps:
-                command: pipetter.pipette
-                program: $liquidClass
-                sources: $$source
-                destinationLabware: $destinationLabware
-                destinations: $$well
-                volumes: $volume
-                cleanBegin: $cleanBegin
-                cleanEnd: $cleanEnd
-                cleanBetween: $cleanBetween
-    27:
+    24:
       1:
-        description: Put PCR plate on bench
-        command: transporter.movePlate
-        object: pcrPlate
-        destination: ourlab.mario.site.P4PCR
-      2:
         description: Put DNA plate on bench
         command: transporter.movePlate
         object: dnaPlate
         destination: ourlab.mario.site.P8
-      3:
+      2:
         description: Unccover the DNA plate
         command: transporter.moveLidFromContainerToSite
         object: dnaPlateLid
         destination: ourlab.mario.site.HOTEL32_D2
-    28:
-        description: Add PEG mix on the cells, add trafo mix, transfer to PCR plate and resuspend
+    25:
+        description: Put PCR plate on bench
+        command: transporter.movePlate
+        object: pcrPlate
+        destination: ourlab.mario.site.P4PCR
+    26:
+        description: Add transformation mix, DNA and peg on the cells, move to PCR plate
         data: {source: design4}
         command: experiment.forEachGroup
         groupBy: group
         steps:
-            1:
-                command: pipetter.pipette
-                sources: peg
-                destinationLabware: filterPlate
-                destinations: $$well
-                volumes: 100 ul
-                program: "OV PEG Wet 1000"
-                cleanBegin: decontaminate
-                cleanBetween: none
-                cleanBetweenSameSource: none
-                cleanEnd: none
-            2:
-                command: pipetter.pipette
-                sourceLabware: dnaPlate
-                sources: $$well
-                destinationLabware: filterPlate
-                destinations: $$well
-                volumes: 10 ul
-                program: Roboliq_Water_Air_1000
-                cleanBegin: none
-                cleanBetween: none
-                cleanBetweenSameSource: none
-                cleanEnd: none
-            3:
-                command: pipetter.pipette
-                program: "OV PEG Wet 1000"
-                sourceLabware: filterPlate
-                sources: $$well
-                destinationLabware: pcrPlate
-                destinations: $$well
-                volumes: $volumeTransfer
-                clean: none
-                cleanBegin: none
-                cleanBetween: none
-                cleanBetweenSameSource: none
-                cleanEnd: none
-            4:
-                command: pipetter.mix
-                program: "OV PEG Wet 1000"
-                wellLabware: pcrPlate
-                wells: $$well
-                counts: 5
-                amounts: 100 ul
-                cleanBegin: none
-                cleanBetween: none
-                cleanBetweenSameSource: none
-                cleanEnd: decontaminate
+          1:
+              command: pipetter.pipette
+              program: Roboliq_Water_Dry_1000
+              sources: trafoMix
+              destinationLabware: $destinationLabware
+              destinations: $$well
+              volumes: 40 ul
+              cleanBegin: decontaminate
+              cleanBetween: decontaminate
+              cleanBetweenSameSource: none
+              cleanEnd: none
+          2:
+              command: pipetter.pipette
+              sourceLabware: dnaPlate
+              sources: $$well
+              destinationLabware: filterPlate
+              destinations: $$well
+              volumes: 10 ul
+              program: Roboliq_Water_Air_1000
+              cleanBegin: none
+              cleanBetween: none
+              cleanBetweenSameSource: none
+              cleanEnd: none
+          3:
+              command: pipetter.mix
+              program: "OV PEG Wet 1000"
+              wellLabware: filterPlate
+              wells: $$well
+              counts: 5
+              amounts: 30 ul
+              cleanBegin: none
+              cleanBetween: decontaminate
+              cleanBetweenSameSource: none
+              cleanEnd: decontaminate
+          4:
+              command: pipetter.pipette
+              sources: peg
+              destinationLabware: filterPlate
+              destinations: $$well
+              volumes: 100 ul
+              program: "OV PEG Wet 1000"
+              cleanBegin: decontaminate
+              cleanBetween: none
+              cleanBetweenSameSource: none
+              cleanEnd: none
+          5:
+              command: pipetter.mix
+              program: "OV PEG Wet 1000"
+              wellLabware: filterPlate
+              wells: $$well
+              counts: 5
+              amounts: 100 ul
+              cleanBegin: none
+              cleanBetween: none
+              cleanBetweenSameSource: none
+              cleanEnd: none
+          6:
+              command: pipetter.pipette
+              program: "OV PEG Wet 1000"
+              sourceLabware: filterPlate
+              sources: $$well
+              destinationLabware: pcrPlate
+              destinations: $$well
+              volumes: $volumeTransfer
+              clean: none
+              cleanBegin: none
+              cleanBetween: decontaminate
+              cleanBetweenSameSource: none
+              cleanEnd: decontaminate
     29:
         description: Put lid on filter plate
         command: transporter.moveLidFromSiteToContainer
