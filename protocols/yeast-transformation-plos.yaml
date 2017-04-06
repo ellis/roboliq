@@ -557,10 +557,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations=allocateWells:
-            rows: 8
-            columns: 12
-            from: $#F
+        destinations: $$well
         volumes: 200 ul
         cleanBegin: decontaminate
         cleanEnd: flush
@@ -577,15 +574,20 @@ steps:
         cleanBetween: decontaminate
         cleanEnd: decontaminate
     44:
+        description: Put lid on filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        container: filterPlate
+    45:
         description: Put PCR plate back
         command: transporter.movePlate
         object: pcrPlate
         destination: ourlab.mario.site.HOTEL32_C2
-    45:
+    46:
         description: Decontamination protocol on a thermocycler, 20mins
         command: evoware._subroutine
         filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_tbot_decon_20170314.esc"
-    46:
+    47:
         description: Incubate for 220 minutes
         command: timer.sleep
         duration: 220 minutes
