@@ -14,18 +14,19 @@
 	* [x] display parameters
 * [x] add [Cancel] button to JsonEditor
 * [?] make JsonEditor a YamlEditor
-* [?] main.js: command line for setting the protocols to be loaded
-* [ ] load Lena's script and make sure it displays OK
-	* [ ] design1
-	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
-* [ ] EK01-test.yaml: look into why light washing of small tips doesn't work (it's probably not configured)
-* [ ] EK01-test.yaml: make a `pipetter.discard` or `pipetter.aspirate` command
+* [x] main.js: command line for setting the protocols to be loaded
 * [ ] send edits back to main.js to save
 * [ ] main.js: load config protocols using roboliq lib
 * [ ] main.js: compile protocols and load `protocolComplete`
 * [ ] let user add an object
 	* [ ] dropdown list for user to select a type
 * [ ] let user add a step
+* [ ] add "Find" functionality
+* [ ] load Lena's script and make sure it displays OK
+	* [ ] design1
+	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
+* [ ] EK01-test.yaml: look into why light washing of small tips doesn't work (it's probably not configured)
+* [ ] EK01-test.yaml: make a `pipetter.discard` or `pipetter.aspirate` command
 
 # Things needed for Oskari's yeast script, part 1 on mario
 

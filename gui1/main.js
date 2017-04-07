@@ -45,12 +45,7 @@ function createWindow () {
   mainWindow.loadURL(`file://${__dirname}/index.html`)
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-
-	const filenames = _.isEmpty(opts) ? []
-		: _.without([opts.pmain, opts.poutput], undefined);
-	const result = loadProtocols(filenames);
-	mainWindow.webContents.send("loadProtocols", result);
+  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
@@ -96,6 +91,15 @@ app.on('activate', function () {
 // code. You can also put them in separate files and require them here.
 
 const ipc = require('electron').ipcMain
+
+ipc.on("loadCommandLineProtocols", (event) => {
+	const filenames = {
+		main: opts.pmain,
+		output: opts.poutput
+	};
+	const result = loadProtocols(filenames);
+	event.sender.send("loadProtocols", result);
+});
 
 ipc.on("loadProtocols", (event, filenames) => {
 	const result = loadProtocols(filenames);
