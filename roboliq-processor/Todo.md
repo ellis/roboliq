@@ -15,6 +15,10 @@
 * [x] add [Cancel] button to JsonEditor
 * [?] make JsonEditor a YamlEditor
 * [x] main.js: command line for setting the protocols to be loaded
+* [ ] add menus:
+	* Menu.setApplicationMenu() https://electron.atom.io/docs/api/menu/
+	* https://www.christianengvall.se/electron-menu/
+* [ ] add menu option to switch between main and output protocols
 * [ ] send edits back to main.js to save
 * [ ] main.js: load config protocols using roboliq lib
 * [ ] main.js: compile protocols and load `protocolComplete`
