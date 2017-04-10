@@ -164,24 +164,26 @@ const makeProtocolObjectPropertyElemRO = (props) => {
 }
 
 const makeProtocolObjectPropertyElemRW = (props) => {
-	return <JsonEditor path={props.path} value={props.propertyValue} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+	return <YamlEditor path={props.path} value={props.propertyValue} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
 }
 
 class JsonEditor extends React.Component {
 	constructor(props) {
-		console.log("ProtocolObject keys: "+_.keys(props))
+		console.log("JsonEditor props: "+_.keys(props))
 		super(props);
 		this.state = {
 			value: JSON.stringify(props.value, null, "\t")
 		};
 
 		this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+		this.handleCancel = this.handleCancel.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
 	}
 
 	render() {
 		return <div>
 			<textarea cols="80" rows="10" value={this.state.value} onChange={this.handleChange}/>
+			<button onClick={this.handleCancel}>Cancel</button>
 			<button onClick={this.handleSubmit}>Save</button>
 		</div>;
 	}
@@ -190,12 +192,55 @@ class JsonEditor extends React.Component {
 		this.setState({value: event.target.value});
 	}
 
+	handleCancel(event) {
+		this.props.onEdit(undefined);
+		event.preventDefault();
+	}
+
 	handleSubmit(event) {
 		const value = JSON.parse(this.state.value);
 		this.props.onSetProperty(this.props.path, value);
 		this.props.onEdit(undefined);
-    event.preventDefault();
-  }
+		event.preventDefault();
+	}
+}
+
+class YamlEditor extends React.Component {
+	constructor(props) {
+		console.log("YamlEditor props: "+_.keys(props))
+		super(props);
+		this.state = {
+			value: YAML.stringify(props.value, 3, 2)
+		};
+
+		this.handleChange = this.handleChange.bind(this);
+		this.handleCancel = this.handleCancel.bind(this);
+		this.handleSubmit = this.handleSubmit.bind(this);
+	}
+
+	render() {
+		return <div>
+			<textarea cols="80" rows="10" value={this.state.value} onChange={this.handleChange}/>
+			<button onClick={this.handleCancel}>Cancel</button>
+			<button onClick={this.handleSubmit}>Save</button>
+		</div>;
+	}
+
+	handleChange(event) {
+		this.setState({value: event.target.value});
+	}
+
+	handleCancel(event) {
+		this.props.onEdit(undefined);
+		event.preventDefault();
+	}
+
+	handleSubmit(event) {
+		const value = YAML.parse(this.state.value);
+		this.props.onSetProperty(this.props.path, value);
+		this.props.onEdit(undefined);
+		event.preventDefault();
+	}
 }
 
 const protocolObjectPropertyHandlers = {

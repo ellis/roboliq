@@ -8,23 +8,29 @@
 	* [x] Protocol.jsx: only display steps in `protocol`
 	* [x] fix schema in step 35 so that 'groupBy' is not displayed in red
 	* [x] remove everything up to last "step" in path before displaying step ID
-* [ ] load Lena's script and make sure it displays OK
+* [x] load Lena's script and make sure it displays OK
 	* [x] display protocol description
 	* [x] output YAML instead of JSON for unknown values
 	* [x] display parameters
+* [x] add [Cancel] button to JsonEditor
+* [?] make JsonEditor a YamlEditor
+* [x] main.js: command line for setting the protocols to be loaded
+* [ ] add menus:
+	* Menu.setApplicationMenu() https://electron.atom.io/docs/api/menu/
+	* https://www.christianengvall.se/electron-menu/
+* [ ] add menu option to switch between main and output protocols
+* [ ] send edits back to main.js to save
+* [ ] main.js: load config protocols using roboliq lib
+* [ ] main.js: compile protocols and load `protocolComplete`
+* [ ] let user add an object
+	* [ ] dropdown list for user to select a type
+* [ ] let user add a step
+* [ ] add "Find" functionality
+* [ ] load Lena's script and make sure it displays OK
 	* [ ] design1
 	* [ ] give param column a sufficient fixed width and let its values take the rest of the width
 * [ ] EK01-test.yaml: look into why light washing of small tips doesn't work (it's probably not configured)
 * [ ] EK01-test.yaml: make a `pipetter.discard` or `pipetter.aspirate` command
-* [ ] add [Cancel] button to JsonEditor
-* [ ] make JsonEditor a YamlEditor
-* [ ] send edits back to main.js to save
-* [ ] main.js: command line for setting the protocols to be loaded
-* [ ] main.js: load config protocols using roboliq lib
-* [ ] main.js: compile protocols to and load `protocolComplete`
-* [ ] let user add an object
-	* [ ] dropdown list for user to select a type
-* [ ] let user add a step
 
 # Things needed for Oskari's yeast script, part 1 on mario
 
@@ -46,6 +52,8 @@
 * [x] move 'api-generator' output to `docs/protocol`
 * [x] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
 * [ ] figure out why 'npm i' sometimes has EPERM rename permission errors on Windows
+* [ ] output warning for unrecognized command parameters
+* [ ] documentation: check whether '$' and '$$' are explained
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
