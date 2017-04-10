@@ -1,5 +1,6 @@
 roboliq: v1
 description: |
+  ToDo: Change waste plate into deep well plate
   Yeast transformation with lithium acetate and plasmid DNA
 
   Input information:
@@ -102,10 +103,6 @@ objects:
     description: PEG 50 % (w/v)
     type: Liquid
     wells: tubeHolder15(B01)
-  dmso:
-    description: DMSO
-    type: Liquid
-    wells: tubeHolder15(C01)
   water:
     description: Sterile water
     type: Liquid
@@ -337,9 +334,9 @@ steps:
             destinationLabware: balancePlate
             destinations: $$well
             volumes: $$volume
-            cleanBegin: none
+            cleanBegin: decontaminate
             cleanBetween: none
-            cleanEnd: decontaminate
+            cleanEnd: none
     16:
         description: Put lid on the filter plate
         command: transporter.moveLidFromSiteToContainer
@@ -395,7 +392,7 @@ steps:
               command: pipetter.pipette
               program: Roboliq_Water_Dry_1000
               sources: trafoMix
-              destinationLabware: $destinationLabware
+              destinationLabware: filterPlate
               destinations: $$well
               volumes: 40 ul
               cleanBegin: decontaminate
@@ -480,7 +477,7 @@ steps:
         command: evoware._subroutine
         filename: "C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV_heatschok_20170314.esc"
     34:
-        description: Put lid on filter plate
+        description: Remove lid from filter plate
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
         destination: ourlab.mario.site.P6
@@ -489,14 +486,17 @@ steps:
         command: pipetter.pipette
         program: "OV PEG Wet 1000"
         sourceLabware: pcrPlate
-        sources=calculate: $$wells
+        sources: $$well
         destinationLabware: filterPlate
-        destinations: $$wells
-        volumes: 250 ul
+        destinations: $$well
+        volumes: 250 ul # Excessive volume
         cleanBegin: decontaminate
         cleanEnd: decontaminate
         cleanBetween: decontaminate
     36:
+      description: Filter PEG plate
+      1:
+        description: Add same volume of water on the balance plate
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
@@ -506,31 +506,95 @@ steps:
         cleanBegin: decontaminate
         cleanBetween: none
         cleanEnd: flush
-    37:
+      2:
         description: Put lid on the filter plate
         command: transporter.moveLidFromSiteToContainer
         object: wastePlateLid
         container: filterPlate
-    38:
+      3:
         description: Put filter plate on the waste plate
         command: transporter.moveLidFromSiteToContainer
         object: filterPlate
         container: wastePlate
-    39:
+      4:
         description: Run the centrifuge to discard supernatant
         command: centrifuge.centrifuge2
         object1: balancePlate
         object2: wastePlate
         program:
-            rpm: 800
+            rpm: 1200
             duration: 5 minutes
             temperature: 25 degC
-    40:
+      5:
         description: Remove filter plate from waste plate
         command: transporter.moveLidFromContainerToSite
         object: filterPlate
         destination: ourlab.mario.site.P3
-    41:
+      6:
+        description: Remove lid from filter plate
+        command: transporter.moveLidFromContainerToSite
+        object: wastePlateLid
+        destination: ourlab.mario.site.P6
+    37:
+      description: Wash and filter PEG plate
+      1:
+        description: Add YPD on the filter plate
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: ypd
+        destinationLabware: filterPlate
+        destinations: $$well
+        volumes: 150 ul
+        cleanBegin: decontaminate
+        cleanEnd: flush
+        cleanBetween: none
+      2:
+        description: Mix the cells
+        data: {source: design1}
+        command: pipetter.mix
+        wellLabware: filterPlate
+        wells: $$well
+        counts: 5
+        amounts: 120 ul
+        cleanBegin: none
+        cleanBetween: decontaminate
+        cleanEnd: decontaminate
+      3:
+        description: Add same volume of water on the balance plate
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: water
+        destinationLabware: balancePlate
+        destinations: $$well
+        volumes: 150 ul
+        cleanBegin: decontaminate
+        cleanBetween: none
+        cleanEnd: flush
+      4:
+        description: Put lid on the filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        container: filterPlate
+      5:
+        description: Put filter plate on the waste plate
+        command: transporter.moveLidFromSiteToContainer
+        object: filterPlate
+        container: wastePlate
+      6:
+        description: Run the centrifuge to discard supernatant
+        command: centrifuge.centrifuge2
+        object1: balancePlate
+        object2: wastePlate
+        program:
+            rpm: 1200
+            duration: 5 minutes
+            temperature: 25 degC
+      7:
+        description: Remove filter plate from waste plate
+        command: transporter.moveLidFromContainerToSite
+        object: filterPlate
+        destination: ourlab.mario.site.P3
+      8:
         description: Remove lid from filter plate
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
@@ -542,7 +606,7 @@ steps:
         sources: ypd
         destinationLabware: filterPlate
         destinations: $$well
-        volumes: 200 ul
+        volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
