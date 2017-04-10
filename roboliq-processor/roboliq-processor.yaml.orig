@@ -1,0 +1,5 @@
+preload:
+  - src/config/ourlab.js
+args: ["--progress", "--print-designs", "-P", "/Users/ellisw/src/roboliq/compiled"]
+args0: ["--progress", "--print-designs", "-P", 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts', "--evoware", "../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/NewLayout_Feb2015.ewt,ourlab.mario.evoware"]
+
