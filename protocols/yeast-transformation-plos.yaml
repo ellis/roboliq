@@ -599,6 +599,70 @@ steps:
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
         destination: ourlab.mario.site.P6
+    38:
+      description: Wash and filter PEG plate again
+      1:
+        description: Add YPD on the filter plate
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: ypd
+        destinationLabware: filterPlate
+        destinations: $$well
+        volumes: 150 ul
+        cleanBegin: decontaminate
+        cleanEnd: flush
+        cleanBetween: none
+      2:
+        description: Mix the cells
+        data: {source: design1}
+        command: pipetter.mix
+        wellLabware: filterPlate
+        wells: $$well
+        counts: 5
+        amounts: 120 ul
+        cleanBegin: none
+        cleanBetween: decontaminate
+        cleanEnd: decontaminate
+      3:
+        description: Add same volume of water on the balance plate
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: water
+        destinationLabware: balancePlate
+        destinations: $$well
+        volumes: 150 ul
+        cleanBegin: decontaminate
+        cleanBetween: none
+        cleanEnd: flush
+      4:
+        description: Put lid on the filter plate
+        command: transporter.moveLidFromSiteToContainer
+        object: wastePlateLid
+        container: filterPlate
+      5:
+        description: Put filter plate on the waste plate
+        command: transporter.moveLidFromSiteToContainer
+        object: filterPlate
+        container: wastePlate
+      6:
+        description: Run the centrifuge to discard supernatant
+        command: centrifuge.centrifuge2
+        object1: balancePlate
+        object2: wastePlate
+        program:
+            rpm: 1200
+            duration: 5 minutes
+            temperature: 25 degC
+      7:
+        description: Remove filter plate from waste plate
+        command: transporter.moveLidFromContainerToSite
+        object: filterPlate
+        destination: ourlab.mario.site.P3
+      8:
+        description: Remove lid from filter plate
+        command: transporter.moveLidFromContainerToSite
+        object: wastePlateLid
+        destination: ourlab.mario.site.P6
     42:
         description: Add YPD on the filter plate
         command: pipetter.pipette
