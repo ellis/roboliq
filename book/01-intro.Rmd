@@ -1,0 +1,33 @@
+# Introduction
+
+## Motivation
+
+Roboliq aims to make it easier to use liquid handling robots for automation
+in biological laboratories.
+
+It lets you write protocols that are portable between labs,
+and it compiles the protocols for execution by liquid handling robots.
+
+The only supported backend is for Tecan Evoware robots, but other backends
+can also be added.
+
+## Get started
+
+This guide presumes some familiarity with the command line terminal.
+You can install Roboliq by following these steps:
+
+1. Install [`nodejs`](https://nodejs.org/en/download/), which lets you execute
+  Javascript programs.
+
+2. If you're using Microsoft Windows, install the [cygwin terminal](https://cygwin.com/install.html),
+  which will be used for typing in commands.
+
+3. Copy the Roboliq repository to your computer.
+
+4. Open the terminal, navigate to the directory where you copied the Roboliq
+  repository, and run `npm install` to download Roboliq's software requirements.
+
+
+## Usage
+
+## Some tips

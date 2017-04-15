@@ -1,0 +1,25 @@
+---
+title: "Roboliq"
+author: "Ellis Whitehead"
+site: bookdown::bookdown_site
+documentclass: book
+output:
+  bookdown::gitbook: default
+  bookdown::pdf_book: default
+---
+
+# Preface {-}
+
+This short book introduces *Roboliq*, a software system for automate lab protocols using liquid handling robots.
+CONTINUE
+
+## Why read this manual {-}
+
+
+
+## Structure of the manual {-}
+
+## Software information and conventions {-}
+
+## Acknowledgements {-}
+

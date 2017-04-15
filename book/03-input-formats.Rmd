@@ -1,0 +1,7 @@
+# Input formats
+
+* JS that outputs an object
+* JS that outputs a function
+* YAML
+* JSON
+
