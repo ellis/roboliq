@@ -30,4 +30,18 @@ You can install Roboliq by following these steps:
 
 ## Usage
 
+The typical steps in running a Roboliq protocol on a Tecan Evoware robot are:
+
+1. Write a configuration for your lab or use one which has been written by someone else.
+
+2. Write a script for your protocol using the Roboliq syntax and commands.
+
+3. Compile your script and configuration to create a program (.ESC) to be executed by your robot.
+
+4. Open the Tecan Evoware script (.ESC) in Evoware, and run it.
+
+5. Load Roboliq's measurement data into R or another statics program to analyze the data.
+
 ## Some tips
+
+CONTINUE
