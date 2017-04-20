@@ -195,6 +195,21 @@ objects:
         cleanBegin: decontaminate
         cleanBetween: none
 
+  design1b:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: $#F2
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+
   design2:
     type: Design
     description: Mixtures for target wells
@@ -566,8 +581,7 @@ steps:
         cleanBetween: none
       2:
         description: Mix the cells
-        data: {source: design0b}
-        data: {source: design1}
+        data: {source: design1b}
         command: pipetter.mix
         wellLabware: filterPlate
         wells: $$well2
@@ -633,8 +647,7 @@ steps:
         cleanBetween: none
       2:
         description: Mix the cells
-        data: {source: design0b}
-        data: {source: design1}
+        data: {source: design1b}
         command: pipetter.mix
         wellLabware: filterPlate
         wells: $$well2
@@ -698,8 +711,7 @@ steps:
         cleanBetween: none
     43:
         description: Mix the cells
-        data: {source: design0b}
-        data: {source: design1}
+        data: {source: design1b}
         command: pipetter.mix
         wellLabware: filterPlate
         wells: $$well2
