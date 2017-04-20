@@ -66,7 +66,7 @@ parameters:
     value: 8
   F:
     description: first usable free well
-    value: A05
+    value: A08
   X:
     description: amount of liquid plated (ul)
     value: 200 ul

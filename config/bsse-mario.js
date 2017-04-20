@@ -410,6 +410,13 @@ module.exports = {
 					"columns": 12,
 					"evowareName": "OV 96 Well Filter Plate wLid"
 				},
+				"plateModel_96_round_deep_OV": {
+					"type": "PlateModel",
+					"label": "96 round-well white filter plate",
+					"rows": 8,
+					"columns": 12,
+					"evowareName": "OV 96 Deep Well Ritter Plate wLid" // ToDo: Verify this
+				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
 					"label": "Trough 100ml",
@@ -476,7 +483,7 @@ module.exports = {
 		makeSiteModelPredicates({
 			siteModel: "ourlab.mario.siteModel_open",
 			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp", "ourlab.model.EK_96_well_Greiner_Black", "ourlab.model.EK_384_greiner_flat_bottom", "ourlab.model.lidModel_standard", "ourlab.model.plateModel_96_round_filter_OV"]
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp", "ourlab.model.EK_96_well_Greiner_Black", "ourlab.model.EK_384_greiner_flat_bottom", "ourlab.model.lidModel_standard", "ourlab.model.plateModel_96_round_filter_OV", "ourlab.model.plateModel_96_round_deep_OV"]
 		}),
 		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
 			"ourlab.mario.roma1": {
@@ -528,12 +535,14 @@ module.exports = {
 				"ourlab.model.plateModel_96_square_transparent_nunc",
 				"ourlab.model.plateModel_384_round",
 				"ourlab.model.plateModel_384_square",
-				"ourlab.model.plateModel_96_round_filter_OV"
+				"ourlab.model.plateModel_96_round_filter_OV",
+				"ourlab.model.plateModel_96_round_deep_OV"
 			],
 			model => ({stackable: {below: model, above: "ourlab.model.lidModel_standard"}})
 		),
 		// Plate stacking
 		{stackable: {below: "ourlab.model.plateModel_96_round_transparent_nunc", above: "ourlab.model.plateModel_96_round_filter_OV"}},
+		{stackable: {below: "ourlab.model.plateModel_96_round_deep_OV", above: "ourlab.model.plateModel_96_round_filter_OV"}},
 		_.map(["ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_dwp"], function(model) {
 			return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 				"agent": "ourlab.mario.evoware",
