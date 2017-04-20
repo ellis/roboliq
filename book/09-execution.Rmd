@@ -1,0 +1,6 @@
+# Protocol execution
+
+* directory structure
+* verify layout
+* where measurements are saved
+* how to analyze the measurements

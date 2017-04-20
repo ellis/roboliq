@@ -1,0 +1,52 @@
+---
+title: "Roboliq"
+author: "Ellis Whitehead"
+site: bookdown::bookdown_site
+documentclass: book
+output:
+  bookdown::gitbook: default
+  bookdown::pdf_book: default
+---
+
+# Preface {-}
+
+This manual will show you how to write high-level protocols that can be executed on multiple robotic platforms.
+We introduce *Roboliq*, a software system for automating lab protocols using liquid handling robots.
+Roboliq support high-level commands that make it much easier to write automation protocols, especially complex ones.
+It then generates the low-level commands that for your robot system (currently only Tecan Evoware).
+
+## Structure of the manual {-}
+
+* Chapter 1 "Introduction" gives a quick overview of how to use Roboliq.
+* Chatper 2 "Quick start" is a practical walk-through for writing Roboliq protocols and compiling them.
+* Chapter 3 "Input formats" describes several formats that Roboliq accepts for writing protocols.
+* Chapter 4 "Robot configuration" describes how to write robot configurations that Roboliq uses to turn high-level commands into low-level instructions.
+* Chapter 5 "Protocols" describes the structure of Roboliq protocols in detail.
+* Chapter 6 "Design tables" describes a how to represent experimental designs in a tree or table format, and how these can be used to concisely define complex experiments.
+* Chapter 7 "Compiling protocols" describes how to compile your protocols for a target robot.
+* Chapter 8 "Output files" describes the files created when compilinig protocols and how you can use them.
+* Chapter 9 "Protocol execution" describes how to execute protocols and how Roboliq handles measurements.
+* Chapter 10 "Cookbook" provides examples of various common protocols.
+* Chapter 11 "Troubleshooting" tries to help you when you run into problems.
+* Chapter 12 "Development" provides further information for programmers who would like to extend or adapt the Roboliq software.
+
+## Software information and conventions {-}
+
+Roboliq accepts several input formats, but in this manual we will use [YAML](http://yaml.olg).
+YAML is a very popular format for writing software configuration files.
+If you are not familiar with it yet, please checkout [this page on Wikipedia](https://en.wikipedia.org/wiki/YAML).
+
+Some of the advanced programmable features of Roboliq are demonstrated with [JavaScript](https://en.wikipedia.org/wiki/JavaScript).
+Most users won't require knowledge of JavaScript, but if you do need it, there are many good tutorials online.
+
+## Acknowledgements {-}
+
+Many many many thanks to [Prof. Joerg Stelling](http://www.csb.ethz.ch/group/members/person-detail.html?persid=125262) for his guidance during my PhD research developing Roboliq.
+[Fabian Rudolf](http://www.csb.ethz.ch/group/members/person-detail.html?persid=104270) was instrumental in determining which features are most relevant for biologists.
+[Michael Kaltenbach](http://www.csb.ethz.ch/group/members/person-detail.html.html?persid=157302) provided sage statistical advice while developing the most sophisticated protocols we tested.
+[Daniel Meyer and Urs Senn](https://www.bsse.ethz.ch/laf/the-facility/team.html)
+provided critical technical support in the lab.
+[Oskari Vinko](https://www.linkedin.com/in/oskarivinko/),
+[Charlotte Ramon](http://www.csb.ethz.ch/group/members/person-detail.html?persid=212334) and
+[Elena Karamaioti](http://www.csb.ethz.ch/group/members/person-detail.html?persid=202373)
+were wonderfully helpful guinnea pigs when testing Roboliq's usability.

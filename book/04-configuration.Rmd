@@ -1,0 +1,50 @@
+# Robot configuration
+
+In order for Roboliq to compile your protocol for your robot setup, it needs to know how the robot is configured.  This is the most complicated part of Roboliq -- it requires advanced technical knowledge or your robot and some programming skill.  Once the configuraiton has been specified, future users don't need to be concerned with it.
+
+So if someone else has configured Roboliq for your robot already, then you should probably just proceed to the next chapter.
+However, if you need to write the configuration, this chapter is for you.
+
+## Components
+
+A *configuration* is a JavaScript object with the following properties:
+
+* `roboliq`: specifies the version of Roboliq.
+* `objects`: specifies the objects provided by the robot.
+* `commandHandlers`: specifies the functions that handle protocol commands, for example by generating low-level commands from high-level commands.
+* `predicates`:  specifies the *logical predicates* used by Roboliq's A.I. to figure out how to compile some high-level commands to low-level commands for this configuration.
+* `objectToPredicateConverters`: specifies functions that generate logical predicates based from `objects`.
+* `planHandlers`: specifies the functions that transform logical tasks into commands.
+
+The first three properties are specified with "standard" JavaScript: `roboliq` takes a string value, `objects` takes an object value, and `commandHandlers` takes a hash map of functions.
+The last three properties, in contrast, are related to Roboliq's A.I. and will require some effort to understand.
+
+## "Standard" components
+
+The standard JavaScript components are described in more detail in this section.
+
+### `roboliq`
+
+As with protocols, the first property of a configuration should be `roboliq: v1`.
+
+### `objects`
+
+CONTINUE
+typically more complex than `objects` in protocols.
+Namespaces are used to build nested objects.
+
+### `commandHandlers`
+
+CONTINUE
+
+## Logical components
+
+Roboliq uses an Articifial Intelligence method called [Hierarchical Task Network (HTN) Planning](https://en.wikipedia.org/wiki/Hierarchical_task_network).
+
+CONTINUE: find resources for learning about HTN.
+
+### `predicates`
+
+### `objectToPredicateConverters`
+
+### `planHandlers`

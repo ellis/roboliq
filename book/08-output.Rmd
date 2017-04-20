@@ -1,0 +1,5 @@
+# Output files
+
+* .out.json
+* .esc
+* .html

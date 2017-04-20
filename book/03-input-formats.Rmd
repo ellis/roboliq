@@ -1,0 +1,19 @@
+# Input formats
+
+Roboliq accepts four input formats:
+
+* JSON
+* YAML
+* JavaScript Node.js module that outputs an object
+* JavaScript Node.js module that outputs a function
+
+[JSON](https://en.wikipedia.org/wiki/JSON) stands for JavaScript Object Notation.
+It is a simple format for encoding software data, and
+it has gradually become the defacto format of choice for transfering data on the web.
+
+[YAML](https://en.wikipedia.org/wiki/YAML) is a JSON-like format that is more legible.
+Due to its superior legibility, this manual usually displays protocols in YAML.
+
+[JavaScript](https://en.wikipedia.org/wiki/JavaScript) is the lingua-franca of the web, and [Node.js](https://nodejs.org/) is the most popular platform for running JavaScript applications outside of browsers.  You probably won't need JavaScript for Roboliq, unless you get into more advanced applications.  If you do use JavaScript, your module may either 1) output a JavaScript object (i.e. `module.exports = myOjbect;`) or 2) a function that accepts configuration parameters and returns an object (i.e. `module.exports = function(options) { ... return myOjbect; };`).
+
+There are many good online tutorials for the above formats, so please search for one if you encounter confusion.
