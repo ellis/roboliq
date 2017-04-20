@@ -201,7 +201,7 @@ objects:
     conditions:
       i*: $#N
       destinationLabware: filterPlate
-      well=allocateWells:
+      well2=allocateWells:
         rows: 8
         columns: 12
         from: $#F2
