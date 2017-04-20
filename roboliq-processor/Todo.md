@@ -67,6 +67,7 @@ Would be nice:
 * [ ] tubes
 * [ ] troughs
 * [ ] print a table of the labware models and sites in `bsse-mario.js`, for reference while writing a script
+* [ ] `data` accepts a `jmespath` argument for running jmespath queries http://jmespath.org/
 
 # Next experiment with Charlotte
 

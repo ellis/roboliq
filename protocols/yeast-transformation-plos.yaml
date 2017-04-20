@@ -496,13 +496,12 @@ steps:
         destination: ourlab.mario.site.P6
     35:
         description: Transfer cells from PCR plate back to filter plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: "OV PEG Wet 1000"
         sourceLabware: pcrPlate
         sources: $$well
         destinationLabware: filterPlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 250 ul # Excessive volume
         cleanBegin: decontaminate
         cleanEnd: decontaminate
@@ -511,12 +510,11 @@ steps:
       description: Filter PEG plate
       1:
         description: Add same volume of water on the balance plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -554,23 +552,20 @@ steps:
       description: Wash and filter PEG plate
       1:
         description: Add YPD on the filter plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
       2:
         description: Mix the cells
-        data: {source: design0b}
-        data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well2
+        wells: {data(): {source: design0b, value: well2}}
         counts: 5
         amounts: 120 ul
         cleanBegin: none
@@ -578,12 +573,11 @@ steps:
         cleanEnd: decontaminate
       3:
         description: Add same volume of water on the balance plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -621,23 +615,20 @@ steps:
       description: Wash and filter PEG plate again
       1:
         description: Add YPD on the filter plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
       2:
         description: Mix the cells
-        data: {source: design0b}
-        data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well2
+        wells: {data(): {source: design0b, value: well2}}
         counts: 5
         amounts: 120 ul
         cleanBegin: none
@@ -645,12 +636,11 @@ steps:
         cleanEnd: decontaminate
       3:
         description: Add same volume of water on the balance plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -686,23 +676,20 @@ steps:
         destination: ourlab.mario.site.P6
     42:
         description: Add YPD on the filter plate
-        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$well2
+        destinations: {data(): {source: design0b, value: well2}}
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
     43:
         description: Mix the cells
-        data: {source: design0b}
-        data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well2
+        wells: {data(): {source: design0b, value: well2}}
         counts: 5
         amounts: 150 ul
         cleanBegin: none

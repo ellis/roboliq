@@ -430,3 +430,41 @@ b*: 2
 [[{a: 1, b: 1}, {a: 1, b: 2}], [{a: 2, b: 1}, {a: 2, b: 2}]] ; [0,1]
 [{a: 1, b: 1}, {a: 1, b: 2}, {a: 2, b: 1}, {a: 2, b: 2}] ; [0,1,2,3]
 ```
+
+## TODOs:
+
+* consider GraphQL
+* consider https://facebook.github.io/relay/
+
+## `data` directive
+
+You can load one design per step, but you can nest steps and load another design in the sub-step.
+
+Consider these two designs:
+
+design1:
+  conditions:
+    a: Alice
+    b: *3
+    c: Charles
+    d: Daniel
+
+design2:
+  conditions:
+    d: David
+
+And these steps:
+
+1:
+  data: {source: design1}
+  description: "`{{$a}} {{$c}} {{$d}}`"
+  1:
+    data: {source: design2}
+    description: "`{{$a}} {{$c}} {{$d}}`"
+
+The descriptions should be:
+
+1.description: "Alice Charles Daniel"
+1.1.description: "Alice Charles David"
+
+In 1.1, "$$b" does not exist, but "$a" and "$c" still do.  That is to say: column data from a previous `data` directive are not carried into sub-steps with a new `data` directive, but the values that were the same for all columns remain in scope.

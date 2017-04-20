@@ -40,18 +40,27 @@ function directive_data(spec, data) {
 	// console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
 	// console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
 	return expect.try("#data", () => {
-		let result = Design.query(data.objects.DATA, spec);
+		const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA({data: spec}, data, data.objects.SCOPE, data.objects.DATA);
+		// console.log(DATAs)
+		// console.log(SCOPEs)
+		const DATA0 = DATAs[0];
+		const SCOPE0 = SCOPEs[0];
+
+		let result = Design.query(DATA0, spec);
 		// console.log("result0: "+JSON.stringify(result))
 		if (spec.templateGroup) {
 			result = _.map(result, DATA => {
-				const SCOPE = _.merge({}, data.objects.SCOPE, Design.getCommonValues(DATA));
+				const SCOPE = _.merge({}, SCOPE0, Design.getCommonValues(DATA));
 				return commandHelper.substituteDeep(spec.templateGroup, data, SCOPE, DATA);
 			});
 			// console.log("result1: "+JSON.stringify(result))
 		}
 		else if (spec.template) {
+			// console.log("result: "+JSON.stringify(result, null, '\t'))
 			result = _.map(result, DATA => _.map(DATA, row => {
-				const SCOPE = _.merge({}, data.objects.SCOPE, row);
+				const SCOPE = _.merge({}, SCOPE0, row);
+				// console.log("row: "+JSON.stringify(row, null, '\t'))
+				// console.log("SCOPE: "+JSON.stringify(SCOPE, null, '\t'))
 				return commandHelper.substituteDeep(spec.template, data, SCOPE, DATA);
 			}));
 			// console.log("result1: "+JSON.stringify(result))
@@ -60,7 +69,7 @@ function directive_data(spec, data) {
 		if (spec.value) {
 			result = _.map(result, DATA => _.map(DATA, row => {
 				if (_.startsWith(spec.value, "$`")) {
-					const SCOPE = _.merge({}, data.objects.SCOPE, row);
+					const SCOPE = _.merge({}, SCOPE0, row);
 					return commandHelper.substituteDeep(spec.value, data, SCOPE, DATA);
 				}
 				else {

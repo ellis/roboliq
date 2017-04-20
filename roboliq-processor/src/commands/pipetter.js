@@ -976,7 +976,7 @@ const commandHandlers = {
 		return result;
 	},
 	"pipetter.mix": function(params, parsed, data) {
-		// console.log("pipetter.mix: "+JSON.stringify(parsed))
+		// console.log("pipetter.mix: "+JSON.stringify(parsed, null, '\t'))
 
 		const items = commandHelper.copyItemsWithDefaults(parsed.value.items, {
 			well: parsed.value.wells,

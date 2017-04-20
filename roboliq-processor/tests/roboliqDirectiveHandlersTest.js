@@ -24,6 +24,12 @@ var data = {
 			type: "Variable",
 			value: [1, 2, 3]
 		},
+		design2: {
+			type: "Design",
+			conditions: {
+				age: 100
+			}
+		},
 		DATA: [
 			{name: "bob", gender: "male", age: 1},
 			{name: "tom", gender: "male", age: 2},
@@ -55,6 +61,10 @@ describe('config/roboliqDirectiveHandlers', function() {
 		should.deepEqual(misc.handleDirective(
 			{"#data": {template: {age2: "$`age*2`"}}}, data),
 			[{age2: 2}, {age2: 4}, {age2: 2}]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"#data": {source: "design2", template: {age2: "$`age*2`"}}}, data),
+			[{age2: 200}]
 		);
 	});
 
