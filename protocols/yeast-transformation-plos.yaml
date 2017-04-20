@@ -67,6 +67,9 @@ parameters:
   F:
     description: first usable free well
     value: A08
+  F2:
+    description: first usable free well
+    value: A09
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -159,6 +162,16 @@ objects:
         rows: 8
         columns: 12
         from: $#F
+
+  design0b:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      well2=allocateWells:
+        rows: 8
+        columns: 12
+        from: $#F2
 
   design1:
     type: Design
@@ -483,12 +496,13 @@ steps:
         destination: ourlab.mario.site.P6
     35:
         description: Transfer cells from PCR plate back to filter plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: "OV PEG Wet 1000"
         sourceLabware: pcrPlate
         sources: $$well
         destinationLabware: filterPlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 250 ul # Excessive volume
         cleanBegin: decontaminate
         cleanEnd: decontaminate
@@ -497,11 +511,12 @@ steps:
       description: Filter PEG plate
       1:
         description: Add same volume of water on the balance plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -539,21 +554,23 @@ steps:
       description: Wash and filter PEG plate
       1:
         description: Add YPD on the filter plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
       2:
         description: Mix the cells
+        data: {source: design0b}
         data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well
+        wells: $$well2
         counts: 5
         amounts: 120 ul
         cleanBegin: none
@@ -561,11 +578,12 @@ steps:
         cleanEnd: decontaminate
       3:
         description: Add same volume of water on the balance plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -603,21 +621,23 @@ steps:
       description: Wash and filter PEG plate again
       1:
         description: Add YPD on the filter plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
       2:
         description: Mix the cells
+        data: {source: design0b}
         data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well
+        wells: $$well2
         counts: 5
         amounts: 120 ul
         cleanBegin: none
@@ -625,11 +645,12 @@ steps:
         cleanEnd: decontaminate
       3:
         description: Add same volume of water on the balance plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -665,21 +686,23 @@ steps:
         destination: ourlab.mario.site.P6
     42:
         description: Add YPD on the filter plate
+        data: {source: design0b}
         command: pipetter.pipette
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$well
+        destinations: $$well2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
         cleanBetween: none
     43:
         description: Mix the cells
+        data: {source: design0b}
         data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well
+        wells: $$well2
         counts: 5
         amounts: 150 ul
         cleanBegin: none
