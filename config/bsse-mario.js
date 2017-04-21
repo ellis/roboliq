@@ -415,7 +415,7 @@ module.exports = {
 					"label": "96 round-well white filter plate",
 					"rows": 8,
 					"columns": 12,
-					"evowareName": "OV 96 Deep Well Ritter Plate wLid" // ToDo: Verify this
+					"evowareName": "OV 96 DW Lid Ritter" // ToDo: Verify this
 				},
 				"troughModel_100ml": {
 					"type": "PlateModel",
