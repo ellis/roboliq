@@ -542,6 +542,20 @@ function directive_zipMerge(spec, data) {
 	return merged;
 }
 
+//
+// from design.js
+//
+
+function directive_allocateWells(spec, data) {
+	const design = {
+		conditions: {
+			"x=allocateWells": spec
+		}
+	};
+	const table = Design.flattenDesign(design);
+	return _.map(table, "x");
+}
+
 module.exports = {
 	"createPipetteMixtureList": directive_pipetteMixtures,
 	"createWellAssignments": directive_createWellAssignments,
@@ -562,5 +576,8 @@ module.exports = {
 	"take": directive_take,
 	//"#wells": genWells,
 	"undefined": function() { return undefined; },
-	"zipMerge": directive_zipMerge
+	"zipMerge": directive_zipMerge,
+
+	// From design.js:
+	"allocateWells": directive_allocateWells,
 };

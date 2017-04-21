@@ -258,8 +258,23 @@ function loadProtocol(a, b, url, filecache) {
 
 	// Add parameters to `objects.PARAMS`
 	if (b.parameters) {
-		_.forEach(b.parameters, (value, key) => {
-			_.set(b.objects, ["PARAMS", key], value.value);
+		// console.log("parameters")
+		_.forEach(b.parameters, (param, key) => {
+			// console.log("parameter: "+key)
+			// If this parameter needs to be 'calculate'd
+			const value0 = param.calculate || param.value;
+			expect.try({path: key, paramName: "value"}, () => {
+				const calculate = _.cloneDeep(value0);
+				const data = {
+					objects: {PARAMS: _.merge({}, _.get(a, ["objects", "PARAMS"]), _.get(b, ["objects", "PARAMS"]))},
+					directiveHandlers: _.merge({}, a.directiveHandlers, b.directiveHandlers)
+				};
+				// console.log({data})
+				const value = expandDirectivesDeep(calculate, data);
+				// console.log({value0, calculate, value})
+				param.value = value;
+			});
+			_.set(b.objects, ["PARAMS", key], param.value);
 		});
 	}
 
@@ -337,7 +352,7 @@ function loadProtocol(a, b, url, filecache) {
 				const key = x.substr(2);
 				const value = _.get(c, ["parameters", key, "value"]) || _.get(imported, ["parameters", key, "value"]);
 				if (_.isUndefined(value)) {
-					throw new Error("undefined parameter value: "+spec);
+					throw new Error("undefined parameter value: "+x);
 				}
 				return value;
 			}
@@ -532,33 +547,37 @@ function postProcessProtocol(protocol) {
  */
 function postProcessProtocol_variables(protocol) {
 	const data = _.clone(protocol);
-	// Recursively expand all directives
-	function expandDirectives(x) {
-		if (_.isPlainObject(x)) {
-			for (var key in x) {
-				var value1 = x[key];
-				if (_.isArray(value1)) {
-					x[key] = _.map(value1, function(x2) { return misc.handleDirectiveDeep(x2, data); });
-				}
-				else {
-					x[key] = expandDirectives(value1);
-				}
-			}
-		}
-		data.accesses = [];
-		return misc.handleDirective(x, data);
-	}
 
 	_.forEach(protocol.objects, (obj, key) => {
 		expect.try({path: key, paramName: "calculate"}, () => {
 			// If this is a variable with a 'calculate' property
 			if (obj.type === 'Variable' && obj.calculate) {
 				const calculate = _.cloneDeep(obj.calculate);
-				const value = expandDirectives(calculate);
+				const value = expandDirectivesDeep(calculate, data);
 				obj.value = value;
 			}
 		});
 	});
+}
+
+// Recursively expand all directives
+function expandDirectivesDeep(x, data) {
+	if (_.isPlainObject(x)) {
+		for (var key in x) {
+			var value1 = x[key];
+			if (_.isArray(value1)) {
+				x[key] = _.map(value1, function(x2) { return misc.handleDirectiveDeep(x2, data); });
+			}
+			else {
+				x[key] = expandDirectivesDeep(value1, data);
+			}
+		}
+	}
+	// Make sure this property exists in order to avoid an exception
+	if (!data.hasOwnProperty("accesses")) {
+		data.accesses = [];
+	}
+	return misc.handleDirective(x, data);
 }
 
 /**

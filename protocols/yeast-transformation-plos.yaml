@@ -73,6 +73,14 @@ parameters:
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
+
+  wells2:
+    description: "the second set of wells to use (@oskari: SET PROPER DESCRIPTION PLEASE)"
+    value:
+      allocateWells():
+        rows: 8
+        columns: 12
+        from: $#F
 objects:
   ourlab:
     mario:
@@ -517,7 +525,7 @@ steps:
         sourceLabware: pcrPlate
         sources: $$well
         destinationLabware: filterPlate
-        destinations: $$well2
+        destinations: $#wells2
         volumes: 250 ul # Excessive volume
         cleanBegin: decontaminate
         cleanEnd: decontaminate
