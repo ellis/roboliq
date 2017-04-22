@@ -1,5 +1,16 @@
 # Todos
 
+Pain points:
+
+* doesn't have the toolbox to solve certain problems alone.
+* getting started guide that walks through all the tools and covers about 80% of what you need to know
+* maybe an exercise or two
+* designs: how do they work, when do you use them, what are the limitations
+* many confusing things:
+	*
+* interactive design table thing
+	* perhaps like a python interpreter, and it shows you what it would do
+
 # Electron GUI
 
 * [x] handle separate protocolBase, protocol, protocolComplete

@@ -10,6 +10,7 @@ However, if you need to write the configuration, this chapter is for you.
 A *configuration* is a JavaScript object with the following properties:
 
 * `roboliq`: specifies the version of Roboliq.
+* `schemas`: JSON Schema defintitions for all object types and commands.
 * `objects`: specifies the objects provided by the robot.
 * `commandHandlers`: specifies the functions that handle protocol commands, for example by generating low-level commands from high-level commands.
 * `predicates`:  specifies the *logical predicates* used by Roboliq's A.I. to figure out how to compile some high-level commands to low-level commands for this configuration.
@@ -27,15 +28,25 @@ The standard JavaScript components are described in more detail in this section.
 
 As with protocols, the first property of a configuration should be `roboliq: v1`.
 
+### `schemas`
+
+For every command and object type, Roboliq requires a schema that defines its properties.  For more information about schemas, please see the documentation for (JSON Schema)[http://json-schema.org/].
+
+Normally, the schemas required for your robot should be automatically provided by your chosen backend and the equipment you select.  The `schemas` property is a hash map: its keys are the command names and object type names; its values are the respective JSON schemas. You will not need to write schemas unless you are creating new commands or objects types for Roboliq.  In that case, please see the developer documentation.
+
+
 ### `objects`
 
-CONTINUE
-typically more complex than `objects` in protocols.
-Namespaces are used to build nested objects.
+The `objects` property of a configuration is the same as describe for protocols in the Quick Start chapter.  However, robot configurations usually contain complex objects, such as measurement devices, whereas protocols usually only define fairly simple labware.
+Furthermore, the configuration may contain information that's required for the backend compiler.  Another peculiarity of configurations is that `Namespace`s are used to build nested objects, whereby a robot "contains" its devices, sites, and permanent labware.
 
 ### `commandHandlers`
 
-CONTINUE
+A command handler is a JavaScript function that processes command parameters and returns information to Roboliq about the command's effects, sub-commands, and user messages.
+
+Command handlers are supplied by various modules.  For example, Roboliq's command modules are in the subdirectory `roboliq-processor/src/commands`, and Evoware's command modules are in the subdirectory `roboliq-evoware/src/commands`.
+
+The individual 
 
 ## Logical components
 
