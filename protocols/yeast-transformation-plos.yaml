@@ -66,10 +66,10 @@ parameters:
     value: 8
   F:
     description: first usable free well
-    value: A08
+    value: A01
   F2:
     description: first usable free well
-    value: A09
+    value: A02
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -500,13 +500,24 @@ steps:
         sourceLabware: pcrPlate
         sources: $$well
         destinationLabware: filterPlate
-        destinations: $#wells2
+        destinations: $$wells2
         volumes: 250 ul # Excessive volume
         cleanBegin: decontaminate
         cleanEnd: decontaminate
         cleanBetween: decontaminate
     36:
       description: Filter PEG plate
+      0:
+        description: Add YPD on the filter plate
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: ypd
+        destinationLabware: filterPlate
+        destinations: $$wells2
+        volumes: 150 ul
+        cleanBegin: decontaminate
+        cleanEnd: flush
+        cleanBetween: none
       1:
         description: Add same volume of water on the balance plate
         command: pipetter.pipette
@@ -562,7 +573,6 @@ steps:
         cleanBetween: none
       2:
         description: Mix the cells
-        data: {source: design1b}
         command: pipetter.mix
         wellLabware: filterPlate
         wells: $$wells2
