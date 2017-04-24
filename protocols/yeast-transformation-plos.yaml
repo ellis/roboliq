@@ -500,7 +500,7 @@ steps:
         sourceLabware: pcrPlate
         sources: $$well
         destinationLabware: filterPlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 250 ul # Excessive volume
         cleanBegin: decontaminate
         cleanEnd: decontaminate
@@ -513,7 +513,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
@@ -524,7 +524,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -566,7 +566,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
@@ -575,7 +575,7 @@ steps:
         description: Mix the cells
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$wells2
+        wells: $#wells2
         counts: 5
         amounts: 120 ul
         cleanBegin: none
@@ -587,7 +587,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -629,7 +629,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
@@ -639,7 +639,7 @@ steps:
         data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$wells2
+        wells: $#wells2
         counts: 5
         amounts: 120 ul
         cleanBegin: none
@@ -651,7 +651,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: water
         destinationLabware: balancePlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanBetween: none
@@ -691,7 +691,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
@@ -701,7 +701,7 @@ steps:
         data: {source: design1}
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$wells2
+        wells: $#wells2
         counts: 5
         amounts: 150 ul
         cleanBegin: none

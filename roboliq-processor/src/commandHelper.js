@@ -86,8 +86,13 @@ function substituteDeep(x, data, SCOPE, DATA) {
 			if (_.isArray(DATA)) {
 				const propertyName = x.substr(2);
 				x2 = getDesignFactor(propertyName, DATA);
+				assert(x2.length > 0 || DATA.length == 0, `factor ${x} not found in data`);
+				// console.log({x2})
 				// console.log("DATA: "+JSON.stringify(DATA, null, '\t'));
 				// console.log({map: _(DATA).map(propertyName).value()});
+			}
+			else {
+				assert(false, `invalid factor ${x}, because no data source is currently selected`);
 			}
 		}
 		// Javascript
@@ -124,6 +129,7 @@ function substituteDeep(x, data, SCOPE, DATA) {
 		// SCOPE substitution
 		else if (_.startsWith(x, "$")) {
 			const propertyName = x.substr(1);
+			assert(_.has(SCOPE, propertyName), `${x} not in scope`);
 			x2 = _.get(SCOPE, propertyName, x);
 		}
 		// Template substitution

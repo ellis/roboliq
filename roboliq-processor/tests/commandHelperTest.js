@@ -696,8 +696,7 @@ describe('commandHelper', function() {
 					"@SCOPE": {b: "B"},
 					x31: "$a",
 					x32: "$b",
-					x33: "$$n",
-					x34: "$$y"
+					x33: "$$y"
 				}
 			};
 			should.deepEqual(
@@ -710,8 +709,7 @@ describe('commandHelper', function() {
 						"@SCOPE": {a: "A", b: "B"},
 						x31: "A",
 						x32: "B",
-						x33: [],
-						x34: ["a", "b"]
+						x33: ["a", "b"]
 					}
 				}
 			);
