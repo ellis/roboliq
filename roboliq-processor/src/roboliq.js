@@ -965,7 +965,7 @@ function _run(opts, userProtocol) {
 		if (opts.throw) {
 			if (_.isPlainObject(e))
 				console.log("e:\n"+JSON.stringify(e));
-			expect.rethrow(e, {stepName: id});
+			expect.rethrow(e);
 		}
 		return {protocol: protocol, output: protocol};
 	}
