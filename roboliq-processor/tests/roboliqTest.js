@@ -118,6 +118,32 @@ describe('roboliq', function() {
 			});
 		});
 
+		it("should handle $#-parameter substitution", () => {
+			const protocol = {
+				roboliq: "v1",
+				parameters: {
+					TEXT: { value: "Hello, World" },
+					WELLS: { value: ["A01", "A02", "A03", "A04"] }
+				},
+				steps: {
+					1: {
+						command: "system._echo",
+						value: "$#TEXT"
+					},
+					2: {
+						command: "system._echo",
+						value: "$#WELLS"
+					}
+				}
+			};
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
+			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": { "command": "system._echo", "value": "Hello, World" },
+				"2": { "command": "system._echo", "value": ["A01", "A02", "A03", "A04"] }
+			});
+		});
+
 		it("should handle ?-properties in objects and steps", () => {
 			var protocol = {
 				roboliq: "v1",
