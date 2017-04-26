@@ -123,7 +123,12 @@ describe('roboliq', function() {
 				roboliq: "v1",
 				parameters: {
 					TEXT: { value: "Hello, World" },
-					WELLS: { value: ["A01", "A02", "A03", "A04"] }
+					// WELLS: { value: ["A01", "A02", "A03", "A04"] }
+					WELLS: {
+						value: {
+							"allocateWells()": { N: 4, rows: 8, columns: 12, from: "A01" }
+						}
+					}
 				},
 				steps: {
 					1: {
@@ -137,10 +142,11 @@ describe('roboliq', function() {
 				}
 			};
 			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
+			// console.log("parameters:\n"+JSON.stringify(result.output.parameters, null, '\t'));
 			//console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
 			should.deepEqual(result.output.steps, {
 				"1": { "command": "system._echo", "value": "Hello, World" },
-				"2": { "command": "system._echo", "value": ["A01", "A02", "A03", "A04"] }
+				"2": { "command": "system._echo", "value": ["A01", "B01", "C01", "D01"] }
 			});
 		});
 

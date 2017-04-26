@@ -78,6 +78,7 @@ parameters:
     description: "Wells to use for PEG filtration and YPD wash"
     value:
       allocateWells():
+        N: $#N
         rows: 8
         columns: 12
         from: $#F2
@@ -566,7 +567,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $$wells2
+        destinations: $#wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
