@@ -66,10 +66,10 @@ parameters:
     value: 8
   F:
     description: first usable free well
-    value: A01
+    value: A03
   F2:
     description: first usable free well
-    value: A02
+    value: A04
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
@@ -545,7 +545,7 @@ steps:
         object1: balancePlate
         object2: wastePlate
         program:
-            rpm: 1200
+            rpm: 800
             duration: 5 minutes
             temperature: 25 degC
       5:
@@ -566,7 +566,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: ypd
         destinationLabware: filterPlate
-        destinations: $#wells2
+        destinations: $$wells2
         volumes: 150 ul
         cleanBegin: decontaminate
         cleanEnd: flush
@@ -608,7 +608,7 @@ steps:
         object1: balancePlate
         object2: wastePlate
         program:
-            rpm: 1200
+            rpm: 800
             duration: 5 minutes
             temperature: 25 degC
       7:
@@ -672,7 +672,7 @@ steps:
         object1: balancePlate
         object2: wastePlate
         program:
-            rpm: 1200
+            rpm: 800
             duration: 5 minutes
             temperature: 25 degC
       7:
