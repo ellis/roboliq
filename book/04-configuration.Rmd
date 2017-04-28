@@ -44,7 +44,7 @@ Furthermore, the configuration may contain information that's required for the b
 
 A command handler is a JavaScript function that processes command parameters and returns information to Roboliq about the command's effects, sub-commands, and user messages.
 
-Command handlers are supplied by various modules.  For example, Roboliq's command modules are in the subdirectory `roboliq-processor/src/commands`, and Evoware's command modules are in the subdirectory `roboliq-evoware/src/commands`.
+Command handlers are supplied by various modules.  Roboliq's command modules are in the subdirectory `roboliq-processor/src/commands`, and Evoware's command modules are in the subdirectory `roboliq-evoware/src/commands`.  In order to 
 
 The individual 
 

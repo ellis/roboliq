@@ -604,13 +604,6 @@ module.exports = {
 		{
 			"shaker.canAgentEquipmentSite": {
 				"agent": "ourlab.mario.evoware",
-				"equipment": "ourlab.mario.shaker",
-				"site": "ourlab.mario.site.P3"
-			}
-		},
-		{
-			"shaker.canAgentEquipmentSite": {
-				"agent": "ourlab.mario.evoware",
 				"equipment": "ourlab.mario.reader",
 				"site": "ourlab.mario.site.READER"
 			}
