@@ -371,7 +371,7 @@ const evowareSpec = {
 				},
 			]
 		},
-		reader: {
+		/*reader: {
 			module: "reader-InfiniteM200Pro.js",
 			evowareId: "ReaderNETwork",
 			sitesInternal: ["READER"],
@@ -381,13 +381,13 @@ const evowareSpec = {
 				"EK_384_greiner_flat_bottom": "GRE384fw",
 				"EK_96_well_Greiner_Black": "GRE96fb_chimney"
 			}
-		},
+		},*/
 		shaker: {
 			module: "shaker-Tecan1.js",
 			evowareId: "HPShaker",
 			site: "P3"
 		},
-		sealer: {
+		/*sealer: {
 			module: "sealer-Tecan.js",
 			evowareId: "RoboSeal",
 			site: "ROBOSEAL",
@@ -396,7 +396,7 @@ const evowareSpec = {
 				plateModel_96_square_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 				plateModel_384_square: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
 			}
-		}
+		}*/
 	}
 };
 

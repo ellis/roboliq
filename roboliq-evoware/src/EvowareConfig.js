@@ -25,7 +25,7 @@ function process(p, data = {objects: {}}) {
 	}
 	function getSiteName(siteName) {
 		assert(siteName, "siteName is undefined");
-		return [namespace, siteName].join(".");
+		return [namespace, "site", siteName].join(".");
 	}
 	// Return fully qualified model name - first lookup to see whether the
 	// model is specific to this robot, and if so, use that name.  Otherwise
@@ -41,21 +41,26 @@ function process(p, data = {objects: {}}) {
 		assert(base, "lookupSyringe: base name must be defined");
 		const id1 = [p.namespace, p.name, "liha", "syringe", base.toString()];
 		const id2 = base.toString();
-		return
+		const id =
 			_.has(output.objects, id1) ? id1 :
 			_.has(data.objects, id2) ? id2 :
-			assert("syringe not found: "+base);
+			undefined;
+		assert(!_.isUndefined(id), "syringe not found: "+base);
+		return id.join(".");
 	}
 	function lookupTipModel(base) {
 		assert(base, "lookupTipModel: base name must be defined");
 		const id1 = [p.namespace, p.name, "liha", "tipModel", base];
 		const id2 = [p.namespace, "tipModel", base];
 		const id3 = base;
-		return
+		// console.log({id1, id2, id3, b1: _.has(output.objects, id1), b2: _.has(data.objects, id2), b3: _.has(data.objects, id3)})
+		const id =
 			_.has(output.objects, id1) ? id1 :
 			_.has(data.objects, id2) ? id2 :
 			_.has(data.objects, id3) ? id3 :
-			assert("tipModel not found: "+base);
+			undefined;
+		assert(!_.isUndefined(id), "tipModel not found: "+base);
+		return id.join(".");
 	}
 
 	const evowareConfigSpec = {
@@ -191,8 +196,11 @@ function handleRomas(p, evowareConfigSpec, namespace, agent, output) {
  * @param {TipModel[]} p.tipModels
  */
 function handleTipModels(p, output) {
-	if (_.isArray(p.tipModels)) {
-		_.set(output, ["object", p.namespace, p.name, "liha", "tipModel"], p.tipModels);
+	if (_.isPlainObject(p.tipModels)) {
+		const tipModels = _.mapValues(p.tipModels, x => _.merge({type: "TipModel"}, x));
+		// console.log(tipModels)
+		_.set(output.objects, [p.namespace, p.name, "liha", "tipModel"], tipModels);
+		// console.log({stuff: _.get(output, ["object", p.namespace, p.name, "liha", "tipModel"])});
 	}
 }
 
@@ -221,7 +229,9 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	const tipModelToSyringes = {};
 
 	// Add syringes
+	_.set(output.objects, [p.namespace, p.name, "liha", "syringe"], {});
 	_.forEach(p.liha.syringes, (syringeSpec, i) => {
+		// console.log({syringeSpec})
 		const syringe = [p.namespace, p.name, "liha", "syringe", (i+1).toString()].join(".");
 		const syringeObj = {
 			type: "Syringe",
@@ -237,6 +247,7 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 			tipModelToSyringes[tipModel] = (tipModelToSyringes[tipModel] || []).concat([syringe]);
 		}
 
+		// console.log({syringeObj})
 		_.set(output.objects, syringe, syringeObj);
 	});
 
@@ -256,9 +267,11 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 
 function handleEquipment(p, evowareConfigSpec, namespace, agent, output) {
 	_.forEach(p.equipment, (params, key) => {
+		console.log({key})
 		const module = require(__dirname+"/equipment/"+params.module);
-		const obj = module.configure(evowareConfigSpec, key, params);
-		_.set(output.objects, [p.namespace, p.name, key], obj);
+		const protocol = module.configure(evowareConfigSpec, key, params);
+		// console.log(key+": "+JSON.stringify(protocol, null, '\t'))
+		_.merge(output, protocol);
 	});
 }
 
@@ -270,4 +283,4 @@ const protocol = process(evowareSpec);
 // console.log(JSON.stringify(protocol, null, '\t'));
 const diff = require('deep-diff');
 const diffs = diff(orig, protocol);
-//console.log(JSON.stringify(diffs, null, '\t'));
+console.log(JSON.stringify(diffs, null, '\t'));

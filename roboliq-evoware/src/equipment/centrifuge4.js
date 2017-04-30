@@ -48,10 +48,9 @@ const expect = require('roboliq-processor/dist/expect.js');
  * @return {EquipmentConfig}
  */
 function configure(config, equipmentName, params) {
-	console.log("centrifuge4:");
-	console.log(JSON.stringify(params, null, '\t'))
-	const N = params.sites.length;
-	assert(N == 4, "centrifuge-X has only been designed for 4-site centrifuges.  Please contact the developer if you need a different number of sites.")
+	// console.log("centrifuge4:"); console.log(JSON.stringify(params, null, '\t'))
+	const N = Object.keys(params.sites).length;
+	assert(N == 4, "centrifuge4 has only been designed for 4-site centrifuges.  Please contact the developer if you need a different number of sites.")
 
 	const sites = _.mapValues(params.sites, value => ({
 		evowareCarrier: params.evowareId,
@@ -74,8 +73,15 @@ function configure(config, equipmentName, params) {
 	const equipment = config.getEquipmentName(equipmentName);
 	const siteNames = Object.keys(sites).map(s => config.getSiteName(s));
 
+	const objects = {};
+	_.set(objects, equipment, {
+		type: "Centrifuge",
+		evowareId: params.evowareId,
+		sitesInternal: siteNames
+	});
+
 	// For the 1st and 3rd sites
-	const predicates13 = _(sitesToModels[siteNames[0]]).map(model => {
+	const predicates13 = _(siteToModels[siteNames[0]]).map(model => {
 		return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 			agent, equipment,
 			model,
@@ -84,7 +90,7 @@ function configure(config, equipmentName, params) {
 		}}
 	}).flatten().value();
 	// For the 2nd and 4th sites
-	const predicates24 = _(sitesToModels[siteNames[1]]).map(model => {
+	const predicates24 = _(siteToModels[siteNames[1]]).map(model => {
 		return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 			agent, equipment,
 			model,
@@ -93,7 +99,7 @@ function configure(config, equipmentName, params) {
 		}}
 	}).flatten().value();
 
-	const predicateTasks = [
+	const predicateTasks = _.flatten([
 		{"action": {"description": equipment+".close: close the centrifuge",
 			"task": {[equipment+".close"]: {"agent": "?agent", "equipment": "?equipment"}},
 			"preconditions": [],
@@ -129,7 +135,7 @@ function configure(config, equipmentName, params) {
 				{[equipment+".close"]: {"agent": "ourlab.mario.evoware", "equipment": "ourlab.mario.centrifuge"}}
 			]}
 		}})),
-	];
+	]);
 
 	const planHandlers = {};
 	planHandlers[equipment+".close"] = (params, parentParams, data) => {
@@ -239,6 +245,14 @@ function configure(config, equipmentName, params) {
 			return {expansion: [makeEvowareFacts(parsed, data, "Execute1", value)]};
 		},
 	};
+
+	const protocol = {
+		objects,
+		predicates: _.flatten([predicates13, predicates24, predicateTasks]),
+		schemas,
+		commandHandlers,
+	};
+	return protocol;
 }
 
 module.exports = {
