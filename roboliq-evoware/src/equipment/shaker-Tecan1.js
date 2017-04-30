@@ -336,3 +336,7 @@ function configure(config, equipmentName, params) {
 		},
 	};
 }
+
+module.exports = {
+	configure
+};

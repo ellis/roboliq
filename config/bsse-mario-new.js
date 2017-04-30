@@ -1,18 +1,3 @@
-const _ = require('lodash');
-const assert = require('assert');
-const math = require('mathjs');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-const expect = require('roboliq-processor/dist/expect.js');
-const Evoware = require('roboliq-evoware/dist/equipment/evoware.js');
-
-const {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} = Evoware;
-
-// const Equipment = {
-// 	evoware: require('roboliq-evoware/dist/equipment/evoware.js'),
-// 	reader: require('roboliq-evoware/dist/equipment/reader-InfiniteM200Pro.js'),
-// 	sealer: require('roboliq-evoware/dist/equipment/sealer-Tecan.js'),
-// };
-
 const evowareSpec = {
 	namespace: "ourlab",
 	name: "mario",
@@ -223,12 +208,12 @@ const evowareSpec = {
 		{
 			lids: ["lidModel_standard"],
 			models: [
-				"ourlab.model.plateModel_96_round_transparent_nunc",
-				"ourlab.model.plateModel_96_square_transparent_nunc",
-				"ourlab.model.plateModel_384_round",
-				"ourlab.model.plateModel_384_square",
-				"ourlab.model.plateModel_96_round_filter_OV",
-				"ourlab.model.plateModel_96_round_deep_OV"
+				"plateModel_96_round_transparent_nunc",
+				"plateModel_96_square_transparent_nunc",
+				"plateModel_384_round",
+				"plateModel_384_square",
+				"plateModel_96_round_filter_OV",
+				"plateModel_96_round_deep_OV"
 			]
 		},
 		{
@@ -239,58 +224,49 @@ const evowareSpec = {
 	romas: [
 		{
 			description: "roma1",
-			safeCliques: [
-				{
-					vector: "Narrow",
-					cliques: [
-						["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"],
-						["CENTRIFUGE_1", "REGRIP"],
-						["CENTRIFUGE_2", "REGRIP"],
-						["CENTRIFUGE_3", "REGRIP"],
-						["CENTRIFUGE_4", "REGRIP"],
-					]
-				}
+			safeVectorCliques: [
+				{ vector: "Narrow", clique: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"] },
+				{ vector: "Narrow", clique: ["CENTRIFUGE_1", "REGRIP"] },
+				{ vector: "Narrow", clique: ["CENTRIFUGE_2", "REGRIP"] },
+				{ vector: "Narrow", clique: ["CENTRIFUGE_3", "REGRIP"] },
+				{ vector: "Narrow", clique: ["CENTRIFUGE_4", "REGRIP"] },
 			]
 		},
 		{
 			description: "roma2",
-			safeCliques: [
+			safeVectorCliques: [
 				{
 					vector: "Narrow",
-					cliques: [
-						[
-							/*"P1DOWNHOLDER",*/ "P2", "P3", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
-							"HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4",
-							"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
-							"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
-							"HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3",
-							"HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4",
-							"HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5",
-							"HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6",
-							"HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7",
-							"HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8",
-						],
-						[
-							"P4PCR",
-							"ROBOPEEL", "ROBOSEAL",
-							"HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4",
-							"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
-							"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
-							"HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3",
-							"HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4",
-							"HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5",
-							"HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6",
-							"HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7",
-							"HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8",
-						],
-					],
+					clique: [
+						/*"P1DOWNHOLDER",*/ "P2", "P3", "P6", "P7", "P8", "ROBOPEEL", "ROBOSEAL", "REGRIP",
+						"HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4",
+						"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
+						"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
+						"HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3",
+						"HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4",
+						"HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5",
+						"HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6",
+						"HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7",
+						"HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8",
+					]
 				},
 				{
-					vector: "Wide",
-					cliques: [
-						["READER", "REGRIP"]
+					vector: "Narrow",
+					clique: [
+						"P4PCR",
+						"ROBOPEEL", "ROBOSEAL",
+						"HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4",
+						"HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1",
+						"HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2",
+						"HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3",
+						"HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4",
+						"HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5",
+						"HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6",
+						"HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7",
+						"HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8",
 					]
-				}
+				},
+				{ vector: "Wide", clique: ["READER", "REGRIP"] }
 			]
 		}
 	],
@@ -405,7 +381,7 @@ const evowareSpec = {
 				"EK_384_greiner_flat_bottom": "GRE384fw",
 				"EK_96_well_Greiner_Black": "GRE96fb_chimney"
 			}
-		}
+		},
 		shaker: {
 			module: "shaker-Tecan1.js",
 			evowareId: "HPShaker",
@@ -415,61 +391,23 @@ const evowareSpec = {
 			module: "sealer-Tecan.js",
 			evowareId: "RoboSeal",
 			site: "ROBOSEAL",
-			modelToPlateFile: [
+			modelToPlateFile: {
 				plateModel_96_round_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 				plateModel_96_square_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
 				plateModel_384_square: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
-			]
+			}
 		}
 	}
-});
+};
+
+
+module.exports = evowareSpec;
 
 
 
-
-
-function process(p) {
-	const output = {};
-	_.set(output, ["roboliq"], "v1");
-	_.set(output, ["objects", p.namespace, "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, p.name, "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, p.name, "evoware", "type"], "EvowareRobot");
-	_.set(output, ["objects", p.namespace, p.name, "evoware", "config"], p.config);
-	_.set(output, ["objects", p.namespace, p.name, "site", "type"], "Namespace");
-
-	// Add bench sites (equipment sites will be added by the equipment modules)
-	_.forEach(p.sites, (value, key) => {
-		_.set(output, ["objects", p.namespace, p.name, "site", key], _.merge({type: "Site"}, value));
-	});
-
-	evowareConfigSpec = _.clone(p);
-	assert(p.name, "you must supply a `name` property");
-	const namespace = _.without([p.namespace, p.name], undefined).join(".")
-	evowareConfigSpec.getAgentName = () => [namespace, "evoware"].join(".");
-	evowareConfigSpec.getEquipmentName = (equipmentName) => {
-		assert(equipmentName, "equipmentName is undefined");
-		return [namespace, equipmentName].join(".");
-	};
-	evowareConfigSpec.getSiteName = (siteName) => {
-		assert(siteName, "siteName is undefined");
-		return [namespace, siteName].join(".");
-	};
-	namespace: "ourlab",
-	name: "mario",
-	config: {
-		TEMPDIR: "C:\\Users\\localadmin\\Desktop\\Ellis\\temp",
-		ROBOLIQ: "wscript C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\roboliq-runtime-cli\\roboliq-runtime-cli.vbs",
-		BROWSER: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-	},
-
-}
-
-
-
-
-
-
+/*
 module.exports = {
+	evowareSpec,
 
 	predicates: _.flatten([
 		{"#for": {
@@ -601,3 +539,4 @@ module.exports = {
 		Equipment.reader.getCommandHandlers("ourlab.mario.evoware", "ourlab.mario.reader"),
 	),
 };
+*/

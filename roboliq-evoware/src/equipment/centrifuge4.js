@@ -48,7 +48,9 @@ const expect = require('roboliq-processor/dist/expect.js');
  * @return {EquipmentConfig}
  */
 function configure(config, equipmentName, params) {
-	const N = params.sitesInternal.length;
+	console.log("centrifuge4:");
+	console.log(JSON.stringify(params, null, '\t'))
+	const N = params.sites.length;
 	assert(N == 4, "centrifuge-X has only been designed for 4-site centrifuges.  Please contact the developer if you need a different number of sites.")
 
 	const sites = _.mapValues(params.sites, value => ({
@@ -129,29 +131,24 @@ function configure(config, equipmentName, params) {
 		}})),
 	];
 
-	const planHandlers = _.fromPairs(_.flatten({
-		[
-			equipment+".close",
-			function(params, parentParams, data) {
-				return [{
-					command: "equipment.close",
-					agent,
-					equipment
-				}];
-			}
-		],
-		_.map(siteNames, (site, i) => [
-			equipment+".open"+(i+1),
-			function(params, parentParams, data) {
-				return [{
-					command: "equipment.openSite",
-					agent,
-					equipment,
-					site
-				}];
-			}
-		])
+	const planHandlers = {};
+	planHandlers[equipment+".close"] = (params, parentParams, data) => {
+		return [{
+			command: "equipment.close",
+			agent,
+			equipment
+		}];
 	};
+	_.forEach(siteNames, (site, i) => {
+		planHandlers[equipment+".open"+(i+1)] = (params, parentParams, data) => {
+			return [{
+				command: "equipment.openSite",
+				agent,
+				equipment,
+				site
+			}];
+		};
+	});
 
 	const schemas = {
 		[`equipment.close|${agent}|${equipment}`]: {
@@ -243,3 +240,7 @@ function configure(config, equipmentName, params) {
 		},
 	};
 }
+
+module.exports = {
+	configure
+};
