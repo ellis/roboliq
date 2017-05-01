@@ -465,29 +465,44 @@ module.exports = {
 	),
 
 	predicates: _.flatten([
-		// Centrifuge sites
-		makeSiteModelPredicates({
-			siteModel: "ourlab.mario.siteModel_CENTRIFUGE",
-			sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"].map(s => "ourlab.mario.site."+s),
-			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp"]
-		}),
+		// Lid stacking
+		_.map(
+			[
+				"ourlab.model.plateModel_96_round_transparent_nunc",
+				"ourlab.model.plateModel_96_square_transparent_nunc",
+				"ourlab.model.plateModel_384_round",
+				"ourlab.model.plateModel_384_square",
+				"ourlab.model.plateModel_96_round_filter_OV",
+				"ourlab.model.plateModel_96_round_deep_OV"
+			],
+			model => ({stackable: {below: model, above: "ourlab.model.lidModel_standard"}})
+		),
+		// Plate stacking
+		{stackable: {below: "ourlab.model.plateModel_96_round_transparent_nunc", above: "ourlab.model.plateModel_96_round_filter_OV"}},
+		{stackable: {below: "ourlab.model.plateModel_96_round_deep_OV", above: "ourlab.model.plateModel_96_round_filter_OV"}},
 		// short-format plate sites (non-tall labware, not for deep well plates)
 		makeSiteModelPredicates({
-			siteModel: "ourlab.mario.siteModel_short",
+			siteModel: "ourlab.mario.siteModel1",
 			sites: ["P1DOWNHOLDER", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "READER", "ROBOPEEL", "ROBOSEAL"].map(s => "ourlab.mario.site."+s),
 			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.EK_96_well_Greiner_Black", "ourlab.model.EK_384_greiner_flat_bottom", "ourlab.model.lidModel_standard", "ourlab.model.plateModel_96_round_filter_OV"]
 		}),
 		// PCR-format sites
 		makeSiteModelPredicates({
-			siteModel: "ourlab.mario.siteModel_pcr",
+			siteModel: "ourlab.mario.siteModel2",
 			sites: ["P4PCR", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "ROBOPEEL", "ROBOSEAL"].map(s => "ourlab.mario.site."+s),
 			labwareModels: ["ourlab.model.plateModel_96_pcr"]
 		}),
 		// Bench sites that don't have any obstructions, so deep well plates can fit on them too
 		makeSiteModelPredicates({
-			siteModel: "ourlab.mario.siteModel_open",
+			siteModel: "ourlab.mario.siteModel3",
 			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"].map(s => "ourlab.mario.site."+s),
 			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp", "ourlab.model.EK_96_well_Greiner_Black", "ourlab.model.EK_384_greiner_flat_bottom", "ourlab.model.lidModel_standard", "ourlab.model.plateModel_96_round_filter_OV", "ourlab.model.plateModel_96_round_deep_OV"]
+		}),
+		// Centrifuge sites
+		makeSiteModelPredicates({
+			siteModel: "ourlab.mario.siteModel4",
+			sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"].map(s => "ourlab.mario.site."+s),
+			labwareModels: ["ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_square_transparent_nunc", "ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_dwp"]
 		}),
 		makeTransporterPredicates("ourlab.mario", "ourlab.mario.evoware", {
 			"ourlab.mario.roma1": {
@@ -532,21 +547,6 @@ module.exports = {
 				]
 			}
 		}),
-		// Lid stacking
-		_.map(
-			[
-				"ourlab.model.plateModel_96_round_transparent_nunc",
-				"ourlab.model.plateModel_96_square_transparent_nunc",
-				"ourlab.model.plateModel_384_round",
-				"ourlab.model.plateModel_384_square",
-				"ourlab.model.plateModel_96_round_filter_OV",
-				"ourlab.model.plateModel_96_round_deep_OV"
-			],
-			model => ({stackable: {below: model, above: "ourlab.model.lidModel_standard"}})
-		),
-		// Plate stacking
-		{stackable: {below: "ourlab.model.plateModel_96_round_transparent_nunc", above: "ourlab.model.plateModel_96_round_filter_OV"}},
-		{stackable: {below: "ourlab.model.plateModel_96_round_deep_OV", above: "ourlab.model.plateModel_96_round_filter_OV"}},
 		_.map(["ourlab.model.plateModel_384_square", "ourlab.model.plateModel_96_round_transparent_nunc", "ourlab.model.plateModel_96_dwp"], function(model) {
 			return {"centrifuge.canAgentEquipmentModelSite1Site2": {
 				"agent": "ourlab.mario.evoware",
@@ -556,28 +556,22 @@ module.exports = {
 				"site2": "ourlab.mario.site.CENTRIFUGE_4"
 			}};
 		}),
-		{"#for": {
-			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"]},
-			output: {
-				"absorbanceReader.canAgentEquipmentModelSite": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.reader",
-					"model": "ourlab.model.{{model}}",
-					"site": "ourlab.mario.site.READER"
-				}
+		_.map(["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"], model => ({
+			"absorbanceReader.canAgentEquipmentModelSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.reader",
+				"model": `ourlab.model.${model}`,
+				"site": "ourlab.mario.site.READER"
 			}
-		}},
-		{"#for": {
-			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"]},
-			output: {
-				"fluorescenceReader.canAgentEquipmentModelSite": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.reader",
-					"model": "ourlab.model.{{model}}",
-					"site": "ourlab.mario.site.READER"
-				}
+		})),
+		_.map(["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"], model => ({
+			"fluorescenceReader.canAgentEquipmentModelSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.reader",
+				"model": `ourlab.model.${model}`,
+				"site": "ourlab.mario.site.READER"
 			}
-		}},
+		})),
 		{
 			"sealer.canAgentEquipmentProgramModelSite": {
 				"agent": "ourlab.mario.evoware",
@@ -618,26 +612,20 @@ module.exports = {
 				"equipment": "ourlab.mario.liha"
 			}
 		},
-		{"#for": {
-			factors: {site: ["P1DOWNHOLDER", "P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
-			output: {
-				"pipetter.canAgentEquipmentSite": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"site": "ourlab.mario.site.{{site}}"
-				}
+		_.map(["P1DOWNHOLDER", "P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"], site => ({
+			"pipetter.canAgentEquipmentSite": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"site": `ourlab.mario.site.${site}`
 			}
-		}},
-		{"#for": {
-			factors: {i: [1, 2, 3, 4, 5, 6, 7, 8]},
-			output: {
-				"pipetter.canAgentEquipmentSyringe": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"syringe": "ourlab.mario.liha.syringe.{{i}}"
-				}
+		})),
+		_.map([1, 2, 3, 4, 5, 6, 7, 8], i => ({
+			"pipetter.canAgentEquipmentSyringe": {
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"syringe": `ourlab.mario.liha.syringe.${i}`
 			}
-		}},
+		})),
 		{"timer.canAgentEquipment": {
 			"agent": "ourlab.mario.evoware",
 			"equipment": "ourlab.mario.timer1",
@@ -659,7 +647,7 @@ module.exports = {
 			"equipment": "ourlab.mario.timer5",
 		}},
 		_.map([1,2,3,4], function(n) {
-			return {"method": {"description": "generic.closeSite-CENTRIFUGE_"+n,
+			return {"method": {"description": "generic.closeSite-ourlab.mario.site.CENTRIFUGE_"+n,
 				"task": {"generic.closeSite": {"site": "?site"}},
 				"preconditions": [
 					{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}
@@ -681,14 +669,14 @@ module.exports = {
 			]
 		}},
 		_.map([1,2,3,4], function(n) {
-			return {"method": {"description": "generic.openSite-CENTRIFUGE_"+n,
+			return {"method": {"description": "generic.openSite-ourlab.mario.site.CENTRIFUGE_"+n,
 				"task": {"generic.openSite": {"site": "?site"}},
 				"preconditions": [{"same": {"thing1": "?site", "thing2": "ourlab.mario.site.CENTRIFUGE_"+n}}],
 				"subtasks": {"ordered": [_.fromPairs([["ourlab.mario.centrifuge.open"+n, {}]])]}
 			}};
 		}),
 		_.map([1,2,3,4], function(n) {
-			return {"action": {"description": "ourlab.mario.centrifuge.open: open an internal site on the centrifuge",
+			return {"action": {"description": "ourlab.mario.centrifuge.open"+n+": open an internal site on the centrifuge",
 				"task": _.fromPairs([["ourlab.mario.centrifuge.open"+n, {}]]),
 				"preconditions": [],
 				"deletions": [

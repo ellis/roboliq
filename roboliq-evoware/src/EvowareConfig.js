@@ -14,7 +14,7 @@ function process(p, data = {objects: {}, predicates: []}) {
 	const namespace = [p.namespace, p.name].join(".");
 	const agent = [p.namespace, p.name, "evoware"].join(".");
 	const predicates = [];
-	const output = { predicates };
+	const output = { predicates, commandHandlers: evowareEquipment.getCommandHandlers() };
 
 	function getAgentName() {
 		return [namespace, "evoware"].join(".");
@@ -62,6 +62,23 @@ function process(p, data = {objects: {}, predicates: []}) {
 		assert(!_.isUndefined(id), "tipModel not found: "+base);
 		return id.join(".");
 	}
+	let siteModelCount = 0;
+	function addSiteModelCompatibilities(siteModelCompatibilities, output) {
+		if (_.isUndefined(output.predicates))
+			output.predicates = [];
+		// Add predicates for siteModelCompatibilities
+		_.forEach(siteModelCompatibilities, compat => {
+			siteModelCount++;
+			const siteModel = `${namespace}.siteModel${siteModelCount}`;
+			output.predicates.push({isSiteModel: {model: siteModel}});
+			_.forEach(compat.sites, site => {
+				output.predicates.push({siteModel: {site: evowareConfigSpec.getSiteName(site), siteModel}});
+			});
+			_.forEach(compat.models, labwareModel => {
+				output.predicates.push({stackable: {below: siteModel, above: evowareConfigSpec.getModelName(labwareModel)}})
+			});
+		});
+	}
 
 	const evowareConfigSpec = {
 		getAgentName,
@@ -70,7 +87,10 @@ function process(p, data = {objects: {}, predicates: []}) {
 		getModelName,
 		lookupSyringe,
 		lookupTipModel,
+		addSiteModelCompatibilities,
 	};
+
+	output.schemas = evowareEquipment.getSchemas();
 
 	_.set(output, ["roboliq"], "v1");
 	_.set(output, ["objects", p.namespace, "type"], "Namespace");
@@ -80,12 +100,15 @@ function process(p, data = {objects: {}, predicates: []}) {
 	_.set(output, ["objects", p.namespace, p.name, "evoware", "config"], p.config);
 	_.set(output, ["objects", p.namespace, p.name, "site", "type"], "Namespace");
 	_.set(output, ["objects", p.namespace, p.name, "liha", "type"], "Pipetter");
+
 	// Add 5 timers
 	_.forEach(_.range(5), i => {
-		_.set(output, ["objects", p.namespace, p.name, `timer${i+1}`], {
+		const equipment = [p.namespace, p.name, `timer${i+1}`].join(".");
+		_.set(output.objects, equipment, {
 			type: "Timer",
 			evowareId: i+1
 		});
+		output.predicates.push({ "timer.canAgentEquipment": {agent, equipment} });
 	});
 
 	// Add bench sites (equipment sites will be added by the equipment modules)
@@ -99,16 +122,7 @@ function process(p, data = {objects: {}, predicates: []}) {
 	});
 
 	// Add predicates for siteModelCompatibilities
-	_.forEach(p.siteModelCompatibilities, compat => {
-		const siteModel = `${namespace}.siteModel${predicates.length + 1}`;
-		predicates.push({isSiteModel: {model: siteModel}});
-		_.forEach(compat.sites, site => {
-			predicates.push({siteModel: {site: evowareConfigSpec.getSiteName(site), siteModel}});
-		});
-		_.forEach(compat.models, labwareModel => {
-			predicates.push({stackable: {below: siteModel, above: evowareConfigSpec.getModelName(labwareModel)}})
-		});
-	});
+	addSiteModelCompatibilities(p.siteModelCompatibilities, output);
 
 	// Lid and plate stacking
 	_.forEach(p.lidStacking, lidsModels => {
@@ -131,6 +145,11 @@ function process(p, data = {objects: {}, predicates: []}) {
 	handleEquipment(p, evowareConfigSpec, namespace, agent, output);
 
 	output.objectToPredicateConverters = evowareEquipment.objectToPredicateConverters;
+
+	// User-defined commandHandlers
+	_.forEach(p.commandHandlers, (fn, key) => {
+		output.commandHandlers[key] = fn;
+	});
 
 	return output;
 }
@@ -166,7 +185,7 @@ function handleRomas(p, evowareConfigSpec, namespace, agent, output) {
 
 		const equipment = [p.namespace, p.name, `roma${i+1}`].join(".");
 		_.forEach(roma.safeVectorCliques, safeVectorClique => {
-			const siteClique = `${agent}.siteClique${siteCliqueId}`;
+			const siteClique = `${namespace}.siteClique${siteCliqueId}`;
 			siteCliqueId++;
 
 			const program = safeVectorClique.vector;
@@ -236,7 +255,31 @@ function handleTipModels(p, output) {
 function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	if (!p.liha) return;
 
+	const equipment = [p.namespace, p.name, "liha"].join(".");
+
 	const tipModelToSyringes = {};
+
+	output.schemas[`pipetter.cleanTips|${agent}|${equipment}`] = {
+		description: "Clean the pipetter tips.",
+		properties: {
+			agent: {description: "Agent identifier", type: "Agent"},
+			equipment: {description: "Equipment identifier", type: "Equipment"},
+			program: {description: "Program identifier", type: "string"},
+			items: {
+				description: "List of which syringes to clean at which intensity",
+				type: "array",
+				items: {
+					type: "object",
+					properties: {
+						syringe: {description: "Syringe identifier", type: "Syringe"},
+						intensity: {description: "Intensity of the cleaning", type: "pipetter.CleaningIntensity"}
+					},
+					required: ["syringe", "intensity"]
+				}
+			}
+		},
+		required: ["agent", "equipment", "items"]
+	};
 
 	// Add syringes
 	_.set(output.objects, [p.namespace, p.name, "liha", "syringe"], {});
@@ -257,6 +300,9 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 			syringeObj.tipModelPermanent = tipModel;
 
 			tipModelToSyringes[tipModel] = (tipModelToSyringes[tipModel] || []).concat([syringe]);
+		}
+		else {
+			assert(false, "roboliq-evoware currently only supports fixed tips; please contact the software developer to add support for disposable tips.")
 		}
 	});
 
@@ -296,6 +342,87 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 		"location": evowareConfigSpec.getSiteName("SYSTEM"),
 		"contents": ["Infinity l", "systemLiquid"]
 	});
+
+	// Equipment predicates
+	output.predicates.push({
+		"pipetter.canAgentEquipment": {
+			agent,
+			equipment
+		}
+	});
+	// Syringe predicates
+	_.forEach(p.liha.syringes, (syringeSpec, i) => {
+		output.predicates.push({
+			"pipetter.canAgentEquipmentSyringe": {
+				agent,
+				equipment,
+				syringe: `ourlab.mario.liha.syringe.${i+1}`
+			}
+		})
+	});
+	// Site predicates
+	_.forEach(p.liha.sites, site0 => {
+		const site = evowareConfigSpec.getSiteName(site0);
+		output.predicates.push({
+			"pipetter.canAgentEquipmentSite": {
+				agent,
+				equipment,
+				site
+			}
+		});
+	});
+
+	// Command handler for `pipetter.cleanTips`
+	output.commandHandlers[`pipetter.cleanTips|${agent}|${equipment}`] = makeCleanTipsHandler();
+}
+
+function makeCleanTipsHandler() {
+	return function cleanTips(params, parsed, data) {
+		//console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
+		//console.log(JSON.stringify(parsed, null, '  '))
+
+		const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
+		const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
+		//console.log(syringeNameToItems);
+
+		const expansionList = [];
+		const sub = function(syringeNames, volume) {
+			const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
+				_.includes(syringeNames, syringeName)
+			);
+			//console.log({syringeNameToItems2})
+			if (!_.isEmpty(syringeNameToItems2)) {
+				const value = _.max(_.map(syringeNameToItems2, ([, item]) => cleaningIntensities.indexOf(item.intensity)));
+				if (value >= 0) {
+					const intensity = cleaningIntensities[value];
+					const syringes = _.map(syringeNameToItems2, ([syringeName, ]) => syringeName);
+					expansionList.push({
+						command: "pipetter._washTips",
+						agent: parsed.objectName.agent,
+						equipment: parsed.objectName.equipment,
+						program: `ourlab.mario.washProgram.${intensity}_${volume}`,
+						intensity: intensity,
+						syringes: syringeNames
+					});
+				}
+			}
+		}
+		// Lists of [syringeNAme, tipModelName, programCode]
+		const l = _.map(syringeNameToItems, ([syringeName, ]) => {
+			const syringeObj = _.get(data.objects, syringeName);
+			assert(syringeObj, "didn't find syringe "+syringeName);
+			const tipModelName = syringe.tipModel;
+			const tipModelObj = _.get(data.objects, tipModelName);
+			assert(tipModelObj, "didn't find tipModel "+tipModelName);
+			return [syringeName, tipModelName, tipModelObj.programCode];
+		});
+		// Group by program code, and call `sub()`
+		const m = _.groupBy(l, x => x[2]);
+		_.forEach(m, (l, programCode) => {
+			sub(l.map(x => x[0]), programCode);
+		})
+		return {expansion: expansionList};
+	};
 }
 
 function handleEquipment(p, evowareConfigSpec, namespace, agent, output) {
@@ -319,5 +446,14 @@ const orig = require('/Users/ellisw/src/roboliq/config/bsse-mario.js');
 const protocol = process(evowareSpec);
 // console.log(JSON.stringify(protocol, null, '\t'));
 const diff = require('deep-diff');
-const diffs = diff(orig, protocol);
-console.log(JSON.stringify(diffs, null, '\t'));
+// console.log("isSiteModel predicates: "+JSON.stringify(_.filter(protocol.predicates, x => Object.keys(x)[0] == "isSiteModel")));
+// console.log("siteCliqueSite predicates: "+JSON.stringify(_.filter(protocol.predicates, x => Object.keys(x)[0] == "siteCliqueSite"), null, '\t'));
+protocol.predicates = _.fromPairs(_.sortBy(protocol.predicates.map(x => [JSON.stringify(x), x]), x => x[0]));
+orig.predicates = _.fromPairs(_.sortBy(orig.predicates.map(x => [JSON.stringify(x), x]), x => x[0]));
+const diffs = diff(_.omit(orig, "objectToPredicateConverters"), _.omit(protocol, "objectToPredicateConverters"));
+const diffs2 = _.filter(diffs, d => (
+	(d.kind == "E" && d.path[0] == "commandHandlers") ? false
+	: (d.kind == "E" && d.path[0] == "planHandlers") ? false
+	: true
+));
+console.log(JSON.stringify(diffs2, null, '\t'));

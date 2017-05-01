@@ -59,7 +59,6 @@ const evowareSpec = {
 		R6: { evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
 		REGRIP: { evowareCarrier: "ReGrip Station", "evowareGrid": 59, "evowareSite": 1 },
 		ROBOPEEL: { evowareCarrier: "RoboPeel", "evowareGrid": 12, "evowareSite": 1 },
-		ROBOSEAL: { evowareCarrier: "RoboSeal", "evowareGrid": 35, "evowareSite": 1 },
 		SYSTEM: { evowareCarrier: "System", "evowareGrid": -1, "evowareSite": 0 },
 		T1: { evowareCarrier: "Cooled 8Pos*15ml 8Pos*50ml", evowareGrid: 4, evowareSite: 1 },
 		T2: { evowareCarrier: "Cooled 8Pos*15ml 8Pos*50ml", evowareGrid: 4, evowareSite: 2 },
@@ -186,6 +185,23 @@ const evowareSpec = {
 			"evowareName": "Reagent Cooled 8*50ml"
 		}
 	},
+	siteModelCompatibilities: [
+		{
+			description: "short-format plate sites (non-tall labware, not for deep well plates)",
+			sites: ["P1DOWNHOLDER", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "READER", "ROBOPEEL", "ROBOSEAL"],
+			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc", "plateModel_384_square", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom", "lidModel_standard", "plateModel_96_round_filter_OV"]
+		},
+		{
+			description: "PCR-format sites",
+			sites: ["P4PCR", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "ROBOPEEL", "ROBOSEAL"],
+			models: ["plateModel_96_pcr"]
+		},
+		{
+			description: "Bench sites that don't have any obstructions, so deep well plates can fit on them too",
+			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"],
+			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc", "plateModel_384_square", "plateModel_96_dwp", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom", "lidModel_standard", "plateModel_96_round_filter_OV", "plateModel_96_round_deep_OV"]
+		},
+	],
 	equipment: {
 		centrifuge: {
 			module: "centrifuge4.js",
@@ -234,34 +250,22 @@ const evowareSpec = {
 				site: "P3"
 			}
 		},
-		/*sealer: {
+		sealer: {
 			module: "sealer-Tecan.js",
-			evowareId: "RoboSeal",
-			site: "ROBOSEAL",
-			modelToPlateFile: {
-				plateModel_96_round_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
-				plateModel_96_square_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
-				plateModel_384_square: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
+			params: {
+				evowareId: "RoboSeal",
+				evowareCarrier: "RoboSeal",
+				evowareGrid: 35,
+				evowareSite: 1,
+				site: "ROBOSEAL",
+				modelToPlateFile: {
+					plateModel_96_round_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
+					plateModel_96_square_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
+					plateModel_384_square: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
+				}
 			}
-		}*/
+		}
 	},
-	siteModelCompatibilities: [
-		{
-			description: "short-format plate sites (non-tall labware, not for deep well plates)",
-			sites: ["P1DOWNHOLDER", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "READER", "ROBOPEEL", "ROBOSEAL"],
-			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc", "plateModel_384_square", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom", "lidModel_standard", "plateModel_96_round_filter_OV"]
-		},
-		{
-			description: "PCR-format sites",
-			sites: ["P4PCR", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "HOTEL32_A1", "HOTEL32_B1", "HOTEL32_C1", "HOTEL32_D1", "HOTEL32_A2", "HOTEL32_B2", "HOTEL32_C2", "HOTEL32_D2", "HOTEL32_A3", "HOTEL32_B3", "HOTEL32_C3", "HOTEL32_D3", "HOTEL32_A4", "HOTEL32_B4", "HOTEL32_C4", "HOTEL32_D4", "HOTEL32_A5", "HOTEL32_B5", "HOTEL32_C5", "HOTEL32_D5", "HOTEL32_A6", "HOTEL32_B6", "HOTEL32_C6", "HOTEL32_D6", "HOTEL32_A7", "HOTEL32_B7", "HOTEL32_C7", "HOTEL32_D7", "HOTEL32_A8", "HOTEL32_B8", "HOTEL32_C8", "HOTEL32_D8", "ROBOPEEL", "ROBOSEAL"],
-			models: ["plateModel_96_pcr"]
-		},
-		{
-			description: "Bench sites that don't have any obstructions, so deep well plates can fit on them too",
-			sites: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"],
-			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc", "plateModel_384_square", "plateModel_96_dwp", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom", "lidModel_standard", "plateModel_96_round_filter_OV", "plateModel_96_round_deep_OV"]
-		},
-	],
 	lidStacking: [
 		{
 			lids: ["lidModel_standard"],
@@ -343,6 +347,7 @@ const evowareSpec = {
 			{ tipModelPermanent: "tipModel0050" },
 			{ tipModelPermanent: "tipModel0050" }
 		],
+		sites: ["P1DOWNHOLDER", "P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"],
 		washPrograms: {
 			"flush_1000": {
 				"type": "EvowareWashProgram",
@@ -407,145 +412,23 @@ const evowareSpec = {
 			}
 		}
 	},
+	commandHandlers: {
+		"scale.weigh": function(params, parsed, data) {
+			console.log({params, parsed})
+			const expansion = [
+				{
+					command: "evoware._userPrompt",
+					agent: parsed.objectName.agent,
+					equipment: parsed.objectName.equipment,
+					text: "Weigh "+parsed.objectName.object,
+					beep: 2 // beep three times
+				}
+			];
+
+			return {expansion};
+		}
+	},
 };
 
 
 module.exports = evowareSpec;
-
-
-
-/*
-module.exports = {
-	evowareSpec,
-
-	predicates: _.flatten([
-		{"#for": {
-			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"]},
-			output: {
-				"absorbanceReader.canAgentEquipmentModelSite": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.reader",
-					"model": "ourlab.model.{{model}}",
-					"site": "ourlab.mario.site.READER"
-				}
-			}
-		}},
-		{"#for": {
-			factors: {model: ["plateModel_384_square", "plateModel_96_round_transparent_nunc", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom"]},
-			output: {
-				"fluorescenceReader.canAgentEquipmentModelSite": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.reader",
-					"model": "ourlab.model.{{model}}",
-					"site": "ourlab.mario.site.READER"
-				}
-			}
-		}},
-		{"#for": {
-			factors: {site: ["P1DOWNHOLDER", "P2", "P3", "P4", "P4PCR", "P5", "P6", "P7", "P8", "R1", "R2", "R3", "R4", "R5", "R6", "SYSTEM", "T1", "T2", "T3"]},
-			output: {
-				"pipetter.canAgentEquipmentSite": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"site": "ourlab.mario.site.{{site}}"
-				}
-			}
-		}},
-		{"#for": {
-			factors: {i: [1, 2, 3, 4, 5, 6, 7, 8]},
-			output: {
-				"pipetter.canAgentEquipmentSyringe": {
-					"agent": "ourlab.mario.evoware",
-					"equipment": "ourlab.mario.liha",
-					"syringe": "ourlab.mario.liha.syringe.{{i}}"
-				}
-			}
-		}},
-		Equipment.reader.getPredicates("ourlab.mario.evoware", "ourlab.mario.reader", "ourlab.mario.site.READER")
-	]),
-
-	schemas: _.merge(
-		{
-			"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": {
-				description: "Clean the pipetter tips.",
-				properties: {
-					agent: {description: "Agent identifier", type: "Agent"},
-					equipment: {description: "Equipment identifier", type: "Equipment"},
-					program: {description: "Program identifier", type: "string"},
-					items: {
-						description: "List of which syringes to clean at which intensity",
-						type: "array",
-						items: {
-							type: "object",
-							properties: {
-								syringe: {description: "Syringe identifier", type: "Syringe"},
-								intensity: {description: "Intensity of the cleaning", type: "pipetter.CleaningIntensity"}
-							},
-							required: ["syringe", "intensity"]
-						}
-					}
-				},
-				required: ["agent", "equipment", "items"]
-			}
-		},
-		Equipment.evoware.getSchemas(),
-		Equipment.reader.getSchemas("ourlab.mario.evoware", "ourlab.mario.reader"),
-	),
-
-	commandHandlers: _.merge(
-		{
-			// Clean tips
-			"pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha": function(params, parsed, data) {
-				//console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
-				//console.log(JSON.stringify(parsed, null, '  '))
-
-				const cleaningIntensities = data.schemas["pipetter.CleaningIntensity"].enum;
-				const syringeNameToItems = _.map(parsed.value.items, (item, index) => [parsed.objectName[`items.${index}.syringe`], item]);
-				//console.log(syringeNameToItems);
-
-				const expansionList = [];
-				const sub = function(syringeNames, volume) {
-					const syringeNameToItems2 = _.filter(syringeNameToItems, ([syringeName, ]) =>
-						_.includes(syringeNames, syringeName)
-					);
-					//console.log({syringeNameToItems2})
-					if (!_.isEmpty(syringeNameToItems2)) {
-						const value = _.max(_.map(syringeNameToItems2, ([, item]) => cleaningIntensities.indexOf(item.intensity)));
-						if (value >= 0) {
-							const intensity = cleaningIntensities[value];
-							const syringes = _.map(syringeNameToItems2, ([syringeName, ]) => syringeName);
-							expansionList.push({
-								command: "pipetter._washTips",
-								agent: parsed.objectName.agent,
-								equipment: parsed.objectName.equipment,
-								program: `ourlab.mario.washProgram.${intensity}_${volume}`,
-								intensity: intensity,
-								syringes: syringeNames
-							});
-						}
-					}
-				}
-				sub(_.map([1, 2, 3, 4], n => `ourlab.mario.liha.syringe.${n}`), "1000");
-				sub(_.map([5, 6, 7, 8], n => `ourlab.mario.liha.syringe.${n}`), "0050");
-				return {expansion: expansionList};
-			},
-			"scale.weigh": function(params, parsed, data) {
-				console.log({params, parsed})
-				const expansion = [
-					{
-						command: "evoware._userPrompt",
-						agent: parsed.objectName.agent,
-						equipment: parsed.objectName.equipment,
-						text: "Weigh "+parsed.objectName.object,
-						beep: 2 // beep three times
-					}
-				];
-
-				return {expansion};
-			},
-		},
-		Equipment.evoware.getCommandHandlers(),
-		Equipment.reader.getCommandHandlers("ourlab.mario.evoware", "ourlab.mario.reader"),
-	),
-};
-*/

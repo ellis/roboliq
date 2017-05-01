@@ -61,19 +61,18 @@ function configure(config, equipmentName, params) {
 	// 	close: true
 	// }));
 
-	// Map from site to all its compatible models
+	// Create map from site to all its compatible models
 	const siteToModels = _(params.siteModelCompatibilities)
-		.map(x => x.sites.map(site => ({site, models: x.models})))
+		.map(x => x.sites.map(site0 => ({site: config.getSiteName(site0), models: x.models.map(config.getModelName)})))
 		.flatten()
 		.groupBy(x => x.site)
 		.mapValues(x => _.flatten(_.map(x, "models")))
 		.value();
-
-	const siteModelCompatibilities = params.siteModelCompatibilities;
+	// console.log({siteToModels})
 
 	const agent = config.getAgentName();
 	const equipment = config.getEquipmentName(equipmentName);
-	const siteNames = Object.keys(params.sites).map(s => config.getSiteName(s));
+	const siteNames = Object.keys(siteToModels);
 
 	const objects = {};
 	// Add centrifuge
@@ -94,6 +93,11 @@ function configure(config, equipmentName, params) {
 		});
 	});
 
+	// Add predicates for siteModelCompatibilities
+	const output = {};
+	config.addSiteModelCompatibilities(params.siteModelCompatibilities, output);
+	// console.log({siteModelCompatibilities: params.siteModelCompatibilities, output})
+
 	// For the 1st and 3rd sites
 	const predicates13 = _(siteToModels[siteNames[0]]).map(model => {
 		return {"centrifuge.canAgentEquipmentModelSite1Site2": {
@@ -112,6 +116,7 @@ function configure(config, equipmentName, params) {
 			site2: siteNames[3],
 		}}
 	}).flatten().value();
+	// console.log({siteToModels, siteNames, predicates24})
 
 	const predicateTasks = _.flatten([
 		{"action": {"description": equipment+".close: close the centrifuge",
@@ -261,11 +266,13 @@ function configure(config, equipmentName, params) {
 	};
 
 	const protocol = {
-		objects,
-		predicates: _.flatten([predicates13, predicates24, predicateTasks]),
 		schemas,
+		objects,
+		predicates: _.flatten([output.predicates, predicates13, predicates24, predicateTasks]),
+		planHandlers,
 		commandHandlers,
 	};
+	// console.log("centrifuge predicates: "+JSON.stringify(protocol.predicates, null, '\t'))
 	return protocol;
 }
 

@@ -40,6 +40,7 @@ function configure(config, equipmentName, params) {
 			}
 		},
 	];
+	// console.log("shaker.predicates: "+JSON.stringify(predicates, null, '\t'));
 
 	const schemas = {
 		[`shaker.run|${agent}|${equipment}`]: {

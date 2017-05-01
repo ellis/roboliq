@@ -80,7 +80,7 @@ function makeTransporterPredicates(namespaceName, agentName, specs) {
 	_.forEach(specs, (programs, equipment) => {
 		_.forEach(programs, (cliques, program) => {
 			_.forEach(cliques, (sites) => {
-				const siteClique = `${namespaceName}.siteClique${siteCliqueId}`;
+				const siteClique = `${namespaceName}.${agentName}.siteClique${siteCliqueId}`;
 				siteCliqueId++;
 				_.forEach(sites, site => {
 					l.push({"siteCliqueSite": {siteClique, site}});

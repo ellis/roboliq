@@ -1,6 +1,55 @@
+import _ from 'lodash';
 import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 
+function configure(config, equipmentName, params) {
+	const agent = config.getAgentName();
+	const equipment = config.getEquipmentName(equipmentName);
+	const site = config.getSiteName(params.site);
+
+	const objects = {};
+	// Add equipment
+	_.set(objects, equipment, {
+		type: "Sealer",
+		evowareId: params.evowareId,
+		// sitesInternal: [site],
+		// modelToPlateFile: _.fromPairs(_.map(_.toPairs(params.modelToPlateFile), ([model0, file]) => [config.getModelName(model0), file]))
+	});
+	// Add site
+	_.set(objects, site, {
+		type: "Site",
+		evowareCarrier: params.evowareCarrier,
+		evowareGrid: params.evowareGrid,
+		evowareSite: params.evowareSite
+	});
+
+	// Add predicates for siteModelCompatibilities
+	// const siteModelCompatibilities = [
+	// 	{sites: [site], models: Object.keys(params.modelToPlateFile).map(model0 => config.getModelName(model0))}
+	// ];
+	// const output = {};
+	// config.addSiteModelCompatibilities(siteModelCompatibilities, output);
+	const predicates = _.map(params.modelToPlateFile, (file, model0) => ({
+		"sealer.canAgentEquipmentProgramModelSite": {
+			agent,
+			equipment,
+			program: file,
+			model: config.getModelName(model0),
+			site
+		}
+	}));
+	// console.log("sealer.predicates: "+JSON.stringify(predicates, null, '\t'))
+
+	const protocol = {
+		schemas: module.exports.getSchemas(agent, equipment),
+		objects,
+		predicates,
+		commandHandlers: module.exports.getCommandHandlers(agent, equipment),
+	};
+	return protocol;
+}
+
 module.exports = {
+	configure,
 	getSchemas: (agentName, equipmentName) => ({
 		[`equipment.run|${agentName}|${equipmentName}`]: {
 			properties: {

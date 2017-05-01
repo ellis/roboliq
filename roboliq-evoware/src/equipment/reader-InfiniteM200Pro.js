@@ -209,8 +209,8 @@ function configure(config, equipmentName, params) {
 	// Add equipment
 	_.set(objects, equipment, {
 		type: "Reader",
-		sitesInternal: [site],
 		evowareId: params.evowareId,
+		sitesInternal: [site],
 		modelToPlateFile: _.fromPairs(_.map(_.toPairs(params.modelToPlateFile), ([model0, file]) => [config.getModelName(model0), file]))
 	});
 	// Add site
@@ -222,14 +222,46 @@ function configure(config, equipmentName, params) {
 		closed: true
 	});
 
+	const predicates = _.flatten([
+		_.flatten(_.map(Object.keys(params.modelToPlateFile), model0 => [
+			{
+				"absorbanceReader.canAgentEquipmentModelSite": {
+					agent,
+					equipment,
+					model: config.getModelName(model0),
+					site
+				}
+			},
+			{
+				"fluorescenceReader.canAgentEquipmentModelSite": {
+					agent,
+					equipment,
+					model: config.getModelName(model0),
+					site
+				}
+			},
+		])),
+		{
+			"shaker.canAgentEquipmentSite": {
+				agent,
+				equipment,
+				site
+			}
+		},
+	]);
+	predicates.push(...exports.getPredicates(agent, equipment, site));
+
 	const protocol = {
-		objects
+		schemas: exports.getSchemas(agent, equipment),
+		objects,
+		predicates,
+		planHandlers: exports.getPlanHandlers(agent, equipment),
+		commandHandlers: exports.getCommandHandlers(agent, equipment),
 	};
 	return protocol;
 }
 
-module.exports = {
-	configure,
+const exports = {
 	getSchemas: (agentName, equipmentName) => ({
 		[`equipment.close|${agentName}|${equipmentName}`]: {
 			properties: {
@@ -438,3 +470,5 @@ module.exports = {
 		},
 	})
 };
+
+module.exports = _.merge({configure}, exports);
