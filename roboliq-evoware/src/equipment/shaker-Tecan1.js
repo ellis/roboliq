@@ -5,6 +5,17 @@ const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 const expect = require('roboliq-processor/dist/expect.js');
 
 /**
+ * @typedef ShakerTecan1Params
+ * @type {object}
+ * @property {!string} evowareId - the Evoware ID of this equipment
+ * @property {?string} evowareGrid - the grid that the equipment is on
+ * @param {!string} site - the equipment's site name (just the base part, without namespace)
+ * ```
+ * evowareId: "HPShaker",
+ * site: "P3"
+ * ```
+ */
+/**
  * Configure the Tecan 1-site shaker
  * @param {ShakerTecan1Params} params - parameters for the configuration
  * @return {EquipmentConfig}
@@ -13,6 +24,12 @@ function configure(config, equipmentName, params) {
 	const agent = config.getAgentName();
 	const equipment = config.getEquipmentName(equipmentName);
 	const siteName = config.getSiteName(params.site);
+
+	const objects = {};
+	_.set(objects, equipment, {
+		type: "Shaker",
+		evowareId: params.evowareId
+	});
 
 	const predicates = [
 		{
@@ -92,6 +109,7 @@ function configure(config, equipmentName, params) {
 	};
 
 	const protocol = {
+		objects,
 		predicates,
 		schemas,
 		commandHandlers

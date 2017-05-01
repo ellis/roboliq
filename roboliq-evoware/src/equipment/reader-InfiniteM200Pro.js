@@ -175,7 +175,61 @@ function getTemplateAbsorbanceParams(parsed, data) {
 	return params;
 }
 
+/**
+ * @typedef ReaderInfiniteM200ProConfig
+ * @type {object}
+ * @property {!string} evowareId - the Evoware ID of this equipment
+ * @property {!string} evowareCarrier - the carrier that the equipment is on
+ * @property {!string} evowareGrid - the grid that the equipment is on
+ * @property {!number} evowareSite - the evoware site index of the equipment site
+ * @param {!string} site - the equipment's site name (just the base part, without namespace)
+ * @param {!Object.<string, string>} modelToPlateFile - a map from labware model to equipment's plate filename
+ * @example
+ * ```
+ * evowareId: "ReaderNETwork",
+ * evowareCarrier: "Infinite M200",
+ * evowareGrid: 61,
+ * evowareSite: 1,
+ * site: "READER",
+ * modelToPlateFile: {
+ * 	"plateModel_96_round_transparent_nunc": "NUN96ft",
+ * 	"plateModel_384_square": "GRE384fw",
+ * 	"EK_384_greiner_flat_bottom": "GRE384fw",
+ * 	"EK_96_well_Greiner_Black": "GRE96fb_chimney"
+ * }
+ * ```
+ */
+
+function configure(config, equipmentName, params) {
+	const agent = config.getAgentName();
+	const equipment = config.getEquipmentName(equipmentName);
+	const site = config.getSiteName(params.site);
+
+	const objects = {};
+	// Add equipment
+	_.set(objects, equipment, {
+		type: "Reader",
+		sitesInternal: [site],
+		evowareId: params.evowareId,
+		modelToPlateFile: _.fromPairs(_.map(_.toPairs(params.modelToPlateFile), ([model0, file]) => [config.getModelName(model0), file]))
+	});
+	// Add site
+	_.set(objects, site, {
+		type: "Site",
+		evowareCarrier: params.evowareCarrier,
+		evowareGrid: params.evowareGrid,
+		evowareSite: params.evowareSite,
+		closed: true
+	});
+
+	const protocol = {
+		objects
+	};
+	return protocol;
+}
+
 module.exports = {
+	configure,
 	getSchemas: (agentName, equipmentName) => ({
 		[`equipment.close|${agentName}|${equipmentName}`]: {
 			properties: {

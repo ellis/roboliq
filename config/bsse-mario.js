@@ -238,7 +238,11 @@ module.exports = {
 						"ourlab.mario.systemLiquidLabware(A01)",
 						"ourlab.mario.systemLiquidLabware(B01)",
 						"ourlab.mario.systemLiquidLabware(C01)",
-						"ourlab.mario.systemLiquidLabware(D01)"
+						"ourlab.mario.systemLiquidLabware(D01)",
+						"ourlab.mario.systemLiquidLabware(E01)",
+						"ourlab.mario.systemLiquidLabware(F01)",
+						"ourlab.mario.systemLiquidLabware(G01)",
+						"ourlab.mario.systemLiquidLabware(H01)",
 					]
 				},
 				"systemLiquidLabware": {
@@ -258,15 +262,15 @@ module.exports = {
 				},
 				"timer3": {
 					"type": "Timer",
-					"evowareId": 2
+					"evowareId": 3
 				},
 				"timer4": {
 					"type": "Timer",
-					"evowareId": 2
+					"evowareId": 4
 				},
 				"timer5": {
 					"type": "Timer",
-					"evowareId": 2
+					"evowareId": 5
 				},
 				"washProgram": {
 					"type": "Namespace",

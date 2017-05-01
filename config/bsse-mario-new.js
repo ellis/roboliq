@@ -57,7 +57,6 @@ const evowareSpec = {
 		R4: { evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 1 },
 		R5: { evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 2 },
 		R6: { evowareCarrier: "LI - Trough 3Pos 100mlOffset", evowareGrid: 8, evowareSite: 3 },
-		READER: { evowareCarrier: "Infinite M200", evowareGrid: 61, evowareSite: 1, closed: true },
 		REGRIP: { evowareCarrier: "ReGrip Station", "evowareGrid": 59, "evowareSite": 1 },
 		ROBOPEEL: { evowareCarrier: "RoboPeel", "evowareGrid": 12, "evowareSite": 1 },
 		ROBOSEAL: { evowareCarrier: "RoboSeal", "evowareGrid": 35, "evowareSite": 1 },
@@ -186,6 +185,65 @@ const evowareSpec = {
 			"columns": 1,
 			"evowareName": "Reagent Cooled 8*50ml"
 		}
+	},
+	equipment: {
+		centrifuge: {
+			module: "centrifuge4.js",
+			params: {
+				evowareId: "Centrifuge",
+				evowareCarrier: "Centrifuge",
+				evowareGrid: 54,
+				sites: {
+					CENTRIFUGE_1: { evowareSite: 1 },
+					CENTRIFUGE_2: { evowareSite: 2 },
+					CENTRIFUGE_3: { evowareSite: 1 },
+					CENTRIFUGE_4: { evowareSite: 2 }
+				},
+				siteModelCompatibilities: [
+					{
+						sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"],
+						models: ["plateModel_384_square", "plateModel_96_round_transparent_nunc"]
+					},
+					{
+						sites: ["CENTRIFUGE_2", "CENTRIFUGE_4"],
+						models: ["plateModel_96_dwp"]
+					},
+				]
+			}
+		},
+		reader: {
+			module: "reader-InfiniteM200Pro.js",
+			params: {
+				evowareId: "ReaderNETwork",
+				evowareCarrier: "Infinite M200",
+				evowareGrid: 61,
+				evowareSite: 1,
+				site: "READER",
+				modelToPlateFile: {
+					"plateModel_96_round_transparent_nunc": "NUN96ft",
+					"plateModel_384_square": "GRE384fw",
+					"EK_384_greiner_flat_bottom": "GRE384fw",
+					"EK_96_well_Greiner_Black": "GRE96fb_chimney"
+				}
+			}
+		},
+		shaker: {
+			module: "shaker-Tecan1.js",
+			params: {
+				evowareId: "HPShaker",
+				site: "P3"
+			}
+		},
+		/*sealer: {
+			module: "sealer-Tecan.js",
+			evowareId: "RoboSeal",
+			site: "ROBOSEAL",
+			modelToPlateFile: {
+				plateModel_96_round_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
+				plateModel_96_square_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
+				plateModel_384_square: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
+			}
+		}*/
 	},
 	siteModelCompatibilities: [
 		{
@@ -349,55 +407,6 @@ const evowareSpec = {
 			}
 		}
 	},
-	equipment: {
-		centrifuge: {
-			module: "centrifuge4.js",
-			evowareId: "Centrifuge",
-			evowareGrid: 54,
-			sites: {
-				CENTRIFUGE_1: { evowareSite: 1 },
-				CENTRIFUGE_2: { evowareSite: 2 },
-				CENTRIFUGE_3: { evowareSite: 1 },
-				CENTRIFUGE_4: { evowareSite: 2 }
-			},
-			siteModelCompatibilities: [
-				{
-					sites: ["CENTRIFUGE_1", "CENTRIFUGE_2", "CENTRIFUGE_3", "CENTRIFUGE_4"],
-					models: ["plateModel_384_square", "plateModel_96_round_transparent_nunc"]
-				},
-				{
-					sites: ["CENTRIFUGE_2", "CENTRIFUGE_4"],
-					models: ["plateModel_96_dwp"]
-				},
-			]
-		},
-		/*reader: {
-			module: "reader-InfiniteM200Pro.js",
-			evowareId: "ReaderNETwork",
-			sitesInternal: ["READER"],
-			modelToPlateFile: {
-				"plateModel_96_round_transparent_nunc": "NUN96ft",
-				"plateModel_384_square": "GRE384fw",
-				"EK_384_greiner_flat_bottom": "GRE384fw",
-				"EK_96_well_Greiner_Black": "GRE96fb_chimney"
-			}
-		},*/
-		shaker: {
-			module: "shaker-Tecan1.js",
-			evowareId: "HPShaker",
-			site: "P3"
-		},
-		/*sealer: {
-			module: "sealer-Tecan.js",
-			evowareId: "RoboSeal",
-			site: "ROBOSEAL",
-			modelToPlateFile: {
-				plateModel_96_round_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
-				plateModel_96_square_transparent_nunc: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\PerkinElmer_weiss.bcf",
-				plateModel_384_square: "C:\\HJBioanalytikGmbH\\RoboSeal3\\RoboSeal_PlateParameters\\Greiner_384_schwarz.bcf",
-			}
-		}*/
-	}
 };
 
 

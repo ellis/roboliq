@@ -8,6 +8,7 @@ const expect = require('roboliq-processor/dist/expect.js');
  * @typedef CentrifugeParams
  * @type {object}
  * @property {!string} evowareId - the Evoware ID of this equipment
+ * @property {!string} evowareCarrier - the carrier that the equipment is on
  * @property {!string} evowareGrid - the grid that the equipment is on
  * @param {!Object} sites - keys are the site names (just the base part, without namespace), values are objects with the property `evowareSite`.
  * @param {!CentrifugeSitesToModels[]} siteModelCompatibilities - an array of objects {sites, models} of which sites
@@ -15,6 +16,7 @@ const expect = require('roboliq-processor/dist/expect.js');
  * ```
  *		{
  *			evowareId: "Centrifuge",
+ *			evowareCarrier: "Centrifuge",
  *			evowareGrid: 54,
  *			sites: {
  *				CENTRIFUGE_1: { evowareSite: 1 },
@@ -52,12 +54,12 @@ function configure(config, equipmentName, params) {
 	const N = Object.keys(params.sites).length;
 	assert(N == 4, "centrifuge4 has only been designed for 4-site centrifuges.  Please contact the developer if you need a different number of sites.")
 
-	const sites = _.mapValues(params.sites, value => ({
-		evowareCarrier: params.evowareId,
-		evowareGrid: params.evowareGrid,
-		evowareSite: value.evowareSite,
-		close: true
-	}));
+	// const sites = _.mapValues(params.sites, value => ({
+	// 	evowareCarrier: params.evowareId,
+	// 	evowareGrid: params.evowareGrid,
+	// 	evowareSite: value.evowareSite,
+	// 	close: true
+	// }));
 
 	// Map from site to all its compatible models
 	const siteToModels = _(params.siteModelCompatibilities)
@@ -71,13 +73,25 @@ function configure(config, equipmentName, params) {
 
 	const agent = config.getAgentName();
 	const equipment = config.getEquipmentName(equipmentName);
-	const siteNames = Object.keys(sites).map(s => config.getSiteName(s));
+	const siteNames = Object.keys(params.sites).map(s => config.getSiteName(s));
 
 	const objects = {};
+	// Add centrifuge
 	_.set(objects, equipment, {
 		type: "Centrifuge",
 		evowareId: params.evowareId,
 		sitesInternal: siteNames
+	});
+	// Add internal sites
+	_.forEach(params.sites, (value, key) => {
+		const site = config.getSiteName(key);
+		_.set(objects, site, {
+			type: "Site",
+			evowareCarrier: params.evowareCarrier,
+			evowareGrid: params.evowareGrid,
+			evowareSite: value.evowareSite,
+			closed: true
+		});
 	});
 
 	// For the 1st and 3rd sites

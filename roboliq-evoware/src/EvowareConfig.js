@@ -3,11 +3,11 @@ const assert = require('assert');
 const math = require('mathjs');
 const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 const expect = require('roboliq-processor/dist/expect.js');
-const Evoware = require('roboliq-evoware/dist/equipment/evoware.js');
+const evowareEquipment = require('./equipment/evoware.js');
 
 
 
-function process(p, data = {objects: {}}) {
+function process(p, data = {objects: {}, predicates: []}) {
 	assert(p.namespace, "you must supply a `namespace` property");
 	assert(p.name, "you must supply a `name` property");
 
@@ -35,7 +35,7 @@ function process(p, data = {objects: {}}) {
 		const model1 = [p.namespace, p.name, "model", base];
 		const model2 = [p.namespace, "model", base];
 		const isOnlyOnRobot = _.has(output.objects, model1);
-		return (isOnlyOnRobot) ? model1 : model2;
+		return (isOnlyOnRobot) ? model1.join(".") : model2.join(".");
 	}
 	function lookupSyringe(base) {
 		assert(base, "lookupSyringe: base name must be defined");
@@ -67,18 +67,26 @@ function process(p, data = {objects: {}}) {
 		getAgentName,
 		getEquipmentName,
 		getSiteName,
+		getModelName,
 		lookupSyringe,
 		lookupTipModel,
 	};
 
 	_.set(output, ["roboliq"], "v1");
 	_.set(output, ["objects", p.namespace, "type"], "Namespace");
+	_.set(output, ["objects", p.namespace, "model", "type"], "Namespace");
 	_.set(output, ["objects", p.namespace, p.name, "type"], "Namespace");
 	_.set(output, ["objects", p.namespace, p.name, "evoware", "type"], "EvowareRobot");
 	_.set(output, ["objects", p.namespace, p.name, "evoware", "config"], p.config);
 	_.set(output, ["objects", p.namespace, p.name, "site", "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, p.name, "model", "type"], "Namespace");
 	_.set(output, ["objects", p.namespace, p.name, "liha", "type"], "Pipetter");
+	// Add 5 timers
+	_.forEach(_.range(5), i => {
+		_.set(output, ["objects", p.namespace, p.name, `timer${i+1}`], {
+			type: "Timer",
+			evowareId: i+1
+		});
+	});
 
 	// Add bench sites (equipment sites will be added by the equipment modules)
 	_.forEach(p.sites, (value, key) => {
@@ -87,7 +95,7 @@ function process(p, data = {objects: {}}) {
 
 	// Add explicitly defined models to p.namespace
 	_.forEach(p.models, (value, key) => {
-		_.set(output, ["objects", p.namespace, p.name, "model", key], value);
+		_.set(output, ["objects", p.namespace, "model", key], value);
 	});
 
 	// Add predicates for siteModelCompatibilities
@@ -95,10 +103,10 @@ function process(p, data = {objects: {}}) {
 		const siteModel = `${namespace}.siteModel${predicates.length + 1}`;
 		predicates.push({isSiteModel: {model: siteModel}});
 		_.forEach(compat.sites, site => {
-			predicates.push({siteModel: {site, siteModel}});
+			predicates.push({siteModel: {site: evowareConfigSpec.getSiteName(site), siteModel}});
 		});
 		_.forEach(compat.models, labwareModel => {
-			predicates.push({stackable: {below: siteModel, above: labwareModel}})
+			predicates.push({stackable: {below: siteModel, above: evowareConfigSpec.getModelName(labwareModel)}})
 		});
 	});
 
@@ -121,6 +129,8 @@ function process(p, data = {objects: {}}) {
 	handleLiha(p, evowareConfigSpec, namespace, agent, output);
 
 	handleEquipment(p, evowareConfigSpec, namespace, agent, output);
+
+	output.objectToPredicateConverters = evowareEquipment.objectToPredicateConverters;
 
 	return output;
 }
@@ -237,6 +247,8 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 			type: "Syringe",
 			row: i + 1
 		};
+		// console.log({syringeObj})
+		_.set(output.objects, syringe, syringeObj);
 
 		// Handle permanent tips
 		if (syringeSpec.tipModelPermanent) {
@@ -246,9 +258,6 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 
 			tipModelToSyringes[tipModel] = (tipModelToSyringes[tipModel] || []).concat([syringe]);
 		}
-
-		// console.log({syringeObj})
-		_.set(output.objects, syringe, syringeObj);
 	});
 
 	// Handle tipModelToSyringes mapping for non-permantent tips
@@ -257,21 +266,49 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 		const syringes = syringes0.map(evowareConfigSpec.lookupSyringe);
 		tipModelToSyringes[tipModel] = (tipModelToSyringes[tipModel] || []).concat(syringes);
 	});
+	// console.log({tipModelToSyringes})
+	_.set(output.objects, [p.namespace, p.name, "liha", "tipModelToSyringes"], tipModelToSyringes);
 
 	// Handle washPrograms
 	if (p.liha.washPrograms) {
-		const washPrograms = _.mapValues(p.liha.washPrograms, x => _.merge({type: "EvowareWashProgram"}, x));
+		const washPrograms = _.merge({type: "Namespace"}, _.mapValues(p.liha.washPrograms, x => _.merge({type: "EvowareWashProgram"}, x)));
 		_.set(output.objects, [p.namespace, p.name, "washProgram"], washPrograms);
 	}
+
+	// Add system liquid
+	const syringeCount = p.liha.syringes.length;
+	assert(syringeCount <= 8, "roboliq-evoware has only been configured to handle 8-syringe LiHas; please contact the software developer to accommodate your needs.");
+	_.set(output.objects, [p.namespace, p.name, "systemLiquidLabwareModel"], {
+		"type": "PlateModel",
+		"description": "dummy labware model representing the system liquid source",
+		"rows": syringeCount,
+		"columns": 1,
+		"evowareName": "SystemLiquid"
+	});
+	_.set(output.objects, [p.namespace, p.name, "systemLiquid"], {
+		"type": "Liquid",
+		"wells": _.map(_.range(syringeCount), i => `${p.namespace}.${p.name}.systemLiquidLabware(${String.fromCharCode(65 + i)}01)`)
+	});
+	_.set(output.objects, [p.namespace, p.name, "systemLiquidLabware"], {
+		"type": "Plate",
+		"description": "dummy labware representing the system liquid source",
+		"model": `${namespace}.systemLiquidLabwareModel`,
+		"location": evowareConfigSpec.getSiteName("SYSTEM"),
+		"contents": ["Infinity l", "systemLiquid"]
+	});
 }
 
 function handleEquipment(p, evowareConfigSpec, namespace, agent, output) {
-	_.forEach(p.equipment, (params, key) => {
+	_.forEach(p.equipment, (value, key) => {
 		console.log({key})
-		const module = require(__dirname+"/equipment/"+params.module);
-		const protocol = module.configure(evowareConfigSpec, key, params);
+		const module = require(__dirname+"/equipment/"+value.module);
+		const protocol = module.configure(evowareConfigSpec, key, value.params);
 		// console.log(key+": "+JSON.stringify(protocol, null, '\t'))
-		_.merge(output, protocol);
+		// console.log(key+".objects: "+JSON.stringify(protocol.objects, null, '\t'))
+		_.merge(output, _.omit(protocol, "predicates"));
+		// console.log("output.objects: "+JSON.stringify(output.objects, null, '\t'))
+		if (!_.isEmpty(protocol.predicates))
+			output.predicates.push(...protocol.predicates);
 	});
 }
 
