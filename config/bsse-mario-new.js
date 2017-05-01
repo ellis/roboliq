@@ -430,5 +430,7 @@ const evowareSpec = {
 	},
 };
 
+const EvowareConfig = require('roboliq-evoware/dist/EvowareConfig.js');
 
-module.exports = evowareSpec;
+//module.exports = evowareSpec;
+module.exports = EvowareConfig.process(evowareSpec);

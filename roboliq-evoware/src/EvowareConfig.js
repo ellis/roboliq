@@ -14,7 +14,7 @@ function process(p, data = {objects: {}, predicates: []}) {
 	const namespace = [p.namespace, p.name].join(".");
 	const agent = [p.namespace, p.name, "evoware"].join(".");
 	const predicates = [];
-	const output = { predicates, commandHandlers: evowareEquipment.getCommandHandlers() };
+	const output = { roboliq: "v1", predicates, commandHandlers: evowareEquipment.getCommandHandlers() };
 
 	function getAgentName() {
 		return [namespace, "evoware"].join(".");
@@ -439,21 +439,28 @@ function handleEquipment(p, evowareConfigSpec, namespace, agent, output) {
 	});
 }
 
+/*
+function test() {
+	const evowareSpec = require('/Users/ellisw/src/roboliq/config/bsse-mario-new.js');
+	const orig = require('/Users/ellisw/src/roboliq/config/bsse-mario.js');
 
-const evowareSpec = require('/Users/ellisw/src/roboliq/config/bsse-mario-new.js');
-const orig = require('/Users/ellisw/src/roboliq/config/bsse-mario.js');
+	const protocol = process(evowareSpec);
+	// console.log(JSON.stringify(protocol, null, '\t'));
+	const diff = require('deep-diff');
+	// console.log("isSiteModel predicates: "+JSON.stringify(_.filter(protocol.predicates, x => Object.keys(x)[0] == "isSiteModel")));
+	// console.log("siteCliqueSite predicates: "+JSON.stringify(_.filter(protocol.predicates, x => Object.keys(x)[0] == "siteCliqueSite"), null, '\t'));
+	protocol.predicates = _.fromPairs(_.sortBy(protocol.predicates.map(x => [JSON.stringify(x), x]), x => x[0]));
+	orig.predicates = _.fromPairs(_.sortBy(orig.predicates.map(x => [JSON.stringify(x), x]), x => x[0]));
+	const diffs = diff(_.omit(orig, "objectToPredicateConverters"), _.omit(protocol, "objectToPredicateConverters"));
+	const diffs2 = _.filter(diffs, d => (
+		(d.kind == "E" && d.path[0] == "commandHandlers") ? false
+		: (d.kind == "E" && d.path[0] == "planHandlers") ? false
+		: true
+	));
+	console.log(JSON.stringify(diffs2, null, '\t'));
+}
+*/
 
-const protocol = process(evowareSpec);
-// console.log(JSON.stringify(protocol, null, '\t'));
-const diff = require('deep-diff');
-// console.log("isSiteModel predicates: "+JSON.stringify(_.filter(protocol.predicates, x => Object.keys(x)[0] == "isSiteModel")));
-// console.log("siteCliqueSite predicates: "+JSON.stringify(_.filter(protocol.predicates, x => Object.keys(x)[0] == "siteCliqueSite"), null, '\t'));
-protocol.predicates = _.fromPairs(_.sortBy(protocol.predicates.map(x => [JSON.stringify(x), x]), x => x[0]));
-orig.predicates = _.fromPairs(_.sortBy(orig.predicates.map(x => [JSON.stringify(x), x]), x => x[0]));
-const diffs = diff(_.omit(orig, "objectToPredicateConverters"), _.omit(protocol, "objectToPredicateConverters"));
-const diffs2 = _.filter(diffs, d => (
-	(d.kind == "E" && d.path[0] == "commandHandlers") ? false
-	: (d.kind == "E" && d.path[0] == "planHandlers") ? false
-	: true
-));
-console.log(JSON.stringify(diffs2, null, '\t'));
+module.exports = {
+	process
+};
