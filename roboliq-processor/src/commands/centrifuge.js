@@ -82,9 +82,13 @@ function centrifuge2(params, parsed, data) {
 		}
 	}
 
-	// Find any parameters which can only take one specific value
-	var params2 = alternatives[0];
-	//console.log("alternatives[0]:\n"+JSON.stringify(params2))
+	// Pick a plan
+	let chosen = undefined;
+	if (data.planAlternativeChoosers.hasOwnProperty("centrifuge.canAgentEquipmentModelSite1Site2")) {
+		chosen = data.planAlternativeChoosers["centrifuge.canAgentEquipmentModelSite1Site2"](alternatives, data);
+		// console.log({chosen})
+	}
+	const params2 = chosen || alternatives[0];
 
 	const destination1
 		= (parsed.value.destinationAfter1 === "stay") ? params2.site1
@@ -232,9 +236,13 @@ function insertPlates2(params, parsed, data) {
 		}
 	}
 
-	// Find any parameters which can only take one specific value
-	var params2 = alternatives[0];
-	//console.log("alternatives[0]:\n"+JSON.stringify(params2))
+	// Pick a plan
+	let chosen = undefined;
+	if (data.planAlternativeChoosers.hasOwnProperty("centrifuge.canAgentEquipmentModelSite1Site2")) {
+		chosen = data.planAlternativeChoosers["centrifuge.canAgentEquipmentModelSite1Site2"](alternatives, data);
+		// console.log({chosen})
+	}
+	const params2 = chosen || alternatives[0];
 
 	var expansion = [
 		(!object1 || object1.location === params2.site1) ? null : [

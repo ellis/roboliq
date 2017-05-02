@@ -413,12 +413,18 @@ const evowareSpec = {
 		}
 	},
 	planAlternativeChoosers: {
-		"shaker.canAgentEquipmentSite": (alternatives) => {
-			// Prefer the shaker over the reader
-			const l = alternatives.filter(x => x["shaker.canAgentEquipmentSite"].equipment.endsWith(".shaker"));
+		"centrifuge.canAgentEquipmentModelSite1Site2": (alternatives) => {
+			// Prefer sites 2+4 over 1+3
+			const l = alternatives.filter(x => x.site1.endsWith("_2"));
 			if (l.length > 0)
 				return l[0];
-		}
+		},
+		"shaker.canAgentEquipmentSite": (alternatives) => {
+			// Prefer the shaker over the reader
+			const l = alternatives.filter(x => x.equipment.endsWith(".shaker"));
+			if (l.length > 0)
+				return l[0];
+		},
 	},
 	commandHandlers: {
 		"scale.weigh": function(params, parsed, data) {

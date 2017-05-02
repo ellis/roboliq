@@ -413,6 +413,14 @@ const evowareSpec = {
 		}
 	},
 	planAlternativeChoosers: {
+		"centrifuge.canAgentEquipmentModelSite1Site2": (alternatives) => {
+			// console.log("alternatives:")
+			// console.log(alternatives)
+			// Prefer sites 2+4 over 1+3
+			const l = alternatives.filter(x => x.site1.endsWith("_2"));
+			if (l.length > 0)
+				return l[0];
+		},
 		"shaker.canAgentEquipmentSite": (alternatives) => {
 			// console.log("alternatives:")
 			// console.log(alternatives)
@@ -420,7 +428,7 @@ const evowareSpec = {
 			const l = alternatives.filter(x => x.equipment.endsWith(".shaker"));
 			if (l.length > 0)
 				return l[0];
-		}
+		},
 	},
 	commandHandlers: {
 		"scale.weigh": function(params, parsed, data) {
