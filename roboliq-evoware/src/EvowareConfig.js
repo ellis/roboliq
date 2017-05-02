@@ -372,10 +372,10 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	});
 
 	// Command handler for `pipetter.cleanTips`
-	output.commandHandlers[`pipetter.cleanTips|${agent}|${equipment}`] = makeCleanTipsHandler();
+	output.commandHandlers[`pipetter.cleanTips|${agent}|${equipment}`] = makeCleanTipsHandler(namespace);
 }
 
-function makeCleanTipsHandler() {
+function makeCleanTipsHandler(namespace) {
 	return function cleanTips(params, parsed, data) {
 		//console.log("pipetter.cleanTips|ourlab.mario.evoware|ourlab.mario.liha")
 		//console.log(JSON.stringify(parsed, null, '  '))
@@ -399,22 +399,27 @@ function makeCleanTipsHandler() {
 						command: "pipetter._washTips",
 						agent: parsed.objectName.agent,
 						equipment: parsed.objectName.equipment,
-						program: `ourlab.mario.washProgram.${intensity}_${volume}`,
+						program: `${namespace}.washProgram.${intensity}_${volume}`,
 						intensity: intensity,
 						syringes: syringeNames
 					});
 				}
 			}
 		}
-		// Lists of [syringeNAme, tipModelName, programCode]
-		const l = _.map(syringeNameToItems, ([syringeName, ]) => {
-			const syringeObj = _.get(data.objects, syringeName);
-			assert(syringeObj, "didn't find syringe "+syringeName);
-			const tipModelName = syringe.tipModel;
+		// Get list of syringes on the liha
+		const syringesName = `${namespace}.liha.syringe`;
+		const syringesObj = _.get(data.objects, syringesName);
+		assert(syringesObj, "didn't find LiHa syringes "+syringesName);
+		// Lists of [syringeName, tipModelName, programCode]
+		const l = _.map(syringesObj, (syringeObj, syringeName0) => {
+			const syringeName = `${namespace}.liha.syringe.${syringeName0}`;
+			// console.log({syringeObj})
+			const tipModelName = syringeObj.tipModel;
 			const tipModelObj = _.get(data.objects, tipModelName);
 			assert(tipModelObj, "didn't find tipModel "+tipModelName);
 			return [syringeName, tipModelName, tipModelObj.programCode];
 		});
+		// console.log({l})
 		// Group by program code, and call `sub()`
 		const m = _.groupBy(l, x => x[2]);
 		_.forEach(m, (l, programCode) => {
