@@ -67,7 +67,12 @@ const commandHandlers = {
 			}}
 		];
 		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."shaker.canAgentEquipmentSite"');
-		const params2 = alternatives[0];
+		let chosen = undefined;
+		if (data.planAlternativeChoosers.hasOwnProperty("shaker.canAgentEquipmentSite")) {
+			chosen = data.planAlternativeChoosers["shaker.canAgentEquipmentSite"](alternatives, data);
+			// console.log({chosen})
+		}
+		const params2 = chosen || alternatives[0];
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
 		const expansion = [

@@ -145,6 +145,11 @@ function process(p, data = {objects: {}, predicates: []}) {
 
 	output.objectToPredicateConverters = evowareEquipment.objectToPredicateConverters;
 
+	if (p.planAlternativeChoosers) {
+		output.planAlternativeChoosers = p.planAlternativeChoosers;
+		// console.log({planAlternativeChoosers: output.planAlternativeChoosers})
+	}
+
 	// User-defined commandHandlers
 	_.forEach(p.commandHandlers, (fn, key) => {
 		output.commandHandlers[key] = fn;

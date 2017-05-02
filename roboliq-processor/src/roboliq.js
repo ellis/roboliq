@@ -171,6 +171,7 @@ const protocolEmpty = {
 	objectToPredicateConverters: {},
 	schemas: {},
 	commandHandlers: {},
+	planAlternativeChoosers: {},
 	planHandlers: {},
 	files: {},
 	fillIns: {},
@@ -291,6 +292,7 @@ function loadProtocol(a, b, url, filecache) {
 		"objectToPredicateConverters",
 		"schemas",
 		"commandHandlers",
+		"planAlternativeChoosers",
 		"planHandlers",
 		"files",
 		"errors",
@@ -610,6 +612,7 @@ function validateProtocol1(protocol, o, path) {
 						const data = {
 							objects: protocol.objects,
 							predicates: protocol.predicates,
+							planAlternativeChoosers: protocol.planAlternativeChoosers,
 							planHandlers: protocol.planHandlers,
 							schemas: protocol.schemas,
 							accesses: [],
@@ -1312,6 +1315,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 	const data = {
 		objects: objects2,
 		predicates,
+		planAlternativeChoosers: protocol.planAlternativeChoosers,
 		planHandlers: protocol.planHandlers,
 		schemas: protocol.schemas,
 		accesses: [],

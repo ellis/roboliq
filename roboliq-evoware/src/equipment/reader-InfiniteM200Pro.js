@@ -241,13 +241,13 @@ function configure(config, equipmentName, params) {
 				}
 			},
 		])),
-		{
+		/*{
 			"shaker.canAgentEquipmentSite": {
 				agent,
 				equipment,
 				site
 			}
-		},
+		},*/
 	]);
 	predicates.push(...exports.getPredicates(agent, equipment, site));
 

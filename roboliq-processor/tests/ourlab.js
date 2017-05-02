@@ -412,9 +412,19 @@ const evowareSpec = {
 			}
 		}
 	},
+	planAlternativeChoosers: {
+		"shaker.canAgentEquipmentSite": (alternatives) => {
+			// console.log("alternatives:")
+			// console.log(alternatives)
+			// Prefer the shaker over the reader
+			const l = alternatives.filter(x => x.equipment.endsWith(".shaker"));
+			if (l.length > 0)
+				return l[0];
+		}
+	},
 	commandHandlers: {
 		"scale.weigh": function(params, parsed, data) {
-			console.log({params, parsed})
+			// console.log({params, parsed})
 			const expansion = [
 				{
 					command: "evoware._userPrompt",

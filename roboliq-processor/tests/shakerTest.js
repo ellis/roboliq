@@ -15,7 +15,7 @@ describe('commands/shaker', function() {
 	};
 
 	describe('shaker.shakePlate', function () {
-		it('should move plate to shaker, seal, then move plate back to original location', function () {
+		it('should move plate to shaker, shake, then move plate back to original location', function () {
 			const protocol = _.merge({}, protocol0, {
 				steps: {
 					1: {
