@@ -202,6 +202,23 @@ const evowareSpec = {
 			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc", "plateModel_384_square", "plateModel_96_dwp", "EK_96_well_Greiner_Black", "EK_384_greiner_flat_bottom", "lidModel_standard", "plateModel_96_round_filter_OV", "plateModel_96_round_deep_OV"]
 		},
 	],
+	lidStacking: [
+		{
+			lids: ["lidModel_standard"],
+			models: [
+				"plateModel_96_round_transparent_nunc",
+				"plateModel_96_square_transparent_nunc",
+				"plateModel_384_round",
+				"plateModel_384_square",
+				"plateModel_96_round_filter_OV",
+				"plateModel_96_round_deep_OV"
+			]
+		},
+		{
+			lids: ["plateModel_96_round_filter_OV"],
+			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_round_deep_OV"]
+		}
+	],
 	equipment: {
 		centrifuge: {
 			module: "centrifuge4.js",
@@ -266,23 +283,6 @@ const evowareSpec = {
 			}
 		}
 	},
-	lidStacking: [
-		{
-			lids: ["lidModel_standard"],
-			models: [
-				"plateModel_96_round_transparent_nunc",
-				"plateModel_96_square_transparent_nunc",
-				"plateModel_384_round",
-				"plateModel_384_square",
-				"plateModel_96_round_filter_OV",
-				"plateModel_96_round_deep_OV"
-			]
-		},
-		{
-			lids: ["plateModel_96_round_filter_OV"],
-			models: ["plateModel_96_round_transparent_nunc", "plateModel_96_round_deep_OV"]
-		}
-	],
 	romas: [
 		{
 			description: "roma1",

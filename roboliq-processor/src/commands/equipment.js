@@ -69,8 +69,7 @@ var commandHandlers = {
 		};
 	},
 	"equipment.openSite": function(params, parsed, data) {
-		//console.log("equipment.openSite:")
-		//console.log(JSON.stringify(parsed, null, '\t'))
+		// console.log("equipment.openSite:"); console.log(JSON.stringify(parsed, null, '\t'))
 		var sitesInternal = parsed.value.equipment.sitesInternal;
 		expect.truthy({paramName: "site"}, sitesInternal.indexOf(parsed.objectName.site) >= 0, `site ${parsed.objectName.site} must be in \`${parsed.objectName.equipment}.sitesInternal\; \`${parsed.objectName.equipment}.sitesInternal\` = ${sitesInternal}`);
 

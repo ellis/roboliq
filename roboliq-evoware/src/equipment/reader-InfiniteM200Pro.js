@@ -251,11 +251,12 @@ function configure(config, equipmentName, params) {
 	]);
 	predicates.push(...exports.getPredicates(agent, equipment, site));
 
+	// console.log({planHandlers: exports.getPlanHandlers(agent, equipment, site)})
 	const protocol = {
 		schemas: exports.getSchemas(agent, equipment),
 		objects,
 		predicates,
-		planHandlers: exports.getPlanHandlers(agent, equipment),
+		planHandlers: exports.getPlanHandlers(agent, equipment, site),
 		commandHandlers: exports.getCommandHandlers(agent, equipment),
 	};
 	return protocol;

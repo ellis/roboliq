@@ -24,7 +24,7 @@ import wellsParser from '../parsers/wellsParser.js';
  */
 var commandHandlers = {
 	"absorbanceReader.measurePlate": function(params, parsed, data) {
-		//console.log(JSON.stringify(parsed));
+		// console.log(JSON.stringify(parsed));
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
@@ -38,8 +38,8 @@ var commandHandlers = {
 		];
 		var alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."absorbanceReader.canAgentEquipmentModelSite"');
 		var params2 = alternatives[0];
-		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
-		//console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
+		// console.log("params2:\n"+JSON.stringify(params2, null, '  '))
+		// console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
 
 		const destinationAfter
 			= (parsed.value.destinationAfter === "stay") ? null
@@ -83,6 +83,7 @@ var commandHandlers = {
 				destination: destinationAfter
 			}
 		];
+		// console.log({expansion1: expansion[0]})
 		// console.log({expansion1output: expansion[1].output})
 
 		const result = {expansion};

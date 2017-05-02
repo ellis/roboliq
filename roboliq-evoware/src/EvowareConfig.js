@@ -135,14 +135,13 @@ function process(p, data = {objects: {}, predicates: []}) {
 		});
 	});
 
-	// Romas and vectors
+	handleEquipment(p, evowareConfigSpec, namespace, agent, output);
+
 	handleRomas(p, evowareConfigSpec, namespace, agent, output);
 
 	handleTipModels(p, output);
 
 	handleLiha(p, evowareConfigSpec, namespace, agent, output);
-
-	handleEquipment(p, evowareConfigSpec, namespace, agent, output);
 
 	output.objectToPredicateConverters = evowareEquipment.objectToPredicateConverters;
 
@@ -427,7 +426,7 @@ function makeCleanTipsHandler() {
 
 function handleEquipment(p, evowareConfigSpec, namespace, agent, output) {
 	_.forEach(p.equipment, (value, key) => {
-		console.log({key})
+		// console.log({key})
 		const module = require(__dirname+"/equipment/"+value.module);
 		const protocol = module.configure(evowareConfigSpec, key, value.params);
 		// console.log(key+": "+JSON.stringify(protocol, null, '\t'))

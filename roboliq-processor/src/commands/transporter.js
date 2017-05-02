@@ -696,15 +696,15 @@ var commandHandlers = {
 			return {errors: ["unable to find a transportation path for `"+parsed.objectName.object+"` from `"+misc.findObjectsValue(parsed.objectName.object+".location", data.objects)+"` to `"+parsed.objectName.destination+"`", JSON.stringify(x)]};
 		}
 		var tasks = planner.listAndOrderTasks(plan, true);
-		//console.log("Tasks:")
-		//console.log(JSON.stringify(tasks, null, '  '));
+		// console.log("Tasks:")
+		// console.log(JSON.stringify(tasks, null, '  '));
 		var cmdList = _(tasks).map(function(task) {
 			return _(task).map(function(taskParams, taskName) {
 				return (data.planHandlers.hasOwnProperty(taskName)) ? data.planHandlers[taskName](taskParams, params, data) : [];
 			}).flatten().value();
 		}).flatten().value();
-		//console.log("cmdList:")
-		//console.log(JSON.stringify(cmdList, null, '  '));
+		// console.log("cmdList:")
+		// console.log(JSON.stringify(cmdList, null, '  '));
 
 		// Create the expansion object
 		var expansion = {};
@@ -713,6 +713,7 @@ var commandHandlers = {
 			expansion[i.toString()] = cmd;
 			i += 1;
 		});
+		// console.log({expansion})
 
 		// Create the effets object
 		var effects = {};
