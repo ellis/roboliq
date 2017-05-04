@@ -15,7 +15,7 @@ EvowareConfigSpec:
       type: string
     config:
       description: Settings for the Evoware compiler.
-      type: EvowareCompilerConfig
+      $ref: /EvowareCompilerConfig
     sites:
       description: |
         These are the bench sites that Roboliq can use on the Evoware robot.
@@ -23,7 +23,7 @@ EvowareConfigSpec:
         The name should not contain any spaces or periods.
       type: object
       additionalProperties:
-        type: EvowareSiteSpec
+        $ref: /EvowareSiteSpec
     models:
       description: |
         These are the labware models that Roboliq can use on the Evoware robot.
@@ -38,6 +38,15 @@ EvowareConfigSpec:
       type: array
       items:
         type: EvowareSiteModelCompatibilitySpec
+    lidStacking:
+      description: |
+        Specifications of which labwares can be stacked. Normally, this means
+        just specifying that the default lid `lidModel_standard` can go on
+        various plate models. Within limit, plates can also be stacked on top
+        of each other.
+      type: array
+      items:
+        $ref: /EvowareLidStackingSpec
     equipment:
       description: |
         These are the equipment devices that are integrated with the Evoware robot.
@@ -81,6 +90,7 @@ EvowareConfigSpec:
       type: object
       additionalProperties:
         type: function
+  additionalProperties: false
 
 EvowareCompilerConfig:
   description: |
@@ -182,6 +192,43 @@ EvowareSiteModelCompatibilitySpec:
     ```yaml
     description: "short-format plate sites (non-tall labware, not for deep well plates)",
     sites: ["P1DOWNHOLDER", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "READER", "ROBOPEEL", "ROBOSEAL"],
+    models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc"]
+    ```
+
+EvowareLidStackingSpec:
+  description: |
+    Specifies combinations of labwares can be stacked. Normally, this means
+    just specifying that the default lid `lidModel_standard` can go on
+    various plate models. Within limit, plates can also be stacked on top
+    of each other.
+    All items in `lids` will be stackable on all items in `models`.
+  properties:
+    description:
+      description: An optional string to describe this list.
+      type: string
+    lids:
+      description: |
+        A list of lid models (or labware models) that can be stacked on `models`.
+        The names in this list should either be `lidModel_standard` or be
+        defined in the `model`
+        property of the parent `EvowareConfigSpec` object.
+      type: array
+      items:
+        type: string
+    models:
+      description: |
+        A list of models that are compatible with the `sites`.
+        The names in this list should be defined in the `models`
+        property of the parent `EvowareConfigSpec` object.
+      type: array
+      items:
+        type: string
+  additionalProperties: false
+  required: [lids, models]
+  example: |
+    ```yaml
+    description: "short-format plate sites (non-tall labware, not for deep well plates)",
+    lids: ["lidModel_standard"]
     models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc"]
     ```
 
