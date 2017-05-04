@@ -4,6 +4,9 @@ const math = require('mathjs');
 const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 const expect = require('roboliq-processor/dist/expect.js');
 const evowareEquipment = require('./equipment/evoware.js');
+// For validate():
+const Validator = require('jsonschema').Validator;
+const YAML = require('yamljs');
 
 
 
@@ -138,8 +141,6 @@ function process(p, data = {objects: {}, predicates: []}) {
 	handleEquipment(p, evowareConfigSpec, namespace, agent, output);
 
 	handleRomas(p, evowareConfigSpec, namespace, agent, output);
-
-	handleTipModels(p, output);
 
 	handleLiha(p, evowareConfigSpec, namespace, agent, output);
 
@@ -463,6 +464,36 @@ function test() {
 }
 */
 
+/**
+ * Validates a EvowareConfigSpec against the JSON schema.
+ * @param  {EvowareConfigSpec} evowareSpec - evoware config spec
+ * @return {object} - returns the validation results from the npm package `jsonschema`
+ */
+function validate(evowareSpec) {
+	const v = new Validator();
+
+	const schemas = YAML.load(__dirname+"/schemas/EvowareConfig.yaml");
+	// console.log(JSON.stringify(schemas, null, '\t'));
+	_.forEach(schemas, (schema, name) => {
+		const id = "/"+name;
+		v.addSchema(_.merge({id}, schema), id);
+	});
+
+	// console.log(JSON.stringify(evowareSpec, null, '\t'));
+	// console.log(evowareSpec);
+
+	// See: http://json-schema.org/example2.html
+	// See: https://spacetelescope.github.io/understanding-json-schema/structuring.html
+	// TODO: raise error on unknown type
+	// TODO: add some extra types, such as `function`, see
+	//  https://www.npmjs.com/package/jsonschema
+	//  https://www.npmjs.com/package/jsonschema-extra
+	const result = v.validate(evowareSpec, schemas.EvowareConfigSpec);
+	// console.log(result);
+	return result;
+}
+
 module.exports = {
-	process
+	process,
+	validate
 };

@@ -1,12 +1,8 @@
 import _ from 'lodash';
 import should from 'should';
-import jsonfile from 'jsonfile';
-import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
-import * as EvowareCompiler from '../src/EvowareCompiler.js';
-import * as EvowareTableFile from '../src/EvowareTableFile.js';
-import schemas from '../../roboliq-processor/tests/schemas.js';
-const Validator = require('jsonschema').Validator;
-const YAML = require('yamljs');
+import * as EvowareConfig from '../src/EvowareConfig.js';
+// const Validator = require('jsonschema').Validator;
+// const YAML = require('yamljs');
 
 const evowareSpec = {
 	namespace: "ourlab",
@@ -434,30 +430,8 @@ const evowareSpec = {
 describe('EvowareConfig', function() {
 	describe('validate', function () {
 		it('should validate', function () {
-			const v = new Validator();
-
-			const schemas = YAML.load(__dirname+"/../src/schemas/EvowareConfig.yaml");
-			// console.log(JSON.stringify(schemas, null, '\t'));
-			_.forEach(schemas, (schema, name) => {
-				const id = "/"+name;
-				v.addSchema(_.merge({id}, schema), id);
-			});
-
-			// console.log(JSON.stringify(evowareSpec, null, '\t'));
-			// console.log(evowareSpec);
-
-			// See: http://json-schema.org/example2.html
-			// See: https://spacetelescope.github.io/understanding-json-schema/structuring.html
-			// TODO: raise error on unknown type
-			// TODO: add some extra types, such as `function`, see
-			//  https://www.npmjs.com/package/jsonschema
-			//  https://www.npmjs.com/package/jsonschema-extra
-			const result = v.validate(evowareSpec, schemas.EvowareConfigSpec);
+			const result = EvowareConfig.validate(evowareSpec);
 			// console.log(result);
-			// should.deepEqual(results, [
-			// 	[{line: 'StartTimer("1");'}],
-			// 	[{line: 'WaitTimer("1","60");'}]
-			// ]);
 			should.deepEqual(result.errors, []);
 		});
 	});
