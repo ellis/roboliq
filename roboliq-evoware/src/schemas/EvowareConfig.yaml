@@ -31,13 +31,13 @@ EvowareConfigSpec:
         The name should not contain any spaces or periods.
       type: object
       additionalProperties:
-        type: EvowareModelSpec
+        $ref: /EvowareModelSpec
     siteModelCompatibilities:
       description: |
         Specifications of which bench sites are compatible with which models.
       type: array
       items:
-        type: EvowareSiteModelCompatibilitySpec
+        $ref: /EvowareSiteModelCompatibilitySpec
     lidStacking:
       description: |
         Specifications of which labwares can be stacked. Normally, this means
@@ -54,17 +54,17 @@ EvowareConfigSpec:
         The name should not contain any spaces or periods.
       type: object
       additionalProperties:
-        type: EvowareEquipmentSpec
+        $ref: /EvowareEquipmentSpec
     romas:
       description: |
         List of Evoware ROMAs (robotic arms for moving plates).
       type: array
       items:
-        type: EvowareRomaSpec
+        $ref: /EvowareRomaSpec
     liha:
       description: |
         Specification of the Evoware robot's LIHA (Liquid Handling Arm).
-      type: EvowareLihaSpec
+      $ref: /EvowareLihaSpec
     commandHandlers:
       description: |
         This allows you to provide user-defined command handlers.
@@ -143,6 +143,9 @@ EvowareModelSpec:
     type:
       description: The type of labware model (currenly only `PlateModel` is available)
       enum: [PlateModel]
+    description:
+      description: An optional string to describe this model.
+      type: string
     rows:
       description: Number of rows on the plate
       type: integer
@@ -308,7 +311,7 @@ EvowareLihaSpec:
         The name should not contain any spaces or periods.
       type: object
       additionalProperties:
-        type: EvowareTipModelSpec
+        $ref: /EvowareTipModelSpec
     syringes:
       description: |
         A list of syringe specifications - one for each syringe on the LIHA.
@@ -339,8 +342,15 @@ EvowareLihaSpec:
         For example, to flush 1000ul tips with a program code of "1000",
         the washProgram name would be "flush_1000".
       additionalProperties:
-        type: EvowareWashProgram
+        $ref: /EvowareWashProgram
   additionalProperties: false
+
+EvowareWashProgram:
+CONTINUE
+properties: {
+  type: {enum: ["EvowareWashProgram"]}
+},
+required: ["type"]
 
 EvowareTipModelSpec:
   description: |

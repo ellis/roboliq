@@ -91,105 +91,105 @@ const evowareSpec = {
 		},
 		"plateModel_48_flower": {
 			"type": "PlateModel",
-			"label": "48 flower-well plate",
+			"description": "48 flower-well plate",
 			"rows": 6,
 			"columns": 8,
 			"evowareName": "Ellis 48 Flower Plate"
 		},
 		"plateModel_96_pcr": {
 			"type": "PlateModel",
-			"label": "96 well PCR plate",
+			"description": "96 well PCR plate",
 			"rows": 8,
 			"columns": 12,
 			"evowareName": "D-BSSE 96 Well PCR Plate"
 		},
 		"plateModel_96_dwp": {
 			"type": "PlateModel",
-			"label": "96 well deep-well plate",
+			"description": "96 well deep-well plate",
 			"rows": 8,
 			"columns": 12,
 			"evowareName": "D-BSSE 96 Well DWP"
 		},
 		"plateModel_96_round_transparent_nunc": {
 			"type": "PlateModel",
-			"label": "96 round-well transparent Nunc plate",
+			"description": "96 round-well transparent Nunc plate",
 			"rows": 8,
 			"columns": 12,
 			"evowareName": "Ellis Nunc F96 MicroWell"
 		},
 		"plateModel_96_square_transparent_nunc": {
 			"type": "PlateModel",
-			"label": "96 square-well transparent Nunc plate",
+			"description": "96 square-well transparent Nunc plate",
 			"rows": 8,
 			"columns": 12,
 			"evowareName": "Ellis Nunc F96 MicroWell"
 		},
 		"plateModel_384_round": {
 			"type": "PlateModel",
-			"label": "384 round-well plate",
+			"description": "384 round-well plate",
 			"rows": 16,
 			"columns": 24,
 			"evowareName": "D-BSSE 384 Well Plate White"
 		},
 		"plateModel_384_square": {
 			"type": "PlateModel",
-			"label": "384 square-flat-well white plate",
+			"description": "384 square-flat-well white plate",
 			"rows": 16,
 			"columns": 24,
 			"evowareName": "D-BSSE 384 Well Plate White"
 		},
 		"plateModel_384_square_transparent_greiner": {
 			"type": "PlateModel",
-			"label": "384 square-flat-well transparent Greiner",
+			"description": "384 square-flat-well transparent Greiner",
 			"rows": 16,
 			"columns": 24,
 			"evowareName": "384 Sqr Flat Trans Greiner"
 		},
 		"plateModel_96_round_filter_OV": {
 			"type": "PlateModel",
-			"label": "96 round-well white filter plate",
+			"description": "96 round-well white filter plate",
 			"rows": 8,
 			"columns": 12,
 			"evowareName": "OV 96 Well Filter Plate wLid"
 		},
 		"plateModel_96_round_deep_OV": {
 			"type": "PlateModel",
-			"label": "96 round-well white filter plate",
+			"description": "96 round-well white filter plate",
 			"rows": 8,
 			"columns": 12,
 			"evowareName": "OV 96 DW Lid Ritter" // ToDo: Verify this
 		},
 		"troughModel_100ml": {
 			"type": "PlateModel",
-			"label": "Trough 100ml",
+			"description": "Trough 100ml",
 			"rows": 8,
 			"columns": 1,
 			"evowareName": "Trough 100ml"
 		},
 		"troughModel_25ml": {
 			"type": "PlateModel",
-			"label": "Trough 25ml",
+			"description": "Trough 25ml",
 			"rows": 8,
 			"columns": 1,
 			"evowareName": "Trough 25ml"
 		},
 		"tubeHolderModel_1500ul": {
 			"type": "PlateModel",
-			"label": "20 tube block 1.5ml",
+			"description": "20 tube block 1.5ml",
 			"rows": 4,
 			"columns": 5,
 			"evowareName": "Block 20Pos 1.5 ml Eppendorf"
 		},
 		"tubeHolderModel_15ml": {
 			"type": "PlateModel",
-			"label": "8 tube block 15ml",
+			"description": "8 tube block 15ml",
 			"rows": 8,
 			"columns": 1,
 			"evowareName": "Reagent Cooled 8*15ml"
 		},
 		"tubeHolderModel_50ml": {
 			"type": "PlateModel",
-			"label": "8 tube block 50ml",
+			"description": "8 tube block 50ml",
 			"rows": 8,
 			"columns": 1,
 			"evowareName": "Reagent Cooled 8*50ml"
