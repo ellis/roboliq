@@ -342,15 +342,53 @@ EvowareLihaSpec:
         For example, to flush 1000ul tips with a program code of "1000",
         the washProgram name would be "flush_1000".
       additionalProperties:
-        $ref: /EvowareWashProgram
+        $ref: /EvowareWashProgramSpec
   additionalProperties: false
 
-EvowareWashProgram:
-CONTINUE
-properties: {
-  type: {enum: ["EvowareWashProgram"]}
-},
-required: ["type"]
+EvowareWashProgramSpec:
+  description: |
+    Describes a method for washing tips in Evoware
+  oneOf: ["#/definitions/specProgram", "#/definitions/specScript"]
+  definitions:
+    specProgram:
+      properties:
+        type:
+          enum: ["EvowareWashProgram"]
+        wasteGrid:
+          type: integer
+        wasteSite:
+          type: integer
+        cleanerGrid:
+          type: integer
+        cleanerSite:
+          type: integer
+        wasteVolume:
+          type: numeric
+        wasteDelay:
+          type: integer
+        cleanerVolume:
+          type: numeric
+        cleanerDelay:
+          type: integer
+        airgapVolume:
+          type: numeric
+        airgapSpeed:
+          type: integer
+        retractSpeed:
+          type: integer
+        fastWash:
+          type: boolean
+      additionalProperties: false
+      required: [type, wasteGrid, wasteSite, cleanerGrid, cleanerSite, wasteVolume, wasteDelay, cleanerVolume, cleanerDelay, airgapVolume, airgapSpeed, retractSpeed, fastWash]
+    specScript:
+      properties:
+        type:
+          enum: ["EvowareWashProgram"]
+        script:
+          description: Full path to evoware script to perform the washing.
+          type: string
+      additionalProperties: false
+      required: [type, script]
 
 EvowareTipModelSpec:
   description: |

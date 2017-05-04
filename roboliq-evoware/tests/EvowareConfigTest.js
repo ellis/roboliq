@@ -434,10 +434,7 @@ const evowareSpec = {
 describe('EvowareConfig', function() {
 	describe('validate', function () {
 		it('should validate', function () {
-			var v = new Validator();
-			var instance = 4;
-			var schema = {"type": "number"};
-			console.log(v.validate(instance, schema));
+			const v = new Validator();
 
 			const schemas = YAML.load(__dirname+"/../src/schemas/EvowareConfig.yaml");
 			// console.log(JSON.stringify(schemas, null, '\t'));
@@ -449,11 +446,19 @@ describe('EvowareConfig', function() {
 			// console.log(JSON.stringify(evowareSpec, null, '\t'));
 			// console.log(evowareSpec);
 
-			console.log(v.validate(evowareSpec, schemas.EvowareConfigSpec));
+			// See: http://json-schema.org/example2.html
+			// See: https://spacetelescope.github.io/understanding-json-schema/structuring.html
+			// TODO: raise error on unknown type
+			// TODO: add some extra types, such as `function`, see
+			//  https://www.npmjs.com/package/jsonschema
+			//  https://www.npmjs.com/package/jsonschema-extra
+			const result = v.validate(evowareSpec, schemas.EvowareConfigSpec);
+			// console.log(result);
 			// should.deepEqual(results, [
 			// 	[{line: 'StartTimer("1");'}],
 			// 	[{line: 'WaitTimer("1","60");'}]
 			// ]);
+			should.deepEqual(result.errors, []);
 		});
 	});
 });
