@@ -48,22 +48,39 @@ EvowareConfigSpec:
         type: EvowareEquipmentSpec
     romas:
       description: |
-        List of Evoware RoMas (robotic arms for moving plates).
+        List of Evoware ROMAs (robotic arms for moving plates).
       type: array
       items:
         type: EvowareRomaSpec
-    tipModels:
+    liha:
       description: |
-        These are the tip models that can be used with the Evoware robot.
-        `tipModels` is a map from tip model name to specification.
-        The name should not contain any spaces or periods.
+        Specification of the Evoware robot's LIHA (Liquid Handling Arm).
+      type: EvowareLihaSpec
+    commandHandlers:
+      description: |
+        This allows you to provide user-defined command handlers.
+        It can also be used to override the command handlers provided by
+        Roboliq, Evoware, or and equipment module.
+        `commandHandlers` is a map from the command name to a command handling
+        function.
+        See the documention about command handlers for more information.
       type: object
       additionalProperties:
-        type: EvowareTipModelSpec
-
-    liha:
+        type: function
     planAlternativeChoosers:
-    commandHandlers:
+      description: |
+        This is an advanced property that will require some understanding of
+        Roboliq's approach to planning.
+        Please see the documenation for more information.
+        `planAlternativeChoosers` is a map from a predicate ID to a function
+        that takes a list of possible alternatives for that predicate.
+        The function can then choose one of those alternatives by returning
+        it.  This allows you to configure planning preferences, such as if
+        you have two shakers, you might always prefer to use a specific one
+        when it's among the alternatives.
+      type: object
+      additionalProperties:
+        type: function
 
 EvowareCompilerConfig:
   description: |
@@ -78,6 +95,7 @@ EvowareCompilerConfig:
     BROWSER:
       description: Path to the browser (e.g Google Chrome) for opening Roboliq's HTML files
       type: string
+  additionalProperties: false
   required: [TEMPDIR, ROBOLIQ, BROWSER]
   example: |
     ```yaml
@@ -99,6 +117,7 @@ EvowareSiteSpec:
     evowareSite:
       description: The site's index
       type: integer
+  additionalProperties: false
   required: [evowareCarrier, evowareGrid, evowareSite]
   example: |
     ```yaml
@@ -123,6 +142,7 @@ EvowareModelSpec:
     evowareName:
       description: Evoware name of the labware model
       type: string
+  additionalProperties: false
   required: [type, rows, columns, evowareName]
   example: |
     ```yaml
@@ -143,7 +163,7 @@ EvowareSiteModelCompatibilitySpec:
     sites:
       description: |
         A list of sites that are compatible with the `models`.
-        The names in this list should defined in the `sites`
+        The names in this list should be defined in the `sites`
         property of the parent `EvowareConfigSpec` object.
       type: array
       items:
@@ -151,11 +171,12 @@ EvowareSiteModelCompatibilitySpec:
     models:
       description: |
         A list of models that are compatible with the `sites`.
-        The names in this list should defined in the `models`
+        The names in this list should be defined in the `models`
         property of the parent `EvowareConfigSpec` object.
       type: array
       items:
         type: string
+  additionalProperties: false
   required: [sites, models]
   example: |
     ```yaml
@@ -166,7 +187,8 @@ EvowareSiteModelCompatibilitySpec:
 
 EvowareEquipmentSpec:
   description: |
-
+    This allows you to specify a equipment module to load and the parameters
+    that should be passed to the module.
   properties:
     description:
       description: An optional string to describe this piece of equipment.
@@ -182,6 +204,7 @@ EvowareEquipmentSpec:
         The parameters to be passed to the equipment module.
         See the documentation for the equipment modules for more information.
       type: object
+  additionalProperties: false
   required: [module, params]
   example: |
     ```yaml
@@ -215,6 +238,7 @@ EvowareRomaSpec:
             type: array
             items:
               type: string
+  additionalProperties: false
   example: |
     ```yaml
     description: "roma1"
@@ -225,6 +249,51 @@ EvowareRomaSpec:
       - { vector: "Narrow", clique: ["CENTRIFUGE_3", "REGRIP"] }
       - { vector: "Narrow", clique: ["CENTRIFUGE_4", "REGRIP"] }
     ```
+
+EvowareLihaSpec:
+  description: |
+    Specification of the Evoware robot's LIHA (Liquid Handling Arm).
+  properties:
+    tipModels:
+      description: |
+        These are the tip models that can be used with the Evoware robot.
+        `tipModels` is a map from tip model name to specification.
+        The name should not contain any spaces or periods.
+      type: object
+      additionalProperties:
+        type: EvowareTipModelSpec
+    syringes:
+      description: |
+        A list of syringe specifications - one for each syringe on the LIHA.
+        For robots with fixed tips, the `tipModelPermanent` must be set
+        to one of the values in `tipModels`.  For disposable tips, an empty
+        object should be specified for each syringe.
+      type: array
+      items:
+        properties:
+          tipModelPermanent:
+            description: a tip model - must be set to one of the values in `tipModels`
+            type: string
+    sites:
+      description: |
+        A list of sites that they LIHA can operate on.
+        The names in this list should either be defined in the `sites`
+        property of the parent `EvowareConfigSpec` object or
+        in an `equipment` defintion.
+      type: array
+      items:
+        type: string
+    washPrograms:
+      description: |
+        These are the wash programs for the LIHA.
+        `washPrograms` is a map from name to specification.
+        The name is composed of a wash intensity, an underscore,
+        and a tip model `programCode`.
+        For example, to flush 1000ul tips with a program code of "1000",
+        the washProgram name would be "flush_1000".
+      additionalProperties:
+        type: EvowareWashProgram
+  additionalProperties: false
 
 EvowareTipModelSpec:
   description: |
@@ -247,6 +316,7 @@ EvowareTipModelSpec:
       description: true if this tip can handle cells (default = false)
       type: boolean
       default: false
+  additionalProperties: false
   required: [programCode, min, max]
   example: |
     ```json

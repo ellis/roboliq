@@ -102,7 +102,7 @@ const protocol0 = {
 	schemas
 };
 
-describe('EvowareCompilerTest', function() {
+describe('EvowareCompiler', function() {
 	describe('compileStep', function () {
 		it('should compile timer._wait', function () {
 			const table = {};

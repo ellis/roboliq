@@ -332,11 +332,11 @@ const evowareSpec = {
 			]
 		}
 	],
-	tipModels: {
-		"tipModel1000": {"programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true},
-		"tipModel0050": {"programCode": "0050", "min": "0.25ul", "max": "45ul", "canHandleSeal": true, "canHandleCells": false}
-	},
 	liha: {
+		tipModels: {
+			"tipModel1000": {"programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true},
+			"tipModel0050": {"programCode": "0050", "min": "0.25ul", "max": "45ul", "canHandleSeal": true, "canHandleCells": false}
+		},
 		syringes: [
 			{ tipModelPermanent: "tipModel1000" },
 			{ tipModelPermanent: "tipModel1000" },
@@ -412,20 +412,6 @@ const evowareSpec = {
 			}
 		}
 	},
-	planAlternativeChoosers: {
-		"centrifuge.canAgentEquipmentModelSite1Site2": (alternatives) => {
-			// Prefer sites 2+4 over 1+3
-			const l = alternatives.filter(x => x.site1.endsWith("_2"));
-			if (l.length > 0)
-				return l[0];
-		},
-		"shaker.canAgentEquipmentSite": (alternatives) => {
-			// Prefer the shaker over the reader
-			const l = alternatives.filter(x => x.equipment.endsWith(".shaker"));
-			if (l.length > 0)
-				return l[0];
-		},
-	},
 	commandHandlers: {
 		"scale.weigh": function(params, parsed, data) {
 			console.log({params, parsed})
@@ -441,6 +427,20 @@ const evowareSpec = {
 
 			return {expansion};
 		}
+	},
+	planAlternativeChoosers: {
+		"centrifuge.canAgentEquipmentModelSite1Site2": (alternatives) => {
+			// Prefer sites 2+4 over 1+3
+			const l = alternatives.filter(x => x.site1.endsWith("_2"));
+			if (l.length > 0)
+				return l[0];
+		},
+		"shaker.canAgentEquipmentSite": (alternatives) => {
+			// Prefer the shaker over the reader
+			const l = alternatives.filter(x => x.equipment.endsWith(".shaker"));
+			if (l.length > 0)
+				return l[0];
+		},
 	},
 };
 

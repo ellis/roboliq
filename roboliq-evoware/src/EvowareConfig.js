@@ -224,20 +224,6 @@ function handleRomas(p, evowareConfigSpec, namespace, agent, output) {
  */
 
 /**
- * Handle the `tipModels` spec
- * @param {Object} p
- * @param {TipModel[]} p.tipModels
- */
-function handleTipModels(p, output) {
-	if (_.isPlainObject(p.tipModels)) {
-		const tipModels = _.mapValues(p.tipModels, x => _.merge({type: "TipModel"}, x));
-		// console.log(tipModels)
-		_.set(output.objects, [p.namespace, p.name, "liha", "tipModel"], tipModels);
-		// console.log({stuff: _.get(output, ["object", p.namespace, p.name, "liha", "tipModel"])});
-	}
-}
-
-/**
  * @typedef Liha
  * @type {Object}
  * @property {Syringe[]} syringes
@@ -262,6 +248,13 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	const equipment = [p.namespace, p.name, "liha"].join(".");
 
 	const tipModelToSyringes = {};
+
+	if (_.isPlainObject(p.liha.tipModels)) {
+		const tipModels = _.mapValues(p.tipModels, x => _.merge({type: "TipModel"}, x));
+		// console.log(tipModels)
+		_.set(output.objects, [p.namespace, p.name, "liha", "tipModel"], tipModels);
+		// console.log({stuff: _.get(output, ["object", p.namespace, p.name, "liha", "tipModel"])});
+	}
 
 	output.schemas[`pipetter.cleanTips|${agent}|${equipment}`] = {
 		description: "Clean the pipetter tips.",
