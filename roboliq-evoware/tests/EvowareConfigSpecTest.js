@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import should from 'should';
-import * as EvowareConfig from '../src/EvowareConfig.js';
+import * as EvowareConfigSpec from '../src/EvowareConfigSpec.js';
 // const Validator = require('jsonschema').Validator;
 // const YAML = require('yamljs');
 
-const evowareSpec = {
+const evowareConfigSpec = {
 	namespace: "ourlab",
 	name: "mario",
 	config: {
@@ -427,10 +427,10 @@ const evowareSpec = {
 	},
 };
 
-describe('EvowareConfig', function() {
+describe('EvowareConfigSpec', function() {
 	describe('validate', function () {
 		it('should validate', function () {
-			const result = EvowareConfig.validate(evowareSpec);
+			const result = EvowareConfigSpec.validate(evowareConfigSpec);
 			// console.log(result);
 			should.deepEqual(result.errors, []);
 		});

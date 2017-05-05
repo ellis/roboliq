@@ -1,4 +1,4 @@
-const evowareSpec = {
+const evowareConfigSpec = {
 	namespace: "ourlab",
 	name: "mario",
 	config: {
@@ -448,7 +448,7 @@ const evowareSpec = {
 	},
 };
 
-const EvowareConfig = require('roboliq-evoware/dist/EvowareConfig.js');
+const EvowareConfigSpec = require('roboliq-evoware/dist/EvowareConfigSpec.js');
 
 //module.exports = evowareSpec;
-module.exports = EvowareConfig.process(evowareSpec);
+module.exports = EvowareConfigSpec.makeProtocol(evowareConfigSpec);

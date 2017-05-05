@@ -13,23 +13,23 @@ const YAML = require('yamljs');
  * Convert an EvowareConfigSpec into the format of a Roboliq Protocol.
  * This function exists, because it is much simpler to write an
  * EvowareConfigSpec than the equivalent Protocol.
- * @param  {EvowareConfigSpec} p - specification of an Evoware robot configuration
+ * @param  {EvowareConfigSpec} spec - specification of an Evoware robot configuration
  * @param  {Object} [data] - (not currently used) protocol data loaded before this configuration
  * @return {Protocol} - an Evoware robot configuration in the format of a Protocol.
  */
-function process(p, data = {objects: {}, predicates: []}) {
+function makeProtocol(spec, data = {objects: {}, predicates: []}) {
 	// Validate
-	const validation = validate(p);
+	const validation = validate(spec);
 	if (!_.isEmpty(validation.errors)) {
 		return {
 			errors: {
-				EvowareConfig: validation.errors
+				EvowareConfigSpec: validation.errors
 			}
 		};
 	}
 
-	const namespace = [p.namespace, p.name].join(".");
-	const agent = [p.namespace, p.name, "evoware"].join(".");
+	const namespace = [spec.namespace, spec.name].join(".");
+	const agent = [spec.namespace, spec.name, "evoware"].join(".");
 	const predicates = [];
 	const output = { roboliq: "v1", predicates, commandHandlers: evowareEquipment.getCommandHandlers() };
 
@@ -46,17 +46,17 @@ function process(p, data = {objects: {}, predicates: []}) {
 	}
 	// Return fully qualified model name - first lookup to see whether the
 	// model is specific to this robot, and if so, use that name.  Otherwise
-	// use the model name for lab, as defined by p.namespace.
+	// use the model name for lab, as defined by spec.namespace.
 	function getModelName(base) {
 		assert(base, "modelName is undefined");
-		const model1 = [p.namespace, p.name, "model", base];
-		const model2 = [p.namespace, "model", base];
+		const model1 = [spec.namespace, spec.name, "model", base];
+		const model2 = [spec.namespace, "model", base];
 		const isOnlyOnRobot = _.has(output.objects, model1);
 		return (isOnlyOnRobot) ? model1.join(".") : model2.join(".");
 	}
 	function lookupSyringe(base) {
 		assert(base, "lookupSyringe: base name must be defined");
-		const id1 = [p.namespace, p.name, "liha", "syringe", base.toString()];
+		const id1 = [spec.namespace, spec.name, "liha", "syringe", base.toString()];
 		const id2 = base.toString();
 		const id =
 			_.has(output.objects, id1) ? id1 :
@@ -67,8 +67,8 @@ function process(p, data = {objects: {}, predicates: []}) {
 	}
 	function lookupTipModel(base) {
 		assert(base, "lookupTipModel: base name must be defined");
-		const id1 = [p.namespace, p.name, "liha", "tipModel", base];
-		const id2 = [p.namespace, "tipModel", base];
+		const id1 = [spec.namespace, spec.name, "liha", "tipModel", base];
+		const id2 = [spec.namespace, "tipModel", base];
 		const id3 = base;
 		// console.log({id1, id2, id3, b1: _.has(output.objects, id1), b2: _.has(data.objects, id2), b3: _.has(data.objects, id3)})
 		const id =
@@ -89,15 +89,15 @@ function process(p, data = {objects: {}, predicates: []}) {
 			const siteModel = `${namespace}.siteModel${siteModelCount}`;
 			output.predicates.push({isSiteModel: {model: siteModel}});
 			_.forEach(compat.sites, site => {
-				output.predicates.push({siteModel: {site: evowareConfigSpec.getSiteName(site), siteModel}});
+				output.predicates.push({siteModel: {site: helpers.getSiteName(site), siteModel}});
 			});
 			_.forEach(compat.models, labwareModel => {
-				output.predicates.push({stackable: {below: siteModel, above: evowareConfigSpec.getModelName(labwareModel)}})
+				output.predicates.push({stackable: {below: siteModel, above: helpers.getModelName(labwareModel)}})
 			});
 		});
 	}
 
-	const evowareConfigSpec = {
+	const helpers = {
 		getAgentName,
 		getEquipmentName,
 		getSiteName,
@@ -110,17 +110,17 @@ function process(p, data = {objects: {}, predicates: []}) {
 	output.schemas = evowareEquipment.getSchemas();
 
 	_.set(output, ["roboliq"], "v1");
-	_.set(output, ["objects", p.namespace, "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, "model", "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, p.name, "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, p.name, "evoware", "type"], "EvowareRobot");
-	_.set(output, ["objects", p.namespace, p.name, "evoware", "config"], p.config);
-	_.set(output, ["objects", p.namespace, p.name, "site", "type"], "Namespace");
-	_.set(output, ["objects", p.namespace, p.name, "liha", "type"], "Pipetter");
+	_.set(output, ["objects", spec.namespace, "type"], "Namespace");
+	_.set(output, ["objects", spec.namespace, "model", "type"], "Namespace");
+	_.set(output, ["objects", spec.namespace, spec.name, "type"], "Namespace");
+	_.set(output, ["objects", spec.namespace, spec.name, "evoware", "type"], "EvowareRobot");
+	_.set(output, ["objects", spec.namespace, spec.name, "evoware", "config"], spec.config);
+	_.set(output, ["objects", spec.namespace, spec.name, "site", "type"], "Namespace");
+	_.set(output, ["objects", spec.namespace, spec.name, "liha", "type"], "Pipetter");
 
 	// Add 5 timers
 	_.forEach(_.range(5), i => {
-		const equipment = [p.namespace, p.name, `timer${i+1}`].join(".");
+		const equipment = [spec.namespace, spec.name, `timer${i+1}`].join(".");
 		_.set(output.objects, equipment, {
 			type: "Timer",
 			evowareId: i+1
@@ -129,20 +129,20 @@ function process(p, data = {objects: {}, predicates: []}) {
 	});
 
 	// Add bench sites (equipment sites will be added by the equipment modules)
-	_.forEach(p.sites, (value, key) => {
-		_.set(output, ["objects", p.namespace, p.name, "site", key], _.merge({type: "Site"}, value));
+	_.forEach(spec.sites, (value, key) => {
+		_.set(output, ["objects", spec.namespace, spec.name, "site", key], _.merge({type: "Site"}, value));
 	});
 
-	// Add explicitly defined models to p.namespace
-	_.forEach(p.models, (value, key) => {
-		_.set(output, ["objects", p.namespace, "model", key], value);
+	// Add explicitly defined models to spec.namespace
+	_.forEach(spec.models, (value, key) => {
+		_.set(output, ["objects", spec.namespace, "model", key], value);
 	});
 
 	// Add predicates for siteModelCompatibilities
-	addSiteModelCompatibilities(p.siteModelCompatibilities, output);
+	addSiteModelCompatibilities(spec.siteModelCompatibilities, output);
 
 	// Lid and plate stacking
-	_.forEach(p.lidStacking, lidsModels => {
+	_.forEach(spec.lidStacking, lidsModels => {
 		_.forEach(lidsModels.lids, lid => {
 			_.forEach(lidsModels.models, model => {
 				const below = getModelName(model);
@@ -152,21 +152,21 @@ function process(p, data = {objects: {}, predicates: []}) {
 		});
 	});
 
-	handleEquipment(p, evowareConfigSpec, namespace, agent, output);
+	handleEquipment(spec, helpers, namespace, agent, output);
 
-	handleRomas(p, evowareConfigSpec, namespace, agent, output);
+	handleRomas(spec, helpers, namespace, agent, output);
 
-	handleLiha(p, evowareConfigSpec, namespace, agent, output);
+	handleLiha(spec, helpers, namespace, agent, output);
 
 	output.objectToPredicateConverters = evowareEquipment.objectToPredicateConverters;
 
-	if (p.planAlternativeChoosers) {
-		output.planAlternativeChoosers = p.planAlternativeChoosers;
+	if (spec.planAlternativeChoosers) {
+		output.planAlternativeChoosers = spec.planAlternativeChoosers;
 		// console.log({planAlternativeChoosers: output.planAlternativeChoosers})
 	}
 
 	// User-defined commandHandlers
-	_.forEach(p.commandHandlers, (fn, key) => {
+	_.forEach(spec.commandHandlers, (fn, key) => {
 		output.commandHandlers[key] = fn;
 	});
 
@@ -193,16 +193,16 @@ function process(p, data = {objects: {}, predicates: []}) {
  *
  * Expect specs of this form:
  * ``{<transporter>: {<program>: [site names]}}``
- * @param {Object} p
- * @param {Roma[]} p.romas
+ * @param {Object} spec
+ * @param {Roma[]} spec.romas
  */
-function handleRomas(p, evowareConfigSpec, namespace, agent, output) {
+function handleRomas(spec, helpers, namespace, agent, output) {
 	let siteCliqueId = 1;
-	_.forEach(p.romas, (roma, i) => {
+	_.forEach(spec.romas, (roma, i) => {
 		// Add the roma object
-		_.set(output, ["objects", p.namespace, p.name, `roma${i+1}`], {type: "Transporter", evowareRoma: i});
+		_.set(output, ["objects", spec.namespace, spec.name, `roma${i+1}`], {type: "Transporter", evowareRoma: i});
 
-		const equipment = [p.namespace, p.name, `roma${i+1}`].join(".");
+		const equipment = [spec.namespace, spec.name, `roma${i+1}`].join(".");
 		_.forEach(roma.safeVectorCliques, safeVectorClique => {
 			const siteClique = `${namespace}.siteClique${siteCliqueId}`;
 			siteCliqueId++;
@@ -211,7 +211,7 @@ function handleRomas(p, evowareConfigSpec, namespace, agent, output) {
 
 			// Add the site clique predicates
 			_.forEach(safeVectorClique.clique, base => {
-				const site = evowareConfigSpec.getSiteName(base);
+				const site = helpers.getSiteName(base);
 				output.predicates.push({"siteCliqueSite": {siteClique, site}});
 			});
 
@@ -257,18 +257,18 @@ function handleRomas(p, evowareConfigSpec, namespace, agent, output) {
  * See EvowareWashProgram
  */
 
-function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
-	if (!p.liha) return;
+function handleLiha(spec, helpers, namespace, agent, output) {
+	if (!spec.liha) return;
 
-	const equipment = [p.namespace, p.name, "liha"].join(".");
+	const equipment = [spec.namespace, spec.name, "liha"].join(".");
 
 	const tipModelToSyringes = {};
 
-	if (_.isPlainObject(p.liha.tipModels)) {
-		const tipModels = _.mapValues(p.liha.tipModels, x => _.merge({type: "TipModel"}, x));
+	if (_.isPlainObject(spec.liha.tipModels)) {
+		const tipModels = _.mapValues(spec.liha.tipModels, x => _.merge({type: "TipModel"}, x));
 		// console.log(tipModels)
-		_.set(output.objects, [p.namespace, p.name, "liha", "tipModel"], tipModels);
-		// console.log({stuff: _.get(output, ["object", p.namespace, p.name, "liha", "tipModel"])});
+		_.set(output.objects, [spec.namespace, spec.name, "liha", "tipModel"], tipModels);
+		// console.log({stuff: _.get(output, ["object", spec.namespace, spec.name, "liha", "tipModel"])});
 	}
 
 	output.schemas[`pipetter.cleanTips|${agent}|${equipment}`] = {
@@ -294,10 +294,10 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	};
 
 	// Add syringes
-	_.set(output.objects, [p.namespace, p.name, "liha", "syringe"], {});
-	_.forEach(p.liha.syringes, (syringeSpec, i) => {
+	_.set(output.objects, [spec.namespace, spec.name, "liha", "syringe"], {});
+	_.forEach(spec.liha.syringes, (syringeSpec, i) => {
 		// console.log({syringeSpec})
-		const syringe = [p.namespace, p.name, "liha", "syringe", (i+1).toString()].join(".");
+		const syringe = [spec.namespace, spec.name, "liha", "syringe", (i+1).toString()].join(".");
 		const syringeObj = {
 			type: "Syringe",
 			row: i + 1
@@ -307,7 +307,7 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 
 		// Handle permanent tips
 		if (syringeSpec.tipModelPermanent) {
-			const tipModel = evowareConfigSpec.lookupTipModel(syringeSpec.tipModelPermanent);
+			const tipModel = helpers.lookupTipModel(syringeSpec.tipModelPermanent);
 			syringeObj.tipModel = tipModel;
 			syringeObj.tipModelPermanent = tipModel;
 
@@ -319,39 +319,39 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	});
 
 	// Handle tipModelToSyringes mapping for non-permantent tips
-	_.forEach(p.liha.tipModelToSyringes, (syringes0, tipModel0) => {
-		const tipModel = evowareConfigSpec.lookupTipModel(syringeSpec.tipModelPermanent);
-		const syringes = syringes0.map(evowareConfigSpec.lookupSyringe);
+	_.forEach(spec.liha.tipModelToSyringes, (syringes0, tipModel0) => {
+		const tipModel = helpers.lookupTipModel(syringeSpec.tipModelPermanent);
+		const syringes = syringes0.map(helpers.lookupSyringe);
 		tipModelToSyringes[tipModel] = (tipModelToSyringes[tipModel] || []).concat(syringes);
 	});
 	// console.log({tipModelToSyringes})
-	_.set(output.objects, [p.namespace, p.name, "liha", "tipModelToSyringes"], tipModelToSyringes);
+	_.set(output.objects, [spec.namespace, spec.name, "liha", "tipModelToSyringes"], tipModelToSyringes);
 
 	// Handle washPrograms
-	if (p.liha.washPrograms) {
-		const washPrograms = _.merge({type: "Namespace"}, _.mapValues(p.liha.washPrograms, x => _.merge({type: "EvowareWashProgram"}, x)));
-		_.set(output.objects, [p.namespace, p.name, "washProgram"], washPrograms);
+	if (spec.liha.washPrograms) {
+		const washPrograms = _.merge({type: "Namespace"}, _.mapValues(spec.liha.washPrograms, x => _.merge({type: "EvowareWashProgram"}, x)));
+		_.set(output.objects, [spec.namespace, spec.name, "washProgram"], washPrograms);
 	}
 
 	// Add system liquid
-	const syringeCount = p.liha.syringes.length;
+	const syringeCount = spec.liha.syringes.length;
 	assert(syringeCount <= 8, "roboliq-evoware has only been configured to handle 8-syringe LiHas; please contact the software developer to accommodate your needs.");
-	_.set(output.objects, [p.namespace, p.name, "systemLiquidLabwareModel"], {
+	_.set(output.objects, [spec.namespace, spec.name, "systemLiquidLabwareModel"], {
 		"type": "PlateModel",
 		"description": "dummy labware model representing the system liquid source",
 		"rows": syringeCount,
 		"columns": 1,
 		"evowareName": "SystemLiquid"
 	});
-	_.set(output.objects, [p.namespace, p.name, "systemLiquid"], {
+	_.set(output.objects, [spec.namespace, spec.name, "systemLiquid"], {
 		"type": "Liquid",
-		"wells": _.map(_.range(syringeCount), i => `${p.namespace}.${p.name}.systemLiquidLabware(${String.fromCharCode(65 + i)}01)`)
+		"wells": _.map(_.range(syringeCount), i => `${spec.namespace}.${spec.name}.systemLiquidLabware(${String.fromCharCode(65 + i)}01)`)
 	});
-	_.set(output.objects, [p.namespace, p.name, "systemLiquidLabware"], {
+	_.set(output.objects, [spec.namespace, spec.name, "systemLiquidLabware"], {
 		"type": "Plate",
 		"description": "dummy labware representing the system liquid source",
 		"model": `${namespace}.systemLiquidLabwareModel`,
-		"location": evowareConfigSpec.getSiteName("SYSTEM"),
+		"location": helpers.getSiteName("SYSTEM"),
 		"contents": ["Infinity l", "systemLiquid"]
 	});
 
@@ -363,7 +363,7 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 		}
 	});
 	// Syringe predicates
-	_.forEach(p.liha.syringes, (syringeSpec, i) => {
+	_.forEach(spec.liha.syringes, (syringeSpec, i) => {
 		output.predicates.push({
 			"pipetter.canAgentEquipmentSyringe": {
 				agent,
@@ -373,8 +373,8 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 		})
 	});
 	// Site predicates
-	_.forEach(p.liha.sites, site0 => {
-		const site = evowareConfigSpec.getSiteName(site0);
+	_.forEach(spec.liha.sites, site0 => {
+		const site = helpers.getSiteName(site0);
 		output.predicates.push({
 			"pipetter.canAgentEquipmentSite": {
 				agent,
@@ -442,11 +442,11 @@ function makeCleanTipsHandler(namespace) {
 	};
 }
 
-function handleEquipment(p, evowareConfigSpec, namespace, agent, output) {
-	_.forEach(p.equipment, (value, key) => {
+function handleEquipment(spec, helpers, namespace, agent, output) {
+	_.forEach(spec.equipment, (value, key) => {
 		// console.log({key})
 		const module = require(__dirname+"/equipment/"+value.module);
-		const protocol = module.configure(evowareConfigSpec, key, value.params);
+		const protocol = module.configure(helpers, key, value.params);
 		// console.log(key+": "+JSON.stringify(protocol, null, '\t'))
 		// console.log(key+".objects: "+JSON.stringify(protocol.objects, null, '\t'))
 		_.merge(output, _.omit(protocol, "predicates"));
@@ -486,7 +486,7 @@ function test() {
 function validate(evowareSpec) {
 	const v = new Validator();
 
-	const schemas = YAML.load(__dirname+"/schemas/EvowareConfig.yaml");
+	const schemas = YAML.load(__dirname+"/schemas/EvowareConfigSpec.yaml");
 	// console.log(JSON.stringify(schemas, null, '\t'));
 	_.forEach(schemas, (schema, name) => {
 		const id = "/"+name;
@@ -508,6 +508,6 @@ function validate(evowareSpec) {
 }
 
 module.exports = {
-	process,
+	makeProtocol,
 	validate
 };
