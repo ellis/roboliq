@@ -9,10 +9,24 @@ const Validator = require('jsonschema').Validator;
 const YAML = require('yamljs');
 
 
-
+/**
+ * Convert an EvowareConfigSpec into the format of a Roboliq Protocol.
+ * This function exists, because it is much simpler to write an
+ * EvowareConfigSpec than the equivalent Protocol.
+ * @param  {EvowareConfigSpec} p - specification of an Evoware robot configuration
+ * @param  {Object} [data] - (not currently used) protocol data loaded before this configuration
+ * @return {Protocol} - an Evoware robot configuration in the format of a Protocol.
+ */
 function process(p, data = {objects: {}, predicates: []}) {
-	assert(p.namespace, "you must supply a `namespace` property");
-	assert(p.name, "you must supply a `name` property");
+	// Validate
+	const validation = validate(p);
+	if (!_.isEmpty(validation.errors)) {
+		return {
+			errors: {
+				EvowareConfig: validation.errors
+			}
+		};
+	}
 
 	const namespace = [p.namespace, p.name].join(".");
 	const agent = [p.namespace, p.name, "evoware"].join(".");
@@ -251,7 +265,7 @@ function handleLiha(p, evowareConfigSpec, namespace, agent, output) {
 	const tipModelToSyringes = {};
 
 	if (_.isPlainObject(p.liha.tipModels)) {
-		const tipModels = _.mapValues(p.tipModels, x => _.merge({type: "TipModel"}, x));
+		const tipModels = _.mapValues(p.liha.tipModels, x => _.merge({type: "TipModel"}, x));
 		// console.log(tipModels)
 		_.set(output.objects, [p.namespace, p.name, "liha", "tipModel"], tipModels);
 		// console.log({stuff: _.get(output, ["object", p.namespace, p.name, "liha", "tipModel"])});

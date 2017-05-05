@@ -7,7 +7,7 @@ Pain points:
 * maybe an exercise or two
 * designs: how do they work, when do you use them, what are the limitations
 * many confusing things:
-	*
+	* different functions available in the designs than in the commands
 * interactive design table thing
 	* perhaps like a python interpreter, and it shows you what it would do
 
