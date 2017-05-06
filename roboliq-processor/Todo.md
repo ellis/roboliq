@@ -281,8 +281,25 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] generated: handle `oneOf`s in `EvowareconfigSpec.yaml`
 * [x] book: figure out how to add appropriate links to the API documentation
 * [ ] draft chapter: configuration
-* [ ] draft chapter: protocol
-* [ ] draft chapter: design
+	* [ ] objectToPredicateConverters
+	* [ ] planHandlers
+* [ ] draft chapter: simple protocols
+	* [ ] split chapter into simple & advanced protocols
+	* [?] objects
+	* [?] steps
+* [ ] draft chapter: advanced protocols
+	* [ ] parameters
+	* [ ] step data and scope
+
+	* [ ] substitution
+	* [ ] $-substitution
+	* [ ] string substitution
+	* [ ] template functions
+
+* [ ] draft chapter: design tables
+	* [ ] plain factors, `*`-factors, array factors, `=` factors
+	* [ ] actions/functions
+	* [ ] manipulations: where, orderBy, etc
 * [ ] book: exclude unfinished chapters for now
 * [ ] make sure the jsdoc is generated for roboliq-processor and roboliq-evoware
 * [ ] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html

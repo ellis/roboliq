@@ -898,7 +898,7 @@ const commandHandlers = {
 				}}
 			];
 			//console.log(predicates)
-			const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."pipetter.canAgentEquipmentSyringe"');
+			const [, alternatives] = commandHelper.queryLogic(data, predicates, "pipetter.canAgentEquipmentSyringe");
 			expect.truthy({paramName: "items"}, !_.isEmpty(alternatives), `could not find agent and equipment to clean syring ${item.syringe}`);
 			return alternatives;
 		}));

@@ -28,8 +28,7 @@ const commandHandlers = {
 				"equipment": parsed.objectName.equipment
 			}}
 		];
-		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."shaker.canAgentEquipment"');
-		const params2 = alternatives[0];
+		const [params2, alternatives] = commandHelper.queryLogic(data, predicates, "shaker.canAgentEquipment");
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
 		const expansion = [
@@ -66,13 +65,7 @@ const commandHandlers = {
 				"site": parsed.objectName.site
 			}}
 		];
-		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."shaker.canAgentEquipmentSite"');
-		let chosen = undefined;
-		if (data.planAlternativeChoosers.hasOwnProperty("shaker.canAgentEquipmentSite")) {
-			chosen = data.planAlternativeChoosers["shaker.canAgentEquipmentSite"](alternatives, data);
-			// console.log({chosen})
-		}
-		const params2 = chosen || alternatives[0];
+		const [params2, alternatives] = commandHelper.queryLogic(data, predicates, "shaker.canAgentEquipmentSite");
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
 		const expansion = [

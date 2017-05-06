@@ -894,7 +894,7 @@ function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
  * @param  {String} queryExtract A jmespath query string to extract values of interest from the llpl result list
  * @return {Array}               Array of objects holding valid values
  */
-function queryLogic(data, predicates, queryExtract) {
+function queryLogicGeneral(data, predicates, queryExtract) {
 	var llpl = require('./HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
@@ -921,6 +921,35 @@ function queryLogic(data, predicates, queryExtract) {
 	else {
 		return resultList;
 	}
+}
+
+/**
+ * Query the logic database with the given predicates.  If solutions are found,
+ * choose one of the alternatives.
+ *
+ * @param  {Object} data         Command data
+ * @param  {Array} predicates    Array of llpl predicates
+ * @param  {String} predicateName Name of the predicate we're interested in
+ * @return {Array} - an array where the first item is the chosen solution, and the second item includes all alternatives.  If no solution was found, then both items will be undefined.
+ */
+function queryLogic(data, predicates, predicateName) {
+	const resultList = queryLogicGeneral(data, predicates, undefined);
+	if (_.isEmpty(resultList)) {
+		return [undefined, undefined];
+	}
+
+	const queryExtract = `[].and[]."${predicateName}"`
+	const alternatives = jmespath.search(resultList, queryExtract);
+	assert(!_.isEmpty(alternatives), `${predicateName} not found in resultList ${JSON.stringify(resultList)} for predicates ${JSON.stringify(predicates)}`);
+
+	// Pick a plan
+	let chosen = alternatives[0];
+	if (data.planAlternativeChoosers.hasOwnProperty(predicateName)) {
+		chosen = data.planAlternativeChoosers[predicateName](alternatives, data);
+		// console.log({chosen})
+	}
+
+	return [chosen, alternatives];
 }
 
 /**

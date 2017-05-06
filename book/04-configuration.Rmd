@@ -249,10 +249,10 @@ Here is an example excerpt of using the predicate database to find all valid sea
 				"site": parsed.objectName.site
 			}}
 		];
-		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
+		const [chosen, alternatives] = commandHelper.queryLogic(data, predicates, "sealer.canAgentEquipmentProgramModelSite");
 ```
 
-
+The function `commandHelper.queryLogic()` will find all solutions the `predicates` array, filling in the missing values as necessary.  If more than one alternative solution is present, it will choose one of them.  The solution can either by chosen by a appropriate function `planAlternativeChoosers`, or else Roboliq simply picks the first item in the alternatives list.
 
 ### `objectToPredicateConverters`
 

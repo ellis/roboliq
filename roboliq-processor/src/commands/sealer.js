@@ -39,8 +39,7 @@ const commandHandlers = {
 				"site": parsed.objectName.site
 			}}
 		];
-		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
-		const params2 = alternatives[0];
+		const [params2, alternatives] = commandHelper.queryLogic(data, predicates, "sealer.canAgentEquipmentProgramModelSite");
 		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
 
 		const expansion = _.flatten([

@@ -507,6 +507,7 @@ function validate(evowareSpec) {
 	return result;
 }
 
+/*
 function makeSchemaMarkdown() {
 	const generateMarkdown = require('wetzel');
 	const schemas = YAML.load(__dirname+"/schemas/EvowareConfigSpec.yaml");
@@ -550,9 +551,9 @@ function deepRename(x) {
 }
 
 makeSchemaMarkdown();
+*/
 
 module.exports = {
 	makeProtocol,
-	validate,
-	makeSchemaMarkdown
+	validate
 };
