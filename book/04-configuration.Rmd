@@ -257,7 +257,7 @@ The function `commandHelper.queryLogic()` will find all solutions the `predicate
 ### `objectToPredicateConverters`
 
 Roboliq's AI needs predicates describing the available objects.  These are generated dynamically by the functions supplied in `objectToPredicateConverters`.
-It is a map from a object type to a function that accepts a named object and returns an array of predicates.  For example, here is Roboliq's converter for `Plate` objects:
+It is a map from an object type to a function that accepts a named object and returns an array of predicates.  For example, here is Roboliq's converter for `Plate` objects:
 
 ```javascript
 objectToPredicateConverters: {
@@ -282,3 +282,13 @@ This converter creates between 4 and 6 predicates for every plate object: `isLab
 You'll only need to create additional object-to-predicate converters if you want to extend Roboliq's object types, or perhaps if you create an advanced command that required additional logic.
 
 ### `planHandlers`
+
+Plan handlers are functions that convert from a planning action to a Roboliq command (usually a low-level command). It is a map from an action name to a function that accepts that action parameters and returns an array of commands.  The function also accepts the parameters of the parent command (the one that generated the plan), and the protocol data, in case those are needed to compute the new command.
+
+An example use-case is using the `transporter.movePlate` command to move a plate into a closed centrifuge: the planning algorithm will include an action to open the centrifuge first, and then the `transporter.movePlate` command will call the appropriate function in `planHandlers` to create the required sub-command.
+
+## Conclusion
+
+Configuring a robot can be complicated.  First of all, it requires a lot of detailed knowledge about your robot.  Secondly, it involves a lot of interdependencies.  For example, in order to support a new labware model, you'll need to add the model to the `models` list (easy), but you also need to update the list of site/model compatibilities, the list of safe transport vectors, and perhaps the list of which models accept lids or can be stacked on top of each other.
+
+It's certainly do-able, but you're likely to encounter some frustrations if you need to trouble-shoot why you get compiler errors when trying to use your new model, for example.

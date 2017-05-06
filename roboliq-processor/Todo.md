@@ -280,9 +280,9 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] generated: handle `$ref`s in `EvowareconfigSpec.yaml`
 * [x] generated: handle `oneOf`s in `EvowareconfigSpec.yaml`
 * [x] book: figure out how to add appropriate links to the API documentation
-* [ ] draft chapter: configuration
+* [x] draft chapter: configuration
 	* [x] objectToPredicateConverters
-	* [ ] planHandlers
+	* [x] planHandlers
 * [ ] draft chapter: simple protocols
 	* [ ] split chapter into simple & advanced protocols
 	* [?] objects
@@ -308,6 +308,7 @@ See misc.js:renderTemplateString, since another convention is used there
 ## Secondary
 
 * [ ] document predicates required by the various command handlers
+* [ ] predicates: explain the difference between state predicates and tasks/actions
 * [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] document the directives
 * [ ] document variable substitution
