@@ -18,7 +18,7 @@
 					</div-->
 					<div class="sidebar" style="height: 100%; margin: .5em">
 							<nav>
-								{{#each collections.commands}}
+								{{#each (lookup collections lookupCollection)}}
 									<ul class="nav nav-stacked nav-pills">
 									{{#each data}}
 										{{#if module}}
@@ -38,7 +38,7 @@
 					<h1>{{title}}</h1>
 					{{{ contents }}}
 
-					{{#each collections.commands}}
+					{{#each (lookup collections lookupCollection)}}
 						{{#each data}}
 							{{#if module}}
 								<h2 id="_{{@key}}">{{@key}}</h2>
@@ -50,26 +50,22 @@
 
 									{{#if properties}}
 									<p style="margin-top: 1em"><b>Properties:</b></p>
+									{{> schemaPropertyTable . }}
+									{{/if}}
 
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Argument</th><th>Description</th></tr>
-										{{#each properties}}
-											<tr>
-												<td>{{@key}}</td>
-												<td>{{type}}</td>
-												<td>{{required}}</td>
-												<td>{{md description}}{{#if enum}}One of: {{enum}}{{/if}}</td>
-											</tr>
-											{{#each properties}}
-												<tr>
-													<td>&nbsp;&nbsp;{{@key}}</td>
-													<td>{{type}}</td>
-													<td>{{required}}</td>
-													<td>{{md description}}</td>
-												</tr>
-											{{/each}}
-										{{/each}}
-									</table>
+									{{#if oneOf}}
+									Must be one of:
+									<ul>
+										{{#each oneOf}}<li>{{this}}</li>{{/each}}
+									</ul>
+									{{/if}}
+
+									{{#if definitions}}
+									<p style="margin-top: 1em"><b>Definitions:</b></p>
+									{{#each definitions}}
+										<h4 id="_{{@key}}">{{@key}}</h4>
+										{{> schemaPropertyTable . }}
+									{{/each}}
 									{{/if}}
 
 									{{#if example}}

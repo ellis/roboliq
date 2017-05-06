@@ -467,4 +467,4 @@ The descriptions should be:
 1.description: "Alice Charles Daniel"
 1.1.description: "Alice Charles David"
 
-In 1.1, "$$b" does not exist, but "$a" and "$c" still do.  That is to say: column data from a previous `data` directive are not carried into sub-steps with a new `data` directive, but the values that were the same for all columns remain in scope.
+In 1.1, "\$\$b" does not exist, but "\$a" and "\$c" still do.  That is to say: column data from a previous `data` directive are not carried into sub-steps with a new `data` directive, but the values that were the same for all columns remain in scope.

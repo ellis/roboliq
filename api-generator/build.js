@@ -47,20 +47,22 @@ function processSchemas(x) {
 				})
 			}
 			// Add some defaults
-			if (x.properties.description && !x.properties.description.description)
-				x.properties.description.description = "Optional user description of this item";
-			if (x.properties.label && !x.properties.label.description)
-				x.properties.label.description = "Optional user label for this item";
-			if (x.properties.description && !x.properties.type.description)
-				x.properties.type.description = "Type of this object";
-			if (x.properties.type && !x.properties.type.type)
-				x.properties.type.type = "string";
-			// Recurse into properties
-			_forEach(x.properties, function(value, key) {
-				if (!value.type && value.enum)
-					value.type = "string";
-				processSchemas(value);
-			});
+			if (x.properties) {
+				if (x.properties.description && !x.properties.description.description)
+					x.properties.description.description = "Optional user description of this item";
+				if (x.properties.label && !x.properties.label.description)
+					x.properties.label.description = "Optional user label for this item";
+				if (x.properties.type && !x.properties.type.description)
+					x.properties.type.description = "Type of this object";
+				if (x.properties.type && !x.properties.type.type)
+					x.properties.type.type = "string";
+				// Recurse into properties
+				_forEach(x.properties, function(value, key) {
+					if (!value.type && value.enum)
+						value.type = "string";
+					processSchemas(value);
+				});
+			}
 		}
 		else {
 			_forEach(x, function(value, key) {
@@ -76,7 +78,10 @@ metalsmith(__dirname)
 	.destination("../docs/protocol")
 	.use(collections({
 		commands: {
-			pattern: "schemas/*.yaml"
+			pattern: "schemas/commands/*.yaml"
+		},
+		evowareConfiguration: {
+			pattern: "schemas/evowareConfiguration/*.yaml"
 		}
 	}))
 	.use(function (files, metalsmith, done) {

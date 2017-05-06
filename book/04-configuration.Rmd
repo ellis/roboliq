@@ -5,24 +5,111 @@ In order for Roboliq to compile your protocol for your robot setup, it needs to 
 So if someone else has configured Roboliq for your robot already, then you should probably just proceed to the next chapter.
 However, if you need to write the configuration, this chapter is for you.
 
+## Evoware configuration
+
+(If you are not using an Evoware robot, you can skip this section.)
+
+Roboliq supplies a simplified method for configuring Evoware robots.  You will need to create a JavaScript file in which you define an `EvowareConfigSpec` object, and then have it converted to the Roboliq protocol format.  Your config file will have the following structure:
+
+```javascript
+const evowareConfigSpec = {
+  namespace: "YOUR LAB ID",
+  name: "YOUR ROBOT ID",
+  config: {
+    TEMPDIR: "TEMPORARY DIRECTORY FOR MEASUREMENT FILES",
+    ROBOLIQ: "COMMAND TO CALL ROBOLIQ'S RUNTIME",
+    BROWSER: "PATH TO WEB BROWSER"
+  },
+  sites: {
+    MYSITE1: {evowareCarrier: "CARRIER ID", evowareGrid: MYGRID, evowareSite: MYSITE},
+    ...
+  },
+  models: {
+    MYPLATEMODEL1: {type: "PlateModel", rows: 8, columns: 12, evowareName: "EVOWARE LABWARE NAME"},
+    ...
+  },
+  siteModelCompatibilities: [
+    {
+      sites: ["MYSITE1", ...],
+      models: ["MYPLATEMODEL1", ...]
+    },
+    ...
+  ],
+  equipment: {
+    MYEQUIPMENT1: {
+      module: "EQUIPMENT1.js",
+      params: {
+        ...
+      }
+    }
+  },
+  lidStacking: [
+    {
+      lids: ["lidModel_standard"],
+      models: ["MYPLATEMODEL1"]
+    }
+  ],
+  romas: [
+    {
+      description: "roma1",
+      safeVectorCliques: [
+				{ vector: "Narrow", clique: ["MYSITE1", ...] },
+				...
+			]
+    },
+    ...
+  ],
+  liha: {
+    tipModels: {
+      MYTIPMODEL1000: {programCode: "1000", min: "3ul", max: "950ul", canHandleSeal: false, canHandleCells: true},
+      ...
+    },
+    syringes: [
+      { tipModelPermanent: "MYTIPMODEL1000" },
+      ...
+    ],
+    sites: ["MYSITE1", ...],
+    washPrograms: {
+      CONTINUE
+    }
+  },
+  commandHandlers: {
+    "MYCOMMAND1": function(params, parsed, data) { ... },
+    ...
+  },
+  planAlternativeChoosers: {
+    CONTINUE
+  }
+  // Your configuration goes here
+};
+CONTINUE: Add comments to the above properties
+
+const EvowareConfigSpec = require('roboliq-evoware/dist/EvowareConfigSpec.js');
+module.exports = EvowareConfigSpec.makeProtocol(evowareConfigSpec);
+```
+
+The details about `evowareConfigSpec` are in the Evoware API documenation, and
+an extensive example can be found in `roboliq-processor/tests/ourlab.js`.
+
+`namespace`: CONTINUE
+
+This information is probably enough to get your robot configured, and you can skip the rest of this chapter unless you need to setup a different kind of robot.
+
+
 ## Components
 
 A *configuration* is a JavaScript object with the following properties:
 
 * `roboliq`: specifies the version of Roboliq.
-* `schemas`: JSON Schema defintitions for all object types and commands.
+* `schemas`: JSON Schema defintitions for all object and commands.
 * `objects`: specifies the objects provided by the robot.
 * `commandHandlers`: specifies the functions that handle protocol commands, for example by generating low-level commands from high-level commands.
 * `predicates`:  specifies the *logical predicates* used by Roboliq's A.I. to figure out how to compile some high-level commands to low-level commands for this configuration.
 * `objectToPredicateConverters`: specifies functions that generate logical predicates based from `objects`.
+* `planAlternativeChoosers`: specifies functions that can choose a specific plan among various alternative plans
 * `planHandlers`: specifies the functions that transform logical tasks into commands.
 
-The first three properties are specified with "standard" JavaScript: `roboliq` takes a string value, `objects` takes an object value, and `commandHandlers` takes a hash map of functions.
-The last three properties, in contrast, are related to Roboliq's A.I. and will require some effort to understand.
-
-## "Standard" components
-
-The standard JavaScript components are described in more detail in this section.
+The first four properties are easy for the average JavaScript programmer to understand: they are straight-forward JSON values or JavaScript functions.  In contrast, the last four properties (`predicates`, `objectToPredicateConverters`, `planAlternativeChoosers`, and `planHandlers`) rely on concepts from Artificial Intelligence, which will require more effort to grasp.
 
 ### `roboliq`
 
@@ -34,7 +121,6 @@ For every command and object type, Roboliq requires a schema that defines its pr
 
 Normally, the schemas required for your robot should be automatically provided by your chosen backend and the equipment you select.  The `schemas` property is a hash map: its keys are the command names and object type names; its values are the respective JSON schemas. You will not need to write schemas unless you are creating new commands or objects types for Roboliq.  In that case, please see the developer documentation.
 
-
 ### `objects`
 
 The `objects` property of a configuration is the same as describe for protocols in the Quick Start chapter.  However, robot configurations usually contain complex objects, such as measurement devices, whereas protocols usually only define fairly simple labware.
@@ -44,9 +130,42 @@ Furthermore, the configuration may contain information that's required for the b
 
 A command handler is a JavaScript function that processes command parameters and returns information to Roboliq about the command's effects, sub-commands, and user messages.
 
-Command handlers are supplied by various modules.  Roboliq's command modules are in the subdirectory `roboliq-processor/src/commands`, and Evoware's command modules are in the subdirectory `roboliq-evoware/src/commands`.  In order to 
+Command handlers are supplied by various modules.  Roboliq's command modules are in the subdirectory `roboliq-processor/src/commands`, and Evoware's command modules are in the subdirectory `roboliq-evoware/src/commands`.  The API documentation contains information about the available commands.
 
-The individual 
+If you want to write your own command handler, you can add it to `commandHandlers` as a property.  The property name should be the name of the command, and the value should be the command handler function.  For example, let's make a simplistic function called `my.hello` that tells an Evoware robot to say "Hello, YOURNAME!".  First we'll defined the schema for the new command:
+
+```javascript
+schemas: {
+  "my.hello": {
+    description: "Say hello to someone",
+    properties: {
+      name: {
+        description: "Name to say hello to",
+        type: "string"
+      }
+    },
+    required: ["name"]
+  }
+}
+```
+
+This schema lets Roboliq know that there's a command named `my.hello` CONTINUE
+
+
+```javascript
+commandHandlers: {
+  "my.hello": function(params, parsed, data) {
+    return {
+      expansion: [
+				{
+					command: "evoware._userPrompt",
+					text: "Hello, "+parsed.value.name",
+				}
+			]
+    };
+  }
+}
+```
 
 ## Logical components
 

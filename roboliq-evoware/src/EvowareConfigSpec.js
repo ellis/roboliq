@@ -507,7 +507,52 @@ function validate(evowareSpec) {
 	return result;
 }
 
+function makeSchemaMarkdown() {
+	const generateMarkdown = require('wetzel');
+	const schemas = YAML.load(__dirname+"/schemas/EvowareConfigSpec.yaml");
+	const markdowns = [];
+	// console.log(JSON.stringify(schemas, null, '\t'));
+	_.forEach(schemas, (schema0, name) => {
+		const id = "/"+name;
+		const schema = _.merge({id, title: name}, deepRename(schema0));
+		const md = generateMarkdown({
+			schema,
+			filePath: "dummy",
+			headerLevel: 1,
+			debug: false,
+			suppressWarnings: false
+		});
+		markdowns.push(md);
+	});
+	console.log(markdowns.join("\n\n\n"));
+}
+
+function deepRename(x) {
+	if (_.isPlainObject(x)) {
+		if (x.hasOwnProperty("$ref")) {
+			x = _(x)
+				.toPairs()
+				.map(([key, value]) => (key == "$ref") ? ["type", value.substr(1)] : [key, value])
+				.fromPairs()
+				.value();
+			// console.log(x)
+		}
+		_.forEach(x, (value, key) => {
+			x[key] = deepRename(x[key]);
+		});
+	}
+	else if (_.isArray(x)) {
+		for (let i = 0; i < x.length; i++) {
+			x[i] = deepRename(x[i]);
+		}
+	}
+	return x;
+}
+
+makeSchemaMarkdown();
+
 module.exports = {
 	makeProtocol,
-	validate
+	validate,
+	makeSchemaMarkdown
 };

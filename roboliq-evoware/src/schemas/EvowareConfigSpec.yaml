@@ -1,6 +1,7 @@
 EvowareConfigSpec:
   description: |
     This is a configuration specification for an Evoware robot.
+  type: object
   properties:
     namespace:
       description: |
@@ -91,10 +92,12 @@ EvowareConfigSpec:
       additionalProperties:
         type: function
   additionalProperties: false
+  required: [namespace, name]
 
 EvowareCompilerConfig:
   description: |
     Settings for the Evoware compiler.
+  type: object
   properties:
     TEMPDIR:
       description: Directory where measurement files can be temporarily stored during processing
@@ -169,6 +172,7 @@ EvowareSiteModelCompatibilitySpec:
     Specification of which bench sites are compatible with which models.
     All such sites should be listed in the `sites` property,
     and the models in the `models` property.
+  type: object
   properties:
     description:
       description: An optional string to describe this list.
@@ -205,6 +209,7 @@ EvowareLidStackingSpec:
     various plate models. Within limit, plates can also be stacked on top
     of each other.
     All items in `lids` will be stackable on all items in `models`.
+  type: object
   properties:
     description:
       description: An optional string to describe this list.
@@ -239,6 +244,7 @@ EvowareEquipmentSpec:
   description: |
     This allows you to specify a equipment module to load and the parameters
     that should be passed to the module.
+  type: object
   properties:
     description:
       description: An optional string to describe this piece of equipment.
@@ -271,12 +277,15 @@ EvowareEquipmentSpec:
     ```
 
 EvowareRomaSpec:
+  description: |
+    Specification of an Evoware ROMA (robotic arms for moving plates).
+  type: object
   properties:
     description:
-      description: An optional string to describe this RoMa.
+      description: An optional string to describe this ROMA.
       type: string
     safeVectorCliques:
-      description: list of cliques of sites that the roma can safetly move plates between using a given vector
+      description: list of cliques of sites that the ROMA can safetly move plates between using a given vector
       type: array
       items:
         properties:
@@ -303,6 +312,7 @@ EvowareRomaSpec:
 EvowareLihaSpec:
   description: |
     Specification of the Evoware robot's LIHA (Liquid Handling Arm).
+  type: object
   properties:
     tipModels:
       description: |
@@ -348,6 +358,7 @@ EvowareLihaSpec:
 EvowareWashProgramSpec:
   description: |
     Describes a method for washing tips in Evoware
+  type: object
   oneOf: ["#/definitions/specProgram", "#/definitions/specScript"]
   definitions:
     specProgram:
@@ -393,6 +404,7 @@ EvowareWashProgramSpec:
 EvowareTipModelSpec:
   description: |
     This specifies a tip model that can be used with the Evoware robot.
+  type: object
   properties:
     programCode:
       description: a string to use for generating the liquid class names for this tip model

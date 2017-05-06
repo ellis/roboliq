@@ -1,0 +1,19 @@
+<table class="table table-striped table-hover table-condensed">
+	<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+	{{#each properties}}
+		<tr>
+			<td>{{@key}}</td>
+			{{#if type}}<td>{{type}}</td>{{else}}<td>{{$ref}}</td>{{/if}}
+			<td>{{md description}}{{#if enum}}One of: {{enum}}{{/if}}</td>
+			<td>{{required}}</td>
+		</tr>
+		{{#each properties}}
+			<tr>
+				<td>&nbsp;&nbsp;{{@key}}</td>
+				<td>{{type}}</td>
+				<td>{{md description}}</td>
+				<td>{{required}}</td>
+			</tr>
+		{{/each}}
+	{{/each}}
+</table>

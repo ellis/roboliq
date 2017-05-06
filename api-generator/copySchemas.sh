@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-rm -f content/schemas/*.yaml
-cp ../roboliq-processor/src/schemas/*.yaml content/schemas
+rm -rf content/schemas
+mkdir -p content/schemas/{commands,evowareConfiguration}
+cd content/schemas/commands &&
+ln -s ../../../../roboliq-processor/src/schemas/*.yaml . &&
+cd ../evowareConfiguration &&
+ln -s ../../../../roboliq-evoware/src/schemas/*.yaml .

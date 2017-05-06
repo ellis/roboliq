@@ -274,6 +274,11 @@ See misc.js:renderTemplateString, since another convention is used there
 
 # Documentations TODOS
 
+* [ ] generate Evoware API documentation
+* [ ] create schema files for Evoware commands, so that they are in the Evoware API documentation
+* [ ] generated: handle `$ref`s in `EvowareconfigSpec.yaml`
+* [ ] generated: handle `oneOf`s in `EvowareconfigSpec.yaml`
+* [ ] book: add appropriate links to the API documentation
 * [ ] generated: separate pages for Commands and Types
 * [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] document the directives

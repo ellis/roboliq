@@ -1,6 +1,7 @@
 ---
 title: Commands & Types
 layout: commands.html
+lookupCollection: commands
 ---
 
 This page lists the commands and types available in Roboliq protocols.
@@ -44,3 +45,5 @@ location after the command is finished.  Such commands have a `destinationAfter`
 property with type `SiteOrStay` which can be used to override this behavior.
 Either you can specify different `Site` where the plate should be moved to after
 the command, or you can specify `"stay"` to leave the plate there.
+
+## Object types
