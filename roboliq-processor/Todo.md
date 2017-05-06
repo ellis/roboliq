@@ -283,10 +283,10 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] draft chapter: configuration
 	* [x] objectToPredicateConverters
 	* [x] planHandlers
-* [ ] draft chapter: simple protocols
-	* [ ] split chapter into simple & advanced protocols
-	* [?] objects
-	* [?] steps
+* [x] draft chapter: simple protocols
+	* [x] split chapter into simple & advanced protocols
+	* [x] objects
+	* [x] steps
 * [ ] draft chapter: advanced protocols
 	* [ ] parameters
 	* [ ] step data and scope

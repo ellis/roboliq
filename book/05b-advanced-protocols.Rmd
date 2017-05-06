@@ -1,0 +1,81 @@
+# Advanced Protocols
+
+More object types:
+
+* [`Variable`](../protocol/commands.html#_Plate): for defining variables that the user can change.
+  `Variable` object lets you name a value which can be referenced by name in
+  the protocol steps -- this is a good idea if the steps reference the value
+	multiple times and you expect to change the value in the future.
+* [`Design`](../protocol/commands.html#_Plate): for defining an experimental design.
+  The `Design` type facilitates complex experimental designs, and you can read
+  more about it in the [Design Documentation]{@tutorial Writing-a-Design}.
+
+Here are examples for each of the four main object types:
+
+```yaml
+objects:
+  extractionVolume:
+    type: Variable
+    description: Amount to extract
+    value: 100 ul
+  design1:
+    type: Design
+    description: Assign various dilutions to each well on plate1
+    conditions:
+      ... {properties not included here}
+```
+
+
+## Steps
+
+The `steps` property specifies the actions to be taken.  Normally, this is
+a numbered list of commands, such as this example of sealing and shaking
+a plate:
+
+```yaml
+steps:
+  1:
+    command: sealer.sealPlate
+    object: plate1
+  2:
+    command: shaker.shakePlate
+    object: plate1
+```
+
+A *command* is indicated by a `command` property, such as the `sealer.sealPlate`
+and `shaker.shakePlate` commands above.
+Besides the `command` property, you will need to specify additional properties
+to tell the command exactly what to do.  In the above example, the line
+`object: plate1` tells the command to act on `plate1`.
+
+The 
+Structure of command names
+List of available commands
+
+A step is either a command or a numbered list of sub-steps.
+
+
+
+Numbered sub-steps
+
+`description`, `data`
+
+CONTINUE:
+
+## Structure and syntax
+
+## Parameters
+
+## Objects
+
+## Steps
+
+## Substitution
+
+### `$` substitution
+
+### String substitution
+
+## Object references by name
+
+## Functions
