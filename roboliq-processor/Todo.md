@@ -288,12 +288,14 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] objects
 	* [x] steps
 * [ ] draft chapter: advanced protocols
-	* [ ] parameters
+	* [x] parameters
+	* [ ] objects
 	* [ ] step data and scope
 
 	* [ ] substitution
 	* [ ] $-substitution
 	* [ ] string substitution
+	* [ ] directives?
 	* [ ] template functions
 
 * [ ] draft chapter: design tables
@@ -311,7 +313,7 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] predicates: explain the difference between state predicates and tasks/actions
 * [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] document the directives
-* [ ] document variable substitution
+* [ ]
 * [ ] distribution documentation
 	* [ ] src/roboliq/README.md
 		* [ ] Getting Started

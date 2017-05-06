@@ -1,32 +1,105 @@
 # Advanced Protocols
 
-More object types:
+Advanced protocols can contain many more elements than the simple protocols
+described in the previous chapter.  In this chapter we'll discuss `parameters`,
+`objects`, `data` properties, variable scope, substitution, directives, and template functions.
 
-* [`Variable`](../protocol/commands.html#_Plate): for defining variables that the user can change.
-  `Variable` object lets you name a value which can be referenced by name in
-  the protocol steps -- this is a good idea if the steps reference the value
-	multiple times and you expect to change the value in the future.
-* [`Design`](../protocol/commands.html#_Plate): for defining an experimental design.
-  The `Design` type facilitates complex experimental designs, and you can read
-  more about it in the [Design Documentation]{@tutorial Writing-a-Design}.
+## Parameters
 
-Here are examples for each of the four main object types:
+Parameters are named values that you define at the beginning of a protocol.
+You can then use the parameter name instead of the value later in the protocol.
+In this partial example, a `VOLUME` parameter is defined which is used in the
+`pipetter.pipette` step:
+
+```yaml
+parameters:
+  VOLUME:
+    description: "amount of water to dispense"
+    value: 200 ul
+...
+steps:
+  1:
+    command: pipetter.pipette
+    sources: water
+    destinations: plate1(all)
+    volumes: $#VOLUME
+```
+
+A parameter should be given a `description` and a `value`.
+Notice that `$#` prefixes `VOLUME` in the step; `$#` tells Roboliq to substitute in a parameter value.  Substitution is discussed in more detail later in this chapter.
+
+## Objects
+
+There are several more object types you might want to use in advanced protocols:
+
+[`Design`](../protocol/commands.html#_Design): for defining an experimental design.
+The `Design` type facilitates complex experimental designs, and you can read
+more about it in the chapter on Design Tables.
+  
+[`Variable`](../protocol/commands.html#_Variable):
+For defining references to other variables.
+Variables are not particularly useful in Roboliq, but they could potentially
+be used to easily switch between objects in case you have, for example,
+two water sources `water1` and `water2`.  In that case you could have a `water`
+variable whose value to set to the source you want to use:
 
 ```yaml
 objects:
-  extractionVolume:
+  water1: ...
+  water2: ...
+  water:
+    description: "water source"
     type: Variable
-    description: Amount to extract
-    value: 100 ul
-  design1:
-    type: Design
-    description: Assign various dilutions to each well on plate1
-    conditions:
-      ... {properties not included here}
+    value: water1
+steps:
+  1:
+    command: pipetter.pipette
+    sources: water
+    destinations: plate1(all)
+    volumes: 50 ul
+```  
+
+[`Template`](../protocol/commands.html#_Template):
+You can use a template to define re-usable steps.
+Here is a non-sense example CONTINUE:
+
+```yaml
+objects:
+  plate1:
+    type: Plate
+    ...
+  dispenseToPlate1:
+    description: "template to dispense `volume` ul of water to all wells on plate1"
+    type: Template
+    template:
+      command: pipetter.pipette
+      sources: water
+      destinations: plate1(all)
+      volumes: $volume
+steps:
+  1:
+    command: system.call
+    name: dispenseToPlate1
+    params:
+      volume: 10 ul
+  2:
+    command: system.call
+    name: dispenseToPlate1
+    params:
+      volume: 50 ul
 ```
 
-
 ## Steps
+
+### `comment` property
+
+
+### `data` property
+
+Steps can be given a `data` property that activates a data table and gives Roboliq
+a lot of power to handle complex experiments.
+
+
 
 The `steps` property specifies the actions to be taken.  Normally, this is
 a numbered list of commands, such as this example of sealing and shaking
@@ -63,8 +136,6 @@ Numbered sub-steps
 CONTINUE:
 
 ## Structure and syntax
-
-## Parameters
 
 ## Objects
 
