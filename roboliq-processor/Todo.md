@@ -274,12 +274,23 @@ See misc.js:renderTemplateString, since another convention is used there
 
 # Documentations TODOS
 
-* [ ] generate Evoware API documentation
+## Version 1
+
+* [x] generate Evoware API documentation
+* [x] generated: handle `$ref`s in `EvowareconfigSpec.yaml`
+* [x] generated: handle `oneOf`s in `EvowareconfigSpec.yaml`
+* [x] book: figure out how to add appropriate links to the API documentation
+* [ ] draft chapter: configuration
+* [ ] draft chapter: protocol
+* [ ] draft chapter: design
+* [ ] book: exclude unfinished chapters for now
+* [ ] make sure the jsdoc is generated for roboliq-processor and roboliq-evoware
+* [ ] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html
 * [ ] create schema files for Evoware commands, so that they are in the Evoware API documentation
-* [ ] generated: handle `$ref`s in `EvowareconfigSpec.yaml`
-* [ ] generated: handle `oneOf`s in `EvowareconfigSpec.yaml`
-* [ ] book: add appropriate links to the API documentation
-* [ ] generated: separate pages for Commands and Types
+
+## Secondary
+
+* [ ] document predicates required by the various command handlers
 * [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] document the directives
 * [ ] document variable substitution

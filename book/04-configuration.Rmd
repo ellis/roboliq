@@ -13,21 +13,26 @@ Roboliq supplies a simplified method for configuring Evoware robots.  You will n
 
 ```javascript
 const evowareConfigSpec = {
+  // Lab name and robot name
   namespace: "YOUR LAB ID",
   name: "YOUR ROBOT ID",
+  // Compiler settings
   config: {
     TEMPDIR: "TEMPORARY DIRECTORY FOR MEASUREMENT FILES",
     ROBOLIQ: "COMMAND TO CALL ROBOLIQ'S RUNTIME",
     BROWSER: "PATH TO WEB BROWSER"
   },
+  // Bench sites on the robot
   sites: {
     MYSITE1: {evowareCarrier: "CARRIER ID", evowareGrid: MYGRID, evowareSite: MYSITE},
     ...
   },
+  // Labware models
   models: {
     MYPLATEMODEL1: {type: "PlateModel", rows: 8, columns: 12, evowareName: "EVOWARE LABWARE NAME"},
     ...
   },
+  // List of which sites and labware models can be used together
   siteModelCompatibilities: [
     {
       sites: ["MYSITE1", ...],
@@ -35,6 +40,7 @@ const evowareConfigSpec = {
     },
     ...
   ],
+  // List of the robot's equipment
   equipment: {
     MYEQUIPMENT1: {
       module: "EQUIPMENT1.js",
@@ -43,15 +49,18 @@ const evowareConfigSpec = {
       }
     }
   },
+  // List of which lid types can be stacked on which labware models
   lidStacking: [
     {
       lids: ["lidModel_standard"],
       models: ["MYPLATEMODEL1"]
     }
   ],
+  // List of the robot's robotic arms
   romas: [
     {
       description: "roma1",
+      // List of sites this ROMA can safely access with which vectors
       safeVectorCliques: [
 				{ vector: "Narrow", clique: ["MYSITE1", ...] },
 				...
@@ -59,41 +68,52 @@ const evowareConfigSpec = {
     },
     ...
   ],
+  // Liquid handing arm
   liha: {
+    // Available tip models
     tipModels: {
       MYTIPMODEL1000: {programCode: "1000", min: "3ul", max: "950ul", canHandleSeal: false, canHandleCells: true},
       ...
     },
+    // List of LIHA syringes (e.g. 8 entries if it has 8 syringes)
     syringes: [
       { tipModelPermanent: "MYTIPMODEL1000" },
       ...
     ],
+    // Sites that the LIHA can access
     sites: ["MYSITE1", ...],
+    // Specifications for how to wash the tips
     washPrograms: {
-      CONTINUE
+      // For Example: Specification for flushing the tips with `programCode == 1000`
+      flush_1000: { ... },
+      ...
     }
   },
+  // Additional user-defined command handlers
   commandHandlers: {
     "MYCOMMAND1": function(params, parsed, data) { ... },
     ...
   },
+  // Optional functions to choose among planning alternatives
   planAlternativeChoosers: {
-    CONTINUE
+    // For Example: when the `shaker.shakePlate` command has
+    // multiple shakers available, you might want to use
+    // the one name `MYEQUIPMENT1`
+    "shaker.canAgentEquipmentSite": (alternatives) => {
+			const l = alternatives.filter(x => x.equipment.endsWith("MYEQUIPMENT1"));
+			if (l.length > 0)
+				return l[0];
+		}
   }
-  // Your configuration goes here
 };
-CONTINUE: Add comments to the above properties
 
 const EvowareConfigSpec = require('roboliq-evoware/dist/EvowareConfigSpec.js');
 module.exports = EvowareConfigSpec.makeProtocol(evowareConfigSpec);
 ```
 
-The details about `evowareConfigSpec` are in the Evoware API documenation, and
+The details about `evowareConfigSpec` are in the [Evoware API documenation](../protocol/evowareConfiguration.html), and
 an extensive example can be found in `roboliq-processor/tests/ourlab.js`.
-
-`namespace`: CONTINUE
-
-This information is probably enough to get your robot configured, and you can skip the rest of this chapter unless you need to setup a different kind of robot.
+This information is probably enough to configure your Evoware robot, and you can skip the rest of this chapter unless you need to setup a different kind of robot.
 
 
 ## Components
@@ -117,14 +137,34 @@ As with protocols, the first property of a configuration should be `roboliq: v1`
 
 ### `schemas`
 
-For every command and object type, Roboliq requires a schema that defines its properties.  For more information about schemas, please see the documentation for (JSON Schema)[http://json-schema.org/].
+For every command and object type, Roboliq requires a schema that defines its properties.  By convention, object types begin with an upper-case letter, and commands begin with a lower-case letter.  The schemas are written in a standardized format, which you can learn more about at [JSON Schema](http://json-schema.org/).
 
-Normally, the schemas required for your robot should be automatically provided by your chosen backend and the equipment you select.  The `schemas` property is a hash map: its keys are the command names and object type names; its values are the respective JSON schemas. You will not need to write schemas unless you are creating new commands or objects types for Roboliq.  In that case, please see the developer documentation.
+Normally, the schemas required for your robot should be automatically provided by your chosen backend and the equipment you select.  The `schemas` property is a hash map: its keys are the command names and object type names; its values are the respective JSON schemas. You will not need to write schemas unless you are creating new commands or objects types for Roboliq.  An example schema is provided below in the `commandHandlers` section.
 
 ### `objects`
 
 The `objects` property of a configuration is the same as describe for protocols in the Quick Start chapter.  However, robot configurations usually contain complex objects, such as measurement devices, whereas protocols usually only define fairly simple labware.
-Furthermore, the configuration may contain information that's required for the backend compiler.  Another peculiarity of configurations is that `Namespace`s are used to build nested objects, whereby a robot "contains" its devices, sites, and permanent labware.
+Furthermore, the configuration may contain information that's required for the backend compiler.  The object schemas are described in the documentation for [standard Roboliq objects](../protocol/commands.html) and for [Evoware objects](../protocol/evowareCommands.html).
+
+*Namespaces.* Because a robot "contains" its devices, sites, and permanent labware, we use `Namespace` types to build nested objects.  For example, if our lab is named "bsse",
+we have a robot named "bert", and it has a site named "P1", this could be encoded as follows:
+
+```yaml
+objects:
+  bsse:
+    type: Namespace
+    bert:
+      type: Namespace
+      site:
+        type: Namespace
+        P1:
+          type: Site
+          ...
+```
+
+We can then reference the site in the protocol as `bsse.bert.site.P1`.
+
+
 
 ### `commandHandlers`
 
@@ -149,7 +189,7 @@ schemas: {
 }
 ```
 
-This schema lets Roboliq know that there's a command named `my.hello` CONTINUE
+This schema lets Roboliq know that there's a command named `my.hello`.
 
 
 ```javascript
@@ -167,13 +207,52 @@ commandHandlers: {
 }
 ```
 
-## Logical components
+## Logic components
 
 Roboliq uses an Articifial Intelligence method called [Hierarchical Task Network (HTN) Planning](https://en.wikipedia.org/wiki/Hierarchical_task_network).
 
-CONTINUE: find resources for learning about HTN.
+CONTINUE: find resources for learning about HTN; there used to be documentation at http://danm.ucsc.edu/~wsack/Plan/abstract.html, but that page has disappeared.
 
 ### `predicates`
+
+A predicate defines a "true statement".  For example, the following predicate is named `sealer.canAgentEquipmentProgramModelSite1`, and it lets Roboliq know that the robot agent `ourlab.mario.evoware` can use the sealer `ourlab.mario.sealer` with the labware model `ourlab.model.plateModel_96_round_transparent_nunc` at site `ourlab.mario.site.ROBOSEAL` with the internal program file `PerkinElmer_weiss.bcf`.
+
+```yaml
+"sealer.canAgentEquipmentProgramModelSite":
+	"agent": "ourlab.mario.evoware"
+	"equipment": "ourlab.mario.sealer"
+	"program": "C:\\HJBioanalytikGmbH\\...\\PerkinElmer_weiss.bcf",
+	"model": "ourlab.model.plateModel_96_round_transparent_nunc",
+	"site": "ourlab.mario.site.ROBOSEAL"
+```yaml
+
+The general form for predicates is:
+
+```yaml
+predicateName:
+  object1: value1
+  object2: value2
+  ...
+```
+
+The values are usually object names, and predicates often define true relationships among objects.  All of the predicates together form a database of true statements about the "world" in which the protocol will run.  They are used by certain command handlers to automatically figure out valid operations without the user needing to specify the low-level details.  (Currently, the end-user documentation does not contain details about which predicates are used by which commands, but it can be found in the command handler source code.)
+
+Here is an example excerpt of using the predicate database to find all valid sealers from the `sealer.sealPlate` command handler:
+
+```javascript
+		const predicates = [
+			{"sealer.canAgentEquipmentProgramModelSite": {
+				"agent": parsed.objectName.agent,
+				"equipment": parsed.objectName.equipment,
+				"program": parsed.objectName.program,
+				"model": model,
+				"site": parsed.objectName.site
+			}}
+		];
+		const alternatives = commandHelper.queryLogic(data, predicates, '[].and[]."sealer.canAgentEquipmentProgramModelSite"');
+```
+
+
 
 ### `objectToPredicateConverters`
 
