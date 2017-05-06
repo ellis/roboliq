@@ -20,13 +20,7 @@ var misc = require('../misc.js');
  */
 var objectToPredicateConverters = {
 	"Incubator": function(name, object) {
-		return {
-			value: [{
-				"isIncubator": {
-					"equipment": name
-				}
-			}]
-		};
+		return [{ "isIncubator": { "equipment": name } }];
 	},
 };
 

@@ -110,13 +110,7 @@ module.exports = {
 	 */
 	objectToPredicateConverters: {
 		"EvowareRobot": function(name) {
-			return {
-				value: [{
-					"isAgent": {
-						"agent": name
-					}
-				}]
-			};
+			return [{ "isAgent": { "agent": name } }];
 		}
 	},
 	/**

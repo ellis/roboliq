@@ -23,13 +23,7 @@ const misc = require('../misc.js');
  */
 var objectToPredicateConverters = {
 	"Transporter": function(name, data) {
-		return {
-			value: [{
-				"isTransporter": {
-					"equipment": name
-				}
-			}]
-		};
+		return [{ "isTransporter": { "equipment": name } }];
 	},
 };
 

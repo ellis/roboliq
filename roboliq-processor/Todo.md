@@ -281,7 +281,7 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] generated: handle `oneOf`s in `EvowareconfigSpec.yaml`
 * [x] book: figure out how to add appropriate links to the API documentation
 * [ ] draft chapter: configuration
-	* [ ] objectToPredicateConverters
+	* [x] objectToPredicateConverters
 	* [ ] planHandlers
 * [ ] draft chapter: simple protocols
 	* [ ] split chapter into simple & advanced protocols

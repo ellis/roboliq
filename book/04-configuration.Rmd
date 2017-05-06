@@ -256,4 +256,29 @@ The function `commandHelper.queryLogic()` will find all solutions the `predicate
 
 ### `objectToPredicateConverters`
 
+Roboliq's AI needs predicates describing the available objects.  These are generated dynamically by the functions supplied in `objectToPredicateConverters`.
+It is a map from a object type to a function that accepts a named object and returns an array of predicates.  For example, here is Roboliq's converter for `Plate` objects:
+
+```javascript
+objectToPredicateConverters: {
+  Plate: function(name, object) {
+		const predicates = [
+			{ "isLabware": { "labware": name } },
+			{ "isPlate": { "labware": name } },
+			{ "model": { "labware": name, "model": object.model } },
+			{ "location": { "labware": name, "site": object.location } }
+		];
+		if (object.sealed) {
+			predicates.push({ "plateIsSealed": { "labware": name } });
+		}
+		return predicates;
+	},
+	...
+}
+```
+
+This converter creates between 4 and 6 predicates for every plate object: `isLabware` lets the AI know that the plate is a kind of labware, `isPlate` says that the plate is a plate, `model` says which labware model the plate has, and `location` says where the plate is located.  Furthermore, `plateIsSealed` will be present if-and-only-if the plate is sealed.
+
+You'll only need to create additional object-to-predicate converters if you want to extend Roboliq's object types, or perhaps if you create an advanced command that required additional logic.
+
 ### `planHandlers`

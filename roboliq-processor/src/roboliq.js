@@ -1140,11 +1140,11 @@ function createStateItems(objectToPredicateConverters, o, name = "", stateList =
 	//console.log("name: "+name);
 	if (o.hasOwnProperty("type")) {
 		//console.log("type: "+o.type);
-		var type = o['type'];
+		const type = o['type'];
 		if (objectToPredicateConverters.hasOwnProperty(type)) {
-			var result = objectToPredicateConverters[type](name, o);
-			if (result.value) {
-				stateList.push.apply(stateList, result.value);
+			const predicates = objectToPredicateConverters[type](name, o);
+			if (!_.isEmpty(predicates)) {
+				stateList.push(...predicates);
 			}
 		}
 	}

@@ -91,23 +91,15 @@ var predicates = [
 
 var objectToPredicateConverters = {
 	Lid: function(name, object) {
-		return {
-			value: [
-				{"isLabware": {"labware": name}},
-				{"isLid": {"labware": name}},
-				{"model": {"labware": name, "model": object.model}},
-				{"location": {"labware": name, "site": object.location}}
-			]
-		}
+		return [
+			{"isLabware": {"labware": name}},
+			{"isLid": {"labware": name}},
+			{"model": {"labware": name, "model": object.model}},
+			{"location": {"labware": name, "site": object.location}}
+		];
 	},
 	LidModel: function(name, object) {
-		return {
-			value: [{
-				"isModel": {
-					"model": name
-				}
-			}]
-		};
+		return [{ "isModel": { "model": name } }];
 	},
 	"Plate": function(name, object) {
 		var value = [
@@ -119,27 +111,16 @@ var objectToPredicateConverters = {
 		if (object.sealed) {
 			value.push({ "plateIsSealed": { "labware": name } });
 		}
-		if (object.hasLid) {
-			value.push({ "plateHasLid": { "labware": name } });
-		}
-		return {value};
+		return value;
 	},
 	"PlateModel": function(name, object) {
-		return {
-			value: [{
-				"isModel": {
-					"model": name
-				}
-			}]
-		};
+		return [{ "isModel": { "model": name } }];
 	},
 	"Site": function(name, object) {
-		return {
-			value: _.compact([
-				{"isSite": {"model": name}},
-				(object.closed) ? {"siteIsClosed": {"site": name}} : null,
-			])
-		};
+		return _.compact([
+			{"isSite": {"model": name}},
+			(object.closed) ? {"siteIsClosed": {"site": name}} : null,
+		]);
 	},
 };
 

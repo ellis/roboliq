@@ -23,12 +23,10 @@ var misc = require('../misc.js');
  */
 var objectToPredicateConverters = {
 	"Timer": function(name, object) {
-		return {
-			value: _.compact([
-				{"isTimer": {"equipment": name}},
-				(object.running) ? {"running": {"equipment": name}} : null
-			])
-		};
+		return _.compact([
+			{"isTimer": {"equipment": name}},
+			(object.running) ? {"running": {"equipment": name}} : null
+		]);
 	},
 };
 

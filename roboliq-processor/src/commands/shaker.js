@@ -6,13 +6,7 @@ import misc from '../misc.js';
 
 const objectToPredicateConverters = {
 	"Shaker": function(name, object) {
-		return {
-			value: [{
-				"isShaker": {
-					"equipment": name
-				}
-			}]
-		};
+		return [{ "isShaker": { "equipment": name } }];
 	},
 };
 
