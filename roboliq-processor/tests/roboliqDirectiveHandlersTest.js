@@ -45,25 +45,25 @@ describe('config/roboliqDirectiveHandlers', function() {
 		precision: 64        // Number of significant digits for BigNumbers
 	});
 
-	it('should handle #data', function() {
+	it('should handle data()', function() {
 		should.deepEqual(misc.handleDirective(
-			{"#data": {where: {age: 1}, value: "name"}}, data),
+			{"data()": {where: {age: 1}, value: "name"}}, data),
 			["bob", "sue"]
 		);
 		should.deepEqual(misc.handleDirective(
-			{"#data": {where: {age: 2}, head: true}}, data),
+			{"data()": {where: {age: 2}, head: true}}, data),
 			{name: "tom", gender: "male", age: 2}
 		);
 		should.deepEqual(misc.handleDirective(
-			{"#data": {value: "$`age*2`", join: ";"}}, data),
+			{"data()": {value: "$`age*2`", join: ";"}}, data),
 			"2;4;2"
 		);
 		should.deepEqual(misc.handleDirective(
-			{"#data": {template: {age2: "$`age*2`"}}}, data),
+			{"data()": {template: {age2: "$`age*2`"}}}, data),
 			[{age2: 2}, {age2: 4}, {age2: 2}]
 		);
 		should.deepEqual(misc.handleDirective(
-			{"#data": {source: "design2", template: {age2: "$`age*2`"}}}, data),
+			{"data()": {source: "design2", template: {age2: "$`age*2`"}}}, data),
 			[{age2: 200}]
 		);
 	});

@@ -290,31 +290,39 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] draft chapter: advanced protocols
 	* [x] parameters
 	* [x] objects
-	* [-] step data and scope
 
+	* [ ] data
+		* [x] Data type
+		* [x] data property
+		* [x] data commands
+		* [ ] data() directive
+	* [ ] rename `Design` to `Data`
+	* [ ] rename `experiment` to `data`
+	* [ ] rename `conditions` to `design`
 	* [ ] scope
-	* [ ] substitution
+	* [ ] improve SCOPE, write tests
+		* SCOPE: should contain parameters, variables, data rows
+			* `__objects`: access the raw objects
+			* `__data`: access the current raw data table
+			* `__parameters`: access raw protocol parameters
+			* `__step`: access parameters of the current step
+			* `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
+			* `__column()`: function to return a column from the current data table
+			* `_`: lodash module
+			* `math`: mathjs module
+	* [x] substitution
 	* [x] $-substitution
 	* [x] template substitution
-	* [ ] directives?
+	* [x] directives
 
 * [x] replace mustache with handlebars
-* [ ] make sure template work like I documented them
-* [ ] improve SCOPE, write tests
-	* SCOPE: should contain parameters, variables, data rows
-		* `__objects`: access the raw objects
-		* `__data`: access the current raw data table
-		* `__parameters`: access raw protocol parameters
-		* `__step`: access parameters of the current step
-		* `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
-		* `__column()`: function to return a column from the current data table
-		* `_`: lodash module
-		* `math`: mathjs module
+* [ ] make sure templates work like I documented them
 
 * [ ] draft chapter: design tables
 	* [ ] plain factors, `*`-factors, array factors, `=` factors
 	* [ ] actions/functions
 	* [ ] manipulations: where, orderBy, etc
+	* [ ] design directives
 * [ ] book: exclude unfinished chapters for now
 * [ ] make sure the jsdoc is generated for roboliq-processor and roboliq-evoware
 * [ ] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html
@@ -323,6 +331,7 @@ See misc.js:renderTemplateString, since another convention is used there
 ## Secondary
 
 * [ ] document predicates required by the various command handlers
+* [ ] create some schema for the `data` property somehow, then generate the documentation, or write it manually in the appropriate place
 * [ ] predicates: explain the difference between state predicates and tasks/actions
 * [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] advanced protocols: make the `data` property documentation more complete

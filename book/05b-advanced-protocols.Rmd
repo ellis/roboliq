@@ -32,9 +32,9 @@ Notice that `$#` prefixes `VOLUME` in the step; `$#` tells Roboliq to substitute
 
 There are several more object types you might want to use in advanced protocols:
 
-[`Design`](../protocol/commands.html#_Design): for defining an experimental design.
-The `Design` type facilitates complex experimental designs, and you can read
-more about it in the chapter on [Design Tables].
+[`Data`](../protocol/commands.html#_Data): for defining a data table.
+The `Data` type facilitates complex experimental designs, and you can read
+more about it in the next section and in the chapter on [Design Tables].
 
 [`Variable`](../protocol/commands.html#_Variable):
 For defining references to other variables.
@@ -94,6 +94,196 @@ steps:
 This protocol will first dispense 10ul to all wells, then another 50ul to all wells -- not actually a useful protocol, but it illustrates the point.
 In the `system.call` command, the name of the template is specified along with the parameters template parameters.  Templates are expanded using the [Handlebars](http://handlebarsjs.com/) template engine, which is the reason for the "{{" and "}}" delimiters in the line `volumes: "{{volume}}"`.
 
+## Data
+
+Roboliq supports data tables to enable complex experiments.  Conceptually,
+a data table is like a spread sheet of rows and named columns, where each row
+represents some "thing", a each column represents a property.
+In Roboliq, a data table is an array of JSON objects: each object is a row,
+and each property is a column.  Normally all the objects will have the same
+set of properties (but this is not required).
+
+Data tables are supported by a `Data` type, a `data` property, a `data()`
+directive, and a set of `data.*` commands.
+
+### `Data` type
+
+You can define a data table using the `Data` object type.
+Here's an example where each row has a well, a liquid source, and a volume:
+
+```yaml
+objects:
+  data1:
+    type: Data
+    value:
+      - {well: A01, volume: 10 ul, source: liquid1}
+      - {well: B01, volume: 10 ul, source: liquid2}
+      - {well: A02, volume: 20 ul, source: liquid1}
+      - {well: B02, volume: 20 ul, source: liquid2}
+```
+
+You can define as many data tables as you want in a protocol.
+
+### `data` property
+
+After defining a data table, you need to "activate" it for usage.  This is done
+using the `data` property, which understands the
+following parameters:
+
+* `source`: this is the name of a `Data` object.
+* `where`: this is an optional boolean [mathjs](http://mathjs.org/) expression that is evaluated for each data row -- only rows for which the expression evaluates to true are activated.
+* `orderBy`: an optional array of column names for ordering rows.  The ordering behavior is the same as the `_.sortBy` function in [lodash](https://lodash.com/docs/#sortBy).
+
+Any step can be given a `data` property to make a table available in that step and its sub-steps.
+Here's an example application:
+
+```yaml
+steps:
+  1:
+    data: {source: data1}
+    command: pipetter.pipette
+    sources: $$source
+    destinationPlate: plate1
+    destinations: $$well
+    volumes: $$volume
+```
+
+The `data` property activates our data table `data1`.  The command `pipetter.pipette`
+can now access the data columns by using the `$$`-prefix along with the column
+name.  So the above example is essentially equivalent to this:
+
+```yaml
+steps:
+  1:
+    command: pipetter.pipette
+    sources: [liquid1, liquid2, liquid1, liquid2]
+    destinationPlate: plate1
+    destinations: [A01, B01, A02, B02]
+    volumes: [10 ul, 10 ul, 20 ul, 20 ul]
+```
+
+### `data.*` commands
+
+Roboliq's `data.*` commands provide two commands for more sophisticated handling
+of data tables: `data.forEachRow` and `data.forEachGroup`.
+
+`data.forEachRow` lets you run a series of steps on each row of the data table.
+For each row, the command activates a new data table containing only that row,
+and it runs its sub-`steps` using that new table.
+Here's a toy example:
+
+```yaml
+steps:
+  1:
+    data: {source: data1}
+    command: data.forEachRow
+    steps:
+      1:
+        command: pipetter.pipette
+        sources: $source
+        destinationPlate: plate1
+        destinations: $well
+        volumes: $volume
+      2:
+        command: fluorescenceReader.measurePlate
+        object: plate1
+        output:
+          joinKey: well
+```
+
+In this case, the sub-steps will be repeated 4 times, once for each row.
+That mean each well will be dispensed into and measured before moving onto
+the next well.
+Notice that here only a single \$-prefix was used rather than the double \$\$-prefix
+for the column variables.
+When a data table is activated, Roboliq will check if any of the columns have
+all the same value; if so, that property and value will be automatically added to the current scope (see
+the next section about Scope).  Scope variables are accessible via the \$-prefix.
+Since the `data.forEachRow` command activates each row individually, all of
+its columns will be added to the scope.
+
+`data.forEachGroup` lets you operate on groups of rows at a time.  You
+provide a `groupBy` property for it to group by, and then for each group it
+activates a new data table with those rows and runs its sub-`steps` using
+that new table.  Here's another toy example:
+
+```yaml
+steps:
+  1:
+    data: {source: data1}
+    command: data.forEachGroup
+    groupBy: source
+    steps:
+      1:
+        command: pipetter.pipette
+        sources: $source
+        destinationPlate: plate1
+        destinations: $$well
+        volumes: $$volume
+      2:
+        command: fluorescenceReader.measurePlate
+        object: plate1
+        output:
+          joinKey: well
+```
+
+Since there are two unique `source` values in `data1`, the `data.forEachGroup`
+command will create two new data tables for it sub-steps:
+
+First table:
+
+```yaml
+- {well: A01, volume: 10 ul, source: liquid1}
+- {well: A02, volume: 20 ul, source: liquid1}
+```
+
+Second table:
+
+```yaml
+- {well: B01, volume: 10 ul, source: liquid2}
+- {well: B02, volume: 20 ul, source: liquid2}
+```
+
+So the sub-steps will be repeated twice, once for new data table.
+Notice that here we used the single \$-prefix for `source`, but the double \$\$-prefix
+for `well` and `volume`.  Because the values of the well and volume columns are
+not the same in all rows, they are not automatically added to the scape, and we
+can't use the single \$-prefix.
+
+
+### `data()` directive
+
+The `data()` directive lets you assign a modified version of your
+data table to a property value.
+
+Here's an example:
+
+```yaml
+data(): {where: 'source == "liquid1"', }
+should.deepEqual(misc.handleDirective(
+  {"data()": {where: {age: 1}, value: "name"}}, data),
+  ["bob", "sue"]
+);
+should.deepEqual(misc.handleDirective(
+  {"data()": {where: {age: 2}, head: true}}, data),
+  {name: "tom", gender: "male", age: 2}
+);
+should.deepEqual(misc.handleDirective(
+  {"data()": {value: "$`age*2`", join: ";"}}, data),
+  "2;4;2"
+);
+should.deepEqual(misc.handleDirective(
+  {"data()": {template: {age2: "$`age*2`"}}}, data),
+  [{age2: 2}, {age2: 4}, {age2: 2}]
+);
+should.deepEqual(misc.handleDirective(
+  {"data()": {source: "design2", template: {age2: "$`age*2`"}}}, data),
+  [{age2: 200}]
+);
+
+```
+CONTINUE
+
 ## Scope
 
 *Scope* is the set of currently active variables in a step.
@@ -103,8 +293,8 @@ CONTINUE
 ## Substitution
 
 *Substitution* lets you work with parameters and data tables by inserting their
-values into the protocol.  Roboliq supports two forms of substitution:
-*template* substitution and *scope* substitution.
+values into the protocol.  Roboliq supports three forms:
+*template* substitution, *scope* substitution, and *directive* substitution.
 
 ### Scope \$ substitution
 
@@ -179,5 +369,9 @@ in scope:
 1: `{command: "system._echo", text: "Hello, {{name}}"}`
 ```
 
+### Directive \(\) substitution
 
-## Functions
+Directives are substitution functions.  The main one is the `data()` directive,
+which was already discussed above in the Data section.
+The other directives are also closely related to `Data` objects, and they are
+discussed more in the chapter on [Design Tables].
