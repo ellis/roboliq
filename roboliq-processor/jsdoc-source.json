@@ -15,9 +15,9 @@
 		"default": {
 			"outputSourceFiles": true
 		},
-		"systemName"      : "Roboliq Source",
+		"systemName"      : "roboliq-processor",
 		"footer"          : "",
-		"copyright"       : "Roboliq Copyright © 2016 Ellis Whitehead",
+		"copyright"       : "Roboliq Copyright © 2016-2017 Ellis Whitehead",
 		"navType"         : "vertical",
 		"theme"           : "cerulean",
 		"linenums"        : true,
@@ -27,6 +27,7 @@
 	},
 	"opts": {
 		"template": "node_modules/ink-docstrap/template",
-		"destination": "../docs/roboliq-processor"
+		"destination": "../docs/roboliq-processor",
+		"readme": "README.md"
 	}
 }
