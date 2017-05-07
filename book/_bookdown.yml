@@ -1,3 +1,9 @@
 book_filename: "roboliq"
-#rmd_files: ["index.md", "01-intro.md"]
+rmd_files:
+- index.Rmd
+- 01-intro.Rmd
+- 02-quick-start.Rmd
+- 03-input-formats.Rmd
+- 04-configuration.Rmd
+- 05a-simple-protocols.Rmd
 output_dir: "../docs/manual"
