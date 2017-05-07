@@ -77,7 +77,7 @@ function getDesignFactor(propertyName, DATA) {
  * @param  {object} data - protocol data
  * @return {any} the value with possible substitutions
  */
-function substituteDeep(x, data, SCOPE, DATA) {
+function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 	// console.log("substituteDeep: "); console.log({x, SCOPE, DATA, x})
 	let x2 = x;
 	if (_.isString(x)) {
@@ -141,28 +141,22 @@ function substituteDeep(x, data, SCOPE, DATA) {
 		}
 	}
 	else if (_.isArray(x)) {
-		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA));
+		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA, addCommonValuesToScope));
 	}
 	else if (_.isPlainObject(x)) {
-		const {DATAs, SCOPEs, foreach} = updateSCOPEDATA(x, data, SCOPE, DATA);
+		const {DATAs, SCOPEs, foreach} = updateSCOPEDATA(x, data, SCOPE, DATA, addCommonValuesToScope);
 
-		// Skip objects with one of these properties:
-		if (foreach) {
-			// TODO: handle this case?
-		}
-		else {
-			const DATA2 = DATAs[0];
-			const SCOPE2 = SCOPEs[0];
-			x2 = _.mapValues(x, (value, name) => {
-				// Skip over @DATA, @SCOPE, directives and 'steps' properties
-				if (_.startsWith(name, "#") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
-					return value;
-				}
-				else {
-					return substituteDeep(value, data, SCOPE2, DATA2);
-				}
-			});
-		}
+		const DATA2 = DATAs[0];
+		const SCOPE2 = SCOPEs[0];
+		x2 = _.mapValues(x, (value, name) => {
+			// Skip over @DATA, @SCOPE, directives and 'steps' properties
+			if (_.startsWith(name, "#") || _.endsWith(name, "()") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
+				return value;
+			}
+			else {
+				return substituteDeep(value, data, SCOPE2, DATA2, addCommonValuesToScope);
+			}
+		});
 	}
 	return x2;
 }
@@ -1164,7 +1158,7 @@ function stepify(steps) {
  * Process '@DATA', '@SCOPE', and 'data' properties for a step,
  * and return updated {DATAs, SCOPEs, foreach}.
  */
-function updateSCOPEDATA(step, data, SCOPE, DATA) {
+function updateSCOPEDATA(step, data, SCOPE, DATA, addCommonValuesToScope=true) {
 	// console.log("updateSCOPEDATA");
 	// console.log("data2: "+JSON.stringify(data));
 	// console.log({SCOPE})
@@ -1198,24 +1192,24 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 		}
 
 		// Replicate the command for each group
-		const groups = Design.query(table, dataInfo);
+		const groups = Design.query(table, dataInfo); // TODO: is this required anymore, now that we're removing the 'foreach' property?
 		// console.log("groups: "+JSON.stringify(groups))
 
-		// TODO: These two 'forEach' checks should be removed -- they are replaced by 'experiment.forEachRow' and 'experiment.forEachGroup'
-		if (dataInfo.forEach === "row") {
-			// Turn each row into its own group
-			DATAs = _(groups).flatten().map(x => [x]).value();
-			//console.log("forEach row DATAs: "+JSON.stringify(DATAs, null, '\t'));
-			foreach = true;
-		}
-		else if (dataInfo.forEach === "group") {
-			DATAs = groups;
-			//console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
-			foreach = true;
-		}
-		else {
+		// // TODO: These two 'forEach' checks should be removed -- they are replaced by 'experiment.forEachRow' and 'experiment.forEachGroup'
+		// if (dataInfo.forEach === "row") {
+		// 	// Turn each row into its own group
+		// 	DATAs = _(groups).flatten().map(x => [x]).value();
+		// 	//console.log("forEach row DATAs: "+JSON.stringify(DATAs, null, '\t'));
+		// 	foreach = true;
+		// }
+		// else if (dataInfo.forEach === "group") {
+		// 	DATAs = groups;
+		// 	//console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
+		// 	foreach = true;
+		// }
+		// else {
 			DATAs = [_.flatten(groups)];
-		}
+		// }
 	}
 	//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
@@ -1229,7 +1223,7 @@ function updateSCOPEDATA(step, data, SCOPE, DATA) {
 	}
 
 	const SCOPEs = DATAs.map(DATA => {
-		const common = Design.getCommonValues(DATA);
+		const common = (addCommonValuesToScope) ? Design.getCommonValues(DATA) : {};
 		return _.defaults(common, SCOPE);
 	});
 

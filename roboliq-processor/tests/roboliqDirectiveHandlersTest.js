@@ -66,6 +66,43 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{"data()": {source: "design2", template: {age2: "$`age*2`"}}}, data),
 			[{age2: 200}]
 		);
+
+		const data2 = _.cloneDeep(data);
+		data2.objects.DATA = [
+			{well: "A01", volume: "10 ul", source: "liquid1"},
+			{well: "B01", volume: "10 ul", source: "liquid2"},
+			{well: "A02", volume: "20 ul", source: "liquid1"},
+			{well: "B02", volume: "20 ul", source: "liquid2"}
+		];
+
+		should.deepEqual(misc.handleDirective(
+			{"data()": {where: 'source == "liquid1"'}}, data2),
+			[{well: "A01", volume: "10 ul", source: "liquid1"}, {well: "A02", volume: "20 ul", source: "liquid1"}]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {map: '$volume'}}, data2),
+			["10 ul", "10 ul", "20 ul", "20 ul"]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {where: 'source == "liquid1"', map: '$(volume * 2)'}}, data2),
+			["20 ul", "40 ul"]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {map: {well: "$well"}}}, data2),
+			[{well: "A01"}, {well: "B01"}, {well: "A02"}, {well: "B02"}]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {map: "$well", join: ","}}, data2),
+			"A01,B01,A02,B02"
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {summarize: {totalVolume: '$(sum(volume))'}}}, data2),
+			[{totalVolume: "60 ul"}]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {groupBy: "source", summarize: {source: '${source[0]}', totalVolume: '$(sum(volume))'}}}, data2),
+			[{source: "liquid1", totalVolume: "30 ul"}, {source: "liquid2", totalVolume: "30 ul"}]
+		);
 	});
 
 	it('should handle #destinationWells', function() {

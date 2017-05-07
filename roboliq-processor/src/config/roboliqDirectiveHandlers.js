@@ -39,7 +39,7 @@ function directive_createWellAssignments(spec, data) {
 function directive_data(spec, data) {
 	// console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
 	// console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
-	return expect.try("#data", () => {
+	return expect.try("data()", () => {
 		const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA({data: spec}, data, data.objects.SCOPE, data.objects.DATA);
 		// console.log(DATAs)
 		// console.log(SCOPEs)
@@ -55,17 +55,19 @@ function directive_data(spec, data) {
 			});
 			// console.log("result1: "+JSON.stringify(result))
 		}
-		else if (spec.template) {
+		else if (spec.hasOwnProperty("map") || spec.template) {
+			const template = _.get(spec, "map", spec.template);
 			// console.log("result: "+JSON.stringify(result, null, '\t'))
 			result = _.map(result, DATA => _.map(DATA, row => {
 				const SCOPE = _.merge({}, SCOPE0, row);
 				// console.log("row: "+JSON.stringify(row, null, '\t'))
 				// console.log("SCOPE: "+JSON.stringify(SCOPE, null, '\t'))
-				return commandHelper.substituteDeep(spec.template, data, SCOPE, DATA);
+				return commandHelper.substituteDeep(template, data, SCOPE, DATA);
 			}));
 			// console.log("result1: "+JSON.stringify(result))
 		}
 
+		// deprecated, use `map`
 		if (spec.value) {
 			result = _.map(result, DATA => _.map(DATA, row => {
 				if (_.startsWith(spec.value, "$`")) {
@@ -76,6 +78,21 @@ function directive_data(spec, data) {
 					return row[spec.value];
 				}
 			}));
+			// console.log("result1: "+JSON.stringify(result))
+		}
+
+		if (spec.hasOwnProperty("summarize")) {
+			// console.log("result: "+JSON.stringify(result, null, '\t'))
+			result = _.map(result, DATA => {
+				const SCOPE = _.clone(SCOPE0);
+				const columns = getColumns(DATA);
+				_.forEach(columns, key => {
+					SCOPE[key] = _.map(DATA, key);
+				});
+				// console.log(SCOPE);
+				// console.log("SCOPE: "+JSON.stringify(SCOPE, null, '\t'))
+				return commandHelper.substituteDeep(spec.summarize, data, SCOPE, DATA, false);
+			});
 			// console.log("result1: "+JSON.stringify(result))
 		}
 
@@ -99,6 +116,15 @@ function directive_data(spec, data) {
 		// console.log("result: "+JSON.stringify(result, null, '\t'))
 		return result;
 	});
+}
+
+function getColumns(DATA) {
+	// Get column names
+	const columnMap = {};
+	_.forEach(DATA, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
+	const columns = _.keys(columnMap);
+	// console.log({columns})
+	return columns;
 }
 
 function directive_destinationWells(spec, data) {
