@@ -292,11 +292,23 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] objects
 	* [-] step data and scope
 
+	* [ ] scope
 	* [ ] substitution
-	* [ ] $-substitution
-	* [ ] string substitution
+	* [x] $-substitution
+	* [x] template substitution
 	* [ ] directives?
-	* [ ] template functions
+
+* [ ] replace mustache with handlebars
+* [ ] improve SCOPE, write tests
+	* SCOPE: should contain parameters, variables, data rows
+		* `__objects`: access the raw objects
+		* `__data`: access the current raw data table
+		* `__parameters`: access raw protocol parameters
+		* `__step`: access parameters of the current step
+		* `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
+		* `__column()`: function to return a column from the current data table
+		* `_`: lodash module
+		* `math`: mathjs module
 
 * [ ] draft chapter: design tables
 	* [ ] plain factors, `*`-factors, array factors, `=` factors
@@ -387,19 +399,12 @@ See misc.js:renderTemplateString, since another convention is used there
 
 # Todos
 
-* [ ] replace usage of mustache with handlebars
 * [ ] designTest: unit test for calculateRow
 * [ ] Variable references:
-	* SCOPE: should contain parameters, variables, data rows
-	* Referencing:
-		* `$`: substitute in scope variable
-		* `$*`: dereference twice (consider `$$`)
-		* `$$`: column array from current data table (consider `$#`)
-		* `$@`: dereference variable in `objects`
-		* `$&`: dereference a parameter value
+	* Future referencing?
+		* `$*`: dereference twice
 		* `${${@myvar}.somevalue}`
 		* `${@myvar.somevalue}`
-		* "$`...`": calculation
 		* template substitution with ticks
 * [ ] allow for setting command defaults:
 	* `commandDefaults: [{command: "transporter.*", equipment: "ourlab.mario.roma2"}]`

@@ -35,7 +35,7 @@ There are several more object types you might want to use in advanced protocols:
 [`Design`](../protocol/commands.html#_Design): for defining an experimental design.
 The `Design` type facilitates complex experimental designs, and you can read
 more about it in the chapter on [Design Tables].
-  
+
 [`Variable`](../protocol/commands.html#_Variable):
 For defining references to other variables.
 Variables are not particularly useful in Roboliq, but they could potentially
@@ -94,12 +94,90 @@ steps:
 This protocol will first dispense 10ul to all wells, then another 50ul to all wells -- not actually a useful protocol, but it illustrates the point.
 In the `system.call` command, the name of the template is specified along with the parameters template parameters.  Templates are expanded using the [Mustache](https://github.com/janl/mustache.js) template engine, which is the reason for the "{{" and "}}" delimiters in the line `volumes: "{{volume}}"`.
 
+## Scope
+
+*Scope* is the set of currently active variables in a step.
+
+CONTINUE
+
 ## Substitution
 
-### `$` substitution
+*Substitution* lets you work with parameters and data tables by inserting their
+values into the protocol.  Roboliq supports two forms of substitution:
+*template* substitution and *scope* substitution.
 
-### String substitution
+### Scope \$ substitution
 
-## Object references by name
+In scope substition, an expression starting with \$ is replaced with a value
+from the scope.  There are various forms of replacement, which we'll dive into
+now.
+
+`$#...`: **pre-scope substitution for parameter values**
+
+Parameters are not actually part of the scope, and they are accessible
+outside of steps as well.  This means that they can be used in
+other parameter values and in object definitions, which is not the case
+for normal scope variables.  You can substitute the value of a parameter named
+`MYPARAM` by with `$#MYPARAM`.  
+
+
+`${...}`: **javascript expression**
+
+Roboliq will substitute in the result of a JavaScript expression.
+The JavaScript expression has access to:
+
+  * The scope variables
+  * `_`: the [lodash](https://lodash.com/) module and its [many functions](https://lodash.com/docs/).
+  * `math`: the [mathjs](http://mathjs.org/) module and its [many functions](http://mathjs.org/docs/reference/functions.html).
+
+Note that any value JSON value may be returned, whether it's a string, number,
+boolean, array, or object.
+
+`$(...)`: **mathjs calculation**
+
+The [mathjs](http://mathjs.org/) module provides a fairly broad range of
+math operations and is able to handle of units, such as volume.  The mathjs
+expression has access to the current scope variables.
+
+`$...`: **scope value substitution**
+
+Here you just name the scope variable, and Roboliq will substitute in its
+value.
+
+`$$...`: **column array from current data table**
+
+If you have activated a data table using the `data` property, then you can
+use `$$colName` to get an array of all the values in the column named `colName`.
+
+**NOTE**: Scope substitution can only be used as a parameter value by itself.
+The following uses are invalid:
+
+* `text: "Hello, $name"`: Roboliq only supports scope substitution for an entire
+  value, so the `name` value will not be substituted into this text.  
+  You can use template substitution for this purpose instead.
+* `$myparam: 4`: Roboliq does not support scope substitution for property names.
+  You can use template substitution for this purpose instead.
+
+### Template \` substitution
+
+Template substitution uses the [Handlebars](http://handlebarsjs.com/) template
+engine to manipulate text.  Template substitution occurs on strings that start
+and end with a tick (\`).  Here's a simple example that produces a new string:
+
+```yaml
+text: "`Hello, {{name}}`"
+```
+
+If the `name` in the current scope is "John", then this will set `text: "Hello, John"`.
+
+If the template substitution result is enclosed by braces or brackets, Roboliq
+will attempt to parse it as a JSON object.  Here's a trivial example that
+turns a template substitution into a command, assuming that `name` is currently
+in scope:
+
+```yaml
+1: `{command: "system._echo", text: "Hello, {{name}}"}`
+```
+
 
 ## Functions
