@@ -112,7 +112,9 @@ to tell the command exactly what to do.  In the above example, the line
 
 Command names have two parts separated by a period.  First is the command category, which contains related commands.  Second is the actual command name.  Roboliq's standard commands are listed in the [Command documentation](../protocol/commands.html), and Evoware's special commands are listed in the [Evoware Command documentation](../protocol/evowareCommands.html).
 
-Steps can also be given a `description` property that let's you add documention.  Here is an example that contains nested steps, descriptions and commands - it is the same as the previous example, but applied to two plates:
+Steps can also be given a `description` property that let's you explanation what's happening for someone else who reads the protocol (or for yourself later after you've forgotten).  Step can also be given a `comment` property, which is intended to be used as programmer comments that aren't of interest to others.
+
+Here is an example that contains nested steps, descriptions and commands - it is the same as the previous example, but applied to two plates:
 
 ```yaml
 steps:

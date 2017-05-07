@@ -289,8 +289,8 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] steps
 * [ ] draft chapter: advanced protocols
 	* [x] parameters
-	* [ ] objects
-	* [ ] step data and scope
+	* [x] objects
+	* [-] step data and scope
 
 	* [ ] substitution
 	* [ ] $-substitution
@@ -312,8 +312,9 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] document predicates required by the various command handlers
 * [ ] predicates: explain the difference between state predicates and tasks/actions
 * [ ] generated: sort in alphabetical order, but put low-level things later
+* [ ] advanced protocols: make the `data` property documentation more complete
 * [ ] document the directives
-* [ ]
+* [ ] document the format for specifying wells, e.g. `plate1(A01 down D02)`
 * [ ] distribution documentation
 	* [ ] src/roboliq/README.md
 		* [ ] Getting Started

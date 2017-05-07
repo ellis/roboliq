@@ -468,3 +468,29 @@ The descriptions should be:
 1.1.description: "Alice Charles David"
 
 In 1.1, "\$\$b" does not exist, but "\$a" and "\$c" still do.  That is to say: column data from a previous `data` directive are not carried into sub-steps with a new `data` directive, but the values that were the same for all columns remain in scope.
+
+
+
+## Steps
+
+### `data` property
+
+Steps can be given a `data` property that activates a data table and gives Roboliq
+a lot of power to handle complex experiments.  The `data` property understands the
+following parameters:
+
+* `source`: this is the name of a `Design` or `Variable` that contains an array of data rows.
+* `where`: this is a boolean [mathjs](http://mathjs.org/) expression that is evaluated for each data row -- only rows for which the expression evaluates to true are activated.
+* `orderBy`: an array of column names for ordering rows.
+
+Here's a toy example:
+
+```yaml
+objects:
+  design1:
+    type: Design
+    value:
+      - {source: water}
+      - {source: mix1}
+```
+

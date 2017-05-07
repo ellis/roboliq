@@ -34,7 +34,7 @@ There are several more object types you might want to use in advanced protocols:
 
 [`Design`](../protocol/commands.html#_Design): for defining an experimental design.
 The `Design` type facilitates complex experimental designs, and you can read
-more about it in the chapter on Design Tables.
+more about it in the chapter on [Design Tables].
   
 [`Variable`](../protocol/commands.html#_Variable):
 For defining references to other variables.
@@ -61,7 +61,9 @@ steps:
 
 [`Template`](../protocol/commands.html#_Template):
 You can use a template to define re-usable steps.
-Here is a non-sense example CONTINUE:
+Here is a toy example for a template named `dispenseToPlate1` which
+creates a `pipetter.pipette` command that transfers a volume of water to
+all wells on `plate1`:
 
 ```yaml
 objects:
@@ -75,7 +77,7 @@ objects:
       command: pipetter.pipette
       sources: water
       destinations: plate1(all)
-      volumes: $volume
+      volumes: "{{volume}}"
 steps:
   1:
     command: system.call
@@ -89,57 +91,8 @@ steps:
       volume: 50 ul
 ```
 
-## Steps
-
-### `comment` property
-
-
-### `data` property
-
-Steps can be given a `data` property that activates a data table and gives Roboliq
-a lot of power to handle complex experiments.
-
-
-
-The `steps` property specifies the actions to be taken.  Normally, this is
-a numbered list of commands, such as this example of sealing and shaking
-a plate:
-
-```yaml
-steps:
-  1:
-    command: sealer.sealPlate
-    object: plate1
-  2:
-    command: shaker.shakePlate
-    object: plate1
-```
-
-A *command* is indicated by a `command` property, such as the `sealer.sealPlate`
-and `shaker.shakePlate` commands above.
-Besides the `command` property, you will need to specify additional properties
-to tell the command exactly what to do.  In the above example, the line
-`object: plate1` tells the command to act on `plate1`.
-
-The 
-Structure of command names
-List of available commands
-
-A step is either a command or a numbered list of sub-steps.
-
-
-
-Numbered sub-steps
-
-`description`, `data`
-
-CONTINUE:
-
-## Structure and syntax
-
-## Objects
-
-## Steps
+This protocol will first dispense 10ul to all wells, then another 50ul to all wells -- not actually a useful protocol, but it illustrates the point.
+In the `system.call` command, the name of the template is specified along with the parameters template parameters.  Templates are expanded using the [Mustache](https://github.com/janl/mustache.js) template engine, which is the reason for the "{{" and "}}" delimiters in the line `volumes: "{{volume}}"`.
 
 ## Substitution
 
