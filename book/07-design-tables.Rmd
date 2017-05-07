@@ -19,20 +19,18 @@ NOTE: In this chapter, we'll uses the following terms interchangeably: column, f
 Let's create a design table with a single row like this:
 
 plate | source | destination | volume
------ | ------ | ----------- | -----:
+:----: | :----: | :----: | :----:
 plate1 | water | A01 | 25 ul
 
-This table could be used to specify a single pipetting operation that dispenses 25 ul of water into well `A01` of `plate1`.
-
-Here is how to specify this in Roboliq:
+This table could be used to specify a single pipetting operation that dispenses 25 ul of water into well `A01` of `plate1`.  We will specify this in Roboliq as follows:
 
 ```yaml
 roboliq: v1
 objects:
-  design1:
-    type: Design
+  data1:
+    type: Data
     description: First example
-    conditions:
+    design:
       plate: plate1
       source: water
       destination: A01
@@ -40,8 +38,8 @@ objects:
 ---
 ```
 
-Within a Roboliq protocol, the design would be place in the `objects` property.  Its object name is `design1`, its type is `Design`, and it has a description.
-The `conditions` property is where factors are specified.
+In a Roboliq protocol, designs are placed under the `objects` property.  In this case, its name is `data1`, its type is `Data`, and it has a description.
+The `design` property is where factors are specified.
 
 
 
@@ -49,7 +47,7 @@ The `conditions` property is where factors are specified.
 Let's expand the design table a bit to dispenses 25 ul of water into several destinations.
 
 plate | source | destination | volume
------ | ------ | ----------- | -----:
+:----: | :----: | :----: | :----:
 plate1 | water | A01 | 25 ul
 plate1 | water | B01 | 25 ul
 plate1 | water | C01 | 25 ul
@@ -59,15 +57,14 @@ To specify this in Roboliq, we change the `destination` property to a *branching
 ```yaml
 roboliq: v1
 objects:
-  design1:
-    type: Design
+  data1:
+    type: Data
     description: First example
-    conditions:
+    design:
       plate: plate1
       source: water
       destination*: [A01, B01, C01]
       volume: 25 ul
----
 ```
 
 Notice the asterisk in `destination*`.  An asterisk at the end of a factor name indicates *branching*.  Branching factors require an array of values, and for each value in the array, the existing rows are first replicated and then the value is assigned to the factor in that row.
@@ -77,7 +74,7 @@ Notice the asterisk in `destination*`.  An asterisk at the end of a factor name 
 Now let's assign a different volume to each row:
 
 plate | source | destination | volume
------ | ------ | ----------- | -----:
+:----: | :----: | :----: | :----:
 plate1 | water | A01 | 25 ul
 plate1 | water | B01 | 50 ul
 plate1 | water | C01 | 75 ul
@@ -87,23 +84,22 @@ To specify this in Roboliq, we change the `volume` property to an array:
 ```yaml
 roboliq: v1
 objects:
-  design1:
-    type: Design
+  data1:
+    type: Data
     description: First example
-    conditions:
+    design:
       plate: plate1
       source: water
       destination*: [A01, B01, C01]
       volume: [25 ul, 50 ul, 75 ul]
----
 ```
 
 When a factor value is an array, a new column is added with those values.
 
-**Try it**. Copy the above code to a new file in Roboliq's root directory named `design1Test.yaml`.  Open a terminal and change directory to the Roboliq root, and run the following command:
+**Try it**. Copy the above code to a new file in Roboliq's root directory named `data1Test.yaml`.  Open a terminal and change directory to the Roboliq root, and run the following command:
 
 ```sh
-npm run design -- --path objects.design1 design1Test.yaml
+npm run design -- --path objects.data1 data1Test.yaml
 ```
 
 It should produce this output:
@@ -118,7 +114,7 @@ plate1  water   C01          75 ul
 ```
 
 
-Branches can also be specified as integers and arrays.
+Branches can also be specified as integers.
 If you specify an integer, it creates that many branches which are each
 given an integer index, as follows:
 
@@ -126,8 +122,8 @@ given an integer index, as follows:
 roboliq: v1
 objects:
   designInteger:
-    type: Design
-    conditions:
+    type: Data
+    design:
       a*: 3
       b*: 3
 ```
@@ -135,7 +131,7 @@ objects:
 Which creates the following table:
 
 a | b
-- | -
+:-: | :-:
 1|1
 1|2
 1|3
@@ -146,8 +142,6 @@ a | b
 3|2
 3|3
 
-TODO: show use of array of objects in branching.
-
 
 ## Nested branching
 
@@ -156,7 +150,7 @@ is also where the complexity starts.  Consider this table where two sources
 are nested in each destination, and each source has its own volume:
 
 plate | destination | source | volume | liquidClass
------ | ------ | ----------- | -----: | -------
+:----: | :----: | :----: | :----: | :------:
 plate1 | A01 | water | 50 ul | Roboliq_Water_Air_1000
 plate1 | A01 | dye | 25 ul | Roboliq_Water_Air_1000
 plate1 | B01 | water | 50 ul | Roboliq_Water_Air_1000
@@ -169,10 +163,10 @@ This can be described in Roboliq as follows:
 ```yaml
 roboliq: v1
 objects:
-  design2:
-    type: Design
+  data2:
+    type: Data
     description: Nested example
-    conditions:
+    design:
       plate: plate1
       destination*: [A01, B01, C01]
       source*:
@@ -181,18 +175,99 @@ objects:
         dye:
           volume: 25 ul
       liquidClass: Roboliq_Water_Air_1000
----
 ```
 
-An alternative way of achieving the same result is:
+Create a file named `data2Test.yaml` with those contents and run:
+
+```sh
+npm run design -- --path objects.data2 data2Test.yaml
+```
+
+Let's walk through this example step-by-step to see how the desired table is achieved.
+
+**Step 0**: A design starts as a single empty row.
+
+**Step 1**: `plate: plate1`
+
+This assigns the value `plate1` to the property `plate` in the first row:
+
+| plate |
+| :----: |
+| plate1 |
+
+**Step 2**: `destination*: [A01, B01, C01]`
+
+Three copies of the previous row are created, and a column for `destination` is added to each row, each with its own value:
+
+plate | destination
+:----: | :----:
+plate1 | A01
+plate1 | B01
+plate1 | C01
+
+**Step 3**: `source*`
+
+This branch has two keys: water and dye.  So to start with, two copies are made of each of the previous three rows.  The first copy is updated according to the first key, giving us:
+
+plate | destination | source
+:----: | :----: | :----:
+plate1 | A01 | water
+plate1 | B01 | water
+plate1 | C01 | water
+
+Then the conditions embedded under `water:` are applied to those rows -- in this case, `volume = 50 ul`:
+
+plate | destination | source | volume
+:----: | :----: | :----: | :----:
+plate1 | A01 | water | 50 ul
+plate1 | B01 | water | 50 ul
+plate1 | C01 | water | 50 ul
+
+For the second table copy, an analogous process sets `source = dye` and `volume = 25 ul`:
+
+plate | destination | source | volume
+:----: | :----: | :----: | :----:
+plate1 | A01 | dye | 25 ul
+plate1 | B01 | dye | 25 ul
+plate1 | C01 | dye | 25 ul
+
+Next those two tables are concatenated, giving us:
+
+plate | destination | source | volume
+:----: | :----: | :----: | :----:
+plate1 | A01 | water | 50 ul
+plate1 | A01 | dye | 25 ul
+plate1 | B01 | water | 50 ul
+plate1 | B01 | dye | 25 ul
+plate1 | C01 | water | 50 ul
+plate1 | C01 | dye | 25 ul
+
+
+**Step 4**: `liquidClass: Roboliq_Water_Air_1000`
+
+Finally, `liquidClass = Roboliq_Water_Air_1000` is assigned to all rows:
+
+plate | destination | source | volume | liquidClass
+:----: | :----: | :----: | :----: | :------:
+plate1 | A01 | water | 50 ul | Roboliq_Water_Air_1000
+plate1 | A01 | dye | 25 ul | Roboliq_Water_Air_1000
+plate1 | B01 | water | 50 ul | Roboliq_Water_Air_1000
+plate1 | B01 | dye | 25 ul | Roboliq_Water_Air_1000
+plate1 | C01 | water | 50 ul | Roboliq_Water_Air_1000
+plate1 | C01 | dye | 25 ul | Roboliq_Water_Air_1000
+
+
+## Hidden factors
+
+There are generally many ways to achieve the same results.  As an example, an alternative way of achieving the same result as above is:
 
 ```yaml
 roboliq: v1
 objects:
-  design2:
-    type: Design
+  data2:
+    type: Data
     description: Nested example
-    conditions:
+    design:
       plate: plate1
       destination*: [A01, B01, C01]
       .sourceId*:
@@ -201,143 +276,71 @@ objects:
       - source: dye
         volume: 25 ul
       liquidClass: Roboliq_Water_Air_1000
----
 ```
 
-Create a file named `design2Test.yaml` with those contents and run:
-
-```sh
-npm run design -- --path objects.design2 design2Test.yaml
-```
-
-What's happening here is:
-
-1. `plate = plate1` is assign to the first table row.
-2. three copies of the previous row are created, and a column for `destination` is added to each row, each with its own value.
-3. Two copies are made of each of the previous three rows.
-    a. For the first copy of each of the three original rows:
-        1. `source = water`
-        2. Then the conditions embedded under `water:` are applied to those rows -- in this case, `volume = 50 ul`
-    b. For the second copy of each of the three original rows:
-        1. `source = water`
-        2. Then the conditions embedded under `water:` are applied to those rows -- in this case, `volume = 25 ul`
-4. `liquidClass = Roboliq_Water_Air_1000` is assigned to all rows.
-
-
-## Advanced assignment #1
-
-```yaml
-"a*": [1, 2, 3, 4]
-"b=":
-  values: [1, 2]
-  order: "reverse"
-```
-
-```yaml
-a*: 2
-b*: 2
-```
-
-Step 0:
-
-{}
-
-Step 1':
-{a: 1}
-
-Step 1:
-[{a: 1}, {a: 2}, {a: 3}, {a: 4}]
-
-Step 2:
-[{a: 1, b: 1}, {a: 2, b: 2}, {a: 3, b: 2}, {a: 4, b: 1}]
-
----
-
-```yaml
-a*: 2
-b*: 2
-c=:
-  values: [A, B]
-  groupBy: b
-```
-
-a1 b1
-a1 b2
-a2 b1
-a2 b2
-
-a1 b1 cA
-a2 b1 cB
---
-a1 b2 cA
-a2 b2 cB
-
-a1 b1 cA
-a1 b2 cA
-a2 b1 cB
-a2 b2 cB
-
-```yaml
-a*: [{x: 1}, {y: 2}, {z: 3}]
-a*:
-  - x: q
-  - y: 2
-  - z: 3
-```
-
-a1 xq
-a2    y2
-a3       z3
-
-```yaml
-a*:
-  - {}
-  - y: 2
-  - {}
-```
-
-a1
-a2 y2
-a3
-
-```yaml
-steps:
-  data: {source: design1}
-  1:
-    command: pipetter.pipette
-    source: $whereItsFrom
-```
+In this case, the branching factor is `.sourceId*` and it's an array.  The period prefix hides that column, and the final results are the same as above.
 
 ## Actions
+
+Roboliq provides various designs "actions" that can be used for more sophisticated values.  The most important ones are:
 
 * allocateWells
 * range
 * calculate
 * case
 
+### `allocateWells`
+
+Let's take a look at an example:
+
 ```{yaml}
 replicate*: 2
 well=allocateWells:
   rows: 8
   columns: 12
-  order: shuffle
 ```
 
+An action is indicated with the "="-infix.  So in the case of `well=allocateWells`, the factor name is `well`, the action is `allocateWells`, and the properties are the arguments
+to the action.  In this case, `rows` and `columns` tells the plate dimension we want to get wells for, and 2 wells will be allocated since the table has two rows:
+
+
 ```{yaml}
-{replicate: 1, well: E05}
-{replicate: 2, well: H01}
+{replicate: 1, well: A01}
+{replicate: 2, well: B01}
 ```
+
+### `range`
+
+The `range` action gives you an integer sequence.  It accepts these arguments:
+
+* `from`: the integer to start at (optional)
+* `till`: the integer to end at (optional)
+* `step`: the distance between generated integers (default = 1)
+
+Here's an example:
 
 ```{yaml}
 a*: 2
 b*: 2
-c=range: {from: 10, step: 10}
+c=range: {}
+d=range: {from: 10, step: 10}
 ```
 
-a1 b1 c10
-a1 b2 c20
-a2 b1 c30
-a2 b2 c40
+Which produces this result:
+
+a | b | c | d
+:-: | :-: | :-: | :-:
+1|1|1|10
+1|2|2|20
+2|1|3|30
+2|2|4|40
+
+The first range, `c`, just numbers all the rows starting with 1.  The second range, `d`, starts numbering at 10 and procedes in steps of 10.
+
+### `calculate`
+
+The `calculate` action takes a string to be parsed by [mathjs](http://mathjs.org/).
+The calculation will be made for each row individually.  Here's an example:
 
 ```{yaml}
 a*: 3
@@ -345,152 +348,93 @@ volume=calculate: '(a * 10) ul'
 more=calculate: '(50 ul) - volume'
 ```
 
-```
-a1 volume:10ul more:40ul
-a2 volume:20ul more:30ul
-a3 volume:30ul more:20ul
+And here is the result:
+
+a | volume | more
+:-: | :-: | :-:
+1|10 ul|40 ul
+2|20 ul|30 ul
+3|30 ul|20 ul
+
+Alternatively, the `calculate` action can accept parameters:
+
+* `value`: the string to parse
+* `units`: the units of the final output
+
+```yaml
+a*: 3
+volume=calculate:
+  value: '(a * 10)'
+  units: ul
 ```
 
-```{yaml}
-a*: [10 ul, 20 ul]
-volume=calculate:
-  value: '(a * 10) ul'
-  units: l
-```
+With this output:
+
+a | volume
+:-: | :-:
+1|10 ul
+2|20 ul
+3|30 ul
+
+### `case`
+
+A `case` action takes an array of cases and tests them against each row of the table.
+The first case whose `where` statement is missing or evaluates to `true` will be applied.
+The individual case items take these arguments:
+
+* `where` - an optional mathjs statement that will be evaluated on each row
+* `design` - a design specification that will be applied to the matching rows
+
+Here's an example:
 
 ```{yaml}
 a*: 3
-.volumeCase=case:
+volumeCase=case:
   - where: a < 2
-    conditions:
-      volume: 10ul
-  - conditions:
+    design:
+      volume: 10 ul
+  - design:
       volume: 12354 ul
 ```
 
-```
-a1 volumeCase1 volume10
-a2 volumeCase2 volume12354
-a3 volumeCase2 volume12354
-```
+a | volumeCase | volume
+:-: | :-: | :-:
+1|1|10 ul
+2|2|12345 ul
+3|2|12345 ul
 
-## Order values
+## Step and data nesting
 
-* `shuffle`
-* `reshuffle`
-* `reverse`
-* `repeat`
-
-
-## Advanced assignment
-
-More complex assignments are possible that allow for randomizing and changing
-the order of assignment.
+You can only load one design per step, but you can nest steps and load another design in the sub-step.  Consider these two excerpts of designs:
 
 ```yaml
-```
-					"a*": [1, 2, 3, 4],
-					"b=": {
-						values: [1, 2],
-						order: "repeat"
-					}
-
-a | b | c
-1 | 1 |
-1 | 2 |
-1 | 3 |
-2 | 1 |
-2 | 2 |
-3 | 3 |
-
-
-
-TODO:
-
-* [ ] Functions
-* [ ] Hiding factors with `.` prefix
-* [ ] `orderBy` at end
-
-## Step-by-step
-
-```
-flattenArrayAndIndexes:
-
-[{}] ; [0]
-
-a*: 2
-[{}] ; [0] =>
-	[{}, {}] ; [0,1] => [{a: 1}, {a: 2}] ; [0,1]
-[[{a: 1}, {a: 2}]] ; [0]
-[{a: 1}, {a: 2}] ; [0,1]
-
-b*: 2
-[{a: 1}, {a: 2}] ; [0,1] =>
-	[{a: 1}, {a: 1}] ; [0,1] => [{a: 1, b: 1}, {a: 1, b: 2}] ; [0,1]
-	[{a: 2}, {a: 2}] ; [0,1] => [{a: 2, b: 1}, {a: 2, b: 2}] ; [0,1]
-[[{a: 1, b: 1}, {a: 1, b: 2}], [{a: 2, b: 1}, {a: 2, b: 2}]] ; [0,1]
-[{a: 1, b: 1}, {a: 1, b: 2}, {a: 2, b: 1}, {a: 2, b: 2}] ; [0,1,2,3]
-```
-
-## TODOs:
-
-* consider GraphQL
-* consider https://facebook.github.io/relay/
-
-## `data` directive
-
-You can load one design per step, but you can nest steps and load another design in the sub-step.
-
-Consider these two designs:
-
-design1:
-  conditions:
+data1:
+  design:
     a: Alice
     b: *3
     c: Charles
     d: Daniel
 
-design2:
-  conditions:
+data2:
+  design:
     d: David
+```
 
-And these steps:
+Let's use them in these steps:
 
+```yaml
 1:
-  data: {source: design1}
-  description: "`{{$a}} {{$c}} {{$d}}`"
+  data: {source: data1}
+  description: "`{{a}} {{c}} {{d}}`"
   1:
-    data: {source: design2}
-    description: "`{{$a}} {{$c}} {{$d}}`"
+    data: {source: data2}
+    description: "`{{a}} {{c}} {{d}}`"
+```
 
-The descriptions should be:
+The descriptions should be expanded as follows:
 
 1.description: "Alice Charles Daniel"
 1.1.description: "Alice Charles David"
 
 In 1.1, "\$\$b" does not exist, but "\$a" and "\$c" still do.  That is to say: column data from a previous `data` directive are not carried into sub-steps with a new `data` directive, but the values that were the same for all columns remain in scope.
 
-
-
-## Steps
-
-### `data` property
-
-Steps can be given a `data` property that activates a data table and gives Roboliq
-a lot of power to handle complex experiments.  The `data` property understands the
-following parameters:
-
-* `source`: this is the name of a `Design` or `Variable` that contains an array of data rows.
-* `where`: this is a boolean [mathjs](http://mathjs.org/) expression that is evaluated for each data row -- only rows for which the expression evaluates to true are activated.
-* `orderBy`: an array of column names for ordering rows.
-
-Here's a toy example:
-
-```yaml
-objects:
-  design1:
-    type: Design
-    value:
-      - {source: water}
-      - {source: mix1}
-```

@@ -304,12 +304,11 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] replace mustache with handlebars
 * [x] make sure the jsdoc is generated for roboliq-processor and roboliq-evoware
 * [x] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html
-* [ ] book: exclude unfinished chapters for now
-* [ ] draft chapter: design tables
-	* [ ] plain factors, `*`-factors, array factors, `=` factors
-	* [ ] actions/functions
-	* [ ] manipulations: where, orderBy, etc
-	* [ ] design directives
+* [x] book: exclude unfinished chapters for now
+* [x] draft chapter: design tables
+	* [x] plain factors, `*`-factors, array factors
+	* [x] hidden factors
+	* [x] actions/functions
 * [ ] create schema files for Evoware commands, so that they are in the Evoware API documentation
 
 * [ ] rename `Design` to `Data`
@@ -330,6 +329,10 @@ See misc.js:renderTemplateString, since another convention is used there
 		* `math`: mathjs module
 		* `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
 * [ ] document predicates required by the various command handlers
+* [ ] Design Tables:
+	* [ ] `order`: add section, document shuffle, reshuffle, reverse, and repeat
+	* [ ] other common action arguments: decimals, units
+	* [ ] other top-level parameters for designs, such as `orderBy`
 * [ ] make sure templates work like I documented them
 * [ ] create some schema for the `data` property somehow, then generate the documentation, or write it manually in the appropriate place
 * [ ] predicates: explain the difference between state predicates and tasks/actions

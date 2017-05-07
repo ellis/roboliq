@@ -5,5 +5,7 @@ rmd_files:
 - 02-quick-start.Rmd
 - 03-input-formats.Rmd
 - 04-configuration.Rmd
-- 05a-simple-protocols.Rmd
+- 05-simple-protocols.Rmd
+- 06-advanced-protocols.Rmd
+- 07-design-tables.Rmd
 output_dir: "../docs/manual"
