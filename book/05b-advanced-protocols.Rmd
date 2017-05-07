@@ -92,7 +92,7 @@ steps:
 ```
 
 This protocol will first dispense 10ul to all wells, then another 50ul to all wells -- not actually a useful protocol, but it illustrates the point.
-In the `system.call` command, the name of the template is specified along with the parameters template parameters.  Templates are expanded using the [Mustache](https://github.com/janl/mustache.js) template engine, which is the reason for the "{{" and "}}" delimiters in the line `volumes: "{{volume}}"`.
+In the `system.call` command, the name of the template is specified along with the parameters template parameters.  Templates are expanded using the [Handlebars](http://handlebarsjs.com/) template engine, which is the reason for the "{{" and "}}" delimiters in the line `volumes: "{{volume}}"`.
 
 ## Scope
 

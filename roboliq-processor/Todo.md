@@ -298,7 +298,8 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] template substitution
 	* [ ] directives?
 
-* [ ] replace mustache with handlebars
+* [x] replace mustache with handlebars
+* [ ] make sure template work like I documented them
 * [ ] improve SCOPE, write tests
 	* SCOPE: should contain parameters, variables, data rows
 		* `__objects`: access the raw objects

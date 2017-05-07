@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import assert from 'assert';
 import math from 'mathjs';
-import Mustache from 'mustache';
+import Handlebars from 'handlebars';
 import path from 'path';
 import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 import expect from 'roboliq-processor/dist/expect.js';
@@ -388,7 +388,8 @@ const exports = {
 
 				// Substitute in relevant values:
 				const templateParams = getTemplateAbsorbanceParams(parsed, data);
-				content = Mustache.render(content, templateParams);
+				const template = Handlebars.compile(content);
+				content = template(templateParams);
 			}
 
 			var start_i = content.indexOf("<TecanFile");

@@ -8,7 +8,7 @@
 
 var _ = require('lodash');
 var assert = require('assert');
-var mustache = require('mustache');
+var Handlebars = require('handlebars');
 
 /**
  * queryResults: value returned from llpl.query()
@@ -283,7 +283,7 @@ function renderTemplateString(s, scope, data) {
 		return scope[name];
 	}
 	else if (_.startsWith(s, "{{") && _.endsWith(s, "}}")) {
-		const s2 = mustache.render(s, scope);
+		const s2 = Handlebars.compile(s)(scope);
 		try {
 			return JSON.parse(s2);
 		}
@@ -293,7 +293,7 @@ function renderTemplateString(s, scope, data) {
 		return s2;
 	}
 	else {
-		return mustache.render(s, scope);
+		return Handlebars.compile(s)(scope);
 	}
 }
 
