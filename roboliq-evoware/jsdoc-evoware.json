@@ -17,7 +17,7 @@
 		},
 		"systemName"      : "Roboliq Evoware",
 		"footer"          : "",
-		"copyright"       : "Roboliq Copyright © 2016 Ellis Whitehead",
+		"copyright"       : "Roboliq Copyright © 2016-2017 Ellis Whitehead",
 		"navType"         : "vertical",
 		"theme"           : "cerulean",
 		"linenums"        : true,

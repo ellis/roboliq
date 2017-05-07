@@ -302,14 +302,14 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] template substitution
 	* [x] directives
 * [x] replace mustache with handlebars
+* [x] make sure the jsdoc is generated for roboliq-processor and roboliq-evoware
+* [x] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html
+* [ ] book: exclude unfinished chapters for now
 * [ ] draft chapter: design tables
 	* [ ] plain factors, `*`-factors, array factors, `=` factors
 	* [ ] actions/functions
 	* [ ] manipulations: where, orderBy, etc
 	* [ ] design directives
-* [ ] book: exclude unfinished chapters for now
-* [ ] make sure the jsdoc is generated for roboliq-processor and roboliq-evoware
-* [ ] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html
 * [ ] create schema files for Evoware commands, so that they are in the Evoware API documentation
 
 * [ ] rename `Design` to `Data`

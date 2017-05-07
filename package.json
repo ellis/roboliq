@@ -16,7 +16,7 @@
     "design": "roboliq-design",
     "compile": "cd roboliq-processor && npm run compile && cd ../roboliq-evoware && npm run compile",
     "test": "cd roboliq-processor && npm test && cd ../roboliq-evoware && npm test",
-    "docs": "cd roboliq-processor && npm run jsdoc && cd ../roboliq-evoware && npm run jsdoc && cd ../api-generator && npm start"
+    "docs": "jsdoc -c jsdoc.json && cd roboliq-processor && npm run jsdoc && cd ../roboliq-evoware && npm run jsdoc && cd ../api-generator && npm start"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0"

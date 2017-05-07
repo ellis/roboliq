@@ -24,6 +24,7 @@
 	},
 	"opts": {
 		"template": "node_modules/ink-docstrap/template",
-		"destination": "docs"
+		"destination": "docs",
+		"readme": "jsdoc-readme.md"
 	}
 }

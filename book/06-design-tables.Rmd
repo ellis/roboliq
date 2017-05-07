@@ -1,6 +1,7 @@
 # Design Tables
 
-In Roboliq terminology, a *Design Table* is a table that specifies all relevant
+Here we use the term *Design Table* to refer to a data table that is
+designed for an experiment.  It should contain all relevant
 factors for later analyzing the experimental results.
 
 Experiments on microwell plates can easily involve hundreds of unique
@@ -11,7 +12,7 @@ WARNING: This is very abstract.  Don't bother with it if you're looking for some
 easy.  That said, it makes complex experiments much, much easier to design,
 trouble-shoot, and analyze.
 
-NOTE: this document uses the following terms interchangeably: column, factor, variable.
+NOTE: In this chapter, we'll uses the following terms interchangeably: column, factor, variable.
 
 ## First examples
 
@@ -493,4 +494,3 @@ objects:
       - {source: water}
       - {source: mix1}
 ```
-

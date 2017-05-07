@@ -50,8 +50,7 @@
     "design": "babel-node -- src/designMain.js",
     "test": "mocha --compilers js:babel-core/register --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
-    "jsdoc": "jsdoc -r -c jsdoc-source.json",
-    "generateSchemaDocs": "babel-node src/generateSchemaDocs.js",
+    "jsdoc": "jsdoc -r -c jsdoc-processor.json",
     "processor": "babel-node -- src/roboliq.js",
     "start": "babel-node -- src/roboliq.js"
   },

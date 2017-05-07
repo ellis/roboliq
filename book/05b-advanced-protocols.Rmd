@@ -360,7 +360,7 @@ data table to a property value.  The directive can take several properties:
 
 * `where`: same as for the `data` property, this lets you select a subset of rows in the active data table.
 * `map`: each row in the data table will be mapped to this value.  This is how you can transform your rows.
-* `summarize`: like `map`, but for summarizing all the rows into a single row.
+* `summarize`: like `map`, but for summarizing all the rows into a single row.  Summarize has a particularity: all column names are pushed into the current scope as arrays, and they are not overwritten by a single common value even if the column only contains a single value.
 * `join`: a string separator that will be used to join all elements of the array (see `Array#join` in some JavaScript documentation).
 * `head`: if set to `true`,
 
