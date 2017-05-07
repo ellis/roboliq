@@ -1,3 +1,7 @@
+/**
+ * Module for converting an EvowareConfigSpec to a general Roboliq configuration protocol.
+ * @module
+ */
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
@@ -174,20 +178,6 @@ function makeProtocol(spec, data = {objects: {}, predicates: []}) {
 }
 
 /**
- * @typedef Roma
- * @type {Object}
- * @property {?string} description - an optional description of this roma
- * @property {!SafeVectorClique[]} safeVectorCliques - list of cliques of sites that the roma can safetly move plates between using a given vector
- */
-
-/**
- * @typedef SafeVectorClique
- * @type {Object}
- * @property {!string} vector - name of the evoware vector
- * @property {!string[]} clique - names of sites that the ROMA can safely move plates between using this vector
- */
-
-/**
  * Create the predictates to be added to Roboliq's robot
  * configuration for Evoware's RoMa relationships.
  *
@@ -227,35 +217,6 @@ function handleRomas(spec, helpers, namespace, agent, output) {
 		});
 	});
 }
-
-/**
- * @typedef TipModel
- * @type {Object}
- * @property {!string} programCode - a string to use for generating the liquid class names for this tip model
- * @property {!string} min - minimum volume (requires volume units, e.g. "3ul")
- * @property {!string} max - maximum volume (requires volume units, e.g. "950ul")
- * @property {!boolean} canHandleSeel - true if this tip can be used with sealed plates
- * @property {!boolean} canHandleCells - true if this tip can handle cells
- */
-
-/**
- * @typedef Liha
- * @type {Object}
- * @property {Syringe[]} syringes
- * @property {Object.<string, WashProgram>} washPrograms
- */
-
-/**
- * @typedef Syringe
- * @type {Object}
- * @property {string} tipModelPermanent - if the syringe has a fixed tip, then the tip model name should be specified here
- */
-
-/**
- * @typedef WashProgram
- * @type {Object}
- * See EvowareWashProgram
- */
 
 function handleLiha(spec, helpers, namespace, agent, output) {
 	if (!spec.liha) return;
@@ -506,52 +467,6 @@ function validate(evowareSpec) {
 	// console.log(result);
 	return result;
 }
-
-/*
-function makeSchemaMarkdown() {
-	const generateMarkdown = require('wetzel');
-	const schemas = YAML.load(__dirname+"/schemas/EvowareConfigSpec.yaml");
-	const markdowns = [];
-	// console.log(JSON.stringify(schemas, null, '\t'));
-	_.forEach(schemas, (schema0, name) => {
-		const id = "/"+name;
-		const schema = _.merge({id, title: name}, deepRename(schema0));
-		const md = generateMarkdown({
-			schema,
-			filePath: "dummy",
-			headerLevel: 1,
-			debug: false,
-			suppressWarnings: false
-		});
-		markdowns.push(md);
-	});
-	console.log(markdowns.join("\n\n\n"));
-}
-
-function deepRename(x) {
-	if (_.isPlainObject(x)) {
-		if (x.hasOwnProperty("$ref")) {
-			x = _(x)
-				.toPairs()
-				.map(([key, value]) => (key == "$ref") ? ["type", value.substr(1)] : [key, value])
-				.fromPairs()
-				.value();
-			// console.log(x)
-		}
-		_.forEach(x, (value, key) => {
-			x[key] = deepRename(x[key]);
-		});
-	}
-	else if (_.isArray(x)) {
-		for (let i = 0; i < x.length; i++) {
-			x[i] = deepRename(x[i]);
-		}
-	}
-	return x;
-}
-
-makeSchemaMarkdown();
-*/
 
 module.exports = {
 	makeProtocol,

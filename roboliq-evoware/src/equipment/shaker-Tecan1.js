@@ -1,3 +1,7 @@
+/**
+ * Module for a 1-site Tecan shaker.
+ * @module
+ */
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');

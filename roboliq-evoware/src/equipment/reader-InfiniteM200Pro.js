@@ -1,3 +1,7 @@
+/**
+ * Module for the Tecan InfiniteM200 reader.
+ * @module
+ */
 import _ from 'lodash';
 import assert from 'assert';
 import math from 'mathjs';

@@ -27,6 +27,7 @@
 	},
 	"opts": {
 		"destination": "../docs/roboliq-evoware",
-		"template": "node_modules/ink-docstrap/template"
+		"template": "node_modules/ink-docstrap/template",
+		"readme": "src/Readme.md"
 	}
 }

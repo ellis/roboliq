@@ -287,37 +287,21 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] split chapter into simple & advanced protocols
 	* [x] objects
 	* [x] steps
-* [ ] draft chapter: advanced protocols
+* [x] draft chapter: advanced protocols
 	* [x] parameters
 	* [x] objects
-
-	* [ ] data
+	* ----- new day
+	* [x] data
 		* [x] Data type
 		* [x] data property
 		* [x] data commands
-		* [ ] data() directive
-	* [ ] rename `Design` to `Data`
-	* [ ] rename `experiment` to `data`
-	* [ ] rename `conditions` to `design`
-	* [ ] scope
-	* [ ] improve SCOPE, write tests
-		* SCOPE: should contain parameters, variables, data rows
-			* `__objects`: access the raw objects
-			* `__data`: access the current raw data table
-			* `__parameters`: access raw protocol parameters
-			* `__step`: access parameters of the current step
-			* `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
-			* `__column()`: function to return a column from the current data table
-			* `_`: lodash module
-			* `math`: mathjs module
+		* [x] data() directive
+	* [x] scope
 	* [x] substitution
 	* [x] $-substitution
 	* [x] template substitution
 	* [x] directives
-
 * [x] replace mustache with handlebars
-* [ ] make sure templates work like I documented them
-
 * [ ] draft chapter: design tables
 	* [ ] plain factors, `*`-factors, array factors, `=` factors
 	* [ ] actions/functions
@@ -328,9 +312,25 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] generate a top-level index.html somehow that links to manual/index.html, protocol/index.html, roboliq-processor/index.html, roboliq-evoware/index.html
 * [ ] create schema files for Evoware commands, so that they are in the Evoware API documentation
 
+* [ ] rename `Design` to `Data`
+* [ ] rename `experiment` to `data`
+* [ ] rename `conditions` to `design`
+
 ## Secondary
 
+* [ ] improve SCOPE, write tests
+	* SCOPE: should contain parameters, variables, data rows
+		* `__objects`: access the raw objects
+		* `__data`: access the current raw data table
+		* `__parameters`: access raw protocol parameters
+		* `__step`: access parameters of the current step
+		* `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
+		* `__column()`: function to return a column from the current data table
+		* `_`: lodash module
+		* `math`: mathjs module
+		* `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
 * [ ] document predicates required by the various command handlers
+* [ ] make sure templates work like I documented them
 * [ ] create some schema for the `data` property somehow, then generate the documentation, or write it manually in the appropriate place
 * [ ] predicates: explain the difference between state predicates and tasks/actions
 * [ ] generated: sort in alphabetical order, but put low-level things later

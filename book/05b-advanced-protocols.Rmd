@@ -254,76 +254,20 @@ can't use the single \$-prefix.
 ### `data()` directive
 
 The `data()` directive lets you assign a modified version of your
-data table to a property value.  The directive can take several properties:
+data table to a property value.  It will be easier to explain this in the section
+on Substitution, so we'll postpone the discussion till the end of this chapter.
 
-* `where`: same as for the `data` property, this lets you select a subset of rows in the active data table.
-* `map`: each row in the data table will be mapped to this value.  This is how you can transform your rows.
-* `summarize`: like `map`, but for summarizing all the rows into a single row.
-* `join`: a string separator that will be used to join all elements of the array (see `Array#join` in some JavaScript documentation).
-* `head`: if set to `true`,
-
-Let's consider some examples using the `data1` table from above:
-
-**Directive**:  
-``data(): {where: 'source == "liquid1"'}}``  
-**Result**:  
-```yaml
-- {well: "A01", volume: "10 ul", source: "liquid1"}
-- {well: "A02", volume: "20 ul", source: "liquid1"}
-```
-
-
-**Directive**:  
-``data(): {map: '$volume'}``  
-**Result**:  
-```yaml
-["10 ul", "10 ul", "20 ul", "20 ul"]
-```
-
-**Directive**:  
-``data(): {where: 'source == "liquid1"', map: '$(volume * 2)'}``  
-**Result**:  
-```yaml
-["20 ul", "40 ul"]
-```
-
-**Directive**:  
-``data(): {map: {well: "$well"}}``  
-**Result**:  
-```yaml
-- {well: "A01"}
-- {well: "B01"}
-- {well: "A02"}
-- {well: "B02"}
-```
-
-**Directive**:  
-``data(): {map: "$well", join: ","}``  
-**Result**:  
-```yaml
-"A01,B01,A02,B02"
-```
-
-**Directive**:  
-``data(): {summarize: {totalVolume: '$(sum(volume))'}}``  
-**Result**:  
-```yaml
-- {totalVolume: "60 ul"}
-```
-
-**Directive**:  
-``data(): {groupBy: "source", summarize: {source: '${source[0]}', totalVolume: '$(sum(volume))'}}``  
-**Result**:  
-```yaml
-- {source: "liquid1", totalVolume: "30 ul"}
-- {source: "liquid2", totalVolume: "30 ul"}
-```
 
 ## Scope
 
 *Scope* is the set of currently active variables in a step.
+These usually come from one of two sources: 1) the `data` directive and commands,
+as discussed above, or 2) a loop command like `system.repeat`, which lets you
+add an index variable to the scope of the sub-steps.
 
-CONTINUE
+The scope is a kind of stacked-tower structure.  When a step pushes variables into scope,
+they are available to that step's command and all substeps; however, they are
+not available to sibling or parent steps.
 
 ## Substitution
 
@@ -407,6 +351,82 @@ in scope:
 ### Directive \(\) substitution
 
 Directives are substitution functions.  The main one is the `data()` directive,
-which was already discussed above in the Data section.
+which was briefly mentioned above in the Data section.
 The other directives are also closely related to `Data` objects, and they are
 discussed more in the chapter on [Design Tables].
+
+The `data()` directive lets you assign a modified version of your
+data table to a property value.  The directive can take several properties:
+
+* `where`: same as for the `data` property, this lets you select a subset of rows in the active data table.
+* `map`: each row in the data table will be mapped to this value.  This is how you can transform your rows.
+* `summarize`: like `map`, but for summarizing all the rows into a single row.
+* `join`: a string separator that will be used to join all elements of the array (see `Array#join` in some JavaScript documentation).
+* `head`: if set to `true`,
+
+Let's consider some examples using the `data1` table from above.  Here is the
+table:
+
+```yaml
+- {well: A01, volume: 10 ul, source: liquid1}
+- {well: B01, volume: 10 ul, source: liquid2}
+- {well: A02, volume: 20 ul, source: liquid1}
+- {well: B02, volume: 20 ul, source: liquid2}
+```
+
+and here are the examples:
+
+**Directive**:  
+``data(): {where: 'source == "liquid1"'}}``  
+**Result**:  
+```yaml
+- {well: "A01", volume: "10 ul", source: "liquid1"}
+- {well: "A02", volume: "20 ul", source: "liquid1"}
+```
+
+
+**Directive**:  
+``data(): {map: '$volume'}``  
+**Result**:  
+```yaml
+["10 ul", "10 ul", "20 ul", "20 ul"]
+```
+
+**Directive**:  
+``data(): {where: 'source == "liquid1"', map: '$(volume * 2)'}``  
+**Result**:  
+```yaml
+["20 ul", "40 ul"]
+```
+
+**Directive**:  
+``data(): {map: {well: "$well"}}``  
+**Result**:  
+```yaml
+- {well: "A01"}
+- {well: "B01"}
+- {well: "A02"}
+- {well: "B02"}
+```
+
+**Directive**:  
+``data(): {map: "$well", join: ","}``  
+**Result**:  
+```yaml
+"A01,B01,A02,B02"
+```
+
+**Directive**:  
+``data(): {summarize: {totalVolume: '$(sum(volume))'}}``  
+**Result**:  
+```yaml
+- {totalVolume: "60 ul"}
+```
+
+**Directive**:  
+``data(): {groupBy: "source", summarize: {source: '${source[0]}', totalVolume: '$(sum(volume))'}}``  
+**Result**:  
+```yaml
+- {source: "liquid1", totalVolume: "30 ul"}
+- {source: "liquid2", totalVolume: "30 ul"}
+```

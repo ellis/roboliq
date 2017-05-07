@@ -1,3 +1,7 @@
+/**
+ * Module for a generic 4-site centrifuge.
+ * @module
+ */
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
