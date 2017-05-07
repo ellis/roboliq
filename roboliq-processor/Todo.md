@@ -309,7 +309,7 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] plain factors, `*`-factors, array factors
 	* [x] hidden factors
 	* [x] actions/functions
-* [ ] create schema files for Evoware commands, so that they are in the Evoware API documentation
+* [x] create schema files for Evoware commands, so that they are in the Evoware API documentation
 
 * [ ] rename `Design` to `Data`
 * [ ] rename `experiment` to `data`
@@ -317,6 +317,7 @@ See misc.js:renderTemplateString, since another convention is used there
 
 ## Secondary
 
+* [ ] make sure templates work like I documented them (see also in the Design Tables chapter the last example with templates and nested steps, do I need the \$-prefix?  I think I saw it used somewhere, probably in unit tests.)
 * [ ] improve SCOPE, write tests
 	* SCOPE: should contain parameters, variables, data rows
 		* `__objects`: access the raw objects
@@ -328,17 +329,15 @@ See misc.js:renderTemplateString, since another convention is used there
 		* `_`: lodash module
 		* `math`: mathjs module
 		* `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
-* [ ] document predicates required by the various command handlers
 * [ ] Design Tables:
 	* [ ] `order`: add section, document shuffle, reshuffle, reverse, and repeat
 	* [ ] other common action arguments: decimals, units
 	* [ ] other top-level parameters for designs, such as `orderBy`
-* [ ] make sure templates work like I documented them
 * [ ] create some schema for the `data` property somehow, then generate the documentation, or write it manually in the appropriate place
+* [ ] document the predicates required by the various command handlers (e.g. transporer.movePlate requires a bunch of transport-related predicates)
 * [ ] predicates: explain the difference between state predicates and tasks/actions
 * [ ] generated: sort in alphabetical order, but put low-level things later
-* [ ] advanced protocols: make the `data` property documentation more complete
-* [ ] document the directives
+* [ ] document the directives, using JSON Schema
 * [ ] document the format for specifying wells, e.g. `plate1(A01 down D02)`
 * [ ] distribution documentation
 	* [ ] src/roboliq/README.md

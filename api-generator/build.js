@@ -82,6 +82,9 @@ metalsmith(__dirname)
 		},
 		evowareConfiguration: {
 			pattern: "schemas/evowareConfiguration/*.yaml"
+		},
+		evowareCommands: {
+			pattern: "schemas/evowareCommands/*.yaml"
 		}
 	}))
 	.use(function (files, metalsmith, done) {

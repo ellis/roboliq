@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import commandHelper from 'roboliq-processor/dist/commandHelper.js';
 import expect from 'roboliq-processor/dist/expect.js';
+import yaml from 'yamljs';
 
 /**
  * Create an instruction for Evoware execute an external command.
@@ -117,77 +118,7 @@ module.exports = {
 	 * Returns the schemas for Evoware commands and objects.
 	 * @return {object} map from name to schema
 	 */
-	getSchemas: () => ({
-		"EvowareRobot": {
-			properties: {
-				type: {enum: ["EvowareRobot"]},
-				config: {description: "configuration options for evoware", type: "object"}
-			},
-			required: ["type"]
-		},
-		"EvowareWashProgram": {
-			properties: {
-				type: {enum: ["EvowareWashProgram"]}
-			},
-			required: ["type"]
-		},
-		"evoware._execute": {
-			description: "An Evoware Execute command",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				path: {description: "Path to program to execute", type: "string"},
-				args: {description: "Arguments to pass to the exeternal program", type: "array", items: {type: "string"}},
-				wait: {description: "True, if Evoware should wait until the program finishes execution", type: "boolean"}
-			},
-			required: ["path", "args", "wait"]
-		},
-		"evoware._facts": {
-			description: "An Evoware FACTS command",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				factsEquipment: {type: "string"},
-				factsVariable: {type: "string"},
-				factsValue: {type: "string"},
-				labware: {type: "Plate"}
-			},
-			required: ["factsEquipment", "factsVariable"]
-		},
-		"evoware._raw": {
-			description: "An Evoware direct command",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				commands: {type: "string"}
-			},
-			required: ["commands"]
-		},
-		"evoware._subroutine": {
-			description: "An Evoware 'Subroutine' command",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				filename: {type: "string", description: "The filename of the subroutine file to call"}
-			},
-			required: ["filename"]
-		},
-		"evoware._userPrompt": {
-			description: "An Evoware UserPrompt command",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				text: {description: "Text to show the user", type: "string"},
-				beep: {description: "0: no beep, 1: beep once, 2: beep three times, 3: beep every 3 seconds", type: "integer"},
-				autoclose: {description: "number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)", type: "integer"}
-			},
-			required: ["text"]
-		},
-		"evoware._variable": {
-			description: "Set an Evoware variable",
-			properties: {
-				agent: {description: "Agent identifier", type: "Agent"},
-				name: {description: "Variable name", type: "string"},
-				value: {description: "Variable value", type: ["string", "number"]}
-			},
-			required: ["name", "value"]
-		},
-	}),
+	getSchemas: () => yaml.load(__dirname+"/../schemas/commands/evoware.yaml"),
 	/**
 	 * Return command handlers for low-level evoware instructions.
 	 * @return {object} map from instruction name to handler.
