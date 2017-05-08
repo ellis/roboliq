@@ -210,8 +210,7 @@ commandHandlers: {
 ## Logic components
 
 Roboliq uses an Articifial Intelligence method called [Hierarchical Task Network (HTN) Planning](https://en.wikipedia.org/wiki/Hierarchical_task_network).
-
-CONTINUE: find resources for learning about HTN; there used to be documentation at http://danm.ucsc.edu/~wsack/Plan/abstract.html, but that page has disappeared.
+In particular, it uses a [SHOP2](https://www.jair.org/media/1141/live-1141-2152-jair.pdf) implementation [written by Warren Sack](http://warrensack.info/HTN/) in JavaScript.
 
 ### `predicates`
 
