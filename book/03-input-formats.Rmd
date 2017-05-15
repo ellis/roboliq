@@ -1,4 +1,4 @@
-# Input formats
+# Input formats {#input-formats}
 
 Roboliq accepts four input formats:
 

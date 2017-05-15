@@ -17,18 +17,32 @@ It then generates the low-level commands that for your robot system (currently o
 
 ## Structure of the manual {-}
 
-* Chapter 1 "Introduction" gives a quick overview of how to use Roboliq.
-* Chatper 2 "Quick start" is a practical walk-through for writing Roboliq protocols and compiling them.
-* Chapter 3 "Input formats" describes several formats that Roboliq accepts for writing protocols.
-* Chapter 4 "Robot configuration" describes how to write robot configurations that Roboliq uses to turn high-level commands into low-level instructions.
-* Chapter 5 "Protocols" describes the structure of Roboliq protocols in detail.
-* Chapter 6 "Design tables" describes a how to represent experimental designs in a tree or table format, and how these can be used to concisely define complex experiments.
+* Chapter \@ref(intro) "Introduction" gives a quick overview of how to use Roboliq.
+* Chatper \@ref(quick-start) "Quick start" is a practical walk-through for writing Roboliq protocols and compiling them.
+* Chapter \@ref(input-formats) "Input formats" describes several formats that Roboliq accepts for writing protocols.
+* Chapter \@ref(configuration) "Robot configuration" describes how to write robot configurations that Roboliq uses to turn high-level commands into low-level instructions.
+* Chapter \@ref(simple-protocols) "Simple Protocols" describes the contents of simple Roboliq protocols.
+* Chapter \@ref(advanced-protocols) "Advanced Protocols" describes the features available for more sophisticated protocols.
+* Chapter \@ref(design-tables) "Design tables" describes a how to represent experimental designs in a tree or table format, and how these can be used to concisely define complex experiments.
+
+[//]: # (
 * Chapter 7 "Compiling protocols" describes how to compile your protocols for a target robot.
 * Chapter 8 "Output files" describes the files created when compilinig protocols and how you can use them.
 * Chapter 9 "Protocol execution" describes how to execute protocols and how Roboliq handles measurements.
 * Chapter 10 "Cookbook" provides examples of various common protocols.
 * Chapter 11 "Troubleshooting" tries to help you when you run into problems.
 * Chapter 12 "Development" provides further information for programmers who would like to extend or adapt the Roboliq software.
+)
+
+
+## Additional documentation {-}
+
+Roboliq has several other documentation sources that might be of interest to you:
+
+* [Protocol](../protocol/index.html) -- reference documentation for the commands and type available in Roboliq protocols
+* [Processor API](../roboliq-processor/index.html) -- programmer documentation for Roboliq's protocol processor
+* [Evoware API](../roboliq-evoware/index.html) -- programmer documentation for Roboliq's Evoware backend
+
 
 ## Software information and conventions {-}
 
@@ -38,6 +52,7 @@ If you are not familiar with it yet, please checkout [this page on Wikipedia](ht
 
 Some of the advanced programmable features of Roboliq are demonstrated with [JavaScript](https://en.wikipedia.org/wiki/JavaScript).
 Most users won't require knowledge of JavaScript, but if you do need it, there are many good tutorials online.
+
 
 ## Acknowledgements {-}
 

@@ -1,4 +1,4 @@
-# Robot configuration
+# Robot configuration {#configuration}
 
 In order for Roboliq to compile your protocol for your robot setup, it needs to know how the robot is configured.  This is the most complicated part of Roboliq -- it requires advanced technical knowledge or your robot and some programming skill.  Once the configuraiton has been specified, future users don't need to be concerned with it.
 

@@ -1,4 +1,4 @@
-# Design Tables
+# Design Tables {#design-tables}
 
 Here we use the term *Design Table* to refer to a data table that is
 designed for an experiment.  It should contain all relevant

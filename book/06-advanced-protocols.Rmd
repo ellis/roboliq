@@ -1,4 +1,4 @@
-# Advanced Protocols
+# Advanced Protocols {#advanced-protocols}
 
 Advanced protocols can contain many more elements than the simple protocols
 described in the previous chapter.  In this chapter we'll discuss `parameters`,
