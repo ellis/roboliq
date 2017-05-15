@@ -311,7 +311,7 @@ See misc.js:renderTemplateString, since another convention is used there
 	* [x] actions/functions
 * [x] create schema files for Evoware commands, so that they are in the Evoware API documentation
 
-* [ ] rename `Design` to `Data`
+* [x] rename `Design` to `Data`
 * [ ] rename `experiment` to `data`
 * [ ] rename `conditions` to `design`
 

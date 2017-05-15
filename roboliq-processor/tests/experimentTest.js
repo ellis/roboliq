@@ -16,7 +16,7 @@ const protocol0 = {
 			type: "Timer"
 		},
 		design1: {
-			type: "Design",
+			type: "Data",
 			conditions: {
 				"a*": ["A1", "A2"],
 				"b*": ["B1", "B2"]
@@ -36,8 +36,8 @@ describe('experiment', function() {
 				roboliq: "v1",
 				steps: {
 					1: {
+						data: "design1",
 						command: "experiment.forEachGroup",
-						design: "design1",
 						groupBy: "b",
 						steps: {
 							1: {
@@ -83,7 +83,7 @@ describe('experiment', function() {
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
 					"command": "experiment.forEachGroup",
-					"design": "design1",
+					"data": "design1",
 					"groupBy": "b",
 					"steps": {
 						"1": { "command": "system.echo", "value": "$b" },
@@ -98,8 +98,8 @@ describe('experiment', function() {
 				roboliq: "v1",
 				steps: {
 					1: {
+						data: "design1",
 						command: "experiment.forEachGroup",
-						design: "design1",
 						groupBy: "b",
 						steps: {
 							description: "`Echo {{$b}}`",
@@ -134,7 +134,7 @@ describe('experiment', function() {
 						"@DATA": [ { "a": "A1", "b": "B2" }, { "a": "A2", "b": "B2" } ]
 					},
 					"command": "experiment.forEachGroup",
-					"design": "design1",
+					"data": "design1",
 					"groupBy": "b",
 					"steps": {
 						description: "`Echo {{$b}}`",
@@ -150,7 +150,7 @@ describe('experiment', function() {
 				steps: {
 					1: {
 						command: "experiment.forEachGroup",
-						design: "design1",
+						data: "design1",
 						groupBy: "b",
 						durationTotal: "1 minute",
 						timers: ["timer1", "timer2"],
@@ -208,7 +208,7 @@ describe('experiment', function() {
 						"stop": true
 					},
 					"command": "experiment.forEachGroup",
-					"design": "design1",
+					"data": "design1",
 					"groupBy": "b",
 					"durationTotal": "1 minute",
 					"timers": [
@@ -231,7 +231,7 @@ describe('experiment', function() {
 				steps: {
 					1: {
 						command: "experiment.forEachGroup",
-						design: "design1",
+						data: "design1",
 						groupBy: "b",
 						durationGroup: "1 minute",
 						timers: ["timer1", "timer2"],
@@ -310,7 +310,7 @@ describe('experiment', function() {
 					}
 				},
 				"command": "experiment.forEachGroup",
-				"design": "design1",
+				"data": "design1",
 				"groupBy": "b",
 				"durationGroup": "1 minute",
 				"timers": [
@@ -387,8 +387,8 @@ describe('experiment', function() {
 				roboliq: "v1",
 				steps: {
 					1: {
+						data: "design1",
 						command: "experiment.forEachRow",
-						design: "design1",
 						steps: {
 							command: "system.echo",
 							value: "`{{$a}} {{$b}}`"
@@ -399,8 +399,8 @@ describe('experiment', function() {
 			var result = roboliq.run(["-o", "", "-T", "--no-ourlab"], protocol, false);
 			//console.log(JSON.stringify(result.output.steps["1"], null, '\t'))
 			should.deepEqual(result.output.steps["1"], {
+				data: "design1",
 				command: "experiment.forEachRow",
-				design: "design1",
 				steps: {
 					command: "system.echo",
 					value: "`{{$a}} {{$b}}`"

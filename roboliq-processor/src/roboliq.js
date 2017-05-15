@@ -996,10 +996,10 @@ function _run(opts, userProtocol) {
 	}
 
 	if (opts.debug || opts.printDesigns) {
-		const designs = misc.getObjectsOfType(protocol.objects, "Design");
+		const designs = misc.getObjectsOfType(protocol.objects, "Data");
 		_.forEach(designs, (design, name) => {
 			console.log();
-			console.log(`Design "${name}":`);
+			console.log(`Data "${name}":`);
 			// console.log(JSON.stringify(design, null, '\t'))
 			design = misc.handleDirectiveDeep(design, protocol);
 			design = commandHelper.substituteDeep(design, protocol, {}, []);
@@ -1101,7 +1101,7 @@ function _run(opts, userProtocol) {
 		});
 
 		// Get tables for all designs
-		const designs = misc.getObjectsOfType(protocol.objects, "Design");
+		const designs = misc.getObjectsOfType(protocol.objects, "Data");
 		const designTables = _.mapValues(designs, design => {
 			design = misc.handleDirectiveDeep(design, protocol);
 			design = commandHelper.substituteDeep(design, protocol, {}, []);

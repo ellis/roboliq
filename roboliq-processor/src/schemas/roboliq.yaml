@@ -6,10 +6,10 @@ Agent:
     label: {type: markdown}
   required: [type]
 
-Design:
+Data:
   description: Specification of an experimental design.
   properties:
-    type: {enum: [Design]}
+    type: {enum: [Data]}
     description: {type: markdown}
     conditions: {type: object}
     actions: {type: array}

@@ -1175,19 +1175,20 @@ function updateSCOPEDATA(step, data, SCOPE, DATA, addCommonValuesToScope=true) {
 		const dataInfo = misc.handleDirectiveDeep(step.data, data);
 		// console.log({dataInfo})
 		let table = DATA;
-		if (dataInfo.source) {
-			const source = _.get(data.objects, [dataInfo.source]);
+		if (_.isString(dataInfo) || dataInfo.source) {
+			const dataId = _.isString(dataInfo) ? dataInfo : dataInfo.source;
+			const source = _.get(data.objects, dataId);
 			assert(source);
 
 			if (_.isArray(source)) {
 				table = source;
 			}
-			else if (source.type === "Design") {
+			else if (source.type === "Data") {
 				const design = substituteDeep(source, data, SCOPE, DATA);
 				table = Design.flattenDesign(design);
 			}
 			else {
-				assert(false, "unrecognized data source: "+JSON.stringify(dataInfo.source)+" -> "+JSON.stringify(source));
+				assert(false, "unrecognized data source: "+JSON.stringify(dataId)+" -> "+JSON.stringify(source));
 			}
 		}
 

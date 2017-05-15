@@ -1,7 +1,7 @@
 roboliq: v1
 objects:
   design1:
-    type: Design
+    type: Data
     description: First example
     conditions:
       plate: plate1

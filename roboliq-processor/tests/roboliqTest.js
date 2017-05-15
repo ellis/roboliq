@@ -313,7 +313,7 @@ describe('roboliq', function() {
 				roboliq: "v1",
 				objects: {
 					design: {
-						type: "Design",
+						type: "Data",
 						conditions: {
 							"a*": {
 								B: { b: 1, c: 1},

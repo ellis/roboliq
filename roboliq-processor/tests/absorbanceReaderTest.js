@@ -322,7 +322,7 @@ describe('commands/absorbanceReader', function() {
 						location: "ourlab.mario.site.READER"
 					},
 					design1: {
-						type: "Design",
+						type: "Data",
 						conditions: {a: 1, testWell: "A1"}
 					}
 				},
