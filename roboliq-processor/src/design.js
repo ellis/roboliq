@@ -145,7 +145,7 @@ export function flattenDesign(design, randomEngine) {
 		children = design.children.map(child => flattenDesign(child, randomEngine));
 	}
 	else {
-		const conditionsList = _.isArray(design.conditions) ? design.conditions : [design.conditions];
+		const conditionsList = _.isArray(design.design) ? design.design : [design.design];
 		children = conditionsList.map(conditions => expandConditions(conditions, randomEngine, design.initialRows));
 	}
 
@@ -881,7 +881,7 @@ const actionHandlers = {
 			const [caseName, caseSpec] = caseMap[i];
 			const rowIndexes2 = _.clone(rowIndexesGroups[i]);
 			expandRowsByNamedValue(rows, rowIndexes2, otherRowIndexes2, name, caseName, randomEngine)
-			expandRowsByObject(rows, rowIndexes2, otherRowIndexes2, caseSpec.conditions, randomEngine);
+			expandRowsByObject(rows, rowIndexes2, otherRowIndexes2, caseSpec.design, randomEngine);
 		}
 	},
 	"calculate": (rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
@@ -926,7 +926,7 @@ const actionHandlers = {
 			const rowIndexes2 = [0];
 			// console.log({groupBy, rowIndexesGroup, row0})
 			// expand the conditions on that row
-			expandRowsByObject(rows2, rowIndexes2, [], action.conditions, randomEngine);
+			expandRowsByObject(rows2, rowIndexes2, [], action.design, randomEngine);
 			// Add the rows back to the original table
 			rows.push(...rows2);
 			rowIndexes.push(..._.range(rowIndexes.length, rowIndexes.length + rows2.length));

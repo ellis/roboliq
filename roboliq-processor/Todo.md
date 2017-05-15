@@ -313,7 +313,7 @@ See misc.js:renderTemplateString, since another convention is used there
 
 * [x] rename `Design` type to `Data`
 * [x] rename `experiment` module to `data`
-* [ ] rename `conditions` to `design`
+* [x] rename `conditions` to `design`
 
 ## Secondary
 

@@ -323,7 +323,7 @@ describe('commands/absorbanceReader', function() {
 					},
 					design1: {
 						type: "Data",
-						conditions: {a: 1, testWell: "A1"}
+						design: {a: 1, testWell: "A1"}
 					}
 				},
 				steps: {

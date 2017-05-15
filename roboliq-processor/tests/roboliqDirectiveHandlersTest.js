@@ -26,7 +26,7 @@ var data = {
 		},
 		design2: {
 			type: "Data",
-			conditions: {
+			design: {
 				age: 100
 			}
 		},

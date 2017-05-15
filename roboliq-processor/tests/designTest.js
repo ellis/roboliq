@@ -588,7 +588,7 @@ describe('design', () => {
 						cases: {
 							A: {
 								where: {a: 1},
-								conditions: {
+								design: {
 									"c*": 2
 								}
 							},
@@ -615,7 +615,7 @@ describe('design', () => {
 				expandConditions({
 					"a=case": [
 						{
-							conditions: {
+							design: {
 								"b*": 2,
 								"c": 0
 							}
@@ -649,7 +649,7 @@ describe('design', () => {
 				expandConditions({
 					"i*": [1,2,3],
 					".=concat": {
-						conditions: {
+						design: {
 							j: 1
 						}
 					}
@@ -667,7 +667,7 @@ describe('design', () => {
 					"j*": 2,
 					".=concat": {
 						groupBy: "i",
-						conditions: {
+						design: {
 							"k=calculate": "i * 2"
 						}
 					}
@@ -844,7 +844,7 @@ describe('design', () => {
 		it("should handle assignment of two branching arrays", () => {
 			should.deepEqual(
 				flattenDesign({
-					conditions: {
+					design: {
 						"a*": [1,2],
 						"b*": [1, 2, 3]
 					}
@@ -859,7 +859,7 @@ describe('design', () => {
 		it("should handle assign() with order=shuffle", () => {
 			const design = {
 				randomSeed: 444,
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
 					"order=": {
@@ -879,7 +879,7 @@ describe('design', () => {
 
 		it('should handle two simple branching factors', () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b*": [1, 2]
 				}
@@ -895,7 +895,7 @@ describe('design', () => {
 
 		it('should handle two factor levels with differing replicate counts', () => {
 			const design = {
-				conditions: {
+				design: {
 					"treatment*": {
 						"a": { },
 						"b": {
@@ -921,7 +921,7 @@ describe('design', () => {
 
 		it('should handle conditions nested inside branching values', () => {
 			const design = {
-				conditions: {
+				design: {
 					"treatment*": {
 						"A": { "*": 2 },
 						"B": { "*": 2 },
@@ -954,7 +954,7 @@ describe('design', () => {
 
 		it("should handle a branching array of objects", () => {
 			const design = {
-				conditions: {
+				design: {
 					"media": "media1",
 					"culturePlate*": {
 						"stillPlate": {
@@ -986,7 +986,7 @@ describe('design', () => {
 					"material*": ["A", "B"],
 					"foot=calculate": "(left == material) ? \"left\" : \"right\""
 				},
-				conditions: {
+				design: {
 					"boy*=range": {till: 4},
 					"condition=sample": [
 						[{material: "A", foot: "L"}, {material: "B", foot: "R"}],
@@ -1051,7 +1051,7 @@ describe('design', () => {
 						rotateValues: true
 					},
 					"*": {
-						conditions: {
+						design: {
 							"material": "B",
 							"foot=calculate": '(foot == "L") ? "R" : "L"'
 						}
@@ -1089,7 +1089,7 @@ describe('design', () => {
 
 		it("should keep factors in the correct order", () => {
 			const design =
-				{ conditions:
+				{ design:
 					{ waterSource: 'saltwater',
 						waterVolume: '40ul',
 						'proteinSource*': [ 'sfGFP', 'Q204H_N149Y', 'tdGFP', 'N149Y', 'Q204H' ],
@@ -1109,7 +1109,7 @@ describe('design', () => {
 
 		it("should support numbers with units in range() assignment", () => {
 			const design =
-				{ conditions:
+				{ design:
 					{ source: "water",
 						'volume*=range': { count: 4, from: 0, till: 20, decimals: 1, units: "ul" } } };
 			const table = flattenDesign(design);
@@ -1124,7 +1124,7 @@ describe('design', () => {
 
 		it("should support calculate() assignments", () => {
 			const design =
-				{ conditions:
+				{ design:
 					{ volume1: "20ul",
 						"volume2=calculate": "30ul - volume1" } };
 			const table = flattenDesign(design);
@@ -1136,7 +1136,7 @@ describe('design', () => {
 
 		it("should support assign() with calculate parameters", () => {
 			const design = {
-				conditions: {
+				design: {
 					source: 'saltwater',
 					acidPH: 3.75,
 					basePH: 5.75,
@@ -1161,7 +1161,7 @@ describe('design', () => {
 
 		it("should support allocatePlates() assignments", () => {
 			const design1 = {
-				conditions: {
+				design: {
 					"condition*": [1, 2, 3],
 					"replicate*": [1, 2],
 					"plate=allocatePlates": {
@@ -1185,7 +1185,7 @@ describe('design', () => {
 
 		it("should support allocatePlates() assignments with 'groupBy' segmentation", () => {
 			const design1 = {
-				conditions: {
+				design: {
 					"condition*": [1, 2, 3],
 					"replicate*": [1, 2],
 					"plate=allocatePlates": {
@@ -1210,7 +1210,7 @@ describe('design', () => {
 
 		it("should support allocateWells() assignments", () => {
 			const design1 = {
-				conditions: {
+				design: {
 					"replicate*=range": {till: 5},
 					"well=allocateWells": {rows: 2, columns: 3}
 				}
@@ -1227,7 +1227,7 @@ describe('design', () => {
 			]);
 
 			const design2 = {
-				conditions: {
+				design: {
 					"replicate*=range": {till: 5},
 					"well=allocateWells": {rows: 2, columns: 3, byColumns: false}
 				}
@@ -1246,7 +1246,7 @@ describe('design', () => {
 
 		it("should support allocateWells() assignments on a subset of plate", () => {
 			const design1 = {
-				conditions: {
+				design: {
 					"replicate*=range": {till: 5},
 					"well=allocateWells": {rows: 8, columns: 12, wells: "A01 down block B03"}
 				}
@@ -1265,7 +1265,7 @@ describe('design', () => {
 
 		it("should support allocateWells() assignments on multiple plates with and orderBy field", () => {
 			const design1 = {
-				conditions: {
+				design: {
 					"plate*": ["A", "B"],
 					"seq*": [2, 1],
 					"*": 2,
@@ -1293,7 +1293,7 @@ describe('design', () => {
 
 		it("should support range() with groupBy", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
 					"order=range": {
@@ -1312,7 +1312,7 @@ describe('design', () => {
 
 		it("should support range() with sameBy", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
 					"order=range": {
@@ -1332,7 +1332,7 @@ describe('design', () => {
 		it("should support range() with groupBy and shuffle", () => {
 			const design = {
 				randomSeed: 1,
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
 					"order=range": {
@@ -1353,7 +1353,7 @@ describe('design', () => {
 		it("should support range() with groupBy and shuffle and shuffleOnce", () => {
 			const design = {
 				randomSeed: 444,
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b*": [1, 2, 3],
 					"order=range": {
@@ -1375,7 +1375,7 @@ describe('design', () => {
 
 		it("should support assignment of an array of objects", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b": [{c: 1}, {c: 2}]
 				}
@@ -1390,7 +1390,7 @@ describe('design', () => {
 
 		it("should support assignment of a nested array of objects, implicitly resulting in branching", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": [1, 2],
 					"b": [[{c: 1}, {c: 2}], [{c: 3}, {c: 4}]]
 				}
@@ -1406,7 +1406,7 @@ describe('design', () => {
 
 		it("should handle previous bug #1", () => {
 			const design = {
-				conditions: {
+				design: {
 					"x*": {
 						A: {
 							"b*": [1, 2],
@@ -1434,7 +1434,7 @@ describe('design', () => {
 
 		it("should handle previous bug #2", () => {
 			const design = {
-				conditions: {
+				design: {
 					n: 2,
 					"i*=range": {groupBy: "n", till: "n"},
 					"j=calculate": "i"
@@ -1451,7 +1451,7 @@ describe('design', () => {
 
 		it("should handle previous bug #3", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": 2,
 					"b*": 2,
 					"c=": {
@@ -1474,7 +1474,7 @@ describe('design', () => {
 
 		it.skip("should support sampling assignment of a nested array of objects, implicitly resulting in branching", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": [1, 2, 3, 4],
 					"b=sample": [[{c: 1}, {c: 2}], [{c: 3}, {c: 4}]]
 				}
@@ -1492,7 +1492,7 @@ describe('design', () => {
 
 		it("should handle 'select' property", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": 2,
 					"b*": 2,
 					"c*": 2
@@ -1511,7 +1511,7 @@ describe('design', () => {
 
 		it("should handle 'orderBy' property", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": 2,
 					"b*": 2,
 					"c*": 2
@@ -1534,7 +1534,7 @@ describe('design', () => {
 
 		it("should handle 'where' property", () => {
 			const design = {
-				conditions: {
+				design: {
 					"a*": 3
 				},
 				where: {a: {lte: 2}}
@@ -1551,7 +1551,7 @@ describe('design', () => {
 				initialRows: [
 					{a: 1}, {a: 2}, {a: 3}
 				],
-				conditions: {
+				design: {
 					"b": 1
 				}
 			};

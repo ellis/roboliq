@@ -85,7 +85,7 @@ const RoboliqPackage = {
 		if (editor) {
 			const state = {
 				design: {
-					conditions: {
+					design: {
 						"plate*": 2
 					}
 				}

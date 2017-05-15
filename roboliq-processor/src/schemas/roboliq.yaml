@@ -11,7 +11,7 @@ Data:
   properties:
     type: {enum: [Data]}
     description: {type: markdown}
-    conditions: {type: object}
+    design: {type: object}
     actions: {type: array}
   required: [type]
 

@@ -61,7 +61,7 @@ import yaml from 'yamljs';
 
 // TODO: add cultureOrder so that random groups of items with syringes 1-8 are assigned increasing order numbers
 const design2 = {
-	conditions: {
+	design: {
 		"strainSource": "strain1",
 		"mediaSource": "media1",
 		//"cultureNum*": _.range(1, 4+1),
@@ -85,7 +85,7 @@ const design2 = {
 			random: true
 		},
 		"*": {
-			conditions: {
+			design: {
 				sampleNum: 2,
 				"sampleCycle=math": "sampleCycle + 48"
 			}

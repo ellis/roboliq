@@ -314,7 +314,7 @@ describe('roboliq', function() {
 				objects: {
 					design: {
 						type: "Data",
-						conditions: {
+						design: {
 							"a*": {
 								B: { b: 1, c: 1},
 								C: { c: 2}

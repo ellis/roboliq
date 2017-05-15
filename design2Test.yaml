@@ -3,7 +3,7 @@ objects:
   design2:
     type: Data
     description: Nested example
-    conditions:
+    design:
       plate: plate1
       destination*: [A01, B01, C01]
       source*:

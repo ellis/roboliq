@@ -3,7 +3,7 @@ objects:
   design1:
     type: Data
     description: First example
-    conditions:
+    design:
       plate: plate1
       source: water
       destination*: [A01, B01, C01]

@@ -576,7 +576,7 @@ function directive_allocateWells(spec, data) {
 	assert(spec.N, "You must specify a positive value for parameter `N` in `allocateWells()`")
 	// console.log("directive_allocateWells: "+JSON.stringify(spec))
 	const design = {
-		conditions: {
+		design: {
 			".*": spec.N,
 			"x=allocateWells": spec
 		}
