@@ -317,7 +317,6 @@ See misc.js:renderTemplateString, since another convention is used there
 
 ## Secondary
 
-* [ ] make sure templates work like I documented them (see also in the Design Tables chapter the last example with templates and nested steps, do I need the \$-prefix?  I think I saw it used somewhere, probably in unit tests.)
 * [ ] improve SCOPE, write tests
 	* SCOPE: should contain parameters, variables, data rows
 		* `__objects`: access the raw objects
@@ -329,6 +328,7 @@ See misc.js:renderTemplateString, since another convention is used there
 		* `_`: lodash module
 		* `math`: mathjs module
 		* `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
+* [ ] make sure templates work like I documented them (see also in the Design Tables chapter the last example with templates and nested steps, do I need the \$-prefix?  I think I saw it used somewhere, probably in unit tests.)
 * [ ] Design Tables:
 	* [ ] `order`: add section, document shuffle, reshuffle, reverse, and repeat
 	* [ ] other common action arguments: decimals, units
