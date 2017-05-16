@@ -169,6 +169,7 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 	}
 	else if (_.isPlainObject(x)) {
 		const updatedSCOPEDATA = updateSCOPEDATA(x, data, SCOPE, DATA, addCommonValuesToScope);
+		// console.log({SCOPE, SCOPE2: updatedSCOPEDATA.SCOPE})
 		x2 = _.mapValues(x, (value, name) => {
 			// Skip over @DATA, @SCOPE, directives and 'steps' properties
 			if (_.startsWith(name, "#") || _.endsWith(name, "()") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
@@ -1191,6 +1192,7 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 	// ENDFIX
 	// console.log("data2: "+JSON.stringify(data));
 	// console.log({SCOPE})
+	const overwriteCommon = !_.isEmpty(DATA);
 	DATA
 		= (step.hasOwnProperty("@DATA")) ? step["@DATA"]
 		: (!_.isUndefined(DATA)) ? DATA
@@ -1253,14 +1255,16 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 		always.__step = step;
 	}
 	// console.log({isEmpty: _.isEmpty(DATA)})
-	const columns = (_.isEmpty(DATA))
+	const columns = (!overwriteCommon || _.isEmpty(DATA))
 		? {}
 		: _.fromPairs(_.map(_.keys(DATA[0]), key => [key, _.map(DATA, key)]));
 	// console.log({DATA, columns, strange: _.map(DATA, "n")});
-	const common = _.mapKeys(
-		(addCommonValuesToScope) ? Design.getCommonValues(DATA) : {},
-		(value, key) => key + "_ONE"
-	);
+	const common = overwriteCommon
+		? _.mapKeys(
+				(addCommonValuesToScope) ? Design.getCommonValues(DATA) : {},
+				(value, key) => key + "_ONE"
+			)
+		: {};
 	const ATSCOPE = (step.hasOwnProperty("@SCOPE")) ? step["@SCOPE"] : {};
 	SCOPE = _.defaults(always, columns, common, ATSCOPE, SCOPE, data.objects.SCOPE);
 

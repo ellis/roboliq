@@ -1251,7 +1251,7 @@ export function calculate(expr, row, action = {}) {
 	// console.log(`unitless: ${JSON.stringify(unitless)}`)
 
 	// Restrict decimal places
-	console.log({unitless})
+	// console.log({unitless})
 	const unitlessText = (_.isNumber(action.decimals))
 		? unitless.toFixed(action.decimals)
 		: _.isNumber(unitless) ? unitless : unitless.toNumber();

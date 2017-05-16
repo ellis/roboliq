@@ -55,10 +55,10 @@ function directive_data(spec, data) {
 			const template = _.get(spec, "map", spec.template);
 			// console.log("result: "+JSON.stringify(result, null, '\t'))
 			result = _.map(result, DATA => _.map(DATA, row => {
-				const SCOPE = _.merge({}, updatedSCOPEDATA.SCOPE, row);
+				const SCOPE = _.defaults({}, row, updatedSCOPEDATA.SCOPE);
 				// console.log("row: "+JSON.stringify(row, null, '\t'))
-				// console.log("SCOPE: "+JSON.stringify(SCOPE, null, '\t'))
-				return commandHelper.substituteDeep(template, data, SCOPE, DATA);
+				// console.log("SCOPE: "); console.log(SCOPE);
+				return commandHelper.substituteDeep(template, data, SCOPE, undefined);
 			}));
 			// console.log("result1: "+JSON.stringify(result))
 		}
