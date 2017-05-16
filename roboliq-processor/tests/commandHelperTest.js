@@ -18,41 +18,42 @@ describe('commandHelper', function() {
 			}
 		};
 		it('should handle 1-depth', () => {
-			const data = {objects, accesses: []};
+			const data = commandHelper.createData({}, objects, objects.SCOPE, objects.DATA);
 			should.deepEqual(
 				commandHelper._dereferenceVariable(data, 'number1'),
 				{objectName: 'number1', value: 1}
 			);
 		});
 		it('should handle 2-depth', () => {
-			const data = {objects, accesses: []};
+			const data = commandHelper.createData({}, objects, objects.SCOPE, objects.DATA);
 			should.deepEqual(
 				commandHelper._dereferenceVariable(data, 'number2'),
 				{objectName: 'number1', value: 1}
 			);
 		});
 		it('should handle 3-depth', () => {
-			const data = {objects, accesses: []};
+			const data = commandHelper.createData({}, objects, objects.SCOPE, objects.DATA);
 			should.deepEqual(
 				commandHelper._dereferenceVariable(data, 'number3'),
 				{objectName: 'number1', value: 1}
 			);
 		});
-		it("should handle SCOPE lookup", () => {
-			const data = {objects, accesses: []};
+		it("should handle SCOPE lookup of DATA column", () => {
+			const data = commandHelper.createData({}, objects, objects.SCOPE, objects.DATA);
+			// console.log("data:"); console.log(data)
 			should.deepEqual(
-				commandHelper._dereferenceVariable(data, '$name'),
-				{value: "bob"}
-			);
-			should.deepEqual(data.accesses, ["SCOPE.name"]);
-		});
-		it("should handle DATA lookup", () => {
-			const data = {objects, accesses: []};
-			should.deepEqual(
-				commandHelper._dereferenceVariable(data, '$$number'),
+				commandHelper._dereferenceVariable(data, '$number'),
 				{value: [1, 2]}
 			);
-			should.deepEqual(data.accesses, ["DATA.number"]);
+			should.deepEqual(data.accesses, ["SCOPE.number"]);
+		});
+		it("should handle SCOPE lookup of DATA column _ONE value", () => {
+			const data = commandHelper.createData({}, objects, objects.SCOPE, objects.DATA);
+			should.deepEqual(
+				commandHelper._dereferenceVariable(data, '$name_ONE'),
+				{value: "bob"}
+			);
+			should.deepEqual(data.accesses, ["SCOPE.name_ONE"]);
 		});
 	});
 
@@ -634,20 +635,21 @@ describe('commandHelper', function() {
 			{n: 1}, {n: 2}
 		];
 		const data = commandHelper.createData({}, {}, SCOPE, DATA);
+		// console.log("data:"); console.log(data);
 
 		it("should handle SCOPE, DATA, and template substitutions", () => {
 			const x = {
 				x1: "$a",
-				x2: "$$n",
+				x2: "$n",
 				x3: {
 					x31: "$a",
-					x32: "$$n"
+					x32: "$n"
 				},
 				x4: [
 					"$a",
-					"$$n"
+					"$n"
 				],
-				x5: "`My {{$a}}`"
+				x5: "`My {{a}}`"
 			};
 			should.deepEqual(
 				commandHelper.substituteDeep(x, data, SCOPE, DATA),
@@ -690,13 +692,13 @@ describe('commandHelper', function() {
 		it("should handle embedded @DATA and @SCOPE properties", () => {
 			const x = {
 				x1: "$a",
-				x2: "$$n",
+				x2: "$n",
 				x3: {
 					"@DATA": [{y: "a"}, {y: "b"}],
 					"@SCOPE": {b: "B"},
 					x31: "$a",
 					x32: "$b",
-					x33: "$$y"
+					x33: "$y"
 				}
 			};
 			should.deepEqual(
@@ -718,12 +720,13 @@ describe('commandHelper', function() {
 		it("should handle 'data' properties", () => {
 			const x = {
 				data: {where: {n: {"gt": 1}}},
-				x1: "$$n",
+				x1: "$n",
 				x2: {
 					"@DATA": [{q: "Q", y: 1}, {q: "R", y: 2}],
 					data: {where: {y: 2}},
 					x21: "$q",
-					x22: "`Hello, {{$q}}`"
+					x22: "$q_ONE",
+					x23: "`Hello, {{q_ONE}}: {{q}}`"
 				}
 			};
 			// console.log("data: "+JSON.stringify(data));
@@ -735,8 +738,9 @@ describe('commandHelper', function() {
 					x2: {
 						"@DATA": [{q: "Q", y: 1}, {q: "R", y: 2}],
 						data: {where: {y: 2}},
-						x21: "R",
-						x22: "Hello, R"
+						x21: ["R"],
+						x22: "R",
+						x23: "Hello, R: R"
 					}
 				}
 			);

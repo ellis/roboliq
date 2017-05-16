@@ -42,11 +42,11 @@ describe('data', function() {
 						steps: {
 							1: {
 								command: "system.echo",
-								value: "$b"
+								value: "$b_ONE"
 							},
 							2: {
 								command: "system.echo",
-								value: "$$a"
+								value: "$a"
 							}
 						}
 					}
@@ -86,8 +86,8 @@ describe('data', function() {
 					"data": "design1",
 					"groupBy": "b",
 					"steps": {
-						"1": { "command": "system.echo", "value": "$b" },
-						"2": { "command": "system.echo", "value": "$$a" }
+						"1": { "command": "system.echo", "value": "$b_ONE" },
+						"2": { "command": "system.echo", "value": "$a" }
 					}
 				}
 			});
@@ -102,10 +102,10 @@ describe('data', function() {
 						command: "data.forEachGroup",
 						groupBy: "b",
 						steps: {
-							description: "`Echo {{$b}}`",
+							description: "`Echo {{b_ONE}}`",
 							1: {
 								command: "system.echo",
-								value: "$b"
+								value: "$b_ONE"
 							}
 						}
 					}
@@ -137,8 +137,8 @@ describe('data', function() {
 					"data": "design1",
 					"groupBy": "b",
 					"steps": {
-						description: "`Echo {{$b}}`",
-						"1": { "command": "system.echo", "value": "$b" },
+						description: "`Echo {{b_ONE}}`",
+						"1": { "command": "system.echo", "value": "$b_ONE" },
 					}
 				}
 			});
@@ -157,7 +157,7 @@ describe('data', function() {
 						steps: {
 							1: {
 								command: "system.echo",
-								value: "$$a"
+								value: "$a"
 							}
 						}
 					}
@@ -218,7 +218,7 @@ describe('data', function() {
 					"steps": {
 						"1": {
 							"command": "system.echo",
-							"value": "$$a"
+							"value": "$a"
 						}
 					}
 				}
@@ -238,7 +238,7 @@ describe('data', function() {
 						steps: {
 							1: {
 								command: "system.echo",
-								value: "$$a"
+								value: "$a"
 							}
 						}
 					}
@@ -320,7 +320,7 @@ describe('data', function() {
 				"steps": {
 					"1": {
 						"command": "system.echo",
-						"value": "$$a"
+						"value": "$a"
 					}
 				}
 			});
@@ -341,7 +341,7 @@ describe('data', function() {
 						command: "data.forEachRow",
 						steps: {
 							command: "system.echo",
-							value: "`{{$a}} {{$b}}`"
+							value: "`{{a_ONE}} {{b}}`"
 						}
 					}
 				}
@@ -353,7 +353,7 @@ describe('data', function() {
 				command: "data.forEachRow",
 				steps: {
 					command: "system.echo",
-					value: "`{{$a}} {{$b}}`"
+					value: "`{{a_ONE}} {{b}}`"
 				},
 				1: {
 					'@DATA': [ { a: 'A1', b: 'B1' } ],

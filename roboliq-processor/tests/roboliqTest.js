@@ -170,16 +170,16 @@ describe('roboliq', function() {
 						data: "data1",
 						command: "system.echo",
 						value: {
-							javascript: "${`${TEXT} ${a} ${__step.groupBy}`}",
-							math: "$(a * 10)",
+							javascript: "${`${TEXT} ${a} ${__step.command}`}",
+							math: "$(a_ONE * 10)",
 							scopeParameter: "$TEXT",
-							scopeDataCommon: "$a",
+							scopeDataCommon: "$a_ONE",
 							scopeData: "$__data[0].b",
 							scopeObjects: "$__objects.data1.type",
 							scopeParameters: "$__parameters.TEXT.value",
 							scopeStep: "$__step.command",
 							scopeColumn: "${__column('b')}",
-							column: "$$b",
+							column: "$b",
 							// templateString: "`Hello, {{a}} {{__column('b')}}`",
 							// templateObject: "`{}`"
 						}
@@ -194,7 +194,7 @@ describe('roboliq', function() {
 					"1": {
 						"command": "system._echo",
 						"value": {
-							"javascript": "Hello, World 1 undefined",
+							"javascript": "Hello, World 1,1 system.echo",
 							"math": 10,
 							"scopeParameter": "Hello, World",
 							"scopeDataCommon": 1,
@@ -211,16 +211,16 @@ describe('roboliq', function() {
 					"data": "data1",
 					"command": "system.echo",
 					"value": {
-						"javascript": "${`${TEXT} ${a} ${__step.groupBy}`}",
-						"math": "$(a * 10)",
+						"javascript": "${`${TEXT} ${a} ${__step.command}`}",
+						"math": "$(a_ONE * 10)",
 						"scopeParameter": "$TEXT",
-						"scopeDataCommon": "$a",
+						"scopeDataCommon": "$a_ONE",
 						"scopeData": "$__data[0].b",
 						"scopeObjects": "$__objects.data1.type",
 						"scopeParameters": "$__parameters.TEXT.value",
 						"scopeStep": "$__step.command",
 						"scopeColumn": "${__column('b')}",
-						"column": "$$b"
+						"column": "$b"
 					}
 				}
 			});
@@ -315,7 +315,7 @@ describe('roboliq', function() {
 							{a: "A", b: 2}
 						],
 						command: "system.echo",
-						value: "$a"
+						value: "$a_ONE"
 					},
 					2: {
 						"@DATA": [
@@ -323,7 +323,7 @@ describe('roboliq', function() {
 							{a: "A", b: 2}
 						],
 						command: "system.echo",
-						value: "$$b"
+						value: "$b"
 					},
 					3: {
 						"@DATA": [
@@ -332,11 +332,11 @@ describe('roboliq', function() {
 						],
 						1: {
 							command: "system.echo",
-							value: "$a"
+							value: "$a_ONE"
 						},
 						2: {
 							command: "system.echo",
-							value: "$$b"
+							value: "$b"
 						}
 					}
 				}
@@ -351,7 +351,7 @@ describe('roboliq', function() {
 					},
 					"@DATA": [ { "a": "A", "b": 1 }, { "a": "A", "b": 2 } ],
 					"command": "system.echo",
-					"value": "$a"
+					"value": "$a_ONE"
 				},
 				"2": {
 					"1": {
@@ -360,7 +360,7 @@ describe('roboliq', function() {
 					},
 					"@DATA": [ { "a": "A", "b": 1 }, { "a": "A", "b": 2 } ],
 					"command": "system.echo",
-					"value": "$$b"
+					"value": "$b"
 				},
 				"3": {
 					"1": {
@@ -369,7 +369,7 @@ describe('roboliq', function() {
 							"value": "A"
 						},
 						"command": "system.echo",
-						"value": "$a"
+						"value": "$a_ONE"
 					},
 					"2": {
 						"1": {
@@ -377,7 +377,7 @@ describe('roboliq', function() {
 							"value": [ 1, 2 ]
 						},
 						"command": "system.echo",
-						"value": "$$b"
+						"value": "$b"
 					},
 					"@DATA": [ { "a": "A", "b": 1 }, { "a": "A", "b": 2 } ]
 				}
@@ -408,7 +408,7 @@ describe('roboliq', function() {
 						2: {
 							data: {where: {a: "C"}},
 							command: "system.echo",
-							value: "$c"
+							value: "$c_ONE"
 						},
 						3: {
 							command: "system.echo",

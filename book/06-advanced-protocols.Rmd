@@ -327,6 +327,53 @@ The following uses are invalid:
 * `$myparam: 4`: Roboliq does not support scope substitution for property names.
   You can use template substitution for this purpose instead.
 
+**Examples**
+
+Let's look at examples of \$-substitutions.  Consider this protocol:
+
+```yaml
+roboliq: v1
+parameters:
+  TEXT: { value: "Hello, World" }
+objects:
+  data1:
+    type: Data
+    value:
+      - {a: 1, b: 1}
+      - {a: 1, b: 2}
+steps:
+  1:
+    data: data1
+    command: system.echo
+    value:
+      javascript: "${`${TEXT} ${a} ${__step.command}`}"
+      math: "$(a * 10)"
+      scopeParameter: $TEXT
+      scopeDataCommon: $a
+      scopeData: "$__data[0].b"
+      scopeObjects: "$__objects.data1.type"
+      scopeParameters: "$__parameters.TEXT.value"
+      scopeStep: "$__step.command"
+      scopeColumn: "${__column('b')}"
+      column: $$b
+```
+
+The `system.echo` command will output the object described in its `value`
+parameter.  The resulting value is this:
+
+```yaml
+javascript: "Hello, World 1 system.echo"
+math: 10
+scopeParameter: "Hello, World"
+scopeDataCommon: 1
+scopeData: 1
+scopeObjects: "Data"
+scopeParameters: "Hello, World"
+scopeStep: "system.echo"
+column: [1, 2]
+```
+
+
 ### Template \` substitution
 
 Template substitution uses the [Handlebars](http://handlebarsjs.com/) template

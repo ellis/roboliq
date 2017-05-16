@@ -317,18 +317,20 @@ See misc.js:renderTemplateString, since another convention is used there
 
 ## Secondary
 
-* [ ] improve SCOPE, write tests
+* [x] improve SCOPE, write tests
 	* SCOPE: should contain parameters, variables, data rows
 		* [x] `__objects`: access the raw objects
 		* [x] `__data`: access the current raw data table
 		* [x] `__parameters`: access raw protocol parameters
 		* [x] `__step`: access parameters of the current step
-		* [ ] `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
 		* [x] `__column()`: function to return a column from the current data table
-		* [ ] `_`: lodash module
-		* [ ] `math`: mathjs module
-		* [ ] `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
-		* [ ] entire DATA column by name, getting rid of \$\$
+		* [x] `*_ONE`: when a column has a single common value, it's added to the scope with the `_ONE`-suffix.
+		* [x] entire DATA column by name, getting rid of \$\$
+* [x] run `rsync -rv docs ellisw@intra.csb.ethz.ch:/local0/www/html/roboliq/`
+* [ ] update documentation for the new SCOPE
+* [ ] SCOPE for `${}` javascript substitution
+	* [?] `_`: lodash module
+	* [?] `math`: mathjs module
 * [ ] roboliq.js: improve the whole context/data thing in the calls to `expand*` functions
 	* [ ] remove PARAMETERS, SCOPE and DATA from objects, put them in the context instead
 	* [ ] pass context to `expand*` functions, stop passing all those other variables
@@ -418,6 +420,8 @@ See misc.js:renderTemplateString, since another convention is used there
 # Todos
 
 * [ ] designTest: unit test for calculateRow
+* [ ] SCOPE
+	* [ ] `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
 * [ ] Variable references:
 	* Future referencing?
 		* `$*`: dereference twice

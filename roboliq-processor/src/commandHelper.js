@@ -105,7 +105,7 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 	// console.log("substituteDeep: "); console.log({x, SCOPE, DATA, x})
 	let x2 = x;
 	if (_.isString(x)) {
-		// DATA substitution
+		/*// DATA substitution
 		if (_.startsWith(x, "$$")) {
 			if (_.isArray(DATA)) {
 				const propertyName = x.substr(2);
@@ -120,10 +120,10 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 			}
 		}
 		// Javascript
-		else if (_.startsWith(x, "${") && _.endsWith(x, "}")) {
+		else*/ if (_.startsWith(x, "${") && _.endsWith(x, "}")) {
 			const safeEval = require('safe-eval');
 			const code = x.substr(2, x.length - 3);
-			const scope = _.defaults({}, SCOPE, data.objects.PARAMS);
+			const scope = _.defaults({_, math}, SCOPE, data.objects.PARAMS);
 			// console.log({code, scope})
 			x2 = safeEval(code, scope);
 			// console.log({x2})
@@ -159,7 +159,7 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 		// Template substitution
 		else if (_.startsWith(x, "`") && _.endsWith(x, "`")) {
 			const template = x.substr(1, x.length - 2);
-			const scope = _.mapKeys(SCOPE, (value, name) => "$"+name);
+			const scope = SCOPE; //_.mapKeys(SCOPE, (value, name) => "$"+name);
 			//console.log({x, template, scope})
 			x2 = misc.renderTemplate(template, scope, data);
 		}
@@ -1252,9 +1252,17 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 		// access parameters of the current step
 		always.__step = step;
 	}
-	const common = (addCommonValuesToScope) ? Design.getCommonValues(DATA) : {};
+	// console.log({isEmpty: _.isEmpty(DATA)})
+	const columns = (_.isEmpty(DATA))
+		? {}
+		: _.fromPairs(_.map(_.keys(DATA[0]), key => [key, _.map(DATA, key)]));
+	// console.log({DATA, columns, strange: _.map(DATA, "n")});
+	const common = _.mapKeys(
+		(addCommonValuesToScope) ? Design.getCommonValues(DATA) : {},
+		(value, key) => key + "_ONE"
+	);
 	const ATSCOPE = (step.hasOwnProperty("@SCOPE")) ? step["@SCOPE"] : {};
-	SCOPE = _.defaults(always, common, ATSCOPE, SCOPE, data.objects.SCOPE);
+	SCOPE = _.defaults(always, columns, common, ATSCOPE, SCOPE, data.objects.SCOPE);
 
 	return {DATA, SCOPE};
 }
