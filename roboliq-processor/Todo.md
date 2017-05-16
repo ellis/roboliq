@@ -319,15 +319,21 @@ See misc.js:renderTemplateString, since another convention is used there
 
 * [ ] improve SCOPE, write tests
 	* SCOPE: should contain parameters, variables, data rows
-		* `__objects`: access the raw objects
-		* `__data`: access the current raw data table
-		* `__parameters`: access raw protocol parameters
-		* `__step`: access parameters of the current step
-		* `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
-		* `__column()`: function to return a column from the current data table
-		* `_`: lodash module
-		* `math`: mathjs module
-		* `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
+		* [x] `__objects`: access the raw objects
+		* [x] `__data`: access the current raw data table
+		* [x] `__parameters`: access raw protocol parameters
+		* [x] `__step`: access parameters of the current step
+		* [ ] `__stepStack[]`: access parameters from any step in the current step stack (0 = current step)
+		* [x] `__column()`: function to return a column from the current data table
+		* [ ] `_`: lodash module
+		* [ ] `math`: mathjs module
+		* [ ] `*_common`: when a column has a single common value, it's added to the scope with the `_common`-suffix.
+		* [ ] entire DATA column by name, getting rid of \$\$
+* [ ] roboliq.js: improve the whole context/data thing in the calls to `expand*` functions
+	* [ ] remove PARAMETERS, SCOPE and DATA from objects, put them in the context instead
+	* [ ] pass context to `expand*` functions, stop passing all those other variables
+	* [ ] create a commandHelpers function to create a new context for new step based on the old context and the new step
+	* [ ] remove all these extra references in the context to things that are already in the protocol
 * [ ] make sure templates work like I documented them (see also in the Design Tables chapter the last example with templates and nested steps, do I need the \$-prefix?  I think I saw it used somewhere, probably in unit tests.)
 * [ ] Design Tables:
 	* [ ] `order`: add section, document shuffle, reshuffle, reverse, and repeat

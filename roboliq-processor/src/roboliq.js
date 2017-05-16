@@ -1212,8 +1212,10 @@ function expandStep(opts, protocol, prefix, step, objects, SCOPE = {}, DATA = []
 	}
 
 	const accesses = [];
-	const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, protocol.COMPILER.filecache);
-	const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA(step, data0, SCOPE, DATA);
+	// TODO: we should create the context further up in the call chain and
+	// pass that around instead of passing protocol, objects, etc to all these
+	// functions.
+	const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, protocol.COMPILER.filecache, step);
 
 	// Check for command and its handler
 	const commandName = step.command;
@@ -1224,70 +1226,36 @@ function expandStep(opts, protocol, prefix, step, objects, SCOPE = {}, DATA = []
 	}
 
 	const step0 = _.omit(step, "data");
-	for (let groupIndex = 0; groupIndex < DATAs.length; groupIndex++) {
-		const prefix2 = prefix.concat([groupIndex + 1]);
-		const DATA = DATAs[groupIndex];
-		const SCOPE = SCOPEs[groupIndex];
-		const data = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix2, protocol.COMPILER.filecache);
-		const SCOPE2 = data.objects.SCOPE;
-		const params = misc.handleDirectiveDeep(step0, data);
+	{
+		// const prefix2 = prefix.concat([groupIndex + 1]);
+		// const DATA = DATA1;
+		// const SCOPE = SCOPE1;
+		// const data = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix2, protocol.COMPILER.filecache, step0);
+		// const SCOPE2 = data.objects.SCOPE;
+		const params = misc.handleDirectiveDeep(step0, data0);
+		// console.log({params})
 
-		if (foreach) {
-			const groupKey = (groupIndex+1).toString();
-			// For each DATA set, parse the command's parameters in order substitute in DATA and SCOPE variables,
-			// then expand for each DATA in DATAs.
-			let step2;
-			if (commandName) {
-				if (protocol.schemas[commandName]) {
-					//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
-					const schema = protocol.schemas[commandName];
-					//console.log("params: "+JSON.stringify(params))
-					const parsed = commandHelper.parseParams(params, data, schema);
-					//console.log("parsed:"+JSON.stringify(parsed, null, '\t'))
-					const params2 = _.merge({}, params, parsed.value, parsed.objectName);
-					step2 = params2;
-				}
-				else {
-					step2 = params;
-				}
-			}
-			else if (params.steps) {
-				step2 = params.steps;
-			}
-
-			if (step2) {
-				expandStep(opts, protocol, prefix2, step2, objects, SCOPE2, DATA);
-				/*// if there are substeps, then don't include the parameters again
-				const substepKeys = commandHelper.getStepKeys(step2);
-				if (!_.isEmpty(substepKeys)) {
-				}
-				if (step2.)*/
-				step[groupKey] = step2;
-			}
-		}
-		else {
-			// If we're skipping to a specific step
-			// console.log({COMPILER: protocol.COMPILER})
-			if (protocol.COMPILER.skipTo) {
-				// If the step has been reached:
-				if (protocol.COMPILER.skipTo === id) {
-					protocol.COMPILER.skipTo = undefined;
-					assert(commandName === "system.runtimeLoadVariables", "Roboliq can only resume compiling at a `system.runtimeLoadVariables` command");
-				}
-				else {
-					expandSubsteps(opts, protocol, prefix, step, objects, SCOPE2, DATA);
-				}
-			}
-			else if (commandName === "system.runtimeLoadVariables") {
-				protocol.COMPILER.suspend = true;
-				protocol.COMPILER.suspendStepId = id;
+		// If we're skipping to a specific step
+		// console.log({COMPILER: protocol.COMPILER})
+		if (protocol.COMPILER.skipTo) {
+			// If the step has been reached:
+			if (protocol.COMPILER.skipTo === id) {
+				protocol.COMPILER.skipTo = undefined;
+				assert(commandName === "system.runtimeLoadVariables", "Roboliq can only resume compiling at a `system.runtimeLoadVariables` command");
 			}
 			else {
-				if (commandName) {
-					expandCommand(protocol, prefix, step, objects, SCOPE2, params, commandName, handler, DATA, id);
-				}
-				expandSubsteps(opts, protocol, prefix, step, objects, SCOPE2, DATA);
+				expandSubsteps(opts, protocol, prefix, step, objects, data0.objects.SCOPE, data0.objects.DATA);
 			}
+		}
+		else if (commandName === "system.runtimeLoadVariables") {
+			protocol.COMPILER.suspend = true;
+			protocol.COMPILER.suspendStepId = id;
+		}
+		else {
+			if (commandName) {
+				expandCommand(protocol, prefix, step, objects, data0.objects.SCOPE, params, commandName, handler, data0.objects.DATA, id);
+			}
+			expandSubsteps(opts, protocol, prefix, step, objects, data0.objects.SCOPE, data0.objects.DATA);
 		}
 	}
 }
@@ -1332,6 +1300,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		const parsed = (schema)
 			? commandHelper.parseParams(params, data, schema)
 			: undefined;
+		// console.log("parsed: "+JSON.stringify(parsed, null, '\t'));
 		// If the handler has an input specification, parse it
 		if (_.isPlainObject(handler.inputSpec)) {
 			const input = commandHelper.parseInputSpec(handler.inputSpec, parsed, data);

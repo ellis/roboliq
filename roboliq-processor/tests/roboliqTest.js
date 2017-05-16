@@ -118,7 +118,7 @@ describe('roboliq', function() {
 			});
 		});
 
-		it("should handle $#-parameter substitution", () => {
+		it("should handle $#-parameter pre-compiler substitution", () => {
 			const protocol = {
 				roboliq: "v1",
 				parameters: {
@@ -147,6 +147,82 @@ describe('roboliq', function() {
 			should.deepEqual(result.output.steps, {
 				"1": { "command": "system._echo", "value": "Hello, World" },
 				"2": { "command": "system._echo", "value": ["A01", "B01", "C01", "D01"] }
+			});
+		});
+
+		it("should handle $-parameter substitution", () => {
+			const protocol = {
+				roboliq: "v1",
+				parameters: {
+					TEXT: { value: "Hello, World" },
+				},
+				objects: {
+					data1: {
+						type: "Data",
+						value: [
+							{a: 1, b: 1},
+							{a: 1, b: 2}
+						]
+					}
+				},
+				steps: {
+					1: {
+						data: "data1",
+						command: "system.echo",
+						value: {
+							javascript: "${`${TEXT} ${a} ${__step.groupBy}`}",
+							math: "$(a * 10)",
+							scopeParameter: "$TEXT",
+							scopeDataCommon: "$a",
+							scopeData: "$__data[0].b",
+							scopeObjects: "$__objects.data1.type",
+							scopeParameters: "$__parameters.TEXT.value",
+							scopeStep: "$__step.command",
+							scopeColumn: "${__column('b')}",
+							column: "$$b",
+							// templateString: "`Hello, {{a}} {{__column('b')}}`",
+							// templateObject: "`{}`"
+						}
+					}
+				}
+			};
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
+			// console.log("parameters:\n"+JSON.stringify(result.output.parameters, null, '\t'));
+			// console.log("result:\n"+JSON.stringify(result.output.steps, null, '\t'));
+			should.deepEqual(result.output.steps, {
+				"1": {
+					"1": {
+						"command": "system._echo",
+						"value": {
+							"javascript": "Hello, World 1 undefined",
+							"math": 10,
+							"scopeParameter": "Hello, World",
+							"scopeDataCommon": 1,
+							"scopeData": 1,
+							"scopeObjects": "Data",
+							"scopeParameters": "Hello, World",
+							"scopeStep": "system.echo",
+							"column": [
+								1,
+								2
+							]
+						}
+					},
+					"data": "data1",
+					"command": "system.echo",
+					"value": {
+						"javascript": "${`${TEXT} ${a} ${__step.groupBy}`}",
+						"math": "$(a * 10)",
+						"scopeParameter": "$TEXT",
+						"scopeDataCommon": "$a",
+						"scopeData": "$__data[0].b",
+						"scopeObjects": "$__objects.data1.type",
+						"scopeParameters": "$__parameters.TEXT.value",
+						"scopeStep": "$__step.command",
+						"scopeColumn": "${__column('b')}",
+						"column": "$$b"
+					}
+				}
 			});
 		});
 
@@ -324,10 +400,6 @@ describe('roboliq', function() {
 				},
 				steps: {
 					1: {
-						// "@DATA": [
-						// 	{a: "B", b: 1, c: 1},
-						// 	{a: "C", c: 2}
-						// ],
 						data: {source: "design"},
 						1: {
 							command: "system.echo",

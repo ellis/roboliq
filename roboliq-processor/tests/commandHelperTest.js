@@ -706,7 +706,7 @@ describe('commandHelper', function() {
 					x2: [1, 2],
 					x3: {
 						"@DATA": [{y: "a"}, {y: "b"}],
-						"@SCOPE": {a: "A", b: "B"},
+						"@SCOPE": {b: "B"},
 						x31: "A",
 						x32: "B",
 						x33: ["a", "b"]

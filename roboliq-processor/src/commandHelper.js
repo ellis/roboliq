@@ -32,6 +32,9 @@ function asArray(x) {
 
 /**
  * Create the 'data' object that gets passed into many commandHelper functions.
+ *
+ * TODO: Rather than calling it 'data', we should probably rename it to 'context'.
+ *
  * @param  {Protocol} protocol
  * @param  {object} objects  =             {} - current objects
  * @param  {object} SCOPE    =             {} - current SCOPE
@@ -40,17 +43,35 @@ function asArray(x) {
  * @param  {object} files = {} - map of filename to loaded filedata
  * @return {object} the 'data' object that gets passed into many commandHelper functions
  */
-function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], files = {}) {
-	const common = Design.getCommonValues(DATA);
-	const SCOPE2 = _.defaults(common, SCOPE);
+function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], files = {}, step = {}) {
+	const updatedSCOPEDATA = updateSCOPEDATA(step, {objects: _.defaults({SCOPE, DATA}, objects)}, SCOPE, DATA);
+	// console.log({step, SCOPE: updatedSCOPEDATA.SCOPE, DATA: updatedSCOPEDATA.DATA})
 
 	// Process any directives in this step
 	const objects2 = _.clone(objects);
 	// TODO: consider changing this so that DATA and SCOPE are not a part of `objects`,
 	// but are their own separate properties.
-	objects2.DATA = DATA;
-	objects2.SCOPE = SCOPE2;
-	const data = {
+	objects2.DATA = updatedSCOPEDATA.DATA;
+	objects2.SCOPE = _.defaults(
+		{
+			// access the raw objects
+			__objects: objects2,
+			// access the current raw data table
+			__data: updatedSCOPEDATA.DATA,
+			// access raw protocol parameters
+			__parameters: protocol.parameters || {},
+			// access parameters of the current step
+			__step: step,
+			// access parameters from any step in the current step stack (0 = current step)
+			__stepStack: null,
+			// function to return a column from the current data table
+			__column: (name) => { _(updatedSCOPEDATA.DATA).map(name).value() }
+		},
+		updatedSCOPEDATA.SCOPE,
+		_.mapValues(protocol.parameters || {}, x => x.value)
+	);
+
+	const context = {
 		objects: objects2,
 		schemas: protocol.schemas,
 		accesses: [],
@@ -58,7 +79,10 @@ function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], fi
 		protocol,
 		path
 	};
-	return data;
+	// console.log("SCOPE:")
+	// console.log(context.objects.SCOPE);
+
+	return context;
 }
 
 function getDesignFactor(propertyName, DATA) {
@@ -144,17 +168,14 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA, addCommonValuesToScope));
 	}
 	else if (_.isPlainObject(x)) {
-		const {DATAs, SCOPEs, foreach} = updateSCOPEDATA(x, data, SCOPE, DATA, addCommonValuesToScope);
-
-		const DATA2 = DATAs[0];
-		const SCOPE2 = SCOPEs[0];
+		const updatedSCOPEDATA = updateSCOPEDATA(x, data, SCOPE, DATA, addCommonValuesToScope);
 		x2 = _.mapValues(x, (value, name) => {
 			// Skip over @DATA, @SCOPE, directives and 'steps' properties
 			if (_.startsWith(name, "#") || _.endsWith(name, "()") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
 				return value;
 			}
 			else {
-				return substituteDeep(value, data, SCOPE2, DATA2, addCommonValuesToScope);
+				return substituteDeep(value, data, updatedSCOPEDATA.SCOPE, updatedSCOPEDATA.DATA, addCommonValuesToScope);
 			}
 		});
 	}
@@ -256,7 +277,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 			}
 			// If not optional, require the variable's presence:
 			else if (required) {
-				console.log({propertyName, type, result, path, params, schema})
+				// console.log({propertyName, type, result, path, params, schema})
 				expect.truthy({paramName: path1.join(".")}, false, "missing required value [CODE 106]");
 			}
 		}
@@ -1156,79 +1177,86 @@ function stepify(steps) {
 
 /**
  * Process '@DATA', '@SCOPE', and 'data' properties for a step,
- * and return updated {DATAs, SCOPEs, foreach}.
+ * The returned data table will be the first to exist of '@DATA', 'DATA', and 'objects.DATA'
+ * The returned scope will be the merger of data.objects.SCOPE, SCOPE, '@SCOPE', and common DATA values.
+ * and return updated {DATA, SCOPE}.
  */
-function updateSCOPEDATA(step, data, SCOPE, DATA, addCommonValuesToScope=true) {
+function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCommonValuesToScope=true) {
 	// console.log("updateSCOPEDATA");
+	// console.log({step})
+	// FIXME: Debug only
+	// if (step.value) {
+	// 	assert(false);
+	// }
+	// ENDFIX
 	// console.log("data2: "+JSON.stringify(data));
 	// console.log({SCOPE})
-	if (step.hasOwnProperty("@DATA")) {
-		DATA = step["@DATA"];
-		// console.log("DATA: "+JSON.stringify(DATA))
-	}
+	DATA
+		= (step.hasOwnProperty("@DATA")) ? step["@DATA"]
+		: (!_.isUndefined(DATA)) ? DATA
+		: data.objects.DATA || [];
+	// console.log({DATA})
 
-	let DATAs = [DATA];
-	let foreach = false; // whether we need to replicate the step contents
 	// Handle `data` parameter by loading Design data SCOPE and possibly
 	// repeating the command for each group or each row
-	if (step["data"]) {
+	if (step.hasOwnProperty("data")) {
 		const dataInfo = misc.handleDirectiveDeep(step.data, data);
 		// console.log({dataInfo})
 		let table = DATA;
 		if (_.isString(dataInfo) || dataInfo.source) {
 			const dataId = _.isString(dataInfo) ? dataInfo : dataInfo.source;
 			const source = _.get(data.objects, dataId);
-			assert(source);
+			// console.log({source})
+			// console.log("data.objects:")
+			// console.log(data.objects)
+			assert(source, `Data source not found: ${dataId}`);
 
 			if (_.isArray(source)) {
 				table = source;
 			}
 			else if (source.type === "Data") {
-				const design = substituteDeep(source, data, SCOPE, DATA);
-				table = Design.flattenDesign(design);
+				if (!_.isUndefined(source.value)) {
+					table = source.value;
+				}
+				else {
+					const design = substituteDeep(source, data, SCOPE, DATA);
+					table = Design.flattenDesign(design);
+				}
 			}
 			else {
 				assert(false, "unrecognized data source: "+JSON.stringify(dataId)+" -> "+JSON.stringify(source));
 			}
 		}
 
-		// Replicate the command for each group
-		const groups = Design.query(table, dataInfo); // TODO: is this required anymore, now that we're removing the 'foreach' property?
-		// console.log("groups: "+JSON.stringify(groups))
-
-		// // TODO: These two 'forEach' checks should be removed -- they are replaced by 'experiment.forEachRow' and 'experiment.forEachGroup'
-		// if (dataInfo.forEach === "row") {
-		// 	// Turn each row into its own group
-		// 	DATAs = _(groups).flatten().map(x => [x]).value();
-		// 	//console.log("forEach row DATAs: "+JSON.stringify(DATAs, null, '\t'));
-		// 	foreach = true;
-		// }
-		// else if (dataInfo.forEach === "group") {
-		// 	DATAs = groups;
-		// 	//console.log("forEach group DATAs: "+JSON.stringify(DATAs, null, '\t'));
-		// 	foreach = true;
-		// }
-		// else {
-			DATAs = [_.flatten(groups)];
-		// }
+		if (_.isPlainObject(dataInfo)) {
+			table = _.flatten(Design.query(table, dataInfo));
+			// console.log({dataInfo, table})
+		}
+		DATA = table;
 	}
 	//console.log("DATAs: "+JSON.stringify(DATAs, null, '\t'));
 
-	//console.log({step, params})
-
-	// Add `@SCOPE` variables to SCOPE, which are automatically inserted into `protocol.objects.SCOPE` before a command handler is called.
-	//console.log({_scope: params["@SCOPE"]})
-	if (!_.isEmpty(step["@SCOPE"])) {
-		SCOPE = _.defaults(step["@SCOPE"], SCOPE);
-		//console.log("SCOPE: "+JSON.stringify(SCOPE))
+	const always = {
+		// access the raw objects
+		__objects: data.objects,
+		// access the current raw data table
+		__data: DATA,
+		// access raw protocol parameters
+		__parameters: _.get(data, ["protocol", "parameters"], {}),
+		// access parameters from any step in the current step stack (0 = current step)
+		// __stepStack: null,
+		// function to return a column from the current data table
+		__column: (name) => { _(DATA).map(name).value() }
+	};
+	if (step.hasOwnProperty("command")) {
+		// access parameters of the current step
+		always.__step = step;
 	}
+	const common = (addCommonValuesToScope) ? Design.getCommonValues(DATA) : {};
+	const ATSCOPE = (step.hasOwnProperty("@SCOPE")) ? step["@SCOPE"] : {};
+	SCOPE = _.defaults(always, common, ATSCOPE, SCOPE, data.objects.SCOPE);
 
-	const SCOPEs = DATAs.map(DATA => {
-		const common = (addCommonValuesToScope) ? Design.getCommonValues(DATA) : {};
-		return _.defaults(common, SCOPE);
-	});
-
-	return {DATAs, SCOPEs, foreach};
+	return {DATA, SCOPE};
 }
 
 function copyItemsWithDefaults(items, defaults) {

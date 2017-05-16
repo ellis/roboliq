@@ -40,17 +40,13 @@ function directive_data(spec, data) {
 	// console.log("directive_data: "+JSON.stringify(spec, null, '\t'))
 	// console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
 	return expect.try("data()", () => {
-		const {DATAs, SCOPEs, foreach} = commandHelper.updateSCOPEDATA({data: spec}, data, data.objects.SCOPE, data.objects.DATA);
-		// console.log(DATAs)
-		// console.log(SCOPEs)
-		const DATA0 = DATAs[0];
-		const SCOPE0 = SCOPEs[0];
+		const updatedSCOPEDATA = commandHelper.updateSCOPEDATA({data: spec}, data);
 
-		let result = Design.query(DATA0, spec);
+		let result = Design.query(updatedSCOPEDATA.DATA, spec);
 		// console.log("result0: "+JSON.stringify(result))
 		if (spec.templateGroup) {
 			result = _.map(result, DATA => {
-				const SCOPE = _.merge({}, SCOPE0, Design.getCommonValues(DATA));
+				const SCOPE = _.merge({}, updatedSCOPEDATA.SCOPE, Design.getCommonValues(DATA));
 				return commandHelper.substituteDeep(spec.templateGroup, data, SCOPE, DATA);
 			});
 			// console.log("result1: "+JSON.stringify(result))
@@ -59,7 +55,7 @@ function directive_data(spec, data) {
 			const template = _.get(spec, "map", spec.template);
 			// console.log("result: "+JSON.stringify(result, null, '\t'))
 			result = _.map(result, DATA => _.map(DATA, row => {
-				const SCOPE = _.merge({}, SCOPE0, row);
+				const SCOPE = _.merge({}, updatedSCOPEDATA.SCOPE, row);
 				// console.log("row: "+JSON.stringify(row, null, '\t'))
 				// console.log("SCOPE: "+JSON.stringify(SCOPE, null, '\t'))
 				return commandHelper.substituteDeep(template, data, SCOPE, DATA);
@@ -71,7 +67,7 @@ function directive_data(spec, data) {
 		if (spec.value) {
 			result = _.map(result, DATA => _.map(DATA, row => {
 				if (_.startsWith(spec.value, "$`")) {
-					const SCOPE = _.merge({}, SCOPE0, row);
+					const SCOPE = _.merge({}, updatedSCOPEDATA.SCOPE, row);
 					return commandHelper.substituteDeep(spec.value, data, SCOPE, DATA);
 				}
 				else {
@@ -84,7 +80,7 @@ function directive_data(spec, data) {
 		if (spec.hasOwnProperty("summarize")) {
 			// console.log("result: "+JSON.stringify(result, null, '\t'))
 			result = _.map(result, DATA => {
-				const SCOPE = _.clone(SCOPE0);
+				const SCOPE = _.clone(updatedSCOPEDATA.SCOPE);
 				const columns = getColumns(DATA);
 				_.forEach(columns, key => {
 					SCOPE[key] = _.map(DATA, key);
