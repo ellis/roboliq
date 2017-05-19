@@ -251,14 +251,14 @@ steps:
             groupBy: layer
             steps:
                 command: pipetter.pipette
-                program: $liquidClass_ONE
+                program: $liquidClass
                 sources: $source
-                destinationLabware: $destinationLabware_ONE
+                destinationLabware: $destinationLabware
                 destinations: $well
-                volumes: $volume_ONE
-                cleanBegin: $cleanBegin_ONE
-                cleanEnd: $cleanEnd_ONE
-                cleanBetween: $cleanBetween_ONE
+                volumes: $volume
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
         2:
             description: Add equal amount of water on the balance plate
             command: pipetter.pipette
@@ -308,14 +308,14 @@ steps:
             groupBy: layer
             steps:
                 command: pipetter.pipette
-                program: $liquidClass_ONE
+                program: $liquidClass
                 sources: $source
-                destinationLabware: $destinationLabware_ONE
+                destinationLabware: $destinationLabware
                 destinations: $well
                 volumes: $volume
-                cleanBegin: $cleanBegin_ONE
-                cleanEnd: $cleanEnd_ONE
-                cleanBetween: $cleanBetween_ONE
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
                 cleanBetweenSameSource: none
         2:
             command: pipetter.mix

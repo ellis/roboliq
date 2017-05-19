@@ -137,7 +137,7 @@ describe('commandHelper', function() {
 			precision: 64        // Number of significant digits for BigNumbers
 		});
 
-		it("should work with values specified in-line", () => {
+		it.only("should work with values specified in-line", () => {
 			const data = {
 				objects: {
 					p: {
@@ -162,15 +162,26 @@ describe('commandHelper', function() {
 				number: 42,
 				string1: "hello",
 				string2: '"hello"',
+				string3: ['"hello"', '"hello"', '"hello"'],
 				time1: 23,
 				time2: "23 minutes",
+				time3: [23, 23, 23],
+				length1: "40 m",
+				length2: ["40 m", "40 m", "40 m"],
+				plate1: "p",
+				plate2: ["p"],
+				plates1: "p",
+				plates2: ["p", "p"],
 				// volume1: 10,
 				volume2: "10 ul",
+				volume3: ["10 ul", "10 ul"],
 				volumes1: "10 ul",
 				volumes2: ["10 ul", "20 ul"],
 				well1: "p(A01)",
+				well2: ["p(A01)", "p(A01)", "p(A01)"],
 				wells1: "p(A01)",
 				source1: "p(A01)",
+				source2: ["p(A01)", "p(A01)", "p(A01)"],
 				sources1: "p(A01 down to B01)",
 				sources2: "q"
 				//file
@@ -182,20 +193,30 @@ describe('commandHelper', function() {
 					number: {type: 'number'},
 					string1: {type: 'string'},
 					string2: {type: 'string'},
+					string3: {type: 'string'},
 					time1: {type: 'Duration'},
 					time2: {type: 'Duration'},
-					// volume1: {type: 'Volume'},
+					time3: {type: 'Duration'},
+					length1: {type: "Length"},
+					length2: {type: "Length"},
+					plate1: {type: "Plate"},
+					plate2: {type: "Plate"},
+					plates1: {type: "Plates"},
+					plates2: {type: "Plates"},
 					volume2: {type: 'Volume'},
+					volume3: {type: 'Volume'},
 					volumes1: {type: 'Volumes'},
 					volumes2: {type: 'Volumes'},
 					well1: {type: 'Well'},
+					well2: {type: 'Well'},
 					wells1: {type: 'Wells'},
 					source1: {type: 'Source'},
+					source2: {type: 'Source'},
 					sources1: {type: 'Sources'},
 					sources2: {type: 'Sources'},
-				},
-				required: ['name', 'object1', 'number', 'string1', 'string2', 'time1', 'time2', /*'volume1',*/ 'volume2', 'volumes1', 'volumes2', 'well1', 'wells1', 'source1', 'sources1']
+				}
 			};
+			schema.required = _.keys(schema.properties);
 			const parsed = commandHelper.parseParams(params, data, schema);
 			//console.log(JSON.stringify(parsed, null, '\t'))
 			should.deepEqual(parsed.value.time2, math.unit(math.bignumber(23), 'minutes'));
@@ -207,20 +228,35 @@ describe('commandHelper', function() {
 					number: 42,
 					string1: "hello",
 					string2: '"hello"',
+					string3: '"hello"',
 					time1: math.unit(23, 's'),
 					time2: math.unit(math.bignumber(23), 'minutes'),
-					// volume1: math.unit(10, 'l'),
+					time3: math.unit(23, 's'),
+					length1: math.unit(math.bignumber(40), 'm'),
+					length2: math.unit(math.bignumber(40), 'm'),
+					plate1: data.objects.p,
+					plate2: data.objects.p,
+					plates1: [data.objects.p],
+					plates2: [data.objects.p, data.objects.p],
 					volume2: math.unit(math.bignumber(10), 'ul'),
+					volume3: math.unit(math.bignumber(10), 'ul'),
 					volumes1: [math.unit(math.bignumber(10), 'ul')],
 					volumes2: [math.unit(math.bignumber(10), 'ul'), math.unit(math.bignumber(20), 'ul')],
 					well1: "p(A01)",
+					well2: "p(A01)",
 					wells1: ["p(A01)"],
 					source1: "p(A01)",
+					source2: "p(A01)",
 					sources1: ["p(A01)", "p(B01)"],
 					sources2: [["p(A01)", "p(A02)"]]
 				},
 				objectName: {
-					sources2: "q"
+					plate1: "p",
+					plate2: "p",
+					"plates1.0": "p",
+					"plates2.0": "p",
+					"plates2.1": "p",
+					"sources2.0": "q"
 				}
 			});
 			should.deepEqual(data.accesses, ["q"]);

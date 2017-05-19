@@ -390,19 +390,11 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 
 	switch (type) {
 		case "array": return processValueAsArray(result, path, value, schema.items, data);
-		case "boolean":
-			expect.truthy({paramName: name}, _.isBoolean(value), "expected boolean: "+value);
-			return;
-		case "integer":
-			expect.truthy({paramName: name}, _.isInteger(value), "expected integer: "+value);
-			return;
+		case "boolean": return processOneOfBasicType(result, path, value, _.isBoolean, "boolean");
+		case "integer": return processOneOfBasicType(result, path, value, _.isInteger, "integer");
 		case "markdown": return processString(result, path, value, data);
-		case "number":
-			expect.truthy({paramName: name}, _.isNumber(value), "expected number: "+JSON.stringify(value));
-			return;
-		case "null":
-			expect.truthy({paramName: name}, _.isNull(value), "expected null: "+value);
-			return;
+		case "number": return processOneOfBasicType(result, path, value, _.isNumber, "number");
+		case "null": return processOneOfBasicType(result, path, value, _.isNull, "null");
 		case "string": return processString(result, path, value, data);
 		case "object": return processParamsBySchema(result, path, value, schema, data);
 		case "Agent":
@@ -611,6 +603,42 @@ function dereferenceVariable(data, name) {
 }
 
 /**
+ * Accept either a single value whose type is checked with fnCheck(), or
+ * an array with each element equal to the first - in that case,
+ * set the result value to the first element of the array.
+ * @param {object} result - the resulting object to return, containing objectName and value representations of params.
+ * @param {array} path - path in the original params object
+ * @param {any} value - the value to process
+ * @param {Function} fnCheck - a function that returns true if the value has the correct type
+ * @param {string} expectedTypeName - name of the expected type, for constructing the error message if fnCheck fails
+ */
+function processOneOfBasicType(result, path, value, fnCheck, expectedTypeName) {
+	if (fnCheck(value)) {
+		return;
+	}
+	if (_.isArray(value)) {
+		const one = value[0];
+		if (_.every(value, x => _.isEqual(x, one))) {
+			_.set(result.value, path, one);
+		}
+	}
+	expect.truthy({paramName: path.join(".")}, false, "expected "+expectedTypeName+": "+value);
+	return;
+}
+
+/**
+ * If value is an array and every element of the array is the same,
+ * return the first value of the array.  Otherwise just return the value.
+ * @param  {any} value - value to inspect
+ */
+function getCommon(value) {
+	if (_.isArray(value) && value.length > 0 && _.every(value, x => _.isEqual(x, value[0]))) {
+		return value[0];
+	}
+	return value;
+}
+
+/**
  * Try to call fn on value0.  If that works, return the value is be made into
  * a singleton array.  Otherwise try to process value0 as an array.
  * fn should accept parameters (result, path, value0) and set the value in
@@ -620,8 +648,8 @@ function dereferenceVariable(data, name) {
  * @param {array} path - path in the original params object
 */
 function processOneOrArray(result, path, value0, fn) {
-	// console.log("processOneOrArray:")
-	// console.log({path, value0})
+	console.log("processOneOrArray:")
+	console.log({path, value0})
 	// Try to process value0 as a single value, then turn it into an array
 	try {
 		_.set(result.value, path, undefined);
@@ -650,12 +678,13 @@ function processOneOrArray(result, path, value0, fn) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  */
-function processLength(result, path, x, data) {
+function processLength(result, path, value0, data) {
+	let x = getCommon(value0);
 	if (_.isString(x)) {
 		x = math.eval(x);
 	}
 	//console.log({function: "processLength", path, x})
-	expect.truthy({paramName: path.join('.')}, math.unit('m').equalBase(x), "expected a volume with meter units (m, mm, nm, etc.): "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, math.unit('m').equalBase(x), "expected a volume with meter units (m, mm, nm, etc.): "+JSON.stringify(value0));
 	_.set(result.value, path, x);
 }
 
@@ -671,7 +700,7 @@ function processString(result, path, value0, data) {
 	// Follow de-references:
 	var references = [];
 	var objectName = undefined;
-	let value1 = value0;
+	let value1 = getCommon(value0);
 	while (_.isString(value1) && _.startsWith(value1, "${") && references.indexOf(value1) < 0) {
 		references.push(value1);
 		objectName = value1.substring(2, value1.length - 1);
@@ -701,12 +730,17 @@ function processString(result, path, value0, data) {
  * @param {object} data - protocol data
  * @param {string} type - type of object expected
  */
-function processObjectOfType(result, path, x, data, type) {
-	//console.log("processObjectOfType:")
-	//console.log({result, path, x, type})
+function processObjectOfType(result, path, value0, data, type) {
+	console.log("processObjectOfType:")
+	console.log({result, path, value0, type})
+	let x = value0;
+	if (_.isArray(value0) && value0.length > 0 && _.every(value0, x => _.isEqual(x, value0[0]))) {
+		x = _.cloneDeep(lookupValue0(result, path, value0[0], data));
+		_.set(result.value, path, x);
+	}
 	const paramName = path.join(".");
-	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(x));
-	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(x));
+	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(value0));
+	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(value0));
 }
 
 /**
@@ -717,7 +751,8 @@ function processObjectOfType(result, path, x, data, type) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  */
-function processSiteOrStay(result, path, x, data) {
+function processSiteOrStay(result, path, value0, data) {
+	const x = getCommon(value0);
 	if (x === "stay") {
 		// do nothing, leave the value as "stay"
 	}
@@ -734,7 +769,8 @@ function processSiteOrStay(result, path, x, data) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  */
-function processSource(result, path, x, data) {
+function processSource(result, path, value0, data) {
+	const x = getCommon(value0);
 	// console.log(`processSource: ${JSON.stringify(path)}, ${JSON.stringify(x)}`)
 	const l = processSources(result, path, x, data);
 	expect.truthy({paramName: path.join('.')}, _.isArray(l) && l.length === 1, "expected a single liquid source: "+JSON.stringify(x));
@@ -791,12 +827,13 @@ function processSources(result, path, x, data) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  */
-function processTemperature(result, path, x, data) {
+function processTemperature(result, path, value0, data) {
+	let x = getCommon(value0);
 	if (_.isString(x)) {
 		x = math.eval(x);
 	}
 	//console.log({function: "processVolume", path, x})
-	expect.truthy({paramName: path.join('.')}, math.unit('degC').equalBase(x), "expected a temperature with units degC, degF, or K: "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, math.unit('degC').equalBase(x), "expected a temperature with units degC, degF, or K: "+JSON.stringify(value0));
 	_.set(result.value, path, x);
 	//console.log("set in result.value")
 }
@@ -809,12 +846,13 @@ function processTemperature(result, path, x, data) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  */
-function processVolume(result, path, x, data) {
+function processVolume(result, path, value0, data) {
+	let x = getCommon(value0);
 	if (_.isString(x)) {
 		x = math.eval(x);
 	}
 	//console.log({function: "processVolume", path, x})
-	expect.truthy({paramName: path.join('.')}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, math.unit('l').equalBase(x), "expected a volume with liter units (l, ul, etc.): "+JSON.stringify(value0));
 	_.set(result.value, path, x);
 	//console.log("set in result.value")
 }
@@ -827,13 +865,14 @@ function processVolume(result, path, x, data) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  */
-function processWell(result, path, x, data) {
+function processWell(result, path, value0, data) {
+	let x = getCommon(value0);
 	if (_.isString(x)) {
 		//console.log("processWell:")
 		//console.log({result, path, x})
 		x = wellsParser.parse(x, data.objects);
 	}
-	expect.truthy({paramName: path.join('.')}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(x));
+	expect.truthy({paramName: path.join('.')}, _.isArray(x) && x.length === 1, "expected a single well indicator: "+JSON.stringify(value0));
 	_.set(result.value, path, x[0]);
 }
 
@@ -861,8 +900,8 @@ function processWells(result, path, x, data) {
  * @param {object} x0 - the value to process
  * @param {object} data - protocol data
  */
-function processDuration(result, path, x0, data) {
-	let x = x0;
+function processDuration(result, path, value0, data) {
+	let x = getCommon(value0);
 	if (_.isNumber(x)) {
 		x = math.unit(x, 's');
 	}
@@ -870,7 +909,7 @@ function processDuration(result, path, x0, data) {
 		x = math.eval(x);
 	}
 	//console.log({a: math.unit('s'), value: x, x0})
-	expect.truthy({paramName: path.join('.')}, math.unit('s').equalBase(x), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(x0));
+	expect.truthy({paramName: path.join('.')}, math.unit('s').equalBase(x), "expected a value with time units (s, second, seconds, minute, minutes, h, hour, hours, day, days): "+JSON.stringify(value0));
 	_.set(result.value, path, x);
 }
 
