@@ -326,8 +326,8 @@ See misc.js:renderTemplateString, since another convention is used there
 		* [x] `*_ONE`: when a column has a single common value, it's added to the scope with the `_ONE`-suffix.
 		* [x] entire DATA column by name, getting rid of \$\$
 * [x] run `rsync -rv docs ellisw@intra.csb.ethz.ch:/local0/www/html/roboliq/`
-* [ ] change parsing of singular values when they are passed an array so that if each entry has the same value, use that value -- this way we can avoid the `$*_ONE` suffix in commands.
-* [ ] update documentation for the new SCOPE
+* [x] change parsing of singular values when they are passed an array so that if each entry has the same value, use that value -- this way we can avoid the `$*_ONE` suffix in commands.
+* [x] update documentation for the new SCOPE
 * [ ] SCOPE for `${}` javascript substitution
 	* [?] `_`: lodash module
 	* [?] `math`: mathjs module

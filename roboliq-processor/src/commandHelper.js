@@ -74,7 +74,7 @@ function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], fi
 	const context = {
 		objects: objects2,
 		schemas: protocol.schemas,
-		accesses: [],
+		accesses: new Set(),
 		files,
 		protocol,
 		path
@@ -411,16 +411,16 @@ function processValue0BySchemaType(result, path, value0, schema, type, data) {
 		case "Length": return processLength(result, path, value, data);
 		case "Lid": return processObjectOfType(result, path, value, data, type);
 		case "Plate": return processObjectOfType(result, path, value, data, type);
-		case "Plates": return processOneOrArray(result, path, value, (result, path, x) => processObjectOfType(result, path, x, data, "Plate"));
+		case "Plates": return processOneOrArray(result, path, value, data, (result, path, x) => processObjectOfType(result, path, x, data, "Plate", false));
 		case "Site": return processObjectOfType(result, path, value, data, type);
 		case "SiteOrStay": return processSiteOrStay(result, path, value, data);
 		case "Source": return processSource(result, path, value, data);
 		case "Sources": return processSources(result, path, value, data);
 		case "String": return processString(result, path, value, data);
 		case "Temperature": return processTemperature(result, path, value, data);
-		case "Temperatures": return processOneOrArray(result, path, value, (result, path, x) => processTemperature(result, path, x, data));
+		case "Temperatures": return processOneOrArray(result, path, value, data, (result, path, x) => processTemperature(result, path, x, data));
 		case "Volume": return processVolume(result, path, value, data);
-		case "Volumes": return processOneOrArray(result, path, value, (result, path, x) => processVolume(result, path, x, data));
+		case "Volumes": return processOneOrArray(result, path, value, data, (result, path, x) => processVolume(result, path, x, data));
 		case "Well": return processWell(result, path, value, data);
 		case "Wells": return processWells(result, path, value, data);
 		case "File":
@@ -515,17 +515,17 @@ function processValueAsArray(result, path, list0, schema, data) {
 function g(data, path, dflt) {
 	const name = (_.isArray(path)) ? path.join('.') : path;
 
-	if (_.isArray(data.accesses))
-		data.accesses.push(name);
+	if (_.isSet(data.accesses))
+		data.accesses.add(name);
 	else
-		data.accesses = [name];
+		data.accesses = new Set([name]);
 
 	return _.get(data.objects, path, dflt);
 }
 
 /**
  * Try to lookup value0 in objects set.
- * This function is recursive, insofar as if the value refers to a variable,
+ * This function is recursive - if the value refers to a variable,
  * the variables value will also be dereferenced.
  * When a variable is looked up, its also added to result.objectName[path].
  *
@@ -539,7 +539,14 @@ function lookupValue0(result, path, value0, data) {
 	if (_.isString(value0) && !_.startsWith(value0, '"')) {
 		const deref = dereferenceVariable(data, value0);
 		if (deref) {
-			result.objectName[path.join('.')] = deref.objectName;
+			result.objectName[path.join(".")] = deref.objectName;
+			// FIXME: for debug only
+			// if (path.join(".") === "plates2.0") {
+			// 	console.trace();
+			// 	const process = require('process');
+			// 	process.exit();
+			// }
+			// ENDFIX
 			return deref.value;
 		}
 	}
@@ -565,10 +572,10 @@ function dereferenceVariable(data, name) {
 			//console.log({map: _(data.objects.DATA).map(propertyName).value()});
 
 			const accessName = "DATA."+propertyName;
-			if (_.isArray(data.accesses))
-				data.accesses.push(accessName);
+			if (_.isSet(data.accesses))
+				data.accesses.add(accessName);
 			else
-				data.accesses = [accessName];
+				data.accesses = new Set([accessName]);
 		}
 	}
 	else {
@@ -639,7 +646,7 @@ function getCommon(value) {
 }
 
 /**
- * Try to call fn on value0.  If that works, return the value is be made into
+ * Try to call fn on value0.  If that works, return the value is made into
  * a singleton array.  Otherwise try to process value0 as an array.
  * fn should accept parameters (result, path, value0) and set the value in
  * result.value at the given path.
@@ -647,19 +654,27 @@ function getCommon(value) {
  * @param {object} result - the resulting object to return, containing objectName and value representations of params.
  * @param {array} path - path in the original params object
 */
-function processOneOrArray(result, path, value0, fn) {
-	console.log("processOneOrArray:")
-	console.log({path, value0})
+function processOneOrArray(result, path, value0, data, fn) {
+	// console.log("processOneOrArray:")
+	// console.log({path, value0})
 	// Try to process value0 as a single value, then turn it into an array
 	try {
-		_.set(result.value, path, undefined);
-		const path2 = path.concat(0);
-		fn(result, path2, value0);
+		const path1 = path.concat(0);
+		_.unset(result.value, path, undefined);
+		fn(result, path1, value0);
+		// If we reach this point, then value0 was able to be processed as an object,
+		// so use it as a singleton array.
+		// const value1 = _.get(result.value, path);
+		// _.set(result.value, path1, value1);
+		if (result.objectName.hasOwnProperty(path.join("."))) {
+			result.objectName[path1.join(".")] = result.objectName[path.join(".")];
+			delete result.objectName[path.join(".")];
+		}
 		// console.log(JSON.stringify(result));
 		// console.log(JSON.stringify(_.get(result.value, path)));
-		const x = _.get(result.value, path2);
+		// const x = _.get(result.value, path2);
 		// console.log({path2, x: JSON.stringify(x)})
-		_.set(result.value, path2, x);
+		// _.set(result.value, path2, x);
 		// console.log(JSON.stringify(result, null, '\t'))
 		return;
 	} catch (e) {
@@ -667,7 +682,12 @@ function processOneOrArray(result, path, value0, fn) {
 	}
 
 	expect.truthy({paramName: path.join('.')}, _.isArray(value0), "expected an array: "+JSON.stringify(value0));
-	value0.forEach((x, i) => fn(result, path.concat(i), x));
+	value0.forEach((x0, i) => {
+		const path1 = path.concat(i)
+		const x1 = _.cloneDeep(lookupValue0(result, path1, x0, data));
+		_.set(result.value, path1, x1);
+		fn(result, path1, x1);
+	});
 }
 
 /**
@@ -729,18 +749,19 @@ function processString(result, path, value0, data) {
  * @param {object} x - the value to process
  * @param {object} data - protocol data
  * @param {string} type - type of object expected
+ * @param {boolean} allowArray - false if we should not look into an array for an object
  */
-function processObjectOfType(result, path, value0, data, type) {
-	console.log("processObjectOfType:")
-	console.log({result, path, value0, type})
+function processObjectOfType(result, path, value0, data, type, allowArray = true) {
+	// console.log("processObjectOfType:")
+	// console.log({result, path, value0, type})
 	let x = value0;
-	if (_.isArray(value0) && value0.length > 0 && _.every(value0, x => _.isEqual(x, value0[0]))) {
+	if (allowArray && _.isArray(value0) && value0.length > 0 && _.every(value0, x => _.isEqual(x, value0[0]))) {
 		x = _.cloneDeep(lookupValue0(result, path, value0[0], data));
-		_.set(result.value, path, x);
 	}
 	const paramName = path.join(".");
 	expect.truthy({paramName}, _.isPlainObject(x), `expected an object of type ${type}: `+JSON.stringify(value0));
 	expect.truthy({paramName}, _.get(x, 'type') === type, `expected an object of type ${type}: `+JSON.stringify(value0));
+	_.set(result.value, path, x);
 }
 
 /**

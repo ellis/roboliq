@@ -45,7 +45,7 @@ describe('commandHelper', function() {
 				commandHelper._dereferenceVariable(data, '$number'),
 				{value: [1, 2]}
 			);
-			should.deepEqual(data.accesses, ["SCOPE.number"]);
+			should.deepEqual(data.accesses, new Set(["SCOPE.number"]));
 		});
 		it("should handle SCOPE lookup of DATA column _ONE value", () => {
 			const data = commandHelper.createData({}, objects, objects.SCOPE, objects.DATA);
@@ -53,7 +53,7 @@ describe('commandHelper', function() {
 				commandHelper._dereferenceVariable(data, '$name_ONE'),
 				{value: "bob"}
 			);
-			should.deepEqual(data.accesses, ["SCOPE.name_ONE"]);
+			should.deepEqual(data.accesses, new Set(["SCOPE.name_ONE"]));
 		});
 	});
 
@@ -137,7 +137,7 @@ describe('commandHelper', function() {
 			precision: 64        // Number of significant digits for BigNumbers
 		});
 
-		it.only("should work with values specified in-line", () => {
+		it("should work with values specified in-line", () => {
 			const data = {
 				objects: {
 					p: {
@@ -186,6 +186,7 @@ describe('commandHelper', function() {
 				sources2: "q"
 				//file
 			};
+			Object.freeze(params);
 			const schema = {
 				properties: {
 					name: {type: 'name'},
@@ -218,48 +219,47 @@ describe('commandHelper', function() {
 			};
 			schema.required = _.keys(schema.properties);
 			const parsed = commandHelper.parseParams(params, data, schema);
-			//console.log(JSON.stringify(parsed, null, '\t'))
-			should.deepEqual(parsed.value.time2, math.unit(math.bignumber(23), 'minutes'));
-			should.deepEqual(parsed, {
-				orig: params,
-				value: {
-					name: "plate1",
-					object1: {a: 1, b: 2},
-					number: 42,
-					string1: "hello",
-					string2: '"hello"',
-					string3: '"hello"',
-					time1: math.unit(23, 's'),
-					time2: math.unit(math.bignumber(23), 'minutes'),
-					time3: math.unit(23, 's'),
-					length1: math.unit(math.bignumber(40), 'm'),
-					length2: math.unit(math.bignumber(40), 'm'),
-					plate1: data.objects.p,
-					plate2: data.objects.p,
-					plates1: [data.objects.p],
-					plates2: [data.objects.p, data.objects.p],
-					volume2: math.unit(math.bignumber(10), 'ul'),
-					volume3: math.unit(math.bignumber(10), 'ul'),
-					volumes1: [math.unit(math.bignumber(10), 'ul')],
-					volumes2: [math.unit(math.bignumber(10), 'ul'), math.unit(math.bignumber(20), 'ul')],
-					well1: "p(A01)",
-					well2: "p(A01)",
-					wells1: ["p(A01)"],
-					source1: "p(A01)",
-					source2: "p(A01)",
-					sources1: ["p(A01)", "p(B01)"],
-					sources2: [["p(A01)", "p(A02)"]]
-				},
+			// console.log("parsed.orig: "+JSON.stringify(parsed.orig, null, '\t'))
+			should.deepEqual(parsed.orig, params);
+			should.deepEqual(_.pick(parsed, "value"), {value: {
+				name: "plate1",
+				object1: {a: 1, b: 2},
+				number: 42,
+				string1: "hello",
+				string2: '"hello"',
+				string3: '"hello"',
+				time1: math.unit(23, 's'),
+				time2: math.unit(math.bignumber(23), 'minutes'),
+				time3: math.unit(23, 's'),
+				length1: math.unit(math.bignumber(40), 'm'),
+				length2: math.unit(math.bignumber(40), 'm'),
+				plate1: data.objects.p,
+				plate2: data.objects.p,
+				plates1: [data.objects.p],
+				plates2: [data.objects.p, data.objects.p],
+				volume2: math.unit(math.bignumber(10), 'ul'),
+				volume3: math.unit(math.bignumber(10), 'ul'),
+				volumes1: [math.unit(math.bignumber(10), 'ul')],
+				volumes2: [math.unit(math.bignumber(10), 'ul'), math.unit(math.bignumber(20), 'ul')],
+				well1: "p(A01)",
+				well2: "p(A01)",
+				wells1: ["p(A01)"],
+				source1: "p(A01)",
+				source2: "p(A01)",
+				sources1: ["p(A01)", "p(B01)"],
+				sources2: [["p(A01)", "p(A02)"]]
+			}});
+			should.deepEqual(_.pick(parsed, "objectName"), {
 				objectName: {
 					plate1: "p",
 					plate2: "p",
 					"plates1.0": "p",
 					"plates2.0": "p",
 					"plates2.1": "p",
-					"sources2.0": "q"
+					"sources2": "q"
 				}
 			});
-			should.deepEqual(data.accesses, ["q"]);
+			should.deepEqual(data.accesses, new Set(["p", "q"]));
 		});
 
 		//it("should work with values supplied via variables", () => {
@@ -335,13 +335,13 @@ describe('commandHelper', function() {
 					count: "number1",
 				}
 			});
-			should.deepEqual(data.accesses, ['agent1', 'equipment1', 'plate1', 'lid1', 'site1', "number1", "string1"]);
+			should.deepEqual(data.accesses, new Set(['agent1', 'equipment1', 'plate1', 'lid1', 'site1', "number1", "string1"]));
 		});
 
 		it('should work with defaults', function() {
 			const data = {
 				objects: {},
-				accesses: []
+				accesses: new Set()
 			};
 			const params = {
 				number1: 1
@@ -362,7 +362,7 @@ describe('commandHelper', function() {
 				},
 				objectName: {}
 			});
-			should.deepEqual(data.accesses, []);
+			should.deepEqual(data.accesses, new Set());
 		});
 
 		it('should work with arrays of variables', () => {
@@ -393,7 +393,7 @@ describe('commandHelper', function() {
 					ns: [1, 2]
 				}
 			});
-			should.deepEqual(data.accesses, ["n1", "n2"]);
+			should.deepEqual(data.accesses, new Set(["n1", "n2"]));
 		});
 
 		it('should work for a previous bug', function() {

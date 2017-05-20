@@ -313,13 +313,15 @@ expression has access to the current scope variables.
 Here you just name the scope variable, and Roboliq will substitute in its
 value.
 
-`$$...`: **column array from current data table**
-
 If you have activated a data table using the `data` property, then you can
-use `$$colName` to get an array of all the values in the column named `colName`.
+use `$colName` to get an array of all the values in the column named `colName`.
+Furthermore, if any of the data columns are filled with the same value, then
+that value is added to the scope as `$colName_ONE`, where `colName` is the actual
+name of the column.  For example, if the active data table has a column named
+`plate` whose entries are all `plate1`, then `$plate1_ONE = "plate1"`.
 
-**NOTE**: Scope substitution can only be used as a parameter value by itself.
-The following uses are invalid:
+**NOTE**: Scope substitution can only be used as a parameter value, but not
+as a parameter name or part of a longer string.  The following uses are invalid:
 
 * `text: "Hello, $name"`: Roboliq only supports scope substitution for an entire
   value, so the `name` value will not be substituted into this text.  
@@ -349,13 +351,12 @@ steps:
       javascript: "${`${TEXT} ${a} ${__step.command}`}"
       math: "$(a * 10)"
       scopeParameter: $TEXT
-      scopeDataCommon: $a
-      scopeData: "$__data[0].b"
-      scopeObjects: "$__objects.data1.type"
-      scopeParameters: "$__parameters.TEXT.value"
-      scopeStep: "$__step.command"
-      scopeColumn: "${__column('b')}"
-      column: $$b
+      scopeColumn: $b
+      scopeOne: $a_ONE
+      scopeData: $__data[0].b
+      scopeObjects: $__objects.data1.type
+      scopeParameters: $__parameters.TEXT.value
+      scopeStep: $__step.command
 ```
 
 The `system.echo` command will output the object described in its `value`
@@ -365,12 +366,12 @@ parameter.  The resulting value is this:
 javascript: "Hello, World 1 system.echo"
 math: 10
 scopeParameter: "Hello, World"
-scopeDataCommon: 1
+scopeColumn: [1, 2]
+scopeOne: 1
 scopeData: 1
 scopeObjects: "Data"
 scopeParameters: "Hello, World"
 scopeStep: "system.echo"
-column: [1, 2]
 ```
 
 
