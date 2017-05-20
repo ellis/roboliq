@@ -171,16 +171,17 @@ describe('roboliq', function() {
 						command: "system.echo",
 						value: {
 							javascript: "${`${TEXT} ${a} ${__step.command}`}",
+							javascriptLodash: "${_.map(b, x => x*2)}",
+							javascriptMath: "${math.multiply(2, 3)}",
 							math: "$(a_ONE * 10)",
 							scopeParameter: "$TEXT",
+							scopeColumn: "$b",
 							scopeDataCommon: "$a_ONE",
 							scopeData: "$__data[0].b",
 							scopeObjects: "$__objects.data1.type",
 							scopeParameters: "$__parameters.TEXT.value",
 							scopeStep: "$__step.command",
-							scopeColumn: "${__column('b')}",
-							column: "$b",
-							// templateString: "`Hello, {{a}} {{__column('b')}}`",
+							// templateString: "`Hello, {{a}} {{b}}`",
 							// templateObject: "`{}`"
 						}
 					}
@@ -195,33 +196,21 @@ describe('roboliq', function() {
 						"command": "system._echo",
 						"value": {
 							"javascript": "Hello, World 1,1 system.echo",
+							"javascriptLodash": [2, 4],
+							"javascriptMath": 6,
 							"math": 10,
 							"scopeParameter": "Hello, World",
+							"scopeColumn": [ 1, 2 ],
 							"scopeDataCommon": 1,
 							"scopeData": 1,
 							"scopeObjects": "Data",
 							"scopeParameters": "Hello, World",
 							"scopeStep": "system.echo",
-							"column": [
-								1,
-								2
-							]
 						}
 					},
 					"data": "data1",
 					"command": "system.echo",
-					"value": {
-						"javascript": "${`${TEXT} ${a} ${__step.command}`}",
-						"math": "$(a_ONE * 10)",
-						"scopeParameter": "$TEXT",
-						"scopeDataCommon": "$a_ONE",
-						"scopeData": "$__data[0].b",
-						"scopeObjects": "$__objects.data1.type",
-						"scopeParameters": "$__parameters.TEXT.value",
-						"scopeStep": "$__step.command",
-						"scopeColumn": "${__column('b')}",
-						"column": "$b"
-					}
+					"value": protocol.steps["1"].value
 				}
 			});
 		});

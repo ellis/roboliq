@@ -328,9 +328,9 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] run `rsync -rv docs ellisw@intra.csb.ethz.ch:/local0/www/html/roboliq/`
 * [x] change parsing of singular values when they are passed an array so that if each entry has the same value, use that value -- this way we can avoid the `$*_ONE` suffix in commands.
 * [x] update documentation for the new SCOPE
-* [ ] SCOPE for `${}` javascript substitution
-	* [?] `_`: lodash module
-	* [?] `math`: mathjs module
+* [x] SCOPE for `${}` javascript substitution
+	* [x] `_`: lodash module
+	* [x] `math`: mathjs module
 * [ ] roboliq.js: improve the whole context/data thing in the calls to `expand*` functions
 	* [ ] remove PARAMETERS, SCOPE and DATA from objects, put them in the context instead
 	* [ ] pass context to `expand*` functions, stop passing all those other variables

@@ -63,9 +63,7 @@ function createData(protocol, objects = {}, SCOPE = {}, DATA = [], path = [], fi
 			// access parameters of the current step
 			__step: step,
 			// access parameters from any step in the current step stack (0 = current step)
-			__stepStack: null,
-			// function to return a column from the current data table
-			__column: (name) => { _(updatedSCOPEDATA.DATA).map(name).value() }
+			__stepStack: null
 		},
 		updatedSCOPEDATA.SCOPE,
 		_.mapValues(protocol.parameters || {}, x => x.value)
@@ -1307,8 +1305,6 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 		__parameters: _.get(data, ["protocol", "parameters"], {}),
 		// access parameters from any step in the current step stack (0 = current step)
 		// __stepStack: null,
-		// function to return a column from the current data table
-		__column: (name) => { _(DATA).map(name).value() }
 	};
 	if (step.hasOwnProperty("command")) {
 		// access parameters of the current step
