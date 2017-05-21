@@ -1357,7 +1357,11 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		warnings.push(...result.warnings);
 	}
 	if (!_.isEmpty(warnings)) {
-		protocol.warnings[id] = warnings;
+		const suppress = protocol.config.suppressWarnings || [];
+		const warnings2 = warnings.filter(s => _.every(suppress, code => !s.startsWith(`[W#${code}]`)));
+		// console.log({config: protocol.config, warnings2})
+		if (!_.isEmpty(warnings2))
+			protocol.warnings[id] = warnings2;
 	}
 	// If the command was expanded, merge the expansion into the protocol as substeps:
 	if (!_.isEmpty(result.expansion)) {

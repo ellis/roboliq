@@ -59,6 +59,7 @@ description: |
 config:
   evowareCompiler:
     checkBench: false
+  suppressWarnings: [CENT0001]
 
 parameters:
   N:

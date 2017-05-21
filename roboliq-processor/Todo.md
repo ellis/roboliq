@@ -64,10 +64,8 @@ Pain points:
 * [x] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
 * [-] figure out why 'npm i' sometimes has EPERM rename permission errors on Windows
 * [x] output warning for unrecognized command parameters
-* [ ] setup warning suppression
-	* [ ] `5.1.1.1.1: parameter "items.0.syringe.contaminants": expected an array: null`
-	* [ ] `unknown parameter description`
-	* [ ] `object1 and object2 are of different labware models; this may be problematic for centrifugation`
+* [x] setup warning suppression
+	* [x] `object1 and object2 are of different labware models; this may be problematic for centrifugation`
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
@@ -345,6 +343,7 @@ See misc.js:renderTemplateString, since another convention is used there
 * [ ] generated: sort in alphabetical order, but put low-level things later
 * [ ] document the directives, using JSON Schema
 * [ ] document the format for specifying wells, e.g. `plate1(A01 down D02)`
+* [ ] document `protocol.config.suppressWarnings`
 * [ ] distribution documentation
 	* [ ] src/roboliq/README.md
 		* [ ] Getting Started
