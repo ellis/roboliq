@@ -183,7 +183,8 @@ describe('commandHelper', function() {
 				source1: "p(A01)",
 				source2: ["p(A01)", "p(A01)", "p(A01)"],
 				sources1: "p(A01 down to B01)",
-				sources2: "q"
+				sources2: "q",
+				extra: "EXTRA"
 				//file
 			};
 			Object.freeze(params);
@@ -259,6 +260,7 @@ describe('commandHelper', function() {
 					"sources2": "q"
 				}
 			});
+			should.deepEqual(parsed.unknown, ["extra"]);
 			should.deepEqual(data.accesses, new Set(["p", "q"]));
 		});
 
@@ -534,7 +536,10 @@ describe('commandHelper', function() {
 							description: {type: "string"},
 							label: {type: "string"},
 							tipModel: {type: "string"},
-							tipModelPermanent: {type: "string"}
+							tipModelPermanent: {type: "string"},
+							contaminants: {type: "array"},
+							contents: {type: "array"},
+							cleaned: {type: "string"}
 						},
 						required: ["type"]
 					}

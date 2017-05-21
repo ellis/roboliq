@@ -168,7 +168,7 @@ function centrifuge2(params, parsed, data) {
 	];
 
 	const warnings = (object1.model != object2.model)
-			? ["object1 and object2 are of different labware models; this may be problematic for centrifugation."]
+			? ["[W#CENT0001] object1 and object2 are of different labware models; this may be problematic for centrifugation."]
 			: [];
 
 	//console.log("centrifuge2 expansion:")
@@ -268,7 +268,7 @@ function insertPlates2(params, parsed, data) {
 	];
 
 	const warnings = (parsed.input.object1Model && parsed.input.object2Model && parsed.input.object1Model != parsed.input.object2Model)
-			? ["object1 and object2 are of different labware models; this may be problematic for centrifugation."]
+			? ["[W#CENT0001] object1 and object2 are of different labware models; this may be problematic for centrifugation."]
 			: [];
 
 	return { expansion, alternatives, warnings };

@@ -1292,6 +1292,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		path: prefix,
 		simulatedOutput: protocol.simulatedOutput || {}
 	};
+	const warnings = [];
 	try {
 		//if (!_.isEmpty(data.objects.SCOPE)) { console.log({SCOPE: data.objects.SCOPE})}
 		// If a schema is given for the command, parse its parameters
@@ -1300,6 +1301,9 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		const parsed = (schema)
 			? commandHelper.parseParams(params, data, schema)
 			: undefined;
+		if (!_.isEmpty(parsed.unknown)) {
+			warnings.push(...parsed.unknown.map(x => `unknown parameter ${x}`));
+		}
 		// console.log("parsed: "+JSON.stringify(parsed, null, '\t'));
 		// If the handler has an input specification, parse it
 		if (_.isPlainObject(handler.inputSpec)) {
@@ -1350,7 +1354,10 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 	}
 	// If there were warnings
 	if (!_.isEmpty(result.warnings)) {
-		protocol.warnings[id] = result.warnings;
+		warnings.push(...result.warnings);
+	}
+	if (!_.isEmpty(warnings)) {
+		protocol.warnings[id] = warnings;
 	}
 	// If the command was expanded, merge the expansion into the protocol as substeps:
 	if (!_.isEmpty(result.expansion)) {

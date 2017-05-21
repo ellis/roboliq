@@ -62,13 +62,15 @@ Pain points:
 * [x] look at Oskari's requests in Email from 2017-03-09 (e.g. documentation)
 * [x] move 'api-generator' output to `docs/protocol`
 * [x] remove the extra 'container' or 'origin' parameters from the high level moveLid commands, since the lid location already tells us that information
-* [ ] figure out why 'npm i' sometimes has EPERM rename permission errors on Windows
-* [ ] output warning for unrecognized command parameters
-* [ ] documentation: check whether '$' and '$$' are explained
+* [-] figure out why 'npm i' sometimes has EPERM rename permission errors on Windows
+* [x] output warning for unrecognized command parameters
+* [ ] setup warning suppression
+	* [ ] `5.1.1.1.1: parameter "items.0.syringe.contaminants": expected an array: null`
+	* [ ] `unknown parameter description`
+	* [ ] `object1 and object2 are of different labware models; this may be problematic for centrifugation`
 * [ ] get rid of `params` argument to command handlers, because its redundant
 * [ ] `shaker.start` or `equipment.start`: implement to allow for other operations to happen during shaking
 * [ ] PCR machine
-* [ ] generate documentation for evoware commands
 * [ ] consider adding display information to the sites, and generate an SVG of the initial bench setup
 * [ ] allow for dynamic bench configuration: let user specify that P4 is a PCR site
 * [ ] in `yeast-transformation-complete`, why is the labware information not generated for the centrifuge site (we had to manually put the labware onto the centrifuge in the table file)?
@@ -331,12 +333,8 @@ See misc.js:renderTemplateString, since another convention is used there
 * [x] SCOPE for `${}` javascript substitution
 	* [x] `_`: lodash module
 	* [x] `math`: mathjs module
-* [ ] roboliq.js: improve the whole context/data thing in the calls to `expand*` functions
-	* [ ] remove PARAMETERS, SCOPE and DATA from objects, put them in the context instead
-	* [ ] pass context to `expand*` functions, stop passing all those other variables
-	* [ ] create a commandHelpers function to create a new context for new step based on the old context and the new step
-	* [ ] remove all these extra references in the context to things that are already in the protocol
 * [ ] make sure templates work like I documented them (see also in the Design Tables chapter the last example with templates and nested steps, do I need the \$-prefix?  I think I saw it used somewhere, probably in unit tests.)
+* [ ] add examples to all commands
 * [ ] Design Tables:
 	* [ ] `order`: add section, document shuffle, reshuffle, reverse, and repeat
 	* [ ] other common action arguments: decimals, units
@@ -395,6 +393,15 @@ See misc.js:renderTemplateString, since another convention is used there
 	- [ ] commands...
 	- [ ] document roboliq's extensions to JSON Schema (types, 'module')
 - [ ] sort through `notes`, `doc`, and `old` directories
+
+# Important internal refactoring
+
+* [ ] roboliq.js: improve the whole context/data thing in the calls to `expand*` functions
+	* [ ] remove PARAMETERS, SCOPE and DATA from objects, put them in the context instead
+	* [ ] pass context to `expand*` functions, stop passing all those other variables
+	* [ ] create a commandHelpers function to create a new context for new step based on the old context and the new step
+	* [ ] remove all these extra references in the context to things that are already in the protocol
+* [ ] Make a complete and validatable schema for Protocol
 
 # Bugs
 

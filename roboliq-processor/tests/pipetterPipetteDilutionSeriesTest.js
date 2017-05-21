@@ -29,7 +29,6 @@ describe('pipetter', function() {
 				steps: {
 					"1": {
 						command: "pipetter.pipetteDilutionSeries",
-						clean: 'none',
 						diluent: "ourlab.mario.systemLiquid",
 						destinationLabware: "plate1",
 						items: [
@@ -513,7 +512,6 @@ describe('pipetter', function() {
 				steps: {
 					"1": {
 						command: "pipetter.pipetteDilutionSeries",
-						clean: 'none',
 						diluent: "ourlab.mario.systemLiquid",
 						diluentParams: {clean: "none"},
 						destinationLabware: "plate1",
@@ -652,7 +650,6 @@ describe('pipetter', function() {
 					"destinationMixing": true
 				},
 				"command": "pipetter.pipetteDilutionSeries",
-				"clean": "none",
 				"diluent": "ourlab.mario.systemLiquid",
 				"diluentParams": {
 					"clean": "none"
@@ -692,7 +689,6 @@ describe('pipetter', function() {
 				steps: {
 					"1": {
 						command: "pipetter.pipetteDilutionSeries",
-						clean: 'none',
 						diluent: "ourlab.mario.systemLiquid",
 						dilutionFactor: 2,
 						dilutionMethod: "source",
@@ -769,7 +765,6 @@ describe('pipetter', function() {
 					"destinationMixing": false
 				},
 				"command": "pipetter.pipetteDilutionSeries",
-				"clean": "none",
 				"diluent": "ourlab.mario.systemLiquid",
 				"dilutionFactor": 2,
 				"dilutionMethod": "source",

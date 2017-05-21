@@ -209,6 +209,9 @@ function parseParams(params, data, schema) {
 	//console.log("SCOPE: "+JSON.stringify(data.objects.SCOPE, null, '\t'))
 	const result = {orig: substituted, value: {}, objectName: {}, unknown: []};
 	processParamsBySchema(result, [], substituted, schema, data);
+	// Remove any unknowns that aren't in the parameteters (they might be in referenced objects)
+	result.unknown = result.unknown.filter(name => _.has(params, name));
+	// Remove unknown list if it's empty
 	if (_.isEmpty(result.unknown)) {
 		delete result.unknown;
 	}
@@ -236,6 +239,8 @@ function processParamsBySchema(result, path, params, schema, data) {
 		_.set(result.value, path, params);
 		return result;
 	}
+	// Add unknowns
+	result.unknown.push(..._.difference(_.keys(params), ["description", "comment", "command", "data", "@DATA", "@SCOPE"].concat(_.keys(schema.properties))).map(x => path.concat(x).join(".")));
 	// Otherwise, convert the parameters
 	for (const [propertyName, p] of l0) {
 		const type = p.type;
@@ -271,7 +276,7 @@ function processParamsBySchema(result, path, params, schema, data) {
 		}
 		else {
 			const value1 = _.clone(lookupValue0(result, path1, value0, data));
-			if (!_.isUndefined(value1)) {
+			if (!_.isUndefined(value1) && !_.isNull(value1)) {
 				processValue0BySchema(result, path1, value1, p, data, propertyName);
 			}
 			// If not optional, require the variable's presence:
@@ -491,6 +496,12 @@ function processValue0OnTypes(result, path, value0, schema, types, data) {
  */
 function processValueAsArray(result, path, list0, schema, data) {
 	//console.log(`processValueAsArray(${path}, ${list0})`)
+	// FIXME: for debug only
+	// if (!_.isArray(list0)) {
+	// 	console.trace();
+	// 	process.exit();
+	// }
+	// ENDFIX
 	expect.truthy({paramName: path.join(".")}, _.isArray(list0), "expected an array: "+list0);
 	//console.log({t2})
 	list0.forEach((x, index) => {
@@ -733,7 +744,8 @@ function processString(result, path, value0, data) {
 		}
 	}
 
-	_.set(result.value, path, value1.toString());
+	if (!_.isNull(value1))
+		_.set(result.value, path, value1.toString());
 }
 
 /**
