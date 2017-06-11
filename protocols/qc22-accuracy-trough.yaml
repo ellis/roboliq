@@ -1,0 +1,63 @@
+roboliq: v1
+description: |
+  Measure the accuracy and precision of 3, 7, 15, 16, 150, 500, 501, 750, and 1000ul dispenses with tip 1.
+
+parameters:
+  EXPERIMENT:
+    value: qc22-accuracy
+  referenceProgram:
+    value: Roboliq_Water_Air_1000
+  referenceSyringe:
+    value: 1
+objects:
+  trough1:
+    type: Plate
+    description: trough for dispenses and weighing
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R3
+  waterLabware:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R2
+    contents: [Infinity l, water]
+  water:
+    type: Liquid
+    wells: waterLabware(C01 down F01)
+
+  data1:
+    type: Data
+    value: ./qc22-accuracy-data1.jsonl
+
+steps:
+  data: data1
+  1:
+    command: evoware._userPrompt
+    agent: ourlab.mario.evoware
+    text: "Weight empty trough 6 times"
+    beep: 3
+  2:
+    command: experiment.forEachRow
+    steps:
+      1:
+        description: "`Volume {{$d}}, dispense count {{$dispenseCount}}, repeat count {{$repeatCount}}`"
+        command: system.repeat
+        count: $repeatCount
+      1:
+        command: pipetter.pipette
+        program: $program
+        sources: water
+        #volumes: 200ul
+        destinationLabware: tubes
+        items:
+          "#data":
+            template:
+              destination: $well
+              volume: $volume
+        clean: light
+        cleanBetweenSameSource: flush
+        syringes: [$syringe]
+      2:
+        command: evoware._userPrompt
+        agent: ourlab.mario.evoware
+        text: "Weight tube"
+        beep: 3
