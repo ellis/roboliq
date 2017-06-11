@@ -38,7 +38,8 @@ var data = {
 		SCOPE: {
 			name: ["bob", "tom", "sue"],
 			gender: ["male", "male", "female"],
-			age: [1, 2, 1]
+			age: [1, 2, 1],
+			someNumber: 3
 		}
 	}
 };
@@ -107,6 +108,18 @@ describe('config/roboliqDirectiveHandlers', function() {
 		should.deepEqual(misc.handleDirective(
 			{"data()": {groupBy: "source", summarize: {source: '${source[0]}', totalVolume: '$(sum(volume))'}}}, data2),
 			[{source: "liquid1", totalVolume: "30 ul"}, {source: "liquid2", totalVolume: "30 ul"}]
+		);
+	});
+
+	it('should handle data() with a `design` property', function() {
+		should.deepEqual(misc.handleDirective(
+			{"data()": {design: {"a*": 4}}}, data),
+			[{a: 1}, {a: 2}, {a: 3}, {a: 4}]
+		);
+
+		should.deepEqual(misc.handleDirective(
+			{"data()": {design: {"a*": "$someNumber"}}}, data),
+			[{a: 1}, {a: 2}, {a: 3}]
 		);
 	});
 

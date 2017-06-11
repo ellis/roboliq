@@ -309,6 +309,7 @@ pipetter.pipette:
     sourceMixing: {description: "Parameters for mixing the source wells with pipetter before aspirating", type: [boolean, pipetter.MixSpec]}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
     tipModel: {description: "Tip model identifier, in order to use a specific tip model", type: string}
+    calibrators: {description: "A map from calibrator names to calibrator data (DOCUMENTAITON REQUIRED)", type: object}
   required: []
 
 pipetter.pipetteDilutionSeries:
@@ -353,6 +354,11 @@ pipetter.pipetteMixtures:
       type: array
       items:
         enum: ["index", "destination"]
+    clean: {description: "Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)", type: string}
+    cleanBegin: {description: "intensity of first cleaning at beginning of pipetting, before first aspiration.", type: string}
+    cleanBetween: {description: "Intensity of cleaning between different liquids.", type: string}
+    cleanBetweenSameSource: {description: "Intensity of cleaning between transfers of the same liquid.", type: string}
+    cleanEnd: {description: "Intensity of cleaning after the last dispense.", type: string}
   required: [mixtures]
 
 pipetter.punctureSeal:

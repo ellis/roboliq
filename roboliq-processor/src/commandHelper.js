@@ -1254,7 +1254,7 @@ function stepify(steps) {
  */
 function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCommonValuesToScope=true) {
 	// console.log("updateSCOPEDATA");
-	// console.log({step})
+	// console.log(JSON.stringify(step));
 	// FIXME: Debug only
 	// if (step.value) {
 	// 	assert(false);
@@ -1298,6 +1298,12 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 			else {
 				assert(false, "unrecognized data source: "+JSON.stringify(dataId)+" -> "+JSON.stringify(source));
 			}
+		}
+		else if (_.isPlainObject(dataInfo.design)) {
+			const design = substituteDeep(dataInfo.design, data, SCOPE, DATA);
+			// console.log({design0: dataInfo.design, design1: design})
+			table = Design.flattenDesign({design});
+			// console.log({table})
 		}
 
 		if (_.isPlainObject(dataInfo)) {

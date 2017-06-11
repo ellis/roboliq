@@ -58,7 +58,8 @@ function configure(config, equipmentName, params) {
 						duration: {description: "Duration of shaking", type: "Duration"}
 					},
 					required: ["duration"]
-				}
+				},
+				object: {description: "Plate identifier (optional)", type: "Plate"}
 			},
 			required: ["agent", "equipment", "program"]
 		}

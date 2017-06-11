@@ -1357,7 +1357,7 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		warnings.push(...result.warnings);
 	}
 	if (!_.isEmpty(warnings)) {
-		const suppress = protocol.config.suppressWarnings || [];
+		const suppress = _.get(protocol, "config.suppressWarnings", []);
 		const warnings2 = warnings.filter(s => _.every(suppress, code => !s.startsWith(`[W#${code}]`)));
 		// console.log({config: protocol.config, warnings2})
 		if (!_.isEmpty(warnings2))

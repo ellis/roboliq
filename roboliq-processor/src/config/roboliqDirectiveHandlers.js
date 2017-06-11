@@ -41,6 +41,7 @@ function directive_data(spec, data) {
 	// console.log("DATA: "+JSON.stringify(data.objects.DATA, null, '\t'))
 	return expect.try("data()", () => {
 		const updatedSCOPEDATA = commandHelper.updateSCOPEDATA({data: spec}, data);
+		// console.log({updateDATA: updatedSCOPEDATA.DATA})
 
 		let result = Design.query(updatedSCOPEDATA.DATA, spec);
 		// console.log("result0: "+JSON.stringify(result))

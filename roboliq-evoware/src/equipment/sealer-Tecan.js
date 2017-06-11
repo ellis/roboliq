@@ -55,7 +55,8 @@ module.exports = {
 			properties: {
 				agent: {description: "Agent identifier", type: "Agent"},
 				equipment: {description: "Equipment identifier", type: "Equipment"},
-				program: {description: "Program identifier for sealing", type: "string"}
+				program: {description: "Program identifier for sealing", type: "string"},
+				object: {description: "Plate identifier (optional)", type: "Plate"}
 			},
 			required: ["agent", "equipment", "program"]
 		}
