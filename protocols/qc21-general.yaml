@@ -169,40 +169,38 @@ steps:
                 variableName: measureIdx
                 steps:
                   1:
-                    data: {source: simData, where: 'l == l_ONE and stage == "full"'}
-                    1:
-                      data: {where: 'exp_sigma_a == shakeIdx and measureStep == measureIdx'}
-                      command: system.if
-                      test: "$(measureIdx == 1)"
-                      then:
-                        command: absorbanceReader.measurePlate
-                        object: $l
-                        program:
-                          excitationWavelength: $excitationWavelength
-                          shakerProgram:
-                            duration: 30 seconds
-                        output:
-                          joinKey: well
-                          appendTo: measurements
-                          userValues:
-                            stage: filled
-                          units:
-                            totalVolume: ul
-                            dyeVolume: ul
-                            waterVolume: ul
-                          simulated: 'a_sim'
-                      else:
-                        command: absorbanceReader.measurePlate
-                        object: $l
-                        program:
-                          excitationWavelength: $excitationWavelength
-                        output:
-                          joinKey: well
-                          appendTo: measurements
-                          userValues:
-                            stage: filled
-                          units:
-                            totalVolume: ul
-                            dyeVolume: ul
-                            waterVolume: ul
-                          simulated: 'a_sim'
+                    data: {source: simData, where: 'l == l_ONE and stage == "full" and exp_sigma_a == shakeIdx and measureStep == measureIdx'}
+                    command: system.if
+                    test: "$(measureIdx == 1)"
+                    then:
+                      command: absorbanceReader.measurePlate
+                      object: $l
+                      program:
+                        excitationWavelength: $excitationWavelength
+                        shakerProgram:
+                          duration: 30 seconds
+                      output:
+                        joinKey: well
+                        appendTo: measurements
+                        userValues:
+                          stage: filled
+                        units:
+                          totalVolume: ul
+                          dyeVolume: ul
+                          waterVolume: ul
+                        simulated: 'a_sim'
+                    else:
+                      command: absorbanceReader.measurePlate
+                      object: $l
+                      program:
+                        excitationWavelength: $excitationWavelength
+                      output:
+                        joinKey: well
+                        appendTo: measurements
+                        userValues:
+                          stage: filled
+                        units:
+                          totalVolume: ul
+                          dyeVolume: ul
+                          waterVolume: ul
+                        simulated: 'a_sim'
