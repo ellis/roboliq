@@ -8,6 +8,13 @@ description: |
   * Fill wells to 300ul with water (include the two empty wells on each plate).
   * Shake and read twice; again, shake and read twice
 
+  Calculations for OrangeG dilutions:
+
+  * stock is OrangeG 8g/L, which has absorbance of 0.9152/ul
+  * dye0003: 0.9152*3 => 2.75x dilution
+  * dye0015: 0.9152*15 => 13.7x dilution -- we'll use 10x dilution
+  * dye0150: 0.9152*150 => 137x dilution
+
 config:
   evowareCompiler:
     timing: false
@@ -177,15 +184,15 @@ steps:
                       object: $l
                       program:
                         excitationWavelength: $excitationWavelength
-                        shakerProgram:
-                          duration: 30 seconds
+                        shakerProgramBefore:
+                          duration: 30 s
+                          settleDuration: 10 s
                       output:
                         joinKey: well
                         appendTo: measurements
                         userValues:
                           stage: filled
                         units:
-                          totalVolume: ul
                           dyeVolume: ul
                           waterVolume: ul
                         simulated: 'a_sim'
@@ -194,13 +201,15 @@ steps:
                       object: $l
                       program:
                         excitationWavelength: $excitationWavelength
+                        shakerProgramBefore:
+                          duration: 30 s
+                          settleDuration: 10 s
                       output:
                         joinKey: well
                         appendTo: measurements
                         userValues:
                           stage: filled
                         units:
-                          totalVolume: ul
                           dyeVolume: ul
                           waterVolume: ul
                         simulated: 'a_sim'

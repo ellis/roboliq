@@ -19,7 +19,9 @@ const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSche
 				<MeasurementManualCycle id="2" number="1" type="Standard">
 						<CyclePlate id="3" file="{{plateFile}}" plateWithCover="{{plateWithCover}}">
 								<PlateRange id="4" range="{{wells}}" auto="false">
-										<MeasurementAbsorbance id="5" mode="Normal" type="" name="ABS" longname="" description="">
+										{{#if doShakeBefore}}<Shaking id="{{shakeBeforeId}}" mode="Orbital" time="{{shakeBeforeTime}}" frequency="0" amplitude="{{shakeBeforeAmplitude}}" maxDeviation="PT0S" settleTime="PT0S" />{{/if}}
+										{{#if doSettleBefore}}<WaitTime id="{{settleBeforeId}}" timeSpan="{{settleBeforeTime}}" maxDeviation="PT0S" refTimeID="0" ignoreInLastCycle="False" />{{/if}}
+										{{#if doMeasure}}<MeasurementAbsorbance id="{{measureId}}" mode="Normal" type="" name="ABS" longname="" description="">
 												<Well id="6" auto="true">
 														<MeasurementReading id="7" name="" beamDiameter="{{beamDiameter}}" beamGridType="{{beamGridType}}" beamGridSize="{{beamGridSize}}" beamEdgeDistance="{{beamEdgeDistance}}">
 																<ReadingLabel id="8" name="Label1" scanType="{{scanType}}" refID="0">
@@ -29,7 +31,7 @@ const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSche
 																</ReadingLabel>
 														</MeasurementReading>
 												</Well>
-										</MeasurementAbsorbance>
+										</MeasurementAbsorbance>{{/if}}
 								</PlateRange>
 						</CyclePlate>
 				</MeasurementManualCycle>
@@ -160,21 +162,48 @@ function getTemplateAbsorbanceParams(parsed, data) {
 		assert(parsed.value.programFileTemplate, "You must supply either `program.excitationWavelength` or `programFileTemplate`");
 	}
 
-	const params = {
-		//createdAt:	moment().format("YYYY-MM-DDTHH:mm:ss.SSSSSSS")+"Z",
-		createdAt: "2016-01-01T00:00:00.0000000Z",
-		plateFile,
-		plateWithCover: (parsed.value.object.isSealed || parsed.value.object.isCovered) ? "True" : "False",
-		wells,
-		beamDiameter: (isScan) ? 0 : 500,
-		beamGridType: "Single",
-		beamGridSize: (isScan) ? 0 : 1,
-		beamEdgeDistance: (isScan) ? "" : "auto",
-		scanType: (isScan) ? "ScanEX" : "ScanFixed",
-		readDelay: (isScan) ? 0 : 10000,
-		excitationWavelength,
-		excitationBandwidth,
-	};
+	const doMeasure = true;
+
+	let nextId = 5;
+	const shakeBeforeParams = (_.has(program, "shakerProgramBefore.duration"))
+		? {
+			doShakeBefore: true,
+			shakeBeforeId: nextId++,
+			shakeBeforeTime: "PT"+program.shakerProgramBefore.duration.toNumber("s")+"S",
+			shakeBeforeAmplitude: 4000
+		}
+		: {};
+	const settleBeforeParams = (_.has(program, "shakerProgramBefore.settleDuration"))
+		? {
+			doSettleBefore: true,
+			settleBeforeId: nextId++,
+			settleBeforeTime: "PT"+program.shakerProgramBefore.settleDuration.toNumber("s")+"S",
+			shakeBeforeAmplitude: 4000
+		}
+		: {};
+	const measureId = (doMeasure) ? nextId++ : null;
+
+	const params = _.defaults(
+		{
+			//createdAt:	moment().format("YYYY-MM-DDTHH:mm:ss.SSSSSSS")+"Z",
+			createdAt: "2016-01-01T00:00:00.0000000Z",
+			plateFile,
+			plateWithCover: (parsed.value.object.isSealed || parsed.value.object.isCovered) ? "True" : "False",
+			wells,
+			doMeasure,
+			measureId,
+			beamDiameter: (isScan) ? 0 : 500,
+			beamGridType: "Single",
+			beamGridSize: (isScan) ? 0 : 1,
+			beamEdgeDistance: (isScan) ? "" : "auto",
+			scanType: (isScan) ? "ScanEX" : "ScanFixed",
+			readDelay: (isScan) ? 0 : 10000,
+			excitationWavelength,
+			excitationBandwidth,
+		},
+		shakeBeforeParams,
+		settleBeforeParams
+	);
 	// console.log({params, excitationWavelength0, excitationWavelength, excitationBandwidth0, excitationBandwidth});
 	return params;
 }
@@ -299,6 +328,14 @@ const exports = {
 				program: {
 					description: "Program definition",
 					properties: {
+						shakerProgramBefore: {
+							description: "Program for shaker.",
+							properties: {
+								rpm: {description: "Rotations per minute (RPM)", type: "number"},
+								duration: {description: "Duration of shaking", type: "Duration"},
+								settleDuration: {description: "Duration to settle after shaking", type: "Duration"}
+							}
+						},
 						wells: {description: "Array of wells to read", type: "Wells"},
 						excitationWavelength: {description: "Excitation wavelength", type: "Length"},
 						excitationBandwidth: {description: "Excitation bandwidth", type: "Length"},

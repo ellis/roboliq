@@ -1,6 +1,20 @@
 # Todos
 
-Pain points:
+Re-running QC scripts:
+
+* [ ] qc21-general
+	* [ ] support shaking in reader commands
+	* [ ] re-run the measurement steps, this time with shaking in the reader
+* [ ] qc23-dilution
+	* [ ] create wellData
+	* [ ] create simData
+	* [ ] create script
+	* [ ] test analysis of simulated output
+	* [ ] run script
+* [ ] test corrected concentration dispenses for low volumes
+* [ ] qc22-accuracy
+
+# Pain points:
 
 * doesn't have the toolbox to solve certain problems alone.
 * getting started guide that walks through all the tools and covers about 80% of what you need to know
