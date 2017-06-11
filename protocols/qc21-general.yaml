@@ -1,0 +1,156 @@
+roboliq: v1
+description: |
+  4 tips, 5 volumes, 3 liquid classes, 3 replicates = 180 wells.  So spread over 2 96-well plates, with 6 water-only wells on each plate.
+  Use dark dye for 3, 7, 15, 16, use light dye for 150.
+
+  * Read empty plate.
+  * Dispense dye.
+  * Fill wells to 300ul with water (include the two empty wells on each plate).
+  * Shake and read twice; again, shake and read twice
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+parameters:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+  testVolumes:
+    description: The volumes to test (parameter $v$)
+    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+  testLiquidClasses:
+    description: The liquid classes to test (parameter $p$)
+    value: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000, Roboliq_Water_Wet_1000]
+  testLabwareModel:
+    description: The labware model to test (parameter $m$)
+    value: ourlab.model.plateModel_96_round_transparent_nunc
+  testSyringes:
+    description: The syringes to test
+    value: [1,2,3,4]
+
+objects:
+  plate1:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P3
+  plate2:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P2
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+  dyeLabware0003:
+    type: Plate
+    description: trough for dye
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R4
+    contents: [Infinity l, dye0003]
+  dye0003:
+    type: Liquid
+    description: dye with concentration such that 3ul measures about 1.
+    wells: dyeLabware0003(C01 down F01)
+  dyeLabware0015:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dye0015]
+  dye0015:
+    type: Liquid
+    description: dye with concentration such that 15ul measures about 1.
+    wells: dyeLabware0015(C01 down F01)
+  dyeLabware0150:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye0150]
+  dye0150:
+    type: Liquid
+    description: dye with concentration such that 150ul measures about 1.
+    wells: dyeLabware0150(C01 down F01)
+
+  wellData:
+    type: Data
+    value: ./qc21-general-wellData.jsonl
+
+  measurementData:
+    type: Data
+    value: ./qc21-general-measurementData.jsonl
+
+steps:
+  1:
+    data: measurementData
+    command: experiment.forEachGroup
+    groupBy: l
+    steps:
+      description: "`Plate {{$l_ONE}}`"
+      1:
+        data: {where: 'stage == "empty"'}
+        description: Read absorbance of empty wells
+        command: absorbanceReader.measurePlate
+        object: $l
+        program:
+          excitationWavelength: $excitationWavelength
+        output:
+          joinKey: well
+          appendTo: measurements
+          simulated: "sim"
+
+      2:
+        data: {where: 'stage == "empty" and waterFirst'}
+        description: Pre-distribute water to wells that require wet-contact
+        command: pipetter.pipette
+        program: $standardLiquidClass
+        sources: water
+        destinationLabware: $p
+        destinations: $well
+        volumes: $$waterVolume
+        clean: light
+        cleanBetween: none
+
+      4:
+        data: {where: 'stage == "empty" and waterFirst'}
+        description: Distribute dye
+        command: pipetter.pipette
+        program: $liquidClass
+        sources: $dyeSource
+        destinationLabware: $plate
+        destinations: $well
+        volumes: $dyeVolume
+        clean: light
+        cleanBetween: flush
+
+      5:
+        data: {where: 'stage == "empty" and not waterFirst'}
+        description: Post-distribute water
+        command: pipetter.pipette
+        program: $standardLiquidClass
+        sources: water
+        destinationLabware: $plate
+        destinations: $$well
+        volumes: $$waterVolume
+        clean: light
+        cleanBetween: none
+
+      6:
+        description: Read absorbance of filled wells
+        command: absorbanceReader.measurePlate
+        object: $plate
+        program:
+          excitationWavelength: $#excitationWavelength
+          shakerProgram:
+            duration: 30 seconds
+        output:
+          joinKey: well
+          appendTo: measurements
+          userValues:
+            stage: filled
+          units:
+            totalVolume: ul
+            dyeVolume: ul
+            waterVolume: ul
+          simulated: 'bignumber(random(number(0.03), number(0.04))) + (dyeVolume / ul) * ((dyeSource == "dye03") ? 0.0333 : 0.00333)'
