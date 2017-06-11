@@ -179,6 +179,7 @@ export function flattenDesign(design, randomEngine) {
 
 export function getCommonValues(table) {
 	if (_.isEmpty(table)) return {};
+	assert(_.isArray(table), `required an array: ${JSON.stringify(table)}`);
 
 	let common = _.clone(table[0]);
 	for (let i = 1; i < table.length; i++) {
@@ -1490,11 +1491,12 @@ function makeComparer(rows, propertyNames) {
 	};
 }
 
-export function query(table, q) {
+export function query(table, q, SCOPE = undefined) {
 	let table2 = _.clone(table);
 
 	if (q.where) {
-		table2 = filterOnWhere(table2, q.where);
+		// console.log({where: q.where})
+		table2 = filterOnWhere(table2, q.where, SCOPE);
 	}
 
 	if (q.shuffle) {
@@ -1545,7 +1547,7 @@ export function query(table, q) {
 	return table2;
 }
 
-function filterOnWhere(table, where) {
+function filterOnWhere(table, where, SCOPE = undefined) {
 	let table2 = table;
 	if (_.isPlainObject(where)) {
 		_.forEach(where, (value, key) => {
@@ -1587,7 +1589,7 @@ function filterOnWhere(table, where) {
 	else if (_.isString(where)) {
 		// console.log({where})
 		table2 = _.filter(table, row => {
-			const scope = _.mapValues(row, x => {
+			const scope1 = _.mapValues(row, x => {
 				// console.log({x})
 				try {
 					const result = math.eval(x);
@@ -1601,10 +1603,16 @@ function filterOnWhere(table, where) {
 				catch (e) {}
 				return x;
 			});
+			const scope = _.defaults({}, scope1, SCOPE);
 			// console.log({where, row, scope})
-			const result = math.eval(where, scope);
-			// console.log({result});
-			return result;
+			try {
+				const result = math.eval(where, scope);
+				// console.log({result});
+				return result;
+			} catch (e) {
+				console.log("WARNING: "+e);
+			}
+			return false;
 		});
 	}
 	return table2;

@@ -336,6 +336,7 @@ function loadProtocol(a, b, url, filecache) {
 				var filename = "./" + path.posix.join(path.dirname(url), x);
 				// If the file hasn't been loaded yet:
 				if (!filecache.hasOwnProperty(filename)) {
+					// console.log("try to load "+filename);
 					try {
 						var filedata = fs.readFileSync(filename);
 						filecache[filename] = filedata;
@@ -504,12 +505,12 @@ function mergeProtocolList(protocols) {
  *
  * @param  {Object} protocol A protocol.
  */
-function postProcessProtocol(protocol) {
+function postProcessProtocol(protocol, filecache) {
 	// Make sure predicates is a flat list
 	protocol.predicates = _.flattenDeep(protocol.predicates);
 
 	// Calculate values for variables
-	postProcessProtocol_variables(protocol);
+	postProcessProtocol_variables(protocol, filecache);
 
 	// For all liquids, if they specify source wells, make sure the source well
 	// has a reference to the liquid in its contents (the contents will be added
@@ -542,20 +543,36 @@ function postProcessProtocol(protocol) {
 /**
  * For all variables that have a `calculate` property, handle the calculation and put the
  * result in the `value` property.
+ * For 'Data' objects:
+ *  if it doesn't have a value, call `Design.flattenDesign`;
+ *  if its value is a filename, load the file into the value
  *
  * Mutates protocol.
  *
  * @param  {Protocol} protocol - The protocol to inspect.
  */
-function postProcessProtocol_variables(protocol) {
+function postProcessProtocol_variables(protocol, filecache) {
 	const data = _.clone(protocol);
 
 	_.forEach(protocol.objects, (obj, key) => {
 		expect.try({path: key, paramName: "calculate"}, () => {
+			// console.log("postProcessProtocol_variables key: "+key);
 			// If this is a variable with a 'calculate' property
 			if (obj.type === 'Variable' && obj.calculate) {
 				const calculate = _.cloneDeep(obj.calculate);
 				const value = expandDirectivesDeep(calculate, data);
+				// console.log("postProcessProtocol_variables value: "+value);
+				obj.value = value;
+			}
+			else if (obj.type === "Data" && obj.valueFile) {
+				// console.log("postProcessProtocol_variables files: "+JSON.stringify(filecache[obj.valueFile]));
+				assert(filecache.hasOwnProperty(obj.valueFile), "file not in cache: "+obj.valueFile);
+				const filedata = filecache[obj.valueFile].toString('utf8');
+				// console.log("filedata: "+filedata);
+				const rows = filedata.split("\n").map(s => s.trim()).filter(s => s != "");
+				// console.log("rows: "+rows);
+				const value = rows.map(s => JSON.parse(s));
+				// console.log({value});
 				obj.value = value;
 			}
 		});
@@ -948,7 +965,7 @@ function _run(opts, userProtocol) {
 	protocol.COMPILER.filecache = filecache;
 
 	try {
-		postProcessProtocol(protocol);
+		postProcessProtocol(protocol, filecache);
 		//console.log("A")
 		validateProtocol1(protocol);
 	} catch(e) {
@@ -1313,8 +1330,38 @@ function expandCommand(protocol, prefix, step, objects, SCOPE, params, commandNa
 		// Try to run the command handler
 		//console.log("A")
 		//console.log(handler)
+		// function isCyclic (obj) {
+		// 	var seenObjects = [];
+		//
+		// 	function detect (obj) {
+		// 	  if (obj && typeof obj === 'object') {
+		// 	    if (seenObjects.indexOf(obj) !== -1) {
+		// 	      return true;
+		// 	    }
+		// 	    seenObjects.push(obj);
+		// 	    for (var key in obj) {
+		// 	      if (obj.hasOwnProperty(key) && detect(obj[key])) {
+		// 					// console.log(obj, 'cycle at ' + key);
+		// 					console.log('cycle at ' + key);
+		// 	        return true;
+		// 	      }
+		// 	    }
+		// 	  }
+		// 	  return false;
+		// 	}
+		//
+		// 	return detect(obj);
+		// }
+		// console.log("A")
 		result = handler(params, parsed, data) || {};
+		// console.log("B")
+		// console.log(Object.keys(result))
+		// isCyclic(result);
+
+		// console.log("result:"); console.log(result)
+		// console.log("result: "+JSON.stringify(result))
 		result = stripUndefined(result);
+		// console.log("C")
 		//console.log("B")
 		//console.log("result: "+JSON.stringify(result))
 	} catch (e) {

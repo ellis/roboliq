@@ -1307,7 +1307,10 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 		}
 
 		if (_.isPlainObject(dataInfo)) {
-			table = _.flatten(Design.query(table, dataInfo));
+			const SCOPE2 = _.defaults({}, SCOPE, data.SCOPE);
+			// console.log({dataInfo, table})
+			// console.log({SCOPE2});
+			table = _.flatten(Design.query(table, dataInfo, SCOPE2));
 			// console.log({dataInfo, table})
 		}
 		DATA = table;

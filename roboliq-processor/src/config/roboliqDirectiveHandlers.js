@@ -326,6 +326,16 @@ function directive_factorialMixtures(spec, data) {
 	return combined;
 }
 
+// function directive_include_jsonl(spec, data) {
+// 	assert(_.isString(spec));
+// 	const filename = spec;
+// 	console.log("files: "+JSON.stringify(Object.keys(data)))
+// 	assert(data.files.hasOwnProperty(filename));
+// 	const filedata = data.files[spec];
+// 	console.log(JSON.stringify(filename));
+// 	assert(false);
+// }
+
 function directive_length(spec, data) {
 	if (_.isArray(spec))
 		return spec.length;
@@ -593,6 +603,7 @@ module.exports = {
 	"factorialMixtures": directive_factorialMixtures,
 	"for": directive_for,
 	"gradient": directive_gradient,
+	// "include_jsonl": directive_include_jsonl,
 	"length": directive_length,
 	"merge": directive_merge,
 	"replaceLabware": directive_replaceLabware,

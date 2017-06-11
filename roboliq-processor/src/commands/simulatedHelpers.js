@@ -19,18 +19,17 @@ export function simulatedByWells(parsed, data, wells0, result) {
 
 		const wells = _.uniq(_.map(wells0, x => x.replace(/.*\(([^)]*)\)/, "$1")));
 
-		// console.log({joinKey})
-		const common = (_.isEmpty(joinKey)) ? Design.getCommonValues(data.objects.DATA) : {};
+		const common = (_.isEmpty(joinKey)) ? data.objects.SCOPE : {};
 		// console.log({common})
 		// console.log("DATA:\n"+JSON.stringify(data.objects.DATA))
 		simulatedOutput = _.map(wells, well => {
 			const row0 = (!_.isUndefined(joinKey))
 				? _.find(data.objects.DATA, row => (row[joinKey].replace(/.*\(([^)]*)\)/, "$1") === well)) || {}
 				: common;
-			const row1 = _.merge({}, data.objects.SCOPE, row0);
+			const scope = _.defaults({}, row0, data.objects.SCOPE);
 			// console.log({row0, row1, simulated: parsed.value.output.simulated})
-			const value = Design.calculate(parsed.value.output.simulated, row1);
-			const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row1, userValues, {well, value_type: "absorbance", value});
+			const value = Design.calculate(parsed.value.output.simulated, scope);
+			const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row0, userValues, {well, value_type: "absorbance", value});
 			// console.log({row})
 			return row;
 		});

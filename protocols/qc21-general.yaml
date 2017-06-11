@@ -17,6 +17,9 @@ parameters:
   excitationWavelength:
     description: excitation wavelength to read absorbance
     value: 480nm
+  standardLiquidClass:
+    description: Liquid class for the standard wells
+    value: Roboliq_Water_Air_1000
   testVolumes:
     description: The volumes to test (parameter $v$)
     value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
@@ -29,6 +32,12 @@ parameters:
   testSyringes:
     description: The syringes to test
     value: [1,2,3,4]
+  shakeCount:
+    description: How many times to shake the plate then measure its absorbance
+    value: 2
+  measureCount:
+    description: How many times to measure the plate after shaking
+    value: 2
 
 objects:
   plate1:
@@ -75,21 +84,21 @@ objects:
 
   wellData:
     type: Data
-    value: ./qc21-general-wellData.jsonl
+    valueFile: ./qc21-general-wellData.jsonl
 
-  measurementData:
+  simData:
     type: Data
-    value: ./qc21-general-measurementData.jsonl
+    valueFile: ./qc21-general-simData.jsonl
 
 steps:
   1:
-    data: measurementData
-    command: experiment.forEachGroup
+    data: wellData
+    command: data.forEachGroup
     groupBy: l
     steps:
-      description: "`Plate {{$l_ONE}}`"
+      description: "`Plate {{l_ONE}}`"
       1:
-        data: {where: 'stage == "empty"'}
+        data: {source: simData, where: 'l == l_ONE and stage == "empty"'}
         description: Read absorbance of empty wells
         command: absorbanceReader.measurePlate
         object: $l
@@ -98,59 +107,102 @@ steps:
         output:
           joinKey: well
           appendTo: measurements
-          simulated: "sim"
+          simulated: "a_sim"
 
       2:
-        data: {where: 'stage == "empty" and waterFirst'}
+        data: {where: 'waterFirst'}
         description: Pre-distribute water to wells that require wet-contact
         command: pipetter.pipette
         program: $standardLiquidClass
         sources: water
-        destinationLabware: $p
+        destinationLabware: $l
         destinations: $well
-        volumes: $$waterVolume
+        volumes: $waterVolume
         clean: light
         cleanBetween: none
 
-      4:
-        data: {where: 'stage == "empty" and waterFirst'}
+      3:
+        data: {where: 'dyeVolume > (0 ul)'}
         description: Distribute dye
         command: pipetter.pipette
         program: $liquidClass
-        sources: $dyeSource
-        destinationLabware: $plate
+        sources: $k
+        destinationLabware: $l
         destinations: $well
         volumes: $dyeVolume
         clean: light
         cleanBetween: flush
+        syringes: $t
 
-      5:
-        data: {where: 'stage == "empty" and not waterFirst'}
+      4:
+        data: {where: 'not waterFirst'}
         description: Post-distribute water
         command: pipetter.pipette
         program: $standardLiquidClass
         sources: water
-        destinationLabware: $plate
-        destinations: $$well
-        volumes: $$waterVolume
+        destinationLabware: $l
+        destinations: $well
+        volumes: $waterVolume
         clean: light
         cleanBetween: none
 
-      6:
+      5:
         description: Read absorbance of filled wells
-        command: absorbanceReader.measurePlate
-        object: $plate
-        program:
-          excitationWavelength: $#excitationWavelength
-          shakerProgram:
-            duration: 30 seconds
-        output:
-          joinKey: well
-          appendTo: measurements
-          userValues:
-            stage: filled
-          units:
-            totalVolume: ul
-            dyeVolume: ul
-            waterVolume: ul
-          simulated: 'bignumber(random(number(0.03), number(0.04))) + (dyeVolume / ul) * ((dyeSource == "dye03") ? 0.0333 : 0.00333)'
+        command: transporter.doThenRestoreLocation
+        objects: [$l]
+        steps:
+          1:
+            description: "Move plate to reader"
+            command: transporter.movePlate
+            object: $l
+            destination: ourlab.mario.site.READER
+          2:
+            description: "`Loop to shake {{shakeCount}} times`"
+            command: system.repeat
+            count: $shakeCount
+            variableName: shakeIdx
+            steps:
+              1:
+                description: "`Loop to measure absorbance {{measureCount}} times`"
+                command: system.repeat
+                count: $measureCount
+                variableName: measureIdx
+                steps:
+                  1:
+                    data: {source: simData, where: 'l == l_ONE and stage == "full"'}
+                    1:
+                      data: {where: 'exp_sigma_a == shakeIdx and measureStep == measureIdx'}
+                      command: system.if
+                      test: "$(measureIdx == 1)"
+                      then:
+                        command: absorbanceReader.measurePlate
+                        object: $l
+                        program:
+                          excitationWavelength: $excitationWavelength
+                          shakerProgram:
+                            duration: 30 seconds
+                        output:
+                          joinKey: well
+                          appendTo: measurements
+                          userValues:
+                            stage: filled
+                          units:
+                            totalVolume: ul
+                            dyeVolume: ul
+                            waterVolume: ul
+                          simulated: 'a_sim'
+                      else:
+                        command: absorbanceReader.measurePlate
+                        object: $l
+                        program:
+                          excitationWavelength: $excitationWavelength
+                        output:
+                          joinKey: well
+                          appendTo: measurements
+                          userValues:
+                            stage: filled
+                          units:
+                            totalVolume: ul
+                            dyeVolume: ul
+                            waterVolume: ul
+                          simulated: 'a_sim'
