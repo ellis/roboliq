@@ -201,9 +201,6 @@ steps:
                       object: $l
                       program:
                         excitationWavelength: $excitationWavelength
-                        shakerProgramBefore:
-                          duration: 30 s
-                          settleDuration: 10 s
                       output:
                         joinKey: well
                         appendTo: measurements
