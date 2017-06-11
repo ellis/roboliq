@@ -3,8 +3,9 @@
 Re-running QC scripts:
 
 * [ ] qc21-general
-	* [ ] support shaking in reader commands
-	* [ ] re-run the measurement steps, this time with shaking in the reader
+	* [x] support shaking in reader commands
+	* [x] re-run the measurement steps, this time with shaking in the reader
+	* [ ] push data to git repo
 * [ ] qc23-dilution
 	* [ ] create wellData
 	* [ ] create simData

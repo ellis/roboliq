@@ -27,18 +27,18 @@ parameters:
   standardLiquidClass:
     description: Liquid class for the standard wells
     value: Roboliq_Water_Air_1000
-  testVolumes:
-    description: The volumes to test (parameter $v$)
-    value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
-  testLiquidClasses:
-    description: The liquid classes to test (parameter $p$)
-    value: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000, Roboliq_Water_Wet_1000]
-  testLabwareModel:
-    description: The labware model to test (parameter $m$)
-    value: ourlab.model.plateModel_96_round_transparent_nunc
-  testSyringes:
-    description: The syringes to test
-    value: [1,2,3,4]
+  # testVolumes:
+  #   description: The volumes to test (parameter $v$)
+  #   value: [3 ul, 7 ul, 15 ul, 16 ul, 150 ul]
+  # testLiquidClasses:
+  #   description: The liquid classes to test (parameter $p$)
+  #   value: [Roboliq_Water_Air_1000, Roboliq_Water_Dry_1000, Roboliq_Water_Wet_1000]
+  # testLabwareModel:
+  #   description: The labware model to test (parameter $m$)
+  #   value: ourlab.model.plateModel_96_round_transparent_nunc
+  # testSyringes:
+  #   description: The syringes to test
+  #   value: [1,2,3,4]
   shakeCount:
     description: How many times to shake the plate then measure its absorbance
     value: 2
