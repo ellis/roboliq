@@ -5,7 +5,8 @@ Re-running QC scripts:
 * [ ] qc21-general
 	* [x] support shaking in reader commands
 	* [x] re-run the measurement steps, this time with shaking in the reader
-	* [ ] push data to git repo
+	* [x] push data to git repo
+	* [ ] analyze results
 * [ ] qc23-dilution
 	* [ ] create wellData
 	* [ ] create simData
@@ -14,6 +15,10 @@ Re-running QC scripts:
 	* [ ] run script
 * [ ] test corrected concentration dispenses for low volumes
 * [ ] qc22-accuracy
+	* [ ] create scale command
+	* [ ] create a user implementation for the scale command
+	* [ ] create an evoware VisualBasic script for getting measurement from user, or use the evoware user dialog
+	* [ ] take the user's measurement and save it to a measurement file
 
 # Pain points:
 

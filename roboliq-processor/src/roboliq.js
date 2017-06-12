@@ -29,7 +29,7 @@
  * @property {Object} alternatives - ???
  */
 
-//Error.stackTraceLimit = Infinity;
+Error.stackTraceLimit = Infinity;
 /**
  * Well contents.
  *
@@ -558,13 +558,15 @@ function postProcessProtocol_variables(protocol, filecache) {
 		expect.try({path: key, paramName: "calculate"}, () => {
 			// console.log("postProcessProtocol_variables key: "+key);
 			// If this is a variable with a 'calculate' property
-			if (obj.type === 'Variable' && obj.calculate) {
+			if (obj.type === "Variable" && obj.calculate) {
 				const calculate = _.cloneDeep(obj.calculate);
 				const value = expandDirectivesDeep(calculate, data);
 				// console.log("postProcessProtocol_variables value: "+value);
 				obj.value = value;
 			}
-			else if (obj.type === "Data" && obj.valueFile) {
+		});
+		expect.try({path: key, paramName: "valueFile"}, () => {
+			if (obj.type === "Data" && obj.valueFile) {
 				// console.log("postProcessProtocol_variables files: "+JSON.stringify(filecache[obj.valueFile]));
 				assert(filecache.hasOwnProperty(obj.valueFile), "file not in cache: "+obj.valueFile);
 				const filedata = filecache[obj.valueFile].toString('utf8');
@@ -1014,14 +1016,20 @@ function _run(opts, userProtocol) {
 
 	if (opts.debug || opts.printDesigns) {
 		const designs = misc.getObjectsOfType(protocol.objects, "Data");
-		_.forEach(designs, (design, name) => {
+		_.forEach(designs, (data, name) => {
 			console.log();
 			console.log(`Data "${name}":`);
 			// console.log(JSON.stringify(design, null, '\t'))
-			design = misc.handleDirectiveDeep(design, protocol);
-			design = commandHelper.substituteDeep(design, protocol, {}, []);
-			const rows = Design.flattenDesign(design);
-			Design.printRows(rows);
+			let table;
+			if (data.hasOwnProperty("value")) {
+				table = data.value;
+			}
+			else {
+				let design = misc.handleDirectiveDeep(data, protocol);
+				design = commandHelper.substituteDeep(design, protocol, {}, []);
+				table = Design.flattenDesign(design);
+			}
+			Design.printRows(table);
 		});
 	}
 

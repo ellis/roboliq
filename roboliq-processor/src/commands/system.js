@@ -17,8 +17,12 @@ const commandHandlers = {
 	"system.call": function(params, parsed, data) {
 		switch (parsed.value.name.type) {
 			case "Template":
-				const expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);
-				return {expansion: expansion};
+				let expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);
+				// console.log("system.call: expansion = "+JSON.stringify(expansion, null, '\t'));
+				if (_.isString(expansion)) {
+					expansion = JSON.parse(expansion);
+				}
+				return {expansion};
 				break;
 			default:
 				expect.truthy({paramName: "name"}, false, "expected an object of type 'Template'");
@@ -45,8 +49,7 @@ const commandHandlers = {
 		};
 	},
 	"system.if": function(params, parsed, data) {
-		//console.log("system.if:")
-		//console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
+		// console.log("system.if:"); console.log({parsed, expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else})
 		return {expansion: (parsed.value.test) ? parsed.value.then : parsed.value.else};
 	},
 	"system.repeat": function(params, parsed, data) {

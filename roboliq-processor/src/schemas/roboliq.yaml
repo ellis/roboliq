@@ -80,6 +80,7 @@ Template:
     label: {type: markdown}
     template: {}
   required: [type]
+  noSubstitution: [template]
 
 Variable:
   description: User-defined variable.

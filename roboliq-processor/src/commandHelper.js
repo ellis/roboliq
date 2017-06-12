@@ -205,7 +205,10 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
  * @return {object} the parsed parameters, if successfully parsed.
  */
 function parseParams(params, data, schema) {
-	const substituted = substituteDeep(params, data, data.objects.SCOPE, data.objects.DATA);
+	const substituted = _.merge(
+		_.pick(params, schema.noSubstitution),
+		substituteDeep(_.omit(params, schema.noSubstitution), data, data.objects.SCOPE, data.objects.DATA)
+	);
 	//console.log("SCOPE: "+JSON.stringify(data.objects.SCOPE, null, '\t'))
 	const result = {orig: substituted, value: {}, objectName: {}, unknown: []};
 	processParamsBySchema(result, [], substituted, schema, data);
@@ -634,8 +637,10 @@ function processOneOfBasicType(result, path, value, fnCheck, expectedTypeName) {
 	}
 	if (_.isArray(value)) {
 		const one = value[0];
+		// console.log("processOneOfBasicType:"); console.log({value, one, ok: _.map(value, x => _.isEqual(x, one))})
 		if (_.every(value, x => _.isEqual(x, one))) {
 			_.set(result.value, path, one);
+			return;
 		}
 	}
 	expect.truthy({paramName: path.join(".")}, false, "expected "+expectedTypeName+": "+value);
