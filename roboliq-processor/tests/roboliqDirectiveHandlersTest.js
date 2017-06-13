@@ -61,15 +61,11 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{name: "tom", gender: "male", age: 2}
 		);
 		should.deepEqual(misc.handleDirective(
-			{"data()": {value: "$`age*2`", join: ";"}}, data),
-			"2;4;2"
-		);
-		should.deepEqual(misc.handleDirective(
 			{"data()": {map: {age2: "$(age*2)"}}}, data),
 			[{age2: 2}, {age2: 4}, {age2: 2}]
 		);
 		should.deepEqual(misc.handleDirective(
-			{"data()": {source: "design2", template: {age2: "$`age*2`"}}}, data),
+			{"data()": {source: "design2", template: {age2: "$(age*2)"}}}, data),
 			[{age2: 200}]
 		);
 

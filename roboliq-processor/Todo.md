@@ -8,22 +8,29 @@ Re-running QC scripts:
 	* [x] push data to git repo
 	* [ ] analyze results
 * [ ] qc23-dilution
-	* [ ] create wellData
-	* [ ] create simData
-	* [ ] create script
-	* [ ] test analysis of simulated output
+	* [x] create wellData
+	* [x] create simData
+	* [x] create script for AW
+	* [x] test analysis of simulated output (AW)
+	* [ ] create script for D
+	* [ ] test analysis of simulated output (D)
 	* [ ] run script
+	* [ ] analyze results
 * [ ] test corrected concentration dispenses for low volumes
 * [ ] qc22-accuracy
 	* [ ] create scale command
 	* [ ] create a user implementation for the scale command
 	* [ ] create an evoware VisualBasic script for getting measurement from user, or use the evoware user dialog
 	* [ ] take the user's measurement and save it to a measurement file
+* [ ] test: write a script to dispense low dye volumes and get a desired amount in the well, correcting for volume bias and dilution
 
-Niceties:
+Speed Optimizations and Niceties:
 
-* [ ] 
+* [ ] refactor to pass `context` object around instead of `data`, `DATA`, and `SCOPE`, etc.
+* [ ] only update object predicates when objects change
+* [ ] only call `getCommonValues()` when DATA changes
 * [ ] refactor to just use nodejs without babel (to let us avoid the compile step)
+* [ ] think about freezing objects, so that we don't need to clone them
 
 # Pain points:
 

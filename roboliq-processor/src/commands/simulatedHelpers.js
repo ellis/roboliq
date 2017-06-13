@@ -30,7 +30,7 @@ export function simulatedByWells(parsed, data, wells0, result) {
 			// console.log({row0, row1, simulated: parsed.value.output.simulated})
 			const value = Design.calculate(parsed.value.output.simulated, scope);
 			const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row0, userValues, {well, value_type: "absorbance", value});
-			// console.log({row})
+			// console.log("row: "+JSON.stringify(row))
 			return row;
 		});
 

@@ -1560,35 +1560,16 @@ function filterOnWhere(table, where, SCOPE = undefined) {
 	let table2 = table;
 	if (_.isPlainObject(where)) {
 		_.forEach(where, (value, key) => {
-			let fn = _.isEqual;
-			let x = value;
-
 			if (_.isPlainObject(value)) {
 				_.forEach(value, (value2, op) => {
 					// Get compare function
 					assert(compareFunctions.hasOwnProperty(op), `unrecognized operator: ${op} in ${JSON.stringify(value)}`);
-					fn = compareFunctions[op];
-					x = value2;
+					const fn = compareFunctions[op];
+					table2 = filterOnWhereOnce(table2, key, value2, fn);
 				});
 			}
-
-			// If x is an array, do an array comparison
-			if (_.isArray(x)) {
-				table2 = _.filter(table, (row, i) => fn(row[key], x[i]));
-			}
-			// If we need to
-			else if (_.isString(x)) {
-				if (_.startsWith(x, "\"")) {
-					const text = x.substr(1, x.length - 2);
-					table2 = table.filter(row => fn(row[key], text));
-				}
-				else {
-					const key2 = x.substr(1);
-					table2 = table.filter(row => fn(row[key], row[key2]));
-				}
-			}
 			else {
-				table2 = table.filter(row => fn(row[key], x));
+				table2 = filterOnWhereOnce(table2, key, value, _.isEqual);
 			}
 		});
 	}
@@ -1625,6 +1606,35 @@ function filterOnWhere(table, where, SCOPE = undefined) {
 		});
 	}
 	return table2;
+}
+
+/**
+ * Sub-function that filters table on a single criterion.
+ * @param  {array}   table - table to filter
+ * @param  {string}   key - key of column in table
+ * @param  {any}   x - value to compare to
+ * @param  {Function} fn - comparison function
+ * @return {array} filtered table
+ */
+function filterOnWhereOnce(table, key, x, fn) {
+	// If x is an array, do an array comparison
+	if (_.isArray(x)) {
+		return _.filter(table, (row, i) => fn(row[key], x[i]));
+	}
+	// If we need to
+	else if (_.isString(x)) {
+		if (_.startsWith(x, "\"")) {
+			const text = x.substr(1, x.length - 2);
+			return table.filter(row => fn(row[key], text));
+		}
+		else {
+			const key2 = x.substr(1);
+			return table.filter(row => fn(row[key], row[key2]));
+		}
+	}
+	else {
+		return table.filter(row => fn(row[key], x));
+	}
 }
 
 /**

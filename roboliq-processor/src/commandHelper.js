@@ -1314,9 +1314,13 @@ function updateSCOPEDATA(step, data, SCOPE = undefined, DATA = undefined, addCom
 
 		if (_.isPlainObject(dataInfo)) {
 			const SCOPE2 = _.defaults({}, SCOPE, data.SCOPE);
+			const query = _.clone(dataInfo);
+			if (query.where) {
+				query.where = substituteDeep(query.where, data, SCOPE, DATA);
+			}
 			// console.log({dataInfo, table})
 			// console.log({SCOPE2});
-			table = _.flatten(Design.query(table, dataInfo, SCOPE2));
+			table = _.flatten(Design.query(table, query, SCOPE2));
 			// console.log({dataInfo, table})
 		}
 		DATA = table;
