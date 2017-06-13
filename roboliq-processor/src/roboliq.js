@@ -1241,6 +1241,10 @@ function expandStep(opts, protocol, prefix, step, objects, SCOPE = {}, DATA = []
 	// pass that around instead of passing protocol, objects, etc to all these
 	// functions.
 	const data0 = commandHelper.createData(protocol, objects, SCOPE, DATA, prefix, protocol.COMPILER.filecache, step);
+	// console.log("step "+prefix)
+	// console.log(_.get(data0, "objects.DATA"))
+	// console.log(_.get(data0, "objects.SCOPE"))
+	// console.log(" data0: "+JSON.stringify(data0, null, '\t'))
 
 	// Check for command and its handler
 	const commandName = step.command;

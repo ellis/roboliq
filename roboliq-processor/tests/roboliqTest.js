@@ -381,8 +381,8 @@ describe('roboliq', function() {
 						type: "Data",
 						design: {
 							"a*": {
-								B: { b: 1, c: 1},
-								C: { c: 2}
+								B: {b: 1, c: 1},
+								C: {c: 2}
 							}
 						}
 					}
@@ -392,16 +392,12 @@ describe('roboliq', function() {
 						data: {source: "design"},
 						1: {
 							command: "system.echo",
-							value: {"#data": {value: "a", join: ","}}
+							value: {"data()": {map: "$a", join: ","}}
 						},
 						2: {
-							data: {where: {a: "C"}},
+							data: {where: {a: '"C"'}},
 							command: "system.echo",
 							value: "$c_ONE"
-						},
-						3: {
-							command: "system.echo",
-							value: {"#data": {value: "b", join: ","}}
 						}
 					}
 				}

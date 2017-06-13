@@ -355,6 +355,7 @@ const exports = {
 						writeTo: {description: "Filename to write measurements to as JSON", type: "string"},
 						appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"},
 						userValues: {description: "User-specificed values that should be included in the output table", type: "object"},
+						simulated: {description: "An expression to evaluate with mathjs", type: "string"},
 						units: {description: "Map of factor names to unit type; converts the factor values to plain numbers in the given units."}
 					}
 				}

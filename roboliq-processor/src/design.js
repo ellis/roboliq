@@ -1547,42 +1547,48 @@ export function query(table, q, SCOPE = undefined) {
 	return table2;
 }
 
+const compareFunctions = {
+	"eq": _.isEqual,
+	"gt": _.gt,
+	"gte": _.gte,
+	"lt": _.lt,
+	"lte": _.lte,
+	"ne": _.ne,
+	"in": _.includes
+};
 function filterOnWhere(table, where, SCOPE = undefined) {
 	let table2 = table;
 	if (_.isPlainObject(where)) {
 		_.forEach(where, (value, key) => {
+			let fn = _.isEqual;
+			let x = value;
+
 			if (_.isPlainObject(value)) {
-				_.forEach(value, (x, op) => {
-					switch (op) {
-						case "eq":
-							table2 = _.filter(table, row => _.isEqual(row[key], x));
-							break;
-						case "gt":
-							// console.log("before:"); printRows(table2);
-							table2 = _.filter(table, row => _.gt(row[key], x));
-							// console.log("after:"); printRows(table2);
-							break;
-						case "gte":
-							table2 = _.filter(table, row => _.gte(row[key], x));
-							break;
-						case "lt":
-							// console.log("before:"); printRows(table2);
-							table2 = _.filter(table, row => _.lt(row[key], x));
-							// console.log("after:"); printRows(table2);
-							break;
-						case "lte":
-							table2 = _.filter(table, row => _.lte(row[key], x));
-							break;
-						case "ne":
-							table2 = _.filter(table, row => !_.isEqual(row[key], x));
-							break;
-						default:
-							assert(false, `unrecognized operator: ${op} in ${JSON.stringify(x)}`);
-					}
+				_.forEach(value, (value2, op) => {
+					// Get compare function
+					assert(compareFunctions.hasOwnProperty(op), `unrecognized operator: ${op} in ${JSON.stringify(value)}`);
+					fn = compareFunctions[op];
+					x = value2;
 				});
 			}
+
+			// If x is an array, do an array comparison
+			if (_.isArray(x)) {
+				table2 = _.filter(table, (row, i) => fn(row[key], x[i]));
+			}
+			// If we need to
+			else if (_.isString(x)) {
+				if (_.startsWith(x, "\"")) {
+					const text = x.substr(1, x.length - 2);
+					table2 = table.filter(row => fn(row[key], text));
+				}
+				else {
+					const key2 = x.substr(1);
+					table2 = table.filter(row => fn(row[key], row[key2]));
+				}
+			}
 			else {
-				table2 = _.filter(table, row => _.isEqual(row[key], value));
+				table2 = table.filter(row => fn(row[key], x));
 			}
 		});
 	}
@@ -1611,6 +1617,9 @@ function filterOnWhere(table, where, SCOPE = undefined) {
 				return result;
 			} catch (e) {
 				console.log("WARNING: "+e);
+				console.log("where: "+JSON.stringify(where));
+				// console.log({scope})
+				process.exit()
 			}
 			return false;
 		});

@@ -20,6 +20,11 @@ Re-running QC scripts:
 	* [ ] create an evoware VisualBasic script for getting measurement from user, or use the evoware user dialog
 	* [ ] take the user's measurement and save it to a measurement file
 
+Niceties:
+
+* [ ] 
+* [ ] refactor to just use nodejs without babel (to let us avoid the compile step)
+
 # Pain points:
 
 * doesn't have the toolbox to solve certain problems alone.

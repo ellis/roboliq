@@ -15,6 +15,7 @@ const commandHandlers = {
 		return {};
 	},
 	"system.call": function(params, parsed, data) {
+		// console.log("system.call: "+JSON.stringify(parsed, null, '\t'))
 		switch (parsed.value.name.type) {
 			case "Template":
 				let expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);

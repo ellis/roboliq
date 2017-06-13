@@ -10,6 +10,10 @@ var _ = require('lodash');
 var assert = require('assert');
 var Handlebars = require('handlebars');
 
+Handlebars.registerHelper('toJSON', function(obj) {
+	return JSON.stringify(obj);
+});
+
 /**
  * queryResults: value returned from llpl.query()
  * predicateName: name of the predicate that was used for the query
@@ -277,6 +281,7 @@ function renderTemplate(template, scope, data) {
 
 function renderTemplateString(s, scope, data) {
 	//console.log("renderTemplateString:", s)
+
 	assert(_.isString(s));
 	if (_.startsWith(s, "${") && _.endsWith(s, "}")) {
 		var name = s.substr(2, s.length - 3);

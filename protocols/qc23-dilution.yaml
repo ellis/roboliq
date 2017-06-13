@@ -117,7 +117,7 @@ objects:
                   "1": {
                     "data": {
                       "source": "{{dataSource}}",
-                      "where": "{{{dataWhere}}}"
+                      "where": {{{toJSON dataWhere}}}
                     },
                     "command": "system.if",
                     "test": "$(measureIdx == 1)",
@@ -176,7 +176,7 @@ steps:
     data: wellAWData
     description: "Test dilution of Air and Wet dispense"
     1:
-      data: {source: simAWData, where: 'stage == "empty"'}
+      data: {source: simAWData, where: {stage: '"empty"'}}
       description: Read absorbance of empty wells
       command: absorbanceReader.measurePlate
       object: $l
@@ -188,7 +188,7 @@ steps:
         simulated: "a_sim"
 
     2:
-      data: {where: 'stage == "water"'}
+      data: {where: {stage: '"water"'}}
       description: Fill water wells
       command: pipetter.pipette
       program: $standardLiquidClass
@@ -201,7 +201,7 @@ steps:
       cleanBetween: none
 
     3:
-      data: {source: simAWData, where: 'stage == "water"'}
+      data: {source: simAWData, where: {stage: '"water"'}}
       description: Read absorbance of water wells
       command: absorbanceReader.measurePlate
       object: $l
@@ -216,7 +216,7 @@ steps:
         simulated: "a_sim"
 
     4:
-      data: {where: 'stage == "dye"'}
+      data: {where: {stage: '"dye"'}}
       description: "Loop through each group of liquidClass+volume combinations"
       command: data.forEachGroup
       groupBy: group
@@ -244,9 +244,11 @@ steps:
             shakeCount: $shakeCount
             measureCount: $measureCount
             dataSource: simAWData
-            dataWhere: 'stage == \"dye\" and step == 1'
+            dataWhere:
+              "stage": "\"dye\""
+              "step": 1
         3:
-          data: {where: 'role == "test"'}
+          data: {where: {role: '"test"'}}
           description: "`Loop through {{stepCount_ONE}} aspiration/dispense steps`"
           command: system.repeat
           count: $stepCount
@@ -275,4 +277,9 @@ steps:
                 shakeCount: $shakeCount
                 measureCount: $measureCount
                 dataSource: simAWData
-                dataWhere: 'stage == \"dilution\" and group == group_ONE and step == (stepIdx + 1) and shakeRep == shakeIdx and measureRep == measureIdx'
+                dataWhere:
+                  stage: '"dilution"'
+                  group: $group_ONE
+                  step: ${stepIdx + 1}
+                  shakeRep: "``$shakeIdx``"
+                  measureRep: "``$measureIdx``"
