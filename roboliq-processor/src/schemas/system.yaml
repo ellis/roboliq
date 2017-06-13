@@ -18,7 +18,7 @@ system.call:
   description: "Call a template function.\n\nThe template function should be an object of type `Template` with a property `template` holding either a Handlebars template string or an object whose properties may be Handlebars template strings. The template will be expanded using the values passed in the `params` property."
   properties:
     name: {description: "Name of the template function.", type: "Object"}
-    params: {description: "Parameters to pass to the template function.", type: "object"}
+    lazyParams: {description: "Parameters to pass to the template function.", type: "object"}
   required: ["name"]
 
 system.description:

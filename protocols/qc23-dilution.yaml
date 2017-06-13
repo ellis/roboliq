@@ -240,7 +240,7 @@ steps:
           description: "Measure wells after filling"
           command: system.call
           name: measureAbsorbance
-          params:
+          lazyParams:
             shakeCount: $shakeCount
             measureCount: $measureCount
             dataSource: simAWData
@@ -273,7 +273,7 @@ steps:
               description: "Measure wells for dilution"
               command: system.call
               name: measureAbsorbance
-              params:
+              lazyParams:
                 shakeCount: $shakeCount
                 measureCount: $measureCount
                 dataSource: simAWData
@@ -281,5 +281,5 @@ steps:
                   stage: '"dilution"'
                   group: $group_ONE
                   step: ${stepIdx + 1}
-                  shakeRep: "``$shakeIdx``"
-                  measureRep: "``$measureIdx``"
+                  shakeRep: "`$shakeIdx`"
+                  measureRep: "`$measureIdx`"

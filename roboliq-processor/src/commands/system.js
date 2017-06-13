@@ -18,7 +18,7 @@ const commandHandlers = {
 		// console.log("system.call: "+JSON.stringify(parsed, null, '\t'))
 		switch (parsed.value.name.type) {
 			case "Template":
-				let expansion = misc.renderTemplate(parsed.value.name.template, params.params, data);
+				let expansion = misc.renderTemplate(parsed.value.name.template, parsed.value.lazyParams, data);
 				// console.log("system.call: expansion = "+JSON.stringify(expansion, null, '\t'));
 				if (_.isString(expansion)) {
 					expansion = JSON.parse(expansion);

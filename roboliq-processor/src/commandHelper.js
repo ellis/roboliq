@@ -99,7 +99,7 @@ function getDesignFactor(propertyName, DATA) {
  * @param  {object} data - protocol data
  * @return {any} the value with possible substitutions
  */
-function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
+function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true, depth=0) {
 	// console.log("substituteDeep: "); console.log({x, SCOPE, DATA, x})
 	let x2 = x;
 	if (_.isString(x)) {
@@ -163,18 +163,19 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true) {
 		}
 	}
 	else if (_.isArray(x)) {
-		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA, addCommonValuesToScope));
+		x2 = _.map(x, y => substituteDeep(y, data, SCOPE, DATA, addCommonValuesToScope, depth+1));
 	}
 	else if (_.isPlainObject(x)) {
 		const updatedSCOPEDATA = updateSCOPEDATA(x, data, SCOPE, DATA, addCommonValuesToScope);
 		// console.log({SCOPE, SCOPE2: updatedSCOPEDATA.SCOPE})
 		x2 = _.mapValues(x, (value, name) => {
 			// Skip over @DATA, @SCOPE, directives and 'steps' properties
-			if (_.startsWith(name, "#") || _.endsWith(name, "()") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps") {
+			if (_.startsWith(name, "#") || _.endsWith(name, "()") || name === "data" || name === "@DATA" || name === "@SCOPE" || name === "steps" || (depth > 0 && _.startsWith(name, "lazy"))) { //(_.isPlainObject(value) && value.hasOwnProperty("command"))) {
+				// console.log("lazy..."); console.trace(); // FIXME: for debug only
 				return value;
 			}
 			else {
-				return substituteDeep(value, data, updatedSCOPEDATA.SCOPE, updatedSCOPEDATA.DATA, addCommonValuesToScope);
+				return substituteDeep(value, data, updatedSCOPEDATA.SCOPE, updatedSCOPEDATA.DATA, addCommonValuesToScope, depth+1);
 			}
 		});
 	}

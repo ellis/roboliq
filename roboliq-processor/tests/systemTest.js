@@ -20,11 +20,11 @@ describe('system', function() {
 					1: {
 						command: "system.call",
 						name: "mySteps1",
-						params: {name: "World"}
+						lazyParams: {name: "World"}
 					}
 				}
 			};
-			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
+			const result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
 			//console.log(JSON.stringify(result, null, '\t'))
 			should.deepEqual(result.output.steps, {
 				1: {
@@ -32,9 +32,44 @@ describe('system', function() {
 					2: {comment: "comment 2"},
 					command: "system.call",
 					name: "mySteps1",
-					params: {name: "World"}
+					lazyParams: {name: "World"}
 				}
-			})
+			});
+		});
+
+		it("should handle substitution within lazyParams", () => {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					mySteps1: {
+						type: "Template",
+						template: {
+							1: {comment: "Hello, {{name}}!"},
+							2: {comment: "Welcome to {{place}}."}
+						}
+					}
+				},
+				steps: {
+					"@SCOPE": {myName: "John"},
+					1: {
+						command: "system.call",
+						name: "mySteps1",
+						lazyParams: {name: "$myName", place: "Earth"}
+					}
+				}
+			};
+			const result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
+			//console.log(JSON.stringify(result, null, '\t'))
+			should.deepEqual(result.output.steps, {
+				"@SCOPE": {myName: "John"},
+				1: {
+					1: {comment: "Hello, John!"},
+					2: {comment: "Welcome to Earth."},
+					command: "system.call",
+					name: "mySteps1",
+					lazyParams: {name: "$myName", place: "Earth"}
+				}
+			});
 		});
 	});
 
