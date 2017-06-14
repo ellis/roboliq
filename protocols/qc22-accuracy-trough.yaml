@@ -26,7 +26,7 @@ objects:
 
   data1:
     type: Data
-    value: ./qc22-accuracy-data1.jsonl
+    valueFile: ./qc22-accuracy-data1.jsonl
 
 steps:
   data: data1
@@ -37,31 +37,28 @@ steps:
     beep: 3
   2:
     data: {where: 'stage == "dispense"'}
-    command: experiment.forEachRow
+    command: data.forEachRow
     steps:
       1:
-        description: "`Volume {{$d}}, dispense count {{$dispenseCount}}, repeat count {{$repeatCount}}`"
-        command: system.repeat
-        count: $repeatCount
-        1:
-          command: pipetter.pipette
-          program: $referenceProgram
-          sources: water
-          destinationLabware: $l
-          items:
-            data():
-              design:
-                destination: D01
-                volume: $d
-                .rep*: $dispenseCount
-          clean: light
-          cleanBetweenSameSource: flush
-          syringes: [$referenceSyringe]
-        2:
-          command: evoware._userPrompt
-          agent: ourlab.mario.evoware
-          text: "Weight trough"
-          beep: 3
+        description: "`Step {{step}}, volume {{d}}, dispense count {{dispenseCount}}`"
+        command: pipetter.pipette
+        program: $referenceProgram
+        sources: water
+        destinationLabware: $l
+        items:
+          data():
+            design:
+              destination: D01
+              volume: $volume
+              .rep*: $dispenseCount
+        clean: light
+        cleanBetweenSameSource: flush
+        syringes: [$referenceSyringe]
+      2:
+        command: evoware._userPrompt
+        agent: ourlab.mario.evoware
+        text: "Weight trough"
+        beep: 3
   3:
     command: evoware._userPrompt
     agent: ourlab.mario.evoware

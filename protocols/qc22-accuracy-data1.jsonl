@@ -1,38 +1,38 @@
-{"stage":"empty","step":0,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"empty","step":0,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"empty","step":0,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"empty","step":0,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"empty","step":0,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"empty","step":0,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":1,"sub":1,"d":3,"dispenseCount":72,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":2,"sub":1,"d":3,"dispenseCount":72,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":3,"sub":1,"d":3,"dispenseCount":72,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":4,"sub":1,"d":7,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":5,"sub":1,"d":7,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":6,"sub":1,"d":7,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":7,"sub":1,"d":15,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":8,"sub":1,"d":15,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":9,"sub":1,"d":15,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":10,"sub":2,"d":16,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":11,"sub":2,"d":16,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":12,"sub":2,"d":16,"dispenseCount":25,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":13,"sub":2,"d":150,"dispenseCount":9,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":14,"sub":2,"d":150,"dispenseCount":9,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":15,"sub":2,"d":150,"dispenseCount":9,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":16,"sub":2,"d":500,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":17,"sub":2,"d":500,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":18,"sub":2,"d":500,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":19,"sub":3,"d":501,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":20,"sub":3,"d":501,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":21,"sub":3,"d":501,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":22,"sub":3,"d":750,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":23,"sub":3,"d":750,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":24,"sub":3,"d":750,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":25,"sub":3,"d":1000,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":26,"sub":3,"d":1000,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"dispense","step":27,"sub":3,"d":1000,"dispenseCount":2,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"sigma_g","step":27,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"sigma_g","step":27,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"sigma_g","step":27,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"sigma_g","step":27,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
-{"stage":"sigma_g","step":27,"dispenseCount":0,"EXPERIMENT":"qc22-accuracy-sim","l":"trough1"}
+{"stage":"empty","step":0,"p":"A","pId":1,"dispenseCount":0,"v":0,"w":1000.2381,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1001}
+{"stage":"empty","step":0,"p":"A","pId":1,"dispenseCount":0,"v":0,"w":1000.2381,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1001}
+{"stage":"empty","step":0,"p":"A","pId":1,"dispenseCount":0,"v":0,"w":1000.2381,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1000}
+{"stage":"empty","step":0,"p":"A","pId":1,"dispenseCount":0,"v":0,"w":1000.2381,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1000}
+{"stage":"empty","step":0,"p":"A","pId":1,"dispenseCount":0,"v":0,"w":1000.2381,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1000}
+{"stage":"empty","step":0,"p":"A","pId":1,"dispenseCount":0,"v":0,"w":1000.2381,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1000}
+{"stage":"dispense","step":1,"p":"A","pId":1,"sub":1,"d":3,"dId":1,"dispenseCount":72,"v":218.07093,"w":1217.82349,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1217,"volume":"3 ul"}
+{"stage":"dispense","step":2,"p":"A","pId":1,"sub":1,"d":3,"dId":1,"dispenseCount":72,"v":435.6819,"w":1434.94995,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1435,"volume":"3 ul"}
+{"stage":"dispense","step":3,"p":"A","pId":1,"sub":1,"d":3,"dId":1,"dispenseCount":72,"v":654.78009,"w":1653.56032,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1655,"volume":"3 ul"}
+{"stage":"dispense","step":4,"p":"A","pId":1,"sub":1,"d":7,"dId":2,"dispenseCount":25,"v":834.27633,"w":1832.65691,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":1831,"volume":"7 ul"}
+{"stage":"dispense","step":5,"p":"A","pId":1,"sub":1,"d":7,"dId":2,"dispenseCount":25,"v":1015.51435,"w":2013.4914,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":2013,"volume":"7 ul"}
+{"stage":"dispense","step":6,"p":"A","pId":1,"sub":1,"d":7,"dId":2,"dispenseCount":25,"v":1194.15976,"w":2191.73906,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":2192,"volume":"7 ul"}
+{"stage":"dispense","step":7,"p":"A","pId":1,"sub":1,"d":15,"dId":3,"dispenseCount":25,"v":1585.12654,"w":2581.83535,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":2581,"volume":"15 ul"}
+{"stage":"dispense","step":8,"p":"A","pId":1,"sub":1,"d":15,"dId":3,"dispenseCount":25,"v":1975.82435,"w":2971.66327,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":2971,"volume":"15 ul"}
+{"stage":"dispense","step":9,"p":"A","pId":1,"sub":1,"d":15,"dId":3,"dispenseCount":25,"v":2365.17955,"w":3360.15158,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":3360,"volume":"15 ul"}
+{"stage":"dispense","step":10,"p":"A","pId":1,"sub":2,"d":16,"dId":4,"dispenseCount":25,"v":2778.24312,"w":3772.29546,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":3773,"volume":"16 ul"}
+{"stage":"dispense","step":11,"p":"A","pId":1,"sub":2,"d":16,"dId":4,"dispenseCount":25,"v":3191.23364,"w":4184.36645,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":4185,"volume":"16 ul"}
+{"stage":"dispense","step":12,"p":"A","pId":1,"sub":2,"d":16,"dId":4,"dispenseCount":25,"v":3603.24648,"w":4595.46195,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":4595,"volume":"16 ul"}
+{"stage":"dispense","step":13,"p":"A","pId":1,"sub":2,"d":150,"dId":5,"dispenseCount":9,"v":5000.02538,"w":5989.13092,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":5989,"volume":"150 ul"}
+{"stage":"dispense","step":14,"p":"A","pId":1,"sub":2,"d":150,"dId":5,"dispenseCount":9,"v":6400.08601,"w":7386.07431,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":7386,"volume":"150 ul"}
+{"stage":"dispense","step":15,"p":"A","pId":1,"sub":2,"d":150,"dId":5,"dispenseCount":9,"v":7798.98675,"w":8781.8604,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":8781,"volume":"150 ul"}
+{"stage":"dispense","step":16,"p":"A","pId":1,"sub":2,"d":500,"dId":6,"dispenseCount":2,"v":8839.85688,"w":9820.41303,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":9821,"volume":"500 ul"}
+{"stage":"dispense","step":17,"p":"A","pId":1,"sub":2,"d":500,"dId":6,"dispenseCount":2,"v":9878.40141,"w":10856.64525,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":10857,"volume":"500 ul"}
+{"stage":"dispense","step":18,"p":"A","pId":1,"sub":2,"d":500,"dId":6,"dispenseCount":2,"v":10918.46789,"w":11894.39601,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":11895,"volume":"500 ul"}
+{"stage":"dispense","step":19,"p":"A","pId":1,"sub":3,"d":501,"dId":7,"dispenseCount":2,"v":11951.37954,"w":12925.00789,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":12925,"volume":"501 ul"}
+{"stage":"dispense","step":20,"p":"A","pId":1,"sub":3,"d":501,"dId":7,"dispenseCount":2,"v":12983.66667,"w":13954.99663,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":13955,"volume":"501 ul"}
+{"stage":"dispense","step":21,"p":"A","pId":1,"sub":3,"d":501,"dId":7,"dispenseCount":2,"v":14014.72217,"w":14983.75649,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":14983,"volume":"501 ul"}
+{"stage":"dispense","step":22,"p":"A","pId":1,"sub":3,"d":750,"dId":8,"dispenseCount":2,"v":15542.82522,"w":16508.45721,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":16509,"volume":"750 ul"}
+{"stage":"dispense","step":23,"p":"A","pId":1,"sub":3,"d":750,"dId":8,"dispenseCount":2,"v":17072.42184,"w":18034.64819,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":18035,"volume":"750 ul"}
+{"stage":"dispense","step":24,"p":"A","pId":1,"sub":3,"d":750,"dId":8,"dispenseCount":2,"v":18603.7352,"w":19562.55208,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":19563,"volume":"750 ul"}
+{"stage":"dispense","step":25,"p":"A","pId":1,"sub":3,"d":1000,"dId":9,"dispenseCount":2,"v":20625.1255,"w":21579.44176,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":21580,"volume":"1000 ul"}
+{"stage":"dispense","step":26,"p":"A","pId":1,"sub":3,"d":1000,"dId":9,"dispenseCount":2,"v":22646.15227,"w":23595.96871,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":23596,"volume":"1000 ul"}
+{"stage":"dispense","step":27,"p":"A","pId":1,"sub":3,"d":1000,"dId":9,"dispenseCount":2,"v":24666.58045,"w":25611.8984,"repeatCount":3,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":25612,"volume":"1000 ul"}
+{"stage":"sigma_g","step":27,"p":"A","pId":1,"dispenseCount":0,"v":24666.58045,"w":25611.8984,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":25612}
+{"stage":"sigma_g","step":27,"p":"A","pId":1,"dispenseCount":0,"v":24666.58045,"w":25611.8984,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":25612}
+{"stage":"sigma_g","step":27,"p":"A","pId":1,"dispenseCount":0,"v":24666.58045,"w":25611.8984,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":25611}
+{"stage":"sigma_g","step":27,"p":"A","pId":1,"dispenseCount":0,"v":24666.58045,"w":25611.8984,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":25611}
+{"stage":"sigma_g","step":27,"p":"A","pId":1,"dispenseCount":0,"v":24666.58045,"w":25611.8984,"EXPERIMENT":"qc22-accuracy-sim","RUNID":"2000-01-01","l":"trough1","lId":1,"g":25612}
