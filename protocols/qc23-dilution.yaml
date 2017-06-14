@@ -1,16 +1,31 @@
 # npm run processor -- --progress --print-designs -P ../compiled ../config/bsse-mario.js ../protocols/qc23-dilution.yaml -T
+# npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc23-dilution.yaml -T
 
 roboliq: v1
 description: |
   Find the amount of unintended dilution taking place in the fixed tips.
 
-  * Measure empty plate
-  * Fill a few control wells with 250ul water and read their absorbance.
-  * for v in 3ul, 7ul, 15ul, 16ul, and 150ul:
-      * each tip dispenses 250ul dye into a well
-      * transfer v to next empty well n times (where n = 1 for 150ul, 9 for other volumes)
-      * fill source and destination wells to 250ul
-      * measure absorbance of source and destination wells
+  For Air and Wet liquid classes, using all 4 tips:
+
+  * read empty plate
+  * fill several wells with 300ul water, then shake and read
+  * fill two border wells with 300ul of dye0150 to reach absorbance ~2 (doesn't matter which syringes are used)
+  * one of those wells will be used for dilution and the other will be left alone for visual comparison
+  * NS times do (shake and NR times do read)
+  * aspirate and dispense 3 times in the dilution well, shake between dispenses while flushing tips
+  * NS times do (shake and NR times do read)
+  * aspirate and dispense 3 times in the dilution well, shake between dispenses while flushing tips
+  * NS times do (shake and NR times do read)
+  * aspirate and dispense 3 times in the dilution well, shake between dispenses while flushing tips
+  * NS times do (shake and NR times do read)
+  * user can optionally visually check the volumes and concentrations
+
+  For Dry liquid class, for volumes 3, 7, 15, 16, and 150, using all tips:
+
+  * estimate alpha_k for the dye by extrapolating to its undiluted state
+  * dispense each volume a particular number of times (32, 20, 12, 12, 12: 88 wells)
+  * fill all wells to 300ul with water (8 water-only wells)
+  * shake and measure several times
 
   OrangeG 8g/L calculations to achive 250ul => ~2:
 
@@ -80,6 +95,14 @@ objects:
   simAWData:
     type: Data
     valueFile: ./qc23-dilution-simAWData.jsonl
+
+  wellDData:
+    type: Data
+    valueFile: ./qc23-dilution-wellDData.jsonl
+
+  simDData:
+    type: Data
+    valueFile: ./qc23-dilution-simDData.jsonl
 
   measureAbsorbance:
     type: Template
@@ -170,11 +193,122 @@ objects:
       }
 
 steps:
-  1:
-    data: wellAWData
-    description: "Test dilution of Air and Wet dispense"
+  # 1:
+  #   data: wellAWData
+  #   description: "Test dilution of Air and Wet dispense"
+  #   1:
+  #     data: {source: simAWData, where: {stage: '"empty"'}}
+  #     description: Read absorbance of empty wells
+  #     command: absorbanceReader.measurePlate
+  #     object: $l_ONE
+  #     program:
+  #       excitationWavelength: $excitationWavelength
+  #     output:
+  #       joinKey: well
+  #       appendTo: measurements
+  #       simulated: "a_sim"
+  #
+  #   2:
+  #     data: {where: {stage: '"water"'}}
+  #     description: "`Fill water wells`"
+  #     command: pipetter.pipette
+  #     program: $standardLiquidClass
+  #     sources: water
+  #     destinationLabware: $l_ONE
+  #     destinations: $well
+  #     volumes: 300 ul
+  #     clean: light
+  #     cleanBetween: none
+  #
+  #   3:
+  #     data: {source: simAWData, where: {stage: '"water"'}}
+  #     description: Read absorbance of water wells
+  #     command: absorbanceReader.measurePlate
+  #     object: $l_ONE
+  #     program:
+  #       excitationWavelength: $excitationWavelength
+  #       shakerProgramBefore:
+  #         duration: 30 s
+  #         settleDuration: 10 s
+  #     output:
+  #       joinKey: well
+  #       appendTo: measurements
+  #       simulated: "a_sim"
+  #
+  #   4:
+  #     data: {where: {group: {gte: 1}}}
+  #     description: "Loop through each group of liquidClass+volume combinations"
+  #     command: data.forEachGroup
+  #     groupBy: group
+  #     steps:
+  #       description: "`Handle group {{group_ONE}}, wells {{well}}`"
+  #       1:
+  #         data: {where: {stage: '"dye"'}}
+  #         description: "`Dispense 2x150ul dye to {{well}}`"
+  #         command: pipetter.pipette
+  #         program: $standardLiquidClass
+  #         sources: $k_ONE
+  #         destinationLabware: $l_ONE
+  #         items:
+  #           data():
+  #             design:
+  #               destination: $well
+  #               syringe: $t
+  #               .rep*: 2
+  #         volumes: 150 ul
+  #         clean: light
+  #         cleanBetween: none
+  #       2:
+  #         data: {source: simAWData, where: {stage: '"dye"', group: $group_ONE}}
+  #         description: "Measure wells after filling"
+  #         command: system.call
+  #         name: measureAbsorbance
+  #         lazyParams:
+  #           plate: $l_ONE
+  #           shakeCount: $shakeCount
+  #           measureCount: $measureCount
+  #       3:
+  #         data: {where: {role: '"test"'}}
+  #         description: "`Loop through {{stepCount_ONE}} aspiration/dispense steps`"
+  #         command: system.repeat
+  #         count: $stepCount
+  #         variableName: stepIdx
+  #         steps:
+  #           1:
+  #             description: "`Aspirate and re-dispense {{dilutionCountPerStep_ONE}} times (step {{stepIdx}} of {{stepCount_ONE}})`"
+  #             command: pipetter.pipette
+  #             program: $liquidClass
+  #             sourceLabware: $l_ONE
+  #             destinationLabware: $l_ONE
+  #             items:
+  #               data():
+  #                 design:
+  #                   source: $well
+  #                   destination: $well
+  #                   volume: $volume
+  #                   layer*: $dilutionCountPerStep
+  #             clean: light
+  #             cleanBetween: none
+  #           2:
+  #             data:
+  #               source: simAWData
+  #               where:
+  #                 stage: '"dilution"'
+  #                 group: $group_ONE
+  #                 step: ${stepIdx + 1}
+  #             description: "Measure wells for dilution"
+  #             command: system.call
+  #             name: measureAbsorbance
+  #             lazyParams:
+  #               shakeCount: $shakeCount
+  #               measureCount: $measureCount
+  #               plate: $l_ONE
+
+  2:
+    data: wellDData
+    description: "Test dilution of Dry dispense"
     1:
-      data: {source: simAWData, where: {stage: '"empty"'}}
+      data: {source: simDData, where: {stage: '"empty"'}}
       description: Read absorbance of empty wells
       command: absorbanceReader.measurePlate
       object: $l_ONE
@@ -185,98 +319,38 @@ steps:
         appendTo: measurements
         simulated: "a_sim"
 
-    2:
-      data: {where: {stage: '"water"'}}
-      description: "`Fill water wells`"
+    4:
+      data: {where: {stage: '"dye"'}}
+      description: "`Dispense dye to wells`"
+      command: pipetter.pipette
+      program: $standardLiquidClass
+      sources: $k_ONE
+      destinationLabware: $l_ONE
+      destinations: $well
+      volumes: $volume
+      syringes: $t
+      clean: light
+      cleanBetween: none
+
+    5:
+      data: {where: {stage: {ne: '"empty"'}}, orderBy: i}
+      description: "`Fill to 300ul with water`"
       command: pipetter.pipette
       program: $standardLiquidClass
       sources: water
       destinationLabware: $l_ONE
       destinations: $well
-      volumes: 300 ul
+      volumes: $((300 ul) - volume)
+      syringes: $t
       clean: light
       cleanBetween: none
 
-    3:
-      data: {source: simAWData, where: {stage: '"water"'}}
-      description: Read absorbance of water wells
-      command: absorbanceReader.measurePlate
-      object: $l_ONE
-      program:
-        excitationWavelength: $excitationWavelength
-        shakerProgramBefore:
-          duration: 30 s
-          settleDuration: 10 s
-      output:
-        joinKey: well
-        appendTo: measurements
-        simulated: "a_sim"
-
-    4:
-      data: {where: {group: {gte: 1}}}
-      description: "Loop through each group of liquidClass+volume combinations"
-      command: data.forEachGroup
-      groupBy: group
-      steps:
-        description: "`Handle group {{group_ONE}}, wells {{well}}`"
-        1:
-          data: {where: {stage: '"dye"'}}
-          description: "`Dispense 2x150ul dye to {{well}}`"
-          command: pipetter.pipette
-          program: $standardLiquidClass
-          sources: $k_ONE
-          destinationLabware: $l_ONE
-          items:
-            data():
-              design:
-                destination: $well
-                syringe: $t
-                .rep*: 2
-          volumes: 150 ul
-          clean: light
-          cleanBetween: none
-        2:
-          data: {source: simAWData, where: {stage: '"dye"', group: $group_ONE}}
-          description: "Measure wells after filling"
-          command: system.call
-          name: measureAbsorbance
-          lazyParams:
-            plate: $l_ONE
-            shakeCount: $shakeCount
-            measureCount: $measureCount
-        3:
-          data: {where: {role: '"test"'}}
-          description: "`Loop through {{stepCount_ONE}} aspiration/dispense steps`"
-          command: system.repeat
-          count: $stepCount
-          variableName: stepIdx
-          steps:
-            1:
-              description: "`Aspirate and re-dispense {{dilutionCountPerStep_ONE}} times (step {{stepIdx}} of {{stepCount_ONE}})`"
-              command: pipetter.pipette
-              program: $liquidClass
-              sourceLabware: $l_ONE
-              destinationLabware: $l_ONE
-              items:
-                data():
-                  design:
-                    source: $well
-                    destination: $well
-                    volume: $volume
-                    layer*: $dilutionCountPerStep
-              clean: light
-              cleanBetween: none
-            2:
-              data:
-                source: simAWData
-                where:
-                  stage: '"dilution"'
-                  group: $group_ONE
-                  step: ${stepIdx + 1}
-              description: "Measure wells for dilution"
-              command: system.call
-              name: measureAbsorbance
-              lazyParams:
-                shakeCount: $shakeCount
-                measureCount: $measureCount
-                plate: $l_ONE
+    5:
+      data: {source: simDData, where: {stage: {ne: '"empty"'}}}
+      description: "Measure wells after filling"
+      command: system.call
+      name: measureAbsorbance
+      lazyParams:
+        plate: $l_ONE
+        shakeCount: $shakeCount
+        measureCount: $measureCount

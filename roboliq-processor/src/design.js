@@ -1553,7 +1553,7 @@ const compareFunctions = {
 	"gte": _.gte,
 	"lt": _.lt,
 	"lte": _.lte,
-	"ne": _.ne,
+	"ne": (a, b) => !_.isEqual(a, b),
 	"in": _.includes
 };
 function filterOnWhere(table, where, SCOPE = undefined) {
@@ -1565,6 +1565,7 @@ function filterOnWhere(table, where, SCOPE = undefined) {
 					// Get compare function
 					assert(compareFunctions.hasOwnProperty(op), `unrecognized operator: ${op} in ${JSON.stringify(value)}`);
 					const fn = compareFunctions[op];
+					// console.log({op, fn})
 					table2 = filterOnWhereOnce(table2, key, value2, fn);
 				});
 			}
@@ -1617,6 +1618,7 @@ function filterOnWhere(table, where, SCOPE = undefined) {
  * @return {array} filtered table
  */
 function filterOnWhereOnce(table, key, x, fn) {
+	// console.log("filterOnWhereOnce: "); console.log({key, x, fn})
 	// If x is an array, do an array comparison
 	if (_.isArray(x)) {
 		return _.filter(table, (row, i) => fn(row[key], x[i]));

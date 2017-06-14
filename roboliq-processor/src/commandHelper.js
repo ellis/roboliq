@@ -132,7 +132,7 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true, depth
 			// console.log({expr})
 			const context = _.defaults({}, SCOPE, data.objects.PARAMS)
 			// console.log({expr, context})
-			x2 = Design.calculate(expr, context);
+			x2 = calculateWithMathjs(expr, context);
 			// console.log({x2, expr})
 		}
 		// Mathjs calculation (deprecated)
@@ -181,6 +181,107 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true, depth
 	}
 	return x2;
 }
+
+/**
+ * Calculate `expr` using variables in `context`, with optional `spec` object specifying `units` and/or `decimals`
+ */
+function calculateWithMathjs(expr, context, spec={}) {
+	const scope = _.mapValues(context, (x, key) => {
+		if (!_.startsWith(key, "__")) {
+			// console.log({key, x});
+			if (_.isString(x)) {
+				return calculateWithMathjs_variable(x);
+			}
+			else if (_.isArray(x)) {
+				return x.map(y => _.isString(y) ? calculateWithMathjs_variable(y) : y);
+			}
+		}
+		return x;
+	});
+
+	// console.log({expr, scope})
+	// console.log("scope:"+JSON.stringify(scope, null, '\t'))
+	let value = math.eval(expr, scope);
+	// console.log({type: value.type, value})
+
+	// We're going to temprarily force value to be an array - this tells us whether we need to convert it back to a single item later.
+	const doUnArray = !_.isArray(value);
+	const values = (doUnArray) ? [value] : value;
+
+	const processedValues = values.map(value => {
+		if (_.isString(value) || _.isNumber(value) || _.isBoolean(value)) {
+			return value;
+		}
+
+		// Get units to use in the end, and the unitless value
+		const {units0, units, unitless} = (() => {
+			const result = {
+				units0: undefined,
+				units: spec.units,
+				unitless: value
+			};
+			// If the result has units:
+			if (value.type === "Unit") {
+				result.units0 = value.formatUnits();
+				if (_.isUndefined(result.units))
+					result.units = result.units0;
+				const conversionUnits = (_.isEmpty(result.units)) ? result.units0 : result.units;
+				// If the units dissappeared, e.g. when dividing 30ul/1ul = 30:
+				if (_.isEmpty(conversionUnits)) {
+					// TODO: find a better way to get the unit-less quantity from `value`
+					// console.log({spec})
+					// console.log({result, conversionUnits});
+					result.unitless = math.eval(value.format());
+				}
+				else {
+					result.unitless = value.toNumeric(conversionUnits);
+				}
+			}
+			return result;
+		})();
+		// console.log(`unitless: ${JSON.stringify(unitless)}`)
+
+		// Restrict decimal places
+		// console.log({unitless})
+		const unitlessText = (_.isNumber(spec.decimals))
+			? unitless.toFixed(spec.decimals)
+			: _.isNumber(unitless) ? unitless : unitless.toNumber();
+
+		// Set units
+		const valueText = (!_.isEmpty(units))
+			? unitlessText + " " + units
+			: unitlessText;
+
+		return valueText;
+	});
+
+	return (doUnArray) ? processedValues[0] : processedValues;
+}
+
+function calculateWithMathjs_variable(x) {
+	// console.log({y: x})
+	if (_.isString(x) && x.length > 0) {
+		const c0 = x[0];
+		const c1 = x[x.length - 1];
+		// console.log({c0, c1})
+		// If this might be a number with units
+		if (
+			// If it starts with a digit or sign
+			((c0 >= "0" && c0 <= "9") || (c0 == "+" || c0 == "-")) &&
+			// and ends with a letter
+			(c1 >= "a" && c1 <= "z")
+		) {
+			try {
+				const result = math.eval(x);
+				// console.log({result})
+				return result;
+			}
+			catch (e) {}
+		}
+	}
+	return x;
+}
+
 
 /**
  * Parse command parameters according to a schema.

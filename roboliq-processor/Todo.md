@@ -26,11 +26,13 @@ Re-running QC scripts:
 
 Speed Optimizations and Niceties:
 
+* [ ] For calls to `mathjs.eval`, find the identifiers in the expression first and only add those variables to the scope
 * [ ] refactor to pass `context` object around instead of `data`, `DATA`, and `SCOPE`, etc.
 * [ ] only update object predicates when objects change
 * [ ] only call `getCommonValues()` when DATA changes
 * [ ] refactor to just use nodejs without babel (to let us avoid the compile step)
 * [ ] think about freezing objects, so that we don't need to clone them
+* [ ] try http://github.com/agershun/alasql for sql queries on data, especially in order to support table joins
 
 # Pain points:
 
