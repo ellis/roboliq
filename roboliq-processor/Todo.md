@@ -19,11 +19,26 @@ Re-running QC scripts:
 	* [ ] extend Stan model for analysis
 	* [ ] add testing of dilution for volumes >150ul?
 * [ ] qc22-accuracy
-	* [ ] create scale command
+	* [?] create scale command
+	* [ ] bsse-mario: scale equipment
+	* [ ] bsse-mario: scale site
+	* [ ] bsse-mario: user transporter
+	* [ ] bsse-mario: user transporter definitions, to move plate from bench sites to scale site
+	* [ ] make it possible for user to move labware to scale
 	* [ ] create a user implementation for the scale command
 	* [ ] create an evoware VisualBasic script for getting measurement from user, or use the evoware user dialog
 	* [ ] take the user's measurement and save it to a measurement file
 * [ ] test: write a script to dispense low dye volumes and get a desired amount in the well, correcting for volume bias and dilution
+	* [ ] measure empty wells
+	* [ ] need to know/determine/verify alpha_k of the dye so that we know how much absorbance to expect from 3, 5, 7, 10, 15ul
+	* [ ] dispense 2 x 150ul dye into several wells, and use dilution and accuracy parameters from previous experiments to estimate alpha_k
+	* [ ] for each $d$ level, pick how many times to dispense it - 10 x 3ul, 6 x 5ul, 4 x 7ul, 3 x 10ul, 2 x 15 ul, so ~30ul of dye will be in each well
+	* [ ] select several wells to just contain water
+	* [ ] the remaining wells are all assigned a $d$ value, with nested factors for uncorrected volume and corrected volume
+	* [ ] dispense 270ul water to all empty wells
+	* [ ] measure plate
+	* [ ] dispense dye volumes as assigned
+	* [ ] measure wells
 
 Speed Optimizations and Niceties:
 

@@ -288,7 +288,6 @@ steps:
                     volume: $volume
                     layer*: $dilutionCountPerStep
               clean: light
-              cleanBetween: none
             2:
               data:
                 source: simAWData
@@ -323,14 +322,13 @@ steps:
       data: {where: {stage: '"dye"'}}
       description: "`Dispense dye to wells`"
       command: pipetter.pipette
-      program: $standardLiquidClass
+      program: $liquidClass
       sources: $k_ONE
       destinationLabware: $l_ONE
       destinations: $well
       volumes: $volume
       syringes: $t
       clean: light
-      cleanBetween: none
 
     3:
       data: {where: {stage: {ne: '"empty"'}}, orderBy: i}

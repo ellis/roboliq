@@ -158,8 +158,9 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true, depth
 		else if (_.startsWith(x, "`") && _.endsWith(x, "`")) {
 			const template = x.substr(1, x.length - 2);
 			const scope = SCOPE; //_.mapKeys(SCOPE, (value, name) => "$"+name);
-			//console.log({x, template, scope})
+			// console.log({x, template, scope})
 			x2 = misc.renderTemplate(template, scope, data);
+			// console.log({x2})
 		}
 	}
 	else if (_.isArray(x)) {
