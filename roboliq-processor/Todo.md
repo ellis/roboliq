@@ -26,7 +26,7 @@ Re-running QC scripts:
 
 Speed Optimizations and Niceties:
 
-* [ ] For calls to `mathjs.eval`, find the identifiers in the expression first and only add those variables to the scope
+* [ ] For calls to `mathjs.eval`, find the identifiers in the expression first and only add those variables to the scope (like done in `commandHelpers.js:calculateWithMathjs`)
 * [ ] refactor to pass `context` object around instead of `data`, `DATA`, and `SCOPE`, etc.
 * [ ] only update object predicates when objects change
 * [ ] only call `getCommonValues()` when DATA changes

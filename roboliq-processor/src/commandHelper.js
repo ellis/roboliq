@@ -186,18 +186,23 @@ function substituteDeep(x, data, SCOPE, DATA, addCommonValuesToScope=true, depth
  * Calculate `expr` using variables in `context`, with optional `spec` object specifying `units` and/or `decimals`
  */
 function calculateWithMathjs(expr, context, spec={}) {
-	const scope = _.mapValues(context, (x, key) => {
-		if (!_.startsWith(key, "__")) {
-			// console.log({key, x});
-			if (_.isString(x)) {
-				return calculateWithMathjs_variable(x);
-			}
-			else if (_.isArray(x)) {
-				return x.map(y => _.isString(y) ? calculateWithMathjs_variable(y) : y);
-			}
+	const rx = /([_$a-zA-Z\xA0-\uFFFF][._$a-zA-Z0-9\xA0-\uFFFF]*)/g;
+	const identifiers = expr.match(rx);
+	const identifierValues = identifiers.map(key => {
+		const x = _.get(context, key);
+		if (_.isUndefined(x)) return undefined;
+		// console.log({key, x});
+		if (_.isString(x)) {
+			return calculateWithMathjs_variable(x);
+		}
+		else if (_.isArray(x)) {
+			return x.map(y => _.isString(y) ? calculateWithMathjs_variable(y) : y);
 		}
 		return x;
 	});
+	const identifierAndValues = _.zip(identifiers, identifierValues).filter(x => !_.isUndefined(x[1]));
+	const scope = _.fromPairs(identifierAndValues);
+	// console.log({expr, context, identifiers, identifierValues, scope})
 
 	// console.log({expr, scope})
 	// console.log("scope:"+JSON.stringify(scope, null, '\t'))
