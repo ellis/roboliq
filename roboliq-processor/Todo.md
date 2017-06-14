@@ -12,11 +12,12 @@ Re-running QC scripts:
 	* [x] create simData
 	* [x] create script for AW
 	* [x] test analysis of simulated output (AW)
-	* [ ] create script for D
-	* [ ] test analysis of simulated output (D)
+	* [x] create script for D
+	* [x] test analysis of simulated output (D)
 	* [ ] run script
 	* [ ] analyze results
-* [ ] test corrected concentration dispenses for low volumes
+	* [ ] extend Stan model for analysis
+	* [ ] add testing of dilution for volumes >150ul?
 * [ ] qc22-accuracy
 	* [ ] create scale command
 	* [ ] create a user implementation for the scale command
