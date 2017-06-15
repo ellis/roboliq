@@ -237,6 +237,7 @@ steps:
 
     4:
       data: {where: {group: {gte: 1}}}
+      # data: {where: {group: {gte: 1, lte: 2}}}
       description: "Loop through each group of liquidClass+volume combinations"
       command: data.forEachGroup
       groupBy: group
@@ -252,9 +253,9 @@ steps:
           items:
             data():
               design:
-                destination: $well
+                destination*: $well
                 syringe: $t
-                .rep*: 2
+                layer*: 2
           volumes: 150 ul
           clean: light
           cleanBetween: none
@@ -277,16 +278,17 @@ steps:
             1:
               description: "`Aspirate and re-dispense {{dilutionCountPerStep_ONE}} times (step {{stepIdx}} of {{stepCount_ONE}})`"
               command: pipetter.pipette
-              program: $liquidClass
+              program: $liquidClass_ONE
               sourceLabware: $l_ONE
               destinationLabware: $l_ONE
               items:
                 data():
                   design:
-                    source: $well
+                    source*: $well
                     destination: $well
                     volume: $volume
-                    layer*: $dilutionCountPerStep
+                    syringe: $t
+                    layer*: $dilutionCountPerStep_ONE
               clean: light
             2:
               data:
