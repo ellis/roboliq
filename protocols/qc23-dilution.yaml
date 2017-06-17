@@ -259,6 +259,7 @@ steps:
           volumes: 150 ul
           clean: light
           cleanBetween: none
+          cleanEnd: thorough
         2:
           data: {source: simAWData, where: {stage: '"dye"', group: $group_ONE}}
           description: "Measure wells after filling"
@@ -290,6 +291,8 @@ steps:
                     syringe: $t
                     layer*: $dilutionCountPerStep_ONE
               clean: light
+              cleanBetween: flush
+              cleanEnd: thorough
             2:
               data:
                 source: simAWData
@@ -331,6 +334,7 @@ steps:
       volumes: $volume
       syringes: $t
       clean: light
+      cleanBetween: flush
 
     3:
       data: {where: {stage: {ne: '"empty"'}}, orderBy: i}
