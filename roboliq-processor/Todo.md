@@ -15,6 +15,11 @@ Re-running QC scripts:
 	* [x] create script for D
 	* [x] test analysis of simulated output (D)
 	* [ ] run script
+		* [x] run from line 567, step 1.4.1.3.4.1 "Aspirate and re-dispense 30 times (step 4 of 6)"
+		* [x] run from 1.4.3.3.3.1, first dispense done, and first wash done, from line 1932
+		* [ ] run from 6437
+	* [ ] re-write analysis to account for the constant volume drop + dilution;
+		in the case of no dilution, absorbance would drop approximately linearly (aside from beam effects)
 	* [ ] analyze results
 	* [ ] extend Stan model for analysis
 	* [ ] add testing of dilution for volumes >150ul?

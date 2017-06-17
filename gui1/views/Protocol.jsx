@@ -260,7 +260,7 @@ const protocolObjectPropertyHandlers = {
 const ProtocolSteps = (props) => {
 	return <div>
 		<h2>Steps</h2>
-		<ProtocolStep state={props.state} path={["steps"]} step={_.get(props.state, ["protocols", "main", "steps"])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
+		<ProtocolStep state={props.state} path={["steps"]} step={_.get(props.state, ["protocols", "output", "steps"])} onEdit={props.onEdit} onSetProperty={props.onSetProperty}/>
 	</div>
 };
 
