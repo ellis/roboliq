@@ -53,11 +53,12 @@ description: |
   - we'll allocate 16 wells to estimate the dilution of 150ul
   - 8 water-only wells
 
-  OrangeG 8g/L calculations to achive 250ul => ~2:
+  OrangeG 8g/L dilution calculations:
 
-  * 50 ul / 2^5 = 1.43
-  * 0.9152/ul
-  * For 250ul dye to be 2: 0.9152*250 / 2 = 114x dilution (I'll use our 100x dilution)
+  * stock concentration is 0.9152/ul
+  * For 150ul dye to be 1: 0.9152*150 = 137x dilution
+  * For 8ul dye to be 1: 0.9152*8 = 7.32x dilution
+    * put 5x1000ul into 50ul tube, fill to 36.6ml
 
 config:
   evowareCompiler:
