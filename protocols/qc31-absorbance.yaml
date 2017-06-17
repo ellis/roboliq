@@ -245,8 +245,8 @@ steps:
       clean: none
 
     3:
-      data: {where: {roleA: '"test"'}, orderBy: i}
-      description: "Dispense water to test wells"
+      data: {where: {roleA: '"test"', roleB: '"src"'}, orderBy: i}
+      description: "Dispense water to test source wells"
       command: pipetter.pipette
       program: $liquidClass_ONE
       sources: water
@@ -258,7 +258,7 @@ steps:
       cleanEnd: thorough
 
     4:
-      data: {where: {roleA: '"control"', roleB: '"dst"'}}
+      data: {where: {roleA: '"control"', roleB: '"src"'}}
       description: "`Dispense 2x 150ul dye0150 to wells {{well}}`"
       command: pipetter.pipette
       program: $liquidClass_ONE
@@ -342,6 +342,20 @@ steps:
       cleanBetween: flush
 
     9:
+      # data: {where: {roleA: {in: ['"test"', '"control"']}}}
+      data: {where: 'roleA == "test" or roleA == "control"', orderBy: i}
+      description: Fill test and control wells to 300ul with water
+      command: pipetter.pipette
+      program: $standardLiquidClass
+      sources: water
+      destinationLabware: $l_ONE
+      destinations: $well
+      volumes: 150 ul
+      syringes: $t
+      clean: light
+      cleanBetween: none
+
+    10:
       data: {source: simData, where: {stage: '"M2"'}}
       description: "Measure wells after filling"
       command: system.call
