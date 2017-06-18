@@ -356,7 +356,7 @@ steps:
       cleanBetween: none
 
     10:
-      data: {source: simData, where: {stage: '"M2"'}}
+      data: {source: simData, where: {stage: '"M3"'}}
       description: "Measure wells after filling"
       command: system.call
       name: measureAbsorbance
