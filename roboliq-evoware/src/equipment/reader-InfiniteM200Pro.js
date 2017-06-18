@@ -119,8 +119,11 @@ function getTemplateAbsorbanceParams(parsed, data) {
 			for (let i = 1; i < rowcols.length; i++) {
 				const rowcol = rowcols[i];
 				const indexOnPlate = (rowcol[0] - 1) * labwareModel.columns + rowcol[1];
-				// If continuity is broken:
-				if (indexOnPlate !== indexOnPlatePrev + 1) {
+				// If continuity is broken or we've changed rows:
+				// TODO: do something smarter than starting over on each row;
+				//  but it can be tricky, because the reader expects square blocks
+				//  of wells.
+				if (indexOnPlate !== indexOnPlatePrev + 1 || rowcol[0] != prev[0]) {
 					wells += locationRowColToText(prev[0], prev[1])+"|"+locationRowColToText(rowcol[0], rowcol[1])+":";
 				}
 				prev = rowcol;
