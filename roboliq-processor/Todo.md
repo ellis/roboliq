@@ -1,6 +1,39 @@
 # Todos
 
-Re-running QC scripts:
+Running newest QC scripts 2017-06-18:
+
+Highest level:
+
+* [ ] create a controlled error - bad liquid class
+* [ ] detect errors
+	* [ ] this can be done with qc31-absorbance
+	* [ ] it would be nicer to do it with qc21-general
+* [ ] correct errors
+
+High-level:
+
+* [ ] one weighing experiment to get average dispense volume of 150ul, and perhaps other volumes too
+* [ ] one absorbance experiment to get bias, variance, and dilution of smaller volumes
+* [ ] a general checking protocol, such as qc21-general?
+
+Todos:
+
+* [x] qc31-absorbance: run it on Wet 3-15ul
+* [x] create bad liquid class: duplicate Roboliq_Water_Wet_1000, adjust for not enough air gap, negative bias towards 15ul
+	* Roboliq_Water_Wet_1000_BADTEST
+	* changes to 3-15ul subclass:
+		* system trailing airgap: 10ul => 1ul
+		* leading air gap: 10ul => 0ul
+		* calibration offset: 0.2ul => 0.8ul
+		* calibration factor: 1.045 => 0.7
+* [ ] make qc31-absorbance-bad script to test bad liquid class
+	* [ ] make modified Rmd file to use the new class
+	* [ ] make modified yaml to load the new data tables
+	* [ ] run it
+	* [ ] analyze it
+* [ ] qc31-absorbance: analyze Wet 3-15ul
+
+Re-running QC scripts (outdated):
 
 * [ ] qc21-general
 	* [x] support shaking in reader commands

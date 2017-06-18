@@ -60,6 +60,8 @@ description: |
   * For 8ul dye to be 1: 0.9152*8 = 7.32x dilution
     * put 5x1000ul into 50ul tube, fill to 36.6ml
 
+  Runtime on mario: about 34 minutes
+
 config:
   evowareCompiler:
     timing: false
@@ -248,7 +250,7 @@ steps:
       data: {where: {roleA: '"test"', roleB: '"src"'}, orderBy: i}
       description: "Dispense water to test source wells"
       command: pipetter.pipette
-      program: $liquidClass_ONE
+      program: $standardLiquidClass
       sources: water
       destinationLabware: $l_ONE
       destinations: $well
@@ -261,7 +263,7 @@ steps:
       data: {where: {roleA: '"control"', roleB: '"src"'}}
       description: "`Dispense 2x 150ul dye0150 to wells {{well}}`"
       command: pipetter.pipette
-      program: $liquidClass_ONE
+      program: $standardLiquidClass
       sources: $k_ONE
       destinationLabware: $l_ONE
       items:
