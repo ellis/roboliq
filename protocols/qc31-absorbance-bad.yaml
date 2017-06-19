@@ -1,0 +1,15 @@
+# npm run processor -- --progress --print-designs -P ../compiled ../config/bsse-mario.js ../protocols/qc23-dilution.yaml -T
+# npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc31-absorbance.yaml -T
+# npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../c onfig/bsse-mario.js ../protocols/qc31-absorbance-bad.yaml
+
+roboliq: v1
+imports: ./qc31-absorbance.yaml
+
+objects:
+  wellData:
+    type: Data
+    valueFile: ./qc31-absorbance-bad-wellData.jsonl
+
+  simData:
+    type: Data
+    valueFile: ./qc31-absorbance-bad-simData.jsonl

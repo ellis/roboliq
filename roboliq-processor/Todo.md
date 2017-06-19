@@ -26,12 +26,17 @@ Todos:
 		* leading air gap: 10ul => 0ul
 		* calibration offset: 0.2ul => 0.8ul
 		* calibration factor: 1.045 => 0.7
-* [ ] make qc31-absorbance-bad script to test bad liquid class
-	* [ ] make modified Rmd file to use the new class
-	* [ ] make modified yaml to load the new data tables
-	* [ ] run it
-	* [ ] analyze it
+* [x] make qc31-absorbance-bad script to test bad liquid class
+	* [x] export modified data tables that use the new class
+	* [x] make modified yaml to load the new data tables
+	* [x] run it
+* [x] woops, reader bug - re-run last measurements
+	* [x] qc31-absorbance-bad
+	* [x] qc31-absorbance
+* [ ] qc31-absorbance-bad: analyze it
 * [ ] qc31-absorbance: analyze Wet 3-15ul
+* [ ] write correction script
+* [ ] run correction script
 
 Re-running QC scripts (outdated):
 
