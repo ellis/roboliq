@@ -1,5 +1,116 @@
 # Todos
 
+Monday
+
+* characterize 150ul A: bias and dilution
+	* read empty plate
+	* weigh empty plate
+	* dispense 150ul twice into each dye well (4 tips, 6 replicates, so 24 wells)
+		* first one layer in each well, then the other, to minimize total evaporation
+	* weigh plate
+	* read filled wells
+	* for each dye well, transfer 150ul to an empty well
+	* fill some wells with water
+	* fill all dye wells to 300ul with water
+	* read dye and water wells
+
+* use a general protocol to characterize v*c for all smaller volumes, repeating 15ul for both dye0015 and dye0150, and use 150ul Air dispenses of dye0150 as a reference
+	*
+
+* correction test
+	* part 1: estimate concentration of dyeDark (e.g. dye0015)
+		* read empty plate
+		* dispense 150ul dye0150, fill to 300ul with water (4 tips)
+		* dispense 300-15ul to the 15ul dye-control wells (dye will be dispensed later)
+		* dispense 300ul water to water-only wells (4 tips)
+		* dispense 300-D ul water to the uncorrected wells
+		* read filled wells
+		* dispense 15ul dye0150 (4 tips)
+		* dispense 15ul dye0015 (4 tips)
+		* read 15ul wells
+	* part 2: run BADTEST dispenses on rest of plate
+		* dispense dye volumes 3, 5, 7, 10, 15 to wells (4 tips, 3 replicates => 60 wells)
+		* read uncorrected wells
+	* part 3: corrections (new plate)
+		* analyze results from parts 1 and 2
+		* calculated corrected dispense volumes
+		* read empty plate
+		* fill plate with water 300-D
+		* read water plate
+		* dispense dye volumes 3, 5, 7, 10, 15 to wells (4 tips, 2 replicates => 40 wells)
+		* repeat that with the corrected volumes
+		* read plate
+
+* test larger volumes on deep well plate or eppendorfs?
+	* for example:
+		* dispense 150ul dye to a bunch of wells, then dispense D water
+		* shake
+		* extract 150ul to reader plate
+		* add 150ul to reader plate
+		* read plate
+	* or:
+		* read empty reader plate
+		* loop over Ds:
+			* empty the dwp and/or put tape over the used wells (not relevant on first step)
+			* weigh deep well plate
+			* dispense 2xD dye on deep well plate
+			* weigh dwp
+			* transfer D to empty well on dwp
+			* transfer 150ul from deep well to reader well
+		* after done with all that, fill reader wells to 300ul with water
+		* read plate
+
+---
+
+* script to find concentration of dye0150 and the unintended dilution of 150ul dispenses
+
+* run an experiment where we dispense half of the volumes corrected and half uncorrected, using Roboliq_Water_Wet_1000_BADTEST
+
+* estimate true dispensed volume from measurements and show p-stars for how significantly different it is from the desired volume
+
+* Just bite the bullet and test all dispense volumes (3,7,15,16,150,300?) on their own plates
+
+	* read empty plate
+	* weigh empty plate
+	* for each tip and volume and liquidClass, dispense into 6 wells
+	* for each group: weigh plate, fill to 300ul with water, read wells, tape over wells, weigh again, and repeat
+	* for 15/16ul volumes, duplicate between dye0015 and dye0150
+	* still need to figure out what to do about Av estimates, alpha_k estimates, and whether to dispense water first or last
+
+* adapt qc21-general to repeat d=15 with both dye0015 and dye0150, or perhaps for d=15 and d=16 to alternate usage of dye0015 and dye0150 (but that would complicate analysis a bit)
+
+* create script to dilute dye0015 to dye0150 and test the unintended dilution of 150ul dispenses
+
+* test weight of water vs dye to see if we need to use a different rho for dye
+
+Or:
+
+* [ ] see if I can modify qc23-dilution to have overlapping k+d points, so that we can compare more, and add loss factor for when droplets stick to tip
+* [ ] re-run qc23-dilution over night
+* [ ] one way to find concentration of dye0008:
+ 	* weigh 15ml tube
+	* dispense 150ul in 15ml tube
+	* weigh tube
+	* fill to 15ml (or some other volume) and shake
+	* weigh tube
+	* transfer 150ul to plate and measure absorbance
+	* also need to find dilution of 150ul air dispenses and concentration of dye0150
+* [ ] for small volumes, find amounts dispensed rather than total volume dispensed and the concentration of the dispense
+	* [ ] `a = a0 + a1*d + epsilon_v0 + d*epsilon_v + a*epsilon_a`
+* [ ] knowing the concentration of dye0008, we can calculate the amounts dispensed
+* [ ] alternative method to find concentration of dye0008 or dye0015:
+	* [ ] find concentration of dye0150 using 150ul dilution series
+	* [ ] dispense dye0150 using 16ul
+	* [ ] dispense dye0008 using 3, 7, 15, 16 ul
+* [ ] and yet another method to find concentration of dye0015:
+	* [ ] dispense 150ul dye0015 into a tube/deep-well
+	* [ ] dispense 9x 150ul water into the tube (from a water trough, with flushing between)
+	* [ ] shake the tube/plate?
+	* [ ] transfer 150ul to reader plate and measure
+* [ ] alternatively, create dye0150 from dye0015 so that we can estimate the relationship
+
+
+
 Running newest QC scripts 2017-06-18:
 
 Highest level:

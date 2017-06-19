@@ -1,0 +1,269 @@
+# npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc42-general.yaml -T
+
+roboliq: v1
+description: |
+  * Use 3 plates (basically, one plate per liquid class, but the liquid classes are distributed among plates for better randomization)
+  * For each liquid class: 4 tips, 5 volumes, 4 replicates = 80 wells
+  * that leaves 16 wells free on each plate - let's use 8 for 15ul of dye0150 and 8 for water-only
+  * Use dye0015 for 3, 7, 15, 16; use dye0150 for 150ul.
+  * Distribute volumes and liquid classes as evenly across plates as possible
+
+  Protocol:
+
+  * For each plate:
+    * Read empty plate.
+    * Dispense water first for air and wet dispenses, and for water-only wells
+    * Read D=0 and D=3ul wells, since they have 297ul water and will let us estimate Av
+    * Dispense dye.
+    * Fill wells to 300ul with water
+    * Shake and read twice; again, shake and read twice
+
+  Calculations for OrangeG dilutions:
+
+  * stock is OrangeG 8g/L, which has absorbance of 0.9152/ul
+  * dye0015: 0.9152*15 => 13.7x dilution -- we'll use 10x dilution
+  * dye0150: 0.9152*150 => 137x dilution
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+parameters:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+  standardLiquidClass:
+    description: Liquid class for the standard wells
+    value: Roboliq_Water_Air_1000
+  testLabwareModel:
+    description: The labware model to test (parameter $m$)
+    value: ourlab.model.plateModel_96_round_transparent_nunc
+  shakeCount:
+    description: How many times to shake the plate then measure its absorbance
+    value: 2
+  measureCount:
+    description: How many times to measure the plate after shaking
+    value: 2
+
+objects:
+  plate1:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P6
+  plate2:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P7
+  plate3:
+    type: Plate
+    description: dye plate
+    model: $#testLabwareModel
+    location: ourlab.mario.site.P8
+  water:
+    type: Variable
+    value: ourlab.mario.systemLiquid
+  dyeLabware0015:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, dye0015]
+  dye0015:
+    type: Liquid
+    description: dye with concentration such that 15ul measures about 1.
+    wells: dyeLabware0015(C01 down F01)
+  dyeLabware0150:
+    type: Plate
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R5
+    contents: [Infinity l, dye0150]
+  dye0150:
+    type: Liquid
+    description: dye with concentration such that 150ul measures about 1.
+    wells: dyeLabware0150(C01 down F01)
+
+  wellData:
+    type: Data
+    valueFile: ./qc42-general-wellData.jsonl
+
+  simData:
+    type: Data
+    valueFile: ./qc42-general-simData.jsonl
+
+  measureAbsorbance:
+    type: Template
+    description: |
+      Parameters:
+
+      * shakeCount: number of cycles for shaking then measuring
+      * measureCount: number of times to measure after shaking
+      * plate: plate
+    template: |
+      {
+        "description": "`Read absorbance of filled wells`",
+        "command": "transporter.doThenRestoreLocation",
+        "objects": ["{{plate}}"],
+        "steps": {
+          "1": {
+            "description": "Move plate to reader",
+            "command": "transporter.movePlate",
+            "object": "{{plate}}",
+            "destination": "ourlab.mario.site.READER"
+          },
+          "2": {
+            "description": "`Loop to shake {{shakeCount}} times`",
+            "command": "system.repeat",
+            "count": {{shakeCount}},
+            "variableName": "shakeIdx",
+            "steps": {
+              "1": {
+                "description": "`Shake (\{{shakeIdx}} of {{shakeCount}}) and measure absorbance {{measureCount}} times`",
+                "command": "system.repeat",
+                "count": {{measureCount}},
+                "variableName": "measureIdx",
+                "steps": {
+                  "1": {
+                    "data": {
+                      "where": {
+                        "shakeRep": "$shakeIdx",
+                        "measureRep": "$measureIdx"
+                      }
+                    },
+                    "description": "`Measure wells \{{well}}`",
+                    "command": "system.if",
+                    "test": "$(measureIdx == 1)",
+                    "then": {
+                      "description": "`Shake (\{{shakeIdx}} of {{shakeCount}}) and measure`",
+                      "command": "absorbanceReader.measurePlate",
+                      "object": "{{plate}}",
+                      "program": {
+                        "excitationWavelength": "$excitationWavelength",
+                        "shakerProgramBefore": {
+                          "duration": "30 s",
+                          "settleDuration": "10 s"
+                        }
+                      },
+                      "output": {
+                        "joinKey": "well",
+                        "appendTo": "measurements",
+                        "units": {
+                          "dyeVolume": "ul",
+                          "waterVolume": "ul"
+                        },
+                        "simulated": "a_sim"
+                      }
+                    },
+                    "else": {
+                      "description": "`Measure absorbance (\{{measureIdx}} of {{measureCount}})`",
+                      "command": "absorbanceReader.measurePlate",
+                      "object": "{{plate}}",
+                      "program": {
+                        "excitationWavelength": "$excitationWavelength"
+                      },
+                      "output": {
+                        "joinKey": "well",
+                        "appendTo": "measurements",
+                        "units": {
+                          "dyeVolume": "ul",
+                          "waterVolume": "ul"
+                        },
+                        "simulated": "a_sim"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+steps:
+  1:
+    description: "Loop over each plate"
+    data: wellData
+    command: data.forEachGroup
+    groupBy: l
+    orderBy: [l, order]
+    steps:
+      description: "`Plate {{l_ONE}}`"
+      command: transporter.doThenRestoreLocation
+      objects: [$l_ONE]
+      steps:
+        1:
+          data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M1"'}}
+          description: Read absorbance of empty wells
+          command: absorbanceReader.measurePlate
+          object: $l_ONE
+          program:
+            excitationWavelength: $excitationWavelength
+          output:
+            joinKey: well
+            appendTo: measurements
+            simulated: "a_sim"
+          destinationAfter: ourlab.mario.site.P3
+
+        2:
+          data: {where: 'waterFirst'}
+          description: Dispense water first for air and wet dispenses, and for water-only wells
+          command: pipetter.pipette
+          program: $standardLiquidClass
+          sources: water
+          destinationLabware: $l_ONE
+          destinations: $well
+          volumes: $(300 ul - volume)
+          syringes: $t
+          clean: light
+          cleanBetween: none
+
+        3:
+          data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M2"'}}
+          description: "Read those wells with water"
+          command: absorbanceReader.measurePlate
+          object: $l
+          program:
+            excitationWavelength: $excitationWavelength
+          output:
+            joinKey: well
+            appendTo: measurements
+            simulated: "a_sim"
+
+        4:
+          data: {where: 'd > 0'}
+          description: Distribute dye
+          command: pipetter.pipette
+          program: $liquidClass
+          sources: $k
+          destinationLabware: $l_ONE
+          destinations: $well
+          volumes: $volume
+          clean: light
+          cleanBetween: flush
+          syringes: $t
+
+        5:
+          # data: {where: 'not waterFirst'}
+          description: Fill all wells to 300ul with water
+          command: pipetter.pipette
+          program: $standardLiquidClass
+          sources: water
+          destinationLabware: $l_ONE
+          destinations: $well
+          items:
+            data():
+              map:
+                volumeTotal: 300 ul
+          clean: light
+          cleanBetween: none
+
+        6:
+          data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M3"'}}
+          description: "Measure wells after filling"
+          command: system.call
+          name: measureAbsorbance
+          lazyParams:
+            plate: $l_ONE
+            shakeCount: $shakeCount
+            measureCount: $measureCount
