@@ -1,0 +1,14 @@
+# npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc42-general-correction.yaml -T
+# npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../c onfig/bsse-mario.js ../protocols/qc42-general-correction.yaml
+
+roboliq: v1
+imports: ./qc42-general.yaml
+
+objects:
+  wellData:
+    type: Data
+    valueFile: ./qc42-general-correction-wellData.jsonl
+
+  simData:
+    type: Data
+    valueFile: ./qc42-general-correction-simData.jsonl

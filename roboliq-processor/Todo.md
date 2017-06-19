@@ -6,7 +6,7 @@ Monday
 	* read empty plate
 	* weigh empty plate
 	* dispense 150ul twice into each dye well (4 tips, 6 replicates, so 24 wells)
-		* first one layer in each well, then the other, to minimize total evaporation
+		* to minimize total evaporation, first dispense one layer in all wells, then the second layer
 	* weigh plate
 	* read filled wells
 	* for each dye well, transfer 150ul to an empty well
@@ -14,8 +14,7 @@ Monday
 	* fill all dye wells to 300ul with water
 	* read dye and water wells
 
-* use a general protocol to characterize v*c for all smaller volumes, repeating 15ul for both dye0015 and dye0150, and use 150ul Air dispenses of dye0150 as a reference
-	*
+* [x] qc42-general: use a general protocol to characterize v*c for all smaller volumes, repeating 15ul for both dye0015 and dye0150, and use 150ul Air dispenses of dye0150 as a reference
 
 * correction test
 	* part 1: estimate concentration of dyeDark (e.g. dye0015)
