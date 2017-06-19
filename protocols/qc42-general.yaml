@@ -1,4 +1,5 @@
 # npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc42-general.yaml -T
+# npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/qc42-general.yaml
 
 roboliq: v1
 description: |
