@@ -1,4 +1,5 @@
 # npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc51-shakeDuration.yaml -T
+# npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/qc51-shakeDuration.yaml
 
 roboliq: v1
 description: |
@@ -61,7 +62,7 @@ objects:
     type: Plate
     description: dye plate
     model: $#testLabwareModel
-    location: ourlab.mario.site.P6
+    location: ourlab.mario.site.P3
   water:
     type: Variable
     value: ourlab.mario.systemLiquid
@@ -127,7 +128,7 @@ objects:
             stage: full
             shakeRep: '{{shakeIdx}}'
             measureRep: 2
-        destinationAfter: ourlab.mario.site.P6
+        destinationAfter: ourlab.mario.site.P3
 
 steps:
   data: wellData
