@@ -12,7 +12,7 @@ description: |
 
   * For each plate:
     * Read empty plate.
-    * Dispense water first for air and wet dispenses, and for water-only wells
+    * Dispense water first for air and half of wet dispenses, and for water-only wells
     * Read D=0 and D=3ul wells, since they have 297ul water and will let us estimate Av
     * Dispense dye.
     * Fill wells to 300ul with water
@@ -23,6 +23,7 @@ description: |
   * stock is OrangeG 8g/L, which has absorbance of 0.9152/ul
   * dye0015: 0.9152*15 => 13.7x dilution -- we'll use 10x dilution
   * dye0150: 0.9152*150 => 137x dilution
+    * 365ul dye stock, fill tube to 50ml
 
 config:
   evowareCompiler:

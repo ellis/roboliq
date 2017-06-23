@@ -1,5 +1,13 @@
 # Todos
 
+Friday
+
+* [ ] write a little script to dispense 270ul water + 3ul dye015 to various wells - some should be water first and others water second - then shake and read in a loop to find how long it takes to reach a well-mixed state
+* [?] qc42-general: for air dispense, dispense water half before, half afterwards in order to test mixing extent
+* [ ] qc42-general: at the end of the script, shake long enough so that the wells are well-mixed - maybe repeat readings a few times to check whether the well-mixed state has been reached.
+* [ ] characterize 150ul
+* [ ] test larger volumes
+
 Monday
 
 * characterize 150ul A: bias and dilution
