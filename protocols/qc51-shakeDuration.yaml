@@ -8,11 +8,13 @@ description: |
 
   Protocol:
 
-  * dispense 300ul of dye0150 into some control wells
+  * assign some control well to get 300ul of dye0150
+  * assign some water-only wells
   * assign various volumes D (3, 7, 15, 16, 150) to wells, some wells should be
     selected for waterFirst.
-  * dispense 300-D water to the waterFirst wells
+  * dispense 30ul water to the waterFirst wells
   * dispense D of the appropriate dye
+  * fill all wells to 300ul with water
   * Loop N times:
     * measure plate in absorbance reader twice (with no shaking in reader)
     * shake on shaker for T duration
@@ -28,6 +30,8 @@ description: |
   * stock is OrangeG 8g/L, which has absorbance of 0.9152/ul
   * dye0015: 0.9152*15 => 13.7x dilution -- we'll use 10x dilution
   * dye0150: 0.9152*150 => 137x dilution
+
+  Execution time on mario: 80 minutes
 
 config:
   evowareCompiler:
@@ -52,7 +56,7 @@ parameters:
     value: 1 minute
   shakeCount:
     description: How many times to shake the plate then measure its absorbance
-    value: 10
+    value: 20
   # measureCount:
   #   description: How many times to measure the plate after shaking
   #   value: 2
@@ -98,7 +102,6 @@ objects:
     type: Template
     description: |
       Parameters:
-
       * shakeIdx: current shakeIdx
     template:
       1:
@@ -114,7 +117,6 @@ objects:
             stage: full
             shakeRep: '{{shakeIdx}}'
             measureRep: 1
-        destinationAfter: stay
       2:
         command: absorbanceReader.measurePlate
         object: $l_ONE
@@ -128,7 +130,42 @@ objects:
             stage: full
             shakeRep: '{{shakeIdx}}'
             measureRep: 2
-        destinationAfter: ourlab.mario.site.P3
+
+  shakeAndMeasureAbsorbanceTwice:
+    type: Template
+    description: |
+      Parameters:
+      * shakeIdx: current shakeIdx
+    template:
+      1:
+        command: absorbanceReader.measurePlate
+        object: $l_ONE
+        program:
+          excitationWavelength: $excitationWavelength
+          shakerProgramBefore:
+            duration: 30 s
+            settleDuration: 10 s
+        output:
+          joinKey: well
+          appendTo: measurements
+          # simulated: "a_sim"
+          userValues:
+            stage: full
+            shakeRep: '{{shakeIdx}}'
+            measureRep: 1
+      2:
+        command: absorbanceReader.measurePlate
+        object: $l_ONE
+        program:
+          excitationWavelength: $excitationWavelength
+        output:
+          joinKey: well
+          appendTo: measurements
+          # simulated: "a_sim"
+          userValues:
+            stage: full
+            shakeRep: '{{shakeIdx}}'
+            measureRep: 2
 
 steps:
   data: wellData
@@ -153,14 +190,14 @@ steps:
     sources: water
     destinationLabware: $l_ONE
     destinations: $well
-    volumes: $(300 ul - volume)
-    syringes: $t
+    volumes: $waterFirstVolume
+    # syringes: $t
     clean: light
     cleanBetween: none
 
   3:
-    data: {where: 'd > 0'}
-    description: Distribute dye
+    data: {where: {d: {gt: 0}, p: '"A"'}}
+    description: Distribute dye using Air dispense
     command: pipetter.pipette
     program: $liquidClass
     sources: $k
@@ -172,6 +209,19 @@ steps:
     syringes: $t
 
   4:
+    data: {where: {d: {gt: 0}, p: '"W"'}}
+    description: Distribute dye using Wet dispense
+    command: pipetter.pipette
+    program: $liquidClass
+    sources: $k
+    destinationLabware: $l_ONE
+    destinations: $well
+    volumes: $volume
+    clean: light
+    cleanBetween: flush
+    syringes: $t
+
+  5:
     description: Fill all wells to 300ul with water
     command: pipetter.pipette
     program: $standardLiquidClass
@@ -185,26 +235,46 @@ steps:
     clean: light
     cleanBetween: none
 
-  5:
-    description: Read absorbance of empty wells
+  6:
+    description: Read absorbance of non-shaken wells
     command: system.call
     name: measureAbsorbanceTwice
     lazyParams:
       shakeIdx: 0
 
-  6:
-    command: system.repeat
-    count: $shakeCount
-    variableName: shakeIdx
+  # 7:
+  #   command: system.repeat
+  #   count: $shakeCount
+  #   variableName: shakeIdx
+  #   steps:
+  #     1:
+  #       description: "`Shake {{shakeIdx}} of {{shakeCount}}`"
+  #       command: shaker.shakePlate
+  #       object: $l_ONE
+  #       program:
+  #         duration: $T
+  #     2:
+  #       command: system.call
+  #       name: measureAbsorbanceTwice
+  #       lazyParams:
+  #         shakeIdx: $shakeIdx
+
+  7:
+    command: transporter.doThenRestoreLocation
+    objects: [$l_ONE]
     steps:
       1:
-        description: "`Shake {{shakeIdx}} of {{shakeCount}}`"
-        command: shaker.shakePlate
-        object: $l_ONE
-        program:
-          duration: $T
+        "description": "Move plate to reader"
+        "command": "transporter.movePlate"
+        "object": $l_ONE
+        "destination": "ourlab.mario.site.READER"
       2:
-        command: system.call
-        name: measureAbsorbanceTwice
-        lazyParams:
-          shakeIdx: $shakeIdx
+        command: system.repeat
+        count: $shakeCount
+        variableName: shakeIdx
+        steps:
+          description: "`Shake {{shakeIdx}} of {{shakeCount}}`"
+          command: system.call
+          name: shakeAndMeasureAbsorbanceTwice
+          lazyParams:
+            shakeIdx: $shakeIdx

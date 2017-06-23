@@ -209,28 +209,29 @@ steps:
 
         2:
           data: {where: 'waterFirst'}
-          description: Dispense water first for air and wet dispenses, and for water-only wells
+          description: Dispense 60ul water first for all air dispense and half of wet dispenses
           command: pipetter.pipette
           program: $standardLiquidClass
           sources: water
           destinationLabware: $l_ONE
           destinations: $well
-          volumes: $(300 ul - volume)
+          # volumes: $(300 ul - volume)
+          volumes: 60 ul
           syringes: $t
           clean: light
           cleanBetween: none
 
-        3:
-          data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M2"'}}
-          description: "Read those wells with water"
-          command: absorbanceReader.measurePlate
-          object: $l
-          program:
-            excitationWavelength: $excitationWavelength
-          output:
-            joinKey: well
-            appendTo: measurements
-            simulated: "a_sim"
+        # 3:
+        #   data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M2"'}}
+        #   description: "Read those wells with water"
+        #   command: absorbanceReader.measurePlate
+        #   object: $l
+        #   program:
+        #     excitationWavelength: $excitationWavelength
+        #   output:
+        #     joinKey: well
+        #     appendTo: measurements
+        #     simulated: "a_sim"
 
         4:
           data: {where: 'd > 0'}
