@@ -1,12 +1,28 @@
 # Todos
 
+Bromphenol blue, ~600nm / 590nm
+
 Friday
 
-* [ ] write a little script to dispense 270ul water + 3ul dye015 to various wells - some should be water first and others water second - then shake and read in a loop to find how long it takes to reach a well-mixed state
-* [?] qc42-general: for air dispense, dispense water half before, half afterwards in order to test mixing extent
-* [ ] qc42-general: at the end of the script, shake long enough so that the wells are well-mixed - maybe repeat readings a few times to check whether the well-mixed state has been reached.
+* [x] write a little script to dispense 270ul water + 3ul dye015 to various wells - some should be water first and others water second - then shake and read in a loop to find how long it takes to reach a well-mixed state
+* [x] qc42-general: fix it for problems with 3ul wells not being well mixed with Wet dispense
+* [x] qc42-general-correction 1
+	* [x] run the rough manual evaluation to get the correction factors
+	* [x] recompile script using the new correction factors
+	* [x] run it
+	* [x] check results: results are BAD
 * [ ] characterize 150ul
+	* [x] run it
+	* [ ] analyze it quickly
+	* [ ] analyze it with MCMC
+* [ ] run qc41-150ul with just water up to the point of weighing the full plate
 * [ ] test larger volumes
+* [ ] qc42-general-correction 2
+	* [ ] try to figure out why correction didn't work well for some volumes
+	* [ ] calculate better correction factors
+	* [ ] recompile script using the new correction factors
+	* [ ] run it
+	* [ ] check results
 
 Monday
 

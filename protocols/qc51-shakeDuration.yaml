@@ -31,7 +31,7 @@ description: |
   * dye0015: 0.9152*15 => 13.7x dilution -- we'll use 10x dilution
   * dye0150: 0.9152*150 => 137x dilution
 
-  Execution time on mario: 80 minutes
+  Execution time on mario: 1h45m
 
 config:
   evowareCompiler:

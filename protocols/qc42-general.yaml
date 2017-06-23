@@ -1,5 +1,5 @@
 # npm run processor -- --progress -P ../compiled ../config/bsse-mario.js ../protocols/qc42-general.yaml -T
-# npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/qc42-general.yaml
+# npm run processor -- --progress -T -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/qc42-general.yaml
 
 roboliq: v1
 description: |
@@ -25,6 +25,8 @@ description: |
   * dye0015: 0.9152*15 => 13.7x dilution -- we'll use 10x dilution
   * dye0150: 0.9152*150 => 137x dilution
     * 365ul dye stock, fill tube to 50ml
+
+  Execution time on mario: 1h38m
 
 config:
   evowareCompiler:
@@ -209,7 +211,7 @@ steps:
 
         2:
           data: {where: 'waterFirst'}
-          description: Dispense 60ul water first for all air dispense and half of wet dispenses
+          description: Dispense 60ul water first for all wet dispenses
           command: pipetter.pipette
           program: $standardLiquidClass
           sources: water
@@ -233,7 +235,7 @@ steps:
         #     appendTo: measurements
         #     simulated: "a_sim"
 
-        4:
+        3:
           data: {where: 'd > 0'}
           description: Distribute dye
           command: pipetter.pipette
@@ -246,8 +248,7 @@ steps:
           cleanBetween: flush
           syringes: $t
 
-        5:
-          # data: {where: 'not waterFirst'}
+        4:
           description: Fill all wells to 300ul with water
           command: pipetter.pipette
           program: $standardLiquidClass
@@ -261,8 +262,14 @@ steps:
           clean: light
           cleanBetween: none
 
+        5:
+          command: shaker.shakePlate
+          object: $l_ONE
+          program:
+            duration: 7 minutes
+
         6:
-          data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M3"'}}
+          data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M2"'}}
           description: "Measure wells after filling"
           command: system.call
           name: measureAbsorbance
