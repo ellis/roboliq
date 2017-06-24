@@ -17,43 +17,74 @@ function createEmptyModel() {
 	};
 }
 
+function getLabwareData(model, l) {
+	const m = "FIXME";
+	if (!model.labwares.hasOwnProperty(l)) {
+		model.labwares[l] = { m };
+	}
+	return model.labwares[l];
+}
+
+function getWellData(model, well) {
+	if (!model.wells.hasOwnProperty(well)) {
+		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
+		model.wells[well] = { l, pos: wellPos };
+	}
+	return model.wells[well];
+}
+
+function getRv_al(model, l) {
+	const labwareData = getLabwareData(model, l);
+	if (!labwareData.hasOwnProperty("idx_al")) {
+		const rv = {type: "al", l, idx: model.rvs.length};
+		model.rvs.push(rv);
+		labwareData.idx_al = rv.idx;
+	}
+	return model.rvs[labwareData.idx_al];
+}
+
+function getRv_a0(model, well) {
+	const wellData = getWellData(model, well);
+	if (!wellData.hasOwnProperty("idx_a0")) {
+		const rv = {type: "a0", well, idx: model.rvs.length};
+		model.rvs.push(rv);
+		wellData.idx_a0 = rv.idx;
+	}
+	return model.rvs[wellData.idx_a0];
+}
+
+function getRv_av(model, well) {
+	const wellData = getWellData(model, well);
+	if (!wellData.hasOwnProperty("idx_av")) {
+		const rv = {type: "av", well, idx: model.rvs.length};
+		model.rvs.push(rv);
+		wellData.idx_av = rv.idx;
+	}
+	return model.rvs[wellData.idx_av];
+}
+
+
 function absorbance_A0(context, model, wells) {
 	_.forEach(wells, well => {
 		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
+		const rv_al = getRv_al(model, l);
+		const rv_a0 = getRv_a0(model, well);
+	});
+}
 
-		const m = "FIXME";
-
-		let rv_al;
-		if (!model.labwares.hasOwnProperty(l)) {
-			rv_al = {type: "al", l, idx: model.rvs.length};
-			model.rvs.push(rv_al);
-			model.labwares[l] = {
-				m,
-				idx_al: rv_al.idx
-			};
-		}
-
-		let rv_a0;
-		if (!model.wells.hasOwnProperty(well)) {
-			rv_a0 = {type: "a0", well, idx: model.rvs.length};
-			model.rvs.push(rv_a0);
-
-			rv_av = {type: "av", well, idx: model.rvs.length};
-			model.rvs.push(rv_av);
-
-			model.wells[well] = {
-				l,
-				pos: wellPos,
-				idx_a0: rv_a0.idx,
-				idx_av: rv_av.idx
-			};
-		}
+function absorbance_AV(context, model, wells) {
+	_.forEach(wells, well => {
+		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
+		const rv_al = getRv_al(model, l);
+		const rv_a0 = getRv_a0(model, well);
+		const rv_av = getRv_av(model, well);
 	});
 }
 
 const context = {};
 const model = createEmptyModel();
 absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
+absorbance_AV(context, model, ["plate1(A01)", "plate1(A02)"]);
 console.log(JSON.stringify(model, null, '\t'));
 
 console.log();
