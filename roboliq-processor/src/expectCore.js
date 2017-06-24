@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 
 // NOTE: with Babel 6 set to transpile to ES6, classes which extend Error are
 // not properly recognized as subclasses -- so "instanceof RoboliqError" won't

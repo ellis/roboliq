@@ -15,7 +15,7 @@ Friday
 	* [x] run it
 	* [ ] analyze it quickly
 	* [ ] analyze it with MCMC
-* [ ] run qc41-150ul with just water up to the point of weighing the full plate
+* [x] run qc41-150ul with just water up to the point of weighing the full plate
 * [ ] test larger volumes
 * [ ] qc42-general-correction 2
 	* [ ] try to figure out why correction didn't work well for some volumes
