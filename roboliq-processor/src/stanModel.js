@@ -152,6 +152,7 @@ console.log();
 console.log("data {");
 if (!_.isEmpty(model.majorDs)) {
 	console.log("  real beta_scale;");
+	console.log("  real gamma_scale;");
 }
 console.log("}");
 
@@ -183,19 +184,19 @@ console.log();
 console.log("  vector[NRV] RV_raw;");
 if (!_.isEmpty(model.majorDs)) {
 	console.log("  vector[NPD] beta_raw;");
+	console.log("  vector[NPD] gamma_raw;");
+	console.log("  vector[NPD] sigma_gamma_raw;");
 }
 console.log("}");
 
-console.log();
-console.log("transformed parameters {");
-function print_transformed_parameters_RV(model) {
-	console.log(`  vector[NRV] RV = RV_raw;`);
-	print_transformed_parameters_RV_al(model);
-	print_transformed_parameters_RV_a0(model);
-	print_transformed_parameters_RV_av(model);
-	print_transformed_parameters_RV_v(model);
+function print_transformed_parameters_RV(model, output) {
+	output.transformedParameters.definitions.push(`  vector[NRV] RV = RV_raw;`);
+	print_transformed_parameters_RV_al(model, output);
+	print_transformed_parameters_RV_a0(model, output);
+	print_transformed_parameters_RV_av(model, output);
+	print_transformed_parameters_RV_v(model, output);
 }
-function print_transformed_parameters_RV_al(model) {
+function print_transformed_parameters_RV_al(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "al");
 	const idxs = Array(rvs.length);
 	const idxs_m = Array(rvs.length);
@@ -204,11 +205,11 @@ function print_transformed_parameters_RV_al(model) {
 		idxs[i] = rv.idx + 1;
 		idxs_m[i] = 0 + 1;
 	}
-	console.log();
-	console.log("  // AL[m] ~ normal(alpha_l[m], sigmal_alpha_l[m])")
-	console.log(`  RV[${idxs}] = alpha_l[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_l[${idxs_m}]);`);
+	output.transformedParameters.statements.push("");
+	output.transformedParameters.statements.push("  // AL[m] ~ normal(alpha_l[m], sigmal_alpha_l[m])")
+	output.transformedParameters.statements.push(`  RV[${idxs}] = alpha_l[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_l[${idxs_m}]);`);
 }
-function print_transformed_parameters_RV_a0(model) {
+function print_transformed_parameters_RV_a0(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "a0");
 	const idxs = Array(rvs.length);
 	const idxs_al = Array(rvs.length);
@@ -222,11 +223,11 @@ function print_transformed_parameters_RV_a0(model) {
 		idxs_m[i] = 0 + 1;
 	}
 
-	console.log();
-	console.log("  // A0[i] ~ normal(AL[m[i]], sigma_alpha_i[m[i]])");
-	console.log(`  RV[${idxs}] = RV[${idxs_al}] + RV_raw[${idxs}] .* sigma_alpha_i[${idxs_m}];`);
+	output.transformedParameters.statements.push("");
+	output.transformedParameters.statements.push("  // A0[i] ~ normal(AL[m[i]], sigma_alpha_i[m[i]])");
+	output.transformedParameters.statements.push(`  RV[${idxs}] = RV[${idxs_al}] + RV_raw[${idxs}] .* sigma_alpha_i[${idxs_m}];`);
 }
-function print_transformed_parameters_RV_av(model) {
+function print_transformed_parameters_RV_av(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "av");
 	const idxs = Array(rvs.length);
 	const idxs_a0 = Array(rvs.length);
@@ -243,15 +244,19 @@ function print_transformed_parameters_RV_av(model) {
 		idxs_m[i] = 0 + 1;
 	}
 
-	console.log();
-	console.log("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
-	console.log(`  RV[${idxs}] = RV[${idxs_a0}] + alpha_v[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_v[${idxs_m}];`);
+	output.transformedParameters.statements.push("");
+	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
+	output.transformedParameters.statements.push(`  RV[${idxs}] = RV[${idxs_a0}] + alpha_v[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_v[${idxs_m}];`);
 }
-function print_transformed_parameters_RV_v(model) {
+function print_transformed_parameters_RV_v(model, output) {
 
 	if (!_.isEmpty(model.majorDs)) {
-		console.log();
-		console.log("  vector[NPD] beta = beta_raw * beta_scale;");
+		output.transformedParameters.definitions.push("");
+		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
+		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
+		output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * gamma_scale;");
+		output.transformedParameters.statements.push("");
+		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max(1, 1 - gamma_raw[i] * gamma_scale);");
 	}
 
 	const n = model.aspirates.length;
@@ -263,18 +268,55 @@ function print_transformed_parameters_RV_v(model) {
 	// 	idx_volTot0, idx_conc,
 	// 	idx_v, idx_c, idx_volTot,
 	// });
-	const idxs = model.aspirates.map(x => x.idx_v + 1);
-	const rvs = idxs.map(idx => model.rvs[idx - 1]);
 	const iAsp = _.range(1, model.aspirates.length + 1);
 	const iMajorD = model.aspirates.map(x => x.idx_majorD + 1);
+	{
+		const idxs = model.aspirates.map(x => x.idx_v + 1);
+		const rvs = idxs.map(idx => model.rvs[idx - 1]);
 
-	console.log();
-	console.log("  // V_t[j] ~ normal(d[j] * (1 + beta[subd[j]]), sigma_v[subd[j]])");
-	console.log(`  RV[${idxs}] = d[${iAsp}] * (1 + beta[${iMajorD}]) + RV_raw[${idxs}] .* sigma_v[${iMajorD}];`);
+		output.transformedParameters.statements.push("");
+		output.transformedParameters.statements.push("  // V_t[j] ~ normal(d[j] * (1 + beta[subd[j]]), sigma_v[subd[j]])");
+		output.transformedParameters.statements.push(`  RV[${idxs}] = d[${iAsp}] * (1 + beta[${iMajorD}]) + RV_raw[${idxs}] .* sigma_v[${iMajorD}];`);
+	}
+
+	{
+		const idxs = model.aspirates.map(x => x.idx_c + 1);
+		const rvs = idxs.map(idx => model.rvs[idx - 1]);
+
+		output.transformedParameters.statements.push("");
+		output.transformedParameters.statements.push("  // C_t[j] ~ normal(gamma[subd[j]], sigma_gamma)");
+		output.transformedParameters.statements.push(`  RV[${idxs}] = gamma[${iMajorD}] + RV_raw[${idxs}] .* sigma_gamma[${iMajorD}];`);
+	}
+
+	{
+		_.forEach(model.aspirates, (asp, iAsp0) => {
+			const idx = asp.idx_volTot + 1;
+			if (_.isNumber(asp.idx_volTot0)) {
+				output.transformedParameters.statements.push("");
+				output.transformedParameters.statements.push("  // VolTot_t[j] = sum of volumes");
+				output.transformedParameters.statements.push(`  RV[${idx}] = RV[${asp.idx_volTot0 + 1}]-RV[${asp.idx_v + 1}];`);
+			}
+			else {
+				output.transformedParameters.statements.push("");
+				output.transformedParameters.statements.push("  // VolTot_t[j] = sum of volumes");
+				output.transformedParameters.statements.push(`  RV[${idx}] = -RV[${asp.idx_v + 1}];`);
+			}
+		});
+	}
 }
 
-
-print_transformed_parameters_RV(model);
+const output = {
+	transformedParameters: {
+		definitions: [],
+		statements: []
+	}
+};
+print_transformed_parameters_RV(model, output);
+console.log();
+console.log("transformed parameters {");
+output.transformedParameters.definitions.forEach(s => console.log(s));
+console.log();
+output.transformedParameters.statements.forEach(s => console.log(s));
 console.log("}");
 
 console.log();
@@ -282,5 +324,7 @@ console.log("model {");
 console.log("  RV_raw ~ normal(0, 1);");
 if (!_.isEmpty(model.majorDs)) {
 	console.log("  beta_raw ~ normal(0, 1);");
+	console.log("  gamma_raw ~ normal(0, 1);");
+	console.log("  sigma_gamma_raw ~ exponential(1);");
 }
 console.log("}");
