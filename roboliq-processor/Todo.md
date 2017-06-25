@@ -4,7 +4,10 @@ stanModel:
 
 * [x] remove sigma_a from RV calculation of absorbance
 * [x] when reading absorbance multiple times in a row, reference the same RV
-* [ ] generate a stanModel for an actual experiment
+* [x] generate a stanModel for an actual experiment
+* [ ] why are tip concentration RVs missing?
+* [ ] separate RV_VTIP
+* [ ] create separate RV_C0TIP
 * [ ] try to compile the model with stan
 * [ ] figure out how to evaluate the results
 * [ ] add weight models

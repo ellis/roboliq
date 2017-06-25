@@ -185,6 +185,8 @@ function aspirate(context, model, {p, t, d, well}) {
 	const tipData = getTipData(model, t);
 	const ref_vWell0 = wellData.ref_vWell; // volume of well before aspirating
 
+	// console.log({p, t, d, well, wellData, tipData})
+
 	// Check for concentration of source
 	if (wellData.hasOwnProperty("k") && !wellData.hasOwnProperty("ref_cWell")) {
 		// We have several possibilities:
@@ -298,6 +300,7 @@ function printModel(model) {
 		console.log("  real beta_scale;");
 		console.log("  real sigma_v_scale;");
 		console.log("  real gamma_scale;");
+		console.log("  real sigma_gamma_scale;");
 	}
 	console.log("  real sigma_a_scale;");
 	_.forEach(model.liquids, liquidData => {
@@ -359,7 +362,7 @@ function printModel(model) {
 		console.log("  vector[NPD] beta_raw;");
 		console.log("  vector[NPD] gamma_raw;");
 		console.log("  vector<lower=0>[NPD] sigma_v_raw;");
-		console.log("  vector<lower=0>[NPD] sigma_gamma_raw;");
+		console.log("  real<lower=0> sigma_gamma_raw;");
 	}
 	console.log("}");
 
@@ -403,9 +406,10 @@ function print_transformed_parameters(model, output) {
 		output.transformedParameters.definitions.push("");
 		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
 		output.transformedParameters.definitions.push("  vector<lower=0>[NPD] sigma_v = sigma_v_raw * sigma_v_scale;");
-		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
+		output.transformedParameters.definitions.push("  vector[NPD] gamma;");
+		output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * sigma_gamma_scale;");
 		output.transformedParameters.statements.push("");
-		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max({1, 1 - gamma_raw[i] * gamma_scale});");
+		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max({1, 1 - gamma_raw[i] * sigma_gamma});");
 	}
 	output.transformedParameters.definitions.push("  real<lower=0> sigma_a = sigma_a_raw * sigma_a_scale;");
 	output.transformedParameters.definitions.push(`  vector[NRV] RV = RV_raw;`);
@@ -498,11 +502,11 @@ function handle_vTipAsp(model, output, rv, idx) {
 	output.transformedParameters.statements.push(`  RV[${idx + 1}] = d[${rv.idx_pip + 1}] * (1 + beta[${rv.idx_majorD + 1}]) + RV_raw[${idx + 1}] .* sigma_v[${rv.idx_majorD + 1}]; // aspirate volume into tip`);
 }
 function handle_cTipAsp(model, output, rv, idx) {
-	// C_t[j] ~ normal(ak[src] * gamma[subd[j]], sigma_gamma)
+	// C_t[j] ~ ak[src] * normal(gamma[subd[j]], sigma_gamma)
 	const cWell0 = _.isNumber(rv.ref_cWell0.idx)
 		? `RV[${rv.ref_cWell0.idx}]`
 		: rv.ref_cWell0.name;
-	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] * sigma_gamma[${rv.idx_majorD + 1}]); // aspirated concentration in tip`);
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] * sigma_gamma); // aspirated concentration in tip`);
 }
 function handle_vWellAsp(model, output, rv, idx) {
 	if (_.isNumber(rv.ref_vWell0.idx)) {
