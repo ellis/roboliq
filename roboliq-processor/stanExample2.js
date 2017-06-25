@@ -1,9 +1,13 @@
 // qc42-general-sim
 const _ = require('lodash');
+const fs = require('fs');
 const stanModel = require('./src/stanModel.js');
 const wellsParser = require('./src/parsers/wellsParser.js');
 
 const {createEmptyModel, addLiquid, assignLiquid, measureAbsorbance, aspirate, dispense} = stanModel;
+
+const wellData = fs.readFileSync("../protocols/qc42-general-wellData.jsonl", "utf8").split("\n").map(s => s.trim()).filter(s => s != "").map(s => JSON.parse(s));
+// console.log(wellData)
 
 const context = {};
 const majorDValues = [3, 7, 15, 16, 150, 500, 501, 750, 1000];
@@ -24,9 +28,22 @@ _.forEach(plates, plate => {
 	});
 	// console.log({wells})
 	measureAbsorbance(context, model, wells);
-	// aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "troughLabware1(A01)", 	aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "waterLabware1(A01)", k: "water"});
-	// dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)"});
+
+	_.forEach(wellData, row => {
+		if (row.l === plate && row.d > 0) {
+			aspirate(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.k}Labware(A01)`, k: row.k});
+			dispense(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.l}(${row.well})`});
+		}
+		// TODO: fill to 300ul with water
+		// aspirate(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.k}Labware(A01)`, k: row.k});
+	})
+
+	measureAbsorbance(context, model, wells);
+	measureAbsorbance(context, model, wells);
+	measureAbsorbance(context, model, wells);
+	measureAbsorbance(context, model, wells);
 });
+
 // console.log(JSON.stringify(model, null, '\t'));
 
 stanModel.printModel(model);

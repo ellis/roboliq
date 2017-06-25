@@ -280,6 +280,7 @@ function printModel(model) {
 	console.log("data {");
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  real beta_scale;");
+		console.log("  real sigma_v_scale;");
 		console.log("  real gamma_scale;");
 	}
 	console.log("  real sigma_a_scale;");
@@ -312,7 +313,7 @@ function printModel(model) {
 	if (!_.isEmpty(model.pipOps)) {
 		console.log();
 		console.log("  // desired volumes")
-		console.log(`  vector[NJ] d = {${model.pipOps.map(x => x.d)}};`);
+		console.log(`  real d[NJ] = {${model.pipOps.map(x => x.d.toFixed(1))}};`);
 	}
 	console.log("}");
 
@@ -321,8 +322,10 @@ function printModel(model) {
 	console.log("  vector<lower=0,upper=1>[NM] alpha_l;");
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_l;");
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_i;");
-	console.log("  vector<lower=-0.5,upper=0.5>[NM] alpha_v;");
-	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_v;");
+	if (_.some(model.rvs, rv => rv.type === "av")) {
+		console.log("  vector<lower=-0.5,upper=0.5>[NM] alpha_v;");
+		console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_v;");
+	}
 	console.log();
 	console.log("  vector[NRV] RV_raw;");
 	_.forEach(model.liquids, liquidData => {
@@ -336,6 +339,7 @@ function printModel(model) {
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  vector[NPD] beta_raw;");
 		console.log("  vector[NPD] gamma_raw;");
+		console.log("  vector[NPD] sigma_v_raw;");
 		console.log("  vector[NPD] sigma_gamma_raw;");
 	}
 	console.log("}");
@@ -359,11 +363,12 @@ function printModel(model) {
 	console.log("  RV_raw ~ normal(0, 1);");
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  beta_raw ~ normal(0, 1);");
+		console.log("  sigma_v_raw ~ normal(0, 1);")
 		console.log("  gamma_raw ~ normal(0, 1);");
 		console.log("  sigma_gamma_raw ~ exponential(1);");
 	}
-	console.log("  sigma_a_raw ~ exponential(1);");
 	if (model.absorbanceMeasurements.length > 0) {
+		console.log("  sigma_a_raw ~ exponential(1);");
 		console.log();
 		const idxsRv = model.absorbanceMeasurements.map(x => x.ref_a.idx);
 		console.log(`  A ~ normal(RV[{${idxsRv}}], RV[{${idxsRv}}] * sigma_a);`);
@@ -375,9 +380,10 @@ function print_transformed_parameters(model, output) {
 	if (!_.isEmpty(model.majorDs)) {
 		output.transformedParameters.definitions.push("");
 		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
+		output.transformedParameters.definitions.push("  vector[NPD] sigma_v = sigma_v_raw * sigma_v_scale;");
 		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
 		output.transformedParameters.statements.push("");
-		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max(1, 1 - gamma_raw[i] * gamma_scale);");
+		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max({1, 1 - gamma_raw[i] * gamma_scale});");
 	}
 	output.transformedParameters.definitions.push("  real sigma_a = sigma_a_raw * sigma_a_scale;");
 	output.transformedParameters.definitions.push(`  vector[NRV] RV = RV_raw;`);
@@ -510,7 +516,12 @@ function handle_cWellDis(model, output, rv, idx) {
 }
 function handle_a(model, output, rv, idx) {
 	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
-	output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[Av] + RV[${rv.ref_vWell.idx}] * RV[${rv.ref_cWell.idx}]; // absorbance in well`);
+	if (rv.ref_cWell) {
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_av.idx}] + RV[${rv.ref_vWell.idx}] * RV[${rv.ref_cWell.idx}]; // absorbance in well`);
+	}
+	else {
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_av.idx}]; // absorbance in well`);
+	}
 }
 
 module.exports = {
