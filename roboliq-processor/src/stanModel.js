@@ -23,8 +23,7 @@ function createEmptyModel(majorDValues) {
 		rvs: [],
 		// Calculated variables
 		xvs: [],
-		aspirates: [],
-		dispenses: []
+		pipOps: [], // Pipetting operations
 	};
 }
 
@@ -153,7 +152,7 @@ function aspirate(context, model, {p, t, d, well}) {
 		idx_majorD = model.majorDs[pd].idx;
 	}
 
-	const idx_pip = model.aspirates.length;
+	const idx_pip = model.pipOps.length;
 	const idx_vTipAsp = model.rvs.length;
 	const rv_vTipAsp = {idx: idx_vTipAsp, type: "vTipAsp", idx_pip, idx_majorD};
 	// TODO: this is currently just calculated, so it'd be better not to have a
@@ -161,7 +160,7 @@ function aspirate(context, model, {p, t, d, well}) {
 	// model. We should differentiate between RV's that are calculated and RV's
 	// that require their own parameter.
 	model.rvs.push(rv_vTipAsp);
-	tipData.idx_v = idx_vTipAsp;
+	tipData.idx_vTipAsp = idx_vTipAsp;
 
 	// If we have information about the source concentration,
 	// then track the concentration in the tip too.
@@ -169,7 +168,7 @@ function aspirate(context, model, {p, t, d, well}) {
 		const idx_cTipAsp = model.rvs.length;
 		const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", idx_cWell0, idx_majorD};
 		model.rvs.push(rv_cTipAsp);
-		tipData.idx_c = idx_cTipAsp;
+		tipData.idx_cTipAsp = idx_cTipAsp;
 	}
 
 	// If we already have information about well volume,
@@ -187,7 +186,7 @@ function aspirate(context, model, {p, t, d, well}) {
 		// idx_volTot0, idx_conc0,
 		// idx_v, idx_c, idx_volTot,
 	};
-	model.aspirates.push(asp);
+	model.pipOps.push(asp);
 }
 
 function dispense(context, model, {p, t, d, well}) {
@@ -200,35 +199,33 @@ function dispense(context, model, {p, t, d, well}) {
 
 	const wellData = getWellData(model, well);
 	const tipData = getTipData(model, t);
-	const idx_volTot0 = wellData.idx_volTot; // volume of well before aspirating
-	const idx_conc0 = wellData.idx_conc; // concentration of well before aspirating
+	const idx_vWell0 = wellData.idx_vWell; // volume of well before aspirating
+	const idx_cWell0 = wellData.idx_cWell; // concentration of well before aspirating
+	const idx_vTipAsp = tipData.idx_vTipAsp; // volume in tip
+	const idx_cTipAsp = tipData.idx_cTipAsp; // concentration in tip
 
-	CONTINUE
-	const idx_volTot = model.rvs.length;
-	const idx_conc = idx_volTot + 1;
-	const rv_volTot = {type: "vWellDis", p, t, d, well, idx_volTot0, idx_v: tipData.idx_v, idx: idx_volTot};
-	const rv_conc = {type: "cWellDis", p, t, d, well, idx_volTot0, idx_conc0, idx: idx_conc};
-	model.rvs.push(rv_volTot);
-	model.rvs.push(rv_conc);
+	const idx_vWellDis = model.rvs.length;
+	// const idx_pip = model.pipOps.length;
+	const rv_vWellDis = {idx: idx_vTipAsp, type: "vWellDis", idx_vTipAsp};
+	model.rvs.push(rv_vWellDis);
+	tipData.idx_vTipAsp = undefined;
 
-	wellData.idx_volTot = idx_volTot;
-	wellData.idx_conc = idx_volTot;
-	tipData.idx_v = undefined;
-	tipData.idx_c = undefined;
-
-	const dis = {
-		p, t, d, well, k,
-		idx_volTot0, idx_conc0,
-		idx_v, idx_c, idx_volTot,
-	};
-	if (_.includes(model.majorDValues, d)) {
-		const pd = p+d;
-		if (!model.majorDs.hasOwnProperty(pd)) {
-			model.majorDs[pd] = {idx: _.size(model.majorDs), p, d};
-		}
-		asp.idx_majorD = model.majorDs[pd].idx;
+	// If we have information about the source concentration,
+	// then track the concentration in the tip too.
+	if (_.isNumber(idx_cTipAsp)) {
+		const idx_cWellDis = model.rvs.length;
+		const rv_cWellDis = {idx: idx_cWellDis, type: "cWellDis", idx_vWell0, idx_cWell0, idx_vTipAsp, idx_cTipAsp};
+		model.rvs.push(rv_cWellDis);
+		tipData.idx_cTipAsp = undefined;
 	}
-	model.aspirates.push(asp);
+
+	const asp = {
+		d
+		// p, t, d, well, k,
+		// idx_volTot0, idx_conc0,
+		// idx_v, idx_c, idx_volTot,
+	};
+	model.pipOps.push(asp);
 }
 
 
@@ -244,7 +241,7 @@ addLiquid(model, "dye", {type: "estimate", lower: 0, upper: 1});
 assignLiquid(context, model, "waterLabware1(A01)", "water");
 assignLiquid(context, model, "troughLabware1(A01)", "dye");
 aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "troughLabware1(A01)", k: "dye0150"});
-// dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)");
+dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)"});
 // aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "waterLabware1(A01)", k: "dye0150"});
 absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
 absorbance_AV(context, model, ["plate1(A01)"]);
@@ -270,7 +267,7 @@ console.log(`  int NL = ${_.size(model.labwares)}; // number of labwares`);
 console.log(`  int NI = ${_.size(model.wells)}; // number of wells`);
 console.log(`  int NT = ${_.size(model.tips)}; // number of tips`);
 console.log(`  int NRV = ${_.size(model.rvs)}; // number of latent random variables`);
-console.log(`  int NJ = ${model.aspirates.length}; // number of pipetting operations`);
+console.log(`  int NJ = ${model.pipOps.length}; // number of pipetting operations`);
 // console.log(`  int NDIS = ${model.dispenses.length}; // number of dispenses`);
 console.log(`  int NPD = ${_.size(model.majorDs)}; // number of liquidClass+majorD combinations`);
 _.forEach(model.liquids, liquidData => {
@@ -278,10 +275,10 @@ _.forEach(model.liquids, liquidData => {
 		console.log(`  real alpha_k_${liquidData.k} = ${liquidData.spec.value}; // concentration of liquid ${liquidData.k}`);
 	}
 });
-if (!_.isEmpty(model.aspirates)) {
+if (!_.isEmpty(model.pipOps)) {
 	console.log();
 	console.log("  // desired volumes")
-	console.log(`  vector[NJ] d = {${model.aspirates.map(x => x.d)}};`);
+	console.log(`  vector[NJ] d = {${model.pipOps.map(x => x.d)}};`);
 }
 console.log("}");
 
@@ -381,8 +378,8 @@ const rvHandlers = {
 	"vTipAsp": handle_vTipAsp,
 	"cTipAsp": handle_cTipAsp,
 	"vWellAsp": handle_vWellAsp,
-	"vWellDis": handle_vWellAsp,
-	// "cWellDis": handle_cWellAsp
+	"vWellDis": handle_vWellDis,
+	"cWellDis": handle_cWellDis
 }
 
 function print_transformed_parameters_RVs(model, output) {
@@ -401,26 +398,42 @@ function handle_vTipAsp(model, output, rv, idx) {
 }
 function handle_cTipAsp(model, output, rv, idx) {
 	// C_t[j] ~ normal(ak[src] * gamma[subd[j]], sigma_gamma)
-	output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_conc0 + 1}] .* (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] .* sigma_gamma[${rv.idx_majorD + 1}]); // aspirated concentration in tip`);
+	const cWell0 = (_.isNumber(rv.idx_cWell0))
+		? `RV[${rv.idx_cWell0 + 1}]`
+		: rv.idx_cWell0;
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] * sigma_gamma[${rv.idx_majorD + 1}]); // aspirated concentration in tip`);
 }
 function handle_vWellAsp(model, output, rv, idx) {
 	if (_.isNumber(rv.idx_vWell0)) {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] - RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] - RV[${rv.idx_vTipAsp + 1}]; // volume aspirated from well`);
 	}
 	else {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = -RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = -RV[${rv.idx_vTipAsp + 1}]; // volume aspirated from well`);
 	}
 }
 function handle_vWellDis(model, output, rv, idx) {
+	// Add volume to well
 	if (_.isNumber(rv.idx_vWell0)) {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_vTipAsp + 1}]; // volume dispensed into well`);
 	}
 	else {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vTipAsp + 1}]; // volume dispensed into well`);
+	}
+}
+function handle_cWellDis(model, output, rv, idx) {
+	// C_t[j] = (c[i,j-1] * v[i,j-1] + cTip * vTip) / (v[i,j-1] + vTip)
+	if (_.isNumber(rv.idx_vWell0)) {
+		const cWell0 = (_.isNumber(rv.idx_cWell0))
+			? `RV[${rv.idx_cWell0 + 1}]`
+			: rv.idx_cWell0;
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = (${cWell0} * RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_cTipAsp + 1}] * RV[${rv.idx_vTipAsp + 1}]) / (RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_vTipAsp + 1}]); // new concentration in well`);
+	}
+	else {
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_cTipAsp + 1}]; // concentration of dispense in well`);
 	}
 }
 
