@@ -16,6 +16,7 @@ function createEmptyModel(majorDValues) {
 		wells: {},
 		tips: {},
 		majorDs: {},
+		// Random variables
 		rvs: [],
 		aspirates: [],
 		dispenses: []
@@ -102,24 +103,77 @@ function aspirate(context, model, {p, t, d, well, k}) {
 
 	const wellData = getWellData(model, well);
 	const tipData = getTipData(model, t);
-	const idx_volTot0 = wellData.idx_volTot; // volume of well before aspirating
-	const idx_conc0 = wellData.idx_conc0; // concentration of well before aspirating
+	const idx_vWell0 = wellData.idx_vWell; // volume of well before aspirating
+	const idx_cWell0 = wellData.idx_cWell; // concentration of well before aspirating
 
-	const idx_v = model.rvs.length;
-	const idx_c = idx_v + 1;
-	const idx_volTot = idx_c + 1;
-	const rv_v = {type: "v", p, t, d, well, k, idx: idx_v};
-	const rv_c = {type: "c", p, t, d, well, k, idx_conc0, idx: idx_c};
-	const rv_volTot = {type: "volTot", p, t, d, well, idx_volTot0, idx_v, idx: idx_volTot};
-	model.rvs.push(rv_v);
-	model.rvs.push(rv_c);
-	model.rvs.push(rv_volTot);
+	let idx_majorD;
+	if (_.includes(model.majorDValues, d)) {
+		const pd = p+d;
+		if (!model.majorDs.hasOwnProperty(pd)) {
+			model.majorDs[pd] = {idx: _.size(model.majorDs), p, d};
+		}
+		idx_majorD = model.majorDs[pd].idx;
+	}
 
-	wellData.idx_volTot = idx_volTot;
-	tipData.idx_v = idx_v;
-	tipData.idx_c = idx_c;
+	const idx_pip = model.aspirates.length;
+	const idx_vTipAsp = model.rvs.length;
+	const idx_cTipAsp = idx_vTipAsp + 1;
+	const rv_vTipAsp = {idx: idx_vTipAsp, type: "vTipAsp", idx_pip, idx_majorD};
+	const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", idx_cWell0, idx_majorD};
+	// TODO: this is currently just calculated, so it'd be better not to have a
+	// RV_raw entry for this, because that adds a superfluous parameter to the
+	// model. We should differentiate between RV's that are calculated and RV's
+	// that require their own parameter.
+	model.rvs.push(rv_vTipAsp);
+	model.rvs.push(rv_cTipAsp);
+
+	// If we already have information about well volume, then update it
+	if (_.isNumber(idx_vWell0)) {
+		const idx_vWellAsp = idx_cTipAsp + 1;
+		const rv_vWellAsp = {idx: idx_vWellAsp, type: "vWellAsp", idx_vWell0, idx_vTipAsp};
+		model.rvs.push(rv_vWellAsp);
+		wellData.idx_vWell = idx_vWellAsp;
+	}
+
+	tipData.idx_v = idx_vTipAsp;
+	tipData.idx_c = idx_cTipAsp;
 
 	const asp = {
+		d
+		// p, t, d, well, k,
+		// idx_volTot0, idx_conc0,
+		// idx_v, idx_c, idx_volTot,
+	};
+	model.aspirates.push(asp);
+}
+
+function dispense(context, model, {p, t, d, well}) {
+	// input: RV for volume aspirated into tip
+	// input: RV for concentration in tip
+	// input: previous volume of dst
+	// input: previous conc of dst
+	// create: RV for new volume of dst
+	// create: RV for new conc of dst
+
+	const wellData = getWellData(model, well);
+	const tipData = getTipData(model, t);
+	const idx_volTot0 = wellData.idx_volTot; // volume of well before aspirating
+	const idx_conc0 = wellData.idx_conc; // concentration of well before aspirating
+
+	CONTINUE
+	const idx_volTot = model.rvs.length;
+	const idx_conc = idx_volTot + 1;
+	const rv_volTot = {type: "vWellDis", p, t, d, well, idx_volTot0, idx_v: tipData.idx_v, idx: idx_volTot};
+	const rv_conc = {type: "cWellDis", p, t, d, well, idx_volTot0, idx_conc0, idx: idx_conc};
+	model.rvs.push(rv_volTot);
+	model.rvs.push(rv_conc);
+
+	wellData.idx_volTot = idx_volTot;
+	wellData.idx_conc = idx_volTot;
+	tipData.idx_v = undefined;
+	tipData.idx_c = undefined;
+
+	const dis = {
 		p, t, d, well, k,
 		idx_volTot0, idx_conc0,
 		idx_v, idx_c, idx_volTot,
@@ -133,7 +187,6 @@ function aspirate(context, model, {p, t, d, well, k}) {
 	}
 	model.aspirates.push(asp);
 }
-
 
 
 
@@ -163,13 +216,13 @@ console.log(`  int NL = ${_.size(model.labwares)}; // number of labwares`);
 console.log(`  int NI = ${_.size(model.wells)}; // number of wells`);
 console.log(`  int NT = ${_.size(model.tips)}; // number of tips`);
 console.log(`  int NRV = ${_.size(model.rvs)}; // number of latent random variables`);
-console.log(`  int NASP = ${model.aspirates.length}; // number of aspirations`);
+console.log(`  int NJ = ${model.aspirates.length}; // number of pipetting operations`);
 // console.log(`  int NDIS = ${model.dispenses.length}; // number of dispenses`);
 console.log(`  int NPD = ${_.size(model.majorDs)}; // number of liquidClass+majorD combinations`);
 if (!_.isEmpty(model.aspirates)) {
 	console.log();
 	console.log("  // desired volumes")
-	console.log(`  vector[NASP] d = {${model.aspirates.map(x => x.d)}};`);
+	console.log(`  vector[NJ] d = {${model.aspirates.map(x => x.d)}};`);
 }
 console.log("}");
 
@@ -189,12 +242,20 @@ if (!_.isEmpty(model.majorDs)) {
 }
 console.log("}");
 
-function print_transformed_parameters_RV(model, output) {
+function print_transformed_parameters(model, output) {
+	if (!_.isEmpty(model.majorDs)) {
+		output.transformedParameters.definitions.push("");
+		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
+		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
+		output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * gamma_scale;");
+		output.transformedParameters.statements.push("");
+		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max(1, 1 - gamma_raw[i] * gamma_scale);");
+	}
 	output.transformedParameters.definitions.push(`  vector[NRV] RV = RV_raw;`);
 	print_transformed_parameters_RV_al(model, output);
 	print_transformed_parameters_RV_a0(model, output);
 	print_transformed_parameters_RV_av(model, output);
-	print_transformed_parameters_RV_v(model, output);
+	print_transformed_parameters_RVs(model, output);
 }
 function print_transformed_parameters_RV_al(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "al");
@@ -248,60 +309,54 @@ function print_transformed_parameters_RV_av(model, output) {
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
 	output.transformedParameters.statements.push(`  RV[${idxs}] = RV[${idxs_a0}] + alpha_v[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_v[${idxs_m}];`);
 }
-function print_transformed_parameters_RV_v(model, output) {
 
-	if (!_.isEmpty(model.majorDs)) {
-		output.transformedParameters.definitions.push("");
-		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
-		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
-		output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * gamma_scale;");
-		output.transformedParameters.statements.push("");
-		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max(1, 1 - gamma_raw[i] * gamma_scale);");
+const rvHandlers = {
+	"al": handle_nop,
+	"a0": handle_nop,
+	"av": handle_nop,
+	"vTipAsp": handle_vTipAsp,
+	"cTipAsp": handle_cTipAsp,
+	"vWellAsp": handle_vWellAsp,
+	"vWellDis": handle_vWellAsp,
+	// "cWellDis": handle_cWellAsp
+}
+
+function print_transformed_parameters_RVs(model, output) {
+	for (let i = 0; i < model.rvs.length; i++) {
+		const rv = model.rvs[i];
+		if (rvHandlers.hasOwnProperty(rv.type))
+			rvHandlers[rv.type](model, output, rv, i);
+		else
+			console.log("unknown rv type "+rv.type+": "+JSON.stringify(rv));
 	}
-
-	const n = model.aspirates.length;
-	// create: RV for volume aspirated into tip
-	// create: RV for concentration in tip
-	// create: RV for new volume in src
-	// model.aspirates.push({
-	// 	p, t, d, well, k,
-	// 	idx_volTot0, idx_conc,
-	// 	idx_v, idx_c, idx_volTot,
-	// });
-	const iAsp = _.range(1, model.aspirates.length + 1);
-	const iMajorD = model.aspirates.map(x => x.idx_majorD + 1);
-	{
-		const idxs = model.aspirates.map(x => x.idx_v + 1);
-		const rvs = idxs.map(idx => model.rvs[idx - 1]);
-
-		output.transformedParameters.statements.push("");
-		output.transformedParameters.statements.push("  // V_t[j] ~ normal(d[j] * (1 + beta[subd[j]]), sigma_v[subd[j]])");
-		output.transformedParameters.statements.push(`  RV[${idxs}] = d[${iAsp}] * (1 + beta[${iMajorD}]) + RV_raw[${idxs}] .* sigma_v[${iMajorD}];`);
+}
+function handle_nop() {}
+function handle_vTipAsp(model, output, rv, idx) {
+	// V_t[j] ~ normal(d[j] * (1 + beta[subd[j]]), sigma_v[subd[j]])
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = d[${rv.idx_pip + 1}] * (1 + beta[${rv.idx_majorD + 1}]) + RV_raw[${idx + 1}] .* sigma_v[${rv.idx_majorD + 1}]; // aspirate volume into tip`);
+}
+function handle_cTipAsp(model, output, rv, idx) {
+	// C_t[j] ~ normal(ak[src] * gamma[subd[j]], sigma_gamma)
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_conc0 + 1}] .* (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] .* sigma_gamma[${rv.idx_majorD + 1}]); // aspirated concentration in tip`);
+}
+function handle_vWellAsp(model, output, rv, idx) {
+	if (_.isNumber(rv.idx_vWell0)) {
+		// VolTot_t[j] = sum of volumes
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] - RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
 	}
-
-	{
-		const idxs = model.aspirates.map(x => x.idx_c + 1);
-		const rvs = idxs.map(idx => model.rvs[idx - 1]);
-
-		output.transformedParameters.statements.push("");
-		output.transformedParameters.statements.push("  // C_t[j] ~ normal(gamma[subd[j]], sigma_gamma)");
-		output.transformedParameters.statements.push(`  RV[${idxs}] = gamma[${iMajorD}] + RV_raw[${idxs}] .* sigma_gamma[${iMajorD}];`);
+	else {
+		// VolTot_t[j] = sum of volumes
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = -RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
 	}
-
-	{
-		_.forEach(model.aspirates, (asp, iAsp0) => {
-			const idx = asp.idx_volTot + 1;
-			if (_.isNumber(asp.idx_volTot0)) {
-				output.transformedParameters.statements.push("");
-				output.transformedParameters.statements.push("  // VolTot_t[j] = sum of volumes");
-				output.transformedParameters.statements.push(`  RV[${idx}] = RV[${asp.idx_volTot0 + 1}]-RV[${asp.idx_v + 1}];`);
-			}
-			else {
-				output.transformedParameters.statements.push("");
-				output.transformedParameters.statements.push("  // VolTot_t[j] = sum of volumes");
-				output.transformedParameters.statements.push(`  RV[${idx}] = -RV[${asp.idx_v + 1}];`);
-			}
-		});
+}
+function handle_vWellDis(model, output, rv, idx) {
+	if (_.isNumber(rv.idx_vWell0)) {
+		// VolTot_t[j] = sum of volumes
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
+	}
+	else {
+		// VolTot_t[j] = sum of volumes
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vTipAsp + 1}]; // aspirate volume from well`);
 	}
 }
 
@@ -311,7 +366,7 @@ const output = {
 		statements: []
 	}
 };
-print_transformed_parameters_RV(model, output);
+print_transformed_parameters(model, output);
 console.log();
 console.log("transformed parameters {");
 output.transformedParameters.definitions.forEach(s => console.log(s));
