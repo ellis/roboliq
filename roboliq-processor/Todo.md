@@ -4,6 +4,10 @@ stanModel:
 
 * [x] remove sigma_a from RV calculation of absorbance
 * [x] when reading absorbance multiple times in a row, reference the same RV
+* [ ] generate a stanModel for an actual experiment
+* [ ] try to compile the model with stan
+* [ ] figure out how to evaluate the results
+* [ ] add weight models
 
 Bromphenol blue, ~600nm / 590nm
 
