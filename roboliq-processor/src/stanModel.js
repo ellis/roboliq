@@ -305,6 +305,10 @@ _.forEach(model.liquids, liquidData => {
 		console.log(`  real alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
 	}
 });
+if (model.absorbanceMeasurements.length > 0) {
+	console.log();
+	console.log(`  vector<lower=0>[${model.absorbanceMeasurements.length}] A; // Absorbance measurements`);
+}
 console.log("}");
 
 console.log();
@@ -517,6 +521,6 @@ console.log("  sigma_a_raw ~ exponential(1);");
 if (model.absorbanceMeasurements.length > 0) {
 	console.log();
 	const idxsRv = model.absorbanceMeasurements.map(x => x.ref_a.idx);
-	console.log(`  A ~ normal(RV[{${idxsRv}}], RV[{${idxsRv}}] * sigma_a)`);
+	console.log(`  A ~ normal(RV[{${idxsRv}}], RV[{${idxsRv}}] * sigma_a);`);
 }
 console.log("}");
