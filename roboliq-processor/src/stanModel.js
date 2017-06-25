@@ -12,15 +12,25 @@ function createEmptyModel(majorDValues) {
 	return {
 		majorDValues,
 		models: {},
+		liquids: {},
 		labwares: {},
 		wells: {},
 		tips: {},
 		majorDs: {},
+		// Fixed variables
+		fvs: [],
 		// Random variables
 		rvs: [],
+		// Calculated variables
+		xvs: [],
 		aspirates: [],
 		dispenses: []
 	};
+}
+
+function addLiquid(model, k, spec) {
+	const liquidData = getLiquidData(model, k);
+	liquidData.spec = spec;
 }
 
 function getLabwareData(model, l) {
@@ -29,6 +39,13 @@ function getLabwareData(model, l) {
 		model.labwares[l] = { m };
 	}
 	return model.labwares[l];
+}
+
+function getLiquidData(model, k) {
+	if (!model.liquids.hasOwnProperty(k)) {
+		model.liquids[k] = {k, idx: model.liquids.length};
+	}
+	return model.liquids[k];
 }
 
 function getWellData(model, well) {
@@ -94,7 +111,14 @@ function absorbance_AV(context, model, wells) {
 	});
 }
 
-function aspirate(context, model, {p, t, d, well, k}) {
+function assignLiquid(context, model, well, k) {
+	const liquidData = getLiquidData(model, k);
+	const wellData = getWellData(model, well);
+	wellData.k = k;
+	wellData.idx_k = liquidData.idx;
+}
+
+function aspirate(context, model, {p, t, d, well}) {
 	// create: RV for volume aspirated into tip
 	// create: RV for concentration in tip
 	// create: RV for new volume in src
@@ -104,6 +128,20 @@ function aspirate(context, model, {p, t, d, well, k}) {
 	const wellData = getWellData(model, well);
 	const tipData = getTipData(model, t);
 	const idx_vWell0 = wellData.idx_vWell; // volume of well before aspirating
+
+	// Check for concentration of source
+	if (wellData.hasOwnProperty("k") && !wellData.hasOwnProperty("idx_cWell")) {
+		// We have several possibilities:
+		// - user can specify concentration exactly
+		// - user can specify concentration with spread
+		// - concentration should be estimated
+		// For now, we'll assume we want to estimate the concentration.
+		// Create a new alpha_k variable.
+		const liquidData = getLiquidData(model, wellData.k);
+		// PROBLEM: we probably do not want to define alpha_k as a RV, because RV_raw ~ normal(0, 1)
+		// PROBLEM: some liquids, especially water, will have alpha_k = 0, with no variance. How to specify that?
+		wellData.idx_cWell = `alpha_k_${liquidData.k}`;
+	}
 	const idx_cWell0 = wellData.idx_cWell; // concentration of well before aspirating
 
 	let idx_majorD;
@@ -117,26 +155,31 @@ function aspirate(context, model, {p, t, d, well, k}) {
 
 	const idx_pip = model.aspirates.length;
 	const idx_vTipAsp = model.rvs.length;
-	const idx_cTipAsp = idx_vTipAsp + 1;
 	const rv_vTipAsp = {idx: idx_vTipAsp, type: "vTipAsp", idx_pip, idx_majorD};
-	const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", idx_cWell0, idx_majorD};
 	// TODO: this is currently just calculated, so it'd be better not to have a
 	// RV_raw entry for this, because that adds a superfluous parameter to the
 	// model. We should differentiate between RV's that are calculated and RV's
 	// that require their own parameter.
 	model.rvs.push(rv_vTipAsp);
-	model.rvs.push(rv_cTipAsp);
+	tipData.idx_v = idx_vTipAsp;
 
-	// If we already have information about well volume, then update it
+	// If we have information about the source concentration,
+	// then track the concentration in the tip too.
+	if (!_.isUndefined(idx_cWell0)) {
+		const idx_cTipAsp = model.rvs.length;
+		const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", idx_cWell0, idx_majorD};
+		model.rvs.push(rv_cTipAsp);
+		tipData.idx_c = idx_cTipAsp;
+	}
+
+	// If we already have information about well volume,
+	// then update it by removing the aliquot.
 	if (_.isNumber(idx_vWell0)) {
-		const idx_vWellAsp = idx_cTipAsp + 1;
+		const idx_vWellAsp = model.rvs.length;
 		const rv_vWellAsp = {idx: idx_vWellAsp, type: "vWellAsp", idx_vWell0, idx_vTipAsp};
 		model.rvs.push(rv_vWellAsp);
 		wellData.idx_vWell = idx_vWellAsp;
 	}
-
-	tipData.idx_v = idx_vTipAsp;
-	tipData.idx_c = idx_cTipAsp;
 
 	const asp = {
 		d
@@ -196,9 +239,15 @@ function dispense(context, model, {p, t, d, well}) {
 const context = {};
 const majorDValues = [3, 7, 15, 16, 150, 500, 501, 750, 1000];
 const model = createEmptyModel(majorDValues);
+addLiquid(model, "water", {type: "fixed", value: 0});
+addLiquid(model, "dye", {type: "estimate", lower: 0, upper: 1});
+assignLiquid(context, model, "waterLabware1(A01)", "water");
+assignLiquid(context, model, "troughLabware1(A01)", "dye");
+aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "troughLabware1(A01)", k: "dye0150"});
+// dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)");
+// aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "waterLabware1(A01)", k: "dye0150"});
 absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
-absorbance_AV(context, model, ["plate1(A01)", "plate1(A02)"]);
-aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "trough1", k: "dye0150"});
+absorbance_AV(context, model, ["plate1(A01)"]);
 console.log(JSON.stringify(model, null, '\t'));
 
 console.log();
@@ -207,6 +256,11 @@ if (!_.isEmpty(model.majorDs)) {
 	console.log("  real beta_scale;");
 	console.log("  real gamma_scale;");
 }
+_.forEach(model.liquids, liquidData => {
+	if (_.get(liquidData.spec, "type") === "user") {
+		console.log(`  real alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
+	}
+});
 console.log("}");
 
 console.log();
@@ -219,6 +273,11 @@ console.log(`  int NRV = ${_.size(model.rvs)}; // number of latent random variab
 console.log(`  int NJ = ${model.aspirates.length}; // number of pipetting operations`);
 // console.log(`  int NDIS = ${model.dispenses.length}; // number of dispenses`);
 console.log(`  int NPD = ${_.size(model.majorDs)}; // number of liquidClass+majorD combinations`);
+_.forEach(model.liquids, liquidData => {
+	if (_.get(liquidData.spec, "type") === "fixed") {
+		console.log(`  real alpha_k_${liquidData.k} = ${liquidData.spec.value}; // concentration of liquid ${liquidData.k}`);
+	}
+});
 if (!_.isEmpty(model.aspirates)) {
 	console.log();
 	console.log("  // desired volumes")
@@ -235,6 +294,11 @@ console.log("  vector<lower=-0.5,upper=0.5>[NM] alpha_v;");
 console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_v;");
 console.log();
 console.log("  vector[NRV] RV_raw;");
+_.forEach(model.liquids, liquidData => {
+	if (_.get(liquidData.spec, "type") === "estimate") {
+		console.log(`  real<lower=${liquidData.spec.lower || 0}, upper=${liquidData.spec.upper}> alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
+	}
+});
 if (!_.isEmpty(model.majorDs)) {
 	console.log("  vector[NPD] beta_raw;");
 	console.log("  vector[NPD] gamma_raw;");
