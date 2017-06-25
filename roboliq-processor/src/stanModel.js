@@ -110,6 +110,23 @@ function absorbance_AV(context, model, wells) {
 	});
 }
 
+function measureAbsorbance(context, model, wells) {
+	_.forEach(wells, well => {
+		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
+
+		const wellData = getWellData(model, well);
+		const rv_al = getRv_al(model, l);
+		const rv_a0 = getRv_a0(model, well);
+
+		if (_.isNumber(wellData.idx_vWell)) {
+			const rv_av = getRv_av(model, well);
+			const idx_a = model.rvs.length;
+			const rv_a = {idx: idx_a, type: "a", idx_av: rv_av.idx, idx_vWell: wellData.idx_vWell, idx_cWell: wellData.idx_cWell};
+			model.rvs.push(rv_a);
+		}
+	});
+}
+
 function assignLiquid(context, model, well, k) {
 	const liquidData = getLiquidData(model, k);
 	const wellData = getWellData(model, well);
@@ -242,12 +259,14 @@ addLiquid(model, "water", {type: "fixed", value: 0});
 addLiquid(model, "dye", {type: "estimate", lower: 0, upper: 1});
 assignLiquid(context, model, "waterLabware1(A01)", "water");
 assignLiquid(context, model, "troughLabware1(A01)", "dye");
+measureAbsorbance(context, model, ["plate1(A01)", "plate1(A02)"]);
 aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "troughLabware1(A01)", k: "dye0150"});
 dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)"});
 aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "waterLabware1(A01)", k: "water"});
 dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)"});
-absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
-absorbance_AV(context, model, ["plate1(A01)"]);
+// absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
+// absorbance_AV(context, model, ["plate1(A01)"]);
+measureAbsorbance(context, model, ["plate1(A01)", "plate1(A02)"]);
 console.log(JSON.stringify(model, null, '\t'));
 
 console.log();
@@ -256,6 +275,7 @@ if (!_.isEmpty(model.majorDs)) {
 	console.log("  real beta_scale;");
 	console.log("  real gamma_scale;");
 }
+console.log("  real sigma_a_scale;");
 _.forEach(model.liquids, liquidData => {
 	if (_.get(liquidData.spec, "type") === "user") {
 		console.log(`  real alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
@@ -304,6 +324,7 @@ if (!_.isEmpty(model.majorDs)) {
 	console.log("  vector[NPD] gamma_raw;");
 	console.log("  vector[NPD] sigma_gamma_raw;");
 }
+console.log("  vector[NPD] sigma_raw;");
 console.log("}");
 
 function print_transformed_parameters(model, output) {
@@ -311,14 +332,15 @@ function print_transformed_parameters(model, output) {
 		output.transformedParameters.definitions.push("");
 		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
 		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
-		output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * gamma_scale;");
 		output.transformedParameters.statements.push("");
 		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max(1, 1 - gamma_raw[i] * gamma_scale);");
 	}
+	output.transformedParameters.definitions.push("  real sigma_a = sigma_a_raw * sigma_a_scale;");
 	output.transformedParameters.definitions.push(`  vector[NRV] RV = RV_raw;`);
 	print_transformed_parameters_RV_al(model, output);
 	print_transformed_parameters_RV_a0(model, output);
 	print_transformed_parameters_RV_av(model, output);
+	output.transformedParameters.statements.push("");
 	print_transformed_parameters_RVs(model, output);
 }
 function print_transformed_parameters_RV_al(model, output) {
@@ -378,6 +400,7 @@ const rvHandlers = {
 	"al": handle_nop,
 	"a0": handle_nop,
 	"av": handle_nop,
+	"a": handle_a,
 	"vTipAsp": handle_vTipAsp,
 	"cTipAsp": handle_cTipAsp,
 	"vWellAsp": handle_vWellAsp,
@@ -439,6 +462,10 @@ function handle_cWellDis(model, output, rv, idx) {
 		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_cTipAsp + 1}]; // concentration of dispense in well`);
 	}
 }
+function handle_a(model, output, rv, idx) {
+	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = (RV[Av] + RV[${rv.idx_vWell + 1}] * RV[${rv.idx_cWell + 1}]) * (1 + RV_raw[${idx + 1}] * sigma_a); // absorbance in well`);
+}
 
 const output = {
 	transformedParameters: {
@@ -462,4 +489,5 @@ if (!_.isEmpty(model.majorDs)) {
 	console.log("  gamma_raw ~ normal(0, 1);");
 	console.log("  sigma_gamma_raw ~ exponential(1);");
 }
+console.log("  sigma_a_raw ~ exponential(1);");
 console.log("}");
