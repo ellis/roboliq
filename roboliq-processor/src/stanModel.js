@@ -339,8 +339,8 @@ function printModel(model) {
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  vector[NPD] beta_raw;");
 		console.log("  vector[NPD] gamma_raw;");
-		console.log("  vector[NPD] sigma_v_raw;");
-		console.log("  vector[NPD] sigma_gamma_raw;");
+		console.log("  vector<lower=0>[NPD] sigma_v_raw;");
+		console.log("  vector<lower=0>[NPD] sigma_gamma_raw;");
 	}
 	console.log("}");
 
@@ -363,7 +363,7 @@ function printModel(model) {
 	console.log("  RV_raw ~ normal(0, 1);");
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  beta_raw ~ normal(0, 1);");
-		console.log("  sigma_v_raw ~ normal(0, 1);")
+		console.log("  sigma_v_raw ~ exponential(1);")
 		console.log("  gamma_raw ~ normal(0, 1);");
 		console.log("  sigma_gamma_raw ~ exponential(1);");
 	}

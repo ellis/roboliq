@@ -18,19 +18,20 @@ addLiquid(model, "dye0150", {type: "estimate", lower: 0, upper: 2});
 assignLiquid(context, model, "waterLabware", "water");
 assignLiquid(context, model, "dyeLabware", "dye");
 
-const plates = ["plate1", "plate2", "plate3"];
+const plates = ["plate1"];//, "plate2", "plate3"];
 _.forEach(plates, plate => {
-	const wells = _.range(96).map(i => {
-		const row = 1 + i % 8;
-		const col = 1 + Math.floor(i / 8);
-		const wellPos = wellsParser.locationRowColToText(row, col);
-		return `${plate}(${wellPos})`;
-	});
+	// const wells = _.range(96).map(i => {
+	// 	const row = 1 + i % 8;
+	// 	const col = 1 + Math.floor(i / 8);
+	// 	const wellPos = wellsParser.locationRowColToText(row, col);
+	// 	return `${plate}(${wellPos})`;
+	// });
+	const wells = [`plate1(A01)`, "plate1(B01)"];
 	// console.log({wells})
 	measureAbsorbance(context, model, wells);
 
 	_.forEach(wellData, row => {
-		if (row.l === plate && row.d > 0) {
+		if (row.l === plate && row.d > 0 && (row.well === "A01" || row.well === "B01")) {
 			aspirate(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.k}Labware(A01)`, k: row.k});
 			dispense(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.l}(${row.well})`});
 		}
