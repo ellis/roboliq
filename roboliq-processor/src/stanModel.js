@@ -2,6 +2,10 @@ const _ = require('lodash');
 const wellsParser = require('./parsers/wellsParser');
 
 function Ref(name, i) {
+	if (_.isPlainObject(name)) {
+		const rv = name;
+		return { name: rv.type, i: rv.i, idx: rv.idx };
+	}
 	return { name, i, idx: (_.isNumber(i)) ? i + 1 : undefined };
 }
 function RefRV(i) {
@@ -94,7 +98,7 @@ function getTipData(model, t) {
 function getRv_al(model, l) {
 	const labwareData = getLabwareData(model, l);
 	if (!labwareData.hasOwnProperty("ref_al")) {
-		const ref = addRv2(model, "RV_AL", {type: "al", l});
+		const ref = addRv2(model, "RV_AL", {type: "RV_AL", l});
 		labwareData.ref_al = ref;
 	}
 	return lookup(model, labwareData.ref_al);
@@ -103,7 +107,7 @@ function getRv_al(model, l) {
 function getRv_a0(model, well) {
 	const wellData = getWellData(model, well);
 	if (!wellData.hasOwnProperty("ref_a0")) {
-		const rv = {type: "a0", well};
+		const rv = {type: "RV_A0", well};
 		const ref = addRv2(model, "RV_A0", rv);
 		wellData.ref_a0 = ref;
 	}
@@ -113,8 +117,8 @@ function getRv_a0(model, well) {
 function getRv_av(model, well) {
 	const wellData = getWellData(model, well);
 	if (!wellData.hasOwnProperty("ref_av")) {
-		const rv = {type: "av", well};
-		const ref = addRv(model, rv);
+		const rv = {type: "RV_AV", well};
+		const ref = addRv2(model, "RV_AV", rv);
 		wellData.ref_av = ref;
 	}
 	return lookup(model, wellData.ref_av);
@@ -151,13 +155,14 @@ function measureAbsorbance(context, model, wells) {
 		}
 		else if (wellData.ref_vWell) {
 			const rv_av = getRv_av(model, well);
-			const rv_a = {type: "a", ref_av: RefRV(rv_av.idx), ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
+			const ref_av = Ref(rv_av);
+			const rv_a = {type: "a", ref_av, ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
 			const ref_a = addRv(model, rv_a);
 			model.absorbanceMeasurements.push({ref_a});
 			wellData.ref_a = ref_a;
 		}
 		else {
-			model.absorbanceMeasurements.push({ref_a: RefRV(rv_a0.idx)});
+			model.absorbanceMeasurements.push({ref_a: Ref(rv_a0)});
 		}
 	});
 }
@@ -333,13 +338,14 @@ function printModel(model) {
 	console.log("  vector<lower=0,upper=1>[NM] alpha_l;");
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_l;");
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_i;");
-	if (_.some(model.rvs, rv => rv.type === "av")) {
+	if (model.RV_AV.length > 0) {
 		console.log("  vector<lower=-0.5,upper=0.5>[NM] alpha_v;");
 		console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_v;");
 	}
 	console.log();
 	if (model.RV_AL.length > 0) console.log(`  vector[${model.RV_AL.length}] RV_AL_raw;`);
 	if (model.RV_A0.length > 0) console.log(`  vector[${model.RV_A0.length}] RV_A0_raw;`);
+	if (model.RV_AV.length > 0) console.log(`  vector[${model.RV_AV.length}] RV_AV_raw;`);
 	console.log("  vector[NRV] RV_raw;");
 	_.forEach(model.liquids, liquidData => {
 		if (_.get(liquidData.spec, "type") === "estimate") {
@@ -375,6 +381,7 @@ function printModel(model) {
 	console.log("model {");
 	if (model.RV_AL.length > 0) console.log("  RV_AL_raw ~ normal(0, 1);");
 	if (model.RV_A0.length > 0) console.log("  RV_A0_raw ~ normal(0, 1);");
+	if (model.RV_AV.length > 0) console.log("  RV_AV_raw ~ normal(0, 1);");
 	console.log("  RV_raw ~ normal(0, 1);");
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  beta_raw ~ normal(0, 1);");
@@ -440,7 +447,7 @@ function print_transformed_parameters_RV_a0(model, output) {
 	output.transformedParameters.statements.push(`  RV_A0 = RV_AL[{${idxs_al}}] + RV_A0_raw .* sigma_alpha_i[{${idxs_m}}];`);
 }
 function print_transformed_parameters_RV_av(model, output) {
-	const rvs = _.filter(model.rvs, rv => rv.type === "av");
+	const rvs = model.RV_AV;
 	if (rvs.length == 0) return;
 
 	const idxs = Array(rvs.length);
@@ -458,9 +465,10 @@ function print_transformed_parameters_RV_av(model, output) {
 		idxs_m[i] = 0 + 1;
 	}
 
+	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_AV; // absorbance of water-filled wells`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
-	output.transformedParameters.statements.push(`  RV[{${idxs}}] = RV_A0[{${idxs_a0}}] + alpha_v[{${idxs_m}}] + RV_raw[{${idxs}}] .* sigma_alpha_v[{${idxs_m}}];`);
+	output.transformedParameters.statements.push(`  RV_AV = RV_A0[{${idxs_a0}}] + alpha_v[{${idxs_m}}] + RV_AV_raw .* sigma_alpha_v[{${idxs_m}}];`);
 }
 
 const rvHandlers = {
@@ -532,10 +540,10 @@ function handle_cWellDis(model, output, rv, idx) {
 function handle_a(model, output, rv, idx) {
 	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
 	if (rv.ref_cWell) {
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_av.idx}] + RV[${rv.ref_vWell.idx}] * RV[${rv.ref_cWell.idx}]; // absorbance in well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV_AV[${rv.ref_av.idx}] + RV[${rv.ref_vWell.idx}] * RV[${rv.ref_cWell.idx}]; // absorbance in well`);
 	}
 	else {
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_av.idx}]; // absorbance in well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV_AV[${rv.ref_av.idx}]; // absorbance in well`);
 	}
 }
 
