@@ -330,12 +330,14 @@ function printModel(model) {
 			console.log(`  real<lower=${liquidData.spec.lower || 0}, upper=${liquidData.spec.upper}> alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
 		}
 	});
+	if (model.absorbanceMeasurements.length > 0) {
+		console.log("  real sigma_a_raw;");
+	}
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  vector[NPD] beta_raw;");
 		console.log("  vector[NPD] gamma_raw;");
 		console.log("  vector[NPD] sigma_gamma_raw;");
 	}
-	console.log("  vector[NPD] sigma_raw;");
 	console.log("}");
 
 	const output = {
@@ -396,7 +398,7 @@ function print_transformed_parameters_RV_al(model, output) {
 	}
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AL[m] ~ normal(alpha_l[m], sigmal_alpha_l[m])")
-	output.transformedParameters.statements.push(`  RV[${idxs}] = alpha_l[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_l[${idxs_m}]);`);
+	output.transformedParameters.statements.push(`  RV[{${idxs}}] = alpha_l[{${idxs_m}}] + RV_raw[{${idxs}}] .* sigma_alpha_l[{${idxs_m}}];`);
 }
 function print_transformed_parameters_RV_a0(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "a0");
@@ -414,10 +416,12 @@ function print_transformed_parameters_RV_a0(model, output) {
 
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // A0[i] ~ normal(AL[m[i]], sigma_alpha_i[m[i]])");
-	output.transformedParameters.statements.push(`  RV[${idxs}] = RV[${idxs_al}] + RV_raw[${idxs}] .* sigma_alpha_i[${idxs_m}];`);
+	output.transformedParameters.statements.push(`  RV[{${idxs}}] = RV[{${idxs_al}}] + RV_raw[{${idxs}}] .* sigma_alpha_i[{${idxs_m}}];`);
 }
 function print_transformed_parameters_RV_av(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "av");
+	if (rvs.length == 0) return;
+
 	const idxs = Array(rvs.length);
 	const idxs_a0 = Array(rvs.length);
 	// const idxs_l = Array(rvs.length);
@@ -435,7 +439,7 @@ function print_transformed_parameters_RV_av(model, output) {
 
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
-	output.transformedParameters.statements.push(`  RV[${idxs}] = RV[${idxs_a0}] + alpha_v[${idxs_m}] + RV_raw[${idxs}] .* sigma_alpha_v[${idxs_m}];`);
+	output.transformedParameters.statements.push(`  RV[{${idxs}}] = RV[{${idxs_a0}}] + alpha_v[{${idxs_m}}] + RV_raw[{${idxs}}] .* sigma_alpha_v[{${idxs_m}}];`);
 }
 
 const rvHandlers = {
