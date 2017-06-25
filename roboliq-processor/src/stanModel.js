@@ -104,7 +104,7 @@ function getRv_a0(model, well) {
 	const wellData = getWellData(model, well);
 	if (!wellData.hasOwnProperty("ref_a0")) {
 		const rv = {type: "a0", well};
-		const ref = addRv(model, rv);
+		const ref = addRv2(model, "RV_A0", rv);
 		wellData.ref_a0 = ref;
 	}
 	return lookup(model, wellData.ref_a0);
@@ -339,6 +339,7 @@ function printModel(model) {
 	}
 	console.log();
 	if (model.RV_AL.length > 0) console.log(`  vector[${model.RV_AL.length}] RV_AL_raw;`);
+	if (model.RV_A0.length > 0) console.log(`  vector[${model.RV_A0.length}] RV_A0_raw;`);
 	console.log("  vector[NRV] RV_raw;");
 	_.forEach(model.liquids, liquidData => {
 		if (_.get(liquidData.spec, "type") === "estimate") {
@@ -346,7 +347,7 @@ function printModel(model) {
 		}
 	});
 	if (model.absorbanceMeasurements.length > 0) {
-		console.log("  real sigma_a_raw;");
+		console.log("  real<lower=0> sigma_a_raw;");
 	}
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  vector[NPD] beta_raw;");
@@ -372,6 +373,8 @@ function printModel(model) {
 
 	console.log();
 	console.log("model {");
+	if (model.RV_AL.length > 0) console.log("  RV_AL_raw ~ normal(0, 1);");
+	if (model.RV_A0.length > 0) console.log("  RV_A0_raw ~ normal(0, 1);");
 	console.log("  RV_raw ~ normal(0, 1);");
 	if (!_.isEmpty(model.majorDs)) {
 		console.log("  beta_raw ~ normal(0, 1);");
@@ -392,12 +395,12 @@ function print_transformed_parameters(model, output) {
 	if (!_.isEmpty(model.majorDs)) {
 		output.transformedParameters.definitions.push("");
 		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
-		output.transformedParameters.definitions.push("  vector[NPD] sigma_v = sigma_v_raw * sigma_v_scale;");
+		output.transformedParameters.definitions.push("  vector<lower=0>[NPD] sigma_v = sigma_v_raw * sigma_v_scale;");
 		output.transformedParameters.definitions.push("  vector[NPD] gamma = 1 - gamma_raw * gamma_scale;");
 		output.transformedParameters.statements.push("");
 		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max({1, 1 - gamma_raw[i] * gamma_scale});");
 	}
-	output.transformedParameters.definitions.push("  real sigma_a = sigma_a_raw * sigma_a_scale;");
+	output.transformedParameters.definitions.push("  real<lower=0> sigma_a = sigma_a_raw * sigma_a_scale;");
 	output.transformedParameters.definitions.push(`  vector[NRV] RV = RV_raw;`);
 	print_transformed_parameters_RV_al(model, output);
 	print_transformed_parameters_RV_a0(model, output);
@@ -409,7 +412,6 @@ function print_transformed_parameters_RV_al(model, output) {
 	const rvs = model.RV_AL;
 	if (rvs.length == 0) return;
 
-	const idxs = Array(rvs.length);
 	const idxs_m = Array(rvs.length);
 	for (let i = 0; i < rvs.length; i++) {
 		const rv = rvs[i];
@@ -421,22 +423,21 @@ function print_transformed_parameters_RV_al(model, output) {
 	output.transformedParameters.statements.push(`  RV_AL = alpha_l[{${idxs_m}}] + RV_AL_raw .* sigma_alpha_l[{${idxs_m}}];`);
 }
 function print_transformed_parameters_RV_a0(model, output) {
-	const rvs = _.filter(model.rvs, rv => rv.type === "a0");
-	const idxs = Array(rvs.length);
+	const rvs = model.RV_A0;
 	const idxs_al = Array(rvs.length);
 	const idxs_m = Array(rvs.length);
 	for (let i = 0; i < rvs.length; i++) {
 		const rv = rvs[i];
-		idxs[i] = rv.idx + 1;
 		const wellData = model.wells[rv.well];
 		const labwareData = model.labwares[wellData.l];
 		idxs_al[i] = labwareData.ref_al.idx;
 		idxs_m[i] = 0 + 1;
 	}
 
+	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_A0; // absorbance of empty wells`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // A0[i] ~ normal(AL[m[i]], sigma_alpha_i[m[i]])");
-	output.transformedParameters.statements.push(`  RV[{${idxs}}] = RV_AL[{${idxs_al}}] + RV_raw[{${idxs}}] .* sigma_alpha_i[{${idxs_m}}];`);
+	output.transformedParameters.statements.push(`  RV_A0 = RV_AL[{${idxs_al}}] + RV_A0_raw .* sigma_alpha_i[{${idxs_m}}];`);
 }
 function print_transformed_parameters_RV_av(model, output) {
 	const rvs = _.filter(model.rvs, rv => rv.type === "av");
@@ -450,7 +451,7 @@ function print_transformed_parameters_RV_av(model, output) {
 		const rv = rvs[i];
 		idxs[i] = rv.idx + 1;
 		const wellData = model.wells[rv.well];
-		idxs_a0[i] = wellData.ref_a0.i + 1;
+		idxs_a0[i] = wellData.ref_a0.idx;
 		// const labwareData = model.labwares[wellData.l];
 		// // console.log({rv, wellData, labwareData})
 		// idxs_l[i] = labwareData.idx_al;
@@ -459,7 +460,7 @@ function print_transformed_parameters_RV_av(model, output) {
 
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
-	output.transformedParameters.statements.push(`  RV[{${idxs}}] = RV[{${idxs_a0}}] + alpha_v[{${idxs_m}}] + RV_raw[{${idxs}}] .* sigma_alpha_v[{${idxs_m}}];`);
+	output.transformedParameters.statements.push(`  RV[{${idxs}}] = RV_A0[{${idxs_a0}}] + alpha_v[{${idxs_m}}] + RV_raw[{${idxs}}] .* sigma_alpha_v[{${idxs_m}}];`);
 }
 
 const rvHandlers = {
