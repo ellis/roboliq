@@ -1,5 +1,10 @@
 # Todos
 
+stanModel:
+
+* [x] remove sigma_a from RV calculation of absorbance
+* [x] when reading absorbance multiple times in a row, reference the same RV
+
 Bromphenol blue, ~600nm / 590nm
 
 Friday

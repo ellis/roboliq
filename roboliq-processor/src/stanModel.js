@@ -24,6 +24,7 @@ function createEmptyModel(majorDValues) {
 		// Calculated variables
 		xvs: [],
 		pipOps: [], // Pipetting operations
+		absorbanceMeasurements: []
 	};
 }
 
@@ -118,11 +119,19 @@ function measureAbsorbance(context, model, wells) {
 		const rv_al = getRv_al(model, l);
 		const rv_a0 = getRv_a0(model, well);
 
-		if (_.isNumber(wellData.idx_vWell)) {
+		if (_.isNumber(wellData.idx_a)) {
+			model.absorbanceMeasurements.push({idx_a: wellData.idx_a});
+		}
+		else if (_.isNumber(wellData.idx_vWell)) {
 			const rv_av = getRv_av(model, well);
 			const idx_a = model.rvs.length;
 			const rv_a = {idx: idx_a, type: "a", idx_av: rv_av.idx, idx_vWell: wellData.idx_vWell, idx_cWell: wellData.idx_cWell};
 			model.rvs.push(rv_a);
+			model.absorbanceMeasurements.push({idx_a: idx_a});
+			wellData.idx_a = idx_a;
+		}
+		else {
+			model.absorbanceMeasurements.push({idx_a: rv_a0.idx});
 		}
 	});
 }
@@ -197,6 +206,8 @@ function aspirate(context, model, {p, t, d, well}) {
 		wellData.idx_vWell = idx_vWellAsp;
 	}
 
+	wellData.idx_a = undefined;
+
 	const asp = {
 		d
 		// p, t, d, well, k,
@@ -238,6 +249,8 @@ function dispense(context, model, {p, t, d, well}) {
 		wellData.idx_cWell = idx_cWellDis;
 	}
 
+	wellData.idx_a = undefined;
+
 	const asp = {
 		d
 		// p, t, d, well, k,
@@ -267,7 +280,8 @@ dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plat
 // absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
 // absorbance_AV(context, model, ["plate1(A01)"]);
 measureAbsorbance(context, model, ["plate1(A01)", "plate1(A02)"]);
-console.log(JSON.stringify(model, null, '\t'));
+measureAbsorbance(context, model, ["plate1(A01)", "plate1(A02)"]);
+// console.log(JSON.stringify(model, null, '\t'));
 
 console.log();
 console.log("data {");
@@ -464,7 +478,7 @@ function handle_cWellDis(model, output, rv, idx) {
 }
 function handle_a(model, output, rv, idx) {
 	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
-	output.transformedParameters.statements.push(`  RV[${idx + 1}] = (RV[Av] + RV[${rv.idx_vWell + 1}] * RV[${rv.idx_cWell + 1}]) * (1 + RV_raw[${idx + 1}] * sigma_a); // absorbance in well`);
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[Av] + RV[${rv.idx_vWell + 1}] * RV[${rv.idx_cWell + 1}]; // absorbance in well`);
 }
 
 const output = {
@@ -490,4 +504,9 @@ if (!_.isEmpty(model.majorDs)) {
 	console.log("  sigma_gamma_raw ~ exponential(1);");
 }
 console.log("  sigma_a_raw ~ exponential(1);");
+if (model.absorbanceMeasurements.length > 0) {
+	console.log();
+	const idxsRv = model.absorbanceMeasurements.map(x => x.idx_a + 1);
+	console.log(`  A ~ normal(RV[{${idxsRv}}], RV[{${idxsRv}}] * sigma_a)`);
+}
 console.log("}");
