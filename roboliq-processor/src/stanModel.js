@@ -1,6 +1,16 @@
 const _ = require('lodash');
 const wellsParser = require('./parsers/wellsParser');
 
+function Ref(name, i) {
+	return { name, i, idx: (_.isNumber(i)) ? i + 1 : undefined };
+}
+function RefRV(i) {
+	return { name: "rvs", i, idx: (_.isNumber(i)) ? i + 1 : undefined };
+}
+function lookup(model, ref) {
+	return model[ref.name][ref.i];
+}
+
 // Standard Normal variate using Box-Muller transform.
 function randn_bm(mean, sigma) {
 	var u = 1 - Math.random(); // Subtraction to flip [0, 1) to (0, 1].
@@ -65,32 +75,32 @@ function getTipData(model, t) {
 
 function getRv_al(model, l) {
 	const labwareData = getLabwareData(model, l);
-	if (!labwareData.hasOwnProperty("idx_al")) {
+	if (!labwareData.hasOwnProperty("ref_al")) {
 		const rv = {type: "al", l, idx: model.rvs.length};
 		model.rvs.push(rv);
-		labwareData.idx_al = rv.idx;
+		labwareData.ref_al = RefRV(rv.idx);
 	}
-	return model.rvs[labwareData.idx_al];
+	return lookup(model, labwareData.ref_al);
 }
 
 function getRv_a0(model, well) {
 	const wellData = getWellData(model, well);
-	if (!wellData.hasOwnProperty("idx_a0")) {
+	if (!wellData.hasOwnProperty("ref_a0")) {
 		const rv = {type: "a0", well, idx: model.rvs.length};
 		model.rvs.push(rv);
-		wellData.idx_a0 = rv.idx;
+		wellData.ref_a0 = RefRV(rv.idx);
 	}
-	return model.rvs[wellData.idx_a0];
+	return lookup(model, wellData.ref_a0);
 }
 
 function getRv_av(model, well) {
 	const wellData = getWellData(model, well);
-	if (!wellData.hasOwnProperty("idx_av")) {
+	if (!wellData.hasOwnProperty("ref_av")) {
 		const rv = {type: "av", well, idx: model.rvs.length};
 		model.rvs.push(rv);
-		wellData.idx_av = rv.idx;
+		wellData.ref_av = RefRV(rv.idx);
 	}
-	return model.rvs[wellData.idx_av];
+	return lookup(model, wellData.ref_av);
 }
 
 
@@ -119,19 +129,19 @@ function measureAbsorbance(context, model, wells) {
 		const rv_al = getRv_al(model, l);
 		const rv_a0 = getRv_a0(model, well);
 
-		if (_.isNumber(wellData.idx_a)) {
-			model.absorbanceMeasurements.push({idx_a: wellData.idx_a});
+		if (wellData.ref_a) {
+			model.absorbanceMeasurements.push({ref_a: wellData.ref_a});
 		}
-		else if (_.isNumber(wellData.idx_vWell)) {
+		else if (wellData.ref_vWell) {
 			const rv_av = getRv_av(model, well);
 			const idx_a = model.rvs.length;
-			const rv_a = {idx: idx_a, type: "a", idx_av: rv_av.idx, idx_vWell: wellData.idx_vWell, idx_cWell: wellData.idx_cWell};
+			const rv_a = {idx: idx_a, type: "a", ref_av: RefRV(rv_av.idx), ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
 			model.rvs.push(rv_a);
-			model.absorbanceMeasurements.push({idx_a: idx_a});
-			wellData.idx_a = idx_a;
+			model.absorbanceMeasurements.push({ref_a: RefRV(idx_a)});
+			wellData.ref_a = RefRV(idx_a);
 		}
 		else {
-			model.absorbanceMeasurements.push({idx_a: rv_a0.idx});
+			model.absorbanceMeasurements.push({ref_a: RefRV(rv_a0.idx)});
 		}
 	});
 }
@@ -152,10 +162,10 @@ function aspirate(context, model, {p, t, d, well}) {
 
 	const wellData = getWellData(model, well);
 	const tipData = getTipData(model, t);
-	const idx_vWell0 = wellData.idx_vWell; // volume of well before aspirating
+	const ref_vWell0 = wellData.ref_vWell; // volume of well before aspirating
 
 	// Check for concentration of source
-	if (wellData.hasOwnProperty("k") && !wellData.hasOwnProperty("idx_cWell")) {
+	if (wellData.hasOwnProperty("k") && !wellData.hasOwnProperty("ref_cWell")) {
 		// We have several possibilities:
 		// - user can specify concentration exactly
 		// - user can specify concentration with spread
@@ -165,9 +175,9 @@ function aspirate(context, model, {p, t, d, well}) {
 		const liquidData = getLiquidData(model, wellData.k);
 		// PROBLEM: we probably do not want to define alpha_k as a RV, because RV_raw ~ normal(0, 1)
 		// PROBLEM: some liquids, especially water, will have alpha_k = 0, with no variance. How to specify that?
-		wellData.idx_cWell = `alpha_k_${liquidData.k}`;
+		wellData.ref_cWell = Ref(`alpha_k_${liquidData.k}`, undefined);
 	}
-	const idx_cWell0 = wellData.idx_cWell; // concentration of well before aspirating
+	const ref_cWell0 = wellData.ref_cWell; // concentration of well before aspirating
 
 	let idx_majorD;
 	if (_.includes(model.majorDValues, d)) {
@@ -186,27 +196,27 @@ function aspirate(context, model, {p, t, d, well}) {
 	// model. We should differentiate between RV's that are calculated and RV's
 	// that require their own parameter.
 	model.rvs.push(rv_vTipAsp);
-	tipData.idx_vTipAsp = idx_vTipAsp;
+	tipData.ref_vTipAsp = RefRV(idx_vTipAsp);
 
 	// If we have information about the source concentration,
 	// then track the concentration in the tip too.
-	if (!_.isUndefined(idx_cWell0)) {
+	if (!_.isUndefined(ref_cWell0)) {
 		const idx_cTipAsp = model.rvs.length;
-		const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", idx_cWell0, idx_majorD};
+		const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", ref_cWell0, idx_majorD};
 		model.rvs.push(rv_cTipAsp);
-		tipData.idx_cTipAsp = idx_cTipAsp;
+		tipData.ref_cTipAsp = RefRV(idx_cTipAsp);
 	}
 
 	// If we already have information about well volume,
 	// then update it by removing the aliquot.
-	if (_.isNumber(idx_vWell0)) {
+	if (ref_vWell0) {
 		const idx_vWellAsp = model.rvs.length;
-		const rv_vWellAsp = {idx: idx_vWellAsp, type: "vWellAsp", idx_vWell0, idx_vTipAsp};
+		const rv_vWellAsp = {idx: idx_vWellAsp, type: "vWellAsp", ref_vWell0, ref_vTipAsp};
 		model.rvs.push(rv_vWellAsp);
-		wellData.idx_vWell = idx_vWellAsp;
+		wellData.ref_vWell = ref_vWellAsp;
 	}
 
-	wellData.idx_a = undefined;
+	wellData.ref_a = undefined;
 
 	const asp = {
 		d
@@ -227,29 +237,29 @@ function dispense(context, model, {p, t, d, well}) {
 
 	const wellData = getWellData(model, well);
 	const tipData = getTipData(model, t);
-	const idx_vWell0 = wellData.idx_vWell; // volume of well before aspirating
-	const idx_cWell0 = wellData.idx_cWell; // concentration of well before aspirating
-	const idx_vTipAsp = tipData.idx_vTipAsp; // volume in tip
-	const idx_cTipAsp = tipData.idx_cTipAsp; // concentration in tip
+	const ref_vWell0 = wellData.ref_vWell; // volume of well before aspirating
+	const ref_cWell0 = wellData.ref_cWell; // concentration of well before aspirating
+	const ref_vTipAsp = tipData.ref_vTipAsp; // volume in tip
+	const ref_cTipAsp = tipData.ref_cTipAsp; // concentration in tip
 
 	const idx_vWellDis = model.rvs.length;
 	// const idx_pip = model.pipOps.length;
-	const rv_vWellDis = {idx: idx_vTipAsp, type: "vWellDis", idx_vTipAsp};
+	const rv_vWellDis = {idx: idx_vWellDis, type: "vWellDis", ref_vTipAsp};
 	model.rvs.push(rv_vWellDis);
-	tipData.idx_vTipAsp = undefined;
-	wellData.idx_vWell = idx_vWellDis;
+	tipData.ref_vTipAsp = undefined;
+	wellData.ref_vWell = RefRV(idx_vWellDis);
 
 	// If we have information about the source concentration,
 	// then track the concentration in the tip too.
-	if (_.isNumber(idx_cTipAsp)) {
+	if (ref_cTipAsp) {
 		const idx_cWellDis = model.rvs.length;
-		const rv_cWellDis = {idx: idx_cWellDis, type: "cWellDis", idx_vWell0, idx_cWell0, idx_vTipAsp, idx_cTipAsp};
+		const rv_cWellDis = {idx: idx_cWellDis, type: "cWellDis", ref_vWell0, ref_cWell0, ref_vTipAsp, ref_cTipAsp};
 		model.rvs.push(rv_cWellDis);
-		tipData.idx_cTipAsp = undefined;
-		wellData.idx_cWell = idx_cWellDis;
+		tipData.ref_cTipAsp = undefined;
+		wellData.ref_cWell = RefRV(idx_cWellDis);
 	}
 
-	wellData.idx_a = undefined;
+	wellData.ref_a = undefined;
 
 	const asp = {
 		d
@@ -380,7 +390,7 @@ function print_transformed_parameters_RV_a0(model, output) {
 		idxs[i] = rv.idx + 1;
 		const wellData = model.wells[rv.well];
 		const labwareData = model.labwares[wellData.l];
-		idxs_al[i] = labwareData.idx_al + 1;
+		idxs_al[i] = labwareData.ref_al.i + 1;
 		idxs_m[i] = 0 + 1;
 	}
 
@@ -398,7 +408,7 @@ function print_transformed_parameters_RV_av(model, output) {
 		const rv = rvs[i];
 		idxs[i] = rv.idx + 1;
 		const wellData = model.wells[rv.well];
-		idxs_a0[i] = wellData.idx_a0 + 1;
+		idxs_a0[i] = wellData.ref_a0.i + 1;
 		// const labwareData = model.labwares[wellData.l];
 		// // console.log({rv, wellData, labwareData})
 		// idxs_l[i] = labwareData.idx_al;
@@ -438,47 +448,47 @@ function handle_vTipAsp(model, output, rv, idx) {
 }
 function handle_cTipAsp(model, output, rv, idx) {
 	// C_t[j] ~ normal(ak[src] * gamma[subd[j]], sigma_gamma)
-	const cWell0 = (_.isNumber(rv.idx_cWell0))
-		? `RV[${rv.idx_cWell0 + 1}]`
-		: rv.idx_cWell0;
+	const cWell0 = _.isNumber(rv.ref_cWell0.idx)
+		? `RV[${rv.ref_cWell0.idx}]`
+		: rv.ref_cWell0.name;
 	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] * sigma_gamma[${rv.idx_majorD + 1}]); // aspirated concentration in tip`);
 }
 function handle_vWellAsp(model, output, rv, idx) {
-	if (_.isNumber(rv.idx_vWell0)) {
+	if (_.isNumber(rv.ref_vWell0.idx)) {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] - RV[${rv.idx_vTipAsp + 1}]; // volume aspirated from well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_vWell0.idx}] - RV[${rv.ref_vTipAsp.idx}]; // volume aspirated from well`);
 	}
 	else {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = -RV[${rv.idx_vTipAsp + 1}]; // volume aspirated from well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = -RV[${rv.ref_vTipAsp.idx}]; // volume aspirated from well`);
 	}
 }
 function handle_vWellDis(model, output, rv, idx) {
 	// Add volume to well
-	if (_.isNumber(rv.idx_vWell0)) {
+	if (rv.ref_vWell0) {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_vTipAsp + 1}]; // volume dispensed into well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_vWell0.idx}] + RV[${rv.ref_vTipAsp.idx}]; // volume dispensed into well`);
 	}
 	else {
 		// VolTot_t[j] = sum of volumes
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_vTipAsp + 1}]; // volume dispensed into well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_vTipAsp.idx}]; // volume dispensed into well`);
 	}
 }
 function handle_cWellDis(model, output, rv, idx) {
 	// C_t[j] = (c[i,j-1] * v[i,j-1] + cTip * vTip) / (v[i,j-1] + vTip)
-	if (_.isNumber(rv.idx_vWell0)) {
-		const cWell0 = (_.isNumber(rv.idx_cWell0))
-			? `RV[${rv.idx_cWell0 + 1}]`
-			: rv.idx_cWell0;
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = (${cWell0} * RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_cTipAsp + 1}] * RV[${rv.idx_vTipAsp + 1}]) / (RV[${rv.idx_vWell0 + 1}] + RV[${rv.idx_vTipAsp + 1}]); // new concentration in well`);
+	if (rv.ref_vWell0 && _.isNumber(rv.ref_vWell0.idx)) {
+		const cWell0 = (_.isNumber(rv.ref_cWell0.idx))
+			? `RV[${rv.ref_cWell0.idx}]`
+			: rv.ref_cWell0.name;
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = (${cWell0} * RV[${rv.ref_vWell0.idx}] + RV[${rv.ref_cTipAsp.idx}] * RV[${rv.ref_vTipAsp.idx}]) / (RV[${rv.ref_vWell0.idx}] + RV[${rv.ref_vTipAsp.idx}]); // new concentration in well`);
 	}
 	else {
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.idx_cTipAsp + 1}]; // concentration of dispense in well`);
+		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[${rv.ref_cTipAsp.idx}]; // concentration of dispense in well`);
 	}
 }
 function handle_a(model, output, rv, idx) {
 	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
-	output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[Av] + RV[${rv.idx_vWell + 1}] * RV[${rv.idx_cWell + 1}]; // absorbance in well`);
+	output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV[Av] + RV[${rv.ref_vWell.idx}] * RV[${rv.ref_cWell.idx}]; // absorbance in well`);
 }
 
 const output = {
@@ -506,7 +516,7 @@ if (!_.isEmpty(model.majorDs)) {
 console.log("  sigma_a_raw ~ exponential(1);");
 if (model.absorbanceMeasurements.length > 0) {
 	console.log();
-	const idxsRv = model.absorbanceMeasurements.map(x => x.idx_a + 1);
+	const idxsRv = model.absorbanceMeasurements.map(x => x.ref_a.idx);
 	console.log(`  A ~ normal(RV[{${idxsRv}}], RV[{${idxsRv}}] * sigma_a)`);
 }
 console.log("}");
