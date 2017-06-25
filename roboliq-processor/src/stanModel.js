@@ -209,6 +209,7 @@ function dispense(context, model, {p, t, d, well}) {
 	const rv_vWellDis = {idx: idx_vTipAsp, type: "vWellDis", idx_vTipAsp};
 	model.rvs.push(rv_vWellDis);
 	tipData.idx_vTipAsp = undefined;
+	wellData.idx_vWell = idx_vWellDis;
 
 	// If we have information about the source concentration,
 	// then track the concentration in the tip too.
@@ -217,6 +218,7 @@ function dispense(context, model, {p, t, d, well}) {
 		const rv_cWellDis = {idx: idx_cWellDis, type: "cWellDis", idx_vWell0, idx_cWell0, idx_vTipAsp, idx_cTipAsp};
 		model.rvs.push(rv_cWellDis);
 		tipData.idx_cTipAsp = undefined;
+		wellData.idx_cWell = idx_cWellDis;
 	}
 
 	const asp = {
@@ -242,7 +244,8 @@ assignLiquid(context, model, "waterLabware1(A01)", "water");
 assignLiquid(context, model, "troughLabware1(A01)", "dye");
 aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "troughLabware1(A01)", k: "dye0150"});
 dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)"});
-// aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "waterLabware1(A01)", k: "dye0150"});
+aspirate(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "waterLabware1(A01)", k: "water"});
+dispense(context, model, {p: "Roboliq_Water_Air_1000", t: 1, d: 150, well: "plate1(A01)"});
 absorbance_A0(context, model, ["plate1(A01)", "plate1(A02)"]);
 absorbance_AV(context, model, ["plate1(A01)"]);
 console.log(JSON.stringify(model, null, '\t'));
