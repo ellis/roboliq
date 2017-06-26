@@ -1,5 +1,13 @@
 # Todos
 
+Monday
+
+* [ ] possibly re-run qc42-general, but remake dye0015, and prepare dye0150 from dye0150 directly
+* [ ] why were the dye factors so different between the two runs last Friday?
+	* might consider diluting dye0015 in a deep well plate 1:10 in order to calculate dye factor using 150ul dispenses
+* [ ] make test for weighing larger volumes
+	* [ ]
+
 stanModel:
 
 * [x] remove sigma_a from RV calculation of absorbance
@@ -34,7 +42,7 @@ Friday
 * [x] run qc41-150ul with just water up to the point of weighing the full plate
 * [ ] test larger volumes
 * [ ] qc42-general-correction 2
-	* [ ] try to figure out why correction didn't work well for some volumes
+	* [x] try to figure out why correction didn't work well for some volumes
 	* [ ] calculate better correction factors
 	* [ ] recompile script using the new correction factors
 	* [ ] run it
