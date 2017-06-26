@@ -186,7 +186,7 @@ objects:
 steps:
   data: wellData
   1:
-    data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M1"'}}
+    data: {source: simData, where: {stage: '"M1"'}}
     description: Read absorbance of empty wells
     command: absorbanceReader.measurePlate
     object: $l_ONE
@@ -204,7 +204,7 @@ steps:
     sources: dye0015
     destinations: tubes(A01)
     volumes: 150 ul
-    syringes: 1
+    syringes: [1]
     clean: thorough
 
   3:
@@ -221,7 +221,8 @@ steps:
       - { source: troughWater, destination: tubes(A01) }
       - { source: troughWater, destination: tubes(A01) }
       - { source: troughWater, destination: tubes(A01) }
-    syringes: 1
+    volumes: 150 ul
+    syringes: [1]
     cleanBetween: flush
 
   4:
@@ -235,7 +236,7 @@ steps:
     description: "transfer 150ul of dye dilution to 8 wells"
     command: pipetter.pipette
     program: $standardLiquidClass
-    sources: tube(A01)
+    sources: tubes(A01)
     destinationLabware: $l_ONE
     destinations: $well
     volumes: 150 ul
@@ -290,7 +291,7 @@ steps:
       duration: 7 minutes
 
   10:
-    data: {source: simData, where: {l: '`"{{l_ONE}}"`', stage: '"M2"'}}
+    data: {source: simData, where: {stage: '"M2"'}}
     description: "Measure wells after filling"
     command: system.call
     name: measureAbsorbance
