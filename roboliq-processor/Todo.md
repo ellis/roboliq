@@ -6,8 +6,12 @@ stanModel:
 * [x] when reading absorbance multiple times in a row, reference the same RV
 * [x] generate a stanModel for an actual experiment
 * [x] why are tip concentration RVs missing?
-* [ ] separate RV_VTIP
+* [x] separate RV_VTIPASP
 * [ ] create separate RV_C0TIP
+* [ ] add comments to `RV_*_raw` definitions in parameters section
+* [ ] separate RV_A
+* [ ] fix calculations of RV_A (one line each for A0, AV, AP)
+* [ ] figure out how to avoid allocating parameters for calculated quantities
 * [ ] try to compile the model with stan
 * [ ] figure out how to evaluate the results
 * [ ] add weight models
