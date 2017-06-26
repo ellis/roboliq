@@ -59,7 +59,7 @@ objects:
     type: Plate
     description: dye plate
     model: $#testLabwareModel
-    location: ourlab.mario.site.P6
+    location: ourlab.mario.site.P3
   tubes:
     type: Plate
     description: eppendorf tubes
