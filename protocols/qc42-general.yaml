@@ -260,6 +260,7 @@ steps:
               map:
                 volumeTotal: 300 ul
           clean: light
+          cleanBegin: thorough
           cleanBetween: none
 
         5:

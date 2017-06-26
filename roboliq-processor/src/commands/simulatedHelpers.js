@@ -22,12 +22,12 @@ export function simulatedByWells(parsed, data, wells0, result) {
 		const common = (_.isEmpty(joinKey)) ? data.objects.SCOPE : {};
 		// console.log({common})
 		// console.log("DATA:\n"+JSON.stringify(data.objects.DATA))
-		simulatedOutput = _.map(wells, well => {
+		simulatedOutput = _.map(wells, (well, i) => {
 			const row0 = (!_.isUndefined(joinKey))
 				? _.find(data.objects.DATA, row => (row[joinKey].replace(/.*\(([^)]*)\)/, "$1") === well)) || {}
 				: common;
 			const scope = _.defaults({}, row0, data.objects.SCOPE);
-			// console.log({row0, row1, simulated: parsed.value.output.simulated})
+			// console.log({i, row0, simulated: parsed.value.output.simulated})
 			const value = Design.calculate(parsed.value.output.simulated, scope);
 			const row = _.merge({RUNID: "simulated", object: parsed.objectName.object}, row0, userValues, {well, value_type: "absorbance", value});
 			// console.log("row: "+JSON.stringify(row))

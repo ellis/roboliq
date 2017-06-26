@@ -2,11 +2,22 @@
 
 Monday
 
-* [ ] possibly re-run qc42-general, but remake dye0015, and prepare dye0150 from dye0150 directly
-* [ ] why were the dye factors so different between the two runs last Friday?
+* [x] create proper dye0015 and dye0150 dilutions
+* [x] measure a bunch of empty plates to determine which ones to use
+* [ ] qc41-150ul: why did some of the water-filled wells have higher absorbance?  maybe the tips were not rinsed well enough.  Maybe modify the script and re-run.
+	* if I do modify the script, then
+		* [?] distribute the initial dye to the middle,
+		* [?] weight twice, once after each dye layer
+		* [?] make sure tips are washed better before dispensing water
+* [ ] possibly make new test of corrected volumes, just 3, 5, 7, 10 on a single plate - half corrected, half not
+* [ ] make test for concentration of larger volumes
+	* [ ] use dye0150 or dye0300
+	* [ ] dispense 150ul to reader plate several times
+	* [ ] dispense 150ul and higher volumes to deep well plate, then transfer 150ul to the reader plate
+* [ ] possibly re-run qc42-general, but using new dye0150 and dye0150 sources with known dilution ratio, and with plates whose A0's I've checked
+	* [ ] why were the dye factors so different between the two runs last Friday?
 	* might consider diluting dye0015 in a deep well plate 1:10 in order to calculate dye factor using 150ul dispenses
 * [ ] make test for weighing larger volumes
-	* [ ]
 
 stanModel:
 

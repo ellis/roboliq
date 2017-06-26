@@ -1,0 +1,48 @@
+# npm run processor -- --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts\qc' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/qc40-empty_plates.yaml
+
+roboliq: v1
+description: |
+  Measure empty plates.  Based on the variance, we can choose which ones to use
+  for further experiments.
+
+  Execution duration on mario: 17min for 6 plates
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
+
+parameters:
+  excitationWavelength:
+    description: excitation wavelength to read absorbance
+    value: 480nm
+  testLabwareModel:
+    description: The labware model to test (parameter $m$)
+    value: ourlab.model.plateModel_96_round_transparent_nunc
+
+objects:
+  plate1: { type: Plate, description: dye plate, model: $#testLabwareModel, location: ourlab.mario.site.HOTEL32_A1 }
+  plate2: { type: Plate, description: dye plate, model: $#testLabwareModel, location: ourlab.mario.site.HOTEL32_B1 }
+  plate3: { type: Plate, description: dye plate, model: $#testLabwareModel, location: ourlab.mario.site.HOTEL32_C1 }
+  plate4: { type: Plate, description: dye plate, model: $#testLabwareModel, location: ourlab.mario.site.HOTEL32_D1 }
+  plate5: { type: Plate, description: dye plate, model: $#testLabwareModel, location: ourlab.mario.site.HOTEL32_A2 }
+  plate6: { type: Plate, description: dye plate, model: $#testLabwareModel, location: ourlab.mario.site.HOTEL32_B2 }
+
+  data1:
+    type: Data
+    design:
+      l*: [plate1, plate2, plate3, plate4, plate5, plate6]
+
+steps:
+  1:
+    data: data1
+    command: data.forEachRow
+    steps:
+      1:
+        description: "`Read absorbance of empty {{l}}`"
+        command: absorbanceReader.measurePlate
+        object: $l
+        program:
+          excitationWavelength: $excitationWavelength
+        output:
+          appendTo: measurements
