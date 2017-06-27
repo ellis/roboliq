@@ -43,7 +43,7 @@ description: |
   - Move the filter plate on an empty site
   - Resuspend the cells in 70 ul 0.1 M LiAc supplemented with 10% Glycerol (the lower the better - 70 ul enough volume?)
   - Prepare PCR plate with DNA (ca 100 ng), 25 ul  of cells and 105 ul of master mix
-  - mix well but really gently 
+  - mix well but really gently
   - Cover with a lid
   - Incubate 30 min in RT
   - Move the PCR plate in a thermocycler
@@ -105,19 +105,23 @@ objects:
     model: ourlab.model.tubeHolderModel_15ml
     location: ourlab.mario.site.T1
   trafoMix:
-    description: Transformation mix (LiAc, ssDNA, water, 40ul per reaction)
+    description: Transformation mix (for 1.05 ml use 800ul 50% PEG3350, 100ul 1 M LiAc, 100ul 10x TE, 50 ul DMSO) and add for each ml add 50 ul of freshly boild ssDNA
     type: Liquid
     wells: tubeHolder15(A01)
-  peg:
-    description: PEG 50 % (w/v)
-    type: Liquid
-    wells: tubeHolder15(B01)
   water:
     description: Sterile water
     type: Liquid
-    wells: tubeHolder15(D01)
+    wells: tubeHolder15(C01)
   ypd:
     description: YPD medium
+    type: Liquid
+    wells: tubeHolder15(D01)
+  liAcGly:
+    description: LiAc 0.1 M + 10% Glycerol
+    type: Liquid
+    wells: tubeHolder15(E01)
+  liAc:
+    description: LiAc 0.1 M
     type: Liquid
     wells: tubeHolder15(E01)
   filterPlate:
@@ -137,24 +141,15 @@ objects:
   culturePlate:
     description: Empty deep well plate for cell cultures
     type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
+    model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P2
   balancePlate:
     description: Empty deep well plate for balancing liquid
     type: Plate
     model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P5
-  dnaPlate:
-    description: 96 well plate for DNA to be transformed
-    type: Plate
-    model: ourlab.model.plateModel_96_round_transparent_nunc
-    location: ourlab.mario.site.HOTEL32_D2
-  dnaPlateLid:
-    type: Lid
-    model: ourlab.model.lidModel_standard
-    location: dnaPlate
   pcrPlate:
-    description: 96 well PCR plate
+    description: 96 well PCR plate with 100ng of DNA prepipetted on wells to be used
     type: Plate
     model: ourlab.model.plateModel_96_pcr
     location: ourlab.mario.site.HOTEL32_C2
@@ -206,15 +201,36 @@ objects:
       cleanBetween: flush
       cleanBetweenSameSource: none
       layer*:
-      - source: water
-        volume: 200 ul
+      - source: cellCulture
+        volume: 350 ul
+        liquidClass: Roboliq_Water_Air_1000
+        cleanBetween: none
+        cleanEnd: none
+
+  design2:
+    type: Design
+    description: Mixtures for target wells
+    conditions:
+      i*: $#N
+      destinationLabware: filterPlate
+      well=allocateWells:
+        rows: 8
+        columns: 12
+        from: $#F
+      cleanBegin: none
+      cleanEnd: flush
+      cleanBetween: flush
+      cleanBetweenSameSource: none
+      layer*:
+      - source: cellCulture
+        volume: 350 ul
         liquidClass: Roboliq_Water_Air_1000
         cleanBetween: none
         cleanEnd: none
 
   design4:
     type: Design
-    description: Add PEG and DNA on filter plate
+    description: Trafomix and cells to PCR plate
     conditions:
       i*: $#N
       well=allocateWells:
@@ -226,7 +242,7 @@ objects:
       cleanEnd: flush
       cleanBetween: flush
       cleanBetweenSameSource: none
-      volumeTransfer: 200 ul
+      volumeTransfer: 25 ul
 
 steps:
     data: {source: design0}
@@ -310,7 +326,7 @@ steps:
         destination: ourlab.mario.site.P6
 
     14:
-        description: "Step: water resuspension"
+        description: Extra cells
         data: {source: design2}
         1:
             command: experiment.forEachGroup
@@ -376,23 +392,35 @@ steps:
         object: wastePlateLid
         destination: ourlab.mario.site.P6
     24:
-      1:
-        description: Put DNA plate on bench
-        command: transporter.movePlate
-        object: dnaPlate
-        destination: ourlab.mario.site.P8
-      2:
-        description: Unccover the DNA plate
-        command: transporter.moveLidFromContainerToSite
-        object: dnaPlateLid
-        destination: ourlab.mario.site.HOTEL32_D2
-    25:
         description: Put PCR plate on bench
         command: transporter.movePlate
         object: pcrPlate
         destination: ourlab.mario.site.P4PCR
+    25:
+      description: Resuspension into LiAc Glycerol
+      1:
+        description: Add LiAc 0.1 M + Glycerol 10% on the filter plate
+        command: pipetter.pipette
+        program: Roboliq_Water_Air_1000
+        sources: liAcGly
+        destinationLabware: filterPlate
+        destinations: $#wells2
+        volumes: 70 ul
+        cleanBegin: flush
+        cleanEnd: flush
+        cleanBetween: none
+      2:
+        description: Mix the cells
+        command: pipetter.mix
+        wellLabware: filterPlate
+        wells: $#wells2
+        counts: 5
+        amounts: 60 ul
+        cleanBegin: none
+        cleanBetween: none
+        cleanEnd: decontaminate
     26:
-        description: Add transformation mix, DNA and peg on the cells, move to PCR plate
+        description: Add transformation mix on PCR plate, move cells there and mix
         data: {source: design4}
         command: experiment.forEachGroup
         groupBy: group
@@ -401,59 +429,14 @@ steps:
               command: pipetter.pipette
               program: Roboliq_Water_Dry_1000
               sources: trafoMix
-              destinationLabware: filterPlate
+              destinationLabware: pcrPlate
               destinations: $$well
-              volumes: 40 ul
+              volumes: 105 ul
               cleanBegin: decontaminate
               cleanBetween: decontaminate
               cleanBetweenSameSource: none
               cleanEnd: none
           2:
-              command: pipetter.pipette
-              sourceLabware: dnaPlate
-              sources: $$well
-              destinationLabware: filterPlate
-              destinations: $$well
-              volumes: 10 ul
-              program: Roboliq_Water_Air_1000
-              cleanBegin: none
-              cleanBetween: none
-              cleanBetweenSameSource: none
-              cleanEnd: none
-          3:
-              command: pipetter.mix
-              program: "OV PEG Wet 1000"
-              wellLabware: filterPlate
-              wells: $$well
-              counts: 5
-              amounts: 30 ul
-              cleanBegin: none
-              cleanBetween: decontaminate
-              cleanBetweenSameSource: none
-              cleanEnd: decontaminate
-          4:
-              command: pipetter.pipette
-              sources: peg
-              destinationLabware: filterPlate
-              destinations: $$well
-              volumes: 100 ul
-              program: "OV PEG Wet 1000"
-              cleanBegin: decontaminate
-              cleanBetween: none
-              cleanBetweenSameSource: none
-              cleanEnd: none
-          5:
-              command: pipetter.mix
-              program: "OV PEG Wet 1000"
-              wellLabware: filterPlate
-              wells: $$well
-              counts: 5
-              amounts: 100 ul
-              cleanBegin: none
-              cleanBetween: none
-              cleanBetweenSameSource: none
-              cleanEnd: none
-          6:
               command: pipetter.pipette
               program: "OV PEG Wet 1000"
               sourceLabware: filterPlate
@@ -466,21 +449,22 @@ steps:
               cleanBetween: decontaminate
               cleanBetweenSameSource: none
               cleanEnd: decontaminate
+          3:
+              command: pipetter.mix
+              program: "OV PEG Wet 1000"
+              wellLabware: pcrPlate
+              wells: $$well
+              counts: 5
+              amounts: 100 ul
+              cleanBegin: none
+              cleanBetween: none
+              cleanBetweenSameSource: none
+              cleanEnd: none
     29:
         description: Put lid on filter plate
         command: transporter.moveLidFromSiteToContainer
         object: wastePlateLid
         container: filterPlate
-    31:
-        description: Put lid on DNA plate
-        command: transporter.moveLidFromSiteToContainer
-        object: dnaPlateLid
-        container: dnaPlate
-    32:
-        description: Put DNA plate on back
-        command: transporter.movePlate
-        object: dnaPlate
-        destination: ourlab.mario.site.HOTEL32_D2
     33:
         description: Heat shock protocol on a thermocycler
         command: evoware._subroutine
@@ -503,7 +487,7 @@ steps:
         cleanEnd: decontaminate
         cleanBetween: decontaminate
     36:
-      description: Filter PEG plate
+      description: Filter plate from trafomix
       0:
         description: Add YPD on the filter plate
         command: pipetter.pipette
