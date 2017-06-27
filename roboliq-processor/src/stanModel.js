@@ -324,6 +324,19 @@ function dispense(context, model, {p, t, d, well}) {
 }
 
 function printModel(model) {
+	const output = {
+		transformedData: {
+			definitions: [],
+			statements: []
+		},
+		transformedParameters: {
+			definitions: [],
+			statements: []
+		}
+	};
+	print_transformed_data(model, output);
+	print_transformed_parameters(model, output);
+
 	console.log();
 	console.log("data {");
 	if (!_.isEmpty(model.majorDs)) {
@@ -346,29 +359,9 @@ function printModel(model) {
 
 	console.log();
 	console.log("transformed data {");
-	console.log(`  int NM = 1; // number of labware models`);
-	console.log(`  int NL = ${_.size(model.labwares)}; // number of labwares`);
-	console.log(`  int NI = ${_.size(model.wells)}; // number of wells`);
-	console.log(`  int NT = ${_.size(model.tips)}; // number of tips`);
-	console.log(`  int NRV = ${_.size(model.rvs)}; // number of latent random variables`);
-	console.log(`  int NJ = ${model.pipOps.length}; // number of pipetting operations`);
-	// console.log(`  int NDIS = ${model.dispenses.length}; // number of dispenses`);
-	console.log(`  int NPD = ${_.size(model.majorDs)}; // number of liquidClass+majorD combinations`);
-	_.forEach(model.liquids, liquidData => {
-		if (_.get(liquidData.spec, "type") === "fixed") {
-			console.log(`  real alpha_k_${liquidData.k} = ${liquidData.spec.value}; // concentration of liquid ${liquidData.k}`);
-		}
-	});
-	if (!_.isEmpty(model.pipOps)) {
-		console.log();
-		console.log("  // desired volumes")
-		// console.log(`  real d[NJ] = {${model.pipOps.map(x => x.d.toFixed(1))}};`);
-		console.log(`  vector<lower=0>[NJ] d;`);
-	  console.log(`  {`);
-	  console.log(`    real d0[NJ] = {${model.pipOps.map(x => x.d.toFixed(1))}};`);
-	  console.log(`    for (i in 1:NJ) d[i] = d0[i];`);
-	  console.log(`  }`);
-	}
+	output.transformedData.definitions.forEach(s => console.log(s));
+	console.log();
+	output.transformedData.statements.forEach(s => console.log(s));
 	console.log("}");
 
 	console.log();
@@ -403,13 +396,6 @@ function printModel(model) {
 	}
 	console.log("}");
 
-	const output = {
-		transformedParameters: {
-			definitions: [],
-			statements: []
-		}
-	};
-	print_transformed_parameters(model, output);
 	console.log();
 	console.log("transformed parameters {");
 	output.transformedParameters.definitions.forEach(s => console.log(s));
@@ -435,9 +421,34 @@ function printModel(model) {
 		console.log("  sigma_a_raw ~ exponential(1);");
 		console.log();
 		const idxsRv = model.absorbanceMeasurements.map(x => x.ref_a.idx);
-		console.log(`  A ~ normal(RV_A[{${idxsRv}}], RV_A[{${idxsRv}}] * sigma_a);`);
+		// console.log(`  A ~ normal(RV_A[{${idxsRv}}], RV_A[{${idxsRv}}] * sigma_a);`);
+		console.log(`  A ~ normal(RV_A[A_i_A], RV_A[A_i_A] * sigma_a);`);
 	}
 	console.log("}");
+}
+
+function print_transformed_data(model, output) {
+	output.transformedData.definitions.push(`  int NM = 1; // number of labware models`);
+	output.transformedData.definitions.push(`  int NL = ${_.size(model.labwares)}; // number of labwares`);
+	output.transformedData.definitions.push(`  int NI = ${_.size(model.wells)}; // number of wells`);
+	output.transformedData.definitions.push(`  int NT = ${_.size(model.tips)}; // number of tips`);
+	output.transformedData.definitions.push(`  int NRV = ${_.size(model.rvs)}; // number of latent random variables`);
+	output.transformedData.definitions.push(`  int NJ = ${model.pipOps.length}; // number of pipetting operations`);
+	// console.log(`  int NDIS = ${model.dispenses.length}; // number of dispenses`);
+	output.transformedData.definitions.push(`  int NPD = ${_.size(model.majorDs)}; // number of liquidClass+majorD combinations`);
+	_.forEach(model.liquids, liquidData => {
+		if (_.get(liquidData.spec, "type") === "fixed") {
+			output.transformedData.definitions.push(`  real alpha_k_${liquidData.k} = ${liquidData.spec.value}; // concentration of liquid ${liquidData.k}`);
+		}
+	});
+	if (!_.isEmpty(model.pipOps)) {
+		// console.log(`  real d[NJ] = {${model.pipOps.map(x => x.d.toFixed(1))}};`);
+		output.transformedData.definitions.push(`  vector<lower=0>[NJ] d; // desired volumes`);
+	  output.transformedData.statements.push(`  {`);
+	  output.transformedData.statements.push(`    real d0[NJ] = {${model.pipOps.map(x => x.d.toFixed(1))}};`);
+	  output.transformedData.statements.push(`    for (i in 1:NJ) d[i] = d0[i];`);
+	  output.transformedData.statements.push(`  }`);
+	}
 }
 
 function print_transformed_parameters(model, output) {
@@ -525,7 +536,9 @@ function print_transformed_parameters_RV_vTipAsp(model, output) {
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_VTIPASP; // volume aspirated into tip`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // V_t[j] ~ normal(d[j] * (1 + beta[subd[j]]), sigma_v[subd[j]])");
-	output.transformedParameters.statements.push(`  RV_VTIPASP = d[{${idxs_pip}}] .* (1 + beta[{${idxs_majorD}}]) + RV_VTIPASP_raw .* sigma_v[{${idxs_majorD}}]; // volume aspirated into tip`);
+	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_d[${idxs_pip.length}] = {${idxs_pip}};`)
+	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_majorD[${idxs_majorD.length}] = {${idxs_majorD}};`)
+	output.transformedParameters.statements.push(`  RV_VTIPASP = d[RV_VTIPASP_i_d] .* (1 + beta[RV_VTIPASP_i_majorD]) + RV_VTIPASP_raw .* sigma_v[RV_VTIPASP_i_majorD]; // volume aspirated into tip`);
 }
 function print_transformed_parameters_RV_V(model, output) {
 	const rvs = model.RV_V;
@@ -600,7 +613,9 @@ function print_transformed_parameters_RV_A(model, output) {
 	if (rvs_A0.length > 0) {
 		const idxs = rvs_A0.map(rv => rv.idx);
 		const idxs_A0 = rvs_A0.map(rv => rv.ref_a0.idx);
-		output.transformedParameters.statements.push(`  RV_A[{${idxs}}] = RV_A0[{${idxs_A0}}]; // absorbance of empty wells`);
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i1[${idxs.length}] = {${idxs}};`)
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i1_A0[${idxs_A0.length}] = {${idxs_A0}};`)
+		output.transformedParameters.statements.push(`  RV_A[RV_A_i1] = RV_A0[RV_A_i1_A0]; // absorbance of empty wells`);
 	}
 
 	// AV readouts
@@ -608,7 +623,9 @@ function print_transformed_parameters_RV_A(model, output) {
 	if (rvs_AV.length > 0) {
 		const idxs = rvs_AV.map(rv => rv.idx);
 		const idxs_AV = rvs_AV.map(rv => rv.ref_av.idx);
-		output.transformedParameters.statements.push(`  RV_A[{${idxs}}] = RV_AV[{${idxs_AV}}]; // absorbance of water-filled wells`);
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i2[${idxs.length}] = {${idxs}};`)
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i2_AV[${idxs_AV.length}] = {${idxs_AV}};`)
+		output.transformedParameters.statements.push(`  RV_A[RV_A_i2] = RV_AV[RV_A_i2_AV]; // absorbance of water-filled wells`);
 	}
 
 	// A readouts
@@ -618,8 +635,19 @@ function print_transformed_parameters_RV_A(model, output) {
 		const idxs_AV = rvs_A.map(rv => rv.ref_av.idx);
 		const idxs_V = rvs_A.map(rv => rv.ref_vWell.idx);
 		const idxs_C = rvs_A.map(rv => rv.ref_cWell.idx);
-		output.transformedParameters.statements.push(`  RV_A[{${idxs}}] = RV_AV[{${idxs_AV}}] + RV_V[{${idxs_V}}] .* RV_C[{${idxs_C}}]; // absorbance of wells with dye`);
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i3[${idxs.length}] = {${idxs}};`)
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i3_AV[${idxs_AV.length}] = {${idxs_AV}};`)
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i3_V[${idxs_V.length}] = {${idxs_V}};`)
+		output.transformedData.definitions.push(`  int<lower=1> RV_A_i3_C[${idxs_C.length}] = {${idxs_C}};`)
+		output.transformedParameters.statements.push(`  RV_A[RV_A_i3] = RV_AV[RV_A_i3_AV] + RV_V[RV_A_i3_V] .* RV_C[RV_A_i3_C]; // absorbance of wells with dye`);
 	}
+
+	// Indexes for A ~ normal(...) model
+	if (model.absorbanceMeasurements.length > 0) {
+		const idxs_A = model.absorbanceMeasurements.map(x => x.ref_a.idx);
+		output.transformedData.definitions.push(`  int<lower=1> A_i_A[${idxs_A.length}] = {${idxs_A}};`)
+	}
+
 }
 
 const rvHandlers = {
