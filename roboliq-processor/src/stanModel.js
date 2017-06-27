@@ -499,10 +499,12 @@ function print_transformed_parameters_RV_a0(model, output) {
 		idxs_m[i] = 0 + 1;
 	}
 
+	output.transformedData.definitions.push(`  int<lower=1> RV_A0_i_AL[${idxs_al.length}] = {${idxs_al}};`)
+	output.transformedData.definitions.push(`  int<lower=1> RV_A0_i_m[${idxs_m.length}] = {${idxs_m}};`)
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_A0; // absorbance of empty wells`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // A0[i] ~ normal(AL[m[i]], sigma_alpha_i[m[i]])");
-	output.transformedParameters.statements.push(`  RV_A0 = RV_AL[{${idxs_al}}] + RV_A0_raw .* sigma_alpha_i[{${idxs_m}}];`);
+	output.transformedParameters.statements.push(`  RV_A0 = RV_AL[RV_A0_i_AL] + RV_A0_raw .* sigma_alpha_i[RV_A0_i_m];`);
 }
 function print_transformed_parameters_RV_av(model, output) {
 	const rvs = model.RV_AV;
@@ -521,10 +523,12 @@ function print_transformed_parameters_RV_av(model, output) {
 		idxs_m[i] = 0 + 1;
 	}
 
+	output.transformedData.definitions.push(`  int<lower=1> RV_AV_i_A0[${idxs_a0.length}] = {${idxs_a0}};`)
+	output.transformedData.definitions.push(`  int<lower=1> RV_AV_i_m[${idxs_m.length}] = {${idxs_m}};`)
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_AV; // absorbance of water-filled wells`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
-	output.transformedParameters.statements.push(`  RV_AV = RV_A0[{${idxs_a0}}] + alpha_v[{${idxs_m}}] + RV_AV_raw .* sigma_alpha_v[{${idxs_m}}];`);
+	output.transformedParameters.statements.push(`  RV_AV = RV_A0[RV_AV_i_A0] + alpha_v[RV_AV_i_m] + RV_AV_raw .* sigma_alpha_v[RV_AV_i_m];`);
 }
 function print_transformed_parameters_RV_vTipAsp(model, output) {
 	const rvs = model.RV_VTIPASP;
