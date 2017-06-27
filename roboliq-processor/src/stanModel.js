@@ -39,6 +39,7 @@ function createEmptyModel(majorDValues) {
 		RV_VTIPASP: [],
 		RV_V: [],
 		RV_C: [],
+		RV_A: [],
 		pipOps: [], // Pipetting operations
 		absorbanceMeasurements: []
 	};
@@ -149,19 +150,36 @@ function measureAbsorbance(context, model, wells) {
 		const rv_al = getRv_al(model, l);
 		const rv_a0 = getRv_a0(model, well);
 
+		// If the well already has an absorbance RV
 		if (wellData.ref_a) {
-			model.absorbanceMeasurements.push({ref_a: wellData.ref_a});
+			model.absorbanceMeasurements.push({ref_a: wellData.ref_a, well});
 		}
+		// If there's some volume in the well
 		else if (wellData.ref_vWell) {
 			const rv_av = getRv_av(model, well);
 			const ref_av = Ref(rv_av);
-			const rv_a = {type: "a", ref_av, ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
-			const ref_a = addRv(model, rv_a);
-			model.absorbanceMeasurements.push({ref_a});
-			wellData.ref_a = ref_a;
+			// If there's some concentration in the well
+			if (wellData.ref_cWell) {
+				const rv_a = {type: "a", ref_av, ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
+				const ref_a = addRv2(model, "RV_A", rv_a);
+				model.absorbanceMeasurements.push({ref_a});
+				wellData.ref_a = ref_a;
+			}
+			// Otherwise the liquid is clear:
+			else {
+				const rv_a = {type: "a", ref_av};
+				const ref_a = addRv2(model, "RV_A", rv_a);
+				model.absorbanceMeasurements.push({ref_a});
+				wellData.ref_a = ref_a;
+			}
 		}
+		// Otherwise, just measure A0
 		else {
-			model.absorbanceMeasurements.push({ref_a: Ref(rv_a0)});
+			const ref_a0 = Ref(rv_a0);
+			const rv_a = {type: "a", ref_a0};
+			const ref_a = addRv2(model, "RV_A", rv_a);
+			wellData.ref_a = ref_a;
+			model.absorbanceMeasurements.push({ref_a});
 		}
 	});
 }
@@ -417,7 +435,7 @@ function printModel(model) {
 		console.log("  sigma_a_raw ~ exponential(1);");
 		console.log();
 		const idxsRv = model.absorbanceMeasurements.map(x => x.ref_a.idx);
-		console.log(`  A ~ normal(RV[{${idxsRv}}], RV[{${idxsRv}}] * sigma_a);`);
+		console.log(`  A ~ normal(RV_A[{${idxsRv}}], RV_A[{${idxsRv}}] * sigma_a);`);
 	}
 	console.log("}");
 }
@@ -440,6 +458,7 @@ function print_transformed_parameters(model, output) {
 	print_transformed_parameters_RV_vTipAsp(model, output);
 	print_transformed_parameters_RV_V(model, output);
 	print_transformed_parameters_RV_C(model, output);
+	print_transformed_parameters_RV_A(model, output);
 	output.transformedParameters.statements.push("");
 	print_transformed_parameters_RVs(model, output);
 }
@@ -567,12 +586,47 @@ function print_transformed_parameters_RV_C(model, output) {
 		}
 	});
 }
+function print_transformed_parameters_RV_A(model, output) {
+	const rvs = model.RV_A;
+	if (rvs.length == 0) return;
+
+	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_A; // absorbance measurements`);
+	output.transformedParameters.statements.push("");
+
+	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
+
+	// A0 readouts
+	const rvs_A0 = rvs.filter(rv => rv.ref_a0);
+	if (rvs_A0.length > 0) {
+		const idxs = rvs_A0.map(rv => rv.idx);
+		const idxs_A0 = rvs_A0.map(rv => rv.ref_a0.idx);
+		output.transformedParameters.statements.push(`  RV_A[{${idxs}}] = RV_A0[{${idxs_A0}}]; // absorbance of empty wells`);
+	}
+
+	// AV readouts
+	const rvs_AV = rvs.filter(rv => rv.ref_av && !rv.ref_cWell);
+	if (rvs_AV.length > 0) {
+		const idxs = rvs_AV.map(rv => rv.idx);
+		const idxs_AV = rvs_AV.map(rv => rv.ref_av.idx);
+		output.transformedParameters.statements.push(`  RV_A[{${idxs}}] = RV_AV[{${idxs_AV}}]; // absorbance of water-filled wells`);
+	}
+
+	// A readouts
+	const rvs_A = rvs.filter(rv => rv.ref_cWell);
+	if (rvs_A.length > 0) {
+		const idxs = rvs_A.map(rv => rv.idx);
+		const idxs_AV = rvs_A.map(rv => rv.ref_av.idx);
+		const idxs_V = rvs_A.map(rv => rv.ref_vWell.idx);
+		const idxs_C = rvs_A.map(rv => rv.ref_cWell.idx);
+		output.transformedParameters.statements.push(`  RV_A[{${idxs}}] = RV_AV[{${idxs_AV}}] + RV_V[{${idxs_V}}] .* RV_C[{${idxs_C}}]; // absorbance of wells with dye`);
+	}
+}
 
 const rvHandlers = {
 	"al": handle_nop,
 	"a0": handle_nop,
 	"av": handle_nop,
-	"a": handle_a,
+	// "a": handle_a,
 	// "cTipAsp": handle_cTipAsp,
 	// "vWellAsp": handle_vWellAsp,
 	// "vWellDis": handle_vWellDis,
@@ -596,18 +650,6 @@ function handle_nop() {}
 // 		: rv.ref_cWell0.name;
 // 	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] * sigma_gamma); // aspirated concentration in tip`);
 // }
-function handle_a(model, output, rv, idx) {
-	// A ~ normal(Av + vWell * cWell, (Av + vWell * cWell) * sigma_a)
-	if (rv.ref_cWell) {
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV_AV[${rv.ref_av.idx}] + RV_V[${rv.ref_vWell.idx}] * RV_C[${rv.ref_cWell.idx}]; // absorbance in well`);
-	}
-	else if (rv.ref_av) {
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV_AV[${rv.ref_av.idx}]; // absorbance in well`);
-	}
-	else {
-		output.transformedParameters.statements.push(`  RV[${idx + 1}] = RV_A0[${rv.ref_a0.idx}]; // absorbance in well`);
-	}
-}
 
 module.exports = {
 	createEmptyModel, addLiquid, assignLiquid, measureAbsorbance, aspirate, dispense,
