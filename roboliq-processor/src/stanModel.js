@@ -158,6 +158,7 @@ function measureAbsorbance(context, model, wells) {
 		else if (wellData.ref_vWell) {
 			const rv_av = getRv_av(model, well);
 			const ref_av = Ref(rv_av);
+			// console.log({wellData})
 			// If there's some concentration in the well
 			if (wellData.ref_cWell) {
 				const rv_a = {type: "a", ref_av, ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
@@ -217,8 +218,10 @@ function aspirate(context, model, {p, t, d, well}) {
 		if (wellData.hasOwnProperty("k")) {
 			const liquidData = getLiquidData(model, wellData.k);
 			if (_.get(liquidData.spec, "type") === "fixed") {
-				const rv_c = {type: "c", k: liquidData.k, value: liquidData.spec.value, of: liquidData.k};
-				ref_c = addRv2(model, "RV_C", rv_c);
+				if (liquidData.spec.value > 0) {
+					const rv_c = {type: "c", k: liquidData.k, value: liquidData.spec.value, of: liquidData.k};
+					ref_c = addRv2(model, "RV_C", rv_c);
+				}
 			}
 			else {
 				// const rv_c_raw = {type: "c", k, value: liquidData.spec.value};
@@ -303,8 +306,8 @@ function dispense(context, model, {p, t, d, well}) {
 	tipData.ref_vTipAsp = undefined;
 	wellData.ref_vWell = ref_vWellDis;
 
-	// If we have information about the source concentration,
-	// then track the concentration in the tip too.
+	// If we have information about the tip concentration,
+	// then update the concentration in the destination well too.
 	if (ref_cTipAsp) {
 		const rv_cWellDis = {type: "cWellDis", ref_vWell0, ref_cWell0, ref_vTipAsp, ref_cTipAsp, well, of: well};
 		const ref_cWellDis = addRv2(model, "RV_C", rv_cWellDis);
