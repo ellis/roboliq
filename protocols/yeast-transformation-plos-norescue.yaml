@@ -63,21 +63,10 @@ parameters:
   F:
     description: first usable free well
     value: A03
-  F2:
-    description: first usable free well
-    value: A04
+    value: A05
   X:
     description: amount of liquid plated (ul)
     value: 200 ul
-
-  wells2:
-    description: "Wells to use for PEG filtration and YPD wash"
-    value:
-      allocateWells():
-        N: $#N
-        rows: 8
-        columns: 12
-        from: $#F2
 
 objects:
   ourlab:
@@ -112,10 +101,6 @@ objects:
     description: Sterile water
     type: Liquid
     wells: tubeHolder15(C01)
-  ypd:
-    description: YPD medium
-    type: Liquid
-    wells: tubeHolder15(D01)
   liAcGly:
     description: LiAc 0.1 M + 10% Glycerol
     type: Liquid
@@ -404,7 +389,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: liAcGly
         destinationLabware: filterPlate
-        destinations: $#wells2
+        destinations: $$well
         volumes: 70 ul
         cleanBegin: flush
         cleanEnd: flush
@@ -413,13 +398,13 @@ steps:
         description: Mix the cells
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $#wells2
+        wells: $$well
         counts: 5
         amounts: 60 ul
         cleanBegin: none
         cleanBetween: none
         cleanEnd: decontaminate
-    26:
+    28:
         description: Add transformation mix on PCR plate, move cells there and mix
         data: {source: design4}
         command: experiment.forEachGroup
