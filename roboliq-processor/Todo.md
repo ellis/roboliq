@@ -26,13 +26,16 @@ stanModel:
 * [x] generate a stanModel for an actual experiment
 * [x] why are tip concentration RVs missing?
 * [x] separate RV_VTIPASP
-* [ ] create separate RV_C0TIP
-* [ ] add comments to `RV_*_raw` definitions in parameters section
-* [ ] separate RV_A
-* [ ] fix calculations of RV_A (one line each for A0, AV, AP)
-* [ ] figure out how to avoid allocating parameters for calculated quantities
-* [ ] try to compile the model with stan
-* [ ] figure out how to evaluate the results
+* [x] create separate RV_C0TIP
+* [x] add comments to `RV_*_raw` definitions in parameters section
+* [x] separate RV_A
+* [x] fix calculations of RV_A (one line each for A0, AV, AP)
+* [x] figure out how to avoid allocating parameters for calculated quantities
+* [x] try to compile the model with stan
+* [x] figure out how to evaluate the results
+* [ ] create betaMajor_raw for just the "major" volumes, and calculate beta from it for all required volumes, using linear interpolation/extrapolation for the non-major volumes
+* [ ] remove 'gamma' variables from the output
+* [ ] RV_V and RV_C: calculate in sequential blocks, rather than each item individually
 * [ ] add weight models
 
 Bromphenol blue, ~600nm / 590nm
