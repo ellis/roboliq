@@ -103,7 +103,7 @@ objects:
   liAcGly:
     description: LiAc 0.1 M + 10% Glycerol
     type: Liquid
-    wells: tubeHolder15(E01)
+    wells: tubeHolder15(D01)
   liAc:
     description: LiAc 0.1 M
     type: Liquid
@@ -139,9 +139,9 @@ objects:
     location: ourlab.mario.site.HOTEL32_C2
 
   design0:
-    type: Design
+    type: Data
     description: Mixtures for target wells
-    conditions:
+    design:
       i*: $#N
       well=allocateWells:
         rows: 8
@@ -149,9 +149,9 @@ objects:
         from: $#F
 
   design1:
-    type: Design
+    type: Data
     description: Mixtures for target wells
-    conditions:
+    design:
       i*: $#N
       destinationLabware: filterPlate
       well=allocateWells:
@@ -171,9 +171,9 @@ objects:
         cleanBetween: none
 
   design2:
-    type: Design
+    type: Data
     description: Mixtures for target wells
-    conditions:
+    design:
       i*: $#N
       destinationLabware: filterPlate
       well=allocateWells:
@@ -192,9 +192,9 @@ objects:
         cleanEnd: none
 
   design3:
-    type: Design
+    type: Data
     description: Mixtures for target wells
-    conditions:
+    design:
       i*: $#N
       destinationLabware: filterPlate
       well=allocateWells:
@@ -213,9 +213,9 @@ objects:
         cleanEnd: none
 
   design4:
-    type: Design
+    type: Data
     description: Trafomix and cells to PCR plate
-    conditions:
+    design:
       i*: $#N
       well=allocateWells:
         rows: 8
@@ -256,14 +256,14 @@ steps:
         description: "Step: Cells"
         data: {source: design1}
         1:
-            command: experiment.forEachGroup
+            command: data.forEachGroup
             groupBy: layer
             steps:
                 command: pipetter.pipette
                 program: $liquidClass
-                sources: $$source
+                sources: $source
                 destinationLabware: $destinationLabware
-                destinations: $$well
+                destinations: $well
                 volumes: $volume
                 cleanBegin: $cleanBegin
                 cleanEnd: $cleanEnd
@@ -274,8 +274,8 @@ steps:
             program: Roboliq_Water_Air_1000
             sources: water
             destinationLabware: balancePlate
-            destinations: $$well
-            volumes: $$volume
+            destinations: $well
+            volumes: $volume
             cleanBegin: none
             cleanBetween: none
             cleanEnd: decontaminate
@@ -311,16 +311,16 @@ steps:
 
     14:
         description: Extra cells
-        data: {source: design2}
+        data: design2
         1:
-            command: experiment.forEachGroup
+            command: data.forEachGroup
             groupBy: layer
             steps:
                 command: pipetter.pipette
                 program: $liquidClass
-                sources: $$source
+                sources: $source
                 destinationLabware: $destinationLabware
-                destinations: $$well
+                destinations: $well
                 volumes: $volume
                 cleanBegin: $cleanBegin
                 cleanEnd: $cleanEnd
@@ -329,7 +329,7 @@ steps:
         2:
             command: pipetter.mix
             wellLabware: filterPlate
-            wells: $$well
+            wells: $well
             counts: 5
             amounts: 150 ul
             cleanBegin: none
@@ -341,8 +341,8 @@ steps:
             program: Roboliq_Water_Air_1000
             sources: water
             destinationLabware: balancePlate
-            destinations: $$well
-            volumes: $$volume
+            destinations: $well
+            volumes: $volume
             cleanBegin: decontaminate
             cleanBetween: none
             cleanEnd: none
@@ -380,14 +380,14 @@ steps:
         description: Resuspension to LiAc
         data: {source: design3}
         1:
-            command: experiment.forEachGroup
+            command: data.forEachGroup
             groupBy: layer
             steps:
                 command: pipetter.pipette
                 program: $liquidClass
-                sources: $$source
+                sources: $source
                 destinationLabware: $destinationLabware
-                destinations: $$well
+                destinations: $well
                 volumes: $volume
                 cleanBegin: $cleanBegin
                 cleanEnd: $cleanEnd
@@ -396,7 +396,7 @@ steps:
         2:
             command: pipetter.mix
             wellLabware: filterPlate
-            wells: $$well
+            wells: $well
             counts: 5
             amounts: 150 ul
             cleanBegin: none
@@ -408,13 +408,13 @@ steps:
             program: Roboliq_Water_Air_1000
             sources: water
             destinationLabware: balancePlate
-            destinations: $$well
-            volumes: $$volume
+            destinations: $well
+            volumes: $volume
             cleanBegin: decontaminate
             cleanBetween: none
             cleanEnd: none
     25:
-      description: Centrifugation to remove LiAc
+        description: Centrifugation to remove LiAc
         1:
             description: Put lid on the filter plate
             command: transporter.moveLidFromSiteToContainer
@@ -457,7 +457,7 @@ steps:
         program: Roboliq_Water_Air_1000
         sources: liAcGly
         destinationLabware: filterPlate
-        destinations: $$well
+        destinations: $well
         volumes: 70 ul
         cleanBegin: flush
         cleanEnd: flush
@@ -466,7 +466,7 @@ steps:
         description: Mix the cells
         command: pipetter.mix
         wellLabware: filterPlate
-        wells: $$well
+        wells: $well
         counts: 5
         amounts: 60 ul
         cleanBegin: none
@@ -475,7 +475,7 @@ steps:
     28:
         description: Add transformation mix on PCR plate, move cells there and mix
         data: {source: design4}
-        command: experiment.forEachGroup
+        command: data.forEachGroup
         groupBy: group
         steps:
           1:
@@ -483,7 +483,7 @@ steps:
               program: "OV PEG Wet 1000"
               sources: trafoMix
               destinationLabware: pcrPlate
-              destinations: $$well
+              destinations: $well
               volumes: 105 ul
               cleanBegin: decontaminate
               cleanBetween: decontaminate
@@ -493,9 +493,9 @@ steps:
               command: pipetter.pipette
               program: Roboliq_Water_Air_1000
               sourceLabware: filterPlate
-              sources: $$well
+              sources: $well
               destinationLabware: pcrPlate
-              destinations: $$well
+              destinations: $well
               volumes: $volumeTransfer
               clean: none
               cleanBegin: none
@@ -506,7 +506,7 @@ steps:
               command: pipetter.mix
               program: "OV PEG Wet 1000"
               wellLabware: pcrPlate
-              wells: $$well
+              wells: $well
               counts: 5
               amounts: 100 ul
               cleanBegin: none
