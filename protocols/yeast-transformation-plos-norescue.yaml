@@ -207,8 +207,8 @@ objects:
       cleanBetween: flush
       cleanBetweenSameSource: none
       layer*:
-      - source: cellCulture
-        volume: 350 ul
+      - source: liAc
+        volume: 300 ul
         liquidClass: Roboliq_Water_Air_1000
         cleanBetween: none
         cleanEnd: none
@@ -376,12 +376,81 @@ steps:
         command: transporter.moveLidFromContainerToSite
         object: wastePlateLid
         destination: ourlab.mario.site.P6
+
     24:
+        description: Resuspension to LiAc
+        data: {source: design3}
+        1:
+            command: experiment.forEachGroup
+            groupBy: layer
+            steps:
+                command: pipetter.pipette
+                program: $liquidClass
+                sources: $$source
+                destinationLabware: $destinationLabware
+                destinations: $$well
+                volumes: $volume
+                cleanBegin: $cleanBegin
+                cleanEnd: $cleanEnd
+                cleanBetween: $cleanBetween
+                cleanBetweenSameSource: none
+        2:
+            command: pipetter.mix
+            wellLabware: filterPlate
+            wells: $$well
+            counts: 5
+            amounts: 150 ul
+            cleanBegin: none
+            cleanBetween: decontaminate
+            cleanBetweenSameSource: none
+            cleanEnd: decontaminate
+        3:
+            command: pipetter.pipette
+            program: Roboliq_Water_Air_1000
+            sources: water
+            destinationLabware: balancePlate
+            destinations: $$well
+            volumes: $$volume
+            cleanBegin: decontaminate
+            cleanBetween: none
+            cleanEnd: none
+    25:
+      description: Centrifugation to remove LiAc
+        1:
+            description: Put lid on the filter plate
+            command: transporter.moveLidFromSiteToContainer
+            object: wastePlateLid
+            container: filterPlate
+        2:
+            description: Put filter plate on the waste plate
+            command: transporter.moveLidFromSiteToContainer
+            object: filterPlate
+            container: wastePlate
+        3:
+            description: Run the centrifuge to discard supernatant
+            command: centrifuge.centrifuge2
+            object1: balancePlate
+            object2: wastePlate
+            program:
+                rpm: 800
+                duration: 3 minutes
+                temperature: 25 degC
+        4:
+            description: Remove filter plate from waste plate
+            command: transporter.moveLidFromContainerToSite
+            object: filterPlate
+            destination: ourlab.mario.site.P3
+        5:
+            description: Remove lid from filter plate
+            command: transporter.moveLidFromContainerToSite
+            object: wastePlateLid
+            destination: ourlab.mario.site.P6
+    26:
         description: Put PCR plate on bench
         command: transporter.movePlate
         object: pcrPlate
         destination: ourlab.mario.site.P4PCR
-    25:
+    27:
       description: Resuspension into LiAc Glycerol
       1:
         description: Add LiAc 0.1 M + Glycerol 10% on the filter plate
