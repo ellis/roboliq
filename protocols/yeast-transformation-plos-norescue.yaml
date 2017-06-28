@@ -412,7 +412,7 @@ steps:
         steps:
           1:
               command: pipetter.pipette
-              program: Roboliq_Water_Dry_1000
+              program: "OV PEG Wet 1000"
               sources: trafoMix
               destinationLabware: pcrPlate
               destinations: $$well
@@ -423,7 +423,7 @@ steps:
               cleanEnd: none
           2:
               command: pipetter.pipette
-              program: "OV PEG Wet 1000"
+              program: Roboliq_Water_Air_1000
               sourceLabware: filterPlate
               sources: $$well
               destinationLabware: pcrPlate
