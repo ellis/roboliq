@@ -59,10 +59,9 @@ config:
 parameters:
   N:
     description: number of transformations
-    value: 8
+    value: 16
   F:
     description: first usable free well
-    value: A03
     value: A05
   X:
     description: amount of liquid plated (ul)
@@ -192,7 +191,7 @@ objects:
         cleanBetween: none
         cleanEnd: none
 
-  design2:
+  design3:
     type: Design
     description: Mixtures for target wells
     conditions:
