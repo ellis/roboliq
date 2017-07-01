@@ -27,8 +27,8 @@ _.forEach(plates, plate => {
 	// 	const wellPos = wellsParser.locationRowColToText(row, col);
 	// 	return `${plate}(${wellPos})`;
 	// });
-	// const testWells = ["A01", "B01", "C01", "E08", "F08", "G08"];
-	const testWells = ["E08", "F08", "G08"];
+	const testWells = ["A01", "B01", "C01", "E08", "F08", "G08"];
+	// const testWells = ["E08", "F08", "G08"];
 	const wells = testWells.map(s => `plate1(${s})`);
 	// console.log({wells})
 	measureAbsorbance(context, model, wells);

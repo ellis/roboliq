@@ -383,7 +383,9 @@ function printModel(model) {
 	console.log();
 	console.log("parameters {");
 	console.log("  vector<lower=0,upper=1>[NM] alpha_l;");
-	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_l;");
+	if (model.models.length > 1) {
+		console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_l;");
+	}
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_i;");
 	if (model.RV_AV.length > 0) {
 		console.log("  vector<lower=-0.5,upper=0.5>[NM] alpha_v;");
@@ -516,7 +518,12 @@ function print_transformed_parameters_RV_al(model, output) {
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_AL; // average absorbance of labware`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AL[m] ~ normal(alpha_l[m], sigmal_alpha_l[m])")
-	output.transformedParameters.statements.push(`  RV_AL = alpha_l[{${idxs_m}}] + RV_AL_raw .* sigma_alpha_l[{${idxs_m}}];`);
+	if (model.models.length > 1) {
+		output.transformedParameters.statements.push(`  RV_AL = alpha_l[{${idxs_m}}] + RV_AL_raw .* sigma_alpha_l[{${idxs_m}}];`);
+	}
+	else {
+		output.transformedParameters.statements.push(`  RV_AL = alpha_l[{${idxs_m}}];`);
+	}
 }
 function print_transformed_parameters_RV_a0(model, output) {
 	const rvs = model.RV_A0;
