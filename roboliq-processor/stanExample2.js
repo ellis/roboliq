@@ -10,8 +10,8 @@ const wellData = fs.readFileSync("../protocols/qc42-general-wellData.jsonl", "ut
 // console.log(wellData)
 
 const context = {};
-const majorDValues = [3, 7, 15, 16, 150, 500, 501, 750, 1000];
-const model = createEmptyModel(majorDValues);
+const subclassNodes = [3,15,500,1000];
+const model = createEmptyModel(subclassNodes);
 addLiquid(model, "water", {type: "fixed", value: 0});
 addLiquid(model, "dye0015", {type: "estimate", lower: 0, upper: 2});
 addLiquid(model, "dye0150", {type: "estimate", lower: 0, upper: 2});
@@ -33,7 +33,10 @@ _.forEach(plates, plate => {
 	measureAbsorbance(context, model, wells);
 
 	_.forEach(wellData, row => {
+		// FIXME: for debug only
+		if (row.l != plate) return;
 		if (!_.includes(testWells, row.well)) return;
+		// ENDFIX
 		if (row.l === plate && row.d > 0) {
 			aspirate(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.k}Labware(A01)`});
 			dispense(context, model, {p: row.liquidClass, t: row.t, d: row.d, well: `${row.l}(${row.well})`});

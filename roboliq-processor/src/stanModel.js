@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const assert = require('assert');
 const wellsParser = require('./parsers/wellsParser');
 
 function Ref(name, i) {
@@ -22,15 +23,21 @@ function randn_bm(mean, sigma) {
 	return mean + sigma * Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
 }
 
-function createEmptyModel(majorDValues) {
+/**
+ * [createEmptyModel description]
+ * @param  {number[]} subclassNodes - sorted volumes after which a subclass starts (e.g. for subclasses 3-15,15.01-500,500.01-1000, subclassNodes = [3,15,500,1000])
+ * @return {[type]}               [description]
+ */
+function createEmptyModel(subclassNodes) {
 	return {
-		majorDValues,
-		models: {},
+		subclassNodes,
+		models: {}, // labware models
 		liquids: {},
 		labwares: {},
 		wells: {},
 		tips: {},
-		majorDs: {},
+		betas: {},
+		gammas: {},
 		// Random variables
 		rvs: [],
 		RV_AL: [],
@@ -41,7 +48,7 @@ function createEmptyModel(majorDValues) {
 		RV_C: [],
 		RV_A: [],
 		pipOps: [], // Pipetting operations
-		absorbanceMeasurements: []
+		absorbanceMeasurements: [],
 	};
 }
 
@@ -238,17 +245,19 @@ function aspirate(context, model, {p, t, d, well}) {
 	}
 	const ref_cWell0 = wellData.ref_cWell; // concentration of well before aspirating
 
-	let idx_majorD;
-	if (_.includes(model.majorDValues, d)) {
-		const pd = p+d;
-		if (!model.majorDs.hasOwnProperty(pd)) {
-			model.majorDs[pd] = {idx: _.size(model.majorDs), p, d};
-		}
-		idx_majorD = model.majorDs[pd].idx;
+	// Add betaMajorD, if this is a major d for beta
+	const sub = _.findIndex(model.subclassNodes, v => d <= v);
+	// console.log({sub, d, x: model.subclassNodes})
+	assert(sub > 0);
+	const psub = p+sub;
+	if (!model.betas.hasOwnProperty(psub)) {
+		const idx = _.size(model.betas) + 1;
+		model.betas[psub] = {idx, psub, p, sub, d};
 	}
+	const idx_psub = model.betas[psub].idx;
 
 	const idx_pip = model.pipOps.length;
-	const rv_vTipAsp = {type: "vTipAsp", idx_pip, idx_majorD};
+	const rv_vTipAsp = {type: "vTipAsp", idx_pip, idx_psub};
 	// TODO: this is currently just calculated, so it'd be better not to have a
 	// RV_raw entry for this, because that adds a superfluous parameter to the
 	// model. We should differentiate between RV's that are calculated and RV's
@@ -261,7 +270,7 @@ function aspirate(context, model, {p, t, d, well}) {
 	// // then track the concentration in the tip too.
 	// if (!_.isUndefined(ref_cWell0)) {
 	// 	const idx_cTipAsp = model.rvs.length;
-	// 	const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", ref_cWell0, idx_majorD};
+	// 	const rv_cTipAsp = {idx: idx_cTipAsp, type: "cTipAsp", ref_cWell0, idx_d};
 	// 	model.rvs.push(rv_cTipAsp);
 	// 	tipData.ref_cTipAsp = RefRV(idx_cTipAsp);
 	// }
@@ -342,9 +351,11 @@ function printModel(model) {
 
 	console.log();
 	console.log("data {");
-	if (!_.isEmpty(model.majorDs)) {
+	if (!_.isEmpty(model.betas)) {
 		console.log("  real beta_scale;");
 		console.log("  real sigma_v_scale;");
+	}
+	if (!_.isEmpty(model.gammas)) {
 		console.log("  real gamma_scale;");
 		console.log("  real sigma_gamma_scale;");
 	}
@@ -391,10 +402,13 @@ function printModel(model) {
 	if (model.absorbanceMeasurements.length > 0) {
 		console.log("  real<lower=0> sigma_a_raw;");
 	}
-	if (!_.isEmpty(model.majorDs)) {
-		console.log("  vector[NPD] beta_raw;");
-		console.log("  vector[NPD] gamma_raw;");
-		console.log("  vector<lower=0>[NPD] sigma_v_raw;");
+	if (!_.isEmpty(model.betas)) {
+		console.log("  vector[NBETA] beta0_raw;");
+		console.log("  vector[NBETA] beta1_raw;");
+		console.log("  vector<lower=0>[NBETA] sigma_v_raw;");
+	}
+	if (!_.isEmpty(model.gammas)) {
+		console.log("  vector[NGAMMA] gamma_raw;");
 		console.log("  real<lower=0> sigma_gamma_raw;");
 	}
 	console.log("}");
@@ -414,9 +428,12 @@ function printModel(model) {
 	if (model.RV_VTIPASP.length > 0) console.log("  RV_VTIPASP_raw ~ normal(0, 1);");
 	// if (model.RV_C_raw.length > 0) console.log("  RV_C_raw ~ normal(0, 1);");
 	console.log("  RV_raw ~ normal(0, 1);");
-	if (!_.isEmpty(model.majorDs)) {
-		console.log("  beta_raw ~ normal(0, 1);");
+	if (!_.isEmpty(model.betas)) {
+		console.log("  beta0_raw ~ normal(0, 1);");
+		console.log("  beta1_raw ~ normal(0, 1);");
 		console.log("  sigma_v_raw ~ exponential(1);")
+	}
+	if (!_.isEmpty(model.gammas)) {
 		console.log("  gamma_raw ~ normal(0, 1);");
 		console.log("  sigma_gamma_raw ~ exponential(1);");
 	}
@@ -437,8 +454,8 @@ function print_transformed_data(model, output) {
 	output.transformedData.definitions.push(`  int NT = ${_.size(model.tips)}; // number of tips`);
 	output.transformedData.definitions.push(`  int NRV = ${_.size(model.rvs)}; // number of latent random variables`);
 	output.transformedData.definitions.push(`  int NJ = ${model.pipOps.length}; // number of pipetting operations`);
-	// console.log(`  int NDIS = ${model.dispenses.length}; // number of dispenses`);
-	output.transformedData.definitions.push(`  int NPD = ${_.size(model.majorDs)}; // number of liquidClass+majorD combinations`);
+	output.transformedData.definitions.push(`  int NBETA = ${_.size(model.betas)}; // number of liquidClass+majorD combinations for beta`);
+	output.transformedData.definitions.push(`  int NGAMMA = ${_.size(model.gammas)}; // number of liquidClass+majorD combinations for gamma`);
 	_.forEach(model.liquids, liquidData => {
 		if (_.get(liquidData.spec, "type") === "fixed") {
 			output.transformedData.definitions.push(`  real alpha_k_${liquidData.k} = ${liquidData.spec.value}; // concentration of liquid ${liquidData.k}`);
@@ -455,14 +472,23 @@ function print_transformed_data(model, output) {
 }
 
 function print_transformed_parameters(model, output) {
-	if (!_.isEmpty(model.majorDs)) {
+	if (!_.isEmpty(model.betas)) {
 		output.transformedParameters.definitions.push("");
-		output.transformedParameters.definitions.push("  vector[NPD] beta = beta_raw * beta_scale;");
-		output.transformedParameters.definitions.push("  vector<lower=0>[NPD] sigma_v = sigma_v_raw * sigma_v_scale;");
-		output.transformedParameters.definitions.push("  vector[NPD] gamma;");
-		output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * sigma_gamma_scale;");
-		output.transformedParameters.statements.push("");
-		output.transformedParameters.statements.push("  for (i in 1:NPD) gamma[i] = max({1, 1 - gamma_raw[i] * sigma_gamma});");
+		output.transformedParameters.definitions.push("  vector[NBETA] beta0 = beta0_raw * beta_scale;");
+		output.transformedParameters.definitions.push("  vector[NBETA] beta1 = beta1_raw * beta_scale;");
+		output.transformedParameters.definitions.push("  vector<lower=0>[NBETA] sigma_v = sigma_v_raw * sigma_v_scale;");
+
+		const rvs_gamma = _.values(model.betas).filter(rv => rv.withGamma);
+		if (!_.isEmpty(rvs_gamma)) {
+			output.transformedData.defintions.push(`  int<lower=0> NGAMMA = ${rvs_gamma.length};`);
+			output.transformedData.defintions.push(`  int<lower=1> gamma_i_raw[NGAMMA] = ${rvs_gamma.map(rv => rv.idx)};`);
+			output.transformedParameters.definitions.push("  vector<lower=0>[NBETA] gamma = 0;"); // need the same number of gamma variables as betas, but we probably have fewer gamma_raw parameters, since it's difficult to identify gamma in many experiments with small volumes.
+			output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * sigma_gamma_scale;");
+
+			output.transformedParameters.statements.push("");
+
+			output.transformedParameters.statements.push("  for (i in 1:NGAMMA) gamma[gamma_i_raw[i]] = max({0, gamma_raw[i] * sigma_gamma});");
+		}
 	}
 	output.transformedParameters.definitions.push("  real<lower=0> sigma_a = sigma_a_raw * sigma_a_scale;");
 	output.transformedParameters.definitions.push(`  vector[NRV] RV;`);
@@ -538,14 +564,14 @@ function print_transformed_parameters_RV_vTipAsp(model, output) {
 	if (rvs.length == 0) return;
 
 	const idxs_pip = rvs.map(rv => rv.idx_pip + 1);
-	const idxs_majorD = rvs.map(rv => rv.idx_majorD + 1);
+	const idxs_psubsId = rvs.map(rv => rv.idx_psub);
 
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_VTIPASP; // volume aspirated into tip`);
 	output.transformedParameters.statements.push("");
-	output.transformedParameters.statements.push("  // V_t[j] ~ normal(d[j] * (1 + beta[subd[j]]), sigma_v[subd[j]])");
+	output.transformedParameters.statements.push("  // V_t[j] ~ normal(beta0[psub[j]] + d[j] * (1 + beta1[subd[j]]), sigma_v[subd[j]])");
 	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_d[${idxs_pip.length}] = {${idxs_pip}};`)
-	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_majorD[${idxs_majorD.length}] = {${idxs_majorD}};`)
-	output.transformedParameters.statements.push(`  RV_VTIPASP = d[RV_VTIPASP_i_d] .* (1 + beta[RV_VTIPASP_i_majorD]) + RV_VTIPASP_raw .* sigma_v[RV_VTIPASP_i_majorD]; // volume aspirated into tip`);
+	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_psub[${idxs_pip.length}] = {${idxs_psubsId}};`)
+	output.transformedParameters.statements.push(`  RV_VTIPASP = beta0[RV_VTIPASP_i_psub] + d[RV_VTIPASP_i_d] .* (1 + beta1[RV_VTIPASP_i_psub]) + RV_VTIPASP_raw .* sigma_v[RV_VTIPASP_i_psub]; // volume aspirated into tip`);
 }
 function print_transformed_parameters_RV_V(model, output) {
 	const rvs = model.RV_V;
@@ -683,7 +709,7 @@ function handle_nop() {}
 // 	const cWell0 = _.isNumber(rv.ref_cWell0.idx)
 // 		? `RV[${rv.ref_cWell0.idx}]`
 // 		: rv.ref_cWell0.name;
-// 	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_majorD + 1}] + RV_raw[${idx + 1}] * sigma_gamma); // aspirated concentration in tip`);
+// 	output.transformedParameters.statements.push(`  RV[${idx + 1}] = ${cWell0} * (gamma[${rv.idx_d + 1}] + RV_raw[${idx + 1}] * sigma_gamma); // aspirated concentration in tip`);
 // }
 
 module.exports = {
