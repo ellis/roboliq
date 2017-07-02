@@ -156,6 +156,7 @@ function measureAbsorbance(context, model, wells) {
 		const wellData = getWellData(model, well);
 		const rv_al = getRv_al(model, l);
 		const rv_a0 = getRv_a0(model, well);
+		// console.log("wellData: "+JSON.stringify(wellData))
 
 		// If the well already has an absorbance RV
 		if (wellData.ref_a) {
@@ -168,14 +169,14 @@ function measureAbsorbance(context, model, wells) {
 			// console.log({wellData})
 			// If there's some concentration in the well
 			if (wellData.ref_cWell) {
-				const rv_a = {type: "a", ref_av, ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
+				const rv_a = {type: "a", well, l, wellPos, ref_av, ref_vWell: wellData.ref_vWell, ref_cWell: wellData.ref_cWell};
 				const ref_a = addRv2(model, "RV_A", rv_a);
 				model.absorbanceMeasurements.push({ref_a});
 				wellData.ref_a = ref_a;
 			}
 			// Otherwise the liquid is clear:
 			else {
-				const rv_a = {type: "a", ref_av};
+				const rv_a = {type: "a", well, l, wellPos, ref_av};
 				const ref_a = addRv2(model, "RV_A", rv_a);
 				model.absorbanceMeasurements.push({ref_a});
 				wellData.ref_a = ref_a;
@@ -184,7 +185,7 @@ function measureAbsorbance(context, model, wells) {
 		// Otherwise, just measure A0
 		else {
 			const ref_a0 = Ref(rv_a0);
-			const rv_a = {type: "a", ref_a0};
+			const rv_a = {type: "a", well, l, wellPos, ref_a0};
 			const ref_a = addRv2(model, "RV_A", rv_a);
 			wellData.ref_a = ref_a;
 			model.absorbanceMeasurements.push({ref_a});
@@ -246,9 +247,10 @@ function aspirate(context, model, {p, t, d, well}) {
 	const ref_cWell0 = wellData.ref_cWell; // concentration of well before aspirating
 
 	// Add betaMajorD, if this is a major d for beta
-	const sub = _.findIndex(model.subclassNodes, v => d <= v);
-	// console.log({sub, d, x: model.subclassNodes})
-	assert(sub > 0);
+	const sub = (model.subclassNodes[0] == d)
+		? 1
+		: _.findIndex(model.subclassNodes, v => d <= v);
+	assert(sub > 0, `didn't find subclass: ${JSON.stringify({sub, d, x: model.subclassNodes})}`);
 	const psub = p+sub;
 	if (!model.betas.hasOwnProperty(psub)) {
 		const idx = _.size(model.betas) + 1;
@@ -346,7 +348,8 @@ function printModel(model) {
 		transformedParameters: {
 			definitions: [],
 			statements: []
-		}
+		},
+		R: []
 	};
 	print_transformed_data(model, output);
 	print_transformed_parameters(model, output);
@@ -354,14 +357,30 @@ function printModel(model) {
 	console.log();
 	console.log("data {");
 	if (!_.isEmpty(model.betas)) {
-		console.log("  real beta_scale;");
-		console.log("  real sigma_v_scale;");
+		console.log("  real<lower=0> beta_scale;");
+		console.log("  real<lower=0> sigma_v_scale;");
 	}
 	if (!_.isEmpty(model.gammas)) {
-		console.log("  real gamma_scale;");
-		console.log("  real sigma_gamma_scale;");
+		console.log("  real<lower=0> gamma_scale;");
+		console.log("  real<lower=0> sigma_gamma_scale;");
 	}
-	console.log("  real sigma_a_scale;");
+	console.log("  real<lower=0> sigma_a_scale;");
+	if (model.RV_AV.length > 0) {
+		const NM = model.models.length || 1;
+		// Need to use real if NM = 1 due to a bug in RStan or something
+		console.log((NM > 1)
+			? `  vector[${model.models.length || 1}] alpha_v_loc;`
+			: `  real alpha_v_loc;`
+		);
+		console.log((NM > 1)
+			? `  vector<lower=0>[${model.models.length || 1}] alpha_v_scale;`
+			: `  real alpha_v_scale;`
+		);
+		console.log((NM > 1)
+			? `  vector<lower=0>[${model.models.length || 1}] sigma_alpha_v_scale;`
+			: `  real sigma_alpha_v_scale;`
+		);
+	}
 	_.forEach(model.liquids, liquidData => {
 		if (_.get(liquidData.spec, "type") === "user") {
 			console.log(`  real alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
@@ -388,8 +407,8 @@ function printModel(model) {
 	}
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_i;");
 	if (model.RV_AV.length > 0) {
-		console.log("  vector<lower=-0.5,upper=0.5>[NM] alpha_v;");
-		console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_v;");
+		console.log("  vector[NM] alpha_v_raw;");
+		console.log("  vector<lower=0>[NM] sigma_alpha_v_raw;");
 	}
 	console.log();
 	if (model.RV_AL.length > 0) console.log(`  vector[${model.RV_AL.length}] RV_AL_raw;`);
@@ -443,12 +462,21 @@ function printModel(model) {
 	}
 	if (model.absorbanceMeasurements.length > 0) {
 		console.log("  sigma_a_raw ~ exponential(1);");
+		if (model.RV_AV.length > 0) {
+			console.log("  alpha_v_raw ~ normal(0, 1);");
+			console.log("  sigma_alpha_v_raw ~ exponential(1);");
+		}
 		console.log();
 		const idxsRv = model.absorbanceMeasurements.map(x => x.ref_a.idx);
 		// console.log(`  A ~ normal(RV_A[{${idxsRv}}], RV_A[{${idxsRv}}] * sigma_a);`);
 		console.log(`  A ~ normal(RV_A[A_i_A], RV_A[A_i_A] * sigma_a);`);
 	}
 	console.log("}");
+
+	console.log("");
+	console.log("/*");
+	_.forEach(output.R, s => console.log(s));
+	console.log("*/");
 }
 
 function print_transformed_data(model, output) {
@@ -563,6 +591,16 @@ function print_transformed_parameters_RV_av(model, output) {
 
 	output.transformedData.definitions.push(`  int<lower=1> RV_AV_i_A0[${idxs_a0.length}] = {${idxs_a0}};`)
 	output.transformedData.definitions.push(`  int<lower=1> RV_AV_i_m[${idxs_m.length}] = {${idxs_m}};`)
+	// There's a bug in Rstan for data vectors of length 1, so this check is necessary...
+	const NM = model.models.length || 1;
+	if (NM == 1) {
+		output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw * alpha_v_scale;`);
+		output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw * sigma_alpha_v_scale;`);
+	}
+	else if (NM > 1) {
+		output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw .* alpha_v_scale;`);
+		output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw .* sigma_alpha_v_scale;`);
+	}
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_AV; // absorbance of water-filled wells`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
@@ -580,7 +618,10 @@ function print_transformed_parameters_RV_vTipAsp(model, output) {
 	output.transformedParameters.statements.push("  // V_t[j] ~ normal(beta0[psub[j]] + d[j] * (1 + beta1[subd[j]]), sigma_v[subd[j]])");
 	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_d[${idxs_pip.length}] = {${idxs_pip}};`)
 	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_psub[${idxs_pip.length}] = {${idxs_psubsId}};`)
-	output.transformedParameters.statements.push(`  RV_VTIPASP = beta0[RV_VTIPASP_i_psub] + d[RV_VTIPASP_i_d] .* (1 + beta1[RV_VTIPASP_i_psub]) + RV_VTIPASP_raw .* sigma_v[RV_VTIPASP_i_psub]; // volume aspirated into tip`);
+	output.transformedParameters.statements.push(`  {`);
+	output.transformedParameters.statements.push(`    vector[${model.RV_VTIPASP.length}] temp = beta0[RV_VTIPASP_i_psub] + d[RV_VTIPASP_i_d] .* (1 + beta1[RV_VTIPASP_i_psub]);`);
+	output.transformedParameters.statements.push(`    RV_VTIPASP = temp + temp .* RV_VTIPASP_raw .* sigma_v[RV_VTIPASP_i_psub]; // volume aspirated into tip`);
+	output.transformedParameters.statements.push(`  }`);
 }
 function print_transformed_parameters_RV_V(model, output) {
 	const rvs = model.RV_V;
@@ -693,6 +734,23 @@ function print_transformed_parameters_RV_A(model, output) {
 	if (model.absorbanceMeasurements.length > 0) {
 		const idxs_A = model.absorbanceMeasurements.map(x => x.ref_a.idx);
 		output.transformedData.definitions.push(`  int<lower=1> A_i_A[${idxs_A.length}] = {${idxs_A}};`)
+
+		output.R.push("df_RV_A = tribble(");
+		output.R.push("  ~l, ~well, ~a, ~A, ~A0, ~AV, ~V, ~C");
+		_.forEach(model.absorbanceMeasurements, (x, i) => {
+			const ref_a = x.ref_a;
+			const rv = model.RV_A[ref_a.i];
+			if (rv.ref_a0) {
+				output.R.push(` ,"${rv.l}", "${rv.wellPos}", ${i + 1}, ${rv.idx}, ${rv.ref_a0.idx}, NA, NA, NA`)
+			}
+			else if (rv.ref_av && !rv.ref_cWell) {
+				output.R.push(` ,"${rv.l}", "${rv.wellPos}", ${i + 1}, ${rv.idx}, NA, ${rv.ref_av.idx}, NA, NA`)
+			}
+			else if (rv.ref_cWell) {
+				output.R.push(` ,"${rv.l}", "${rv.wellPos}", ${i + 1}, ${rv.idx}, NA, ${rv.ref_av.idx}, ${rv.ref_vWell.idx}, ${rv.ref_cWell.idx}`)
+			}
+		});
+		output.R.push(")");
 	}
 
 }
