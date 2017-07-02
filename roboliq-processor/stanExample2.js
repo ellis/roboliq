@@ -13,13 +13,13 @@ const context = {};
 const subclassNodes = [3,15,500,1000];
 const model = createEmptyModel(subclassNodes);
 addLiquid(model, "water", {type: "fixed", value: 0});
-addLiquid(model, "dye0015", {type: "estimate", lower: 0, upper: 2});
-addLiquid(model, "dye0150", {type: "estimate", lower: 0, upper: 2});
+addLiquid(model, "dye0015", {type: "normal"});
+addLiquid(model, "dye0150", {type: "normal"});
 assignLiquid(context, model, "waterLabware", "water");
 assignLiquid(context, model, "dye0015Labware(A01)", "dye0015");
 assignLiquid(context, model, "dye0150Labware(A01)", "dye0150");
 
-const plates = ["plate1"];//, "plate2", "plate3"];
+const plates = ["plate1", "plate2", "plate3"];
 _.forEach(plates, plate => {
 	const wellDataPlate = wellData.filter(x => x.l == plate);
 	// console.log({wellDataPlate})
@@ -31,7 +31,7 @@ _.forEach(plates, plate => {
 	// 	return `${plate}(${wellPos})`;
 	// });
 	// const testWells = ["A01", "B01", "C01", "E08", "F08", "G08"];
-	// const testWells = ["E08", "F08", "G08"];
+	// const testWells = ["A01", "A04", "A07", "A11"];
 	// const wells = testWells.map(s => `plate1(${s})`);
 	// console.log({wells})
 	measureAbsorbance(context, model, wells);

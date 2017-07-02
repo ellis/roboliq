@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const assert = require('assert');
+const fs = require('fs');
 const wellsParser = require('./parsers/wellsParser');
 
 function Ref(name, i) {
@@ -365,25 +366,22 @@ function printModel(model) {
 		console.log("  real<lower=0> sigma_gamma_scale;");
 	}
 	console.log("  real<lower=0> sigma_a_scale;");
+	if (model.RV_AL.length > 0) {
+		//const NL = model.RV_AL.length;
+		const NM = _.size(model.models) || 1;
+		console.log(makeVectorOrRealData("alpha_l_loc", NM, "<lower=0>"));
+		console.log(makeVectorOrRealData("alpha_l_scale", NM, "<lower=0>"));
+	}
 	if (model.RV_AV.length > 0) {
-		const NM = model.models.length || 1;
-		// Need to use real if NM = 1 due to a bug in RStan or something
-		console.log((NM > 1)
-			? `  vector[${model.models.length || 1}] alpha_v_loc;`
-			: `  real alpha_v_loc;`
-		);
-		console.log((NM > 1)
-			? `  vector<lower=0>[${model.models.length || 1}] alpha_v_scale;`
-			: `  real alpha_v_scale;`
-		);
-		console.log((NM > 1)
-			? `  vector<lower=0>[${model.models.length || 1}] sigma_alpha_v_scale;`
-			: `  real sigma_alpha_v_scale;`
-		);
+		const NM = _.size(model.models) || 1;
+		console.log(makeVectorOrRealData("alpha_v_loc", NM, ""));
+		console.log(makeVectorOrRealData("alpha_v_scale", NM, "<lower=0>"));
+		console.log(makeVectorOrRealData("sigma_alpha_v_scale", NM, "<lower=0>"));
 	}
 	_.forEach(model.liquids, liquidData => {
-		if (_.get(liquidData.spec, "type") === "user") {
-			console.log(`  real alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
+		if (_.get(liquidData.spec, "type") === "normal") {
+			console.log(`  real<lower=0> alpha_k_${liquidData.k}_loc; // concentration of liquid ${liquidData.k}`);
+			console.log(`  real<lower=0> alpha_k_${liquidData.k}_scale; // concentration of liquid ${liquidData.k}`);
 		}
 	});
 	if (model.absorbanceMeasurements.length > 0) {
@@ -401,14 +399,23 @@ function printModel(model) {
 
 	console.log();
 	console.log("parameters {");
-	console.log("  vector<lower=0,upper=1>[NM] alpha_l;");
-	if (model.models.length > 1) {
+	if (model.RV_AL.length > 0) {
+		console.log("  vector[NM] alpha_l_raw;");
+		const NM = 1;
+		const times = (NM == 1) ? "*" : ".*";
+		output.transformedParameters.definitions.push(`  vector<lower=0>[NM] alpha_l = alpha_l_loc + alpha_l_raw ${times} alpha_l_scale;`);
+	}
+	if (model.RV_AL.length > 1) {
 		console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_l;");
 	}
 	console.log("  vector<lower=0,upper=1>[NM] sigma_alpha_i;");
 	if (model.RV_AV.length > 0) {
 		console.log("  vector[NM] alpha_v_raw;");
 		console.log("  vector<lower=0>[NM] sigma_alpha_v_raw;");
+		const times = (model.RV_AL.length == 1 || (_.size(model.models) || 1) == 1) ? "*" : ".*";
+		// console.log({times, NL: model.RV_AL.length, NM: model.models.length})
+		output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw ${times} alpha_v_scale;`);
+		output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw ${times} sigma_alpha_v_scale;`);
 	}
 	console.log();
 	if (model.RV_AL.length > 0) console.log(`  vector[${model.RV_AL.length}] RV_AL_raw;`);
@@ -418,8 +425,10 @@ function printModel(model) {
 	// if (model.RV_C_raw.length > 0) console.log(`  vector[${model.RV_C_raw.length}] RV_C_raw;`)
 	// console.log("  vector[NRV] RV_raw;");
 	_.forEach(model.liquids, liquidData => {
-		if (_.get(liquidData.spec, "type") === "estimate") {
-			console.log(`  real<lower=${liquidData.spec.lower || 0}, upper=${liquidData.spec.upper}> alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
+		if (_.get(liquidData.spec, "type") === "normal") {
+			// console.log(`  real<lower=${liquidData.spec.lower || 0}, upper=${liquidData.spec.upper}> alpha_k_${liquidData.k}; // concentration of liquid ${liquidData.k}`);
+			console.log(`  real alpha_k_${liquidData.k}_raw; // unscaled concentration variance of liquid ${liquidData.k}`);
+			output.transformedParameters.definitions.push(`  real alpha_k_${liquidData.k} = alpha_k_${liquidData.k}_loc + alpha_k_${liquidData.k}_raw * alpha_k_${liquidData.k}_scale;`);
 		}
 	});
 	if (model.absorbanceMeasurements.length > 0) {
@@ -473,10 +482,15 @@ function printModel(model) {
 	}
 	console.log("}");
 
-	console.log("");
-	console.log("/*");
-	_.forEach(output.R, s => console.log(s));
-	console.log("*/");
+	fs.writeFileSync("stanModel.R", output.R.join("\n")+"\n");
+}
+
+// There's appears to be a bug in RStan such that 1-element vectors
+// are not passed to stan.  So we need to turn 1-element vectors into reals.
+function makeVectorOrRealData(name, n, modifier) {
+	return (n > 1)
+		? `  vector${modifier}[${n}] ${name};`
+		: `  real${modifier} ${name};`;
 }
 
 function print_transformed_data(model, output) {
@@ -512,8 +526,8 @@ function print_transformed_parameters(model, output) {
 
 		const rvs_gamma = _.values(model.betas).filter(rv => rv.withGamma);
 		if (!_.isEmpty(rvs_gamma)) {
-			output.transformedData.defintions.push(`  int<lower=0> NGAMMA = ${rvs_gamma.length};`);
-			output.transformedData.defintions.push(`  int<lower=1> gamma_i_raw[NGAMMA] = ${rvs_gamma.map(rv => rv.idx)};`);
+			output.transformedData.definitions.push(`  int<lower=0> NGAMMA = ${rvs_gamma.length};`);
+			output.transformedData.definitions.push(`  int<lower=1> gamma_i_raw[NGAMMA] = ${rvs_gamma.map(rv => rv.idx)};`);
 			output.transformedParameters.definitions.push("  vector<lower=0>[NBETA] gamma = 0;"); // need the same number of gamma variables as betas, but we probably have fewer gamma_raw parameters, since it's difficult to identify gamma in many experiments with small volumes.
 			output.transformedParameters.definitions.push("  real sigma_gamma = sigma_gamma_raw * sigma_gamma_scale;");
 
@@ -545,8 +559,8 @@ function print_transformed_parameters_RV_al(model, output) {
 	}
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_AL; // average absorbance of labware`);
 	output.transformedParameters.statements.push("");
-	output.transformedParameters.statements.push("  // AL[m] ~ normal(alpha_l[m], sigmal_alpha_l[m])")
-	if (model.models.length > 1) {
+	output.transformedParameters.statements.push("  // AL[l] ~ normal(alpha_l[m], sigmal_alpha_l[m])")
+	if (model.RV_AL.length > 1) {
 		output.transformedParameters.statements.push(`  RV_AL = alpha_l[{${idxs_m}}] + RV_AL_raw .* sigma_alpha_l[{${idxs_m}}];`);
 	}
 	else {
@@ -592,15 +606,16 @@ function print_transformed_parameters_RV_av(model, output) {
 	output.transformedData.definitions.push(`  int<lower=1> RV_AV_i_A0[${idxs_a0.length}] = {${idxs_a0}};`)
 	output.transformedData.definitions.push(`  int<lower=1> RV_AV_i_m[${idxs_m.length}] = {${idxs_m}};`)
 	// There's a bug in Rstan for data vectors of length 1, so this check is necessary...
-	const NM = model.models.length || 1;
-	if (NM == 1) {
-		output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw * alpha_v_scale;`);
-		output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw * sigma_alpha_v_scale;`);
-	}
-	else if (NM > 1) {
-		output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw .* alpha_v_scale;`);
-		output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw .* sigma_alpha_v_scale;`);
-	}
+	// const NM = model.models.length || 1;
+	// CONTINUE
+	// if (NM == 1) {
+	// 	output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw * alpha_v_scale;`);
+	// 	output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw * sigma_alpha_v_scale;`);
+	// }
+	// else if (NM > 1) {
+	// 	output.transformedParameters.definitions.push(`  vector[NM] alpha_v = alpha_v_loc + alpha_v_raw .* alpha_v_scale;`);
+	// 	output.transformedParameters.definitions.push(`  vector<lower=0>[NM] sigma_alpha_v = sigma_alpha_v_raw .* sigma_alpha_v_scale;`);
+	// }
 	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_AV; // absorbance of water-filled wells`);
 	output.transformedParameters.statements.push("");
 	output.transformedParameters.statements.push("  // AV[i] ~ normal(A0[i] + alpha_v[m[i]], sigma_alpha_v[m[i]])");
