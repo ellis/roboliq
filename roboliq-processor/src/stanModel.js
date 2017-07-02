@@ -255,7 +255,7 @@ function aspirate(context, model, {p, t, d, well}) {
 	const psub = p+sub;
 	if (!model.betas.hasOwnProperty(psub)) {
 		const idx = _.size(model.betas) + 1;
-		model.betas[psub] = {idx, psub, p, sub, d};
+		model.betas[psub] = {idx, psub, p, sub};
 	}
 	const idx_psub = model.betas[psub].idx;
 
@@ -438,6 +438,12 @@ function printModel(model) {
 		console.log("  vector[NBETA] beta0_raw;");
 		console.log("  vector[NBETA] beta1_raw;");
 		console.log("  vector<lower=0>[NBETA] sigma_v_raw;");
+
+		output.R.push("dfBetaEntries = tibble(");
+		output.R.push(`  idx = c(${_.map(model.betas, "idx").join(", ")}),`);
+		output.R.push(`  p = c(\"${_.map(model.betas, "p").join('", "')}\"),`);
+		output.R.push(`  sub = c(${_.map(model.betas, "sub").join(", ")})`);
+		output.R.push(")");
 	}
 	if (!_.isEmpty(model.gammas)) {
 		console.log("  vector[NGAMMA] gamma_raw;");
