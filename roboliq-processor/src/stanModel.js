@@ -42,15 +42,17 @@ function randn_bm(mean, sigma) {
 /**
  * [createEmptyModel description]
  * @param  {number[]} subclassNodes - sorted volumes after which a subclass starts (e.g. for subclasses 3-15,15.01-500,500.01-1000, subclassNodes = [3,15,500,1000])
- * @param {number[]} betaDs - volumes for which we want a beta parameter
+ * @param {number[]} betaDs - volumes for which we want a beta parameter (dispense bias)
+ * @param {number[]} gammaDs - volumes for which we want a gamma parameter (unintended dilution)
  * @return {[type]}               [description]
  */
-function createEmptyModel(subclassNodes, betaDs) {
+function createEmptyModel(subclassNodes, betaDs, gammaDs) {
 	assert(!_.isEmpty(subclassNodes));
 	assert(!_.isEmpty(betaDs));
 	return {
 		subclassNodes,
 		betaDs,
+		gammaDs,
 		models: {}, // labware models
 		liquids: {},
 		labwares: {},
@@ -60,13 +62,14 @@ function createEmptyModel(subclassNodes, betaDs) {
 		pds: {},
 		// liquidClass/pipettingParameters (p) + subclass (sub) combinations
 		psubs: {},
-		// gammas: {},
+		gammas: {},
 		// Random variables
 		RV_AL: [],
 		RV_A0: [],
 		RV_AV: [],
 		RV_VTIPASP: [],
 		RV_V: [],
+		RV_U: [],
 		RV_C: [],
 		RV_A: [],
 		RV_G0: [], // empty/starting weights
@@ -401,8 +404,21 @@ function dispense(context, model, {p, t, d, well}) {
 	const ref_vTipAsp = tipData.ref_vTipAsp; // volume in tip
 	const ref_cTipAsp = tipData.ref_cTipAsp; // concentration in tip
 
-	// const idx_pip = model.pipOps.length;
-	const rv_vWellDis = {type: "vWellDis", well, ref_vWell0, ref_vTipAsp};
+	// Unintended dilution
+	let ref_uWellDis;
+	if (_.includes(model.gammaDs, d)) {
+		const pd = p + d;
+		if (!model.gammas.hasOwnProperty(pd)) {
+			const idx = _.size(model.gammas) + 1;
+			model.gammas[pd] = {idx, pd, p, d};
+		}
+		const idx_gamma = model.gammas[pd].idx;
+		const rv_uWellDis = {type: "RV_U", well, idx_gamma};
+		ref_uWellDis = addRv2(model, "RV_U", rv_uWellDis);
+	}
+
+	// Add aliquot to well
+	const rv_vWellDis = {type: "vWellDis", well, ref_vWell0, ref_vTipAsp, ref_uWellDis};
 	const ref_vWellDis = addRv2(model, "RV_V", rv_vWellDis);
 	tipData.ref_vTipAsp = undefined;
 	wellData.ref_vWell = ref_vWellDis;
@@ -410,7 +426,7 @@ function dispense(context, model, {p, t, d, well}) {
 	// If we have information about the tip concentration,
 	// then update the concentration in the destination well too.
 	if (ref_cTipAsp || ref_cWell0) {
-		const rv_cWellDis = {type: "cWellDis", ref_vWell0, ref_cWell0, ref_vWell1: ref_vWellDis, ref_vTipAsp, ref_cTipAsp, well, of: well};
+		const rv_cWellDis = {type: "cWellDis", ref_vWell0, ref_cWell0, ref_vWell1: ref_vWellDis, ref_vTipAsp, ref_cTipAsp, ref_uWellDis, well, of: well};
 		const ref_cWellDis = addRv2(model, "RV_C", rv_cWellDis);
 		wellData.ref_cWell = ref_cWellDis;
 		tipData.ref_cTipAsp = undefined;
@@ -453,10 +469,6 @@ function printModel(model, basename) {
 	console.log();
 	console.log("data {");
 	output.data.forEach(s => console.log(s));
-	if (!_.isEmpty(model.gammas)) {
-		console.log("  real<lower=0> gamma_scale;");
-		console.log("  real<lower=0> sigma_gamma_scale;");
-	}
 	console.log("  real<lower=0> sigma_a_scale;");
 	if (model.RV_AL.length > 0) {
 		//const NL = model.RV_AL.length;
@@ -527,10 +539,6 @@ function printModel(model, basename) {
 	if (model.absorbanceMeasurements.length > 0) {
 		console.log("  real<lower=0> sigma_a_raw;");
 	}
-	if (!_.isEmpty(model.gammas)) {
-		console.log("  vector[NGAMMA] gamma_raw;");
-		console.log("  real<lower=0> sigma_gamma_raw;");
-	}
 	console.log("}");
 
 	console.log();
@@ -549,10 +557,6 @@ function printModel(model, basename) {
 	if (model.RV_VTIPASP.length > 0) console.log("  RV_VTIPASP_raw ~ normal(0, 1);");
 	// if (model.RV_C_raw.length > 0) console.log("  RV_C_raw ~ normal(0, 1);");
 	// console.log("  RV_raw ~ normal(0, 1);");
-	if (!_.isEmpty(model.gammas)) {
-		console.log("  gamma_raw ~ normal(0, 1);");
-		console.log("  sigma_gamma_raw ~ exponential(1);");
-	}
 	if (model.absorbanceMeasurements.length > 0) {
 		console.log("  sigma_a_raw ~ exponential(1);");
 		if (model.RV_AV.length > 0) {
@@ -590,7 +594,6 @@ function handle_transformed_data(model, output) {
 	output.transformedData.definitions.push(`  int NT = ${_.size(model.tips)}; // number of tips`);
 	// output.transformedData.definitions.push(`  int NRV = ${_.size(model.rvs)}; // number of latent random variables`);
 	output.transformedData.definitions.push(`  int NJ = ${model.pipOps.length}; // number of pipetting operations`);
-	output.transformedData.definitions.push(`  int NGAMMA = ${_.size(model.gammas)}; // number of liquidClass+majorD combinations for gamma`);
 	_.forEach(model.liquids, liquidData => {
 		if (_.get(liquidData.spec, "type") === "fixed") {
 			output.transformedData.definitions.push(`  real alpha_k_${liquidData.k} = ${liquidData.spec.value}; // concentration of liquid ${liquidData.k}`);
@@ -763,6 +766,7 @@ function handle_transformed_parameters(model, output) {
 	handle_transformed_parameters_RV_a0(model, output);
 	handle_transformed_parameters_RV_av(model, output);
 	handle_transformed_parameters_RV_vTipAsp(model, output);
+	handle_transformed_parameters_RV_U(model, output);
 	handle_transformed_parameters_RV_V(model, output);
 	handle_transformed_parameters_RV_C(model, output);
 	handle_transformed_parameters_RV_A(model, output);
@@ -869,6 +873,22 @@ function handle_transformed_parameters_RV_vTipAsp(model, output) {
 	output.transformedParameters.statements.push(`    RV_VTIPASP = temp + RV_VTIPASP_raw .* (sigma_v0 + temp ${times} sigma_v1${(_.size(model.psubs) > 1) ? "[RV_VTIPASP_i_psub]" : ""}); // volume aspirated into tip`);
 	output.transformedParameters.statements.push(`  }`);
 }
+function handle_transformed_parameters_RV_U(model, output) {
+	const rvs = model.RV_U;
+	if (rvs.length == 0) return;
+
+	const n = _.size(model.gammas);
+	output.transformedData.definitions.push(`  int NGAMMA = ${n}; // Number of gamma parameters`);
+
+	addCentralizedParameter_mean("gamma", true, n, 1, "NGAMMA", "<lower=0>", output);
+	addCentralizedParameter_sigma("cv_gamma", 1, 1, output);
+
+	output.parameters.push(`  vector<lower=0>[${rvs.length}] RV_U_raw; // uninteded dilution due to extra water dispense volumes`);
+
+	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_U = gamma[{${rvs.map(rv => rv.idx_gamma)}}] .* (1 + RV_U_raw * cv_gamma); // uninteded dilution due to extra water dispense volumes`)
+
+	output.model.push(`  RV_U_raw ~ normal(0, 1);`);
+}
 function handle_transformed_parameters_RV_V(model, output) {
 	const rvs = model.RV_V;
 	if (rvs.length == 0) return;
@@ -888,16 +908,17 @@ function handle_transformed_parameters_RV_V(model, output) {
 			// }
 		}
 		else if (rv.type == "vWellDis") {
-			// C_t[j] = (c[i,j-1] * v[i,j-1] + cTip * vTip) / (v[i,j-1] + vTip)
-			// Add volume to well
+			// Summands for well volume
+			const l = [];
 			if (rv.ref_vWell0) {
-				// VolTot_t[j] = sum of volumes
-				output.transformedParameters.statements.push(`  RV_V[${rv.idx}] = RV_V[${rv.ref_vWell0.idx}] + RV_VTIPASP[${rv.ref_vTipAsp.idx}]; // volume in ${rv.well} after dispensing`);
+				l.push(`RV_V[${rv.ref_vWell0.idx}]`);
 			}
-			else {
-				// VolTot_t[j] = sum of volumes
-				output.transformedParameters.statements.push(`  RV_V[${rv.idx}] = RV_VTIPASP[${rv.ref_vTipAsp.idx}]; // volume in ${rv.well} after dispensing`);
+			l.push(`RV_VTIPASP[${rv.ref_vTipAsp.idx}]`);
+			if (rv.ref_uWellDis) {
+				l.push(`RV_U[${rv.ref_uWellDis.idx}]`);
 			}
+			// Add volume to well as sum of volumes
+			output.transformedParameters.statements.push(`  RV_V[${rv.idx}] = ${l.join(" + ")}; // volume in ${rv.well} after dispensing`);
 		}
 	});
 }
@@ -926,6 +947,9 @@ function handle_transformed_parameters_RV_C(model, output) {
 			else if (rv.ref_cWell0) {
 				const cWell0 = `RV_C[${rv.ref_cWell0.idx}]`;
 				output.transformedParameters.statements.push(`  RV_C[${rv.idx}] = (${cWell0} * RV_V[${rv.ref_vWell0.idx}]) / RV_V[${rv.ref_vWell1.idx}]; // concentration of ${rv.of}`);
+			}
+			else if (rv.ref_uWellDis) {
+				output.transformedParameters.statements.push(`  RV_C[${rv.idx}] = (RV_C[${rv.ref_cTipAsp.idx}] * RV_VTIPASP[${rv.ref_vTipAsp.idx}]) / RV_V[${rv.ref_vWell1.idx}]; // concentration of ${rv.of}`);
 			}
 			else {
 				output.transformedParameters.statements.push(`  RV_C[${rv.idx}] = RV_C[${rv.ref_cTipAsp.idx}]; // concentration of ${rv.of}`);

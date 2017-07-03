@@ -1,4 +1,7 @@
-// qc42-general-sim
+// Execute in ~/src/roboliq/roboliq-processor:
+// node ./stan-qc41-150ul.js ~/repo/bsse-lab/EvowareScripts/qc/qc41-150ul-roboliq | tee ~/repo/bsse-lab/EvowareScripts/qc/qc41-150ul-roboliq.stan
+
+// qc41-150ul-sim
 const _ = require('lodash');
 const fs = require('fs');
 const process = require('process');
@@ -13,7 +16,8 @@ const wellData = fs.readFileSync("../protocols/qc41-150ul-wellData.jsonl", "utf8
 const context = {};
 const subclassNodes = [3, 15, 500, 1000];
 const betaDs = [3, 7, 15, 16, 150, 500, 501, 750, 950];
-const model = createEmptyModel(subclassNodes, betaDs);
+const gammaDs = [150];
+const model = createEmptyModel(subclassNodes, betaDs, gammaDs);
 addLiquid(model, "water", {type: "fixed", value: 0});
 addLiquid(model, "dye0150", {type: "normal"});
 assignLiquid(context, model, "waterLabware(A01)", "water");
