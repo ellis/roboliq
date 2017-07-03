@@ -3,6 +3,21 @@ const assert = require('assert');
 const fs = require('fs');
 const wellsParser = require('./parsers/wellsParser');
 
+// PROBLEM WITH beta:
+// Using beta0 and beta1 doesn't work well enough
+// Will need to have a beta for each individual tested volume, like before with the `majorDs` setting.
+// But still need to decide how to calculate the bias for volumes
+// we're not interested in, such as 297ul of water.
+// We might need to have several lines for assigning to RV_VTIPASP:
+//
+// - RV_TIPASP[i1] = d * (1 + beta[pd]) + RV_TIPASP_raw * (sigma_v0 + d * sigma_v[psub])
+// - RV_TIPASP[i2] = d + RV_TIPASP_raw * (sigma_v0 + d * sigma_v[psub])
+//
+// The first line is for the nodal volumes we want beta estimate for.
+// The second line is for the volumes where we completely ignore beta.
+// The third line is for interpolating volumes between two nodal volumes.
+// The fourth line is for extrapolating beta to volumes beyond our nodal volumes.
+
 function Ref(name, i) {
 	if (_.isPlainObject(name)) {
 		const rv = name;
