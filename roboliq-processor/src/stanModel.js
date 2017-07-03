@@ -69,9 +69,12 @@ function createEmptyModel(subclassNodes, betaDs) {
 		RV_V: [],
 		RV_C: [],
 		RV_A: [],
+		RV_G0: [], // empty/starting weights
+		RV_G: [], // weight
 		// Pipetting operations
 		pipOps: [],
 		absorbanceMeasurements: [],
+		weightMeasurements: [],
 	};
 }
 
@@ -96,6 +99,7 @@ function addLiquid(model, k, spec) {
 }
 
 function getLabwareData(model, l) {
+	// console.log("getLabwareData: "+l);
 	const m = "FIXME";
 	if (!model.labwares.hasOwnProperty(l)) {
 		model.labwares[l] = { m };
@@ -152,6 +156,16 @@ function getRv_av(model, well) {
 		wellData.ref_av = ref;
 	}
 	return lookup(model, wellData.ref_av);
+}
+
+function getRv_g0(model, l) {
+	const labwareData = getLabwareData(model, l);
+	if (!labwareData.hasOwnProperty("ref_g0")) {
+		const rv = {type: "RV_G0", l};
+		const ref = addRv2(model, "RV_G0", rv);
+		labwareData.ref_g0 = ref;
+	}
+	return lookup(model, labwareData.ref_g0);
 }
 
 
@@ -216,6 +230,38 @@ function measureAbsorbance(context, model, wells) {
 	});
 }
 
+function measureWeight(context, model, l) {
+	// console.log("measureWeight: "+l)
+	const labwareData = getLabwareData(model, l);
+	// console.log({labwareData})
+	let ref_g;
+
+	// If we already have an RV for the current weight, use it.
+	if (labwareData.ref_g) {
+		ref_g = labwareData.ref_g;
+	}
+	// Otherwise, calculate a new RV
+	else {
+		// Ensure we have a variable for the empty/starting weight of the plate
+		const rv_g0 = getRv_g0(model, l);
+		const ref_g0 = Ref(rv_g0);
+
+		// Find wells on the plate
+		const wells = _.filter(model.wells, wellData => wellData.l == l && wellData.ref_vWell);
+		// Get their volumes
+		const ref_vs = wells.map(x => x.ref_vWell);
+
+		const rv_g = {type: "RV_G", l, ref_g0, ref_vs};
+		// console.log({rv_g})
+		ref_g = addRv2(model, "RV_G", rv_g);
+
+		labwareData.ref_g = ref_g;
+	}
+
+	// console.log({ref_g})
+	model.weightMeasurements.push({ref_g});
+}
+
 function assignLiquid(context, model, well, k) {
 	const liquidData = getLiquidData(model, k);
 	const wellData = getWellData(model, well);
@@ -231,6 +277,7 @@ function aspirate(context, model, {p, t, d, well}) {
 	// input: variable for k's concentration - we'll need a random variable for the original sources and a calculated variable for what we pipette together
 
 	const wellData = getWellData(model, well);
+	const labwareData = getLabwareData(model, wellData.l);
 	const tipData = getTipData(model, t);
 	const ref_vWell0 = wellData.ref_vWell; // volume of well before aspirating
 
@@ -324,6 +371,8 @@ function aspirate(context, model, {p, t, d, well}) {
 	}
 
 	wellData.ref_a = undefined;
+	labwareData.ref_g = undefined;
+
 
 	const asp = {
 		d
@@ -345,6 +394,7 @@ function dispense(context, model, {p, t, d, well}) {
 	// create: RV for new conc of dst
 
 	const wellData = getWellData(model, well);
+	const labwareData = getLabwareData(model, wellData.l);
 	const tipData = getTipData(model, t);
 	const ref_vWell0 = wellData.ref_vWell; // volume of well before dispensing
 	const ref_cWell0 = wellData.ref_cWell; // concentration of well before dispensing
@@ -367,6 +417,7 @@ function dispense(context, model, {p, t, d, well}) {
 	}
 
 	wellData.ref_a = undefined;
+	labwareData.ref_g = undefined;
 
 	const asp = {
 		d
@@ -377,7 +428,7 @@ function dispense(context, model, {p, t, d, well}) {
 	model.pipOps.push(asp);
 }
 
-function printModel(model) {
+function printModel(model, basename) {
 	const output = {
 		data: [],
 		transformedData: {
@@ -397,6 +448,7 @@ function printModel(model) {
 
 	handle_model_psubs(model, output);
 	handle_model_pds(model, output);
+	handle_model_weightMeasurements(model, output);
 
 	console.log();
 	console.log("data {");
@@ -514,7 +566,7 @@ function printModel(model) {
 	}
 	console.log("}");
 
-	fs.writeFileSync("stanModel.R", output.R.join("\n")+"\n");
+	fs.writeFileSync((basename || "stanModel")+".R", output.R.join("\n")+"\n");
 }
 
 // There's appears to be a bug in RStan such that 1-element vectors
@@ -525,6 +577,11 @@ function makeVectorOrRealVariable(name, n, modifier, value) {
 		: `real${modifier}`;
 	return `  ${type} ${name}${_.isUndefined(value) ? "" : " = "+value};`;
 }
+
+/*function makeVectorVariable(name, n, modifier, value) {
+	const type = `vector${modifier}[${n}]`;
+	return `  ${type} ${name}${_.isUndefined(value) ? "" : " = "+value};`;
+}*/
 
 function handle_transformed_data(model, output) {
 	output.transformedData.definitions.push(`  int NM = 1; // number of labware models`);
@@ -652,6 +709,33 @@ function handle_model_pds(model, output) {
 	output.R.push(")");
 }
 
+function handle_model_weightMeasurements(model, output) {
+	const n = model.weightMeasurements.length;
+	if (n == 0) return;
+
+	output.data.push(`  vector<lower=0>[${n}] G; // weight measurements`);
+
+	addCentralizedParameter_sigma("sigma_g", 1, 1, output);
+
+	output.data.push(`  real<lower=0> rho; // density of liquid`);
+
+	output.parameters.push(`  vector<lower=0>[${model.RV_G0.length}] RV_G0; // empty/starting weights`);
+
+	output.transformedParameters.definitions.push(`  vector<lower=0>[${n}] RV_G; // empty/starting weights`);
+	_.forEach(model.RV_G, rv_g => {
+		const idx_g0 = rv_g.ref_g0.idx;
+		const idxs_v = rv_g.ref_vs.map(x => x.idx);
+		let s = `  RV_G[${rv_g.idx}] = RV_G0[${idx_g0}]`;
+		if (!_.isEmpty(rv_g.ref_vs))
+			s = s + ` + rho * sum(RV_V[{${idxs_v}}])`;
+		s += `; // weight of ${rv_g.l}`;
+		output.transformedParameters.statements.push(s);
+	});
+
+	const idxs_g = model.weightMeasurements.map(x => x.ref_g.idx);
+	output.model.push(`  G ~ normal(RV_G[{${idxs_g}}], sigma_g);`);
+}
+
 function handle_transformed_parameters(model, output) {
 	/*
 	if (!_.isEmpty(model.betas)) {
@@ -770,7 +854,9 @@ function handle_transformed_parameters_RV_vTipAsp(model, output) {
 	output.transformedParameters.statements.push("");
 
 	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_d[${idxs_pip.length}] = {${idxs_pip}};`);
-	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_psub[${idxs_pip.length}] = {${idxs_psubsId}};`);
+	if (_.size(model.psubs) > 1) {
+		output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_psub[${idxs_pip.length}] = {${idxs_psubsId}};`);
+	}
 	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_withBeta[${idxs_withBeta.length}] = {${idxs_withBeta}};`);
 	output.transformedData.definitions.push(`  int<lower=1> RV_VTIPASP_i_withBeta_beta[${idxs_withBeta_beta.length}] = {${idxs_withBeta_beta}};`);
 
@@ -779,7 +865,8 @@ function handle_transformed_parameters_RV_vTipAsp(model, output) {
 	output.transformedParameters.statements.push(`    // - RV_TIPASP[i2] = d + RV_TIPASP_raw * (sigma_v0 + d * sigma_v1[psub])`);
 	output.transformedParameters.statements.push(`    vector[${model.RV_VTIPASP.length}] temp = d[RV_VTIPASP_i_d];`);
 	output.transformedParameters.statements.push(`    temp[RV_VTIPASP_i_withBeta] = temp[RV_VTIPASP_i_withBeta] .* (1 + beta[RV_VTIPASP_i_withBeta_beta]);`);
-	output.transformedParameters.statements.push(`    RV_VTIPASP = temp + RV_VTIPASP_raw .* (sigma_v0 + temp .* sigma_v1[RV_VTIPASP_i_psub]); // volume aspirated into tip`);
+	const times = (_.size(model.psubs) > 1) ? ".*" : "*";
+	output.transformedParameters.statements.push(`    RV_VTIPASP = temp + RV_VTIPASP_raw .* (sigma_v0 + temp ${times} sigma_v1${(_.size(model.psubs) > 1) ? "[RV_VTIPASP_i_psub]" : ""}); // volume aspirated into tip`);
 	output.transformedParameters.statements.push(`  }`);
 }
 function handle_transformed_parameters_RV_V(model, output) {
@@ -834,7 +921,7 @@ function handle_transformed_parameters_RV_C(model, output) {
 			// C_t[j] = (c[i,j-1] * v[i,j-1] + cTip * vTip) / (v[i,j-1] + vTip)
 			if (rv.ref_cWell0 && rv.ref_cTipAsp) {
 				const cWell0 = `RV_C[${rv.ref_cWell0.idx}]`;
-				output.transformedParameters.statements.push(`  RV_C[${rv.idx}] = (${cWell0} * RV_V[${rv.ref_vWell0.idx}] + RV_C[${rv.ref_cTipAsp.idx}] * RV_VTIPASP[${rv.ref_vTipAsp.idx}]) / RV_V[${rv.ref_vWell1.idx}]); // concentration of ${rv.of}`);
+				output.transformedParameters.statements.push(`  RV_C[${rv.idx}] = (${cWell0} * RV_V[${rv.ref_vWell0.idx}] + RV_C[${rv.ref_cTipAsp.idx}] * RV_VTIPASP[${rv.ref_vTipAsp.idx}]) / RV_V[${rv.ref_vWell1.idx}]; // concentration of ${rv.of}`);
 			}
 			else if (rv.ref_cWell0) {
 				const cWell0 = `RV_C[${rv.ref_cWell0.idx}]`;
@@ -915,6 +1002,6 @@ function handle_transformed_parameters_RV_A(model, output) {
 }
 
 module.exports = {
-	createEmptyModel, addLiquid, assignLiquid, measureAbsorbance, aspirate, dispense,
+	createEmptyModel, addLiquid, assignLiquid, measureAbsorbance, measureWeight, aspirate, dispense,
 	printModel,
 };
