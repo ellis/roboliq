@@ -1199,5 +1199,51 @@ describe('pipetter', function() {
 			});
 		});
 
+		it('should accept items from a data table', function () {
+			var protocol = {
+				roboliq: "v1",
+				objects: {
+					plate1: {
+						type: "Plate",
+						model: "ourlab.model.plateModel_96_square_transparent_nunc",
+						location: "ourlab.mario.site.P2"
+					},
+					items1: {
+						type: "Data",
+						value: [{
+							source: "plate1(A01)",
+							destination: "plate1(A02)",
+							volume: "20ul"
+						}]
+					}
+				},
+				steps: {
+					"1": {
+						command: "pipetter.pipette",
+						items: "items1"
+					}
+				}
+			};
+			var result = roboliq.run([__dirname+"/ourlab.js", "-o", "", "-T"], protocol, false);
+			//console.log(JSON.stringify(result.output.steps, null, '\t'));
+			//console.log(JSON.stringify(result.output.effects, null, '\t'));
+			should.deepEqual(result.output.errors, {});
+			should.deepEqual(result.output.warnings, {});
+			should.deepEqual(result.output.steps[1][2], {
+				"command": "pipetter._pipette",
+				"agent": "ourlab.mario.evoware",
+				"equipment": "ourlab.mario.liha",
+				"program": "\"Roboliq_Water_Dry_1000\"",
+				"items": [
+					{
+						"syringe": "ourlab.mario.liha.syringe.1",
+						"source": "plate1(A01)",
+						"destination": "plate1(A02)",
+						"volume": "20 ul"
+					}
+				]
+			});
+		});
+
 	});
 });

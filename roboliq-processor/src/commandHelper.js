@@ -716,7 +716,7 @@ function dereferenceVariable(data, name) {
 				result.objectName = name;
 			}
 			//console.log({name, value})
-			if (value.type === 'Variable') {
+			if (value.type === "Variable" || value.type === "Data") {
 				result.value = value.value;
 				name = value.value;
 			}
