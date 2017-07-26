@@ -93,23 +93,23 @@ objects:
     model: ourlab.model.tubeHolderModel_15ml
     location: ourlab.mario.site.T1
   trafoMix:
-    description: Transformation mix (for 1.05 ml use 800ul 50% PEG3350, 100ul 1 M LiAc, 100ul 10x TE, 50 ul DMSO) and add for each ml add 50 ul of freshly boild ssDNA
+    description: Transformation mix, 105 ul per well (for 1.05 ml use 800ul 50% PEG3350, 100ul 1 M LiAc, 100ul 10x TE, 50 ul DMSO) and add for each ml add 50 ul of freshly boild ssDNA
     type: Liquid
     wells: tubeHolder15(A01)
   water:
-    description: Sterile water
+    description: Water (non-sterile is OK)
+    type: Liquid
+    wells: tubeHolder15(B01)
+  liAcGly:
+    description: LiAc 0.1 M + 10% Glycerol, 70 ul per well
     type: Liquid
     wells: tubeHolder15(C01)
-  liAcGly:
-    description: LiAc 0.1 M + 10% Glycerol
+  liAc:
+    description: LiAc 0.1 M, 300 ul per well
     type: Liquid
     wells: tubeHolder15(D01)
-  liAc:
-    description: LiAc 0.1 M
-    type: Liquid
-    wells: tubeHolder15(E01)
   filterPlate:
-    description: PVD filter plate up to 350 ul
+    description: PVDF filter plate up to 350 ul
     type: Plate
     model: ourlab.model.plateModel_96_round_filter_OV
     location: ourlab.mario.site.HOTEL32_D1
@@ -122,11 +122,6 @@ objects:
     type: Lid
     model: ourlab.model.lidModel_standard
     location: wastePlate
-  culturePlate:
-    description: Empty deep well plate for cell cultures
-    type: Plate
-    model: ourlab.model.plateModel_96_dwp
-    location: ourlab.mario.site.P2
   balancePlate:
     description: Empty deep well plate for balancing liquid
     type: Plate
@@ -333,7 +328,7 @@ steps:
             counts: 5
             amounts: 150 ul
             cleanBegin: none
-            cleanBetween: decontaminate
+            cleanBetween: none
             cleanBetweenSameSource: none
             cleanEnd: decontaminate
         3:
