@@ -1,12 +1,11 @@
 roboliq: v1
 description: |
-  ToDo: Change waste plate into deep well plate
-  Yeast transformation with lithium acetate and plasmid DNA
+  Yeast heatshock transformation with lithium acetate and plasmid DNA
 
   Input information:
 
   - N: number of transformations
-  - X: amount of liquid plated (ul)
+  - F: First free usable well
 
   Starting resources:
 
@@ -15,10 +14,10 @@ description: |
   - LiAc 0.1 M supplemented with 10% glycerol
   - freshly prepared master mix (for 1.05 ml use 800ul 50% PEG3350, 100ul 1 M LiAc, 100ul 10x TE, 50 ul DMSO) and add for each ml add 50 ul of freshly boild ssDNA
   - DNA to transform on a microtitier/PCR plate - a pRG216 plasmid
-  - YPD container
-  - Slightly dried SD-URA agar plates
   - PVD filter plate
   - Waste plate (see Test waste plate)
+  - PCR plate
+  - Balance plate
 
   Protocol:
 
@@ -27,30 +26,21 @@ description: |
   - Prepare a counter weight either by pipetting same volumes on identical plates or having a DW plate
   - Move the balance to the centrifuge
   - Move the stack to centrifuge
-  - Run a suitable time and rpm (see Test centrifugation)
+  - Run at 800 rpm
   - Move the stack out
   - Move the balance out
   - Move the filter plate on an empty site
-  - repeat with another 350 ul for a total of 700 ul culture
-  - Resuspend the pellet on the filter plate into 300 ul 0.1 M LiAc
-  - Move the plate on top of the stack
-  - Fill the balance with water matching to the added volume
-  - Move the stack to the centrifuge
-  - Move the balance to the centrifuge
-  - Run a suitable time and rpm
-  - Move the stack out
-  - Move the balance out
-  - Move the filter plate on an empty site
+  - Repeat with another 350 ul for a total of 700 ul culture
+  - Repeat after resuspending the pellet on the filter plate into 300 ul 0.1 M LiAc
   - Resuspend the cells in 70 ul 0.1 M LiAc supplemented with 10% Glycerol (the lower the better - 70 ul enough volume?)
-  - Prepare PCR plate with DNA (ca 100 ng), 25 ul  of cells and 105 ul of master mix
-  - mix well but really gently
-  - Cover with a lid
-  - Incubate 30 min in RT
+  - Prepare PCR plate with DNA (ca 100 ng), 25 ul of cells and 105 ul of transformation mix and mix
   - Move the PCR plate in a thermocycler
   - Heat shock the cells at 42C in a thermocycler for 30 mins
   - Move the plate out of the thermocycler
   - Move the PCR plate to a cooled carrier and let it stand for 5 min
-  - Plate x ul of each culture on agar plates
+  Manual steps:
+  - Transfer cells to YPD for recovery if recovery step is needed and incubate 3h in 30C
+  - Plate each culture on agar plates (100 ul should suffice)
 
 config:
   evowareCompiler:
