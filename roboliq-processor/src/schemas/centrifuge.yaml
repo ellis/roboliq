@@ -11,7 +11,7 @@ Centrifuge:
     sitesInternal: {type: array, items: {type: Site}}
   required: [type, sitesInternal]
   example: |
-    ```
+    ```json
     "centrifuge": {
     	"type": "Centrifuge",
     	"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
@@ -19,7 +19,7 @@ Centrifuge:
     ```
 
 centrifuge.centrifuge2:
-  description: "Centrifuge using two plate"
+  description: "Centrifuge two plate."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

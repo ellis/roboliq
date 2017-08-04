@@ -21,8 +21,9 @@ shaker.ShakerProgram:
 
 shaker.shakePlate:
   description: |
-    Shake a plate.  If necessary, the plate will be transfered to the shaker
-    first.  By default, the plate will also be automatically moved back to its
+    Shake a plate.
+    If necessary, the plate will be transfered to the shaker first.
+    By default, the plate will also be automatically moved back to its
     prior location after shaking.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}

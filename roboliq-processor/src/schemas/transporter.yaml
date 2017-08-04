@@ -56,8 +56,7 @@ transporter._movePlate:
 
 transporter.doThenRestoreLocation:
   description: |
-    Perform steps, then make sure that the given labware is stored to the
-    locations before the steps.
+    Perform steps, then return the given labwares to their prior locations.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     objects: {description: "Plate identifier", type: "array", items: {type: Plate}}
@@ -68,7 +67,7 @@ transporter.doThenRestoreLocation:
 
 transporter.moveLidFromContainerToSite:
   description: |
-    Transport a plate to a destination.
+    Transport a lid from a container to a destination site.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
@@ -79,7 +78,7 @@ transporter.moveLidFromContainerToSite:
 
 transporter.moveLidFromSiteToContainer:
   description: |
-    Transport a plate to a destination.
+    Transport a lid from an origin site to a labware container.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

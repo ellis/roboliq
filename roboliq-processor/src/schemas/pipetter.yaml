@@ -219,7 +219,7 @@ pipetter._punctureSeal:
   required: [agent, equipment, items]
 
 pipetter._washTips:
-  description: Clean the pipetter tips.
+  description: Clean the pipetter tips by washing.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

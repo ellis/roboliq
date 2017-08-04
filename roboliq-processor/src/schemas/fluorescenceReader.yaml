@@ -11,7 +11,7 @@ Reader:
   required: [type]
 
 fluorescenceReader.measurePlate:
-  description: "Measure the fluorescence of a plate."
+  description: "Measure the fluorescence of wells on a plate."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

@@ -8,7 +8,7 @@ data:
 
 data.forEachGroup:
   description: |
-    This command will performs its sub-steps for every grouping of rows in the active data table.
+    Perform sub-steps for every grouping of rows in the active data table.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
@@ -24,7 +24,7 @@ data.forEachGroup:
 
 data.forEachRow:
   description: |
-    This command will performs its sub-steps for every row in the active data table.
+    Perform sub-steps for every row in the active data table.
     The row's values are placed in SCOPE for the sub-steps.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}

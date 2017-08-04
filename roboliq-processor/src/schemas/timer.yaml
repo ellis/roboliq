@@ -59,8 +59,7 @@ timer._wait:
 
 timer.doAndWait:
   description: |
-    A control construct to perform the given sub-steps and then wait
-    until a certain amount of time has elapsed since the beginning of this command.
+    Start a timer, perform sub-steps, then wait till the given duration has elapsed.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

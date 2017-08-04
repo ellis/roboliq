@@ -4,12 +4,12 @@ system:
     not specific to any particular type of equipment.
 
 system._description:
-  description: "Include the value as a description in the generated script"
+  description: "Include the value as a description in the generated script."
   properties:
     text: {description: "Description text", type: string}
 
 system._echo:
-  description: "A trouble-shooting function to echo something"
+  description: "Include the value as an echo statement in the generated script for trouble-shooting."
   properties:
     name: {description: "Name of echoed thing", type: string}
     value: {description: "Thing to echo"}
@@ -22,12 +22,12 @@ system.call:
   required: ["name"]
 
 system.description:
-  description: "Output the value as a description to the generated script"
+  description: "Include the value as a description in the generated script."
   properties:
     value: {description: "Value to use as description"}
 
 system.echo:
-  description: "A trouble-shooting function to echo a variable or text"
+  description: "Include the value as an echo statement in the generated script for trouble-shooting."
   properties:
     value: {description: "Value to echo"}
 
@@ -40,7 +40,7 @@ system.if:
   required: ["test"]
 
 system.repeat:
-  description: "Repeat the given command a given number of times."
+  description: "Repeat sub-steps a given number of times."
   properties:
     count: {description: "The number of times to repeat.", type: "integer"}
     steps: {description: "The sequence of commands to repeat.", type: "object"}
@@ -48,14 +48,14 @@ system.repeat:
   required: ["count"]
 
 system.runtimeExitLoop:
-  description: "Perform a run-time check to test whether execution should exit the current loop"
+  description: "Perform a run-time check to test whether execution should exit the current loop."
   properties:
     testType: {description: "The type of code to execute to determine whether to break; a JSON truthy value should be returned.", enum: [nodejs, R]}
     test: {description: "The code to execute at runtime that will test whether to exit.", type: string}
   required: [testType, test]
 
 system.runtimeLoadVariables:
-  description: "Handle steps which require runtime variables"
+  description: "Load the runtime values into variables."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     varset: {description: "Name of the variable set to load", type: string}
@@ -63,7 +63,7 @@ system.runtimeLoadVariables:
   required: [varset, variables]
 
 system.runtimeSteps:
-  description: "Handle steps which require runtime variables"
+  description: "Handle steps that require runtime variables."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     varset: {description: "Name of the variable set to load", type: string}
