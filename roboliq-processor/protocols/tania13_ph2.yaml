@@ -12,6 +12,12 @@ parameters:
   NUMBER_OF_MEASUREMENTS:
     description: Number of times to measure fluorescence
     value: 2
+  SALTWATER_VOLUME:
+    description: Volume of saltwater to dispense in each well
+    value: 40 ul
+  GFP_VOLUME:
+    description: Volume of GFP to dispense in each well
+    value: 5 ul
 
 objects:
   balancePlate:
@@ -41,7 +47,14 @@ objects:
     model: ourlab.model.plateModel_96_dwp
     location: ourlab.mario.site.P2
 
+  balanceWater:
+    type: Liquid
+    description: water used to fill the balance plate
+    type!: Variable
+    value!: ourlab.mario.systemLiquid
   saltwater:   {type: Liquid, group: Buffers, wells!: trough1(C01 down to F01)}
+
+  # Buffers
   hepes_850:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A01 down to D01)}
   hepes_650:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A02 down to D02)}
   pipes_775:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A03 down to D03)}
@@ -58,53 +71,49 @@ objects:
   N149Y:       {type: Liquid, description: single mutant, wells!: tubes1(A04)}
   Q204H:       {type: Liquid, description: single mutant, wells!: tubes1(A05)}
 
-  balanceWater:
-    type: Liquid
-    description: water used to fill the balance plate
-    type!: Variable
-    value!: ourlab.mario.systemLiquid
-
   phDesign:
-    type: Design
+    type: Data
     randomSeed: 0
-    conditions:
-      waterSource: saltwater
-      waterVolume: 40ul
-      proteinSource*: [sfGFP, Q204H_N149Y, tdGFP] #, N149Y, Q204H]
-      proteinVolume: 5ul
-      bufferSystem*:
+    design:
+      gfp*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      buffer*:
         acetate:
-          acidSource: acetate_375
-          baseSource: acetate_575
+          acid: acetate_375
+          base: acetate_575
           acidPH: 3.75
           basePH: 5.75
-          acidVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
+          baseVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
         mes:
-          acidSource: mes_510
-          baseSource: mes_710
+          acid: mes_510
+          base: mes_710
           acidPH: 5.10
           basePH: 7.10
-          acidVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
+          baseVolume*=range: {count: 7, from: 0, till: 30, decimals: 1, units: ul}
         pipes:
-          acidSource: pipes_575
-          baseSource: pipes_775
+          acid: pipes_575
+          base: pipes_775
           acidPH: 5.75
           basePH: 7.75
-          acidVolume*=range: {count: 7, from: 0, till: 30, decimals: 1, units: ul}
+          baseVolume*=range: {count: 5, from: 0, till: 30, decimals: 1, units: ul}
         hepes:
-          acidSource: hepes_650
-          baseSource: hepes_850
+          acid: hepes_650
+          base: hepes_850
           acidPH: 6.50
           basePH: 8.50
-          acidVolume*=range: {count: 5, from: 0, till: 30, decimals: 1, units: ul}
-      baseVolume=calculate: "30ul - acidVolume"
-      pH=calculate: "(acidPH * acidVolume + basePH * baseVolume) / (30ul)"
-      replicate*: [1,2,3]
-      well=allocateWells: {rows: 16, columns: 24, shuffle: true}
+          baseVolume*=range: {count: 5, from: 0, till: 30, decimals: 1, units: ul}
+      acidVolume=calculate: "30ul - baseVolume"
+      pH=calculate:
+        expression: "(acidPH * acidVolume + basePH * baseVolume) / (30ul)"
+        decimals: 2
+      replicate*: 3
+      order=range: {order: shuffle}
+      well=allocateWells: {rows: 16, columns: 24, orderBy: order}
+    select: [gfp, buffer, pH, replicate, acid, base, acidVolume, baseVolume, order, well]
 
 steps:
   data:
     source: phDesign
+    orderBy: order
   1:
     description: Fill balance plate with 75ul in same wells as mix plate; store it in the centrifuge
     1:
@@ -112,7 +121,7 @@ steps:
       program!: Roboliq_Water_Air_1000
       sources: balanceWater
       destinationLabware: balancePlate
-      destinations: $$well
+      destinations: $well
       volumes: 75ul
       cleanBetween: none
 
@@ -127,21 +136,35 @@ steps:
   2:
     description: Prepare the mixture plate with a range of pH levels
     1:
+      description: Dispense water and buffer first (sorted to minimize tip cleaning)
       command: pipetter.pipetteMixtures
       mixtures:
         data():
-          template:
-            - {source: $waterSource, volume: $waterVolume}
-            - {source: $acidSource, volume: $acidVolume}
-            - {source: $baseSource, volume: $baseVolume}
-            - {source: $proteinSource, volume: $proteinVolume, clean: thorough, cleanBetweenSameSource: flush, program!: Roboliq_Water_Wet_1000_mix3x50ul}
+          map:
+            - {source: saltwater, volume: $#SALTWATER_VOLUME, layer: 1}
+            - {source: $acid, volume: $acidVolume, layer: 2}
+            - {source: $base, volume: $baseVolume, layer: 3}
+          orderBy: [layer, source]
       destinationLabware: mixPlate
-      destinations: $$well
+      destinations: $well
       clean: flush
       cleanBegin: thorough
       cleanBetweenSameSource: none
       cleanEnd: thorough
     2:
+      description: Dispense GFPs last (according to mixture order)
+      command: pipetter.pipetteMixtures
+      mixtures:
+        data():
+          map:
+            - {source: $gfp, volume: $#GFP_VOLUME, clean: thorough, cleanBetweenSameSource: flush, program!: Roboliq_Water_Wet_1000_mix3x50ul}
+      destinationLabware: mixPlate
+      destinations: $well
+      clean: flush
+      cleanBegin: thorough
+      cleanBetweenSameSource: none
+      cleanEnd: thorough
+    3:
       command: sealer.sealPlate
       object: mixPlate
 
