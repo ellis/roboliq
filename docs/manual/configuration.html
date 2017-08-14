@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Roboliq</title>
+  <meta name="description" content="Roboliq">
+  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Roboliq" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  <meta name="github-repo" content="ellis/roboliq" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Roboliq" />
+  
+  
+  
+
+<meta name="author" content="Ellis Whitehead">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="input-formats.html">
+<link rel="next" href="simple-protocols.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#structure-of-the-manual"><i class="fa fa-check"></i>Structure of the manual</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#additional-documentation"><i class="fa fa-check"></i>Additional documentation</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software-information-and-conventions"><i class="fa fa-check"></i>Software information and conventions</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#motivation"><i class="fa fa-check"></i><b>1.1</b> Motivation</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#get-started"><i class="fa fa-check"></i><b>1.2</b> Get started</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#usage"><i class="fa fa-check"></i><b>1.3</b> Usage</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="quick-start.html"><a href="quick-start.html"><i class="fa fa-check"></i><b>2</b> Quick Start</a><ul>
+<li class="chapter" data-level="2.1" data-path="quick-start.html"><a href="quick-start.html#the-simplest-protocol"><i class="fa fa-check"></i><b>2.1</b> The simplest protocol</a></li>
+<li class="chapter" data-level="2.2" data-path="quick-start.html"><a href="quick-start.html#a-protocol-with-a-minimal-configuration"><i class="fa fa-check"></i><b>2.2</b> A protocol with a minimal configuration</a></li>
+<li class="chapter" data-level="2.3" data-path="quick-start.html"><a href="quick-start.html#a-bsse-protocol-for-mario"><i class="fa fa-check"></i><b>2.3</b> A BSSE protocol for mario</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="input-formats.html"><a href="input-formats.html"><i class="fa fa-check"></i><b>3</b> Input formats</a></li>
+<li class="chapter" data-level="4" data-path="configuration.html"><a href="configuration.html"><i class="fa fa-check"></i><b>4</b> Robot configuration</a><ul>
+<li class="chapter" data-level="4.1" data-path="configuration.html"><a href="configuration.html#evoware-configuration"><i class="fa fa-check"></i><b>4.1</b> Evoware configuration</a></li>
+<li class="chapter" data-level="4.2" data-path="configuration.html"><a href="configuration.html#components"><i class="fa fa-check"></i><b>4.2</b> Components</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="configuration.html"><a href="configuration.html#roboliq"><i class="fa fa-check"></i><b>4.2.1</b> <code>roboliq</code></a></li>
+<li class="chapter" data-level="4.2.2" data-path="configuration.html"><a href="configuration.html#schemas"><i class="fa fa-check"></i><b>4.2.2</b> <code>schemas</code></a></li>
+<li class="chapter" data-level="4.2.3" data-path="configuration.html"><a href="configuration.html#objects"><i class="fa fa-check"></i><b>4.2.3</b> <code>objects</code></a></li>
+<li class="chapter" data-level="4.2.4" data-path="configuration.html"><a href="configuration.html#commandhandlers"><i class="fa fa-check"></i><b>4.2.4</b> <code>commandHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="configuration.html"><a href="configuration.html#logic-components"><i class="fa fa-check"></i><b>4.3</b> Logic components</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="configuration.html"><a href="configuration.html#predicates"><i class="fa fa-check"></i><b>4.3.1</b> <code>predicates</code></a></li>
+<li class="chapter" data-level="4.3.2" data-path="configuration.html"><a href="configuration.html#objecttopredicateconverters"><i class="fa fa-check"></i><b>4.3.2</b> <code>objectToPredicateConverters</code></a></li>
+<li class="chapter" data-level="4.3.3" data-path="configuration.html"><a href="configuration.html#planhandlers"><i class="fa fa-check"></i><b>4.3.3</b> <code>planHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="configuration.html"><a href="configuration.html#conclusion"><i class="fa fa-check"></i><b>4.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="simple-protocols.html"><a href="simple-protocols.html"><i class="fa fa-check"></i><b>5</b> Simple Protocols</a><ul>
+<li class="chapter" data-level="5.1" data-path="simple-protocols.html"><a href="simple-protocols.html#objects-1"><i class="fa fa-check"></i><b>5.1</b> Objects</a></li>
+<li class="chapter" data-level="5.2" data-path="simple-protocols.html"><a href="simple-protocols.html#steps"><i class="fa fa-check"></i><b>5.2</b> Steps</a></li>
+<li class="chapter" data-level="5.3" data-path="simple-protocols.html"><a href="simple-protocols.html#conclusion-1"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="advanced-protocols.html"><a href="advanced-protocols.html"><i class="fa fa-check"></i><b>6</b> Advanced Protocols</a><ul>
+<li class="chapter" data-level="6.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#parameters"><i class="fa fa-check"></i><b>6.1</b> Parameters</a></li>
+<li class="chapter" data-level="6.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#objects-2"><i class="fa fa-check"></i><b>6.2</b> Objects</a></li>
+<li class="chapter" data-level="6.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data"><i class="fa fa-check"></i><b>6.3</b> Data</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-type"><i class="fa fa-check"></i><b>6.3.1</b> <code>Data</code> type</a></li>
+<li class="chapter" data-level="6.3.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-property"><i class="fa fa-check"></i><b>6.3.2</b> <code>data</code> property</a></li>
+<li class="chapter" data-level="6.3.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data.-commands"><i class="fa fa-check"></i><b>6.3.3</b> <code>data.*</code> commands</a></li>
+<li class="chapter" data-level="6.3.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-directive"><i class="fa fa-check"></i><b>6.3.4</b> <code>data()</code> directive</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope"><i class="fa fa-check"></i><b>6.4</b> Scope</a></li>
+<li class="chapter" data-level="6.5" data-path="advanced-protocols.html"><a href="advanced-protocols.html#substitution"><i class="fa fa-check"></i><b>6.5</b> Substitution</a><ul>
+<li class="chapter" data-level="6.5.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope-substitution"><i class="fa fa-check"></i><b>6.5.1</b> Scope $ substitution</a></li>
+<li class="chapter" data-level="6.5.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#template-substitution"><i class="fa fa-check"></i><b>6.5.2</b> Template ` substitution</a></li>
+<li class="chapter" data-level="6.5.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#directive-substitution"><i class="fa fa-check"></i><b>6.5.3</b> Directive () substitution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="design-tables.html"><a href="design-tables.html"><i class="fa fa-check"></i><b>7</b> Design Tables</a><ul>
+<li class="chapter" data-level="7.1" data-path="design-tables.html"><a href="design-tables.html#first-examples"><i class="fa fa-check"></i><b>7.1</b> First examples</a></li>
+<li class="chapter" data-level="7.2" data-path="design-tables.html"><a href="design-tables.html#nested-branching"><i class="fa fa-check"></i><b>7.2</b> Nested branching</a></li>
+<li class="chapter" data-level="7.3" data-path="design-tables.html"><a href="design-tables.html#hidden-factors"><i class="fa fa-check"></i><b>7.3</b> Hidden factors</a></li>
+<li class="chapter" data-level="7.4" data-path="design-tables.html"><a href="design-tables.html#actions"><i class="fa fa-check"></i><b>7.4</b> Actions</a><ul>
+<li class="chapter" data-level="7.4.1" data-path="design-tables.html"><a href="design-tables.html#allocatewells"><i class="fa fa-check"></i><b>7.4.1</b> <code>allocateWells</code></a></li>
+<li class="chapter" data-level="7.4.2" data-path="design-tables.html"><a href="design-tables.html#range"><i class="fa fa-check"></i><b>7.4.2</b> <code>range</code></a></li>
+<li class="chapter" data-level="7.4.3" data-path="design-tables.html"><a href="design-tables.html#calculate"><i class="fa fa-check"></i><b>7.4.3</b> <code>calculate</code></a></li>
+<li class="chapter" data-level="7.4.4" data-path="design-tables.html"><a href="design-tables.html#case"><i class="fa fa-check"></i><b>7.4.4</b> <code>case</code></a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="design-tables.html"><a href="design-tables.html#step-and-data-nesting"><i class="fa fa-check"></i><b>7.5</b> Step and data nesting</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Roboliq</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="configuration" class="section level1">
+<h1><span class="header-section-number">4</span> Robot configuration</h1>
+<p>In order for Roboliq to compile your protocol for your robot setup, it needs to know how the robot is configured. This is the most complicated part of Roboliq – it requires advanced technical knowledge or your robot and some programming skill. Once the configuraiton has been specified, future users don’t need to be concerned with it.</p>
+<p>So if someone else has configured Roboliq for your robot already, then you should probably just proceed to the next chapter. However, if you need to write the configuration, this chapter is for you.</p>
+<div id="evoware-configuration" class="section level2">
+<h2><span class="header-section-number">4.1</span> Evoware configuration</h2>
+<p>(If you are not using an Evoware robot, you can skip this section.)</p>
+<p>Roboliq supplies a simplified method for configuring Evoware robots. You will need to create a JavaScript file in which you define an <code>EvowareConfigSpec</code> object, and then have it converted to the Roboliq protocol format. Your config file will have the following structure:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">const</span> evowareConfigSpec <span class="op">=</span> <span class="op">{</span>
+  <span class="co">// Lab name and robot name</span>
+  <span class="dt">namespace</span><span class="op">:</span> <span class="st">&quot;YOUR LAB ID&quot;</span><span class="op">,</span>
+  <span class="dt">name</span><span class="op">:</span> <span class="st">&quot;YOUR ROBOT ID&quot;</span><span class="op">,</span>
+  <span class="co">// Compiler settings</span>
+  <span class="dt">config</span><span class="op">:</span> <span class="op">{</span>
+    <span class="dt">TEMPDIR</span><span class="op">:</span> <span class="st">&quot;TEMPORARY DIRECTORY FOR MEASUREMENT FILES&quot;</span><span class="op">,</span>
+    <span class="dt">ROBOLIQ</span><span class="op">:</span> <span class="st">&quot;COMMAND TO CALL ROBOLIQ&#39;S RUNTIME&quot;</span><span class="op">,</span>
+    <span class="dt">BROWSER</span><span class="op">:</span> <span class="st">&quot;PATH TO WEB BROWSER&quot;</span>
+  <span class="op">},</span>
+  <span class="co">// Bench sites on the robot</span>
+  <span class="dt">sites</span><span class="op">:</span> <span class="op">{</span>
+    <span class="dt">MYSITE1</span><span class="op">:</span> <span class="op">{</span><span class="dt">evowareCarrier</span><span class="op">:</span> <span class="st">&quot;CARRIER ID&quot;</span><span class="op">,</span> <span class="dt">evowareGrid</span><span class="op">:</span> MYGRID<span class="op">,</span> <span class="dt">evowareSite</span><span class="op">:</span> MYSITE<span class="op">},</span>
+    ...
+  <span class="op">},</span>
+  <span class="co">// Labware models</span>
+  <span class="dt">models</span><span class="op">:</span> <span class="op">{</span>
+    <span class="dt">MYPLATEMODEL1</span><span class="op">:</span> <span class="op">{</span><span class="dt">type</span><span class="op">:</span> <span class="st">&quot;PlateModel&quot;</span><span class="op">,</span> <span class="dt">rows</span><span class="op">:</span> <span class="dv">8</span><span class="op">,</span> <span class="dt">columns</span><span class="op">:</span> <span class="dv">12</span><span class="op">,</span> <span class="dt">evowareName</span><span class="op">:</span> <span class="st">&quot;EVOWARE LABWARE NAME&quot;</span><span class="op">},</span>
+    ...
+  <span class="op">},</span>
+  <span class="co">// List of which sites and labware models can be used together</span>
+  <span class="dt">siteModelCompatibilities</span><span class="op">:</span> [
+    <span class="op">{</span>
+      <span class="dt">sites</span><span class="op">:</span> [<span class="st">&quot;MYSITE1&quot;</span><span class="op">,</span> ...]<span class="op">,</span>
+      <span class="dt">models</span><span class="op">:</span> [<span class="st">&quot;MYPLATEMODEL1&quot;</span><span class="op">,</span> ...]
+    <span class="op">},</span>
+    ...
+  ]<span class="op">,</span>
+  <span class="co">// List of the robot&#39;s equipment</span>
+  <span class="dt">equipment</span><span class="op">:</span> <span class="op">{</span>
+    <span class="dt">MYEQUIPMENT1</span><span class="op">:</span> <span class="op">{</span>
+      <span class="dt">module</span><span class="op">:</span> <span class="st">&quot;EQUIPMENT1.js&quot;</span><span class="op">,</span>
+      <span class="dt">params</span><span class="op">:</span> <span class="op">{</span>
+        ...
+      <span class="op">}</span>
+    <span class="op">}</span>
+  <span class="op">},</span>
+  <span class="co">// List of which lid types can be stacked on which labware models</span>
+  <span class="dt">lidStacking</span><span class="op">:</span> [
+    <span class="op">{</span>
+      <span class="dt">lids</span><span class="op">:</span> [<span class="st">&quot;lidModel_standard&quot;</span>]<span class="op">,</span>
+      <span class="dt">models</span><span class="op">:</span> [<span class="st">&quot;MYPLATEMODEL1&quot;</span>]
+    <span class="op">}</span>
+  ]<span class="op">,</span>
+  <span class="co">// List of the robot&#39;s robotic arms</span>
+  <span class="dt">romas</span><span class="op">:</span> [
+    <span class="op">{</span>
+      <span class="dt">description</span><span class="op">:</span> <span class="st">&quot;roma1&quot;</span><span class="op">,</span>
+      <span class="co">// List of sites this ROMA can safely access with which vectors</span>
+      <span class="dt">safeVectorCliques</span><span class="op">:</span> [
+                <span class="op">{</span> <span class="dt">vector</span><span class="op">:</span> <span class="st">&quot;Narrow&quot;</span><span class="op">,</span> <span class="dt">clique</span><span class="op">:</span> [<span class="st">&quot;MYSITE1&quot;</span><span class="op">,</span> ...] <span class="op">},</span>
+                ...
+            ]
+    <span class="op">},</span>
+    ...
+  ]<span class="op">,</span>
+  <span class="co">// Liquid handing arm</span>
+  <span class="dt">liha</span><span class="op">:</span> <span class="op">{</span>
+    <span class="co">// Available tip models</span>
+    <span class="dt">tipModels</span><span class="op">:</span> <span class="op">{</span>
+      <span class="dt">MYTIPMODEL1000</span><span class="op">:</span> <span class="op">{</span><span class="dt">programCode</span><span class="op">:</span> <span class="st">&quot;1000&quot;</span><span class="op">,</span> <span class="dt">min</span><span class="op">:</span> <span class="st">&quot;3ul&quot;</span><span class="op">,</span> <span class="dt">max</span><span class="op">:</span> <span class="st">&quot;950ul&quot;</span><span class="op">,</span> <span class="dt">canHandleSeal</span><span class="op">:</span> <span class="kw">false</span><span class="op">,</span> <span class="dt">canHandleCells</span><span class="op">:</span> <span class="kw">true</span><span class="op">},</span>
+      ...
+    <span class="op">},</span>
+    <span class="co">// List of LIHA syringes (e.g. 8 entries if it has 8 syringes)</span>
+    <span class="dt">syringes</span><span class="op">:</span> [
+      <span class="op">{</span> <span class="dt">tipModelPermanent</span><span class="op">:</span> <span class="st">&quot;MYTIPMODEL1000&quot;</span> <span class="op">},</span>
+      ...
+    ]<span class="op">,</span>
+    <span class="co">// Sites that the LIHA can access</span>
+    <span class="dt">sites</span><span class="op">:</span> [<span class="st">&quot;MYSITE1&quot;</span><span class="op">,</span> ...]<span class="op">,</span>
+    <span class="co">// Specifications for how to wash the tips</span>
+    <span class="dt">washPrograms</span><span class="op">:</span> <span class="op">{</span>
+      <span class="co">// For Example: Specification for flushing the tips with `programCode == 1000`</span>
+      <span class="dt">flush_1000</span><span class="op">:</span> <span class="op">{</span> ... <span class="op">},</span>
+      ...
+    <span class="op">}</span>
+  <span class="op">},</span>
+  <span class="co">// Additional user-defined command handlers</span>
+  <span class="dt">commandHandlers</span><span class="op">:</span> <span class="op">{</span>
+    <span class="st">&quot;MYCOMMAND1&quot;</span><span class="op">:</span> <span class="kw">function</span>(params<span class="op">,</span> parsed<span class="op">,</span> data) <span class="op">{</span> ... <span class="op">},</span>
+    ...
+  <span class="op">},</span>
+  <span class="co">// Optional functions to choose among planning alternatives</span>
+  <span class="dt">planAlternativeChoosers</span><span class="op">:</span> <span class="op">{</span>
+    <span class="co">// For Example: when the `shaker.shakePlate` command has</span>
+    <span class="co">// multiple shakers available, you might want to use</span>
+    <span class="co">// the one name `MYEQUIPMENT1`</span>
+    <span class="st">&quot;shaker.canAgentEquipmentSite&quot;</span><span class="op">:</span> (alternatives) <span class="op">=&gt;</span> <span class="op">{</span>
+            <span class="kw">const</span> l <span class="op">=</span> <span class="va">alternatives</span>.<span class="at">filter</span>(x <span class="op">=&gt;</span> <span class="va">x</span>.<span class="va">equipment</span>.<span class="at">endsWith</span>(<span class="st">&quot;MYEQUIPMENT1&quot;</span>))<span class="op">;</span>
+            <span class="cf">if</span> (<span class="va">l</span>.<span class="at">length</span> <span class="op">&gt;</span> <span class="dv">0</span>)
+                <span class="cf">return</span> l[<span class="dv">0</span>]<span class="op">;</span>
+        <span class="op">}</span>
+  <span class="op">}</span>
+<span class="op">};</span>
+
+<span class="kw">const</span> EvowareConfigSpec <span class="op">=</span> <span class="at">require</span>(<span class="st">&#39;roboliq-evoware/dist/EvowareConfigSpec.js&#39;</span>)<span class="op">;</span>
+<span class="va">module</span>.<span class="at">exports</span> <span class="op">=</span> <span class="va">EvowareConfigSpec</span>.<span class="at">makeProtocol</span>(evowareConfigSpec)<span class="op">;</span></code></pre></div>
+<p>The details about <code>evowareConfigSpec</code> are in the <a href="../protocol/evowareConfiguration.html">Evoware API documenation</a>, and an extensive example can be found in <code>roboliq-processor/tests/ourlab.js</code>. This information is probably enough to configure your Evoware robot, and you can skip the rest of this chapter unless you need to setup a different kind of robot.</p>
+</div>
+<div id="components" class="section level2">
+<h2><span class="header-section-number">4.2</span> Components</h2>
+<p>A <em>configuration</em> is a JavaScript object with the following properties:</p>
+<ul>
+<li><code>roboliq</code>: specifies the version of Roboliq.</li>
+<li><code>schemas</code>: JSON Schema defintitions for all object and commands.</li>
+<li><code>objects</code>: specifies the objects provided by the robot.</li>
+<li><code>commandHandlers</code>: specifies the functions that handle protocol commands, for example by generating low-level commands from high-level commands.</li>
+<li><code>predicates</code>: specifies the <em>logical predicates</em> used by Roboliq’s A.I. to figure out how to compile some high-level commands to low-level commands for this configuration.</li>
+<li><code>objectToPredicateConverters</code>: specifies functions that generate logical predicates based from <code>objects</code>.</li>
+<li><code>planAlternativeChoosers</code>: specifies functions that can choose a specific plan among various alternative plans</li>
+<li><code>planHandlers</code>: specifies the functions that transform logical tasks into commands.</li>
+</ul>
+<p>The first four properties are easy for the average JavaScript programmer to understand: they are straight-forward JSON values or JavaScript functions. In contrast, the last four properties (<code>predicates</code>, <code>objectToPredicateConverters</code>, <code>planAlternativeChoosers</code>, and <code>planHandlers</code>) rely on concepts from Artificial Intelligence, which will require more effort to grasp.</p>
+<div id="roboliq" class="section level3">
+<h3><span class="header-section-number">4.2.1</span> <code>roboliq</code></h3>
+<p>As with protocols, the first property of a configuration should be <code>roboliq: v1</code>.</p>
+</div>
+<div id="schemas" class="section level3">
+<h3><span class="header-section-number">4.2.2</span> <code>schemas</code></h3>
+<p>For every command and object type, Roboliq requires a schema that defines its properties. By convention, object types begin with an upper-case letter, and commands begin with a lower-case letter. The schemas are written in a standardized format, which you can learn more about at <a href="http://json-schema.org/">JSON Schema</a>.</p>
+<p>Normally, the schemas required for your robot should be automatically provided by your chosen backend and the equipment you select. The <code>schemas</code> property is a hash map: its keys are the command names and object type names; its values are the respective JSON schemas. You will not need to write schemas unless you are creating new commands or objects types for Roboliq. An example schema is provided below in the <code>commandHandlers</code> section.</p>
+</div>
+<div id="objects" class="section level3">
+<h3><span class="header-section-number">4.2.3</span> <code>objects</code></h3>
+<p>The <code>objects</code> property of a configuration is the same as describe for protocols in the Quick Start chapter. However, robot configurations usually contain complex objects, such as measurement devices, whereas protocols usually only define fairly simple labware. Furthermore, the configuration may contain information that’s required for the backend compiler. The object schemas are described in the documentation for <a href="../protocol/commands.html">standard Roboliq objects</a> and for <a href="../protocol/evowareCommands.html">Evoware objects</a>.</p>
+<p><em>Namespaces.</em> Because a robot “contains” its devices, sites, and permanent labware, we use <code>Namespace</code> types to build nested objects. For example, if our lab is named “bsse”, we have a robot named “bert”, and it has a site named “P1”, this could be encoded as follows:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
+  <span class="fu">bsse:</span>
+    <span class="fu">type:</span> Namespace
+    <span class="fu">bert:</span>
+      <span class="fu">type:</span> Namespace
+      <span class="fu">site:</span>
+        <span class="fu">type:</span> Namespace
+        <span class="fu">P1:</span>
+          <span class="fu">type:</span> Site
+          ...</code></pre></div>
+<p>We can then reference the site in the protocol as <code>bsse.bert.site.P1</code>.</p>
+</div>
+<div id="commandhandlers" class="section level3">
+<h3><span class="header-section-number">4.2.4</span> <code>commandHandlers</code></h3>
+<p>A command handler is a JavaScript function that processes command parameters and returns information to Roboliq about the command’s effects, sub-commands, and user messages.</p>
+<p>Command handlers are supplied by various modules. Roboliq’s command modules are in the subdirectory <code>roboliq-processor/src/commands</code>, and Evoware’s command modules are in the subdirectory <code>roboliq-evoware/src/commands</code>. The API documentation contains information about the available commands.</p>
+<p>If you want to write your own command handler, you can add it to <code>commandHandlers</code> as a property. The property name should be the name of the command, and the value should be the command handler function. For example, let’s make a simplistic function called <code>my.hello</code> that tells an Evoware robot to say “Hello, YOURNAME!”. First we’ll defined the schema for the new command:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript">schemas<span class="op">:</span> <span class="op">{</span>
+  <span class="st">&quot;my.hello&quot;</span><span class="op">:</span> <span class="op">{</span>
+    <span class="dt">description</span><span class="op">:</span> <span class="st">&quot;Say hello to someone&quot;</span><span class="op">,</span>
+    <span class="dt">properties</span><span class="op">:</span> <span class="op">{</span>
+      <span class="dt">name</span><span class="op">:</span> <span class="op">{</span>
+        <span class="dt">description</span><span class="op">:</span> <span class="st">&quot;Name to say hello to&quot;</span><span class="op">,</span>
+        <span class="dt">type</span><span class="op">:</span> <span class="st">&quot;string&quot;</span>
+      <span class="op">}</span>
+    <span class="op">},</span>
+    <span class="dt">required</span><span class="op">:</span> [<span class="st">&quot;name&quot;</span>]
+  <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+<p>This schema lets Roboliq know that there’s a command named <code>my.hello</code>.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript">commandHandlers<span class="op">:</span> <span class="op">{</span>
+  <span class="st">&quot;my.hello&quot;</span><span class="op">:</span> <span class="kw">function</span>(params<span class="op">,</span> parsed<span class="op">,</span> data) <span class="op">{</span>
+    <span class="cf">return</span> <span class="op">{</span>
+      <span class="dt">expansion</span><span class="op">:</span> [
+                <span class="op">{</span>
+                    <span class="dt">command</span><span class="op">:</span> <span class="st">&quot;evoware._userPrompt&quot;</span><span class="op">,</span>
+                    <span class="dt">text</span><span class="op">:</span> <span class="st">&quot;Hello, &quot;</span><span class="op">+</span><span class="va">parsed</span>.<span class="va">value</span>.<span class="at">name</span><span class="st">&quot;,</span>
+                <span class="op">}</span>
+            ]
+    <span class="op">};</span>
+  <span class="op">}</span>
+<span class="op">}</span></code></pre></div>
+</div>
+</div>
+<div id="logic-components" class="section level2">
+<h2><span class="header-section-number">4.3</span> Logic components</h2>
+<p>Roboliq uses an Articifial Intelligence method called <a href="https://en.wikipedia.org/wiki/Hierarchical_task_network">Hierarchical Task Network (HTN) Planning</a>. In particular, it uses a <a href="https://www.jair.org/media/1141/live-1141-2152-jair.pdf">SHOP2</a> implementation <a href="http://warrensack.info/HTN/">written by Warren Sack</a> in JavaScript.</p>
+<div id="predicates" class="section level3">
+<h3><span class="header-section-number">4.3.1</span> <code>predicates</code></h3>
+<p>A predicate defines a “true statement”. For example, the following predicate is named <code>sealer.canAgentEquipmentProgramModelSite1</code>, and it lets Roboliq know that the robot agent <code>ourlab.mario.evoware</code> can use the sealer <code>ourlab.mario.sealer</code> with the labware model <code>ourlab.model.plateModel_96_round_transparent_nunc</code> at site <code>ourlab.mario.site.ROBOSEAL</code> with the internal program file <code>PerkinElmer_weiss.bcf</code>.</p>
+<p><code>yaml &quot;sealer.canAgentEquipmentProgramModelSite&quot;:     &quot;agent&quot;: &quot;ourlab.mario.evoware&quot;     &quot;equipment&quot;: &quot;ourlab.mario.sealer&quot;     &quot;program&quot;: &quot;C:\\HJBioanalytikGmbH\\...\\PerkinElmer_weiss.bcf&quot;,     &quot;model&quot;: &quot;ourlab.model.plateModel_96_round_transparent_nunc&quot;,     &quot;site&quot;: &quot;ourlab.mario.site.ROBOSEAL&quot;</code>yaml</p>
+<p>The general form for predicates is:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">predicateName:</span>
+  <span class="fu">object1:</span> value1
+  <span class="fu">object2:</span> value2
+  ...</code></pre></div>
+<p>The values are usually object names, and predicates often define true relationships among objects. All of the predicates together form a database of true statements about the “world” in which the protocol will run. They are used by certain command handlers to automatically figure out valid operations without the user needing to specify the low-level details. (Currently, the end-user documentation does not contain details about which predicates are used by which commands, but it can be found in the command handler source code.)</p>
+<p>Here is an example excerpt of using the predicate database to find all valid sealers from the <code>sealer.sealPlate</code> command handler:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript">        <span class="kw">const</span> predicates <span class="op">=</span> [
+            <span class="op">{</span><span class="st">&quot;sealer.canAgentEquipmentProgramModelSite&quot;</span><span class="op">:</span> <span class="op">{</span>
+                <span class="st">&quot;agent&quot;</span><span class="op">:</span> <span class="va">parsed</span>.<span class="va">objectName</span>.<span class="at">agent</span><span class="op">,</span>
+                <span class="st">&quot;equipment&quot;</span><span class="op">:</span> <span class="va">parsed</span>.<span class="va">objectName</span>.<span class="at">equipment</span><span class="op">,</span>
+                <span class="st">&quot;program&quot;</span><span class="op">:</span> <span class="va">parsed</span>.<span class="va">objectName</span>.<span class="at">program</span><span class="op">,</span>
+                <span class="st">&quot;model&quot;</span><span class="op">:</span> model<span class="op">,</span>
+                <span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="va">parsed</span>.<span class="va">objectName</span>.<span class="at">site</span>
+            <span class="op">}}</span>
+        ]<span class="op">;</span>
+        <span class="kw">const</span> [chosen<span class="op">,</span> alternatives] <span class="op">=</span> <span class="va">commandHelper</span>.<span class="at">queryLogic</span>(data<span class="op">,</span> predicates<span class="op">,</span> <span class="st">&quot;sealer.canAgentEquipmentProgramModelSite&quot;</span>)<span class="op">;</span></code></pre></div>
+<p>The function <code>commandHelper.queryLogic()</code> will find all solutions the <code>predicates</code> array, filling in the missing values as necessary. If more than one alternative solution is present, it will choose one of them. The solution can either by chosen by a appropriate function <code>planAlternativeChoosers</code>, or else Roboliq simply picks the first item in the alternatives list.</p>
+</div>
+<div id="objecttopredicateconverters" class="section level3">
+<h3><span class="header-section-number">4.3.2</span> <code>objectToPredicateConverters</code></h3>
+<p>Roboliq’s AI needs predicates describing the available objects. These are generated dynamically by the functions supplied in <code>objectToPredicateConverters</code>. It is a map from an object type to a function that accepts a named object and returns an array of predicates. For example, here is Roboliq’s converter for <code>Plate</code> objects:</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript">objectToPredicateConverters<span class="op">:</span> <span class="op">{</span>
+  <span class="dt">Plate</span><span class="op">:</span> <span class="kw">function</span>(name<span class="op">,</span> object) <span class="op">{</span>
+        <span class="kw">const</span> predicates <span class="op">=</span> [
+            <span class="op">{</span> <span class="st">&quot;isLabware&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;labware&quot;</span><span class="op">:</span> name <span class="op">}</span> <span class="op">},</span>
+            <span class="op">{</span> <span class="st">&quot;isPlate&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;labware&quot;</span><span class="op">:</span> name <span class="op">}</span> <span class="op">},</span>
+            <span class="op">{</span> <span class="st">&quot;model&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;labware&quot;</span><span class="op">:</span> name<span class="op">,</span> <span class="st">&quot;model&quot;</span><span class="op">:</span> <span class="va">object</span>.<span class="at">model</span> <span class="op">}</span> <span class="op">},</span>
+            <span class="op">{</span> <span class="st">&quot;location&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;labware&quot;</span><span class="op">:</span> name<span class="op">,</span> <span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="va">object</span>.<span class="at">location</span> <span class="op">}</span> <span class="op">}</span>
+        ]<span class="op">;</span>
+        <span class="cf">if</span> (<span class="va">object</span>.<span class="at">sealed</span>) <span class="op">{</span>
+            <span class="va">predicates</span>.<span class="at">push</span>(<span class="op">{</span> <span class="st">&quot;plateIsSealed&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;labware&quot;</span><span class="op">:</span> name <span class="op">}</span> <span class="op">}</span>)<span class="op">;</span>
+        <span class="op">}</span>
+        <span class="cf">return</span> predicates<span class="op">;</span>
+    <span class="op">},</span>
+    ...
+<span class="op">}</span></code></pre></div>
+<p>This converter creates between 4 and 6 predicates for every plate object: <code>isLabware</code> lets the AI know that the plate is a kind of labware, <code>isPlate</code> says that the plate is a plate, <code>model</code> says which labware model the plate has, and <code>location</code> says where the plate is located. Furthermore, <code>plateIsSealed</code> will be present if-and-only-if the plate is sealed.</p>
+<p>You’ll only need to create additional object-to-predicate converters if you want to extend Roboliq’s object types, or perhaps if you create an advanced command that required additional logic.</p>
+</div>
+<div id="planhandlers" class="section level3">
+<h3><span class="header-section-number">4.3.3</span> <code>planHandlers</code></h3>
+<p>Plan handlers are functions that convert from a planning action to a Roboliq command (usually a low-level command). It is a map from an action name to a function that accepts that action parameters and returns an array of commands. The function also accepts the parameters of the parent command (the one that generated the plan), and the protocol data, in case those are needed to compute the new command.</p>
+<p>An example use-case is using the <code>transporter.movePlate</code> command to move a plate into a closed centrifuge: the planning algorithm will include an action to open the centrifuge first, and then the <code>transporter.movePlate</code> command will call the appropriate function in <code>planHandlers</code> to create the required sub-command.</p>
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2><span class="header-section-number">4.4</span> Conclusion</h2>
+<p>Configuring a robot can be complicated. First of all, it requires a lot of detailed knowledge about your robot. Secondly, it involves a lot of interdependencies. For example, in order to support a new labware model, you’ll need to add the model to the <code>models</code> list (easy), but you also need to update the list of site/model compatibilities, the list of safe transport vectors, and perhaps the list of which models accept lids or can be stacked on top of each other.</p>
+<p>It’s certainly do-able, but you’re likely to encounter some frustrations if you need to trouble-shoot why you get compiler errors when trying to use your new model, for example.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="input-formats.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="simple-protocols.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": false,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["roboliq.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

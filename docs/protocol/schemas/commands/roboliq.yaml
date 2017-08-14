@@ -1,0 +1,92 @@
+Agent:
+  description: An agent that can execute commands.
+  properties:
+    type: {enum: [Agent]}
+    description: {type: markdown}
+    label: {type: markdown}
+  required: [type]
+
+Data:
+  description: Specification of an experimental design.
+  properties:
+    type: {enum: [Data]}
+    description: {type: markdown}
+    design: {type: object}
+    actions: {type: array}
+  required: [type]
+
+Lid:
+  description: Lid labware
+  properties:
+    type: {enum: [Lid]}
+    description: {type: markdown}
+    label: {type: markdown}
+    model: {type: string}
+    location: {type: string}
+  required: [type, model]
+
+LidModel:
+  description: Model for lid labware
+  properties:
+    type: {enum: [LidModel]}
+    description: {type: markdown}
+    label: {type: markdown}
+  required: [type]
+
+Liquid:
+  description: Liquid substance.
+  properties:
+    type: {enum: [Liquid]}
+    description: {type: markdown}
+    label: {type: markdown}
+    wells: {type: array}
+  required: [type]
+
+Plate:
+  description: Plate labware.
+  properties:
+    type: {enum: [Plate]}
+    description: {type: markdown}
+    label: {type: markdown}
+    model: {type: PlateModel}
+    location: {type: Site}
+    contents: {type: [object, array]}
+    sealed: {type: boolean, description: "Indicated whether the plate is sealed"}
+  required: [type, model]
+
+PlateModel:
+  description: Model for plate labware.
+  properties:
+    type: {enum: [PlateModel]}
+    description: {type: markdown}
+    label: {type: markdown}
+    rows: {type: integer}
+    columns: {type: integer}
+  required: [type, rows, columns]
+
+Site:
+  description: Represents a bench site where labware can placed.
+  properties:
+    type: {enum: [Site]}
+    description: {type: markdown}
+    label: {type: markdown}
+  required: [type]
+
+Template:
+  description: A template object, used by the `system.call` command.
+  properties:
+    type: {enum: [Template]}
+    description: {type: markdown}
+    label: {type: markdown}
+    template: {}
+  required: [type]
+  noSubstitution: [template]
+
+Variable:
+  description: User-defined variable.
+  properties:
+    type: {enum: [Variable]}
+    description: {type: markdown}
+    label: {type: markdown}
+    value: {}
+  required: [type]

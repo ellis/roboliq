@@ -1,0 +1,431 @@
+EvowareConfigSpec:
+  description: |
+    This is a configuration specification for an Evoware robot.
+  type: object
+  properties:
+    namespace:
+      description: |
+        This is the namespace prefix for the robot.
+        By convention, this can be a label for your lab.
+        The value should not contain any spaces or periods.
+      type: string
+    name:
+      description: |
+        This is the robot name.
+        The value should not contain any spaces or periods.
+      type: string
+    config:
+      description: Settings for the Evoware compiler.
+      $ref: /EvowareCompilerConfig
+    sites:
+      description: |
+        These are the bench sites that Roboliq can use on the Evoware robot.
+        `sites` is a map from site name to site specification.
+        The name should not contain any spaces or periods.
+      type: object
+      additionalProperties:
+        $ref: /EvowareSiteSpec
+    models:
+      description: |
+        These are the labware models that Roboliq can use on the Evoware robot.
+        `models` is a map from model name to model specification.
+        The name should not contain any spaces or periods.
+      type: object
+      additionalProperties:
+        $ref: /EvowareModelSpec
+    siteModelCompatibilities:
+      description: |
+        Specifications of which bench sites are compatible with which models.
+      type: array
+      items:
+        $ref: /EvowareSiteModelCompatibilitySpec
+    lidStacking:
+      description: |
+        Specifications of which labwares can be stacked. Normally, this means
+        just specifying that the default lid `lidModel_standard` can go on
+        various plate models. Within limit, plates can also be stacked on top
+        of each other.
+      type: array
+      items:
+        $ref: /EvowareLidStackingSpec
+    equipment:
+      description: |
+        These are the equipment devices that are integrated with the Evoware robot.
+        `equipment` is a map from equipment name to equipment specification.
+        The name should not contain any spaces or periods.
+      type: object
+      additionalProperties:
+        $ref: /EvowareEquipmentSpec
+    romas:
+      description: |
+        List of Evoware ROMAs (robotic arms for moving plates).
+      type: array
+      items:
+        $ref: /EvowareRomaSpec
+    liha:
+      description: |
+        Specification of the Evoware robot's LIHA (Liquid Handling Arm).
+      $ref: /EvowareLihaSpec
+    commandHandlers:
+      description: |
+        This allows you to provide user-defined command handlers.
+        It can also be used to override the command handlers provided by
+        Roboliq, Evoware, or and equipment module.
+        `commandHandlers` is a map from the command name to a command handling
+        function.
+        See the documention about command handlers for more information.
+      type: object
+      additionalProperties:
+        type: function
+    planAlternativeChoosers:
+      description: |
+        This is an advanced property that will require some understanding of
+        Roboliq's approach to planning.
+        Please see the documenation for more information.
+        `planAlternativeChoosers` is a map from a predicate ID to a function
+        that takes a list of possible alternatives for that predicate.
+        The function can then choose one of those alternatives by returning
+        it.  This allows you to configure planning preferences, such as if
+        you have two shakers, you might always prefer to use a specific one
+        when it's among the alternatives.
+      type: object
+      additionalProperties:
+        type: function
+  additionalProperties: false
+  required: [namespace, name]
+
+EvowareCompilerConfig:
+  description: |
+    Settings for the Evoware compiler.
+  type: object
+  properties:
+    TEMPDIR:
+      description: Directory where measurement files can be temporarily stored during processing
+      type: string
+    ROBOLIQ:
+      description: The evoware command to call the roboliq runtime
+      type: string
+    BROWSER:
+      description: Path to the browser (e.g Google Chrome) for opening Roboliq's HTML files
+      type: string
+  additionalProperties: false
+  required: [TEMPDIR, ROBOLIQ, BROWSER]
+  example: |
+    ```yaml
+    TEMPDIR: "C:\\Users\\localadmin\\Desktop\\Ellis\\temp",
+    ROBOLIQ: "wscript C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\roboliq-runtime-cli\\roboliq-runtime-cli.vbs",
+    BROWSER: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+    ```
+
+EvowareSiteSpec:
+  description: Specification of an Evoware site
+  type: object
+  properties:
+    evowareCarrier:
+      description: Name of the Evoware carrier
+      type: string
+    evowareGrid:
+      description: The site's grid
+      type: integer
+    evowareSite:
+      description: The site's index
+      type: integer
+  additionalProperties: false
+  required: [evowareCarrier, evowareGrid, evowareSite]
+  example: |
+    ```yaml
+    evowareCarrier: "Hotel 4Pos Transfer Grid 69"
+    evowareGrid: 69
+    evowareSite: 1
+    ```
+
+EvowareModelSpec:
+  description: Specification of an Evoware labware model
+  type: object
+  properties:
+    type:
+      description: The type of labware model (currenly only `PlateModel` is available)
+      enum: [PlateModel]
+    description:
+      description: An optional string to describe this model.
+      type: string
+    rows:
+      description: Number of rows on the plate
+      type: integer
+    columns:
+      description: Number of columns on the plate
+      type: integer
+    evowareName:
+      description: Evoware name of the labware model
+      type: string
+  additionalProperties: false
+  required: [type, rows, columns, evowareName]
+  example: |
+    ```yaml
+    type: PlateModel
+    rows: 8
+    columns: 12
+    evowareName: "EK 96 well Greiner Black"
+    ```
+EvowareSiteModelCompatibilitySpec:
+  description: |
+    Specification of which bench sites are compatible with which models.
+    All such sites should be listed in the `sites` property,
+    and the models in the `models` property.
+  type: object
+  properties:
+    description:
+      description: An optional string to describe this list.
+      type: string
+    sites:
+      description: |
+        A list of sites that are compatible with the `models`.
+        The names in this list should be defined in the `sites`
+        property of the parent `EvowareConfigSpec` object.
+      type: array
+      items:
+        type: string
+    models:
+      description: |
+        A list of models that are compatible with the `sites`.
+        The names in this list should be defined in the `models`
+        property of the parent `EvowareConfigSpec` object.
+      type: array
+      items:
+        type: string
+  additionalProperties: false
+  required: [sites, models]
+  example: |
+    ```yaml
+    description: "short-format plate sites (non-tall labware, not for deep well plates)",
+    sites: ["P1DOWNHOLDER", "HOTEL4_1", "HOTEL4_2", "HOTEL4_3", "HOTEL4_4", "READER", "ROBOPEEL", "ROBOSEAL"],
+    models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc"]
+    ```
+
+EvowareLidStackingSpec:
+  description: |
+    Specifies combinations of labwares can be stacked. Normally, this means
+    just specifying that the default lid `lidModel_standard` can go on
+    various plate models. Within limit, plates can also be stacked on top
+    of each other.
+    All items in `lids` will be stackable on all items in `models`.
+  type: object
+  properties:
+    description:
+      description: An optional string to describe this list.
+      type: string
+    lids:
+      description: |
+        A list of lid models (or labware models) that can be stacked on `models`.
+        The names in this list should either be `lidModel_standard` or be
+        defined in the `model`
+        property of the parent `EvowareConfigSpec` object.
+      type: array
+      items:
+        type: string
+    models:
+      description: |
+        A list of models that are compatible with the `sites`.
+        The names in this list should be defined in the `models`
+        property of the parent `EvowareConfigSpec` object.
+      type: array
+      items:
+        type: string
+  additionalProperties: false
+  required: [lids, models]
+  example: |
+    ```yaml
+    description: "short-format plate sites (non-tall labware, not for deep well plates)",
+    lids: ["lidModel_standard"]
+    models: ["plateModel_96_round_transparent_nunc", "plateModel_96_square_transparent_nunc"]
+    ```
+
+EvowareEquipmentSpec:
+  description: |
+    This allows you to specify a equipment module to load and the parameters
+    that should be passed to the module.
+  type: object
+  properties:
+    description:
+      description: An optional string to describe this piece of equipment.
+      type: string
+    module:
+      description: |
+        Filename of the equipment module to load.
+        The available modules can be found in the directory
+        `roboliq-evoware/src/equipment`.
+      type: string
+    params:
+      description: |
+        The parameters to be passed to the equipment module.
+        See the documentation for the equipment modules for more information.
+      type: object
+  additionalProperties: false
+  required: [module, params]
+  example: |
+    ```yaml
+    module: "reader-InfiniteM200Pro.js"
+    params:
+      evowareId: "ReaderNETwork"
+      evowareCarrier: "Infinite M200"
+      evowareGrid: 61
+      evowareSite: 1
+      site: "READER"
+      modelToPlateFile:
+        "plateModel_96_round_transparent_nunc": "NUN96ft"
+        "plateModel_384_square": "GRE384fw"
+    ```
+
+EvowareRomaSpec:
+  description: |
+    Specification of an Evoware ROMA (robotic arms for moving plates).
+  type: object
+  properties:
+    description:
+      description: An optional string to describe this ROMA.
+      type: string
+    safeVectorCliques:
+      description: list of cliques of sites that the ROMA can safetly move plates between using a given vector
+      type: array
+      items:
+        properties:
+          vector:
+            description: name of the evoware vector
+            type: string
+          clique:
+            description: names of sites that the ROMA can safely move plates between using this vector
+            type: array
+            items:
+              type: string
+  additionalProperties: false
+  example: |
+    ```yaml
+    description: "roma1"
+    safeVectorCliques:
+      - { vector: "Narrow", clique: ["P2", "P3", "P4", "P5", "P6", "P7", "P8", "REGRIP"] }
+      - { vector: "Narrow", clique: ["CENTRIFUGE_1", "REGRIP"] }
+      - { vector: "Narrow", clique: ["CENTRIFUGE_2", "REGRIP"] }
+      - { vector: "Narrow", clique: ["CENTRIFUGE_3", "REGRIP"] }
+      - { vector: "Narrow", clique: ["CENTRIFUGE_4", "REGRIP"] }
+    ```
+
+EvowareLihaSpec:
+  description: |
+    Specification of the Evoware robot's LIHA (Liquid Handling Arm).
+  type: object
+  properties:
+    tipModels:
+      description: |
+        These are the tip models that can be used with the Evoware robot.
+        `tipModels` is a map from tip model name to specification.
+        The name should not contain any spaces or periods.
+      type: object
+      additionalProperties:
+        $ref: /EvowareTipModelSpec
+    syringes:
+      description: |
+        A list of syringe specifications - one for each syringe on the LIHA.
+        For robots with fixed tips, the `tipModelPermanent` must be set
+        to one of the values in `tipModels`.  For disposable tips, an empty
+        object should be specified for each syringe.
+      type: array
+      items:
+        properties:
+          tipModelPermanent:
+            description: a tip model - must be set to one of the values in `tipModels`
+            type: string
+    sites:
+      description: |
+        A list of sites that they LIHA can operate on.
+        The names in this list should either be defined in the `sites`
+        property of the parent `EvowareConfigSpec` object or
+        in an `equipment` defintion.
+      type: array
+      items:
+        type: string
+    washPrograms:
+      description: |
+        These are the wash programs for the LIHA.
+        `washPrograms` is a map from name to specification.
+        The name is composed of a wash intensity, an underscore,
+        and a tip model `programCode`.
+        For example, to flush 1000ul tips with a program code of "1000",
+        the washProgram name would be "flush_1000".
+      additionalProperties:
+        $ref: /EvowareWashProgramSpec
+  additionalProperties: false
+
+EvowareWashProgramSpec:
+  description: |
+    Describes a method for washing tips in Evoware
+  type: object
+  oneOf: ["#/definitions/specProgram", "#/definitions/specScript"]
+  definitions:
+    specProgram:
+      properties:
+        type:
+          enum: ["EvowareWashProgram"]
+        wasteGrid:
+          type: integer
+        wasteSite:
+          type: integer
+        cleanerGrid:
+          type: integer
+        cleanerSite:
+          type: integer
+        wasteVolume:
+          type: numeric
+        wasteDelay:
+          type: integer
+        cleanerVolume:
+          type: numeric
+        cleanerDelay:
+          type: integer
+        airgapVolume:
+          type: numeric
+        airgapSpeed:
+          type: integer
+        retractSpeed:
+          type: integer
+        fastWash:
+          type: boolean
+      additionalProperties: false
+      required: [type, wasteGrid, wasteSite, cleanerGrid, cleanerSite, wasteVolume, wasteDelay, cleanerVolume, cleanerDelay, airgapVolume, airgapSpeed, retractSpeed, fastWash]
+    specScript:
+      properties:
+        type:
+          enum: ["EvowareWashProgram"]
+        script:
+          description: Full path to evoware script to perform the washing.
+          type: string
+      additionalProperties: false
+      required: [type, script]
+
+EvowareTipModelSpec:
+  description: |
+    This specifies a tip model that can be used with the Evoware robot.
+  type: object
+  properties:
+    programCode:
+      description: a string to use for generating the liquid class names for this tip model
+      type: string
+    min:
+      description: minimum volume (requires volume units, e.g. "3ul")
+      type: string
+    max:
+      description: maximum volume (requires volume units, e.g. "950ul")
+      type: string
+    canHandleSeal:
+      description: true if this tip can be used with sealed plates (default = false)
+      type: boolean
+      default: false
+    canHandleCells:
+      description: true if this tip can handle cells (default = false)
+      type: boolean
+      default: false
+  additionalProperties: false
+  required: [programCode, min, max]
+  example: |
+    ```json
+    {"programCode": "1000", "min": "3ul", "max": "950ul", "canHandleSeal": false, "canHandleCells": true}
+    ```

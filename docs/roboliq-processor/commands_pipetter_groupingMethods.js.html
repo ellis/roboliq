@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-processor Source: commands/pipetter/groupingMethods.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-processor</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="equipment.html">equipment</a></li><li><a href="fluorescenceReader.html">fluorescenceReader</a></li><li><a href="pipetter.html">pipetter</a></li><li><a href="timer.html">timer</a></li><li><a href="transporter.html">transporter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commandHelper.html">commandHelper</a></li><li><a href="module-commands_absorbanceReader.html">commands/absorbanceReader</a></li><li><a href="module-commands_centrifuge.html">commands/centrifuge</a></li><li><a href="module-commands_equipment.html">commands/equipment</a></li><li><a href="module-commands_fluorescenceReader.html">commands/fluorescenceReader</a></li><li><a href="module-commands_incubator.html">commands/incubator</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_pipetter_groupingMethods.html">commands/pipetter/groupingMethods</a></li><li><a href="module-commands_pipetter_pipetterUtils.html">commands/pipetter/pipetterUtils</a></li><li><a href="module-commands_pipetter_sourceMethods.html">commands/pipetter/sourceMethods</a></li><li><a href="module-commands_simulatedHelpers.html">commands/simulatedHelpers</a></li><li><a href="module-commands_timer.html">commands/timer</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-config_roboliq.html">config/roboliq</a></li><li><a href="module-config_roboliqDirectiveHandlers.html">config/roboliqDirectiveHandlers</a></li><li><a href="module-design.html">design</a></li><li><a href="module-generateSchemaDocs.html">generateSchemaDocs</a></li><li><a href="module-misc.html">misc</a></li><li><a href="module-parsers_wellsParser.html">parsers/wellsParser</a></li><li><a href="module-roboliq.html">roboliq</a></li><li><a href="module-stanModel.html">stanModel</a></li><li><a href="module-WellContents.html">WellContents</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: commands/pipetter/groupingMethods.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Functions to break pipeetting items into groups that should be handled simultaneously.
+ * Possible methods include:
+ *
+ * - each item is its own group
+ * - groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)
+ * - groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns
+ * - have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips
+ * @module
+ */
+
+import _ from 'lodash'
+import assert from 'assert'
+
+/**
+ * Place each item into its own group.
+ *
+ * @param {array} items Array of pipetting items.
+ * @return {array} An array of groups of items; each group is a sublist of items from the original array.
+ */
+export function groupingMethod1(items) {
+	return _.map(items, function(item) { return [item]; });
+}
+
+/**
+ * Groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet).
+ * Also break groups on program changes.
+ * TODO: break group if a previous dispense well is used as a source well.
+ *
+ * NOTE: if 'tipModelToSyringes' is supplied, this algorithm will not work predictably if the sets of syringes partially overlap with each other (complete overlap is fine).
+ *
+ * @param {array} items Array of pipetting items.
+ * @param {array} syringes Array of integers representing the available syringe indexes
+ * @param {object} tipModelToSyringes An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.
+ * @return {array} An array of groups of items; each group is a sublist of items from the original array.
+ */
+export function groupingMethod2(items, syringes, tipModelToSyringes) {
+	//console.log({items, syringes, tipModelToSyringes})
+	const groups = [];
+	while (!_.isEmpty(items)) {
+		const program = items[0].program;
+		let syringesAvailable = _.clone(syringes);
+		const group = _.takeWhile(items, function (item) {
+			//console.log("A "+JSON.stringify(item));
+			// Make sure we still have syringes available
+			if (syringesAvailable.length == 0) return false;
+			// Make sure all items in the group use the same program
+			if (item.program !== program) return false;
+			//console.log("B");
+
+			assert(item.tipModel);
+
+			// If tipModelToSyringes was provided
+			if (!_.isEmpty(tipModelToSyringes)) {
+				//console.log("C");
+				assert(tipModelToSyringes.hasOwnProperty(item.tipModel));
+				var syringesPossible = tipModelToSyringes[item.tipModel];
+				//console.log({syringesPossible, syringesAvailable})
+				assert(!_.isEmpty(syringesPossible));
+				// Try to find a possible syringe that's still available
+				var l = _.intersection(syringesPossible, syringesAvailable);
+				if (_.isEmpty(l)) return false;
+				//console.log("D");
+				// Remove an arbitrary syringe from the list of available syringes
+				syringesAvailable = _.without(syringesAvailable, l[0]);
+			}
+			else {
+				//console.log("E");
+				// Remove an arbitrary syringe from the list of available syringes
+				syringesAvailable.splice(0, 1);
+			}
+
+			return true;
+		});
+		assert(group.length > 0);
+		items = _.drop(items, group.length);
+		groups.push(group);
+	}
+
+	return groups;
+}
+
+/**
+ * Groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet).
+ * It tries to group by `layer` by putting as many items from the same layer into the group before moving onto the next item.
+ * Breaks are forced on:
+ * * program changes
+ * * when a previous dispense well is used as a source well
+ *
+ * NOTE: if 'tipModelToSyringes' is supplied, this algorithm will not work predictably if the sets of syringes partially overlap with each other (complete overlap is fine).
+ *
+ * @param {array} items Array of pipetting items.
+ * @param {array} syringes Array of integers representing the available syringe indexes
+ * @param {object} tipModelToSyringes An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.
+ * @return {array} An array of groups of items; each group is a sublist of items from the original array.
+ */
+export function groupingMethod3(items, syringes, tipModelToSyringes) {
+	//console.log({items, syringes, tipModelToSyringes})
+
+	if (_.isEmpty(items))
+		return [];
+
+	assert(syringes.length > 0)
+
+	// Make a mutable copy of items, which we'll be splicing and shifting
+	items = _.clone(items);
+
+	// While items list isn't empty:
+	//
+	// If group is empty:
+	//  Create a group with first item
+	//  Set dispenseWells = {}
+	//  Set syringesAvailable = all
+	//  Set program to item.program
+	//  Set layer to item.layer
+	//  If layer:
+	//   nextItems = [next item with same layer, next item in items list]
+	//  Else:
+	//   nextItems = [next item in items list]
+	// Else: (group isn't empty)
+	//  nextItems = [next item in items list]
+	//
+	// For all items in nextItems:
+	//  if the item can be added to the group:
+	//   add item to group
+	//   remote item from items list
+	//   break
+	//
+	// If no item was added, create a new empty group
+	let current = undefined;
+
+	function tryAdd(item, debug = false) {
+		//console.log("A "+JSON.stringify(item));
+		// Make sure we still have syringes available
+		if (current.syringesAvailable.length == 0) { if (debug) console.log("syringesAvailable.length == 0"); return false; }
+		// Make sure all items in the group use the same program
+		if (current.program !== item.program) { if (debug) console.log({currentProgram: current.program, itemProgram: item.program}); return false; }
+		// Make sure source was not previously a destination in this group
+		// const source = item.source || item.well;
+		// const destination = item.destination || item.well;
+		if (_.some(current.group, item2 => (item.source || item.well) === (item2.destination || item2.well))) { if (debug) console.log({currentGroup: current.group, item}); return false; }
+		// Make sure syringe was not already used (only relevant want syringe is manually specified)
+		if (item.syringe) {
+			if (current.syringesUsed.hasOwnProperty(item.syringe)) { if (debug) console.log({syringesUsed: current.syringesUsed, itemSyringe: item.syringe}); return false; }
+			current.syringesUsed[item.syringe] = true;
+		}
+		//console.log("B");
+
+		assert(item.tipModel);
+
+		// If tipModelToSyringes was provided
+		if (!_.isEmpty(tipModelToSyringes)) {
+			//console.log("C");
+			assert(tipModelToSyringes.hasOwnProperty(item.tipModel), `tipModelToSyringes must contain an entry for "${item.tipModel}"`);
+			const syringesPossible = tipModelToSyringes[item.tipModel];
+			//console.log({syringesPossible, syringesAvailable})
+			assert(!_.isEmpty(syringesPossible));
+			// Try to find a possible syringe that's still available
+			const l = _.intersection(syringesPossible, current.syringesAvailable);
+			if (_.isEmpty(l)) { if (debug) console.log({syringesPossible, syringesAvailable: current.syringesAvailable}); return false; }
+			//console.log("D");
+			// Remove an arbitrary syringe from the list of available syringes
+			current.syringesAvailable = _.without(current.syringesAvailable, l[0]);
+		}
+		else {
+			//console.log("E");
+			// Remove an arbitrary syringe from the list of available syringes
+			current.syringesAvailable.splice(0, 1);
+		}
+
+		current.group.push(item);
+		current.layer = item.layer;
+
+		return true;
+	}
+
+	const groups = [];
+	while (!_.isEmpty(items)) {
+		// If we need to start a new group:
+		if (_.isUndefined(current)) {
+			const item = items.shift();
+			current = {
+				group: [],
+				syringesAvailable: _.clone(syringes),
+				syringesUsed: {},
+				program: item.program,
+				layer: item.layer
+			};
+			const added = tryAdd(item);
+			assert(added, `couldn't add item to empty group!: ${JSON.stringify(item)}`);
+			groups.push(current.group);
+		}
+		// Else, we will try to add an item to the current group
+		else {
+			const nextIndexes = [0];
+			// First check next item that's in the same layer as the last item in group
+			if (!_.isUndefined(current.layer)) {
+				const j = _.findIndex(items, item => {
+					//console.log({a: current.layer, b: item.layer, c: _.isEqual(current.layer, item.layer), d: current.layer === item.layer});
+					return _.isEqual(current.layer, item.layer);
+				});
+				//console.log({layer: current.layer, j})
+				if (j > 0) {
+					nextIndexes.unshift(j);
+				}
+			}
+
+			// Try to add one of the items in nextIndexes
+			let added = false;
+			for (let k = 0; k &lt; nextIndexes.length; k++) {
+				const j = nextIndexes[k];
+				const item = items[j];
+				if (tryAdd(item)) {
+					// Remove the j-th element
+					items.splice(j, 1);
+					added = true;
+					break;
+				}
+			}
+
+			// If no item could be added, signal that a new group should be started by undefining `current`
+			if (!added) {
+				current = undefined;
+			}
+		}
+	}
+
+	return groups;
+}
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:01+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+equipment:
+  module: |
+    The `equipment` commands specify generic actions such as 'run' and 'open'
+    that may apply to various types of equipment.
+
+equipment._run:
+  description: |
+    Run the given equipment.
+
+    This is a generic command, and any addition parameters may be passed that are required by the target equipment.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]
+
+equipment.open:
+  description: |
+    Open the given equipment.
+
+    This is a generic command that expands to a sub-command named `equipment.open|${agent}|${equipment}`. That command should be defined in your configuration for your lab.
+
+    The handler should return effects indicating that the equipment is open.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]
+
+equipment.openSite:
+  description: |
+    Open an equipment site.
+    This command assumes that only one equipment site can be open at a time.
+
+    This is a generic command that expands to a sub-command named
+    `equipment.openSite|${agent}|${equipment}`.
+    That command should be defined in your configuration for your lab.
+
+    The handler should return effects indicating that the equipment is open,
+    the given site is open, and all other equipment sites are closed.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    site: {description: "Site identifier", type: "Site"}
+  required: ["agent", "equipment", "site"]
+
+equipment.close:
+  description: |
+    Close the given equipment.
+
+    This is a generic command that expands to a sub-command named
+    `equipment.close|${agent}|${equipment}`.
+    That command should be defined in your lab configuration.
+
+    The handler should return effects indicating the the equipment is closed
+    and all of its sites are closed.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]
+
+equipment.start:
+  description: |
+    Start the given equipment.
+
+    This is a generic command that expands to a sub-command named
+    `equipment.start|${agent}|${equipment}`.
+    That command should be defined in your configuration for your lab.
+    Any addition parameters may be passed that are required by the target equipment.
+
+    The handler returns effects indicating that the equipment is running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]
+
+equipment.stop:
+  description: |
+    Stop the given equipment.
+
+    This is a generic command that expands to a sub-command named
+    `equipment.stop|${agent}|${equipment}`.
+    That command should be defined in your configuration for your lab.
+    Any addition parameters may be passed that are required by the target equipment.
+
+    The handler returns effects indicating that the equipment is not running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: ["agent", "equipment"]

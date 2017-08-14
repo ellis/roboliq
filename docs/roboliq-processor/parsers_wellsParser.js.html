@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-processor Source: parsers/wellsParser.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-processor</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="equipment.html">equipment</a></li><li><a href="fluorescenceReader.html">fluorescenceReader</a></li><li><a href="pipetter.html">pipetter</a></li><li><a href="timer.html">timer</a></li><li><a href="transporter.html">transporter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commandHelper.html">commandHelper</a></li><li><a href="module-commands_absorbanceReader.html">commands/absorbanceReader</a></li><li><a href="module-commands_centrifuge.html">commands/centrifuge</a></li><li><a href="module-commands_equipment.html">commands/equipment</a></li><li><a href="module-commands_fluorescenceReader.html">commands/fluorescenceReader</a></li><li><a href="module-commands_incubator.html">commands/incubator</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_pipetter_groupingMethods.html">commands/pipetter/groupingMethods</a></li><li><a href="module-commands_pipetter_pipetterUtils.html">commands/pipetter/pipetterUtils</a></li><li><a href="module-commands_pipetter_sourceMethods.html">commands/pipetter/sourceMethods</a></li><li><a href="module-commands_simulatedHelpers.html">commands/simulatedHelpers</a></li><li><a href="module-commands_timer.html">commands/timer</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-config_roboliq.html">config/roboliq</a></li><li><a href="module-config_roboliqDirectiveHandlers.html">config/roboliqDirectiveHandlers</a></li><li><a href="module-design.html">design</a></li><li><a href="module-generateSchemaDocs.html">generateSchemaDocs</a></li><li><a href="module-misc.html">misc</a></li><li><a href="module-parsers_wellsParser.html">parsers/wellsParser</a></li><li><a href="module-roboliq.html">roboliq</a></li><li><a href="module-stanModel.html">stanModel</a></li><li><a href="module-WellContents.html">WellContents</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: parsers/wellsParser.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Module for parsing strings that represent wells and labware.
+ * @module
+ */
+
+var _ = require('lodash');
+var assert = require('assert');
+var random = require('random-js');
+var expect = require('../expectCore.js');
+var misc = require('../misc.js');
+var wellsParser0 = require('./wellsParser0.js');
+
+/**
+ * Take a well identifier (e.g. A01) and returns an integer array
+ * representing the row and column of that well.
+ * @param  {string} location - a well identifier starting with a capital letter and followed by a number (e.g. A01)
+ * @return {array} an integer array of `[row, col]`.  The values are 1-based (i.e. row 1 is the first row)
+ * @static
+ */
+function locationTextToRowCol(location) {
+	var row = location.charCodeAt(0) - "A".charCodeAt(0) + 1;
+	var col = parseInt(location.substr(1));
+	return [row, col];
+}
+
+/**
+ * Converts a row and column index to a string.
+ * For example, `[1, 1] => A01`, and `[8, 12] => H12`.
+ * @param  {number} row - row of well
+ * @param  {number} col - column of well
+ * @return {string} string representation of location of well on labware
+ * @static
+ */
+function locationRowColToText(row, col) {
+	var colText = col.toString();
+	if (colText.length == 1) colText = "0"+colText;
+	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
+}
+
+/**
+ * Parses a text which should represent one or more labwares and wells.
+ * If the `objects` parameter is passed, this function will return an array of the individual wells;
+ * otherwise it will return the raw parser results.
+ *
+ * @param {string} text - text to parse
+ * @param {object} objects - map of protocol objects, in order to find labwares and number of rows and columns on labware.
+ * @param {object} [config] - optional object that contains properties for 'rows' and 'columns', in case we want to expand something like 'A1 down C3' without having specified a plate
+ * @return {array} If the `objects` parameter is passed, this function will return an array of the individual wells; otherwise it will return the raw parser results.
+ * @static
+ */
+function parse(text, objects, config) {
+	assert(_.isString(text), "wellsParser.parse() expected a string, received: "+text)
+	var result;
+	try {
+		result = wellsParser0.parse(text);
+	} catch (e) {
+		expect.rethrow(e);
+	}
+	if (!objects)
+		return result;
+
+	return processParserResult(result, objects, text, config);
+}
+
+/**
+ * Take the raw parser results and return an array of location names,
+ * one entry for each well.
+ * @param {array} result - raw parser results.
+ * @param {object} objects - map of protocol objects, in order to find labwares and number of rows and columns on labware.
+ * @param {string} text - the original text that was parsed; this is merely used for error output.
+ * @param {object} [config] - optional object that contains properties for 'rows' and 'columns', in case we want to expand something like 'A1 down C3' without having specified a plate
+ * @return {array} array of names for each plate + well (e.g. `plate1(C04)`)
+ */
+function processParserResult(result, objects, text, config = {}) {
+	var commandHelper = require('../commandHelper.js');
+	//console.log("text", text)
+	//console.log("result", result)
+	//console.log("result:\n"+JSON.stringify(result, null, '  '));
+	var ll = _.map(result, function(clause) {
+		const data = {objects};
+		// Get source or labware objects
+		//console.log({commandHelper})
+		const parsed = commandHelper.parseParams(clause, data, {
+			properties: {
+				source: {},
+				labware: {},
+				//subject: 'Any?'
+			}
+		});
+		// console.log({clause, parsed});
+		if (parsed.value.source) {
+			// If this was a source, return its wells
+			if (parsed.value.source.type === 'Source' || parsed.value.source.type === 'Liquid')
+				return [parsed.value.source.wells];
+			// Handle the case of when a variable is used and here we can substitute in its value
+			else if (_.isString(parsed.value.source) &amp;&amp; parsed.value.source !== clause.source)
+				return parse(parsed.value.source, objects);
+			// Else
+			else {
+				// console.log({clause, parsed})
+				expect.throw({}, "unrecognized source specifier: "+JSON.stringify(parsed.value.source));
+			}
+		}
+		else if (parsed.value.labware || (config.rows &amp;&amp; config.columns)) {
+			// Get number of rows and columns
+			let rows, columns;
+			let labwareName;
+			if (parsed.value.labware) {
+				const labware = parsed.value.labware;
+				labwareName = parsed.objectName.labware;
+				var modelName = labware.model;
+				assert(modelName, "`"+labwareName+".model` missing");
+				var model = misc.getObjectsValue(modelName, objects);
+				assert(model.rows, "`"+modelName+".rows` missing");
+				assert(model.columns, "`"+modelName+".columns` missing");
+				rows = model.rows;
+				columns = model.columns;
+			}
+			else {
+				rows = config.rows;
+				columns = config.columns;
+			}
+
+			var l = [];
+			if (clause.subject === 'all') {
+				for (var col = 1; col &lt;= columns; col++) {
+					for (var row = 1; row &lt;= rows; row++) {
+						l.push([row, col]);
+					}
+				}
+			}
+			else {
+				l.push(locationTextToRowCol(clause.subject));
+			}
+			if (clause.phrases) {
+				_.forEach(clause.phrases, function(phrase) {
+					switch (phrase[0]) {
+						case "down":
+							assert(l.length == 1, "`down` can only be used with a single well");
+							var rc0 = l[0];
+							var n = phrase[1];
+							assert(n >= 1, "`down n` must be positive: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							for (var i = 1; i &lt; n; i++) {
+								row++;
+								if (row > rows) {
+									row = 1;
+									col++;
+									if (col > columns) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
+									}
+								}
+								l.push([row, col])
+							}
+							break;
+						case "down-to":
+							assert(l.length == 1, "`down` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[1] &lt; rc1[1] || rc0[0] &lt;= rc1[0], "invalid target for `down`: "+text)
+							assert(rc0[1] &lt;= rc1[1], "column of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								row++;
+								if (row > rows) {
+									row = 1;
+									col++;
+									if (col > columns) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
+									}
+								}
+								l.push([row, col])
+							}
+							break;
+						case "down-block":
+							assert(l.length == 1, "`block` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[0] &lt;= rc1[0], "row of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							assert(rc0[1] &lt;= rc1[1], "column of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								row++;
+								if (row > rc1[0]) {
+									row = rc0[0];
+									col++;
+								}
+								l.push([row, col])
+							}
+							break;
+						case "right":
+							assert(l.length == 1, "`right` can only be used with a single well");
+							var rc0 = l[0];
+							var n = phrase[1];
+							assert(n >= 1, "`right n` must be positive: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							for (var i = 1; i &lt; n; i++) {
+								col++;
+								if (col > columns) {
+									row++;
+									col = 1;
+									if (row > rows) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
+									}
+								}
+								l.push([row, col])
+							}
+							break;
+						case "right-to":
+							assert(l.length == 1, "`right` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[0] &lt; rc1[0] || rc0[1] &lt;= rc1[1], "invalid target for `right`: "+text)
+							assert(rc0[0] &lt;= rc1[0], "row of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								col++;
+								if (col > columns) {
+									col = 1;
+									row++;
+									if (row > rows) {
+										throw {name: "RangeError", message: "`"+text+"` extends beyond range of labware `"+labwareName+"`"};
+									}
+								}
+								l.push([row, col])
+							}
+							break;
+						case "right-block":
+							assert(l.length == 1, "`block` can only be used with a single well");
+							var rc0 = l[0];
+							var rc1 = locationTextToRowCol(phrase[1]);
+							assert(rc0[0] &lt;= rc1[0], "row of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							assert(rc0[1] &lt;= rc1[1], "column of `"+phrase[1]+"` must be equal or greater than origin: "+text);
+							var row = rc0[0];
+							var col = rc0[1];
+							while (row !== rc1[0] || col != rc1[1]) {
+								col++;
+								if (col > rc1[1]) {
+									col = rc0[1];
+									row++;
+								}
+								l.push([row, col])
+							}
+							break;
+						case "random":
+							// Initialize randomizing engine
+							var mt = random.engines.mt19937();
+							if (phrase.length == 2) {
+								mt.seed(phrase[1]);
+							}
+							else {
+								mt.autoSeed();
+							}
+							// Randomize the list
+							var rest = _.clone(l);
+							random.shuffle(mt, rest);
+							//console.log("rest:", rest);
+							// Now try to not repeated pick the sames rows or columns
+							var l2 = [];
+							var choices = [];
+							while (rest.length > 0) {
+								if (choices.length == 0)
+									choices = _.clone(rest);
+								//console.log("choices:", JSON.stringify(choices));
+								// Pick the first choice in list
+								var rc = _.pullAt(choices, 0)[0];
+								// Add it to our new list
+								l2.push(rc);
+								// Remove it from 'rest'
+								rest = _.without(rest, rc);
+								// Remove all items from choices with the same row or column
+								_.remove(choices, function(rc2) {
+									return (rc2[0] == rc[0] || rc2[1] == rc[1]);
+								});
+							}
+							l = l2;
+							break;
+						case "take":
+							var n = phrase[1];
+							assert(n >= 0);
+							l = _.take(l, n);
+							break;
+						case "row-jump":
+							// Number of rows of space to leave between rows
+							var n = phrase[1];
+							expect.truthy(null, n >= 0, "row-spacing value must be >= 0");
+							var cycleLen = n + 1;
+
+							var l2 = [];
+							while (l.length > 0) {
+								// Get consecutive rc's that are in the same col
+								var col = l[0][1];
+								var sameCol = _.takeWhile(l, function(rc) { return rc[1] == col; });
+								l = _.drop(l, sameCol.length);
+
+								//console.dir(sameCol);
+								while (sameCol.length > 0) {
+									var row = sameCol[0][0];
+									var l3 = _.remove(sameCol, function(rc) {
+										return (((rc[0] - row) % cycleLen) === 0);
+									});
+									//console.log(row, l3, sameCol);
+									l2 = l2.concat(l3);
+								}
+							}
+							l = l2;
+							break;
+						default:
+							assert(false, "unhandled verb: "+phrase[0]);
+					}
+				});
+			}
+			// Convert the list of row/col back to text
+			return _.map(l, function(rc) {
+				var location = locationRowColToText(rc[0], rc[1]);
+				return (labwareName) ? labwareName+'('+location+')' : location;
+			});
+		}
+		else if (clause.subject) {
+			assert(_.isEmpty(clause.phrases));
+			return clause.subject;
+		}
+		else {
+			assert(false);
+		}
+	});
+	//console.log("ll:")
+	//console.log(ll);
+	return _.flatten(ll);
+}
+
+/**
+ * Parses a string which should represent a single well, and return the raw
+ * parser results.
+ *
+ * @param {string} text - text to parse
+ * @return {object} an object representing the raw parser results.
+ * @static
+ */
+function parseOne(text) {
+	assert(_.isString(text), "wellsParser.parseOne() expected a string, received: "+JSON.stringify(text))
+	try {
+		return wellsParser0.parse(text, {startRule: 'startOne'});
+	} catch (e) {
+		throw e;
+		//throw Error(e.toString());
+	}
+
+}
+
+module.exports = {
+	locationRowColToText,
+	locationTextToRowCol,
+	parse,
+	parseOne,
+	processParserResult,
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:01+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

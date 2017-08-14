@@ -1,0 +1,107 @@
+timer:
+  module: |
+    The `timer` commands specify actions using timer equipment.
+
+Timer:
+  description: Timer equipment.
+  properties:
+    type: {enum: [Timer]}
+    description: {type: markdown}
+    label: {type: markdown}
+  required: [type]
+
+timer._sleep:
+  description: |
+    Sleep for a given duration using a specific timer.
+
+    Handler should return `effects` that the timer is not running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    duration: {description: "Duration to sleep", type: "Duration"}
+    stop: {description: "Whether to stop the timer after waiting, or let it continue", type: boolean}
+  required: [agent, equipment, duration]
+
+timer._start:
+  description: |
+    Start the given timer.
+
+    Handler should return `effects` that the timer is running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: [agent, equipment]
+
+timer._stop:
+  description: |
+    Stop the given timer.
+
+    Handler should return `effects` that the timer is not running.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: [agent, equipment]
+
+timer._wait:
+  description: |
+    Wait until the given timer has reacher the given elapsed time.
+
+    Handler should:
+
+    - expect that the timer (identified by the `equipment` parameter) is running
+    - return `effects` that the timer is not running
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    till: {description: "Number of seconds to wait till from the time the timer was started", type: Duration}
+    stop: {description: "Whether to stop the timer after waiting, or let it continue", type: boolean}
+  required: [agent, equipment, till, stop]
+
+timer.doAndWait:
+  description: |
+    Start a timer, perform sub-steps, then wait till duration has elapsed.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    duration: {description: "Duration that this command should last", type: Duration}
+    steps: {description: "Sub-steps to perform", type: [object, array]}
+  required: [duration, steps]
+
+timer.sleep:
+  description: Sleep for a given duration.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    duration: {description: "Duration to sleep", type: Duration}
+  required: [duration]
+
+timer.start:
+  description: |
+    Start a timer.
+
+    If no parameters are supplied, a timer will be automatically chosen.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: []
+
+timer.stop:
+  description: |
+    Stop a running a timer.
+
+    If only one timer is running, this command can be called without any parameters.
+    Otherwise, the equipment identifier must be supplied.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+  required: []
+
+timer.wait:
+  description: |
+    Wait until the given timer has reacher the given elapsed time.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    till: {description: "Time that the timer should reach before continuing with the next step", type: Duration}
+    stop: {description: "Whether to stop the timer after waiting, or let it continue", type: boolean}
+  required: [till, stop]

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-evoware Source: commands/transporter.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-evoware</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commands_evoware.html">commands/evoware</a></li><li><a href="module-commands_evowareHelper.html">commands/evowareHelper</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-equipment_centrifuge4.html">equipment/centrifuge4</a></li><li><a href="module-equipment_evoware.html">equipment/evoware</a></li><li><a href="module-equipment_reader-InfiniteM200Pro.html">equipment/reader-InfiniteM200Pro</a></li><li><a href="module-equipment_shaker-Tecan1.html">equipment/shaker-Tecan1</a></li><li><a href="module-EvowareCarrierFile.html">EvowareCarrierFile</a></li><li><a href="module-EvowareCompiler.html">EvowareCompiler</a></li><li><a href="module-EvowareConfigSpec.html">EvowareConfigSpec</a></li><li><a href="module-EvowareTableFile.html">EvowareTableFile</a></li><li><a href="module-EvowareUtils.html">EvowareUtils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-evoware_EvowareCarrierFile.Carrier.html">evoware/EvowareCarrierFile.Carrier</a></li><li><a href="module-evoware_EvowareCarrierFile.CarrierGridSiteIndex.html">evoware/EvowareCarrierFile.CarrierGridSiteIndex</a></li><li><a href="module-evoware_EvowareCarrierFile.CarrierSiteIndex.html">evoware/EvowareCarrierFile.CarrierSiteIndex</a></li><li><a href="module-evoware_EvowareCarrierFile.EvowareCarrierData.html">evoware/EvowareCarrierFile.EvowareCarrierData</a></li><li><a href="module-evoware_EvowareCarrierFile.LabwareModel.html">evoware/EvowareCarrierFile.LabwareModel</a></li><li><a href="module-evoware_EvowareCarrierFile.Vector.html">evoware/EvowareCarrierFile.Vector</a></li><li><a href="module-evoware_EvowareTableFile.ExternalObject.html">evoware/EvowareTableFile.ExternalObject</a></li><li><a href="module-evoware_EvowareTableFile.HotelObject.html">evoware/EvowareTableFile.HotelObject</a></li><li><a href="module-evoware_EvowareUtils.EvowareSemicolonFile.html">evoware/EvowareUtils.EvowareSemicolonFile</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: commands/transporter.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Handles transporter instructions and supplies some additional control functions
+ * for moving the ROMAs.
+ * @module
+ */
+
+import _ from 'lodash';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+
+function getMoveRomaHomeLine(romaIndex) {
+	return getRomaMoveLine(romaIndex, 2);
+}
+
+/**
+ * Move a ROMA
+ * @param  {number} romaIndex - index of roma
+ * @param  {number} action - 0=open gripper, 1=close gripper, 2=move home, 3=move relative,
+ * @return {string} string representation of ROMA command
+ */
+function getRomaMoveLine(romaIndex, action) {
+	const x = {
+		action,
+		gripperDistance: 80,
+		force: 0,
+		dx: 0,
+		dy: 0,
+		dz: 0,
+		speed: 150,
+		maximumSpeed: 1,
+		romaIndex
+	};
+	return `ROMA(${x.action},${x.gripperDistance},${x.force},${x.dx},${x.dy},${x.dz},${x.speed},${x.maximumSpeed},${x.romaIndex});`;
+}
+
+/**
+ * Handle the `transporter._moveLidFromContainerToSite` instruction.
+ *
+ * @param  {object} params - original paramters
+ * @param  {object} parsed - parsed parameters
+ * @param  {object} data - protocol data
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
+export function _moveLidFromContainerToSite(params, parsed, data) {
+	// console.log("_moveLidFromContainerToSite: "+JSON.stringify(parsed, null, '\t'));
+	const params2 = {
+		agent: params.agent,
+		equipment: params.equipment,
+		program: params.program,
+		object: params.container,
+		destination: parsed.value.container.location
+	};
+	// console.log("params2: "+JSON.stringify(params2, null, '\t'));
+	const parsed2 = commandHelper.parseParams(params2, data, data.protocol.schemas["transporter._movePlate"]);
+	const lidHandling = {
+		lid: parsed.objectName.object,
+		action: "remove",
+		location: parsed.objectName.destination,
+		destination: parsed.objectName.destination
+	};
+	return _movePlate(params2, parsed2, data, lidHandling);
+}
+
+/**
+ * Handle the `transporter._moveLidFromSiteToContainer` instruction.
+ *
+ * @param  {object} params - original paramters
+ * @param  {object} parsed - parsed parameters
+ * @param  {object} data - protocol data
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
+export function _moveLidFromSiteToContainer(params, parsed, data) {
+	// console.log("_moveLidFromContainerToSite: "+JSON.stringify(parsed, null, '\t'));
+	const params2 = {
+		agent: params.agent,
+		equipment: params.equipment,
+		program: params.program,
+		object: params.container,
+		destination: parsed.value.container.location
+	};
+	// console.log("params2: "+JSON.stringify(params2, null, '\t'));
+	const parsed2 = commandHelper.parseParams(params2, data, data.protocol.schemas["transporter._movePlate"]);
+	const lidHandling = {
+		lid: parsed.objectName.object,
+		action: "cover",
+		location: parsed.objectName.origin,
+		destination: parsed.objectName.container
+	};
+	return _movePlate(params2, parsed2, data, lidHandling);
+}
+
+/**
+ * Handle the `transporter._movePlate` instruction.
+ *
+ * @param {object} params - original paramters
+ * @param {object} parsed - parsed parameters
+ * @param {object} data - protocol data
+ * @param {object} [lidHandling0] - an optional option to define lid handling - this is only used by the `_moveLidFromContainerToSite` and `_moveLidFromSiteToContainer` handlers.
+ * @param {string} [lidHandling0.lid] - name of the lid
+ * @param {string} [lidHandling0.action] - should either be "remove" or "cover"
+ * @param {string} [lidHandling0.location] - the site where the lid should be moved from or to
+ * @param {string} [lidHandling0.destination] - the site where the lid should be after the transfer
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
+export function _movePlate(params, parsed, data, lidHandling0) {
+	// console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
+	// romaIndex: "(@equipment).evowareRoma: integer"
+	const values = commandHelper.lookupPaths({
+		romaIndex: ["@equipment", "evowareRoma"],
+		programName: ["@program"],
+		plateModelName: [["@object", "model"], "evowareName"],
+		plateOrigName: ["@object", "location"],
+		plateOrigCarrierName: [["@object", "location"], "evowareCarrier"],
+		plateOrig: [["@object", "location"]],
+		plateOrigGrid: [["@object", "location"], "evowareGrid"],
+		plateOrigSite: [["@object", "location"], "evowareSite"],
+		plateDest: [["@destination"]],
+		plateDestCarrierName: ["@destination", "evowareCarrier"],
+		plateDestGrid: ["@destination", "evowareGrid"],
+		plateDestSite: ["@destination", "evowareSite"],
+	}, params, data);
+
+	// Lid handling parameters
+	const lidHandling = {
+		enabled: false,
+		grid: "",
+		carrierName: "",
+		site: "(Not defined)"
+	};
+	if (!_.isEmpty(lidHandling0)) {
+		lidHandling.enabled = true;
+		lidHandling.removeAtSource = (lidHandling0.action == "remove");
+		lidHandling.grid = commandHelper.lookupPath(["@location", "evowareGrid"], lidHandling0, data)
+		lidHandling.carrierName = commandHelper.lookupPath(["@location", "evowareCarrier"], lidHandling0, data)
+		lidHandling.site = commandHelper.lookupPath(["@location", "evowareSite"], lidHandling0, data)
+	}
+
+	const plateDestName = parsed.objectName.destination;
+
+	// It may be that multiple sites are defined which are actually the same physical location.
+	// We can supress transporter commands between the logical sites by checking whether the sames have the same siteIdUnique.
+	// console.log({plateOrig: values.plateOrig, plateDest: values.plateDest})
+	if (values.plateOrig.siteIdUnique &amp;&amp; values.plateOrig.siteIdUnique === values.plateDest.siteIdUnique) {
+		return [{
+			tableEffects: [
+				[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
+				[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
+			]
+		}];
+	}
+
+	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"], values.romaIndex);
+	const bMoveBackToHome = parsed.value.evowareMoveBackToHome || false; // 1 = move back to home position
+	values.moveBackToHome = (bMoveBackToHome) ? 1 : 0;
+	//console.log(JSON.stringify(values, null, '\t'))
+	const l = [
+		`"${values.plateOrigGrid}"`,
+		`"${values.plateDestGrid}"`,
+		values.moveBackToHome,
+		(lidHandling.enabled) ? 1 : 0,
+		0, // speed: 0 = maximum, 1 = taught in vector dialog
+		values.romaIndex,
+		(lidHandling.removeAtSource) ? 1 : 0,
+		`"${lidHandling.grid}"`,
+		`"${values.plateModelName}"`,
+		`"${values.programName}"`,
+		'""',
+		'""',
+		`"${values.plateOrigCarrierName}"`,
+		`"${lidHandling.carrierName}"`,
+		`"${values.plateDestCarrierName}"`,
+		`"${values.plateOrigSite}"`,
+		`"${lidHandling.site}"`,
+		`"${values.plateDestSite}"`
+	];
+	const line = `Transfer_Rack(${l.join(",")});`;
+	//println(s"line: $line")
+	//val let = JsonUtils.makeSimpleObject(x.`object`+".location", JsString(plateDestName))
+
+	const plateName = parsed.objectName.object;
+
+	const items = [];
+
+	if (values.romaIndex !== romaIndexPrev) {
+		items.push({
+			line: getMoveRomaHomeLine(romaIndexPrev)
+		});
+	}
+
+	items.push({
+		line,
+		effects:  _.fromPairs(_.compact([
+			[`${plateName}.location`, plateDestName],
+			(lidHandling.enabled) ? [`${lidHandling0.lid}.location`, lidHandling0.destination] : undefined,
+			[`EVOWARE.romaIndexPrev`, values.romaIndex]]
+		)),
+		tableEffects: [
+			[[values.plateOrigCarrierName, values.plateOrigGrid, values.plateOrigSite], {label: _.last(values.plateOrigName.split('.')), labwareModelName: values.plateModelName}],
+			[[values.plateDestCarrierName, values.plateDestGrid, values.plateDestSite], {label: _.last(plateDestName.split('.')), labwareModelName: values.plateModelName}],
+		]
+	});
+
+	return items;
+}
+
+/**
+ * Move the last-moved ROMA back to its home position.
+ *
+ * @param  {object} data - protocol data
+ * @return {array} an array of objects that describe output, effects, and table effects
+ */
+export function moveLastRomaHome(data) {
+	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"]);
+	if (romaIndexPrev) {
+		return [{
+			line: getMoveRomaHomeLine(romaIndexPrev)
+		}];
+	}
+	else {
+		return [];
+	}
+}
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:03+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

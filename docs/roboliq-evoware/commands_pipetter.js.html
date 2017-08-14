@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-evoware Source: commands/pipetter.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-evoware</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commands_evoware.html">commands/evoware</a></li><li><a href="module-commands_evowareHelper.html">commands/evowareHelper</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-equipment_centrifuge4.html">equipment/centrifuge4</a></li><li><a href="module-equipment_evoware.html">equipment/evoware</a></li><li><a href="module-equipment_reader-InfiniteM200Pro.html">equipment/reader-InfiniteM200Pro</a></li><li><a href="module-equipment_shaker-Tecan1.html">equipment/shaker-Tecan1</a></li><li><a href="module-EvowareCarrierFile.html">EvowareCarrierFile</a></li><li><a href="module-EvowareCompiler.html">EvowareCompiler</a></li><li><a href="module-EvowareConfigSpec.html">EvowareConfigSpec</a></li><li><a href="module-EvowareTableFile.html">EvowareTableFile</a></li><li><a href="module-EvowareUtils.html">EvowareUtils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-evoware_EvowareCarrierFile.Carrier.html">evoware/EvowareCarrierFile.Carrier</a></li><li><a href="module-evoware_EvowareCarrierFile.CarrierGridSiteIndex.html">evoware/EvowareCarrierFile.CarrierGridSiteIndex</a></li><li><a href="module-evoware_EvowareCarrierFile.CarrierSiteIndex.html">evoware/EvowareCarrierFile.CarrierSiteIndex</a></li><li><a href="module-evoware_EvowareCarrierFile.EvowareCarrierData.html">evoware/EvowareCarrierFile.EvowareCarrierData</a></li><li><a href="module-evoware_EvowareCarrierFile.LabwareModel.html">evoware/EvowareCarrierFile.LabwareModel</a></li><li><a href="module-evoware_EvowareCarrierFile.Vector.html">evoware/EvowareCarrierFile.Vector</a></li><li><a href="module-evoware_EvowareTableFile.ExternalObject.html">evoware/EvowareTableFile.ExternalObject</a></li><li><a href="module-evoware_EvowareTableFile.HotelObject.html">evoware/EvowareTableFile.HotelObject</a></li><li><a href="module-evoware_EvowareUtils.EvowareSemicolonFile.html">evoware/EvowareUtils.EvowareSemicolonFile</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: commands/pipetter.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Handles pipetter instructions.
+ * @module
+ */
+import _ from 'lodash';
+import assert from 'assert';
+import math from 'mathjs';
+import {sprintf} from 'sprintf-js';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+import * as evowareHelper from './evowareHelper.js';
+import * as EvowareUtils from '../EvowareUtils.js';
+import * as Tokens from './tokens.js';
+import wellsParser from 'roboliq-processor/dist/parsers/wellsParser.js';
+
+export function _aspirate(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data);
+}
+
+export function _dispense(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data);
+}
+
+export function _measureVolume(params, parsed, data) {
+	// console.log("measureVolume: "+JSON.stringify(parsed, null, '\t'))
+	return handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
+}
+
+export function _mix(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data, {well: "Mix"});
+}
+
+export function _pipette(params, parsed, data) {
+	return handlePipetterSpirate(parsed, data);
+}
+
+export function _washTips(params, parsed, data) {
+	//console.log("handleWashProgram: "+JSON.stringify(parsed, null, '\t'))
+
+	function handleScript(filename) {
+		return `Subroutine("${filename}",0);`;
+	}
+
+	function handleWashProgram(program) {
+		const syringeRows = parsed.value.syringes.map(x => _.isNumber(x) ? x : x.row);
+		const syringeMask = encodeSyringesByRow(syringeRows);
+		const bUNKNOWN1 = false;
+		const lWash = [
+			syringeMask,
+			program.wasteGrid, program.wasteSite-1,
+			program.cleanerGrid, program.cleanerSite-1,
+			`"${math.format(program.wasteVolume, {precision: 14})}"`,
+			program.wasteDelay,
+			`"${math.format(program.cleanerVolume, {precision: 14})}"`,
+			program.cleanerDelay,
+			program.airgapVolume,
+			program.airgapSpeed,
+			program.retractSpeed,
+			(program.fastWash) ? 1 : 0,
+			(bUNKNOWN1) ? 1 : 0,
+			1000,
+			0
+		];
+		const lineWash = `Wash(${lWash.join(",")});`;
+
+		const doRetract = _.get(data, ["protocol", "config", "evowareCompiler", "retractTips"], true);
+		if (doRetract) {
+			const labwareModel = {rows: 8, columns: 1};
+			const tuples = parsed.value.syringes.map(syringe => ({retract: {row: _.isNumber(syringe) ? syringe : syringe.row, col: 1, labwareModel}}));
+			const retractWellMask = encodeWells(tuples, "retract");
+			// console.log({tuples: JSON.stringify(tuples), retractWellMask})
+			const lRetract = [
+				syringeMask,
+				program.cleanerGrid, program.cleanerSite-1,
+				1, // tip spacing
+				`"${retractWellMask}"`,
+				4, // 0=positioning with global z travel, 4=z-move
+				4, // 4=global z travel
+				0,
+				400, // speed (mm/s), min 0.1, max 400
+				0, 0
+			];
+			const lineRetract = `MoveLiha(${lRetract.join(",")});`;
+
+			return [lineWash, lineRetract];
+		}
+		else {
+			return [lineWash];
+		}
+	}
+
+	const program = (_.isString(parsed.value.program))
+		? commandHelper.lookupPath([parsed.value.program], {}, data)
+		: parsed.value.program;
+	assert(!_.isEmpty(program), "missing wash program")
+	//console.log({program})
+
+	const results = [];
+	if (!_.isEmpty(program.script)) {
+		results.push({line: handleScript(program.script)});
+	}
+	else {
+		handleWashProgram(program).forEach(line => results.push({line}));
+	}
+	return results;
+}
+
+
+function handlePipetterSpirate(parsed, data, groupTypeToFunc) {
+	if (!groupTypeToFunc) {
+		groupTypeToFunc = {
+			"source": "Aspirate",
+			"destination": "Dispense"
+		};
+	}
+
+	// Create groups of items that can be pipetted simultaneously
+	const groups = groupItems(parsed, data);
+	// console.log("groups:\n"+JSON.stringify(groups, null, '\t'));
+
+	// Create a script line for each group:
+	const results = _.flatMap(groups, group => handleGroup(parsed, data, group, groupTypeToFunc));
+	// console.log("results:\n"+JSON.stringify(results, null, '\t'))
+	const doRetract = _.get(data, ["protocol", "config", "evowareCompiler", "retractTips"], true);
+	if (groups.length > 0 &amp;&amp; doRetract) {
+		results.push(handleRetract(parsed, data, groups))
+	}
+
+	// Get list of all accessed sites
+	//	token_l2 &lt;- handlePipetterSpirateDoGroup(objects, program, func, tuple_l.drop(tuple_l3.size))
+	const siteToWellInfo = {};
+	_.forEach(groups, group => _.forEach(group.tuples, tuple => {
+		for (let propertyName of ["source", "destination", "well"]) {
+			const wellInfo = tuple[propertyName];
+			if (wellInfo &amp;&amp; !siteToWellInfo.hasOwnProperty(wellInfo.siteName))
+				siteToWellInfo[wellInfo.siteName] = wellInfo;
+		}
+	}));
+	//console.log({siteToWellInfo})
+	const tableEffects = [];
+	_.forEach(siteToWellInfo, (wellInfo, siteName) => {
+		const key = [wellInfo.site.evowareCarrier, wellInfo.site.evowareGrid, wellInfo.site.evowareSite];
+		const label = _.last(siteName.split("."));
+		tableEffects.push([key, {label, labwareModelName: wellInfo.labwareModel.evowareName}]);
+	});
+	//console.log(tableEffects)
+
+	return results.concat({tableEffects});
+}
+
+/**
+ * Returns an array of groupings of the pipette items.  Each group has these properties:
+ *
+ * - `groupType` -- either "source" or "destination", depending on whether this group is for aspiration or dispense
+ * - `tuples` -- an array of objects with these properties:
+ *     - `item` -- the original pipette item
+ *     - `syringeName` -- roboliq name of the syringe to use
+ *     - `syringe` -- syringe object
+ *     - `syringeRow` -- row of syringe on the LiHa
+ *     - `source` -- source properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
+ *     - `destination` -- destination properties `{labwareName, labware, labwareModel, site, siteName, row, col}`
+ * - `syringeSpacing`
+ *
+ * @param  {object} parsed - parsed command parameters
+ * @param  {object} data - protocol data
+ * @return {array} an array of groupings of the pipette items
+ */
+function groupItems(parsed, data) {
+	//console.log("parsed:\n"+JSON.stringify(parsed, null, '\t'))
+
+	let items = commandHelper.copyItemsWithDefaults(parsed.value.items, parsed.value.itemDefaults);
+	// console.log("groupItems items:"+JSON.stringify(items))
+	if (_.isEmpty(items)) return [];
+
+	const tuples = [];
+	for (let i = 0; i &lt; items.length; i++) {
+		const item = items[i];
+		const syringeName = _.isInteger(item.syringe)
+			? `${parsed.objectName.equipment}.syringe.${item.syringe}`
+			: parsed.objectName[`items.${i}.syringe`];
+		const syringe = commandHelper._g(data, syringeName);
+		const syringeRow = _.isInteger(item.syringe)
+			? item.syringe
+			: syringe.row;
+		//console.log("stuff: "+JSON.stringify(wellsParser.parseOne(item.source)))
+		// const well = (item.hasOwnProperty("source")) ? item.source : item.destination;
+		function getWellInfo(well) {
+			if (_.isUndefined(well)) return undefined;
+			const {labware: labwareName, wellId} = wellsParser.parseOne(well);
+			//console.log({parseOne: wellsParser.parseOne(item.source)})
+			//console.log({labwareName, wellId})
+			const labware = commandHelper.lookupPath([labwareName], {}, data);
+			const labwareModel = commandHelper.lookupPath([[labwareName, "model"]], {}, data);
+			const [row, col] = wellsParser.locationTextToRowCol(wellId);
+			const siteName = commandHelper.lookupPath([labwareName, "location"], {}, data);
+			const site = commandHelper.lookupPath([[labwareName, "location"]], {}, data);
+			return {labwareName, labware, labwareModel, site, siteName, row, col};
+		}
+		//labwareName &lt;- ResultC.from(wellPosition.labware_?, "incomplete well specification; please also specify the labware")
+		//labwareInfo &lt;- getLabwareInfo(objects, labwareName)
+		tuples.push({item, syringeName, syringeRow, source: getWellInfo(item.source), destination: getWellInfo(item.destination), well: getWellInfo(item.well)});
+	}
+	// console.log("tuples:\n"+JSON.stringify(tuples, null, '\t'))
+
+	//console.log({ref})
+	// the spread of the syringes; normally this is 1, but Evoware can spread its syringes out more
+	function canJoinGroup(group, tuple, debug) {
+		// console.log("canJoinGroup: "+JSON.stringify({group, tuple}, null, '\t'))
+		const ref = group.tuples[0];
+
+		// Make sure the same syringe is not used twice in one group
+		const isUniqueSyringe = _.every(group.tuples, tuple2 => tuple2.syringeName != tuple.syringeName);
+		if (!isUniqueSyringe) {
+			if (debug) console.log({group, tuple, isUniqueSyringe, syringes: group.tuples.map(x => x.syringeName)})
+			return false;
+		}
+
+		function checkWellInfo(wellInfo, wellInfoRef) {
+			// Same column?
+			if (wellInfo.col === wellInfoRef.col) {
+				//console.log({tuple})
+				const dRow1 = tuple.syringeRow - ref.syringeRow
+				const dRow2 = wellInfo.row - wellInfoRef.row;
+				//console.log({tupleSyringe: tuple.item.syringe, refSyringe: ref.item.syringe})
+				if (_.isUndefined(group.syringeSpacing)) {
+					// If using the same well
+					if (dRow2 === 0) {
+						group.syringeSpacing = 0;
+						return true;
+					}
+					else if (dRow1 === 0 || dRow2 === 0) {
+						if (debug) console.log({group, tuple, dRow1, dRow2})
+						return false;
+					}
+					//console.log(1)
+					//console.log({dRow1, dRow2})
+					const syringeSpacing = math.fraction(dRow2, dRow1);
+					// console.log(2)
+					// FIXME: need to check wether the syringe spacing is permissible!  Check how much the syringes need to spread physically (not just relative to the plate wells), and whether that's possible for the hardware.  Also, not all fractions will be permissible, probably.
+					if (syringeSpacing &lt; 1) {
+						if (debug) console.log({group, tuple, syringeSpacing})
+						return false;
+					}
+					else {
+						group.syringeSpacing = syringeSpacing;
+						return true;
+					}
+				}
+				else {
+					// If using the same well
+					if (dRow2 === 0 &amp;&amp; group.syringeSpacing === 0) {
+						return true;
+					}
+					// console.log(3)
+					else if (math.equal(math.fraction(dRow2, dRow1), group.syringeSpacing))
+						return true;
+					// console.log(4)
+				}
+			}
+			if (debug) console.log({group, tuple, col: wellInfo.col, colRef: wellInfoRef.col})
+			return false;
+		}
+		// Same labware?
+		if ((tuple.source &amp;&amp; tuple.source.labwareName !== ref.source.labwareName) || (tuple.destination &amp;&amp; tuple.destination.labwareName !== ref.destination.labwareName) || (tuple.well &amp;&amp; tuple.well.labwareName !== ref.well.labwareName)) {
+			if (debug) console.log({group, tuple, col: wellInfo.col, colRef: wellInfoRef.col})
+			return false;
+		}
+		// Other things ok?
+		if (!_.isUndefined(tuple[group.groupType])) {
+			if (checkWellInfo(tuple[group.groupType], ref[group.groupType]))
+				return true;
+		}
+
+		return false;
+	}
+
+	let groupSrc = {groupType: "source", tuples: []};
+	let groupDst = {groupType: "destination", tuples: []};
+	let groupWll = {groupType: "well", tuples: []};
+	const groups = [groupSrc, groupDst, groupWll];
+	const debug = false;
+	for (let i = 0; i &lt; tuples.length; i++) {
+		const tuple = tuples[i];
+
+		let needNew = false;
+		if (tuple.well) {
+			if (groupWll.tuples.length === 0 || canJoinGroup(groupWll, tuple, debug)) {
+				groupWll.tuples.push(tuple);
+			}
+			else {
+				needNew = true;
+			}
+		}
+		else {
+			if (tuple.source) {
+				if (groupSrc.tuples.length === 0 || canJoinGroup(groupSrc, tuple, debug)) {
+					groupSrc.tuples.push(tuple);
+				}
+				else {
+					needNew = true;
+				}
+			}
+			if (!needNew &amp;&amp; tuple.destination) {
+				if (groupDst.tuples.length === 0 || canJoinGroup(groupDst, tuple, debug)) {
+					groupDst.tuples.push(tuple);
+				}
+				else {
+					groupDst = {groupType: "destination", tuples: [tuple]};
+					groups.push(groupDst);
+				}
+			}
+		}
+
+		// No, so start new src and dst groups
+		if (needNew) {
+			// Start a new group`
+			groupSrc = {groupType: "source", tuples: []};
+			groupDst = {groupType: "destination", tuples: []};
+			groupWll = {groupType: "well", tuples: []};
+			groups.push(groupSrc);
+			groups.push(groupDst);
+			groups.push(groupWll);
+			i--;
+		}
+	}
+
+	const groups2 = groups.filter(group => group.tuples.length > 0);
+	return groups2;
+}
+
+function handleGroup(parsed, data, group, groupTypeToFunc) {
+	assert(group.tuples.length > 0);
+	// If the syringe spacing is 0, that means that each syringe is accessing the
+	// same well, in which case we actually need to seaparate the group items:
+	if (group.syringeSpacing === 0) {
+		const groups = group.tuples.map(tuple => ({
+			groupType: group.groupType, tuples: [tuple]
+		}));
+		return _.flatMap(groups, group => handleGroup(parsed, data, group, groupTypeToFunc));
+	}
+
+	const tuples = group.tuples;
+	// Calculate syringe mask
+	const tuple0 = tuples[0];
+	const syringeMask = encodeSyringes(tuples);
+	// console.log({syringeMask})
+	// Volumes for each syringe (in ul)
+	const volumes = _.fill(Array(12), "0");
+	_.forEach(tuples, tuple => {
+		const index = (tuple.syringeRow || 1) - 1;
+		const ul = (tuple.item.volume) ? tuple.item.volume.toNumber('ul') : 0;
+		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
+	});
+
+	// Script command line
+	function makeLines(func, propertyName) {
+		const wellInfo = tuple0[propertyName];
+		// console.log({func, propertyName, wellInfo})
+		if (_.isUndefined(wellInfo))
+			return [];
+
+		const labwareModel = wellInfo.labwareModel;
+		const plateMask = encodeWells(tuples, propertyName);
+		const program = (func === "Aspirate" &amp;&amp; parsed.value.sourceProgram) ? parsed.value.sourceProgram : parsed.value.program;
+		const l = [
+			syringeMask,
+			`"${evowareHelper.stripQuotes(program)}"`,
+			(func != "Detect_Liquid") ? volumes.join(",") : undefined,
+			wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
+			group.syringeSpacing || 1,
+			`"${plateMask}"`,
+			0,
+			0
+		];
+		_.remove(l, _.isUndefined);
+		// console.log({l0, l1: _.remove(l, _.isUndefined)})
+		// const l = l0;
+		let lines = [{line: `${func}(${l.join(",")});`}];
+
+		// sourceMixing
+		if (func === "Aspirate") {
+			const mixTuples = (parsed.value.sourceMixing)
+				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.sourceMixing));
+			if (!_.isEmpty(mixTuples)) {
+				const count = (mixTuples[0].item.sourceMixing || parsed.value.sourceMixing).count;
+				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.sourceMixing, "sourceMixing.volume", parsed.value.program, group.syringeSpacing || 1, count);
+				lines = lines2.concat(lines);
+			}
+		}
+
+		// destinationMixing
+		else if (func === "Dispense") {
+			const mixTuples = (parsed.value.destinationMixing)
+				? tuples : tuples.filter(tuple => !_.isUndefined(tuple.item.destinationMixing));
+			if (!_.isEmpty(mixTuples)) {
+				// console.log(parsed.value.destinationMixing)
+				const count = (mixTuples[0].item.destinationMixing || parsed.value.destinationMixing).count;
+				const lines2 = makeLines_Mix(mixTuples, propertyName, parsed.value.destinationMixing, "destinationMixing.volume", parsed.value.program, group.syringeSpacing || 1, count);
+				lines = lines.concat(lines2);
+			}
+		}
+
+		else if (func === "Detect_Liquid") {
+			// console.log({tuples})
+			// console.log({well: _.first(tuples).well})
+			const l = tuples.map(tuple => {
+				// Indicate to EvowareCompiler that we need to create this variable at the top of the script
+				const variable = `DETECTED_VOLUME_${tuple.syringeRow}`;
+				data.evowareVariables[variable] = 0;
+				// Parameters for the call to ROBOLIQ
+				return [tuple.syringeRow, tuple.well.labwareName, wellsParser.locationRowColToText(tuple.well.row, tuple.well.col), `~${variable}~`].join(",");
+			});
+			// console.log({l})
+			const args = ["evowareDetectedVolume", "%{SCRIPTFILE}", data.path.join(".")].concat(l);
+			const lines2 = [{line: evowareHelper.createExecuteLine("%{ROBOLIQ}", args, true)}];
+			lines = lines.concat(lines2);
+		}
+
+		return lines;
+	}
+	function makeLinesMix(propertyName) {
+		return makeLines_Mix(tuples, propertyName, undefined, "volume", parsed.value.program, group.syringeSpacing || 1, tuple0.item.count);
+	}
+
+	const func = groupTypeToFunc[group.groupType];
+	//console.log({syringeMask, volumes})
+	return (func === "Mix") ? makeLinesMix(group.groupType) : makeLines(func, group.groupType);
+}
+
+//
+/**
+ * Return Array of size 12 with volumes for each syringe (in ul), taking the
+ * values from the 'tuples' items.  For each item, the volume is queried
+ * using the volumePropertyName.  If the volume is missing, volumeDefault should
+ * be provided.
+ *
+ * @param  {array} tuples
+ * @param  {string} volumePropertyName
+ * @param  {mathjs.Unit} volumeDefault
+ * @return {array} An array of volumes (in ul)
+ */
+function makeVolumes(tuples, volumePropertyName, volumeDefault) {
+	const volumes = _.fill(Array(12), "0");
+	_.forEach(tuples, tuple => {
+		const index = (tuple.syringeRow || 1) - 1;
+		const ul = _.get(tuple.item, volumePropertyName, volumeDefault).toNumber('ul');
+		volumes[index] = `"${math.format(ul, {precision: 14})}"`;
+	});
+	return volumes;
+}
+
+function makeLines_Mix(tuples, propertyName, mixingDefault, volumePropertyName, program, syringeSpacing, count) {
+	const syringeMask = encodeSyringes(tuples);
+	// console.log({syringeMask})
+	const plateMask = encodeWells(tuples, propertyName);
+	const volumes = makeVolumes(tuples, volumePropertyName, _.get(mixingDefault, "volume"));
+	const wellInfo = tuples[0][propertyName];
+	if (_.isUndefined(wellInfo))
+		return [];
+	const line = new Tokens.Mix({
+		syringeMask,
+		program,
+		volumes,
+		evowareGrid: wellInfo.site.evowareGrid,
+		evowareSite: wellInfo.site.evowareSite,
+		syringeSpacing,
+		plateMask,
+		count
+	}).toLine();
+	return [{line}];
+}
+
+function handleRetract(parsed, data, groups) {
+	const tuplesOrig = _.flatMap(groups, group => group.tuples);
+	const tuple0 = _.last(tuplesOrig);
+	const propertyName = (tuple0.well) ? "well" : (tuple0.destination) ? "destination" : "source";
+	const wellInfo = tuple0[propertyName];
+	// console.log({propertyName, wellInfo, tuple0})
+	if (_.isUndefined(wellInfo))
+		return undefined;
+
+	const labwareModel = wellInfo.labwareModel;
+
+	const syringeRows = _.uniq(tuplesOrig.map(x => x.syringeRow)).sort();
+	const tuples = syringeRows.map(syringeRow => ({syringeRow, retract: {row: syringeRow, col: 1, labwareModel}}));
+	// Calculate syringe mask
+	const syringeMask = encodeSyringes(tuples);
+
+	const retractWellMask = encodeWells(tuples, "retract");
+	// console.log({tuples: JSON.stringify(tuples), retractWellMask})
+	const lRetract = [
+		syringeMask,
+		wellInfo.site.evowareGrid, wellInfo.site.evowareSite - 1,
+		1, // tip spacing
+		`"${retractWellMask}"`,
+		4, // 0=positioning with global z travel, 4=z-move
+		4, // 4=global z travel
+		0,
+		400, // speed (mm/s), min 0.1, max 400
+		0, 0
+	];
+	const line = `MoveLiha(${lRetract.join(",")});`;
+
+	return {line};
+}
+
+/**
+ * Generate a bitmap encoding of syringes to use
+ * @param  {array} syringes - array of syringes to use
+ * @return {integer} an bitmask encoding of the syringes
+ */
+function encodeSyringes(tuples) {
+	return _.sum(_.map(tuples, tuple => 1 &lt;&lt; (tuple.syringeRow - 1)));
+}
+
+/**
+ * Generate a bitmap encoding of syringes to use
+ * @param  {array} rows - array of syringe rows (base value is 1)
+ * @return {integer} an bitmask encoding of the syringes
+ */
+function encodeSyringesByRow(rows) {
+	return _.sum(_.map(rows, row => 1 &lt;&lt; (row - 1)));
+}
+
+/**
+ * Encode a list of wells on a plate as an evoware bitmask
+ */
+//function encodeWells(rows, cols, well_l: Traversable[WellNameSingleParsed]): ResultC[String] = {
+function encodeWells(tuples, propertyName) {
+	assert(tuples.length > 0);
+	const labwareModel = tuples[0][propertyName].labwareModel;
+	const nWellMaskChars = math.ceil(labwareModel.rows * labwareModel.columns / 7.0);
+	const amWells = _.fill(Array(nWellMaskChars), 0);
+	_.forEach(tuples, tuple => {
+		const index = (tuple[propertyName].row - 1) + (tuple[propertyName].col - 1) * labwareModel.rows;
+		const iChar = _.toInteger(index / 7);
+		const iWell1 = index % 7;
+		assert(iChar &lt; amWells.length, "INTERNAL ERROR: encodeWells: index out of bounds -- "+JSON.stringify(tuple));
+		// console.log({index, iChar, iWell1})
+		amWells[iChar] += 1 &lt;&lt; iWell1;
+	});
+	// console.log({amWells})
+	const sWellMask = amWells.map(EvowareUtils.encode).join("");
+	const sPlateMask = sprintf("%02X%02X", labwareModel.columns, labwareModel.rows) + sWellMask;
+	return sPlateMask;
+}
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:03+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

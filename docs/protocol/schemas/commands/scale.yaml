@@ -1,0 +1,28 @@
+scale:
+  module: |
+    The `scale` commands specify actions using weight scale equipment.
+
+Scale:
+  description: Scale equipment.
+  properties:
+    type: {enum: [Scale]}
+    description: {type: markdown}
+    label: {type: markdown}
+  required: [type]
+
+scale.ScaleProgram:
+  description: Program for scale.
+  properties:
+    #type: {enum: [scale.ScaleProgram]}
+    #duration: {description: "Duration of weighing (for purpose of settling)", type: Duration}
+
+scale.weigh:
+  description: "Weigh an object."
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program: {description: "Program for shaking", type: scale.ScaleProgram}
+    object: {description: "Plate identifier", type: "Plate"}
+    site: {description: "Site identifier on scale", type: "Site"}
+    destinationAfter: {description: "Site to move the plate to after this command", "type": "SiteOrStay"}
+  required: ["object"]

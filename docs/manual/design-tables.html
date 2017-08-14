@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Roboliq</title>
+  <meta name="description" content="Roboliq">
+  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Roboliq" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  <meta name="github-repo" content="ellis/roboliq" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Roboliq" />
+  
+  
+  
+
+<meta name="author" content="Ellis Whitehead">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="advanced-protocols.html">
+
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#structure-of-the-manual"><i class="fa fa-check"></i>Structure of the manual</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#additional-documentation"><i class="fa fa-check"></i>Additional documentation</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software-information-and-conventions"><i class="fa fa-check"></i>Software information and conventions</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#motivation"><i class="fa fa-check"></i><b>1.1</b> Motivation</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#get-started"><i class="fa fa-check"></i><b>1.2</b> Get started</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#usage"><i class="fa fa-check"></i><b>1.3</b> Usage</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="quick-start.html"><a href="quick-start.html"><i class="fa fa-check"></i><b>2</b> Quick Start</a><ul>
+<li class="chapter" data-level="2.1" data-path="quick-start.html"><a href="quick-start.html#the-simplest-protocol"><i class="fa fa-check"></i><b>2.1</b> The simplest protocol</a></li>
+<li class="chapter" data-level="2.2" data-path="quick-start.html"><a href="quick-start.html#a-protocol-with-a-minimal-configuration"><i class="fa fa-check"></i><b>2.2</b> A protocol with a minimal configuration</a></li>
+<li class="chapter" data-level="2.3" data-path="quick-start.html"><a href="quick-start.html#a-bsse-protocol-for-mario"><i class="fa fa-check"></i><b>2.3</b> A BSSE protocol for mario</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="input-formats.html"><a href="input-formats.html"><i class="fa fa-check"></i><b>3</b> Input formats</a></li>
+<li class="chapter" data-level="4" data-path="configuration.html"><a href="configuration.html"><i class="fa fa-check"></i><b>4</b> Robot configuration</a><ul>
+<li class="chapter" data-level="4.1" data-path="configuration.html"><a href="configuration.html#evoware-configuration"><i class="fa fa-check"></i><b>4.1</b> Evoware configuration</a></li>
+<li class="chapter" data-level="4.2" data-path="configuration.html"><a href="configuration.html#components"><i class="fa fa-check"></i><b>4.2</b> Components</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="configuration.html"><a href="configuration.html#roboliq"><i class="fa fa-check"></i><b>4.2.1</b> <code>roboliq</code></a></li>
+<li class="chapter" data-level="4.2.2" data-path="configuration.html"><a href="configuration.html#schemas"><i class="fa fa-check"></i><b>4.2.2</b> <code>schemas</code></a></li>
+<li class="chapter" data-level="4.2.3" data-path="configuration.html"><a href="configuration.html#objects"><i class="fa fa-check"></i><b>4.2.3</b> <code>objects</code></a></li>
+<li class="chapter" data-level="4.2.4" data-path="configuration.html"><a href="configuration.html#commandhandlers"><i class="fa fa-check"></i><b>4.2.4</b> <code>commandHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="configuration.html"><a href="configuration.html#logic-components"><i class="fa fa-check"></i><b>4.3</b> Logic components</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="configuration.html"><a href="configuration.html#predicates"><i class="fa fa-check"></i><b>4.3.1</b> <code>predicates</code></a></li>
+<li class="chapter" data-level="4.3.2" data-path="configuration.html"><a href="configuration.html#objecttopredicateconverters"><i class="fa fa-check"></i><b>4.3.2</b> <code>objectToPredicateConverters</code></a></li>
+<li class="chapter" data-level="4.3.3" data-path="configuration.html"><a href="configuration.html#planhandlers"><i class="fa fa-check"></i><b>4.3.3</b> <code>planHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="configuration.html"><a href="configuration.html#conclusion"><i class="fa fa-check"></i><b>4.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="simple-protocols.html"><a href="simple-protocols.html"><i class="fa fa-check"></i><b>5</b> Simple Protocols</a><ul>
+<li class="chapter" data-level="5.1" data-path="simple-protocols.html"><a href="simple-protocols.html#objects-1"><i class="fa fa-check"></i><b>5.1</b> Objects</a></li>
+<li class="chapter" data-level="5.2" data-path="simple-protocols.html"><a href="simple-protocols.html#steps"><i class="fa fa-check"></i><b>5.2</b> Steps</a></li>
+<li class="chapter" data-level="5.3" data-path="simple-protocols.html"><a href="simple-protocols.html#conclusion-1"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="advanced-protocols.html"><a href="advanced-protocols.html"><i class="fa fa-check"></i><b>6</b> Advanced Protocols</a><ul>
+<li class="chapter" data-level="6.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#parameters"><i class="fa fa-check"></i><b>6.1</b> Parameters</a></li>
+<li class="chapter" data-level="6.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#objects-2"><i class="fa fa-check"></i><b>6.2</b> Objects</a></li>
+<li class="chapter" data-level="6.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data"><i class="fa fa-check"></i><b>6.3</b> Data</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-type"><i class="fa fa-check"></i><b>6.3.1</b> <code>Data</code> type</a></li>
+<li class="chapter" data-level="6.3.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-property"><i class="fa fa-check"></i><b>6.3.2</b> <code>data</code> property</a></li>
+<li class="chapter" data-level="6.3.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data.-commands"><i class="fa fa-check"></i><b>6.3.3</b> <code>data.*</code> commands</a></li>
+<li class="chapter" data-level="6.3.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-directive"><i class="fa fa-check"></i><b>6.3.4</b> <code>data()</code> directive</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope"><i class="fa fa-check"></i><b>6.4</b> Scope</a></li>
+<li class="chapter" data-level="6.5" data-path="advanced-protocols.html"><a href="advanced-protocols.html#substitution"><i class="fa fa-check"></i><b>6.5</b> Substitution</a><ul>
+<li class="chapter" data-level="6.5.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope-substitution"><i class="fa fa-check"></i><b>6.5.1</b> Scope $ substitution</a></li>
+<li class="chapter" data-level="6.5.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#template-substitution"><i class="fa fa-check"></i><b>6.5.2</b> Template ` substitution</a></li>
+<li class="chapter" data-level="6.5.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#directive-substitution"><i class="fa fa-check"></i><b>6.5.3</b> Directive () substitution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="design-tables.html"><a href="design-tables.html"><i class="fa fa-check"></i><b>7</b> Design Tables</a><ul>
+<li class="chapter" data-level="7.1" data-path="design-tables.html"><a href="design-tables.html#first-examples"><i class="fa fa-check"></i><b>7.1</b> First examples</a></li>
+<li class="chapter" data-level="7.2" data-path="design-tables.html"><a href="design-tables.html#nested-branching"><i class="fa fa-check"></i><b>7.2</b> Nested branching</a></li>
+<li class="chapter" data-level="7.3" data-path="design-tables.html"><a href="design-tables.html#hidden-factors"><i class="fa fa-check"></i><b>7.3</b> Hidden factors</a></li>
+<li class="chapter" data-level="7.4" data-path="design-tables.html"><a href="design-tables.html#actions"><i class="fa fa-check"></i><b>7.4</b> Actions</a><ul>
+<li class="chapter" data-level="7.4.1" data-path="design-tables.html"><a href="design-tables.html#allocatewells"><i class="fa fa-check"></i><b>7.4.1</b> <code>allocateWells</code></a></li>
+<li class="chapter" data-level="7.4.2" data-path="design-tables.html"><a href="design-tables.html#range"><i class="fa fa-check"></i><b>7.4.2</b> <code>range</code></a></li>
+<li class="chapter" data-level="7.4.3" data-path="design-tables.html"><a href="design-tables.html#calculate"><i class="fa fa-check"></i><b>7.4.3</b> <code>calculate</code></a></li>
+<li class="chapter" data-level="7.4.4" data-path="design-tables.html"><a href="design-tables.html#case"><i class="fa fa-check"></i><b>7.4.4</b> <code>case</code></a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="design-tables.html"><a href="design-tables.html#step-and-data-nesting"><i class="fa fa-check"></i><b>7.5</b> Step and data nesting</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Roboliq</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="design-tables" class="section level1">
+<h1><span class="header-section-number">7</span> Design Tables</h1>
+<p>Here we use the term <em>Design Table</em> to refer to a data table that is designed for an experiment. It should contain all relevant factors for later analyzing the experimental results.</p>
+<p>Experiments on microwell plates can easily involve hundreds of unique liquid combinations, so specifying them manually can be tedious and error-prone. Here we present a short-hand for creating design tables.</p>
+<p>WARNING: This is very abstract. Don’t bother with it if you’re looking for something easy. That said, it makes complex experiments much, much easier to design, trouble-shoot, and analyze.</p>
+<p>NOTE: In this chapter, we’ll uses the following terms interchangeably: column, factor, variable.</p>
+<div id="first-examples" class="section level2">
+<h2><span class="header-section-number">7.1</span> First examples</h2>
+<p>Let’s create a design table with a single row like this:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">source</th>
+<th align="center">destination</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">A01</td>
+<td align="center">25 ul</td>
+</tr>
+</tbody>
+</table>
+<p>This table could be used to specify a single pipetting operation that dispenses 25 ul of water into well <code>A01</code> of <code>plate1</code>. We will specify this in Roboliq as follows:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">objects:</span>
+  <span class="fu">data1:</span>
+    <span class="fu">type:</span> Data
+    <span class="fu">description:</span> First example
+    <span class="fu">design:</span>
+      <span class="fu">plate:</span> plate1
+      <span class="fu">source:</span> water
+      <span class="fu">destination:</span> A01
+      <span class="fu">volume:</span> 25 ul
+<span class="ot">---</span></code></pre></div>
+<p>In a Roboliq protocol, designs are placed under the <code>objects</code> property. In this case, its name is <code>data1</code>, its type is <code>Data</code>, and it has a description. The <code>design</code> property is where factors are specified.</p>
+<p>Let’s expand the design table a bit to dispenses 25 ul of water into several destinations.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">source</th>
+<th align="center">destination</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">A01</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">B01</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">C01</td>
+<td align="center">25 ul</td>
+</tr>
+</tbody>
+</table>
+<p>To specify this in Roboliq, we change the <code>destination</code> property to a <em>branching</em> factor:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">objects:</span>
+  <span class="fu">data1:</span>
+    <span class="fu">type:</span> Data
+    <span class="fu">description:</span> First example
+    <span class="fu">design:</span>
+      <span class="fu">plate:</span> plate1
+      <span class="fu">source:</span> water
+      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">volume:</span> 25 ul</code></pre></div>
+<p>Notice the asterisk in <code>destination*</code>. An asterisk at the end of a factor name indicates <em>branching</em>. Branching factors require an array of values, and for each value in the array, the existing rows are first replicated and then the value is assigned to the factor in that row.</p>
+<p>Now let’s assign a different volume to each row:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">source</th>
+<th align="center">destination</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">A01</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">B01</td>
+<td align="center">50 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">water</td>
+<td align="center">C01</td>
+<td align="center">75 ul</td>
+</tr>
+</tbody>
+</table>
+<p>To specify this in Roboliq, we change the <code>volume</code> property to an array:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">objects:</span>
+  <span class="fu">data1:</span>
+    <span class="fu">type:</span> Data
+    <span class="fu">description:</span> First example
+    <span class="fu">design:</span>
+      <span class="fu">plate:</span> plate1
+      <span class="fu">source:</span> water
+      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">volume:</span> <span class="kw">[</span>25 ul<span class="kw">,</span> 50 ul<span class="kw">,</span> 75 ul<span class="kw">]</span></code></pre></div>
+<p>When a factor value is an array, a new column is added with those values.</p>
+<p><strong>Try it</strong>. Copy the above code to a new file in Roboliq’s root directory named <code>data1Test.yaml</code>. Open a terminal and change directory to the Roboliq root, and run the following command:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run design -- --path objects.data1 data1Test.yaml</code></pre></div>
+<p>It should produce this output:</p>
+<pre><code>plate   source  destination  volume
+======  ======  ===========  ======
+plate1  water   A01          25 ul
+plate1  water   B01          50 ul
+plate1  water   C01          75 ul
+======  ======  ===========  ======</code></pre>
+<p>Branches can also be specified as integers. If you specify an integer, it creates that many branches which are each given an integer index, as follows:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">objects:</span>
+  <span class="fu">designInteger:</span>
+    <span class="fu">type:</span> Data
+    <span class="fu">design:</span>
+      <span class="fu">a*:</span> 3
+      <span class="fu">b*:</span> 3</code></pre></div>
+<p>Which creates the following table:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">a</th>
+<th align="center">b</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">2</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">3</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">2</td>
+<td align="center">2</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">3</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">3</td>
+<td align="center">2</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">3</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="nested-branching" class="section level2">
+<h2><span class="header-section-number">7.2</span> Nested branching</h2>
+<p>Nested branching provides a lot of power to the design specification, but it is also where the complexity starts. Consider this table where two sources are nested in each destination, and each source has its own volume:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+<th align="center">source</th>
+<th align="center">volume</th>
+<th align="center">liquidClass</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+</tbody>
+</table>
+<p>This can be described in Roboliq as follows:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">objects:</span>
+  <span class="fu">data2:</span>
+    <span class="fu">type:</span> Data
+    <span class="fu">description:</span> Nested example
+    <span class="fu">design:</span>
+      <span class="fu">plate:</span> plate1
+      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">source*:</span>
+        <span class="fu">water:</span>
+          <span class="fu">volume:</span> 50 ul
+        <span class="fu">dye:</span>
+          <span class="fu">volume:</span> 25 ul
+      <span class="fu">liquidClass:</span> Roboliq_Water_Air_1000</code></pre></div>
+<p>Create a file named <code>data2Test.yaml</code> with those contents and run:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run design -- --path objects.data2 data2Test.yaml</code></pre></div>
+<p>Let’s walk through this example step-by-step to see how the desired table is achieved.</p>
+<p><strong>Step 0</strong>: A design starts as a single empty row.</p>
+<p><strong>Step 1</strong>: <code>plate: plate1</code></p>
+<p>This assigns the value <code>plate1</code> to the property <code>plate</code> in the first row:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 2</strong>: <code>destination*: [A01, B01, C01]</code></p>
+<p>Three copies of the previous row are created, and a column for <code>destination</code> is added to each row, each with its own value:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 3</strong>: <code>source*</code></p>
+<p>This branch has two keys: water and dye. So to start with, two copies are made of each of the previous three rows. The first copy is updated according to the first key, giving us:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+<th align="center">source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">water</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">water</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">water</td>
+</tr>
+</tbody>
+</table>
+<p>Then the conditions embedded under <code>water:</code> are applied to those rows – in this case, <code>volume = 50 ul</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+<th align="center">source</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+</tr>
+</tbody>
+</table>
+<p>For the second table copy, an analogous process sets <code>source = dye</code> and <code>volume = 25 ul</code>:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+<th align="center">source</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+</tr>
+</tbody>
+</table>
+<p>Next those two tables are concatenated, giving us:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+<th align="center">source</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Step 4</strong>: <code>liquidClass: Roboliq_Water_Air_1000</code></p>
+<p>Finally, <code>liquidClass = Roboliq_Water_Air_1000</code> is assigned to all rows:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">plate</th>
+<th align="center">destination</th>
+<th align="center">source</th>
+<th align="center">volume</th>
+<th align="center">liquidClass</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">A01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">B01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="odd">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">water</td>
+<td align="center">50 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+<tr class="even">
+<td align="center">plate1</td>
+<td align="center">C01</td>
+<td align="center">dye</td>
+<td align="center">25 ul</td>
+<td align="center">Roboliq_Water_Air_1000</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="hidden-factors" class="section level2">
+<h2><span class="header-section-number">7.3</span> Hidden factors</h2>
+<p>There are generally many ways to achieve the same results. As an example, an alternative way of achieving the same result as above is:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">objects:</span>
+  <span class="fu">data2:</span>
+    <span class="fu">type:</span> Data
+    <span class="fu">description:</span> Nested example
+    <span class="fu">design:</span>
+      <span class="fu">plate:</span> plate1
+      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">.sourceId*:</span>
+      <span class="kw">-</span> <span class="fu">source:</span> water
+        <span class="fu">volume:</span> 50 ul
+      <span class="kw">-</span> <span class="fu">source:</span> dye
+        <span class="fu">volume:</span> 25 ul
+      <span class="fu">liquidClass:</span> Roboliq_Water_Air_1000</code></pre></div>
+<p>In this case, the branching factor is <code>.sourceId*</code> and it’s an array. The period prefix hides that column, and the final results are the same as above.</p>
+</div>
+<div id="actions" class="section level2">
+<h2><span class="header-section-number">7.4</span> Actions</h2>
+<p>Roboliq provides various designs “actions” that can be used for more sophisticated values. The most important ones are:</p>
+<ul>
+<li>allocateWells</li>
+<li>range</li>
+<li>calculate</li>
+<li>case</li>
+</ul>
+<div id="allocatewells" class="section level3">
+<h3><span class="header-section-number">7.4.1</span> <code>allocateWells</code></h3>
+<p>Let’s take a look at an example:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">replicate*:</span> 2
+<span class="fu">well=allocateWells:</span>
+  <span class="fu">rows:</span> 8
+  <span class="fu">columns:</span> 12</code></pre></div>
+<p>An action is indicated with the “=”-infix. So in the case of <code>well=allocateWells</code>, the factor name is <code>well</code>, the action is <code>allocateWells</code>, and the properties are the arguments to the action. In this case, <code>rows</code> and <code>columns</code> tells the plate dimension we want to get wells for, and 2 wells will be allocated since the table has two rows:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">{</span><span class="fu">replicate:</span> 1<span class="kw">,</span> <span class="fu">well:</span> A01<span class="kw">}</span>
+<span class="kw">{</span><span class="fu">replicate:</span> 2<span class="kw">,</span> <span class="fu">well:</span> B01<span class="kw">}</span></code></pre></div>
+</div>
+<div id="range" class="section level3">
+<h3><span class="header-section-number">7.4.2</span> <code>range</code></h3>
+<p>The <code>range</code> action gives you an integer sequence. It accepts these arguments:</p>
+<ul>
+<li><code>from</code>: the integer to start at (optional)</li>
+<li><code>till</code>: the integer to end at (optional)</li>
+<li><code>step</code>: the distance between generated integers (default = 1)</li>
+</ul>
+<p>Here’s an example:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 2
+<span class="fu">b*:</span> 2
+<span class="fu">c=range:</span> <span class="kw">{}</span>
+<span class="fu">d=range:</span> <span class="kw">{</span><span class="fu">from:</span> 10<span class="kw">,</span> <span class="fu">step:</span> 10<span class="kw">}</span></code></pre></div>
+<p>Which produces this result:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">a</th>
+<th align="center">b</th>
+<th align="center">c</th>
+<th align="center">d</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">10</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">20</td>
+</tr>
+<tr class="odd">
+<td align="center">2</td>
+<td align="center">1</td>
+<td align="center">3</td>
+<td align="center">30</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">4</td>
+<td align="center">40</td>
+</tr>
+</tbody>
+</table>
+<p>The first range, <code>c</code>, just numbers all the rows starting with 1. The second range, <code>d</code>, starts numbering at 10 and procedes in steps of 10.</p>
+</div>
+<div id="calculate" class="section level3">
+<h3><span class="header-section-number">7.4.3</span> <code>calculate</code></h3>
+<p>The <code>calculate</code> action takes a string to be parsed by <a href="http://mathjs.org/">mathjs</a>. The calculation will be made for each row individually. Here’s an example:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 3
+<span class="fu">volume=calculate:</span> <span class="st">&#39;(a * 10) ul&#39;</span>
+<span class="fu">more=calculate:</span> <span class="st">&#39;(50 ul) - volume&#39;</span></code></pre></div>
+<p>And here is the result:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">a</th>
+<th align="center">volume</th>
+<th align="center">more</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">10 ul</td>
+<td align="center">40 ul</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">20 ul</td>
+<td align="center">30 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">30 ul</td>
+<td align="center">20 ul</td>
+</tr>
+</tbody>
+</table>
+<p>Alternatively, the <code>calculate</code> action can accept parameters:</p>
+<ul>
+<li><code>value</code>: the string to parse</li>
+<li><code>units</code>: the units of the final output</li>
+</ul>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 3
+<span class="fu">volume=calculate:</span>
+  <span class="fu">value:</span> <span class="st">&#39;(a * 10)&#39;</span>
+  <span class="fu">units:</span> ul</code></pre></div>
+<p>With this output:</p>
+<table>
+<thead>
+<tr class="header">
+<th align="center">a</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">10 ul</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">20 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">30 ul</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="case" class="section level3">
+<h3><span class="header-section-number">7.4.4</span> <code>case</code></h3>
+<p>A <code>case</code> action takes an array of cases and tests them against each row of the table. The first case whose <code>where</code> statement is missing or evaluates to <code>true</code> will be applied. The individual case items take these arguments:</p>
+<ul>
+<li><code>where</code> - an optional mathjs statement that will be evaluated on each row</li>
+<li><code>design</code> - a design specification that will be applied to the matching rows</li>
+</ul>
+<p>Here’s an example:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 3
+<span class="fu">volumeCase=case:</span>
+  <span class="kw">-</span> <span class="fu">where:</span> a &lt; 2
+    <span class="fu">design:</span>
+      <span class="fu">volume:</span> 10 ul
+  <span class="kw">-</span> <span class="fu">design:</span>
+      <span class="fu">volume:</span> 12354 ul</code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="center">a</th>
+<th align="center">volumeCase</th>
+<th align="center">volume</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">10 ul</td>
+</tr>
+<tr class="even">
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">12345 ul</td>
+</tr>
+<tr class="odd">
+<td align="center">3</td>
+<td align="center">2</td>
+<td align="center">12345 ul</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="step-and-data-nesting" class="section level2">
+<h2><span class="header-section-number">7.5</span> Step and data nesting</h2>
+<p>You can only load one design per step, but you can nest steps and load another design in the sub-step. Consider these two excerpts of designs:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">data1:</span>
+  <span class="fu">design:</span>
+    <span class="fu">a:</span> Alice
+    <span class="fu">b:</span> <span class="dt">*3</span>
+    <span class="fu">c:</span> Charles
+    <span class="fu">d:</span> Daniel
+
+<span class="fu">data2:</span>
+  <span class="fu">design:</span>
+    <span class="fu">d:</span> David</code></pre></div>
+<p>Let’s use them in these steps:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">1:</span>
+  <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data1<span class="kw">}</span>
+  <span class="fu">description:</span> <span class="st">&quot;`{{a}} {{c}} {{d}}`&quot;</span>
+  <span class="fu">1:</span>
+    <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data2<span class="kw">}</span>
+    <span class="fu">description:</span> <span class="st">&quot;`{{a}} {{c}} {{d}}`&quot;</span></code></pre></div>
+<p>The descriptions should be expanded as follows:</p>
+<p>1.description: “Alice Charles Daniel” 1.1.description: “Alice Charles David”</p>
+<p>In 1.1, “$$b” does not exist, but “$a” and “$c” still do. That is to say: column data from a previous <code>data</code> directive are not carried into sub-steps with a new <code>data</code> directive, but the values that were the same for all columns remain in scope.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="advanced-protocols.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": false,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["roboliq.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

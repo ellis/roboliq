@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Evoware Configuration</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/yaml.min.js"></script>
+	<style>
+	html, body {
+	height: 100%;
+	}
+	
+	/* Main view, move content down due to fixed navbar. */
+	.main-wrapper {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	padding-top: 50px;
+	}
+	
+	/* Container for a sidebar. */
+	.sidebar-container {
+	height: 100%;
+	position: fixed;
+	padding: 0px;
+	margin-top: -50px;
+	padding-top: 50px;
+	border-right: 1px solid #ddd;
+	
+	}
+	
+	.sidebar-header {
+	position: relative;
+	padding: 15px;
+	border-bottom: 1px solid #ddd;
+	}
+	
+	/* Scrollable sidebar. */
+	.sidebar {
+	height: 85%;
+	position: relative;
+	overflow-y: scroll;
+	}
+	
+	.main-view {
+	height: 100%;
+	overflow: auto;
+	position: relative;
+	padding: 0px;
+	}
+	
+	.amain {
+	color: white;
+	font-weight: bold;
+	margin: 0 2em;
+	}
+	h2 {
+	margin-top: 1em;
+	padding: .5em 0;
+	background-color: #ddd;
+	}
+	.command {
+	display: block;
+	margin-left: 2em;
+	}
+	.command > table > tbody > tr > td > p {
+		margin-bottom: 0;
+	}
+	</style>
+</head>
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<nav class="navbar navbar-inverse" style="margin-bottom: 0">
+				<div class="container-fluid">
+					<a class="amain" href="index.html"><span style="font-size: 150%; font-weight: bold; color: white; margin: 0 2em 0 4em">Roboliq Protocol</span></a>
+					<a class="amain" href="commands.html">Commands</a>
+					<a class="amain" href="evowareConfiguration.html">Evoware Configuration</a>
+					<a class="amain" href="evowareCommands.html">Evoware Commands</a>
+				</div>
+		</nav>
+	</nav>
+
+	<div class="main-wrapper">
+			<div class="sidebar-container col-xs-3">
+					<!--div class="sidebar-header">
+							<form class="form-inline">
+									<input type="text" name="search" class="form-control" placeholder="Search"/>
+							</form>
+					</div-->
+					<div class="sidebar" style="height: 100%; margin: .5em">
+							<nav>
+									<ul class="nav nav-stacked nav-pills">
+											<a href="#_EvowareConfigSpec">&nbsp;&nbsp;EvowareConfigSpec</a><br/>
+											<a href="#_EvowareCompilerConfig">&nbsp;&nbsp;EvowareCompilerConfig</a><br/>
+											<a href="#_EvowareSiteSpec">&nbsp;&nbsp;EvowareSiteSpec</a><br/>
+											<a href="#_EvowareModelSpec">&nbsp;&nbsp;EvowareModelSpec</a><br/>
+											<a href="#_EvowareSiteModelCompatibilitySpec">&nbsp;&nbsp;EvowareSiteModelCompatibilitySpec</a><br/>
+											<a href="#_EvowareLidStackingSpec">&nbsp;&nbsp;EvowareLidStackingSpec</a><br/>
+											<a href="#_EvowareEquipmentSpec">&nbsp;&nbsp;EvowareEquipmentSpec</a><br/>
+											<a href="#_EvowareRomaSpec">&nbsp;&nbsp;EvowareRomaSpec</a><br/>
+											<a href="#_EvowareLihaSpec">&nbsp;&nbsp;EvowareLihaSpec</a><br/>
+											<a href="#_EvowareWashProgramSpec">&nbsp;&nbsp;EvowareWashProgramSpec</a><br/>
+											<a href="#_EvowareTipModelSpec">&nbsp;&nbsp;EvowareTipModelSpec</a><br/>
+									</ul>
+								<br/><br/>
+							</nav>
+					</div>
+			</div>
+			<div class="container main-view col-xs-9 pull-right">
+				<div style="padding: .75em">
+					<h1>Evoware Configuration</h1>
+					<p>The <code>EvowareConfigSpec</code> enables you to configure your Evoware robot for Roboliq.
+You will need to create a JavaScript file in which you define an
+<code>EvowareConfigSpec</code> object, and then have it converted to the Roboliq protocol format.  Your config file will have the following structure:</p>
+<pre><code class="lang-javascript">const evowareConfigSpec = {
+  // Lab name and robot name
+  namespace: &quot;YOUR LAB ID&quot;,
+  name: &quot;YOUR ROBOT ID&quot;,
+  // Compiler settings
+  config: {
+    TEMPDIR: &quot;TEMPORARY DIRECTORY FOR MEASUREMENT FILES&quot;,
+    ROBOLIQ: &quot;COMMAND TO CALL ROBOLIQ&#39;S RUNTIME&quot;,
+    BROWSER: &quot;PATH TO WEB BROWSER&quot;
+  },
+  // Bench sites on the robot
+  sites: {
+    MYSITE1: {evowareCarrier: &quot;CARRIER ID&quot;, evowareGrid: MYGRID, evowareSite: MYSITE},
+    ...
+  },
+  // Labware models
+  models: {
+    MYPLATEMODEL1: {type: &quot;PlateModel&quot;, rows: 8, columns: 12, evowareName: &quot;EVOWARE LABWARE NAME&quot;},
+    ...
+  },
+  // List of which sites and labware models can be used together
+  siteModelCompatibilities: [
+    {
+      sites: [&quot;MYSITE1&quot;, ...],
+      models: [&quot;MYPLATEMODEL1&quot;, ...]
+    },
+    ...
+  ],
+  // List of the robot&#39;s equipment
+  equipment: {
+    MYEQUIPMENT1: {
+      module: &quot;EQUIPMENT1.js&quot;,
+      params: {
+        ...
+      }
+    }
+  },
+  // List of which lid types can be stacked on which labware models
+  lidStacking: [
+    {
+      lids: [&quot;lidModel_standard&quot;],
+      models: [&quot;MYPLATEMODEL1&quot;]
+    }
+  ],
+  // List of the robot&#39;s robotic arms
+  romas: [
+    {
+      description: &quot;roma1&quot;,
+      // List of sites this ROMA can safely access with which vectors
+      safeVectorCliques: [
+                { vector: &quot;Narrow&quot;, clique: [&quot;MYSITE1&quot;, ...] },
+                ...
+            ]
+    },
+    ...
+  ],
+  // Liquid handing arm
+  liha: {
+    // Available tip models
+    tipModels: {
+      MYTIPMODEL1000: {programCode: &quot;1000&quot;, min: &quot;3ul&quot;, max: &quot;950ul&quot;, canHandleSeal: false, canHandleCells: true},
+      ...
+    },
+    // List of LIHA syringes (e.g. 8 entries if it has 8 syringes)
+    syringes: [
+      { tipModelPermanent: &quot;MYTIPMODEL1000&quot; },
+      ...
+    ],
+    // Sites that the LIHA can access
+    sites: [&quot;MYSITE1&quot;, ...],
+    // Specifications for how to wash the tips
+    washPrograms: {
+      // For Example: Specification for flushing the tips with `programCode == 1000`
+      flush_1000: { ... },
+      ...
+    }
+  },
+  // Additional user-defined command handlers
+  commandHandlers: {
+    &quot;MYCOMMAND1&quot;: function(params, parsed, data) { ... },
+    ...
+  },
+  // Optional functions to choose among planning alternatives
+  planAlternativeChoosers: {
+    // For Example: when the `shaker.shakePlate` command has
+    // multiple shakers available, you might want to use
+    // the one name `MYEQUIPMENT1`
+    &quot;shaker.canAgentEquipmentSite&quot;: (alternatives) =&gt; {
+            const l = alternatives.filter(x =&gt; x.equipment.endsWith(&quot;MYEQUIPMENT1&quot;));
+            if (l.length &gt; 0)
+                return l[0];
+        }
+  }
+};
+
+const EvowareConfigSpec = require(&#39;roboliq-evoware/dist/EvowareConfigSpec.js&#39;);
+module.exports = EvowareConfigSpec.makeProtocol(evowareConfigSpec);
+</code></pre>
+<p>Details about the <code>EvowareConfigSpec</code> structure can be found below.</p>
+
+
+								<h3 id="_EvowareConfigSpec">EvowareConfigSpec</h3>
+								<div class="command">
+									<p>This is a configuration specification for an Evoware robot.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>namespace</td>
+												<td>string</td>
+												<td><p>This is the namespace prefix for the robot.
+									By convention, this can be a label for your lab.
+									The value should not contain any spaces or periods.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>name</td>
+												<td>string</td>
+												<td><p>This is the robot name.
+									The value should not contain any spaces or periods.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>config</td>
+												<td>/EvowareCompilerConfig</td>
+												<td><p>Settings for the Evoware compiler.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sites</td>
+												<td>object</td>
+												<td><p>These are the bench sites that Roboliq can use on the Evoware robot.
+									<code>sites</code> is a map from site name to site specification.
+									The name should not contain any spaces or periods.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>models</td>
+												<td>object</td>
+												<td><p>These are the labware models that Roboliq can use on the Evoware robot.
+									<code>models</code> is a map from model name to model specification.
+									The name should not contain any spaces or periods.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>siteModelCompatibilities</td>
+												<td>array</td>
+												<td><p>Specifications of which bench sites are compatible with which models.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>lidStacking</td>
+												<td>array</td>
+												<td><p>Specifications of which labwares can be stacked. Normally, this means
+									just specifying that the default lid <code>lidModel_standard</code> can go on
+									various plate models. Within limit, plates can also be stacked on top
+									of each other.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>object</td>
+												<td><p>These are the equipment devices that are integrated with the Evoware robot.
+									<code>equipment</code> is a map from equipment name to equipment specification.
+									The name should not contain any spaces or periods.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>romas</td>
+												<td>array</td>
+												<td><p>List of Evoware ROMAs (robotic arms for moving plates).</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>liha</td>
+												<td>/EvowareLihaSpec</td>
+												<td><p>Specification of the Evoware robot&#39;s LIHA (Liquid Handling Arm).</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>commandHandlers</td>
+												<td>object</td>
+												<td><p>This allows you to provide user-defined command handlers.
+									It can also be used to override the command handlers provided by
+									Roboliq, Evoware, or and equipment module.
+									<code>commandHandlers</code> is a map from the command name to a command handling
+									function.
+									See the documention about command handlers for more information.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>planAlternativeChoosers</td>
+												<td>object</td>
+												<td><p>This is an advanced property that will require some understanding of
+									Roboliq&#39;s approach to planning.
+									Please see the documenation for more information.
+									<code>planAlternativeChoosers</code> is a map from a predicate ID to a function
+									that takes a list of possible alternatives for that predicate.
+									The function can then choose one of those alternatives by returning
+									it.  This allows you to configure planning preferences, such as if
+									you have two shakers, you might always prefer to use a specific one
+									when it&#39;s among the alternatives.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_EvowareCompilerConfig">EvowareCompilerConfig</h3>
+								<div class="command">
+									<p>Settings for the Evoware compiler.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>TEMPDIR</td>
+												<td>string</td>
+												<td><p>Directory where measurement files can be temporarily stored during processing</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>ROBOLIQ</td>
+												<td>string</td>
+												<td><p>The evoware command to call the roboliq runtime</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>BROWSER</td>
+												<td>string</td>
+												<td><p>Path to the browser (e.g Google Chrome) for opening Roboliq&#39;s HTML files</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">TEMPDIR: &quot;C:\\Users\\localadmin\\Desktop\\Ellis\\temp&quot;,
+ROBOLIQ: &quot;wscript C:\\Users\\localadmin\\Desktop\\Ellis\\roboliq\\roboliq-runtime-cli\\roboliq-runtime-cli.vbs&quot;,
+BROWSER: &quot;C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe&quot;
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareSiteSpec">EvowareSiteSpec</h3>
+								<div class="command">
+									<p>Specification of an Evoware site</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>evowareCarrier</td>
+												<td>string</td>
+												<td><p>Name of the Evoware carrier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>evowareGrid</td>
+												<td>integer</td>
+												<td><p>The site&#39;s grid</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>evowareSite</td>
+												<td>integer</td>
+												<td><p>The site&#39;s index</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">evowareCarrier: &quot;Hotel 4Pos Transfer Grid 69&quot;
+evowareGrid: 69
+evowareSite: 1
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareModelSpec">EvowareModelSpec</h3>
+								<div class="command">
+									<p>Specification of an Evoware labware model</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>The type of labware model (currenly only <code>PlateModel</code> is available)</p>
+									One of: PlateModel</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>string</td>
+												<td><p>An optional string to describe this model.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>rows</td>
+												<td>integer</td>
+												<td><p>Number of rows on the plate</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>columns</td>
+												<td>integer</td>
+												<td><p>Number of columns on the plate</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>evowareName</td>
+												<td>string</td>
+												<td><p>Evoware name of the labware model</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">type: PlateModel
+rows: 8
+columns: 12
+evowareName: &quot;EK 96 well Greiner Black&quot;
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareSiteModelCompatibilitySpec">EvowareSiteModelCompatibilitySpec</h3>
+								<div class="command">
+									<p>Specification of which bench sites are compatible with which models.
+All such sites should be listed in the <code>sites</code> property,
+and the models in the <code>models</code> property.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>description</td>
+												<td>string</td>
+												<td><p>An optional string to describe this list.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sites</td>
+												<td>array</td>
+												<td><p>A list of sites that are compatible with the <code>models</code>.
+									The names in this list should be defined in the <code>sites</code>
+									property of the parent <code>EvowareConfigSpec</code> object.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>models</td>
+												<td>array</td>
+												<td><p>A list of models that are compatible with the <code>sites</code>.
+									The names in this list should be defined in the <code>models</code>
+									property of the parent <code>EvowareConfigSpec</code> object.</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">description: &quot;short-format plate sites (non-tall labware, not for deep well plates)&quot;,
+sites: [&quot;P1DOWNHOLDER&quot;, &quot;HOTEL4_1&quot;, &quot;HOTEL4_2&quot;, &quot;HOTEL4_3&quot;, &quot;HOTEL4_4&quot;, &quot;READER&quot;, &quot;ROBOPEEL&quot;, &quot;ROBOSEAL&quot;],
+models: [&quot;plateModel_96_round_transparent_nunc&quot;, &quot;plateModel_96_square_transparent_nunc&quot;]
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareLidStackingSpec">EvowareLidStackingSpec</h3>
+								<div class="command">
+									<p>Specifies combinations of labwares can be stacked. Normally, this means
+just specifying that the default lid <code>lidModel_standard</code> can go on
+various plate models. Within limit, plates can also be stacked on top
+of each other.
+All items in <code>lids</code> will be stackable on all items in <code>models</code>.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>description</td>
+												<td>string</td>
+												<td><p>An optional string to describe this list.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>lids</td>
+												<td>array</td>
+												<td><p>A list of lid models (or labware models) that can be stacked on <code>models</code>.
+									The names in this list should either be <code>lidModel_standard</code> or be
+									defined in the <code>model</code>
+									property of the parent <code>EvowareConfigSpec</code> object.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>models</td>
+												<td>array</td>
+												<td><p>A list of models that are compatible with the <code>sites</code>.
+									The names in this list should be defined in the <code>models</code>
+									property of the parent <code>EvowareConfigSpec</code> object.</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">description: &quot;short-format plate sites (non-tall labware, not for deep well plates)&quot;,
+lids: [&quot;lidModel_standard&quot;]
+models: [&quot;plateModel_96_round_transparent_nunc&quot;, &quot;plateModel_96_square_transparent_nunc&quot;]
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareEquipmentSpec">EvowareEquipmentSpec</h3>
+								<div class="command">
+									<p>This allows you to specify a equipment module to load and the parameters
+that should be passed to the module.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>description</td>
+												<td>string</td>
+												<td><p>An optional string to describe this piece of equipment.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>module</td>
+												<td>string</td>
+												<td><p>Filename of the equipment module to load.
+									The available modules can be found in the directory
+									<code>roboliq-evoware/src/equipment</code>.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>params</td>
+												<td>object</td>
+												<td><p>The parameters to be passed to the equipment module.
+									See the documentation for the equipment modules for more information.</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">module: &quot;reader-InfiniteM200Pro.js&quot;
+params:
+  evowareId: &quot;ReaderNETwork&quot;
+  evowareCarrier: &quot;Infinite M200&quot;
+  evowareGrid: 61
+  evowareSite: 1
+  site: &quot;READER&quot;
+  modelToPlateFile:
+    &quot;plateModel_96_round_transparent_nunc&quot;: &quot;NUN96ft&quot;
+    &quot;plateModel_384_square&quot;: &quot;GRE384fw&quot;
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareRomaSpec">EvowareRomaSpec</h3>
+								<div class="command">
+									<p>Specification of an Evoware ROMA (robotic arms for moving plates).</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>description</td>
+												<td>string</td>
+												<td><p>An optional string to describe this ROMA.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>safeVectorCliques</td>
+												<td>array</td>
+												<td><p>list of cliques of sites that the ROMA can safetly move plates between using a given vector</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-yaml">description: &quot;roma1&quot;
+safeVectorCliques:
+  - { vector: &quot;Narrow&quot;, clique: [&quot;P2&quot;, &quot;P3&quot;, &quot;P4&quot;, &quot;P5&quot;, &quot;P6&quot;, &quot;P7&quot;, &quot;P8&quot;, &quot;REGRIP&quot;] }
+  - { vector: &quot;Narrow&quot;, clique: [&quot;CENTRIFUGE_1&quot;, &quot;REGRIP&quot;] }
+  - { vector: &quot;Narrow&quot;, clique: [&quot;CENTRIFUGE_2&quot;, &quot;REGRIP&quot;] }
+  - { vector: &quot;Narrow&quot;, clique: [&quot;CENTRIFUGE_3&quot;, &quot;REGRIP&quot;] }
+  - { vector: &quot;Narrow&quot;, clique: [&quot;CENTRIFUGE_4&quot;, &quot;REGRIP&quot;] }
+</code></pre>
+
+								</div>
+								<h3 id="_EvowareLihaSpec">EvowareLihaSpec</h3>
+								<div class="command">
+									<p>Specification of the Evoware robot&#39;s LIHA (Liquid Handling Arm).</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>tipModels</td>
+												<td>object</td>
+												<td><p>These are the tip models that can be used with the Evoware robot.
+									<code>tipModels</code> is a map from tip model name to specification.
+									The name should not contain any spaces or periods.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>A list of syringe specifications - one for each syringe on the LIHA.
+									For robots with fixed tips, the <code>tipModelPermanent</code> must be set
+									to one of the values in <code>tipModels</code>.  For disposable tips, an empty
+									object should be specified for each syringe.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sites</td>
+												<td>array</td>
+												<td><p>A list of sites that they LIHA can operate on.
+									The names in this list should either be defined in the <code>sites</code>
+									property of the parent <code>EvowareConfigSpec</code> object or
+									in an <code>equipment</code> defintion.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>washPrograms</td>
+												<td></td>
+												<td><p>These are the wash programs for the LIHA.
+									<code>washPrograms</code> is a map from name to specification.
+									The name is composed of a wash intensity, an underscore,
+									and a tip model <code>programCode</code>.
+									For example, to flush 1000ul tips with a program code of &quot;1000&quot;,
+									the washProgram name would be &quot;flush_1000&quot;.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_EvowareWashProgramSpec">EvowareWashProgramSpec</h3>
+								<div class="command">
+									<p>Describes a method for washing tips in Evoware</p>
+
+
+
+									Must be one of:
+									<ul>
+										<li>#/definitions/specProgram</li><li>#/definitions/specScript</li>
+									</ul>
+
+									<p style="margin-top: 1em"><b>Definitions:</b></p>
+										<h4 id="_specProgram">specProgram</h4>
+										<table class="table table-striped table-hover table-condensed">
+											<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+												<tr>
+													<td>type</td>
+													<td>string</td>
+													<td><p>Type of this object</p>
+										One of: EvowareWashProgram</td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>wasteGrid</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>wasteSite</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>cleanerGrid</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>cleanerSite</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>wasteVolume</td>
+													<td>numeric</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>wasteDelay</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>cleanerVolume</td>
+													<td>numeric</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>cleanerDelay</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>airgapVolume</td>
+													<td>numeric</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>airgapSpeed</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>retractSpeed</td>
+													<td>integer</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>fastWash</td>
+													<td>boolean</td>
+													<td></td>
+													<td>required</td>
+												</tr>
+										</table>
+										<h4 id="_specScript">specScript</h4>
+										<table class="table table-striped table-hover table-condensed">
+											<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+												<tr>
+													<td>type</td>
+													<td>string</td>
+													<td><p>Type of this object</p>
+										One of: EvowareWashProgram</td>
+													<td>required</td>
+												</tr>
+												<tr>
+													<td>script</td>
+													<td>string</td>
+													<td><p>Full path to evoware script to perform the washing.</p>
+										</td>
+													<td>required</td>
+												</tr>
+										</table>
+
+								</div>
+								<h3 id="_EvowareTipModelSpec">EvowareTipModelSpec</h3>
+								<div class="command">
+									<p>This specifies a tip model that can be used with the Evoware robot.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>programCode</td>
+												<td>string</td>
+												<td><p>a string to use for generating the liquid class names for this tip model</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>min</td>
+												<td>string</td>
+												<td><p>minimum volume (requires volume units, e.g. &quot;3ul&quot;)</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>max</td>
+												<td>string</td>
+												<td><p>maximum volume (requires volume units, e.g. &quot;950ul&quot;)</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>canHandleSeal</td>
+												<td>boolean</td>
+												<td><p>true if this tip can be used with sealed plates (default = false)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>canHandleCells</td>
+												<td>boolean</td>
+												<td><p>true if this tip can handle cells (default = false)</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-json">{&quot;programCode&quot;: &quot;1000&quot;, &quot;min&quot;: &quot;3ul&quot;, &quot;max&quot;: &quot;950ul&quot;, &quot;canHandleSeal&quot;: false, &quot;canHandleCells&quot;: true}
+</code></pre>
+
+								</div>
+				</div>
+			</div>
+
+	</div>
+
+</body>
+</html>
