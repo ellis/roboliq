@@ -1,13 +1,17 @@
+/**
+ * Function to generate an MCMC model for use with [Stan](http://mc-stan.org/).
+ * @module stanModel
+ */
+
 const _ = require('lodash');
 const assert = require('assert');
 const fs = require('fs');
 const wellsParser = require('./parsers/wellsParser');
 
 // PROBLEM WITH beta:
-// Using beta0 and beta1 doesn't work well enough
-// Will need to have a beta for each individual tested volume, like before with the `majorDs` setting.
-// But still need to decide how to calculate the bias for volumes
-// we're not interested in, such as 297ul of water.
+// Will need to have a beta for each explicitly tested volume,
+// but also need to calculate the bias for other volumes
+// (e.g. we might add 3ul dye and 297ul water to a well, but 297ul isn't one of our test volumes).
 // We might need to have several lines for assigning to RV_VTIPASP:
 //
 // - RV_TIPASP[i1] = d * (1 + beta[pd]) + RV_TIPASP_raw * (sigma_v0 + d * sigma_v1[psub])
@@ -40,11 +44,12 @@ function randn_bm(mean, sigma) {
 }
 
 /**
- * [createEmptyModel description]
+ * Create the initial empty model.
+ * You will add pipetting and measurement actions will be added to.
  * @param  {number[]} subclassNodes - sorted volumes after which a subclass starts (e.g. for subclasses 3-15,15.01-500,500.01-1000, subclassNodes = [3,15,500,1000])
  * @param {number[]} betaDs - volumes for which we want a beta parameter (dispense bias)
  * @param {number[]} gammaDs - volumes for which we want a gamma parameter (unintended dilution)
- * @return {[type]}               [description]
+ * @return {object} an object with mostly empty properties representing the model's random variables and labware.
  */
 function createEmptyModel(subclassNodes, betaDs, gammaDs) {
 	assert(!_.isEmpty(subclassNodes));
@@ -96,6 +101,14 @@ function addRv2(model, group, rv) {
 	return Ref(group, rv.i);
 }
 
+/**
+ * Add a liquid to the model.
+ * @param {object} model - the model
+ * @param {string} k - liquid name
+ * @param {object} spec - concentration specification
+ * @param {string} [spec.type="fixed"] - set to "fixed" for a concentration, "normal" for a normally distributed concentration.  If set to "normal", you will need to supply the "loc" and "scale" values as input data when running Stan.
+ * @param {number} [spec.value=0] - if fixed, this is the fixed concentration - otherwise the parameters will be estimated.
+ */
 function addLiquid(model, k, spec) {
 	const liquidData = getLiquidData(model, k);
 	liquidData.spec = spec;
@@ -172,7 +185,7 @@ function getRv_g0(model, l) {
 }
 
 
-function absorbance_A0(context, model, wells) {
+function absorbance_A0(model, wells) {
 	_.forEach(wells, well => {
 		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
 		const rv_al = getRv_al(model, l);
@@ -180,7 +193,7 @@ function absorbance_A0(context, model, wells) {
 	});
 }
 
-function absorbance_AV(context, model, wells) {
+function absorbance_AV(model, wells) {
 	_.forEach(wells, well => {
 		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
 		const rv_al = getRv_al(model, l);
@@ -189,7 +202,12 @@ function absorbance_AV(context, model, wells) {
 	});
 }
 
-function measureAbsorbance(context, model, wells) {
+/**
+ * Add an absorbance measurement to the model.
+ * @param  {object} model - the model
+ * @param  {string[]} wells - the names of the measured wells
+ */
+function measureAbsorbance(model, wells) {
 	_.forEach(wells, well => {
 		const {labware: l, wellId: wellPos} = wellsParser.parseOne(well);
 
@@ -233,7 +251,12 @@ function measureAbsorbance(context, model, wells) {
 	});
 }
 
-function measureWeight(context, model, l) {
+/**
+ * Add a weight measurement to the model.
+ * @param  {object} model - the model
+ * @param  {string} l - the labware name
+ */
+function measureWeight(model, l) {
 	// console.log("measureWeight: "+l)
 	const labwareData = getLabwareData(model, l);
 	// console.log({labwareData})
@@ -265,14 +288,29 @@ function measureWeight(context, model, l) {
 	model.weightMeasurements.push({ref_g});
 }
 
-function assignLiquid(context, model, well, k) {
+/**
+ * Assign a liquid to a well in the model.
+ * @param  {object} model - the model
+ * @param  {string} well - the well name
+ * @param  {string} k - the liquid name
+ */
+function assignLiquid(model, well, k) {
 	const liquidData = getLiquidData(model, k);
 	const wellData = getWellData(model, well);
 	wellData.k = k;
 	wellData.idx_k = liquidData.idx;
 }
 
-function aspirate(context, model, {p, t, d, well}) {
+/**
+ * Add an aspiration operation to the model.
+ * @param  {object} model - the model
+ * @param  {object} args
+ * @param  {string} args.p - the name of the pipetting parameters
+ * @param  {number|string} args.t - the tip identifier
+ * @param  {number} args.d - volume in microliters
+ * @param  {string} args.well - the well name
+ */
+function aspirate(model, {p, t, d, well}) {
 	// create: RV for volume aspirated into tip
 	// create: RV for concentration in tip
 	// create: RV for new volume in src
@@ -386,7 +424,16 @@ function aspirate(context, model, {p, t, d, well}) {
 	model.pipOps.push(asp);
 }
 
-function dispense(context, model, {p, t, d, well}) {
+/**
+ * Add a dispense operation to the model.
+ * @param  {object} model - the model
+ * @param  {object} args
+ * @param  {string} args.p - the name of the pipetting parameters
+ * @param  {number|string} args.t - the tip identifier
+ * @param  {number} args.d - volume in microliters
+ * @param  {string} args.well - the well name
+ */
+function dispense(model, {p, t, d, well}) {
 	if (d === 0) return;
 
 	// input: RV for volume aspirated into tip
@@ -444,6 +491,11 @@ function dispense(context, model, {p, t, d, well}) {
 	model.pipOps.push(asp);
 }
 
+/**
+ * Print the Stan model to stdout, and save a `basename`.R file that holds indexes to associate the random variables back to labware.
+ * @param  {string} model - the model
+ * @param  {string} [basename="stanModel"] - the basename for the R output
+ */
 function printModel(model, basename) {
 	const output = {
 		data: [],
@@ -883,9 +935,9 @@ function handle_transformed_parameters_RV_U(model, output) {
 	addCentralizedParameter_mean("gamma", true, n, 1, "NGAMMA", "<lower=0>", output);
 	addCentralizedParameter_sigma("cv_gamma", 1, 1, output);
 
-	output.parameters.push(`  vector<lower=0>[${rvs.length}] RV_U_raw; // uninteded dilution due to extra water dispense volumes`);
+	output.parameters.push(`  vector<lower=0>[${rvs.length}] RV_U_raw; // unintended dilution due to extra water dispense volumes`);
 
-	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_U = gamma[{${rvs.map(rv => rv.idx_gamma)}}] .* (1 + RV_U_raw * cv_gamma); // uninteded dilution due to extra water dispense volumes`)
+	output.transformedParameters.definitions.push(`  vector<lower=0>[${rvs.length}] RV_U = gamma[{${rvs.map(rv => rv.idx_gamma)}}] .* (1 + RV_U_raw * cv_gamma); // unintended dilution due to extra water dispense volumes`)
 
 	output.model.push(`  RV_U_raw ~ normal(0, 1);`);
 }
