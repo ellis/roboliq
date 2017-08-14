@@ -45,7 +45,8 @@ shaker.shakePlate:
 
 shaker.run:
   description: |
-    Run the shaker.  This will simply run the given shaker program, regardless of
+    Run the shaker.
+    This will simply run the given shaker program, regardless of
     what plate is on the shaker or whether the shaker is empty.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}

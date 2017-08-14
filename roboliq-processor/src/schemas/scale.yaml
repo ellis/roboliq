@@ -17,7 +17,7 @@ scale.ScaleProgram:
     #duration: {description: "Duration of weighing (for purpose of settling)", type: Duration}
 
 scale.weigh:
-  description: "Weigh an object"
+  description: "Weigh an object."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

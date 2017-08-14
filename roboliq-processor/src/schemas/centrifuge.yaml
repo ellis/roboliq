@@ -12,14 +12,13 @@ Centrifuge:
   required: [type, sitesInternal]
   example: |
     ```json
-    "centrifuge": {
-    	"type": "Centrifuge",
-    	"sitesInternal": ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
-    }
+    centrifuge:
+    	type: Centrifuge
+    	sitesInternal: ["ourlab.mario.site.CENTRIFUGE_1", "ourlab.mario.site.CENTRIFUGE_2", "ourlab.mario.site.CENTRIFUGE_3", "ourlab.mario.site.CENTRIFUGE_4"]
     ```
 
 centrifuge.centrifuge2:
-  description: "Centrifuge two plate."
+  description: "Centrifuge two plates."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

@@ -59,7 +59,7 @@ timer._wait:
 
 timer.doAndWait:
   description: |
-    Start a timer, perform sub-steps, then wait till the given duration has elapsed.
+    Start a timer, perform sub-steps, then wait till duration has elapsed.
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}

@@ -19,7 +19,7 @@ Incubator:
     ```
 
 incubator.incubatePlates:
-  description: "Incubate the given plates"
+  description: "Incubate the given plates."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
@@ -60,7 +60,7 @@ incubator.insertPlates:
     ```
 
 incubator.run:
-  description: "Run the incubator with the given program"
+  description: "Run the incubator with the given program."
   properties:
     agent: {description: "Agent identifier", type: "Agent"}
     equipment: {description: "Equipment identifier", type: "Equipment"}
