@@ -697,13 +697,12 @@ function addCentralizedParameter_sigma(name, n, nScales, output) {
 
 /**
  * Add variables for a centralized mean
- * @param {[type]} name    [description]
+ * @param {string} name - name of variable
  * @param {boolean} withLoc - whether to include a location data variable
- * @param {[type]} n       [description]
- * @param {[type]} nScales [description]
+ * @param {integer} n - array size, or 1 for a scalar
+ * @param {integer} nScales - number of scale parameters; 1 = same scale for each item in array; n = one scale parameter for each item.
  * @param {string} [nName] - optional name for array size (to be used in place of n in some places)
  * @param {string} limits - a limits modifier ("" if no limits)
- * @param {[type]} output  [description]
  */
 function addCentralizedParameter_mean(name, withLoc, n, nScales, nName, limits, output) {
 	assert(n > 0);
