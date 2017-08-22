@@ -105,17 +105,30 @@ describe('config/roboliqDirectiveHandlers', function() {
 			{"data()": {groupBy: "source", summarize: {source: '${source[0]}', totalVolume: '$(sum(volume))'}}}, data2),
 			[{source: "liquid1", totalVolume: "30 ul"}, {source: "liquid2", totalVolume: "30 ul"}]
 		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {map: [{x: "$source"}, {x: "$well"}]}}, data2),
+			[
+				[{x: "liquid1"}, {x: "A01"}],
+				[{x: "liquid2"}, {x: "B01"}],
+				[{x: "liquid1"}, {x: "A02"}],
+				[{x: "liquid2"}, {x: "B02"}]
+			]
+		);
+		should.deepEqual(misc.handleDirective(
+			{"data()": {map: [{x: "$source"}, {x: "$well"}], flatten: true}}, data2),
+			[
+				{x: "liquid1"}, {x: "A01"},
+				{x: "liquid2"}, {x: "B01"},
+				{x: "liquid1"}, {x: "A02"},
+				{x: "liquid2"}, {x: "B02"}
+			]
+		);
 	});
 
 	it('should handle data() with a `design` property', function() {
 		should.deepEqual(misc.handleDirective(
 			{"data()": {design: {"a*": 4}}}, data),
 			[{a: 1}, {a: 2}, {a: 3}, {a: 4}]
-		);
-
-		should.deepEqual(misc.handleDirective(
-			{"data()": {design: {"a*": "$someNumber"}}}, data),
-			[{a: 1}, {a: 2}, {a: 3}]
 		);
 	});
 
