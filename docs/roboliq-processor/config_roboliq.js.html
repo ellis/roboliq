@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-processor Source: config/roboliq.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-processor</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="equipment.html">equipment</a></li><li><a href="fluorescenceReader.html">fluorescenceReader</a></li><li><a href="pipetter.html">pipetter</a></li><li><a href="timer.html">timer</a></li><li><a href="transporter.html">transporter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commandHelper.html">commandHelper</a></li><li><a href="module-commands_absorbanceReader.html">commands/absorbanceReader</a></li><li><a href="module-commands_centrifuge.html">commands/centrifuge</a></li><li><a href="module-commands_equipment.html">commands/equipment</a></li><li><a href="module-commands_fluorescenceReader.html">commands/fluorescenceReader</a></li><li><a href="module-commands_incubator.html">commands/incubator</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_pipetter_groupingMethods.html">commands/pipetter/groupingMethods</a></li><li><a href="module-commands_pipetter_pipetterUtils.html">commands/pipetter/pipetterUtils</a></li><li><a href="module-commands_pipetter_sourceMethods.html">commands/pipetter/sourceMethods</a></li><li><a href="module-commands_simulatedHelpers.html">commands/simulatedHelpers</a></li><li><a href="module-commands_timer.html">commands/timer</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-config_roboliq.html">config/roboliq</a></li><li><a href="module-config_roboliqDirectiveHandlers.html">config/roboliqDirectiveHandlers</a></li><li><a href="module-design.html">design</a></li><li><a href="module-generateSchemaDocs.html">generateSchemaDocs</a></li><li><a href="module-misc.html">misc</a></li><li><a href="module-parsers_wellsParser.html">parsers/wellsParser</a></li><li><a href="module-roboliq.html">roboliq</a></li><li><a href="module-stanModel.html">stanModel</a></li><li><a href="module-WellContents.html">WellContents</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: config/roboliq.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Roboliq's default configuration.
+ * @module config/roboliq
+ */
+
+var _ = require('lodash');
+import yaml from 'yamljs';
+
+var predicates = [
+	//
+	// Rules
+	//
+
+	// same: Two things are the same if they unify.
+	{
+		"&lt;--": {
+			"same": {
+				"thing1": "?thing",
+				"thing2": "?thing"
+			}
+		}
+	},
+
+	// labwareHasNoLid: a labware has no lid if no labware is on top of it
+	{
+		"&lt;--": {
+			"labwareHasNoLid": {
+				"labware": "?labware"
+			},
+			"and": [{
+				"not": {
+					"location": {
+						"labware": "?lid",
+						"site": "?labware"
+					}
+				}
+			}]
+		}
+	},
+
+	// siteIsClear: a site is clear if no labware is on it
+	{
+		"&lt;--": {
+			"siteIsClear": {
+				"site": "?site"
+			},
+			"and": [{
+				"not": {
+					"location": {
+						"labware": "?labware",
+						"site": "?site"
+					}
+				}
+			}]
+		}
+	},
+
+	// siteIsOpen: a site is open if it's not closed (FUTURE: and if it's not locked)
+	{
+		"&lt;--": {
+			"siteIsOpen": {
+				"site": "?site"
+			},
+			"and": [{
+				"not": {
+					"siteIsClosed": {
+						"site": "?site"
+					}
+				}
+			}]
+		}
+	},
+
+	// member of list (see HTN-orig/lists.js)
+	{"&lt;--": {"member": {"target": "?target", "list": {"cons": {"first": "?target",
+								   "rest": "?restOfList"}}}}},
+	{"&lt;--": {"member": {"target": "?target", "list": {"cons": {"first": "?firstOfList",
+								   "rest": "?restOfList"}}},
+		 "and": [{"member": {"target": "?target", "list": "?restOfList"}}]}},
+
+	{"method": {"description": "generic.openSite-null: null-operation for opening an already open site",
+		"task": {"generic.openSite": {"site": "?site"}},
+		"preconditions": [
+			{"siteIsOpen": {"site": "?site"}}
+		],
+		"subtasks": {"ordered": [
+			//{"print": {"text": "generic.openSite-null"}}
+		]}
+	}},
+];
+
+var objectToPredicateConverters = {
+	Lid: function(name, object) {
+		return [
+			{"isLabware": {"labware": name}},
+			{"isLid": {"labware": name}},
+			{"model": {"labware": name, "model": object.model}},
+			{"location": {"labware": name, "site": object.location}}
+		];
+	},
+	LidModel: function(name, object) {
+		return [{ "isModel": { "model": name } }];
+	},
+	"Plate": function(name, object) {
+		var value = [
+			{ "isLabware": { "labware": name } },
+			{ "isPlate": { "labware": name } },
+			{ "model": { "labware": name, "model": object.model } },
+			{ "location": { "labware": name, "site": object.location } }
+		];
+		if (object.sealed) {
+			value.push({ "plateIsSealed": { "labware": name } });
+		}
+		return value;
+	},
+	"PlateModel": function(name, object) {
+		return [{ "isModel": { "model": name } }];
+	},
+	"Site": function(name, object) {
+		return _.compact([
+			{"isSite": {"model": name}},
+			(object.closed) ? {"siteIsClosed": {"site": name}} : null,
+		]);
+	},
+};
+
+var planHandlers = {
+	"trace": function() {
+		return [];
+	}
+};
+
+module.exports = {
+	roboliq: "v1",
+	imports: [
+		'../commands/data.js',
+		'../commands/system.js',
+		// Equipment
+		'../commands/equipment.js',
+		'../commands/absorbanceReader.js',
+		'../commands/centrifuge.js',
+		'../commands/fluorescenceReader.js',
+		'../commands/incubator.js',
+		'../commands/pipetter.js',
+		'../commands/scale.js',
+		'../commands/sealer.js',
+		'../commands/shaker.js',
+		'../commands/timer.js',
+		'../commands/transporter.js',
+	],
+	predicates: predicates,
+	objectToPredicateConverters: objectToPredicateConverters,
+	schemas: yaml.load(__dirname+'/../schemas/roboliq.yaml'),
+	planHandlers: planHandlers,
+	directiveHandlers: require('./roboliqDirectiveHandlers.js'),
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:01+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

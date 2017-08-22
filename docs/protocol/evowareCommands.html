@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Evoware Commands &amp; Types</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/yaml.min.js"></script>
+	<style>
+	html, body {
+	height: 100%;
+	}
+	
+	/* Main view, move content down due to fixed navbar. */
+	.main-wrapper {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	padding-top: 50px;
+	}
+	
+	/* Container for a sidebar. */
+	.sidebar-container {
+	height: 100%;
+	position: fixed;
+	padding: 0px;
+	margin-top: -50px;
+	padding-top: 50px;
+	border-right: 1px solid #ddd;
+	
+	}
+	
+	.sidebar-header {
+	position: relative;
+	padding: 15px;
+	border-bottom: 1px solid #ddd;
+	}
+	
+	/* Scrollable sidebar. */
+	.sidebar {
+	height: 85%;
+	position: relative;
+	overflow-y: scroll;
+	}
+	
+	.main-view {
+	height: 100%;
+	overflow: auto;
+	position: relative;
+	padding: 0px;
+	}
+	
+	.amain {
+	color: white;
+	font-weight: bold;
+	margin: 0 2em;
+	}
+	h2 {
+	margin-top: 1em;
+	padding: .5em 0;
+	background-color: #ddd;
+	}
+	.command {
+	display: block;
+	margin-left: 2em;
+	}
+	.command > table > tbody > tr > td > p {
+		margin-bottom: 0;
+	}
+	</style>
+</head>
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<nav class="navbar navbar-inverse" style="margin-bottom: 0">
+				<div class="container-fluid">
+					<a class="amain" href="index.html"><span style="font-size: 150%; font-weight: bold; color: white; margin: 0 2em 0 4em">Roboliq Protocol</span></a>
+					<a class="amain" href="commands.html">Commands</a>
+					<a class="amain" href="evowareConfiguration.html">Evoware Configuration</a>
+					<a class="amain" href="evowareCommands.html">Evoware Commands</a>
+				</div>
+		</nav>
+	</nav>
+
+	<div class="main-wrapper">
+			<div class="sidebar-container col-xs-3">
+					<!--div class="sidebar-header">
+							<form class="form-inline">
+									<input type="text" name="search" class="form-control" placeholder="Search"/>
+							</form>
+					</div-->
+					<div class="sidebar" style="height: 100%; margin: .5em">
+							<nav>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_evoware">evoware</a><br/>
+											<a href="#_EvowareRobot">&nbsp;&nbsp;EvowareRobot</a><br/>
+											<a href="#_EvowareWashProgram">&nbsp;&nbsp;EvowareWashProgram</a><br/>
+											<a href="#_evoware._execute">&nbsp;&nbsp;evoware._execute</a><br/>
+											<a href="#_evoware._facts">&nbsp;&nbsp;evoware._facts</a><br/>
+											<a href="#_evoware._raw">&nbsp;&nbsp;evoware._raw</a><br/>
+											<a href="#_evoware._subroutine">&nbsp;&nbsp;evoware._subroutine</a><br/>
+											<a href="#_evoware._userPrompt">&nbsp;&nbsp;evoware._userPrompt</a><br/>
+											<a href="#_evoware._variable">&nbsp;&nbsp;evoware._variable</a><br/>
+									</ul>
+								<br/><br/>
+							</nav>
+					</div>
+			</div>
+			<div class="container main-view col-xs-9 pull-right">
+				<div style="padding: .75em">
+					<h1>Evoware Commands &amp; Types</h1>
+					<p>This page lists the commands and types made available by the Evoware backend.
+Note that:</p>
+<ul>
+<li><p>Types begin with an uppercase letter, whereas command and namespaces begin with a lowercase
+letter.</p>
+</li>
+<li><p>A namespace group related commands and types, such as the <code>pipetter</code> namespace
+contains items relevant to pipetting.  Normally the namespaces will be nouns by
+convention.</p>
+</li>
+<li><p>As a matter of convention, all commands belong to a namespace.  Normally
+commands will start with a verb.  For example, <code>pipetter.mix</code> is a command to
+use the pipetter to mix well contents.</p>
+</li>
+<li><p>Commands and types that begin with an underscore, such as <code>pipetter._mix</code>,
+are low-level commands.  Normally you will not need to use them and can use
+the other higher-level commands instead.</p>
+</li>
+</ul>
+
+
+								<h2 id="_evoware">evoware</h2>
+								<p>The <code>evoware</code> commands specify low-level instructions provided by the
+Evoware backend.</p>
+
+								<h3 id="_EvowareRobot">EvowareRobot</h3>
+								<div class="command">
+									
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: EvowareRobot</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>config</td>
+												<td>object</td>
+												<td><p>configuration options for evoware</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_EvowareWashProgram">EvowareWashProgram</h3>
+								<div class="command">
+									
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: EvowareWashProgram</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_evoware._execute">evoware._execute</h3>
+								<div class="command">
+									<p>An Evoware Execute command</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>path</td>
+												<td>string</td>
+												<td><p>Path to program to execute</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>args</td>
+												<td>array</td>
+												<td><p>Arguments to pass to the exeternal program</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>wait</td>
+												<td>boolean</td>
+												<td><p>True, if Evoware should wait until the program finishes execution</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_evoware._facts">evoware._facts</h3>
+								<div class="command">
+									<p>An Evoware FACTS command</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>factsEquipment</td>
+												<td>string</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>factsVariable</td>
+												<td>string</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>factsValue</td>
+												<td>string</td>
+												<td></td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>labware</td>
+												<td>Plate</td>
+												<td></td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_evoware._raw">evoware._raw</h3>
+								<div class="command">
+									<p>An Evoware direct command</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>commands</td>
+												<td>string</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_evoware._subroutine">evoware._subroutine</h3>
+								<div class="command">
+									<p>An Evoware &#39;Subroutine&#39; command</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>filename</td>
+												<td>string</td>
+												<td><p>The filename of the subroutine file to call</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_evoware._userPrompt">evoware._userPrompt</h3>
+								<div class="command">
+									<p>An Evoware UserPrompt command</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>text</td>
+												<td>string</td>
+												<td><p>Text to show the user</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>beep</td>
+												<td>integer</td>
+												<td><p>0: no beep, 1: beep once, 2: beep three times, 3: beep every 3 seconds</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>autoclose</td>
+												<td>integer</td>
+												<td><p>number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_evoware._variable">evoware._variable</h3>
+								<div class="command">
+									<p>Set an Evoware variable</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>name</td>
+												<td>string</td>
+												<td><p>Variable name</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td>string,number</td>
+												<td><p>Variable value</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+				</div>
+			</div>
+
+	</div>
+
+</body>
+</html>

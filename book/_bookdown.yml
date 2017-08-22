@@ -1,4 +1,5 @@
 book_filename: "roboliq"
+repo: https://github.com/ellis/roboliq/
 rmd_files:
 - index.Rmd
 - 01-intro.Rmd

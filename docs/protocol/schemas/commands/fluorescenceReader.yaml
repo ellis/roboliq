@@ -1,0 +1,48 @@
+fluorescenceReader:
+  module: |
+    The `fluorescenceReader` commands specify actions using equipment for fluorescence readouts.
+
+Reader:
+  description: Reader equipment.
+  properties:
+    type: {enum: [Reader]}
+    description: {type: markdown}
+    label: {type: markdown}
+  required: [type]
+
+fluorescenceReader.measurePlate:
+  description: "Measure the fluorescence of wells on a plate."
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    equipment: {description: "Equipment identifier", type: "Equipment"}
+    program:
+      description: "Program parameters"
+      properties:
+        shakerProgram:
+          description: Program for shaker.
+          properties:
+            rpm: {description: Rotations per minute (RPM), type: number}
+            duration: {description: "Duration of shaking", type: Duration}
+        excitationWavelength: {description: "Excitation wavelength", type: Length}
+        #excitationBandwidth: {description: "Excitation bandwidth", type: Length}
+        #excitationWavelengthMin: {description: "Minimum excitation wavelength for a scan", type: Length}
+        #excitationWavelengthMax: {description: "Maximum excitation wavelength for a scan", type: Length}
+        #excitationWavelengthStep: {description: "Size of steps for a scan", type: Length}
+        emissionWavelength: {description: "Emission wavelength", type: Length}
+        wells: {description: "Array of wells to read", type: "Wells"}
+    programFileTemplate: {description: "Program template; well information will be substituted into the template automatically.", type: "string"}
+    programFile: {description: "Program filename", type: "string"}
+    programData: {description: "Program data"}
+    output:
+      description: "Output definition for where and how to save the measurements"
+      properties:
+        joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: string}
+        writeTo: {description: "Filename to write measurements to as JSON", type: "string"}
+        appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"}
+        userValues: {description: "User-specificed values that should be included in the output table", type: object}
+        simulated: {description: "An expression to evaluate with mathjs", type: string}
+        units: {description: "Map of factor names to unit type; converts the factor values to plain numbers in the given units."}
+    object: {description: "Plate identifier", type: "Plate"}
+    site: {description: "Site identifier in reader", type: "Site"}
+    destinationAfter: {description: "Site to move the plate to after measurement", "type": "SiteOrStay"}
+  required: ["object"]

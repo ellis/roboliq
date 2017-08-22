@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-evoware Source: equipment/reader-InfiniteM200Pro.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-evoware</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commands_evoware.html">commands/evoware</a></li><li><a href="module-commands_evowareHelper.html">commands/evowareHelper</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-equipment_centrifuge4.html">equipment/centrifuge4</a></li><li><a href="module-equipment_evoware.html">equipment/evoware</a></li><li><a href="module-equipment_reader-InfiniteM200Pro.html">equipment/reader-InfiniteM200Pro</a></li><li><a href="module-equipment_shaker-Tecan1.html">equipment/shaker-Tecan1</a></li><li><a href="module-EvowareCarrierFile.html">EvowareCarrierFile</a></li><li><a href="module-EvowareCompiler.html">EvowareCompiler</a></li><li><a href="module-EvowareConfigSpec.html">EvowareConfigSpec</a></li><li><a href="module-EvowareTableFile.html">EvowareTableFile</a></li><li><a href="module-EvowareUtils.html">EvowareUtils</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-evoware_EvowareCarrierFile.Carrier.html">evoware/EvowareCarrierFile.Carrier</a></li><li><a href="module-evoware_EvowareCarrierFile.CarrierGridSiteIndex.html">evoware/EvowareCarrierFile.CarrierGridSiteIndex</a></li><li><a href="module-evoware_EvowareCarrierFile.CarrierSiteIndex.html">evoware/EvowareCarrierFile.CarrierSiteIndex</a></li><li><a href="module-evoware_EvowareCarrierFile.EvowareCarrierData.html">evoware/EvowareCarrierFile.EvowareCarrierData</a></li><li><a href="module-evoware_EvowareCarrierFile.LabwareModel.html">evoware/EvowareCarrierFile.LabwareModel</a></li><li><a href="module-evoware_EvowareCarrierFile.Vector.html">evoware/EvowareCarrierFile.Vector</a></li><li><a href="module-evoware_EvowareTableFile.ExternalObject.html">evoware/EvowareTableFile.ExternalObject</a></li><li><a href="module-evoware_EvowareTableFile.HotelObject.html">evoware/EvowareTableFile.HotelObject</a></li><li><a href="module-evoware_EvowareUtils.EvowareSemicolonFile.html">evoware/EvowareUtils.EvowareSemicolonFile</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: equipment/reader-InfiniteM200Pro.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Module for the Tecan InfiniteM200 reader.
+ * @module
+ */
+import _ from 'lodash';
+import assert from 'assert';
+import math from 'mathjs';
+import Handlebars from 'handlebars';
+import path from 'path';
+import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+import expect from 'roboliq-processor/dist/expect.js';
+import wellsParser from 'roboliq-processor/dist/parsers/wellsParser.js';
+
+import {makeEvowareExecute, makeEvowareFacts} from './evoware.js';
+
+const templateAbsorbance = `&lt;TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+		&lt;FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="{{createdAt}}" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+		&lt;TecanMeasurement id="1" class="Measurement">
+				&lt;MeasurementManualCycle id="2" number="1" type="Standard">
+						&lt;CyclePlate id="3" file="{{plateFile}}" plateWithCover="{{plateWithCover}}">
+								&lt;PlateRange id="4" range="{{wells}}" auto="false">
+										{{#if doShakeBefore}}&lt;Shaking id="{{shakeBeforeId}}" mode="Orbital" time="{{shakeBeforeTime}}" frequency="0" amplitude="{{shakeBeforeAmplitude}}" maxDeviation="PT0S" settleTime="PT0S" />{{/if}}
+										{{#if doSettleBefore}}&lt;WaitTime id="{{settleBeforeId}}" timeSpan="{{settleBeforeTime}}" maxDeviation="PT0S" refTimeID="0" ignoreInLastCycle="False" />{{/if}}
+										{{#if doMeasure}}&lt;MeasurementAbsorbance id="{{measureId}}" mode="Normal" type="" name="ABS" longname="" description="">
+												&lt;Well id="6" auto="true">
+														&lt;MeasurementReading id="7" name="" beamDiameter="{{beamDiameter}}" beamGridType="{{beamGridType}}" beamGridSize="{{beamGridSize}}" beamEdgeDistance="{{beamEdgeDistance}}">
+																&lt;ReadingLabel id="8" name="Label1" scanType="{{scanType}}" refID="0">
+																		&lt;ReadingSettings number="25" rate="25000" />
+																		&lt;ReadingTime integrationTime="0" lagTime="0" readDelay="{{readDelay}}" flash="0" dark="0" excitationTime="0" />
+																		&lt;ReadingFilter id="0" type="Ex" wavelength="{{excitationWavelength}}" bandwidth="{{excitationBandwidth}}" attenuation="0" usage="ABS" />
+																&lt;/ReadingLabel>
+														&lt;/MeasurementReading>
+												&lt;/Well>
+										&lt;/MeasurementAbsorbance>{{/if}}
+								&lt;/PlateRange>
+						&lt;/CyclePlate>
+				&lt;/MeasurementManualCycle>
+				&lt;MeasurementInfo id="0" description="">
+						&lt;ScriptTemplateSettings id="0">
+								&lt;ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+								&lt;ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+						&lt;/ScriptTemplateSettings>
+				&lt;/MeasurementInfo>
+		&lt;/TecanMeasurement>
+&lt;/TecanFile>`;
+
+// TODO: continue working on this with the goal of allowing shaking in the reader
+const templateShake = `&lt;TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
+		&lt;FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="{{createdAt}}" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />
+		&lt;TecanMeasurement id="1" class="Measurement">
+				&lt;MeasurementManualCycle id="2" number="1" type="Standard">
+						&lt;CyclePlate id="3" file="{{plateFile}}" plateWithCover="{{plateWithCover}}">
+								&lt;PlateRange id="4" range="{{wells}}" auto="false">
+{{#items}}
+										&lt;Shaking id="{{id}}" mode="Orbital" time="{{time}}" frequency="0" amplitude="{{amplitude}}" maxDeviation="PT0S" settleTime="PT0S" />
+{{/items}}
+								&lt;/PlateRange>
+						&lt;/CyclePlate>
+				&lt;/MeasurementManualCycle>
+				&lt;MeasurementInfo id="0" description="">
+						&lt;ScriptTemplateSettings id="0">
+								&lt;ScriptTemplateGeneralSettings id="0" Title="" Group="" Info="" Image="" />
+								&lt;ScriptTemplateDescriptionSettings id="0" Internal="" External="" IsExternal="False" />
+						&lt;/ScriptTemplateSettings>
+				&lt;/MeasurementInfo>
+		&lt;/TecanMeasurement>
+&lt;/TecanFile>`;
+
+function locationRowColToText(row, col) {
+	var colText = col.toString();
+	return String.fromCharCode("A".charCodeAt(0) + row - 1) + colText;
+}
+
+function getTemplateAbsorbanceParams(parsed, data) {
+	const program = parsed.value.program || {};
+	const output = parsed.value.output || {};
+	// const labwareModelName = parsed.objectName["object.model"];
+	const labwareModelName = parsed.value.object.model;
+	// console.log({labwareModelName})
+	const labwareModel = _.get(data.objects, labwareModelName);
+	// console.log({labwareModel})
+	const modelToPlateFile = parsed.value.equipment.modelToPlateFile;
+	// assert(modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
+	expect.truthy({paramName: "equipment"}, modelToPlateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile`);
+	const plateFile = modelToPlateFile[labwareModelName];
+	// assert(plateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile."${labwareModelName}"`);
+	expect.truthy({paramName: "equipment"}, plateFile, `please define ${parsed.objectName.equipment}.modelToPlateFile."${labwareModelName}"`);
+
+	let wells;
+	const wells0 = (program.wells)
+		? commandHelper.asArray(program.wells)
+		: (output.joinKey)
+			? commandHelper.getDesignFactor(output.joinKey, data.objects.DATA)
+			: undefined;
+	if (wells0) {
+		// console.log({program})
+		// Get well list
+		const wells1 = _.flatMap(wells0, s => wellsParser.parse(s, data.objects));
+		// console.log({wells0})
+		const rx = /\(([^)]*)\)/;
+		const wells2 = wells1.map(s => {
+			const match = s.match(rx);
+			return (match) ? match[1] : s;
+		});
+		// console.log({wells1})
+		const rowcols = wells2.map(s => wellsParser.locationTextToRowCol(s));
+		// console.log({rowcols})
+		// rowcols.sort();
+		rowcols.sort((a, b) => (a[0] == b[0]) ? a[1] - b[1] : a[0] - b[0]);
+		// console.log({rowcols})
+
+		if (_.isEmpty(rowcols)) {
+			wells = "";
+		}
+		else {
+			let prev = rowcols[0];
+			let indexOnPlatePrev = (prev[0] - 1) * labwareModel.columns + prev[1];
+			wells = locationRowColToText(prev[0], prev[1])+":";
+			for (let i = 1; i &lt; rowcols.length; i++) {
+				const rowcol = rowcols[i];
+				const indexOnPlate = (rowcol[0] - 1) * labwareModel.columns + rowcol[1];
+				// If continuity is broken or we've changed rows:
+				// TODO: do something smarter than starting over on each row;
+				//  but it can be tricky, because the reader expects square blocks
+				//  of wells.
+				if (indexOnPlate !== indexOnPlatePrev + 1 || rowcol[0] != prev[0]) {
+					wells += locationRowColToText(prev[0], prev[1])+"|"+locationRowColToText(rowcol[0], rowcol[1])+":";
+				}
+				prev = rowcol;
+				indexOnPlatePrev = indexOnPlate;
+			}
+			wells += locationRowColToText(prev[0], prev[1]);
+		}
+	}
+	// If not specified, read all wells on plate
+	else {
+		wells = "A1:"+locationRowColToText(labwareModel.rows, labwareModel.columns);
+	}
+	// console.log({wells})
+
+	let isScan = false;
+	let excitationWavelength;
+	let excitationBandwidth;
+	// This will normally be true if program data was passed to the absorbanceReader command,
+	// but it may be empty if `programFileTemplate` was passed.
+	if (program.excitationWavelength || program.excitationWavelengthMax) {
+		isScan = (program.excitationWavelengthMin &amp;&amp; program.excitationWavelengthMax);
+		if (isScan) {
+			const excitationWavelengthMin = program.excitationWavelengthMin.toNumber("nm");
+			const excitationWavelengthStep0 = program.excitationWavelengthStep || math.unit(2, "nm");
+			const excitationWavelengthStep = excitationWavelengthStep0.toNumber("nm");
+			const excitationWavelengthMax0 = program.excitationWavelengthMax.toNumber("nm");
+			const stepCount = Math.floor((excitationWavelengthMax0 - excitationWavelengthMin) / excitationWavelengthStep);
+			const excitationWavelengthMax = excitationWavelengthMin + excitationWavelengthStep * stepCount;
+			excitationWavelength = `${excitationWavelengthMin*10}~${excitationWavelengthMax*10}:${excitationWavelengthStep*10}`;
+		}
+		else {
+			// console.log({program})
+			excitationWavelength = program.excitationWavelength.toNumber("nm") * 10;
+		}
+		const excitationBandwidth0 = program.excitationBandwidth || math.unit(9, "nm");
+		excitationBandwidth = excitationBandwidth0.toNumber("nm") * 10;
+	}
+	else {
+		assert(parsed.value.programFileTemplate, "You must supply either `program.excitationWavelength` or `programFileTemplate`");
+	}
+
+	const doMeasure = true;
+
+	let nextId = 5;
+	const shakeBeforeParams = (_.has(program, "shakerProgramBefore.duration"))
+		? {
+			doShakeBefore: true,
+			shakeBeforeId: nextId++,
+			shakeBeforeTime: "PT"+program.shakerProgramBefore.duration.toNumber("s")+"S",
+			shakeBeforeAmplitude: 4000
+		}
+		: {};
+	const settleBeforeParams = (_.has(program, "shakerProgramBefore.settleDuration"))
+		? {
+			doSettleBefore: true,
+			settleBeforeId: nextId++,
+			settleBeforeTime: "PT"+program.shakerProgramBefore.settleDuration.toNumber("s")+"S",
+			shakeBeforeAmplitude: 4000
+		}
+		: {};
+	const measureId = (doMeasure) ? nextId++ : null;
+
+	const params = _.defaults(
+		{
+			//createdAt:	moment().format("YYYY-MM-DDTHH:mm:ss.SSSSSSS")+"Z",
+			createdAt: "2016-01-01T00:00:00.0000000Z",
+			plateFile,
+			plateWithCover: (parsed.value.object.isSealed || parsed.value.object.isCovered) ? "True" : "False",
+			wells,
+			doMeasure,
+			measureId,
+			beamDiameter: (isScan) ? 0 : 500,
+			beamGridType: "Single",
+			beamGridSize: (isScan) ? 0 : 1,
+			beamEdgeDistance: (isScan) ? "" : "auto",
+			scanType: (isScan) ? "ScanEX" : "ScanFixed",
+			readDelay: (isScan) ? 0 : 10000,
+			excitationWavelength,
+			excitationBandwidth,
+		},
+		shakeBeforeParams,
+		settleBeforeParams
+	);
+	// console.log({params, excitationWavelength0, excitationWavelength, excitationBandwidth0, excitationBandwidth});
+	return params;
+}
+
+/**
+ * @typedef ReaderInfiniteM200ProConfig
+ * @type {object}
+ * @property {!string} evowareId - the Evoware ID of this equipment
+ * @property {!string} evowareCarrier - the carrier that the equipment is on
+ * @property {!string} evowareGrid - the grid that the equipment is on
+ * @property {!number} evowareSite - the evoware site index of the equipment site
+ * @param {!string} site - the equipment's site name (just the base part, without namespace)
+ * @param {!Object.&lt;string, string>} modelToPlateFile - a map from labware model to equipment's plate filename
+ * @example
+ * ```
+ * evowareId: "ReaderNETwork",
+ * evowareCarrier: "Infinite M200",
+ * evowareGrid: 61,
+ * evowareSite: 1,
+ * site: "READER",
+ * modelToPlateFile: {
+ * 	"plateModel_96_round_transparent_nunc": "NUN96ft",
+ * 	"plateModel_384_square": "GRE384fw",
+ * 	"EK_384_greiner_flat_bottom": "GRE384fw",
+ * 	"EK_96_well_Greiner_Black": "GRE96fb_chimney"
+ * }
+ * ```
+ */
+
+function configure(config, equipmentName, params) {
+	const agent = config.getAgentName();
+	const equipment = config.getEquipmentName(equipmentName);
+	const site = config.getSiteName(params.site);
+
+	const objects = {};
+	// Add equipment
+	_.set(objects, equipment, {
+		type: "Reader",
+		evowareId: params.evowareId,
+		sitesInternal: [site],
+		modelToPlateFile: _.fromPairs(_.map(_.toPairs(params.modelToPlateFile), ([model0, file]) => [config.getModelName(model0), file]))
+	});
+	// Add site
+	_.set(objects, site, {
+		type: "Site",
+		evowareCarrier: params.evowareCarrier,
+		evowareGrid: params.evowareGrid,
+		evowareSite: params.evowareSite,
+		closed: true
+	});
+
+	const predicates = _.flatten([
+		_.flatten(_.map(Object.keys(params.modelToPlateFile), model0 => [
+			{
+				"absorbanceReader.canAgentEquipmentModelSite": {
+					agent,
+					equipment,
+					model: config.getModelName(model0),
+					site
+				}
+			},
+			{
+				"fluorescenceReader.canAgentEquipmentModelSite": {
+					agent,
+					equipment,
+					model: config.getModelName(model0),
+					site
+				}
+			},
+		])),
+		/*{
+			"shaker.canAgentEquipmentSite": {
+				agent,
+				equipment,
+				site
+			}
+		},*/
+	]);
+	predicates.push(...exports.getPredicates(agent, equipment, site));
+
+	// console.log({planHandlers: exports.getPlanHandlers(agent, equipment, site)})
+	const protocol = {
+		schemas: exports.getSchemas(agent, equipment),
+		objects,
+		predicates,
+		planHandlers: exports.getPlanHandlers(agent, equipment, site),
+		commandHandlers: exports.getCommandHandlers(agent, equipment),
+	};
+	return protocol;
+}
+
+const exports = {
+	getSchemas: (agentName, equipmentName) => ({
+		[`equipment.close|${agentName}|${equipmentName}`]: {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+			},
+			required: ["agent", "equipment"]
+		},
+		[`equipment.open|${agentName}|${equipmentName}`]: {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+			},
+			required: ["agent", "equipment"]
+		},
+		[`equipment.openSite|${agentName}|${equipmentName}`]: {
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				site: {description: "Site identifier", type: "Site"}
+			},
+			required: ["agent", "equipment", "site"]
+		},
+		[`equipment.run|${agentName}|${equipmentName}`]: {
+			description: "Run measurement on Infinite M200 Pro reader",
+			properties: {
+				agent: {description: "Agent identifier", type: "Agent"},
+				equipment: {description: "Equipment identifier", type: "Equipment"},
+				measurementType: {description: "Type of measurement, i.e fluorescence or absorbance", enum: ["fluorescence", "absorbance"]},
+				program: {
+					description: "Program definition",
+					properties: {
+						shakerProgramBefore: {
+							description: "Program for shaker.",
+							properties: {
+								rpm: {description: "Rotations per minute (RPM)", type: "number"},
+								duration: {description: "Duration of shaking", type: "Duration"},
+								settleDuration: {description: "Duration to settle after shaking", type: "Duration"}
+							}
+						},
+						wells: {description: "Array of wells to read", type: "Wells"},
+						excitationWavelength: {description: "Excitation wavelength", type: "Length"},
+						excitationBandwidth: {description: "Excitation bandwidth", type: "Length"},
+						excitationWavelengthMin: {description: "Minimum excitation wavelength for a scan", type: "Length"},
+						excitationWavelengthMax: {description: "Maximum excitation wavelength for a scan", type: "Length"},
+						excitationWavelengthStep: {description: "Size of steps for a scan", type: "Length"}
+					}
+				},
+				programFileTemplate: {description: "Program template; well information will be substituted into the template automatically.", type: "File"},
+				programFile: {description: "Program filename", type: "File"},
+				programData: {description: "Program data"},
+				object: {description: "The labware being measured", type: "Plate"},
+				output: {
+					description: "Output definition for where and how to save the measurements",
+					properties: {
+						joinKey: {description: "The key used to left-join the measurement values with the current DATA", type: "string"},
+						writeTo: {description: "Filename to write measurements to as JSON", type: "string"},
+						appendTo: {description: "Filename to append measurements to as newline-delimited JSON", type: "string"},
+						userValues: {description: "User-specificed values that should be included in the output table", type: "object"},
+						simulated: {description: "An expression to evaluate with mathjs", type: "string"},
+						units: {description: "Map of factor names to unit type; converts the factor values to plain numbers in the given units."}
+					}
+				}
+			},
+			required: ["measurementType"]
+		},
+		// [`shaker.run|${agentName}|${equipmentName}`]: {
+		// 	properties: {
+		// 		agent: {description: "Agent identifier", type: "Agent"},
+		// 		equipment: {description: "Equipment identifier", type: "Equipment"},
+		// 		program: {
+		// 			description: "Program for shaking",
+		// 			properties: {
+		// 				amplitude: {description: "Amplitude", enum: ["min", "low", "high", "max"]},
+		// 				duration: {description: "Duration of shaking", type: "Duration"}
+		// 			},
+		// 			required: ["duration"]
+		// 		}
+		// 	},
+		// 	required: ["agent", "equipment", "program"]
+		// },
+	}),
+	getCommandHandlers: (agentName, equipmentName) => ({
+		// Reader
+		[`equipment.close|${agentName}|${equipmentName}`]: function(params, parsed, data) {
+			return {expansion: [makeEvowareFacts(parsed, data, "Close")]};
+		},
+		[`equipment.open|${agentName}|${equipmentName}`]: function(params, parsed, data) {
+			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
+		},
+		[`equipment.openSite|${agentName}|${equipmentName}`]: function(params, parsed, data) {
+			var carrier = commandHelper.getParsedValue(parsed, data, "equipment", "evowareId");
+			var sitesInternal = commandHelper.getParsedValue(parsed, data, "equipment", "sitesInternal");
+			var siteIndex = sitesInternal.indexOf(parsed.objectName.site);
+			expect.truthy({paramName: "site"}, siteIndex >= 0, "site must be one of the equipments internal sites: "+sitesInternal.join(", "));
+
+			return {expansion: [makeEvowareFacts(parsed, data, "Open")]};
+		},
+		[`equipment.run|${agentName}|${equipmentName}`]: function(params, parsed, data) {
+			// console.log("reader-InfiniteM200Pro-equipment.run: "+JSON.stringify(parsed, null, '\t'));
+
+			const hasProgram = (parsed.value.program) ? 1 : 0;
+			const hasProgramFile = (parsed.value.programFile) ? 1 : 0;
+			const hasProgramData = (parsed.value.programData) ? 1 : 0;
+			expect.truthy({}, hasProgram + hasProgramFile + hasProgramData >= 1, "either `program`, `programFile` or `programData` must be specified.");
+			expect.truthy({}, hasProgram + hasProgramFile + hasProgramData &lt;= 1, "only one of `program`, `programFile` or `programData` may be specified.");
+
+			let content
+				= (hasProgramData) ? parsed.value.programData.toString('utf8')
+				: (hasProgramFile) ? parsed.value.programFile.toString('utf8')
+				: (!_.isEmpty(parsed.value.programFileTemplate)) ? parsed.value.programFileTemplate.toString('utf8')
+				: undefined;
+
+			// If program:
+			//   if hasProgramFile: take programFile as template and modify it for substituting in wells and whatnot
+			//   otherwise use the template
+			//   do substitutions
+			if (hasProgram) {
+				// If programFile is not supplied, use the default template:
+				if (_.isUndefined(content)) {
+					assert(parsed.value.measurementType === "absorbance", "MISSING FUNCTIONALITY: programmer needs to supply template for fluorescence programs");
+					content = templateAbsorbance;
+				}
+				// Otherwise, modify the programFile/programData to allow for substitutions:
+				else {
+					// substitute the wells into the program file
+					if (!_.isEmpty(parsed.value.program.wells) || !_.isEmpty(parsed.value.output.joinKey)) {
+						content = content.replace(/&lt;PlateRange id="(\d+)" range="[^"]+"/, '&lt;PlateRange id="$1" range="{{wells}}"');
+					}
+				}
+				assert(!_.isEmpty(content), "Program content is empty");
+
+				// Substitute in relevant values:
+				const templateParams = getTemplateAbsorbanceParams(parsed, data);
+				const template = Handlebars.compile(content);
+				content = template(templateParams);
+			}
+
+			var start_i = content.indexOf("&lt;TecanFile");
+			if (start_i &lt; 0)
+				start_i = 0;
+			var programData = content.substring(start_i).
+				replace(/[\r\n]/g, "").
+				replace(/&amp;/g, "&amp;amp;"). // "&amp;amp;" is probably not needed, since I didn't find it in the XML files
+				replace(/=/g, "&amp;equal;").
+				replace(/"/g, "&amp;quote;").
+				replace(/~/, "&amp;tilde;").
+				replace(/>[ \t]+&lt;/g, ">&lt;");
+
+			// Save the file to the agent-configured TEMPDIR, if no absolute path is given
+			const writeTo = _.get(parsed.value, "output.writeTo") || parsed.value.outputFile;
+			const outputFile0 = (writeTo)
+				? path.join(path.dirname(writeTo), path.basename(writeTo, ".xml") + ".xml")
+				: parsed.value.measurementType+".xml";
+			const outputFile = (path.win32.isAbsolute(outputFile0))
+				? outputFile0
+				: "%{TEMPDIR}\\" + path.win32.basename(outputFile0);
+			const value = outputFile + "|" + programData;
+			const args = ["TecanInfinite", "%{SCRIPTFILE}", data.path.join("."), outputFile];
+			const expansion = [
+				makeEvowareFacts(parsed, data, "Measure", value, parsed.objectName.object),
+				makeEvowareExecute(parsed.objectName.agent, "%{ROBOLIQ}", args, true)
+			];
+			return {
+				expansion,
+				reports: (_.isEmpty(data.objects.DATA)) ? undefined : {
+					measurementFactors: data.objects.DATA
+				}
+			};
+		},
+		// [`shaker.run|${agentName}|${equipmentName}`]: function(params, parsed, data) {
+	}),
+	getPredicates: (agentName, equipmentName, siteName) => [
+		// Open READER
+		{"method": {"description": `generic.openSite-${siteName}`,
+			"task": {"generic.openSite": {"site": "?site"}},
+			"preconditions": [{"same": {"thing1": "?site", "thing2": siteName}}],
+			"subtasks": {"ordered": [{[`${equipmentName}.open`]: {}}]}
+		}},
+		{"action": {"description": `${equipmentName}.open: open the reader`,
+			"task": {[`${equipmentName}.open`]: {}},
+			"preconditions": [],
+			"deletions": [{"siteIsClosed": {"site": siteName}}],
+			"additions": []
+		}},
+		// Close READER
+		{"method": {"description": `generic.closeSite-${siteName}`,
+			"task": {"generic.closeSite": {"site": "?site"}},
+			"preconditions": [{"same": {"thing1": "?site", "thing2": siteName}}],
+			"subtasks": {"ordered": [{[`${equipmentName}.close`]: {}}]}
+		}},
+		{"action": {"description": `${equipmentName}.close: close the reader`,
+			"task": {[`${equipmentName}.close`]: {}},
+			"preconditions": [],
+			"deletions": [],
+			"additions": [
+				{"siteIsClosed": {"site": siteName}}
+			]
+		}},
+	],
+	getPlanHandlers: (agentName, equipmentName, siteName) => ({
+		[`${equipmentName}.close`]: function(params, parentParams, data) {
+			return [{
+				command: "equipment.close",
+				agent: agentName,
+				equipment: equipmentName
+			}];
+		},
+		[`${equipmentName}.open`]: function(params, parentParams, data) {
+			return [{
+				command: "equipment.openSite",
+				agent: agentName,
+				equipment: equipmentName,
+				site: siteName
+			}];
+		},
+	})
+};
+
+module.exports = _.merge({configure}, exports);
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:03+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

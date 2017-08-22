@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-processor Source: WellContents.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-processor</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="equipment.html">equipment</a></li><li><a href="fluorescenceReader.html">fluorescenceReader</a></li><li><a href="pipetter.html">pipetter</a></li><li><a href="timer.html">timer</a></li><li><a href="transporter.html">transporter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commandHelper.html">commandHelper</a></li><li><a href="module-commands_absorbanceReader.html">commands/absorbanceReader</a></li><li><a href="module-commands_centrifuge.html">commands/centrifuge</a></li><li><a href="module-commands_equipment.html">commands/equipment</a></li><li><a href="module-commands_fluorescenceReader.html">commands/fluorescenceReader</a></li><li><a href="module-commands_incubator.html">commands/incubator</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_pipetter_groupingMethods.html">commands/pipetter/groupingMethods</a></li><li><a href="module-commands_pipetter_pipetterUtils.html">commands/pipetter/pipetterUtils</a></li><li><a href="module-commands_pipetter_sourceMethods.html">commands/pipetter/sourceMethods</a></li><li><a href="module-commands_simulatedHelpers.html">commands/simulatedHelpers</a></li><li><a href="module-commands_timer.html">commands/timer</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-config_roboliq.html">config/roboliq</a></li><li><a href="module-config_roboliqDirectiveHandlers.html">config/roboliqDirectiveHandlers</a></li><li><a href="module-design.html">design</a></li><li><a href="module-generateSchemaDocs.html">generateSchemaDocs</a></li><li><a href="module-misc.html">misc</a></li><li><a href="module-parsers_wellsParser.html">parsers/wellsParser</a></li><li><a href="module-roboliq.html">roboliq</a></li><li><a href="module-stanModel.html">stanModel</a></li><li><a href="module-WellContents.html">WellContents</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: WellContents.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * A module of functions for querying and manipulating well contents.
+ * @module WellContents
+ */
+
+import _ from 'lodash';
+var assert = require('assert');
+var math = require('mathjs');
+import expect from './expectCore.js';
+var misc = require('./misc.js');
+var wellsParser = require('./parsers/wellsParser.js');
+
+export const emptyVolume = math.unit(0, 'ul');
+export const unknownVolume = math.eval('Infinity l');
+
+/**
+ * Validate well contents.  Throws an error if they aren't valid.
+ *
+ * @param  {array} contents - The well contents.
+ */
+export function checkContents(contents) {
+	if (_.isUndefined(contents)) {
+		// ok
+	}
+	else if (!_.isArray(contents)) {
+		assert(false, "expected well contents to be represented by an array: "+JSON.stringify(contents));
+	}
+	else if (contents.length == 0) {
+		// ok
+	}
+	else {
+		//console.log(contents)
+		var volume = math.eval(contents[0]);
+		if (contents.length == 1) {
+			// FIXME: remove 'false, ' from here!
+			assert.equal(volume.toNumber('l'), 0, "when the contents array has only one element, that element must be 0: "+JSON.stringify(contents));
+		}
+		else if (contents.length == 2) {
+			assert(_.isString(contents[1]), "second element of contents should be a string: "+JSON.stringify(contents));
+		}
+		else {
+			for (var i = 1; i &lt; contents.length; i++) {
+				//try {
+					checkContents(contents[i]);
+				//} catch (e) {
+				//
+				//}
+			}
+		}
+	}
+}
+
+/**
+ * Tries to find the contents array for the given syringe.
+ *
+ * @param {string} syringeName name of the syringe
+ * @param {object} data the data object passed to command handlers
+ * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
+ * @return {WellContents} the contents array if found, otherwise null
+ *//*
+export function getSyringeContents(syringeName, data, effects) {
+	//console.log({syringeName})
+	const contentsName = `${syringeName}.contents`;
+	// Check for well or labware contents in effects object
+	if (!_.isEmpty(effects)) {
+		if (effects.hasOwnProperty(contentsName))
+			return effects[contentsName];
+	}
+
+	let contents = misc.findObjectsValue(contentsName, data.objects, effects);
+	checkContents(contents);
+	return contents;
+}*/
+
+/**
+ * Tries to find the contents array for the given well.
+ *
+ * @param {string} wellName name of the well
+ * @param {object} data the data object passed to command handlers
+ * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
+ * @return {WellContents} the contents array if found, otherwise null
+ */
+export function getWellContents(wellName, data, effects) {
+	//console.log({wellName})
+	var wellInfo = wellsParser.parseOne(wellName);
+	assert(wellInfo.wellId, "missing `wellId`: "+JSON.stringify(wellInfo));
+	var labwareContentsName = wellInfo.labware+".contents";
+	var wellContentsName = wellInfo.labware+".contents."+wellInfo.wellId;
+	// Check for well or labware contents in effects object
+	if (!_.isEmpty(effects)) {
+		if (effects.hasOwnProperty(wellContentsName))
+			return effects[wellContentsName];
+		if (effects.hasOwnProperty(labwareContentsName))
+			return effects[labwareContentsName];
+	}
+
+	var contents = misc.findObjectsValue(wellContentsName, data.objects, effects);
+	if (!_.isEmpty(contents)) return contents;
+
+	contents = misc.findObjectsValue(labwareContentsName, data.objects, effects);
+	if (_.isArray(contents)) {
+		expect.try({objectName: wellName}, () => checkContents(contents));
+		return contents;
+	}
+
+	return [];
+}
+
+/**
+ * Get the volume of the contents array.
+ * @param {array} contents The well contents array
+ * @return {object} the mathjs volume if found, otherwise 0ul
+ */
+export function getVolume(contents) {
+	checkContents(contents);
+	if (!_.isEmpty(contents)) {
+		const volume = math.eval(contents[0]);
+		if (math.unit('l').equalBase(volume)) return volume;
+	}
+	return emptyVolume;
+}
+
+/**
+ * Check whether the contents are empty.
+ * They are empty if the contents are undefined, an empty array,
+ * or the array begins with a number that mathjs considers equal to 0.
+ *
+ * @param {WellContents} contents
+ * @return {Boolean} true if the contents are empty
+ */
+export function isEmpty(contents) {
+	const volume = getVolume(contents);
+	return math.equal(volume.toNumber('l'), 0);
+}
+
+/**
+ * Get the volume of the given well.
+ * @param {string} wellName name of the well
+ * @param {object} data the data object passed to command handlers
+ * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
+ * @return {object} the mathjs volume if found, otherwise 0ul
+ */
+export function getWellVolume(wellName, data, effects) {
+	var contents = getWellContents(wellName, data, effects);
+	if (!_.isEmpty(contents)) {
+		var volume = math.eval(contents[0]);
+		if (math.unit('l').equalBase(volume)) return volume;
+	}
+	return emptyVolume;
+}
+
+/**
+ * Get an object representing the effects of pipetting.
+ * @param {string} wellName fully qualified object name of the well
+ * @param {object} data The data object passed to command handlers.
+ * @param {object} effects The effects object for effects which have taken place during the command handler and aren't in the data object
+* @return {array} [content, contentName], where content will be null if not found
+ */
+export function getContentsAndName(wellName, data, effects) {
+	//console.log("getContentsAndName", wellName)
+	if (!effects) effects = {};
+
+	//var i = wellName.indexOf('(');
+	//var wellId = if (i >= 0) {}
+	var wellInfo = wellsParser.parseOne(wellName);
+	var labwareName;
+	//console.log("wellInfo", wellInfo);
+	if (wellInfo.source) {
+		labwareName = wellInfo.source;
+	}
+	else {
+		assert(wellInfo.wellId);
+		labwareName = wellInfo.labware;
+		// Check for contents of well
+		var contentsName = labwareName+".contents."+wellInfo.wellId;
+		//console.log("contentsName", contentsName, effects[contentsName], _.get(data.objects, contentsName))
+		var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
+		checkContents(contents);
+		if (contents)
+			return [contents, contentsName];
+	}
+
+	// Check for contents of labware
+	//console.log("labwareName", labwareName);
+	var contentsName = labwareName+".contents";
+	//console.log("contentsName", contentsName)
+	var contents = effects[contentsName] || misc.findObjectsValue(contentsName, data.objects, effects);
+	// If contents is an array, then we have the correct contents;
+	// Otherwise, we have a map of well contents, but no entry for the current well yet
+	if (_.isArray(contents)) {
+		checkContents(contents);
+		return [contents, contentsName];
+	}
+
+	return [undefined, wellInfo.labware+".contents."+wellInfo.wellId];
+}
+
+/**
+ * Convert the contents array encoding to a map of substances to amounts
+ * @param  {array} contents The well contents array
+ * @return {object} map of substance name to the volume or amount of that substance in the well
+ */
+export function flattenContents(contents) {
+	if (_.isUndefined(contents)) {
+		return {};
+	}
+	
+	checkContents(contents);
+	//console.log("flattenContents:", contents);
+	assert(_.isArray(contents), "Expected 'contents' to be an array: "+JSON.stringify(contents));
+	// The first element always holds the volume in the well.
+	// If the array has exactly one element, the volume should be 0l.
+	if (contents.length &lt;= 1) {
+		return {};
+	}
+	// If the array has exactly two elements, the second element is the name of the substance.
+	else if (contents.length == 2) {
+		assert(_.isString(contents[1]), "second element of contents should be a string: "+JSON.stringify(contents));
+		var volume = math.eval(contents[0]).format({precision: 14});
+		return _.fromPairs([[contents[1], volume]]);
+	}
+	// If the array has more than two elements, each element after the volume has the same
+	// structure as the top array and they represent the mixture originally dispensed in the well.
+	else {
+		/*const maps = _(contents).tail().map(contents2 => {
+			const flattened = flattenContents(contents2);
+			//console.log({flattened});
+			const x = _.mapValues(flattened, value => math.eval(value))
+			//console.log({x});
+			return x;
+		}).value();*/
+		var maps = _.map(_.tail(contents), contents => _.mapValues(flattenContents(contents), value => math.eval(value)));
+		//console.log("maps: "+JSON.stringify(maps));
+		var merger = function(a, b) { return (_.isUndefined(a)) ? b : math.add(a, b); };
+		var mergeArgs = _.flatten([{}, maps, merger]);
+		//console.log("mergeArgs: "+mergeArgs);
+		var merged = _.mergeWith.apply(_, mergeArgs);
+		//console.log("merged: "+JSON.stringify(merged));
+		var total = math.eval(contents[0]);
+		var subTotal = _.reduce(merged, function(total, n) { return math.add(total, n); }, emptyVolume);
+		//console.log("total: "+total);
+		//console.log("subTotal: "+subTotal);
+		//var factor = math.fraction(total, subTotal);
+		try {
+			const result = _.mapValues(merged, function(v) {
+				//console.log({v, totalNumber: total.toNumber("l")})
+				const numerator = math.multiply(v, total.toNumber("l"));
+				const result = math.divide(numerator, subTotal.toNumber("l"))
+				return result.format({precision: 4});
+			});
+			return result;
+		} catch (e) {
+			console.log({total: total.toNumber("l"), subTotal: subTotal.toNumber("l"), factor})
+			console.log(JSON.stringify(contents))
+			throw e;
+		}
+	}
+}
+
+export function mergeContents(contents) {
+	const flat = flattenContents(contents);
+	const pairs = _.toPairs(flat);
+	if (pairs.length === 0) {
+		return [];
+	}
+	else if (pairs.length === 1) {
+		const l = pairs[0];
+		return [l[1], l[0]];
+	}
+	else {
+		const volumes1 = _.values(flat);
+		const volumes2 = volumes1.map(s => math.eval(s));
+		const sum = math.sum(volumes2);
+		const contents2 = [sum.format({precision: 14})].concat(pairs.map(l => [l[1], l[0]]));
+		return contents2;
+	}
+}
+
+/**
+ * Add source contents to destination contents at the given volume.
+ * @param {array} srcContents - current contents of the source well
+ * @param {array} dstContents - current contents of the destination well
+ * @param {string} volume - a string representing the volume to transfer
+ * @return {array} an array whose first element is the new source contents and whose second element is the new destination contents.
+ */
+export function transferContents(srcContents, dstContents, volume) {
+	assert(_.isArray(srcContents));
+	checkContents(srcContents);
+
+	if (_.isString(volume))
+		volume = math.eval(volume);
+
+	const volumeText = volume.format({precision: 14});
+
+	//console.log({dstContents})
+	if (_.isUndefined(dstContents) || _.isEmpty(dstContents) || !_.isArray(dstContents))
+		dstContents = [];
+	//console.log({dstContents})
+	checkContents(dstContents);
+
+	const srcContentsToAppend = [volumeText].concat(_.tail(srcContents));
+	let dstContents2;
+	// If the destination is empty:
+	if (dstContents.length &lt;= 1) {
+		dstContents2 = srcContentsToAppend;
+	}
+	else {
+		const dstVolume = math.eval(dstContents[0]);
+		const totalVolumeText = math.add(dstVolume, volume).format({precision: 14});
+		// If the destination currently only contains one substance:
+		if (dstContents.length === 2) {
+			dstContents2 = [totalVolumeText, dstContents, srcContentsToAppend];
+		}
+		// Otherwise add source to destination contents
+		else {
+			const dstSumOfComponents = math.sum(_.map(_.tail(dstContents), l => math.eval(l[0])));
+			if (math.equal(dstVolume, dstSumOfComponents)) {
+				dstContents2 = _.flatten([totalVolumeText, _.tail(dstContents), [srcContentsToAppend]]);
+			}
+			else {
+				dstContents2 = _.flatten([totalVolumeText, [dstContents], [srcContentsToAppend]]);
+			}
+		}
+	}
+	//console.log("dstContents", dstContents);
+
+	// Decrease volume of source
+	const srcVolume0 = math.eval(srcContents[0]);
+	const srcVolume1 = math.chain(srcVolume0).subtract(volume).done();
+	const srcContents2 = [srcVolume1.format({precision: 14})].concat(_.tail(srcContents));
+
+	checkContents(srcContents2);
+	checkContents(dstContents2);
+
+	return [srcContents2, dstContents2];
+}
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:01+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

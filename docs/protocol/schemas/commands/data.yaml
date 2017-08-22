@@ -1,0 +1,37 @@
+data:
+  module: |
+    The `data` module contains two commands for working with data tables:
+
+    * `data.forEachRow` executes sub-steps for each row in the active data table.
+    * `data.forEachGroup` executes sub-steps for each group of rows in active data table.
+      The grouping criterion is specified by `groupBy` parameter.
+
+data.forEachGroup:
+  description: |
+    Perform sub-steps for every grouping of rows in the active data table.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    groupBy: {description: "The factor(s) to group by", type: [array, string], items: {type: string}}
+    distinctBy: {description: "The factor(s) to distinguish row by", type: [array, string], items: {type: string}}
+    orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
+    durationTotal: {description: "The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
+    durationGroup: {description: "The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
+    interleave: {description: "The time offset for interleaving each group", type: Duration}
+    timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
+    startTimerAfterStep: {description: "The duration timer will be started after this step rather than from the beginning, if specified", type: integer}
+    steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}
+  required: [groupBy]
+
+data.forEachRow:
+  description: |
+    Perform sub-steps for every row in the active data table.
+    The row's values are placed in SCOPE for the sub-steps.
+  properties:
+    agent: {description: "Agent identifier", type: "Agent"}
+    distinctBy: {description: "The factor(s) to distinguish row by", type: [array, string], items: {type: string}}
+    orderBy: {description: "The factor(s) to order by", type: [array, string], items: {type: string}}
+    durationTotal: {description: "The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
+    durationRow: {description: "The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.", type: Duration}
+    interleave: {description: "The time offset for interleaving each group", type: Duration}
+    timers: {description: "Timers that should be used", type: array, items: {type: Timer}}
+    steps: {description: "The sequence of commands to perform for each set of factor values.", type: "object"}

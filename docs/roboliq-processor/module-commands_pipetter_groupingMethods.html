@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-processor Module: commands/pipetter/groupingMethods</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-processor</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="equipment.html">equipment</a></li><li><a href="fluorescenceReader.html">fluorescenceReader</a></li><li><a href="pipetter.html">pipetter</a></li><li><a href="timer.html">timer</a></li><li><a href="transporter.html">transporter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commandHelper.html">commandHelper</a></li><li><a href="module-commands_absorbanceReader.html">commands/absorbanceReader</a></li><li><a href="module-commands_centrifuge.html">commands/centrifuge</a></li><li><a href="module-commands_equipment.html">commands/equipment</a></li><li><a href="module-commands_fluorescenceReader.html">commands/fluorescenceReader</a></li><li><a href="module-commands_incubator.html">commands/incubator</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_pipetter_groupingMethods.html">commands/pipetter/groupingMethods</a></li><li><a href="module-commands_pipetter_pipetterUtils.html">commands/pipetter/pipetterUtils</a></li><li><a href="module-commands_pipetter_sourceMethods.html">commands/pipetter/sourceMethods</a></li><li><a href="module-commands_simulatedHelpers.html">commands/simulatedHelpers</a></li><li><a href="module-commands_timer.html">commands/timer</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-config_roboliq.html">config/roboliq</a></li><li><a href="module-config_roboliqDirectiveHandlers.html">config/roboliqDirectiveHandlers</a></li><li><a href="module-design.html">design</a></li><li><a href="module-generateSchemaDocs.html">generateSchemaDocs</a></li><li><a href="module-misc.html">misc</a></li><li><a href="module-parsers_wellsParser.html">parsers/wellsParser</a></li><li><a href="module-roboliq.html">roboliq</a></li><li><a href="module-stanModel.html">stanModel</a></li><li><a href="module-WellContents.html">WellContents</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	<h1 class="page-title">Module: commands/pipetter/groupingMethods</h1>
+<section>
+
+<header>
+    
+</header>
+
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description"><p>Functions to break pipeetting items into groups that should be handled simultaneously.
+Possible methods include:</p>
+<ul>
+<li>each item is its own group</li>
+<li>groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet)</li>
+<li>groups are built (with limited look-ahead) where alternatives are investigated when a group splits over two columns</li>
+<li>have a fixed assignment between wells and syringes (i.e. row n = tip (n % 4)) for the sake of managing differences between tips</li>
+</ul></div>
+        
+
+        
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="commands_pipetter_groupingMethods.js.html">commands/pipetter/groupingMethods.js</a>,
+				 <a href="commands_pipetter_groupingMethods.js.html#sunlight-1-line-1">line 1</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        <dl>
+            
+<hr>
+<dt>
+    <h4 class="name" id=".groupingMethod1"><span class="type-signature">&lt;static> </span>groupingMethod1(items)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Place each item into its own group.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>items</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of pipetting items.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="commands_pipetter_groupingMethods.js.html">commands/pipetter/groupingMethods.js</a>,
+				 <a href="commands_pipetter_groupingMethods.js.html#sunlight-1-line-21">line 21</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>An array of groups of items; each group is a sublist of items from the original array.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">array</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".groupingMethod2"><span class="type-signature">&lt;static> </span>groupingMethod2(items, syringes, tipModelToSyringes)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet).
+Also break groups on program changes.
+TODO: break group if a previous dispense well is used as a source well.</p>
+<p>NOTE: if 'tipModelToSyringes' is supplied, this algorithm will not work predictably if the sets of syringes partially overlap with each other (complete overlap is fine).</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>items</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of pipetting items.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>syringes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of integers representing the available syringe indexes</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tipModelToSyringes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="commands_pipetter_groupingMethods.js.html">commands/pipetter/groupingMethods.js</a>,
+				 <a href="commands_pipetter_groupingMethods.js.html#sunlight-1-line-37">line 37</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>An array of groups of items; each group is a sublist of items from the original array.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">array</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
+    <h4 class="name" id=".groupingMethod3"><span class="type-signature">&lt;static> </span>groupingMethod3(items, syringes, tipModelToSyringes)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Groups are built until no more syringes would be available based on the item's tipModel (but syringe doesn't need to be assigned yet).
+It tries to group by <code>layer</code> by putting as many items from the same layer into the group before moving onto the next item.
+Breaks are forced on:</p>
+<ul>
+<li>program changes</li>
+<li>when a previous dispense well is used as a source well</li>
+</ul>
+<p>NOTE: if 'tipModelToSyringes' is supplied, this algorithm will not work predictably if the sets of syringes partially overlap with each other (complete overlap is fine).</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>items</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of pipetting items.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>syringes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of integers representing the available syringe indexes</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>tipModelToSyringes</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="commands_pipetter_groupingMethods.js.html">commands/pipetter/groupingMethods.js</a>,
+				 <a href="commands_pipetter_groupingMethods.js.html#sunlight-1-line-97">line 97</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>An array of groups of items; each group is a sublist of items from the original array.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">array</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:01+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
