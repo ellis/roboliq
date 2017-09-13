@@ -1,0 +1,75 @@
+# Run with:
+# 'C:\Users\localadmin\Desktop\Ellis\roboliq\node_modules\.bin\roboliq-processor' --progress -P 'C:\ProgramData\Tecan\EVOware\database\scripts\EK' --evoware 'C:\ProgramData\Tecan\EVOware\database\Carrier.cfg,C:\ProgramData\Tecan\EVOware\database\wt_templates\NewLayout_Feb2015.ewt,ourlab.mario.evoware' 'C:\Users\localadmin\Desktop\Ellis\roboliq\config\bsse-mario.js' EK01-test.yaml
+roboliq: v1
+description: |
+  We want to have an iteration per well, where the corresponding components are mixed and fluorescence intensity is measured over time before we get to the next iteration for the next well.
+
+  Q: What shall we do about piercing, since it damages the large tips?
+parameters:
+  wells:
+    description: Which wells should we measure
+    value: A01 down D01
+  volume1:
+    description: What is the volume in ul of the first DNA? (0 to 40 ul)
+    value: 5 ul
+  volume2:
+    description: What is the volume in ul of the second DNA (injected)? (0 to 100 ul)
+    value: 95 ul
+
+objects:
+  plate1:
+    description: |
+      A sealed 96-well plate where each well has a solution of one unlabeled DNA.
+      (Note: some wells will have the solution of the same unlabeled DNA in order to have replicates for
+      our measurements, but in principle each well will have the same labeled DNA but different
+      unlabeled DNA)
+    type: Plate
+    model: ourlab.model.EK_96_well_Greiner_Black
+    location: ourlab.mario.site.P1DOWNHOLDER
+    sealed: true
+  plate2:
+    description: empty 384-well plate to be used for fluorescence readouts
+    type: Plate
+    model: ourlab.model.EK_384_greiner_flat_bottom
+    location: ourlab.mario.site.P3
+
+  design1:
+    type: Design
+    conditions:
+      well*=allocateWells:
+        rows: 8
+        columns: 12
+        wells: $#wells
+
+steps:
+  1:
+    command: evoware._userPrompt
+    agent: ourlab.mario.evoware
+    #text: "Add total volume of labeled DNA solution needed for the whole plate (this component will be the same for all wells) in the reader injector."
+    text: "`Please add to deck: One black 384-well-MTP on Pos P3, one sealed 96-well PCR plate with First DNA on P1. One 50-ml Facon tube with >TotalVolSecDNA ul of second DNA in Injector-Device.`"
+
+  2:
+    data: {source: design1}
+    command: experiment.forEachRow
+    steps:
+      1:
+        description: "`Pipette well {{$well}}`"
+        command: pipetter.pipette
+        program: "Water_C_50_EK_DNA"
+        sourceLabware: plate1
+        destinationLabware: plate2
+        items:
+        - source: $well
+          destination: $well
+          volume: $#volume1
+          syringe: 8
+      2:
+        description: "`Measure well {{$well}}`"
+        command: fluorescenceReader.measurePlate
+        object: plate2
+        programFileTemplate: ./EK_ReaderScript.mdfx
+        program:
+          wells: $$well
+        output:
+          joinKey: well
+          appendTo: measurements

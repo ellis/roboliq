@@ -1,0 +1,143 @@
+roboliq: v1
+
+description: |
+  1. Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
+  2. Tania's Assam protocol for testing a range of pHs
+  3. repeat pH measurements
+
+parameters:
+  SALTWATER_VOLUME:
+    description: Volume of saltwater to dispense in each well
+    value: 40 ul
+  GFP_VOLUME:
+    description: Volume of GFP to dispense in each well
+    value: 5 ul
+
+objects:
+  mixPlate:
+    type: Plate
+    model!: ourlab.model.plateModel_384_square
+    location!: ourlab.mario.site.P3
+
+  tubes1!:
+    type: Plate
+    description: GFP eppendorf tubes
+    model: ourlab.model.tubeHolderModel_1500ul
+    location: ourlab.mario.site.T3
+  trough1!:
+    type: Plate
+    description: trough for water/glycerol/salt mix
+    model: ourlab.model.troughModel_100ml
+    location: ourlab.mario.site.R6
+    contents: [Infinity l, saltwater]
+  sourcePlate1!:
+    type: Plate
+    description: buffer plate
+    model: ourlab.model.plateModel_96_dwp
+    location: ourlab.mario.site.P2
+
+  saltwater:   {type: Liquid, group: Buffers, wells!: trough1(C01 down to F01)}
+
+  # Buffers
+  hepes_850:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A01 down to D01)}
+  hepes_650:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A02 down to D02)}
+  pipes_775:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A03 down to D03)}
+  pipes_575:   {type: Liquid, group: Buffers, wells!: sourcePlate1(A04 down to D04)}
+  mes_710:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A05 down to D05)}
+  mes_510:     {type: Liquid, group: Buffers, wells!: sourcePlate1(A06 down to D06)}
+  acetate_575: {type: Liquid, group: Buffers, wells!: sourcePlate1(A07 down to D07)}
+  acetate_375: {type: Liquid, group: Buffers, wells!: sourcePlate1(A08 down to D08)}
+
+  # GFPs
+  sfGFP:       {type: Liquid, group: GFPs, description: wild type, wells!: tubes1(A01)}
+  Q204H_N149Y: {type: Liquid, description: double mutant, wells!: tubes1(A02)}
+  tdGFP:       {type: Liquid, description: fusion of double mutant, wells!: tubes1(A03)}
+  N149Y:       {type: Liquid, description: single mutant, wells!: tubes1(A04)}
+  Q204H:       {type: Liquid, description: single mutant, wells!: tubes1(A05)}
+
+  phDesign:
+    type: Data
+    randomSeed: 0
+    design:
+      gfp*: [sfGFP, Q204H_N149Y, tdGFP, N149Y, Q204H]
+      buffer*:
+        acetate:
+          acid: acetate_375
+          base: acetate_575
+          acidPH: 3.75
+          basePH: 5.75
+          baseVolume*=range: {count: 8, from: 0, till: 30, decimals: 1, units: ul}
+        mes:
+          acid: mes_510
+          base: mes_710
+          acidPH: 5.10
+          basePH: 7.10
+          baseVolume*=range: {count: 7, from: 0, till: 30, decimals: 1, units: ul}
+        pipes:
+          acid: pipes_575
+          base: pipes_775
+          acidPH: 5.75
+          basePH: 7.75
+          baseVolume*=range: {count: 5, from: 0, till: 30, decimals: 1, units: ul}
+        hepes:
+          acid: hepes_650
+          base: hepes_850
+          acidPH: 6.50
+          basePH: 8.50
+          baseVolume*=range: {count: 5, from: 0, till: 30, decimals: 1, units: ul}
+      acidVolume=calculate: "30ul - baseVolume"
+      pH=calculate:
+        expression: "(acidPH * acidVolume + basePH * baseVolume) / (30ul)"
+        decimals: 2
+      replicate*: 3
+      order=range: {order: shuffle}
+      well=allocateWells: {rows: 16, columns: 24, orderBy: order}
+    select: [gfp, buffer, pH, replicate, acid, base, acidVolume, baseVolume, order, well]
+
+steps:
+  1:
+    description: Prepare the mixture plate with a range of pH levels
+    data:
+      source: phDesign
+      orderBy: order
+    1:
+      description: Dispense water and buffer first (sorted to minimize tip cleaning)
+      command: pipetter.pipetteMixtures
+      mixtures:
+        data():
+          map:
+            - {source: saltwater, volume: $#SALTWATER_VOLUME, layer: 1}
+            - {source: $acid, volume: $acidVolume, layer: 2}
+            - {source: $base, volume: $baseVolume, layer: 3}
+            - {source: $gfp, volume: $GFP_VOLUME, layer: 4}
+      destinationLabware: mixPlate
+      destinations: $well
+      clean: thorough
+      cleanBetweenSameSource: none
+#    1:
+#      description: Create mixtures (sorted to minimize tip cleaning)
+#      command: pipetter.pipette
+#      items:
+#        data():
+#          map:
+#            - {source: saltwater, destination: $well, volume: $SALTWATER_VOLUME, layer: 1}
+#            - {source: $acid, destination: $well, volume: $acidVolume, layer: 2}
+#            - {source: $base, destination: $well, volume: $baseVolume, layer: 3}
+#            - {source: $gfp, destination: $well, volume: $GFP_VOLUME, layer: 4}
+#          flatten: true
+#          orderBy: [layer, source]
+#      destinationLabware: mixPlate
+#      clean: thorough
+#      cleanBetweenSameSource: none
+    2:
+      command: sealer.sealPlate
+      object: mixPlate
+    3:
+      command: absorbanceReader.measurePlate
+      object: mixPlate
+      program:
+        excitationWavelength: 488nm
+        emissionWavelength: 510nm
+      output:
+        joinKey: well
+        appendTo: pH_measurements
