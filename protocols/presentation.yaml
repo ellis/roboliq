@@ -1,9 +1,16 @@
+# npm run processor -- --progress -T -P 'C:\ProgramData\Tecan\EVOware\database\scripts\Ellis\EvowareScripts' --evoware ../testdata/bsse-mario/Carrier.cfg,../testdata/bsse-mario/OV_TranformationTestNew_20170111.ewt,ourlab.mario.evoware ../config/bsse-mario.js ../protocols/presentation.yaml
+
 roboliq: v1
 
 description: |
   1. Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
   2. Tania's Assam protocol for testing a range of pHs
   3. repeat pH measurements
+
+config:
+  evowareCompiler:
+    timing: false
+    retractTips: false
 
 parameters:
   SALTWATER_VOLUME:
@@ -91,7 +98,7 @@ objects:
         decimals: 2
       replicate*: 3
       order=range: {order: shuffle}
-      well=allocateWells: {rows: 16, columns: 24, orderBy: order}
+      well=allocateWells: {rows: 16, columns: 24, orderBy: order, rowJump: 1}
     select: [gfp, buffer, pH, replicate, acid, base, acidVolume, baseVolume, order, well]
 
 steps:
@@ -100,39 +107,41 @@ steps:
     data:
       source: phDesign
       orderBy: order
+    # 1:
+    #   description: Dispense water and buffer first (sorted to minimize tip cleaning)
+    #   command: pipetter.pipetteMixtures
+    #   mixtures:
+    #     data():
+    #       map:
+    #         - {source: saltwater, volume: $#SALTWATER_VOLUME, layer: 1}
+    #         - {source: $acid, volume: $acidVolume, layer: 2}
+    #         - {source: $base, volume: $baseVolume, layer: 3}
+    #         - {source: $gfp, volume: $GFP_VOLUME, layer: 4}
+    #   destinationLabware: mixPlate
+    #   destinations: $well
+    #   clean: thorough
+    #   cleanBetweenSameSource: none
     1:
-      description: Dispense water and buffer first (sorted to minimize tip cleaning)
-      command: pipetter.pipetteMixtures
-      mixtures:
+      description: Create mixtures (sorted to minimize tip cleaning)
+      command: pipetter.pipette
+      items:
         data():
           map:
-            - {source: saltwater, volume: $#SALTWATER_VOLUME, layer: 1}
-            - {source: $acid, volume: $acidVolume, layer: 2}
-            - {source: $base, volume: $baseVolume, layer: 3}
-            - {source: $gfp, volume: $GFP_VOLUME, layer: 4}
+            - {source: saltwater, destination: $well, volume: $SALTWATER_VOLUME, layer: 1}
+            - {source: $acid, destination: $well, volume: $acidVolume, layer: 2}
+            - {source: $base, destination: $well, volume: $baseVolume, layer: 3}
+            - {source: $gfp, destination: $well, volume: $GFP_VOLUME, layer: 4}
+          flatten: true
+          orderBy: [layer, source]
       destinationLabware: mixPlate
-      destinations: $well
       clean: thorough
       cleanBetweenSameSource: none
-#    1:
-#      description: Create mixtures (sorted to minimize tip cleaning)
-#      command: pipetter.pipette
-#      items:
-#        data():
-#          map:
-#            - {source: saltwater, destination: $well, volume: $SALTWATER_VOLUME, layer: 1}
-#            - {source: $acid, destination: $well, volume: $acidVolume, layer: 2}
-#            - {source: $base, destination: $well, volume: $baseVolume, layer: 3}
-#            - {source: $gfp, destination: $well, volume: $GFP_VOLUME, layer: 4}
-#          flatten: true
-#          orderBy: [layer, source]
-#      destinationLabware: mixPlate
-#      clean: thorough
-#      cleanBetweenSameSource: none
     2:
+      description: Seal plate
       command: sealer.sealPlate
       object: mixPlate
     3:
+      description: Measure fluorescence
       command: absorbanceReader.measurePlate
       object: mixPlate
       program:

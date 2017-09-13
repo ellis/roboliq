@@ -857,8 +857,10 @@ const actionHandlers = {
 	"allocateWells": (_rows, rowIndexes, otherRowIndexes, name, action, randomEngine) => {
 		const rows = action.rows;
 		const cols = action.columns;
+		const rowJump = action.rowJump || 0; // whether to jump over rows (and then return to the skipped ones), and by how much
 		assert(_.isNumber(rows) && rows > 0, "missing required positive number `rows`");
 		assert(_.isNumber(cols) && cols > 0, "missing required positive number `columns`");
+		assert(_.isNumber(rowJump) && rowJump >= 0, "`rowJump`, if specified, must be a number >= 0");
 		const from0 = action.from || 1;
 		let iFrom;
 		if (_.isInteger(from0)) {
@@ -878,7 +880,11 @@ const actionHandlers = {
 		else {
 			const byColumns = _.get(action, "byColumns", true);
 			values = _.range(iFrom, rows * cols).map(i => {
-				const [row, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+				const [row0, col] = (byColumns) ? [i % rows, Math.floor(i / rows)] : [Math.floor(i / cols), i % cols];
+				// Calculate row when jumping
+				const row1 = row0 * (rowJump + 1);
+				const rowLayer = Math.floor(row1 / rows);
+				const row = (row1 + rowLayer) % rows;
 				const s = locationRowColToText(row + 1, col + 1);
 				// console.log({row, col, s});
 				return s;

@@ -288,7 +288,7 @@ function processParserResult(result, objects, text, config = {}) {
 						case "row-jump":
 							// Number of rows of space to leave between rows
 							var n = phrase[1];
-							expect.truthy(null, n >= 0, "row-spacing value must be >= 0");
+							expect.truthy(null, n >= 0, "row-jump value must be >= 0");
 							var cycleLen = n + 1;
 
 							var l2 = [];
