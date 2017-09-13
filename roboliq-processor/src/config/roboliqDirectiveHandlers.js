@@ -112,6 +112,9 @@ function directive_data(spec, data) {
 			result = result.join(spec.join);
 			// console.log("result5: "+JSON.stringify(result))
 		}
+		if (spec.orderBy) {
+			result = _.orderBy(result, spec.orderBy);
+		}
 		if (spec.reverse) {
 			result = _.reverse(result);
 		}
