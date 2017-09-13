@@ -103,7 +103,7 @@ objects:
     description: PVDF filter plate up to 350 ul
     type: Plate
     model: ourlab.model.plateModel_96_round_filter_OV
-    location: ourlab.mario.site.HOTEL32_D1
+    location: ourlab.mario.site.P3
   wastePlate:
     description: Single-well plate for waste
     type: Plate
@@ -122,7 +122,7 @@ objects:
     description: 96 well PCR plate with 100ng of DNA prepipetted on wells to be used
     type: Plate
     model: ourlab.model.plateModel_96_pcr
-    location: ourlab.mario.site.P3
+    location: ourlab.mario.site.P4PCR
 
   design0:
     type: Data
@@ -425,11 +425,6 @@ steps:
             command: transporter.moveLidFromContainerToSite
             object: wastePlateLid
             destination: ourlab.mario.site.P6
-    26:
-        description: Put PCR plate on bench
-        command: transporter.movePlate
-        object: pcrPlate
-        destination: ourlab.mario.site.P4PCR
     27:
       description: Resuspension into LiAc Glycerol
       1:
