@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Roboliq</title>
+  <meta name="description" content="Roboliq">
+  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Roboliq" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  <meta name="github-repo" content="ellis/roboliq" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Roboliq" />
+  
+  
+  
+
+<meta name="author" content="Ellis Whitehead">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="intro.html">
+<link rel="next" href="input-formats.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#structure-of-the-manual"><i class="fa fa-check"></i>Structure of the manual</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#additional-documentation"><i class="fa fa-check"></i>Additional documentation</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software-information-and-conventions"><i class="fa fa-check"></i>Software information and conventions</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#motivation"><i class="fa fa-check"></i><b>1.1</b> Motivation</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#get-started"><i class="fa fa-check"></i><b>1.2</b> Get started</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#usage"><i class="fa fa-check"></i><b>1.3</b> Usage</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="quick-start.html"><a href="quick-start.html"><i class="fa fa-check"></i><b>2</b> Quick Start</a><ul>
+<li class="chapter" data-level="2.1" data-path="quick-start.html"><a href="quick-start.html#the-simplest-protocol"><i class="fa fa-check"></i><b>2.1</b> The simplest protocol</a></li>
+<li class="chapter" data-level="2.2" data-path="quick-start.html"><a href="quick-start.html#a-protocol-with-a-minimal-configuration"><i class="fa fa-check"></i><b>2.2</b> A protocol with a minimal configuration</a></li>
+<li class="chapter" data-level="2.3" data-path="quick-start.html"><a href="quick-start.html#a-bsse-protocol-for-mario"><i class="fa fa-check"></i><b>2.3</b> A BSSE protocol for mario</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="input-formats.html"><a href="input-formats.html"><i class="fa fa-check"></i><b>3</b> Input formats</a></li>
+<li class="chapter" data-level="4" data-path="configuration.html"><a href="configuration.html"><i class="fa fa-check"></i><b>4</b> Robot configuration</a><ul>
+<li class="chapter" data-level="4.1" data-path="configuration.html"><a href="configuration.html#evoware-configuration"><i class="fa fa-check"></i><b>4.1</b> Evoware configuration</a></li>
+<li class="chapter" data-level="4.2" data-path="configuration.html"><a href="configuration.html#components"><i class="fa fa-check"></i><b>4.2</b> Components</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="configuration.html"><a href="configuration.html#roboliq"><i class="fa fa-check"></i><b>4.2.1</b> <code>roboliq</code></a></li>
+<li class="chapter" data-level="4.2.2" data-path="configuration.html"><a href="configuration.html#schemas"><i class="fa fa-check"></i><b>4.2.2</b> <code>schemas</code></a></li>
+<li class="chapter" data-level="4.2.3" data-path="configuration.html"><a href="configuration.html#objects"><i class="fa fa-check"></i><b>4.2.3</b> <code>objects</code></a></li>
+<li class="chapter" data-level="4.2.4" data-path="configuration.html"><a href="configuration.html#commandhandlers"><i class="fa fa-check"></i><b>4.2.4</b> <code>commandHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="configuration.html"><a href="configuration.html#logic-components"><i class="fa fa-check"></i><b>4.3</b> Logic components</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="configuration.html"><a href="configuration.html#predicates"><i class="fa fa-check"></i><b>4.3.1</b> <code>predicates</code></a></li>
+<li class="chapter" data-level="4.3.2" data-path="configuration.html"><a href="configuration.html#objecttopredicateconverters"><i class="fa fa-check"></i><b>4.3.2</b> <code>objectToPredicateConverters</code></a></li>
+<li class="chapter" data-level="4.3.3" data-path="configuration.html"><a href="configuration.html#planhandlers"><i class="fa fa-check"></i><b>4.3.3</b> <code>planHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="configuration.html"><a href="configuration.html#conclusion"><i class="fa fa-check"></i><b>4.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="simple-protocols.html"><a href="simple-protocols.html"><i class="fa fa-check"></i><b>5</b> Simple Protocols</a><ul>
+<li class="chapter" data-level="5.1" data-path="simple-protocols.html"><a href="simple-protocols.html#objects-1"><i class="fa fa-check"></i><b>5.1</b> Objects</a></li>
+<li class="chapter" data-level="5.2" data-path="simple-protocols.html"><a href="simple-protocols.html#steps"><i class="fa fa-check"></i><b>5.2</b> Steps</a></li>
+<li class="chapter" data-level="5.3" data-path="simple-protocols.html"><a href="simple-protocols.html#conclusion-1"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="advanced-protocols.html"><a href="advanced-protocols.html"><i class="fa fa-check"></i><b>6</b> Advanced Protocols</a><ul>
+<li class="chapter" data-level="6.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#parameters"><i class="fa fa-check"></i><b>6.1</b> Parameters</a></li>
+<li class="chapter" data-level="6.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#objects-2"><i class="fa fa-check"></i><b>6.2</b> Objects</a></li>
+<li class="chapter" data-level="6.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data"><i class="fa fa-check"></i><b>6.3</b> Data</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-type"><i class="fa fa-check"></i><b>6.3.1</b> <code>Data</code> type</a></li>
+<li class="chapter" data-level="6.3.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-property"><i class="fa fa-check"></i><b>6.3.2</b> <code>data</code> property</a></li>
+<li class="chapter" data-level="6.3.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data.-commands"><i class="fa fa-check"></i><b>6.3.3</b> <code>data.*</code> commands</a></li>
+<li class="chapter" data-level="6.3.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-directive"><i class="fa fa-check"></i><b>6.3.4</b> <code>data()</code> directive</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope"><i class="fa fa-check"></i><b>6.4</b> Scope</a></li>
+<li class="chapter" data-level="6.5" data-path="advanced-protocols.html"><a href="advanced-protocols.html#substitution"><i class="fa fa-check"></i><b>6.5</b> Substitution</a><ul>
+<li class="chapter" data-level="6.5.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope-substitution"><i class="fa fa-check"></i><b>6.5.1</b> Scope $ substitution</a></li>
+<li class="chapter" data-level="6.5.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#template-substitution"><i class="fa fa-check"></i><b>6.5.2</b> Template ` substitution</a></li>
+<li class="chapter" data-level="6.5.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#directive-substitution"><i class="fa fa-check"></i><b>6.5.3</b> Directive () substitution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="design-tables.html"><a href="design-tables.html"><i class="fa fa-check"></i><b>7</b> Design Tables</a><ul>
+<li class="chapter" data-level="7.1" data-path="design-tables.html"><a href="design-tables.html#first-examples"><i class="fa fa-check"></i><b>7.1</b> First examples</a></li>
+<li class="chapter" data-level="7.2" data-path="design-tables.html"><a href="design-tables.html#nested-branching"><i class="fa fa-check"></i><b>7.2</b> Nested branching</a></li>
+<li class="chapter" data-level="7.3" data-path="design-tables.html"><a href="design-tables.html#hidden-factors"><i class="fa fa-check"></i><b>7.3</b> Hidden factors</a></li>
+<li class="chapter" data-level="7.4" data-path="design-tables.html"><a href="design-tables.html#actions"><i class="fa fa-check"></i><b>7.4</b> Actions</a><ul>
+<li class="chapter" data-level="7.4.1" data-path="design-tables.html"><a href="design-tables.html#allocatewells"><i class="fa fa-check"></i><b>7.4.1</b> <code>allocateWells</code></a></li>
+<li class="chapter" data-level="7.4.2" data-path="design-tables.html"><a href="design-tables.html#range"><i class="fa fa-check"></i><b>7.4.2</b> <code>range</code></a></li>
+<li class="chapter" data-level="7.4.3" data-path="design-tables.html"><a href="design-tables.html#calculate"><i class="fa fa-check"></i><b>7.4.3</b> <code>calculate</code></a></li>
+<li class="chapter" data-level="7.4.4" data-path="design-tables.html"><a href="design-tables.html#case"><i class="fa fa-check"></i><b>7.4.4</b> <code>case</code></a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="design-tables.html"><a href="design-tables.html#step-and-data-nesting"><i class="fa fa-check"></i><b>7.5</b> Step and data nesting</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Roboliq</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="quick-start" class="section level1">
+<h1><span class="header-section-number">2</span> Quick Start</h1>
+<p>Let’s get started with a hands-on walk through. We’ll begin with a very basic protocol and build up from there as follows:</p>
+<ol style="list-style-type: decimal">
+<li>a protocol that doesn’t require any configuration or backend</li>
+<li>a protocol with a minimal configuration</li>
+<li>a protocol with a backend</li>
+<li>a protocol compiled for Evoware</li>
+<li>running the server and getting the data during execution of an Evoware script</li>
+</ol>
+<div id="the-simplest-protocol" class="section level2">
+<h2><span class="header-section-number">2.1</span> The simplest protocol</h2>
+<p>We’ll test a simple protocol to show you how to run the software.</p>
+<ol style="list-style-type: decimal">
+<li><p>Navigate to the <code>protocols</code> subdirectory and type this code into a file named <code>walkthrough1.yaml</code> (or copy the file <code>walkthrough1-sample.yaml</code>):</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">description:</span> test that doesn&#39;t require configuration
+<span class="fu">steps:</span>
+  <span class="fu">command:</span> system.echo
+  <span class="fu">text:</span> Hello, World!</code></pre></div></li>
+<li><p>Open the terminal, and navigate to the directory where you copied the Roboliq repository.</p>
+<p><code>cd ~/Desktop/Ellis/roboliq/</code></p></li>
+<li><p>Run Roboliq from the terminal, passing <code>walkthrough1.yaml</code> as input:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- protocols/walkthrough1.yaml</code></pre></div>
+<p>If there were no errors, you can now find a file named <code>protocols/walkthrough1.out.json</code>. The output file contains a lot of information: in addition to your script, it also contains the core configuration data that comes with Roboliq by default. If you open the file, you can find a <code>steps</code> property which looks like this:</p>
+<div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="er">&quot;steps&quot;:</span> <span class="fu">{</span>
+  <span class="dt">&quot;1&quot;</span><span class="fu">:</span> <span class="fu">{</span>
+    <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;system._echo&quot;</span><span class="fu">,</span>
+    <span class="dt">&quot;value&quot;</span><span class="fu">:</span> <span class="st">&quot;Hello, World!&quot;</span>
+  <span class="fu">},</span>
+  <span class="dt">&quot;command&quot;</span><span class="fu">:</span> <span class="st">&quot;system.echo&quot;</span><span class="fu">,</span>
+  <span class="dt">&quot;value&quot;</span><span class="fu">:</span> <span class="st">&quot;Hello, World!&quot;</span>
+<span class="fu">}</span></code></pre></div>
+<p>You can see a substep with the command <code>system._echo</code>. Commands that begin with an underscore are “final” instructions that will be passed the the backend without further processing. It may be confusing that the original command (<code>system.echo</code>) and its properties appear <em>after</em> the subcommand, but this is just an artifact of how JavaScript always prints numeric properties first in JSON data.</p>
+<p>An important difference between <code>system.echo</code> and <code>system._echo</code> is that <code>system.echo</code> is a higher level command that can handles variables, whereas <code>system._echo</code> just takes the value verbatim.</p></li>
+<li><p>Run the command above again, but this time add the <code>-P compiled</code> argument to put the output in a separate <code>compiled</code> folder.</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- protocols/walkthrough1.yaml -P compiled/</code></pre></div>
+<p>This will automatically create a subfolder named <code>compiled/walkthrough1</code> and it will save the file <code>compiled/walkthrough1/walkthrough1.out.json</code>. It’s important to have a separate folder for every experiment in order to properly organize measured data for each experimental run.</p></li>
+</ol>
+<p>Now you know how to run the software and write a basic protocol. Let’s continue to the next step, where we’ll see how to create a basic robot configuration file.</p>
+</div>
+<div id="a-protocol-with-a-minimal-configuration" class="section level2">
+<h2><span class="header-section-number">2.2</span> A protocol with a minimal configuration</h2>
+<p>The robot configuration file lets you specify the capabilities of a robot. Let’s start building such a configuration – this task can be quite technical and complicated, so we’ll keep it basic here.</p>
+<p>We will write the robot configuration in JavaScript; this way, we can later use helper function that will simplify configuring some of the equipment. Please copy the code below to a file named <code>config/walkthrough2a-config.js</code></p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="co">// This variable lets us export our configuration to Roboliq</span>
+<span class="va">module</span>.<span class="at">exports</span> <span class="op">=</span> <span class="op">{</span>
+  <span class="co">// The targetted version of Roboliq</span>
+  <span class="st">&quot;roboliq&quot;</span><span class="op">:</span> <span class="st">&quot;v1&quot;</span><span class="op">,</span>
+  <span class="co">// The configuration objects</span>
+  <span class="st">&quot;objects&quot;</span><span class="op">:</span> <span class="op">{</span>
+    <span class="co">// The top namespace for things in &quot;our lab&quot;</span>
+    <span class="st">&quot;ourlab&quot;</span><span class="op">:</span> <span class="op">{</span>
+      <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Namespace&quot;</span><span class="op">,</span>
+      <span class="co">// The namespace for things on our robot &quot;mario&quot;</span>
+      <span class="st">&quot;mario&quot;</span><span class="op">:</span> <span class="op">{</span>
+        <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Namespace&quot;</span><span class="op">,</span>
+        <span class="co">// An object to represent Mario&#39;s controller software</span>
+        <span class="co">// An `Agent` object executes instructions, such as operating equipment.</span>
+        <span class="st">&quot;controller&quot;</span><span class="op">:</span> <span class="op">{</span>
+          <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Agent&quot;</span>
+        <span class="op">},</span>
+        <span class="co">// The robot&#39;s &quot;arm&quot;, used for moving labware</span>
+        <span class="st">&quot;transporter1&quot;</span><span class="op">:</span> <span class="op">{</span>
+          <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Transporter&quot;</span><span class="op">,</span>
+        <span class="op">},</span>
+        <span class="co">// The namespace for mario&#39;s &quot;sites&quot; -- i.e., where it can place the</span>
+        <span class="co">// labware.  In this case, we have just two sites, named P1 and P2.</span>
+        <span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="op">{</span>
+          <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Namespace&quot;</span><span class="op">,</span>
+          <span class="st">&quot;P1&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Site&quot;</span> <span class="op">},</span>
+          <span class="st">&quot;P2&quot;</span><span class="op">:</span> <span class="op">{</span> <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Site&quot;</span> <span class="op">}</span>
+        <span class="op">}</span>
+      <span class="op">},</span>
+      <span class="co">// Namespace for labware models in our lab</span>
+      <span class="st">&quot;model&quot;</span><span class="op">:</span> <span class="op">{</span>
+        <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;Namespace&quot;</span><span class="op">,</span>
+        <span class="co">// A 96-well plate model with 8 rows and 12 columns</span>
+        <span class="st">&quot;plateModel_96well&quot;</span><span class="op">:</span> <span class="op">{</span>
+          <span class="st">&quot;type&quot;</span><span class="op">:</span> <span class="st">&quot;PlateModel&quot;</span><span class="op">,</span>
+          <span class="st">&quot;label&quot;</span><span class="op">:</span> <span class="st">&quot;96 well plate&quot;</span><span class="op">,</span>
+          <span class="st">&quot;rows&quot;</span><span class="op">:</span> <span class="dv">8</span><span class="op">,</span>
+          <span class="st">&quot;columns&quot;</span><span class="op">:</span> <span class="dv">12</span>
+        <span class="op">}</span>
+      <span class="op">}</span>
+    <span class="op">}</span>
+  <span class="op">},</span>
+  <span class="co">// The logical predicates for our configuration (see explanation in text below)</span>
+  <span class="st">&quot;predicates&quot;</span><span class="op">:</span> [
+    <span class="co">// -----------------</span>
+    <span class="co">// Transporter logic</span>
+    <span class="co">// -----------------</span>
+    <span class="co">// Declare a site model siteModel_1</span>
+    <span class="op">{</span><span class="st">&quot;isSiteModel&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;model&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteModel_1&quot;</span><span class="op">}},</span>
+    <span class="co">// Our 96-well plate can be placed on top of siteModel_1</span>
+    <span class="op">{</span><span class="st">&quot;stackable&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;below&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteModel_1&quot;</span><span class="op">,</span> <span class="st">&quot;above&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.model.plateModel_96well&quot;</span><span class="op">}},</span>
+    <span class="co">// Both sites, P1 and P2, are assigned to siteModel_1</span>
+    <span class="op">{</span><span class="st">&quot;siteModel&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.site.P1&quot;</span><span class="op">,</span> <span class="st">&quot;siteModel&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteModel_1&quot;</span><span class="op">}},</span>
+    <span class="op">{</span><span class="st">&quot;siteModel&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.site.P2&quot;</span><span class="op">,</span> <span class="st">&quot;siteModel&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteModel_1&quot;</span><span class="op">}},</span>
+    <span class="co">// The list of sites that we can move labware between directly (i.e. without needing to go through an intermediate site)</span>
+    <span class="op">{</span><span class="st">&quot;siteCliqueSite&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;siteClique&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteClique1&quot;</span><span class="op">,</span> <span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.site.P1&quot;</span><span class="op">}},</span>
+    <span class="op">{</span><span class="st">&quot;siteCliqueSite&quot;</span><span class="op">:</span> <span class="op">{</span><span class="st">&quot;siteClique&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteClique1&quot;</span><span class="op">,</span> <span class="st">&quot;site&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.site.P2&quot;</span><span class="op">}},</span>
+    <span class="co">// Let Roboliq know that mario&#39;s controller can use transporter1 to move</span>
+    <span class="co">// labware around on siteClique1.</span>
+    <span class="co">// The `program` property provides an additional specification for how the</span>
+    <span class="co">// transporter should move or grip the labware (not always necessary)</span>
+    <span class="op">{</span><span class="st">&quot;transporter.canAgentEquipmentProgramSites&quot;</span><span class="op">:</span> <span class="op">{</span>
+        <span class="st">&quot;agent&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.controller&quot;</span><span class="op">,</span>
+        <span class="st">&quot;equipment&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.transporter1&quot;</span><span class="op">,</span>
+        <span class="st">&quot;program&quot;</span><span class="op">:</span> <span class="st">&quot;Narrow&quot;</span><span class="op">,</span>
+        <span class="st">&quot;siteClique&quot;</span><span class="op">:</span> <span class="st">&quot;ourlab.mario.siteClique1&quot;</span>
+    <span class="op">}}</span>
+  ]
+<span class="op">};</span></code></pre></div>
+<p>The logic for labware transportation is somewhat complex – to understand it, you’ll need to know the following concepts:</p>
+<ul>
+<li>site: a location where the transporter can place labware</li>
+<li>site model: basically a list of labware that a site can accept; since some sites will accept the same set of labware, they can share the same “site model”.</li>
+<li>stackable: this mean that one thing can be placed on top of another thing. In particular, it specified which labware models can go on top of which site models.</li>
+<li>site clique: a set of sites that that permit direct movement of labware among all members of the clique. This concept is a bit tricky. A simple robot configuration might just have a single clique that includes all of its sites. But more complex configuration may need to prohibit some movements. For example, we might have sites on the left of the bench and sites on the right, which are partially blocked by equipment in the middle. If each side of the bench has its own transporter arm and there is a single site in the middle that both arms can reach, then we could define two clicks: the left clique would contain all sites on the left plus the middle site, and the right clique would contain all sites on the right plus the middle site. This would ensure that Roboliq never generates instructions to directly move a plate from the left side to the right side, but rather first navigates through the middle site.</li>
+</ul>
+<p>Now write a script to verify that we can move a plate between the two bench sites. Save this file as <code>protocols/walkthrough2a.yaml</code> or use the file <code>protocols/walkthrough2a-sample.yaml</code>.</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">description:</span> Move plate from site P1 to P2
+<span class="fu">objects:</span>
+  <span class="fu">plate1:</span>
+    <span class="fu">type:</span> Plate
+    <span class="fu">model:</span> ourlab.model.plateModel_96well
+    <span class="fu">location:</span> ourlab.mario.site.P1
+<span class="fu">steps:</span>
+  <span class="fu">command:</span> transporter.movePlate
+  <span class="fu">object:</span> plate1
+  <span class="fu">destination:</span> ourlab.mario.site.P2</code></pre></div>
+<p>Process the script by running this command from the terminal:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- config/walkthrough2a.js protocols/walkthrough2a.yaml -P compiled/</code></pre></div>
+<p>Or if you just want to run the sample files which are already present:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml -P compiled/</code></pre></div>
+</div>
+<div id="a-bsse-protocol-for-mario" class="section level2">
+<h2><span class="header-section-number">2.3</span> A BSSE protocol for mario</h2>
+<p>Now we’ll run a protocol on the real robot (named mario). In our lab, mario has already been configured.</p>
+<p>For this example, we’ll simply dispense water into each well of a 96-well plate, seal it, and shake it. Create a new file <code>~/Desktop/Ellis/roboliq/charlotte01.yaml</code> and write a script like this:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1                                <span class="co"># version of Roboliq being used</span>
+<span class="co"># description of this protocol; the pipe symbol &quot;|&quot;&quot; allows for multi-line text</span>
+<span class="fu">description:</span> |
+  Dispense a liquid into each well of a
+  96-well plate, seal it, and shake it.
+<span class="fu">objects:</span>                                   <span class="co"># the set of materials used in this protocol</span>
+  <span class="fu">plate1:</span>                                  <span class="co"># an object named &quot;plate1&quot;</span>
+    <span class="fu">type:</span> Plate                            <span class="co"># which is a type of plate</span>
+    <span class="fu">model:</span> ourlab.model.plateModel_96_round_transparent_nunc  <span class="co"># whose model is defined in the configuration file &quot;bsse-mario.js&quot;</span>
+    <span class="fu">location:</span> ourlab.mario.site.P3         <span class="co"># which the user should place at the location &quot;P1&quot;</span>
+  <span class="fu">waterLabware:</span>
+    <span class="fu">type:</span> Plate
+    <span class="fu">model:</span> ourlab.model.troughModel_100ml
+    <span class="fu">location:</span> ourlab.mario.site.R6
+    <span class="fu">contents:</span> <span class="kw">[</span>Infinity l<span class="kw">,</span> water<span class="kw">]</span>
+  <span class="fu">water:</span>
+    <span class="fu">type:</span> Liquid
+    <span class="fu">wells:</span> waterLabware(A01 down D01)
+<span class="fu">steps:</span>
+  <span class="fu">1:</span>
+    <span class="fu">command:</span> pipetter.pipette
+    <span class="fu">sources:</span> water
+    <span class="fu">destinations:</span> plate1(all)
+    <span class="fu">volumes:</span> 40 ul
+    <span class="fu">cleanBetween:</span> none
+  <span class="fu">2:</span>
+    <span class="fu">command:</span> sealer.sealPlate
+    <span class="fu">object:</span> plate1
+  <span class="fu">3:</span>
+    <span class="fu">command:</span> shaker.shakePlate
+    <span class="fu">object:</span> plate1
+    <span class="fu">program:</span>
+      <span class="fu">duration:</span> 10 seconds</code></pre></div>
+<p>Make sure your in the directory <code>~/Desktop/Ellis/roboliq/roboliq-processor</code>, and run the command:</p>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> start -- ../protocols/charlotte01.yaml</code></pre></div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="intro.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="input-formats.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": false,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["roboliq.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

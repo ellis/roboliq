@@ -3,8 +3,14 @@ title: "Roboliq"
 author: "Ellis Whitehead"
 site: bookdown::bookdown_site
 documentclass: book
+github-repo: ellis/roboliq
 output:
-  bookdown::gitbook: default
+  bookdown::gitbook:
+    config:
+      sharing:
+        facebook: false
+        twitter: false
+        github: true
   bookdown::pdf_book: default
 ---
 

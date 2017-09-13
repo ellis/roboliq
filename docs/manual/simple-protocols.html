@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html >
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Roboliq</title>
+  <meta name="description" content="Roboliq">
+  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+
+  <meta property="og:title" content="Roboliq" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  <meta name="github-repo" content="ellis/roboliq" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Roboliq" />
+  
+  
+  
+
+<meta name="author" content="Ellis Whitehead">
+
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  
+  
+<link rel="prev" href="configuration.html">
+<link rel="next" href="advanced-protocols.html">
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Preface</a><ul>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#structure-of-the-manual"><i class="fa fa-check"></i>Structure of the manual</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#additional-documentation"><i class="fa fa-check"></i>Additional documentation</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#software-information-and-conventions"><i class="fa fa-check"></i>Software information and conventions</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html#acknowledgements"><i class="fa fa-check"></i>Acknowledgements</a></li>
+</ul></li>
+<li class="chapter" data-level="1" data-path="intro.html"><a href="intro.html"><i class="fa fa-check"></i><b>1</b> Introduction</a><ul>
+<li class="chapter" data-level="1.1" data-path="intro.html"><a href="intro.html#motivation"><i class="fa fa-check"></i><b>1.1</b> Motivation</a></li>
+<li class="chapter" data-level="1.2" data-path="intro.html"><a href="intro.html#get-started"><i class="fa fa-check"></i><b>1.2</b> Get started</a></li>
+<li class="chapter" data-level="1.3" data-path="intro.html"><a href="intro.html#usage"><i class="fa fa-check"></i><b>1.3</b> Usage</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="quick-start.html"><a href="quick-start.html"><i class="fa fa-check"></i><b>2</b> Quick Start</a><ul>
+<li class="chapter" data-level="2.1" data-path="quick-start.html"><a href="quick-start.html#the-simplest-protocol"><i class="fa fa-check"></i><b>2.1</b> The simplest protocol</a></li>
+<li class="chapter" data-level="2.2" data-path="quick-start.html"><a href="quick-start.html#a-protocol-with-a-minimal-configuration"><i class="fa fa-check"></i><b>2.2</b> A protocol with a minimal configuration</a></li>
+<li class="chapter" data-level="2.3" data-path="quick-start.html"><a href="quick-start.html#a-bsse-protocol-for-mario"><i class="fa fa-check"></i><b>2.3</b> A BSSE protocol for mario</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="input-formats.html"><a href="input-formats.html"><i class="fa fa-check"></i><b>3</b> Input formats</a></li>
+<li class="chapter" data-level="4" data-path="configuration.html"><a href="configuration.html"><i class="fa fa-check"></i><b>4</b> Robot configuration</a><ul>
+<li class="chapter" data-level="4.1" data-path="configuration.html"><a href="configuration.html#evoware-configuration"><i class="fa fa-check"></i><b>4.1</b> Evoware configuration</a></li>
+<li class="chapter" data-level="4.2" data-path="configuration.html"><a href="configuration.html#components"><i class="fa fa-check"></i><b>4.2</b> Components</a><ul>
+<li class="chapter" data-level="4.2.1" data-path="configuration.html"><a href="configuration.html#roboliq"><i class="fa fa-check"></i><b>4.2.1</b> <code>roboliq</code></a></li>
+<li class="chapter" data-level="4.2.2" data-path="configuration.html"><a href="configuration.html#schemas"><i class="fa fa-check"></i><b>4.2.2</b> <code>schemas</code></a></li>
+<li class="chapter" data-level="4.2.3" data-path="configuration.html"><a href="configuration.html#objects"><i class="fa fa-check"></i><b>4.2.3</b> <code>objects</code></a></li>
+<li class="chapter" data-level="4.2.4" data-path="configuration.html"><a href="configuration.html#commandhandlers"><i class="fa fa-check"></i><b>4.2.4</b> <code>commandHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.3" data-path="configuration.html"><a href="configuration.html#logic-components"><i class="fa fa-check"></i><b>4.3</b> Logic components</a><ul>
+<li class="chapter" data-level="4.3.1" data-path="configuration.html"><a href="configuration.html#predicates"><i class="fa fa-check"></i><b>4.3.1</b> <code>predicates</code></a></li>
+<li class="chapter" data-level="4.3.2" data-path="configuration.html"><a href="configuration.html#objecttopredicateconverters"><i class="fa fa-check"></i><b>4.3.2</b> <code>objectToPredicateConverters</code></a></li>
+<li class="chapter" data-level="4.3.3" data-path="configuration.html"><a href="configuration.html#planhandlers"><i class="fa fa-check"></i><b>4.3.3</b> <code>planHandlers</code></a></li>
+</ul></li>
+<li class="chapter" data-level="4.4" data-path="configuration.html"><a href="configuration.html#conclusion"><i class="fa fa-check"></i><b>4.4</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="simple-protocols.html"><a href="simple-protocols.html"><i class="fa fa-check"></i><b>5</b> Simple Protocols</a><ul>
+<li class="chapter" data-level="5.1" data-path="simple-protocols.html"><a href="simple-protocols.html#objects-1"><i class="fa fa-check"></i><b>5.1</b> Objects</a></li>
+<li class="chapter" data-level="5.2" data-path="simple-protocols.html"><a href="simple-protocols.html#steps"><i class="fa fa-check"></i><b>5.2</b> Steps</a></li>
+<li class="chapter" data-level="5.3" data-path="simple-protocols.html"><a href="simple-protocols.html#conclusion-1"><i class="fa fa-check"></i><b>5.3</b> Conclusion</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="advanced-protocols.html"><a href="advanced-protocols.html"><i class="fa fa-check"></i><b>6</b> Advanced Protocols</a><ul>
+<li class="chapter" data-level="6.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#parameters"><i class="fa fa-check"></i><b>6.1</b> Parameters</a></li>
+<li class="chapter" data-level="6.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#objects-2"><i class="fa fa-check"></i><b>6.2</b> Objects</a></li>
+<li class="chapter" data-level="6.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data"><i class="fa fa-check"></i><b>6.3</b> Data</a><ul>
+<li class="chapter" data-level="6.3.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-type"><i class="fa fa-check"></i><b>6.3.1</b> <code>Data</code> type</a></li>
+<li class="chapter" data-level="6.3.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-property"><i class="fa fa-check"></i><b>6.3.2</b> <code>data</code> property</a></li>
+<li class="chapter" data-level="6.3.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data.-commands"><i class="fa fa-check"></i><b>6.3.3</b> <code>data.*</code> commands</a></li>
+<li class="chapter" data-level="6.3.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#data-directive"><i class="fa fa-check"></i><b>6.3.4</b> <code>data()</code> directive</a></li>
+</ul></li>
+<li class="chapter" data-level="6.4" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope"><i class="fa fa-check"></i><b>6.4</b> Scope</a></li>
+<li class="chapter" data-level="6.5" data-path="advanced-protocols.html"><a href="advanced-protocols.html#substitution"><i class="fa fa-check"></i><b>6.5</b> Substitution</a><ul>
+<li class="chapter" data-level="6.5.1" data-path="advanced-protocols.html"><a href="advanced-protocols.html#scope-substitution"><i class="fa fa-check"></i><b>6.5.1</b> Scope $ substitution</a></li>
+<li class="chapter" data-level="6.5.2" data-path="advanced-protocols.html"><a href="advanced-protocols.html#template-substitution"><i class="fa fa-check"></i><b>6.5.2</b> Template ` substitution</a></li>
+<li class="chapter" data-level="6.5.3" data-path="advanced-protocols.html"><a href="advanced-protocols.html#directive-substitution"><i class="fa fa-check"></i><b>6.5.3</b> Directive () substitution</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="design-tables.html"><a href="design-tables.html"><i class="fa fa-check"></i><b>7</b> Design Tables</a><ul>
+<li class="chapter" data-level="7.1" data-path="design-tables.html"><a href="design-tables.html#first-examples"><i class="fa fa-check"></i><b>7.1</b> First examples</a></li>
+<li class="chapter" data-level="7.2" data-path="design-tables.html"><a href="design-tables.html#nested-branching"><i class="fa fa-check"></i><b>7.2</b> Nested branching</a></li>
+<li class="chapter" data-level="7.3" data-path="design-tables.html"><a href="design-tables.html#hidden-factors"><i class="fa fa-check"></i><b>7.3</b> Hidden factors</a></li>
+<li class="chapter" data-level="7.4" data-path="design-tables.html"><a href="design-tables.html#actions"><i class="fa fa-check"></i><b>7.4</b> Actions</a><ul>
+<li class="chapter" data-level="7.4.1" data-path="design-tables.html"><a href="design-tables.html#allocatewells"><i class="fa fa-check"></i><b>7.4.1</b> <code>allocateWells</code></a></li>
+<li class="chapter" data-level="7.4.2" data-path="design-tables.html"><a href="design-tables.html#range"><i class="fa fa-check"></i><b>7.4.2</b> <code>range</code></a></li>
+<li class="chapter" data-level="7.4.3" data-path="design-tables.html"><a href="design-tables.html#calculate"><i class="fa fa-check"></i><b>7.4.3</b> <code>calculate</code></a></li>
+<li class="chapter" data-level="7.4.4" data-path="design-tables.html"><a href="design-tables.html#case"><i class="fa fa-check"></i><b>7.4.4</b> <code>case</code></a></li>
+</ul></li>
+<li class="chapter" data-level="7.5" data-path="design-tables.html"><a href="design-tables.html#step-and-data-nesting"><i class="fa fa-check"></i><b>7.5</b> Step and data nesting</a></li>
+</ul></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Roboliq</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="simple-protocols" class="section level1">
+<h1><span class="header-section-number">5</span> Simple Protocols</h1>
+<p>Roboliq was developed to help automate protocols on liquid handling robots, especially for lab experiments in molecular biology. This chapter will explain the four properties in simple protocols and how to write write them.</p>
+<p>First consider this short example – it uses Roboliq version “v1”; it defines a <code>Plate</code> named <code>sourcePlate</code>; and it instructs us to shake the plate:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<span class="fu">description:</span> Shake a plate, just because we can
+<span class="fu">objects:</span>
+  <span class="fu">sourcePlate:</span>
+    <span class="fu">type:</span> Plate
+<span class="fu">steps:</span>
+  <span class="fu">1:</span>
+    <span class="fu">command:</span> shaker.shakePlate
+    <span class="fu">object:</span> sourcePlate</code></pre></div>
+<p>The protocol consists of <em>properties</em> and <em>values</em>. A <em>property</em> is a name followed by a semicolon and then a <em>value</em>. In the above example, we see the following properties and values:</p>
+<ol style="list-style-type: decimal">
+<li><p>The first property is <code>roboliq</code>, and it has a string value of <code>v1</code> which indicates we’re using Roboliq version 1.</p></li>
+<li><p>The second property is <code>description</code>, whose value is also a text string.</p></li>
+<li><p>The third property is <code>objects</code>, which defines the materials we’ll use in the protocol. In contrast to the previous properties, the <em>value</em> starts on the next line and is indented by two spaces. This means that the value of <code>objects</code> is another set of properties: <code>sourcePlate</code> is the name of a material whose <code>type</code> property is set to <code>Plate</code>.</p></li>
+<li><p>The forth property is <code>steps</code>, which defines the steps to be performed. Its <em>value</em> is usually a numbered set of steps, and each numbered step is assigned properties as well: in this case, step <code>1</code> has the properties <code>command: shaker.shakePlate</code> and <code>object: sourcePlate</code> which tell Roboliq to shake the plate named <code>sourcePlate</code>.</p></li>
+</ol>
+<p>Most of your protocols will have those four basic properties, and perhaps additional properties as well.</p>
+<p>Next we will describe the <code>objects</code> and <code>steps</code> properties in more detail.</p>
+<div id="objects-1" class="section level2">
+<h2><span class="header-section-number">5.1</span> Objects</h2>
+<p>In order to add more objects, just give them a name and assign them the appropriate properties. Here we extend <code>objects</code> to include another plate for mixing named <code>mixPlate</code>:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
+  <span class="fu">sourcePlate:</span>
+    <span class="fu">type:</span> Plate
+  <span class="fu">mixPlate:</span>
+    <span class="fu">type:</span> Plate</code></pre></div>
+<p>Objects are the things that can be used in the protocol’s steps, including labware, liquids, and equipment. Each object requires a <code>type</code> property (e.g. <code>Plate</code> in the example above) – the two most common types used in protocols are:</p>
+<ul>
+<li><a href="../protocol/commands.html#_Plate"><code>Plate</code></a>: for defining labware, including tubes and troughs.</li>
+<li><a href="../protocol/commands.html#_Liquid"><code>Liquid</code></a>: for defining liquids.</li>
+</ul>
+<p>A complete list of types can be found in the <a href="../protocol/commands.html">Commands &amp; Types documentation</a>, but most of them are only used in robot configurations rather than in protocols.</p>
+<p>In addition to the <code>type</code> property, object have other properties as well (also available in the <a href="../protocol/commands.html">type documentation</a>), and all objects have an optional <code>description</code> property that you can use to add your own notes about the object. Here are examples of the two main object types to indicate that a liquid named <code>specialMix</code> is in all wells on <code>plate1</code>:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
+  <span class="fu">plate1:</span>
+    <span class="fu">type:</span> Plate
+    <span class="fu">description:</span> Plate to be used for initial mixing
+    <span class="fu">model:</span> ourlab.roboto.model.96microwell
+    <span class="fu">location:</span> ourlab.roboto.P1
+  <span class="fu">specialMix:</span>
+    <span class="fu">type:</span> Liquid
+    <span class="fu">description:</span> Our special mad-scientist mix
+    <span class="fu">wells:</span> plate1(all)</code></pre></div>
+</div>
+<div id="steps" class="section level2">
+<h2><span class="header-section-number">5.2</span> Steps</h2>
+<p>A <em>step</em> is either a command or a numbered list of sub-steps, and a protocol’s <code>steps</code> property specifies the steps that should be taken during the protocol. Here is an example with two numbered steps in which a plate is sealed and shaken:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
+  <span class="fu">1:</span>
+    <span class="fu">command:</span> sealer.sealPlate
+    <span class="fu">object:</span> plate1
+  <span class="fu">2:</span>
+    <span class="fu">command:</span> shaker.shakePlate
+    <span class="fu">object:</span> plate1</code></pre></div>
+<p>A <em>command</em> is indicated by a <code>command</code> property, such as the commands <code>sealer.sealPlate</code> and <code>shaker.shakePlate</code> above. Besides the <code>command</code> property, you will need to specify additional properties to tell the command exactly what to do. In the above example, the line <code>object: plate1</code> tells the command to act on <code>plate1</code>.</p>
+<p>Command names have two parts separated by a period. First is the command category, which contains related commands. Second is the actual command name. Roboliq’s standard commands are listed in the <a href="../protocol/commands.html">Command documentation</a>, and Evoware’s special commands are listed in the <a href="../protocol/evowareCommands.html">Evoware Command documentation</a>.</p>
+<p>Steps can also be given a <code>description</code> property that let’s you explanation what’s happening for someone else who reads the protocol (or for yourself later after you’ve forgotten). Step can also be given a <code>comment</code> property, which is intended to be used as programmer comments that aren’t of interest to others.</p>
+<p>Here is an example that contains nested steps, descriptions and commands - it is the same as the previous example, but applied to two plates:</p>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
+  <span class="fu">1:</span>
+    <span class="fu">description:</span> <span class="st">&quot;Handle plate1&quot;</span>
+    <span class="fu">1:</span>
+      <span class="fu">command:</span> sealer.sealPlate
+      <span class="fu">object:</span> plate1
+    <span class="fu">2:</span>
+      <span class="fu">command:</span> shaker.shakePlate
+      <span class="fu">object:</span> plate1
+  <span class="fu">2:</span>
+    <span class="fu">description:</span> <span class="st">&quot;Handle plate2&quot;</span>
+    <span class="fu">1:</span>
+      <span class="fu">command:</span> sealer.sealPlate
+      <span class="fu">object:</span> plate2
+    <span class="fu">2:</span>
+      <span class="fu">command:</span> shaker.shakePlate
+      <span class="fu">object:</span> plate2</code></pre></div>
+</div>
+<div id="conclusion-1" class="section level2">
+<h2><span class="header-section-number">5.3</span> Conclusion</h2>
+<p>Simple protocols can be writen using four properties: <code>roboliq</code>, <code>description</code>, <code>objects</code>, and <code>steps</code>. The <code>roboliq</code> property indicates the version of Roboliq, and <code>description</code> lets you document what the protocol does. In <code>objects</code> you specify the labware and liquids used in the protocol. And in <code>steps</code> you create a list of numbered commands; the steps can be nested and documented however you prefer. You can find documentation for the objects and commands in the <a href="../protocol/commands.html">Commands &amp; Types documentation</a>.</p>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="configuration.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="advanced-protocols.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": true,
+"facebook": false,
+"twitter": false,
+"google": false,
+"weibo": false,
+"instapper": false,
+"vk": false,
+"all": ["facebook", "google", "twitter", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"download": ["roboliq.pdf"],
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>

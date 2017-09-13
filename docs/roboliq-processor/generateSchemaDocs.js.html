@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>roboliq-processor Source: generateSchemaDocs.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">roboliq-processor</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="equipment.html">equipment</a></li><li><a href="fluorescenceReader.html">fluorescenceReader</a></li><li><a href="pipetter.html">pipetter</a></li><li><a href="timer.html">timer</a></li><li><a href="transporter.html">transporter</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-commandHelper.html">commandHelper</a></li><li><a href="module-commands_absorbanceReader.html">commands/absorbanceReader</a></li><li><a href="module-commands_centrifuge.html">commands/centrifuge</a></li><li><a href="module-commands_equipment.html">commands/equipment</a></li><li><a href="module-commands_fluorescenceReader.html">commands/fluorescenceReader</a></li><li><a href="module-commands_incubator.html">commands/incubator</a></li><li><a href="module-commands_pipetter.html">commands/pipetter</a></li><li><a href="module-commands_pipetter_groupingMethods.html">commands/pipetter/groupingMethods</a></li><li><a href="module-commands_pipetter_pipetterUtils.html">commands/pipetter/pipetterUtils</a></li><li><a href="module-commands_pipetter_sourceMethods.html">commands/pipetter/sourceMethods</a></li><li><a href="module-commands_simulatedHelpers.html">commands/simulatedHelpers</a></li><li><a href="module-commands_timer.html">commands/timer</a></li><li><a href="module-commands_transporter.html">commands/transporter</a></li><li><a href="module-config_roboliq.html">config/roboliq</a></li><li><a href="module-config_roboliqDirectiveHandlers.html">config/roboliqDirectiveHandlers</a></li><li><a href="module-design.html">design</a></li><li><a href="module-generateSchemaDocs.html">generateSchemaDocs</a></li><li><a href="module-misc.html">misc</a></li><li><a href="module-parsers_wellsParser.html">parsers/wellsParser</a></li><li><a href="module-roboliq.html">roboliq</a></li><li><a href="module-stanModel.html">stanModel</a></li><li><a href="module-WellContents.html">WellContents</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: generateSchemaDocs.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Generate documentation from the schemas in `schemas/*.yaml`.
+ * Running this module will create these files:
+ *
+ * * `tutorials/Object_Types.md`
+ * * `tutorials/Commands.md`
+ *
+ * @module
+ */
+
+import _ from 'lodash';
+import fs from 'fs';
+import path from 'path';
+import yaml from 'yamljs';
+
+/**
+ * Convert a name/schema pair to markdown text.
+ * @param {array} pair - [name, schema]
+ * @return A markdown string.
+ */
+function toMarkdown(pair) {
+	const [name, o] = pair;
+	//console.log({name, o})
+	if (o.module) {
+		return `\n## &lt;a name="${name}">&lt;/a>${name}\n\n${o.module}`;
+	}
+	else {
+		return _.flattenDeep([
+			`### \`${name}\``,
+			"",
+			o.description ? [o.description, ""] : [],
+			"Properties:",
+			"",
+			"Name | Type | Argument | Description",
+			"-----|------|----------|------------",
+			_.map(o.properties, (p, pName) => {
+				const isRequired = _.includes(o.required, pName);
+				// const nameText = (isRequired) ? pName : `[${pName}]`;
+				// const nameTypeText = (p.type) ? `${nameText}: ${p.type}` : nameText;
+				// const descriptionText = p.description || "";
+				// return `* \`${nameTypeText}\` -- ${descriptionText}`;
+				return `${pName} | ${p.type || ""} | ${(isRequired) ? "" : "*optional*"} | ${p.description || ""}`;
+			}),
+			(_.isEmpty(o.example)) ? [] : [
+				"",
+				"Example:",
+				"",
+				o.example,
+				""
+			]
+		]).join('\n');
+	}
+}
+
+/**
+ * Take a string, split it on all newlines, prepend each newline with " * ", and then rejoin.
+ * @param {string} s - string to indent
+ * @return {string} - string indented by " * "
+ */
+function indentJsdocComment(s) {
+	return s.trim().split("\n").map(s => " * "+s).join("\n");
+}
+
+/**
+ * Convert a name/schema pair to jsdoc text.
+ * @param {array} pair - [name, schema]
+ * @param {boolean} isCommand - true if pair is a command, in which case the `memberOf` field is handled differently.
+ * @return A markdown string.
+ */
+function typeToJsdoc(pair, isCommand = false) {
+	const [name, o] = pair;
+	//console.log({name, o})
+	const s = _.flattenDeep([
+		o.description ? [o.description, ""] : [],
+		(isCommand) ? `@typedef "${name}"` : `@class ${name}`,
+		//(isCommand) ? `@memberof ${_.initial(name.split(".")).join(".")}` : [],
+		//(isCommand) ? `@memberof commands`: "@memberof types",
+		_.map(o.properties, (p, pName) => {
+			const isRequired = _.includes(o.required, pName);
+			const nameText = (isRequired) ? pName : `[${pName}]`;
+			const typeText = (p.type) ? `{${_.flatten([p.type]).join("|").replace(/ /g, "")}}` : "";
+			const descriptionText = (p.description) ? `- ${p.description}` : "";
+			return `@property ${typeText} ${nameText} ${descriptionText}`;
+		}),
+		(_.isEmpty(o.example)) ? [] : [
+			"@example",
+			o.example
+		]
+	]).join('\n').trim().split("\n").map(s => " * "+s).join("\n");
+	return "/**\n" + s + "\n */\n\n";
+}
+
+/**
+ * Convert a name/schema pair to markdown text.
+ * @param {array} pair - [name, schema]
+ * @return A markdown string.
+ */
+function commandToJsdoc(pair) {
+	const [name, o] = pair;
+	//console.log({name, o})
+	if (o.module) {
+		return `\n/**\n${indentJsdocComment(o.module)}\n *\n * @module ${name}\n */\n`;
+	}
+	else {
+		return typeToJsdoc(pair, true);
+	}
+}
+
+// All files in the schema/ directory
+const filename_l = _.filter(fs.readdirSync(__dirname+"/schemas/"), s => path.extname(s) === ".yaml");
+// Load the schemas from the files
+const schemas_l = _.map(filename_l, filename => yaml.load(__dirname+"/schemas/"+filename));
+// Merge all schemas together
+const schemas = _.merge.apply(_, [{}].concat(schemas_l));
+// Separate object schemas from command schemas
+const [objectSchemas, commandSchemas] = _.partition(_.toPairs(schemas), ([name, schema]) => name[0] === name[0].toUpperCase());
+
+// Generate documentation for object types
+const objectSchemasText = _.map(objectSchemas, toMarkdown).join('\n\n');
+fs.writeFileSync(__dirname+"/../tutorials/Object_Types.md", objectSchemasText);
+
+// Generate documentation for commands
+const commandSchemasText = _.map(commandSchemas, toMarkdown).join('\n\n');
+fs.writeFileSync(__dirname+"/../tutorials/Commands.md", commandSchemasText);
+fs.writeFileSync(__dirname+"/../generated/content/commands.md", commandSchemasText);
+
+// Generate documentation for object types
+const generatedTypesText = "/**\n * Namespace for the object types available in Roboliq protocols.\n * @namespace types\n * @version v1 \n */\n\n" + _.map(objectSchemas, x => typeToJsdoc(x)).join('\n\n');
+fs.writeFileSync(__dirname+"/../generated/types.jsdoc", generatedTypesText);
+
+// Generate documentation for commands
+const generatedCommandsText = "/**\n * Namespace for the commands available in Roboliq protocols.\n * @namespace commands\n * @version v1 \n */\n\n" + _.map(commandSchemas, commandToJsdoc).join('\n\n');
+fs.writeFileSync(__dirname+"/../generated/commands.jsdoc", generatedCommandsText);
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	Roboliq Copyright © 2016-2017 Ellis Whitehead
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
+	
+		on 2017-08-14T16:32:01+02:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

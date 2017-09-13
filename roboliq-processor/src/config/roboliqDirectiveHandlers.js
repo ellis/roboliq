@@ -96,6 +96,11 @@ function directive_data(spec, data) {
 		result = (spec.groupBy) ? result : _.flatten(result);
 		// console.log("result2: "+JSON.stringify(result))
 
+		if (spec.flatten) {
+			result = _.flatten(result);
+			// console.log("result3: "+JSON.stringify(result))
+		}
+
 		if (spec.head) {
 			result = _.head(result);
 			// console.log("result4: "+JSON.stringify(result))
@@ -106,6 +111,9 @@ function directive_data(spec, data) {
 		if (spec.join) {
 			result = result.join(spec.join);
 			// console.log("result5: "+JSON.stringify(result))
+		}
+		if (spec.orderBy) {
+			result = _.orderBy(result, spec.orderBy);
 		}
 		if (spec.reverse) {
 			result = _.reverse(result);

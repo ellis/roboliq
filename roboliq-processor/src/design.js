@@ -128,6 +128,49 @@ export function printTAB(rows) {
 }
 
 /**
+ * Print a markdown pipe table
+ * @param  {array}  rows - array of rows
+ */
+export function printMarkdown(rows) {
+	const hideRedundancies = false;
+	const data = _.flattenDeep(rows);
+
+	// Get column names
+	const columnMap = {};
+	_.forEach(data, row => _.forEach(_.keys(row), key => { columnMap[key] = true; } ));
+	const columns = _.keys(columnMap);
+	// console.log({columns})
+
+	// Convert data to array of lines (which are arrays of columns)
+	const lines = [];
+	_.forEach(data, group => {
+		if (!_.isArray(group)) {
+			group = [group];
+		}
+		else {
+			lines.push(["---"]);
+		}
+		_.forEach(group, row => {
+			// console.log(JSON.stringify(row))
+			const line = _.map(columns, key => {
+				const x1 = _.get(row, key, "");
+				const x2 = (_.isNull(x1)) ? "" : x1;
+				return x2.toString();
+			});
+			lines.push(line);
+		});
+	});
+
+	console.log(columns.join(" | "));
+	console.log(columns.map(s => ":-----:").join(" | "));
+	_.forEach(lines, line => {
+		const s = line.join(" | ");
+		console.log(s);
+	});
+	console.log();
+}
+
+/**
  * Turn a design specification into a design table.
  * @param {object} design - the design specification.
  */

@@ -1,0 +1,5154 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Commands &amp; Types</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/styles/default.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/languages/yaml.min.js"></script>
+	<style>
+	html, body {
+	height: 100%;
+	}
+	
+	/* Main view, move content down due to fixed navbar. */
+	.main-wrapper {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	padding-top: 50px;
+	}
+	
+	/* Container for a sidebar. */
+	.sidebar-container {
+	height: 100%;
+	position: fixed;
+	padding: 0px;
+	margin-top: -50px;
+	padding-top: 50px;
+	border-right: 1px solid #ddd;
+	
+	}
+	
+	.sidebar-header {
+	position: relative;
+	padding: 15px;
+	border-bottom: 1px solid #ddd;
+	}
+	
+	/* Scrollable sidebar. */
+	.sidebar {
+	height: 85%;
+	position: relative;
+	overflow-y: scroll;
+	}
+	
+	.main-view {
+	height: 100%;
+	overflow: auto;
+	position: relative;
+	padding: 0px;
+	}
+	
+	.amain {
+	color: white;
+	font-weight: bold;
+	margin: 0 2em;
+	}
+	h2 {
+	margin-top: 1em;
+	padding: .5em 0;
+	background-color: #ddd;
+	}
+	.command {
+	display: block;
+	margin-left: 2em;
+	}
+	.command > table > tbody > tr > td > p {
+		margin-bottom: 0;
+	}
+	</style>
+</head>
+<body>
+
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<nav class="navbar navbar-inverse" style="margin-bottom: 0">
+				<div class="container-fluid">
+					<a class="amain" href="index.html"><span style="font-size: 150%; font-weight: bold; color: white; margin: 0 2em 0 4em">Roboliq Protocol</span></a>
+					<a class="amain" href="commands.html">Commands</a>
+					<a class="amain" href="evowareConfiguration.html">Evoware Configuration</a>
+					<a class="amain" href="evowareCommands.html">Evoware Commands</a>
+				</div>
+		</nav>
+	</nav>
+
+	<div class="main-wrapper">
+			<div class="sidebar-container col-xs-3">
+					<!--div class="sidebar-header">
+							<form class="form-inline">
+									<input type="text" name="search" class="form-control" placeholder="Search"/>
+							</form>
+					</div-->
+					<div class="sidebar" style="height: 100%; margin: .5em">
+							<nav>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_scale">scale</a><br/>
+											<a href="#_Scale">&nbsp;&nbsp;Scale</a><br/>
+											<a href="#_scale.ScaleProgram">&nbsp;&nbsp;scale.ScaleProgram</a><br/>
+											<a href="#_scale.weigh">&nbsp;&nbsp;scale.weigh</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_centrifuge">centrifuge</a><br/>
+											<a href="#_Centrifuge">&nbsp;&nbsp;Centrifuge</a><br/>
+											<a href="#_centrifuge.centrifuge2">&nbsp;&nbsp;centrifuge.centrifuge2</a><br/>
+											<a href="#_centrifuge.insertPlates2">&nbsp;&nbsp;centrifuge.insertPlates2</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_equipment">equipment</a><br/>
+											<a href="#_equipment._run">&nbsp;&nbsp;equipment._run</a><br/>
+											<a href="#_equipment.open">&nbsp;&nbsp;equipment.open</a><br/>
+											<a href="#_equipment.openSite">&nbsp;&nbsp;equipment.openSite</a><br/>
+											<a href="#_equipment.close">&nbsp;&nbsp;equipment.close</a><br/>
+											<a href="#_equipment.start">&nbsp;&nbsp;equipment.start</a><br/>
+											<a href="#_equipment.stop">&nbsp;&nbsp;equipment.stop</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_incubator">incubator</a><br/>
+											<a href="#_Incubator">&nbsp;&nbsp;Incubator</a><br/>
+											<a href="#_incubator.incubatePlates">&nbsp;&nbsp;incubator.incubatePlates</a><br/>
+											<a href="#_incubator.insertPlates">&nbsp;&nbsp;incubator.insertPlates</a><br/>
+											<a href="#_incubator.run">&nbsp;&nbsp;incubator.run</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_pipetter">pipetter</a><br/>
+											<a href="#_Pipetter">&nbsp;&nbsp;Pipetter</a><br/>
+											<a href="#_Syringe">&nbsp;&nbsp;Syringe</a><br/>
+											<a href="#_pipetter._MixSpec">&nbsp;&nbsp;pipetter._MixSpec</a><br/>
+											<a href="#_pipetter._AspirateItem">&nbsp;&nbsp;pipetter._AspirateItem</a><br/>
+											<a href="#_pipetter._DispenseItem">&nbsp;&nbsp;pipetter._DispenseItem</a><br/>
+											<a href="#_pipetter._MeasureVolumeItem">&nbsp;&nbsp;pipetter._MeasureVolumeItem</a><br/>
+											<a href="#_pipetter.MeasureVolumeItem">&nbsp;&nbsp;pipetter.MeasureVolumeItem</a><br/>
+											<a href="#_pipetter._MixItem">&nbsp;&nbsp;pipetter._MixItem</a><br/>
+											<a href="#_pipetter.CleaningIntensity">&nbsp;&nbsp;pipetter.CleaningIntensity</a><br/>
+											<a href="#_pipetter._PipetteItem">&nbsp;&nbsp;pipetter._PipetteItem</a><br/>
+											<a href="#_pipetter.PipetteItem">&nbsp;&nbsp;pipetter.PipetteItem</a><br/>
+											<a href="#_pipetter._PunctureItem">&nbsp;&nbsp;pipetter._PunctureItem</a><br/>
+											<a href="#_pipetter.PunctureItem">&nbsp;&nbsp;pipetter.PunctureItem</a><br/>
+											<a href="#_pipetter.DilutionItem">&nbsp;&nbsp;pipetter.DilutionItem</a><br/>
+											<a href="#_pipetter.MixItem">&nbsp;&nbsp;pipetter.MixItem</a><br/>
+											<a href="#_pipetter.MixSpec">&nbsp;&nbsp;pipetter.MixSpec</a><br/>
+											<a href="#_pipetter._aspirate">&nbsp;&nbsp;pipetter._aspirate</a><br/>
+											<a href="#_pipetter._dispense">&nbsp;&nbsp;pipetter._dispense</a><br/>
+											<a href="#_pipetter._measureVolume">&nbsp;&nbsp;pipetter._measureVolume</a><br/>
+											<a href="#_pipetter._mix">&nbsp;&nbsp;pipetter._mix</a><br/>
+											<a href="#_pipetter._pipette">&nbsp;&nbsp;pipetter._pipette</a><br/>
+											<a href="#_pipetter._punctureSeal">&nbsp;&nbsp;pipetter._punctureSeal</a><br/>
+											<a href="#_pipetter._washTips">&nbsp;&nbsp;pipetter._washTips</a><br/>
+											<a href="#_pipetter.cleanTips">&nbsp;&nbsp;pipetter.cleanTips</a><br/>
+											<a href="#_pipetter.measureVolume">&nbsp;&nbsp;pipetter.measureVolume</a><br/>
+											<a href="#_pipetter.mix">&nbsp;&nbsp;pipetter.mix</a><br/>
+											<a href="#_pipetter.pipette">&nbsp;&nbsp;pipetter.pipette</a><br/>
+											<a href="#_pipetter.pipetteDilutionSeries">&nbsp;&nbsp;pipetter.pipetteDilutionSeries</a><br/>
+											<a href="#_pipetter.pipetteMixtures">&nbsp;&nbsp;pipetter.pipetteMixtures</a><br/>
+											<a href="#_pipetter.punctureSeal">&nbsp;&nbsp;pipetter.punctureSeal</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<a href="#_Agent">&nbsp;&nbsp;Agent</a><br/>
+											<a href="#_Data">&nbsp;&nbsp;Data</a><br/>
+											<a href="#_Lid">&nbsp;&nbsp;Lid</a><br/>
+											<a href="#_LidModel">&nbsp;&nbsp;LidModel</a><br/>
+											<a href="#_Liquid">&nbsp;&nbsp;Liquid</a><br/>
+											<a href="#_Plate">&nbsp;&nbsp;Plate</a><br/>
+											<a href="#_PlateModel">&nbsp;&nbsp;PlateModel</a><br/>
+											<a href="#_Site">&nbsp;&nbsp;Site</a><br/>
+											<a href="#_Template">&nbsp;&nbsp;Template</a><br/>
+											<a href="#_Variable">&nbsp;&nbsp;Variable</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_sealer">sealer</a><br/>
+											<a href="#_Sealer">&nbsp;&nbsp;Sealer</a><br/>
+											<a href="#_sealer.sealPlate">&nbsp;&nbsp;sealer.sealPlate</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_data">data</a><br/>
+											<a href="#_data.forEachGroup">&nbsp;&nbsp;data.forEachGroup</a><br/>
+											<a href="#_data.forEachRow">&nbsp;&nbsp;data.forEachRow</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_shaker">shaker</a><br/>
+											<a href="#_Shaker">&nbsp;&nbsp;Shaker</a><br/>
+											<a href="#_shaker.ShakerProgram">&nbsp;&nbsp;shaker.ShakerProgram</a><br/>
+											<a href="#_shaker.shakePlate">&nbsp;&nbsp;shaker.shakePlate</a><br/>
+											<a href="#_shaker.run">&nbsp;&nbsp;shaker.run</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_system">system</a><br/>
+											<a href="#_system._description">&nbsp;&nbsp;system._description</a><br/>
+											<a href="#_system._echo">&nbsp;&nbsp;system._echo</a><br/>
+											<a href="#_system.call">&nbsp;&nbsp;system.call</a><br/>
+											<a href="#_system.description">&nbsp;&nbsp;system.description</a><br/>
+											<a href="#_system.echo">&nbsp;&nbsp;system.echo</a><br/>
+											<a href="#_system.if">&nbsp;&nbsp;system.if</a><br/>
+											<a href="#_system.repeat">&nbsp;&nbsp;system.repeat</a><br/>
+											<a href="#_system.runtimeExitLoop">&nbsp;&nbsp;system.runtimeExitLoop</a><br/>
+											<a href="#_system.runtimeLoadVariables">&nbsp;&nbsp;system.runtimeLoadVariables</a><br/>
+											<a href="#_system.runtimeSteps">&nbsp;&nbsp;system.runtimeSteps</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_timer">timer</a><br/>
+											<a href="#_Timer">&nbsp;&nbsp;Timer</a><br/>
+											<a href="#_timer._sleep">&nbsp;&nbsp;timer._sleep</a><br/>
+											<a href="#_timer._start">&nbsp;&nbsp;timer._start</a><br/>
+											<a href="#_timer._stop">&nbsp;&nbsp;timer._stop</a><br/>
+											<a href="#_timer._wait">&nbsp;&nbsp;timer._wait</a><br/>
+											<a href="#_timer.doAndWait">&nbsp;&nbsp;timer.doAndWait</a><br/>
+											<a href="#_timer.sleep">&nbsp;&nbsp;timer.sleep</a><br/>
+											<a href="#_timer.start">&nbsp;&nbsp;timer.start</a><br/>
+											<a href="#_timer.stop">&nbsp;&nbsp;timer.stop</a><br/>
+											<a href="#_timer.wait">&nbsp;&nbsp;timer.wait</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_absorbanceReader">absorbanceReader</a><br/>
+											<a href="#_Reader">&nbsp;&nbsp;Reader</a><br/>
+											<a href="#_absorbanceReader.measurePlate">&nbsp;&nbsp;absorbanceReader.measurePlate</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_fluorescenceReader">fluorescenceReader</a><br/>
+											<a href="#_Reader">&nbsp;&nbsp;Reader</a><br/>
+											<a href="#_fluorescenceReader.measurePlate">&nbsp;&nbsp;fluorescenceReader.measurePlate</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_transporter">transporter</a><br/>
+											<a href="#_Transporter">&nbsp;&nbsp;Transporter</a><br/>
+											<a href="#_transporter._moveLidFromContainerToSite">&nbsp;&nbsp;transporter._moveLidFromContainerToSite</a><br/>
+											<a href="#_transporter._moveLidFromSiteToContainer">&nbsp;&nbsp;transporter._moveLidFromSiteToContainer</a><br/>
+											<a href="#_transporter._movePlate">&nbsp;&nbsp;transporter._movePlate</a><br/>
+											<a href="#_transporter.doThenRestoreLocation">&nbsp;&nbsp;transporter.doThenRestoreLocation</a><br/>
+											<a href="#_transporter.moveLidFromContainerToSite">&nbsp;&nbsp;transporter.moveLidFromContainerToSite</a><br/>
+											<a href="#_transporter.moveLidFromSiteToContainer">&nbsp;&nbsp;transporter.moveLidFromSiteToContainer</a><br/>
+											<a href="#_transporter.movePlate">&nbsp;&nbsp;transporter.movePlate</a><br/>
+									</ul>
+								<br/><br/>
+							</nav>
+					</div>
+			</div>
+			<div class="container main-view col-xs-9 pull-right">
+				<div style="padding: .75em">
+					<h1>Commands &amp; Types</h1>
+					<p>This page lists the commands and types available in Roboliq protocols.
+Note that:</p>
+<ul>
+<li><p>Types begin with an uppercase letter, whereas command and namespaces begin with a lowercase
+letter.</p>
+</li>
+<li><p>A namespace group related commands and types, such as the <code>pipetter</code> namespace
+contains items relevant to pipetting.  Normally the namespaces will be nouns by
+convention.</p>
+</li>
+<li><p>As a matter of convention, all commands belong to a namespace.  Normally
+commands will start with a verb.  For example, <code>pipetter.mix</code> is a command to
+use the pipetter to mix well contents.</p>
+</li>
+<li><p>Commands and types that begin with an underscore, such as <code>pipetter._mix</code>,
+are low-level commands.  Normally you will not need to use them and can use
+the other higher-level commands instead.</p>
+</li>
+</ul>
+<h2 id="basic-types">Basic types</h2>
+<h3 id="duration">Duration</h3>
+<p>Duration specified as a string.  Parsing is handled by <a href="http://mathjs.org/docs/datatypes/units.html">mathjs</a>.
+Valid units are:
+second (s, secs, seconds), minute (mins, minutes), hour (h, hr, hrs, hours), day (days), week (weeks), month (months), year (years), decade (decades), century (centuries), millennium (millennia)</p>
+<p><strong>Example</strong>:</p>
+<ul>
+<li><code>1s</code> = 1 second</li>
+<li><code>3 minutes</code> = 3 minutes</li>
+<li><code>4 h</code> = 4 hours</li>
+</ul>
+<h3 id="siteorstay">SiteOrStay</h3>
+<p>When a command is performed on a plate, sometimes the plate first needs to
+be moved to the proper equipment (e.g. you might put a plate onto a shaker in
+order to shake it).  By default, the plate will be moved back to its prior
+location after the command is finished.  Such commands have a <code>destinationAfter</code>
+property with type <code>SiteOrStay</code> which can be used to override this behavior.
+Either you can specify different <code>Site</code> where the plate should be moved to after
+the command, or you can specify <code>&quot;stay&quot;</code> to leave the plate there.</p>
+<h2 id="object-types">Object types</h2>
+
+
+								<h2 id="_scale">scale</h2>
+								<p>The <code>scale</code> commands specify actions using weight scale equipment.</p>
+
+								<h3 id="_Scale">Scale</h3>
+								<div class="command">
+									<p>Scale equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Scale</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_scale.ScaleProgram">scale.ScaleProgram</h3>
+								<div class="command">
+									<p>Program for scale.</p>
+
+
+
+
+
+								</div>
+								<h3 id="_scale.weigh">scale.weigh</h3>
+								<div class="command">
+									<p>Weigh an object.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>scale.ScaleProgram</td>
+												<td><p>Program for shaking</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier on scale</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after this command</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_centrifuge">centrifuge</h2>
+								<p>The <code>centrifuge</code> commands specify actions using centrifuge equipment.</p>
+
+								<h3 id="_Centrifuge">Centrifuge</h3>
+								<div class="command">
+									<p>Centrifuge equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Centrifuge</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sitesInternal</td>
+												<td>array</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code class="lang-json">centrifuge:
+    type: Centrifuge
+    sitesInternal: [&quot;ourlab.mario.site.CENTRIFUGE_1&quot;, &quot;ourlab.mario.site.CENTRIFUGE_2&quot;, &quot;ourlab.mario.site.CENTRIFUGE_3&quot;, &quot;ourlab.mario.site.CENTRIFUGE_4&quot;]
+</code></pre>
+
+								</div>
+								<h3 id="_centrifuge.centrifuge2">centrifuge.centrifuge2</h3>
+								<div class="command">
+									<p>Centrifuge two plates.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td></td>
+												<td><p>Program for centrifuging</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>object1</td>
+												<td>Plate</td>
+												<td><p>Plate identifier 1</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>object2</td>
+												<td>Plate</td>
+												<td><p>Plate identifier 2</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site1</td>
+												<td>Site</td>
+												<td><p>Location identifier for the centrifugation site of object1</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>site2</td>
+												<td>Site</td>
+												<td><p>Location identifier for the centrifugation site of object2</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter1</td>
+												<td>SiteOrStay</td>
+												<td><p>Location identifier for where object1 should be placed after centrifugation</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter2</td>
+												<td>SiteOrStay</td>
+												<td><p>Location identifier for where object2 should be placed after centrifugation</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<p>This will centrifuge 2 plates at 3000rpm for 2 minutes at 25°C:</p>
+<pre><code>{
+  &quot;command&quot;: &quot;centrifuge.centrifuge2&quot;,
+  &quot;object1&quot;: &quot;plate1&quot;,
+  &quot;object2&quot;: &quot;plate2&quot;,
+  &quot;program&quot;: {
+    &quot;rpm&quot;: 3000,
+    &quot;duration&quot;: &quot;2 minutes&quot;,
+    &quot;temperature&quot;: &quot;25 degC&quot;
+  }
+}
+</code></pre>
+								</div>
+								<h3 id="_centrifuge.insertPlates2">centrifuge.insertPlates2</h3>
+								<div class="command">
+									<p>Insert up to two plates into the centrifuge.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object1</td>
+												<td>Plate</td>
+												<td><p>Plate identifier 1</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object2</td>
+												<td>Plate</td>
+												<td><p>Plate identifier 2</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>site1</td>
+												<td>Site</td>
+												<td><p>Location identifier for the centrifugation site of object1</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>site2</td>
+												<td>Site</td>
+												<td><p>Location identifier for the centrifugation site of object2</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<p>This will insert two plates into the centrifuge:</p>
+<pre><code>{
+  &quot;command&quot;: &quot;centrifuge.insertPlates2&quot;,
+  &quot;object1&quot;: &quot;plate1&quot;,
+  &quot;object2&quot;: &quot;plate2&quot;,
+}
+</code></pre>
+								</div>
+								<h2 id="_equipment">equipment</h2>
+								<p>The <code>equipment</code> commands specify generic actions such as &#39;run&#39; and &#39;open&#39;
+that may apply to various types of equipment.</p>
+
+								<h3 id="_equipment._run">equipment._run</h3>
+								<div class="command">
+									<p>Run the given equipment.</p>
+<p>This is a generic command, and any addition parameters may be passed that are required by the target equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_equipment.open">equipment.open</h3>
+								<div class="command">
+									<p>Open the given equipment.</p>
+<p>This is a generic command that expands to a sub-command named <code>equipment.open|${agent}|${equipment}</code>. That command should be defined in your configuration for your lab.</p>
+<p>The handler should return effects indicating that the equipment is open.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_equipment.openSite">equipment.openSite</h3>
+								<div class="command">
+									<p>Open an equipment site.
+This command assumes that only one equipment site can be open at a time.</p>
+<p>This is a generic command that expands to a sub-command named
+<code>equipment.openSite|${agent}|${equipment}</code>.
+That command should be defined in your configuration for your lab.</p>
+<p>The handler should return effects indicating that the equipment is open,
+the given site is open, and all other equipment sites are closed.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_equipment.close">equipment.close</h3>
+								<div class="command">
+									<p>Close the given equipment.</p>
+<p>This is a generic command that expands to a sub-command named
+<code>equipment.close|${agent}|${equipment}</code>.
+That command should be defined in your lab configuration.</p>
+<p>The handler should return effects indicating the the equipment is closed
+and all of its sites are closed.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_equipment.start">equipment.start</h3>
+								<div class="command">
+									<p>Start the given equipment.</p>
+<p>This is a generic command that expands to a sub-command named
+<code>equipment.start|${agent}|${equipment}</code>.
+That command should be defined in your configuration for your lab.
+Any addition parameters may be passed that are required by the target equipment.</p>
+<p>The handler returns effects indicating that the equipment is running.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_equipment.stop">equipment.stop</h3>
+								<div class="command">
+									<p>Stop the given equipment.</p>
+<p>This is a generic command that expands to a sub-command named
+<code>equipment.stop|${agent}|${equipment}</code>.
+That command should be defined in your configuration for your lab.
+Any addition parameters may be passed that are required by the target equipment.</p>
+<p>The handler returns effects indicating that the equipment is not running.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_incubator">incubator</h2>
+								<p>The <code>incubator</code> commands specify actions using incubator equipment.</p>
+
+								<h3 id="_Incubator">Incubator</h3>
+								<div class="command">
+									<p>Incubator equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Incubator</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sitesInternal</td>
+												<td>array</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<pre><code>&quot;incubator&quot;: {
+  &quot;type&quot;: &quot;Incubator&quot;,
+  &quot;sitesInternal&quot;: [&quot;ourlab.luigi.site.BOX_1&quot;, &quot;ourlab.luigi.site.BOX_2&quot;, &quot;ourlab.luigi.site.BOX_3&quot;, &quot;ourlab.luigi.site.BOX_4&quot;, &quot;ourlab.luigi.site.BOX_5&quot;, &quot;ourlab.luigi.site.BOX_6&quot;, &quot;ourlab.luigi.site.BOX_7&quot;, &quot;ourlab.luigi.site.BOX_8&quot;],
+}
+</code></pre>
+								</div>
+								<h3 id="_incubator.incubatePlates">incubator.incubatePlates</h3>
+								<div class="command">
+									<p>Incubate the given plates.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td></td>
+												<td><p>Program for incubation</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>plates</td>
+												<td>array</td>
+												<td><p>List of plates to incubate</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>sites</td>
+												<td>array</td>
+												<td><p>Internal sites to put the plates on</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfters</td>
+												<td>array</td>
+												<td><p>Location identifier for where the plates should be placed after incubation</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<p>This will incubate 2 plates at 300rpm for 2 minutes at 25°C:</p>
+<pre><code>{
+  &quot;command&quot;: &quot;incubator.incubatePlates&quot;,
+  &quot;plates&quot;: [&quot;plate1&quot;, &quot;plate2&quot;],
+  &quot;program&quot;: {
+    &quot;rpm&quot;: 300,
+    &quot;duration&quot;: &quot;2 minutes&quot;,
+    &quot;temperature&quot;: &quot;25 degC&quot;
+  }
+}
+</code></pre>
+								</div>
+								<h3 id="_incubator.insertPlates">incubator.insertPlates</h3>
+								<div class="command">
+									<p>Insert up to two plates into the incubator.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>plates</td>
+												<td>array</td>
+												<td><p>List of plates to incubate</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sites</td>
+												<td>array</td>
+												<td><p>Internal sites to put the plates on</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<p>This will insert two plates into the incubator:</p>
+<pre><code>{
+  &quot;command&quot;: &quot;incubator.insertPlates&quot;,
+  &quot;plates&quot;: [&quot;plate1&quot;, &quot;plate2&quot;]
+}
+</code></pre>
+								</div>
+								<h3 id="_incubator.run">incubator.run</h3>
+								<div class="command">
+									<p>Run the incubator with the given program.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>object</td>
+												<td><p>Program for shaking and incubating</p>
+									</td>
+												<td>required</td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;rpm</td>
+													<td>number</td>
+													<td></td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;duration</td>
+													<td>Duration</td>
+													<td></td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;temperature</td>
+													<td>Temperature</td>
+													<td></td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>plates</td>
+												<td>array</td>
+												<td><p>List of plates to incubate</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>sites</td>
+												<td>array</td>
+												<td><p>Internal sites to put the plates on</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfters</td>
+												<td>array</td>
+												<td><p>Location identifier for where the plates should be placed after incubation</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<p>This will incubate 2 plates at 300rpm for 2 minutes at 25°C:</p>
+<pre><code>{
+  &quot;command&quot;: &quot;incubator.incubatePlates&quot;,
+  &quot;plates&quot;: [&quot;plate1&quot;, &quot;plate2&quot;],
+  &quot;program&quot;: {
+    &quot;rpm&quot;: 300,
+    &quot;duration&quot;: &quot;2 minutes&quot;,
+    &quot;temperature&quot;: &quot;25 degC&quot;
+  }
+}
+</code></pre>
+								</div>
+								<h2 id="_pipetter">pipetter</h2>
+								<p>The <code>pipetter</code> commands specify actions using pipetting equipment.</p>
+
+								<h3 id="_Pipetter">Pipetter</h3>
+								<div class="command">
+									<p>Pipetting equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Pipetter</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Syringe">Syringe</h3>
+								<div class="command">
+									<p>Pipetting syringe.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Syringe</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>tipModel</td>
+												<td>string</td>
+												<td><p>Tip model identifier for the tip currently on the syringe</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>tipModelPermanent</td>
+												<td>string</td>
+												<td><p>Tip model identifier if this syringe has a permanent tip</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>contaminants</td>
+												<td>array</td>
+												<td><p>List of contaminants the syringe has had contact with</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>contents</td>
+												<td>array</td>
+												<td><p>Current contents of the syringe</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleaned</td>
+												<td>string</td>
+												<td><p>Last cleaning intensity</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._MixSpec">pipetter._MixSpec</h3>
+								<div class="command">
+									<p>Parameters for mixing in higher-level commands like pipetter._PipetteItem.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>count</td>
+												<td>integer</td>
+												<td><p>Number of times to aspirate and re-dispense</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Amount to aspirate, either as a fraction or absolute volume</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._AspirateItem">pipetter._AspirateItem</h3>
+								<div class="command">
+									<p>Parameters for pipette items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>source</td>
+												<td>Well</td>
+												<td><p>Source specifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Volume</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._DispenseItem">pipetter._DispenseItem</h3>
+								<div class="command">
+									<p>Parameters for pipette items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Well</td>
+												<td><p>Destination specifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Volume</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._MeasureVolumeItem">pipetter._MeasureVolumeItem</h3>
+								<div class="command">
+									<p>Parameters for low-level pipetter._measureVolume items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>well</td>
+												<td>Well</td>
+												<td><p>Well specifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.MeasureVolumeItem">pipetter.MeasureVolumeItem</h3>
+								<div class="command">
+									<p>Parameters for pipetter.measureVolume items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>well</td>
+												<td>Well</td>
+												<td><p>Well specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanAfter</td>
+												<td>pipetter.CleaningIntensity</td>
+												<td><p>intensity of cleaning required after this item.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._MixItem">pipetter._MixItem</h3>
+								<div class="command">
+									<p>Parameters for mixing with pipetter.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>well</td>
+												<td>Well</td>
+												<td><p>Well to mix</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>count</td>
+												<td>integer</td>
+												<td><p>Number of times to aspirate and re-dispense</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Volume</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.CleaningIntensity">pipetter.CleaningIntensity</h3>
+								<div class="command">
+									<p>Intensity of cleaning.</p>
+<p>The enum lists the intensities in increase order.</p>
+
+
+
+
+
+								</div>
+								<h3 id="_pipetter._PipetteItem">pipetter._PipetteItem</h3>
+								<div class="command">
+									<p>Parameters for low-level pipette items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>source</td>
+												<td>Well</td>
+												<td><p>Source specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Well</td>
+												<td><p>Destination specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Volume</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>sourceMixing</td>
+												<td>pipetter._MixSpec</td>
+												<td><p>Parameters for mixing the source prior to aspiration</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationMixing</td>
+												<td>pipetter._MixSpec</td>
+												<td><p>Parameters for mixing the destination after dispense</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>tipModel</td>
+												<td>string</td>
+												<td><p>Tip model identifier, in order to use a specific tip model</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.PipetteItem">pipetter.PipetteItem</h3>
+								<div class="command">
+									<p>Parameters for pipette items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>source</td>
+												<td>Source</td>
+												<td><p>Source specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Well</td>
+												<td><p>Destination specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Volume</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volumeCalibrated</td>
+												<td>object</td>
+												<td><p>Calculate a calibrated volume</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volumeTotal</td>
+												<td>Volume</td>
+												<td><p>Volume that the well should be brought up to.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>layer</td>
+												<td></td>
+												<td><p>A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren&#39;t in adjacent in the items list.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanAfter</td>
+												<td>pipetter.CleaningIntensity</td>
+												<td><p>intensity of cleaning required after this item.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceMixing</td>
+												<td>boolean,pipetter.MixSpec</td>
+												<td><p>Parameters for mixing the source prior to aspiration</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationMixing</td>
+												<td>boolean,pipetter.MixSpec</td>
+												<td><p>Parameters for mixing the destination after dispense</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._PunctureItem">pipetter._PunctureItem</h3>
+								<div class="command">
+									<p>Parameters for low-level puncture items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>well</td>
+												<td>Well</td>
+												<td><p>Well specifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>distance</td>
+												<td>Length</td>
+												<td><p>Distance for puncturing</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.PunctureItem">pipetter.PunctureItem</h3>
+								<div class="command">
+									<p>Parameters for puncture items.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>well</td>
+												<td>Well</td>
+												<td><p>Well specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>distance</td>
+												<td>Length</td>
+												<td><p>Distance for puncturing</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanAfter</td>
+												<td>pipetter.CleaningIntensity</td>
+												<td><p>intensity of cleaning required after this item.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.DilutionItem">pipetter.DilutionItem</h3>
+								<div class="command">
+									<p>Parameters for a dilution series.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>source</td>
+												<td>Source</td>
+												<td><p>Source specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinations</td>
+												<td>Wells</td>
+												<td><p>Destination wells</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Volume</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.MixItem">pipetter.MixItem</h3>
+								<div class="command">
+									<p>Parameters for mixing with pipetter.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>syringe</td>
+												<td>number,nameOf Syringe</td>
+												<td><p>Syringe identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>well</td>
+												<td>Well</td>
+												<td><p>Well to mix</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>count</td>
+												<td>integer</td>
+												<td><p>Number of times to aspirate and re-dispense</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>amount</td>
+												<td>Volume,number</td>
+												<td><p>Amount to aspirate, either as a fraction or absolute volume</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.MixSpec">pipetter.MixSpec</h3>
+								<div class="command">
+									<p>Parameters for mixing (used in higher-level commands like pipetter.pipette and pipetter.pipetteDilutionSeries).</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>count</td>
+												<td>integer</td>
+												<td><p>Number of times to aspirate and re-dispense</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>amount</td>
+												<td>Volume,number</td>
+												<td><p>Amount to aspirate, either as a fraction or absolute volume</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._aspirate">pipetter._aspirate</h3>
+								<div class="command">
+									<p>Aspirate liquids from sources into syringes.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Data about what should be aspirated from where</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._dispense">pipetter._dispense</h3>
+								<div class="command">
+									<p>Dispense liquids from sryinges into destinations.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Data about what should be dispensed where</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._measureVolume">pipetter._measureVolume</h3>
+								<div class="command">
+									<p>Measure well volume using pipetter tips.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>List of parameters for individual wells</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>output</td>
+												<td></td>
+												<td><p>Output definition for where and how to save the measurements</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;joinKey</td>
+													<td>string</td>
+													<td><p>The key used to left-join the measurement values with the current DATA</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;writeTo</td>
+													<td>string</td>
+													<td><p>Filename to write measured to as JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;appendTo</td>
+													<td>string</td>
+													<td><p>Filename to append measured to as newline-delimited JSON</p>
+									</td>
+													<td></td>
+												</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._mix">pipetter._mix</h3>
+								<div class="command">
+									<p>Mix liquids by aspirating and re-dispensing.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>itemDefaults</td>
+												<td></td>
+												<td><p>Default values for items</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;count</td>
+													<td>integer</td>
+													<td><p>Number of times to aspirate and re-dispense</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;volume</td>
+													<td>Volume</td>
+													<td><p>Volume</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Data about mixing</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._pipette">pipetter._pipette</h3>
+								<div class="command">
+									<p>Pipette liquids from sources to destinations.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>sourceProgram</td>
+												<td>string</td>
+												<td><p>Program identifier for aspirating from source, if it should differ from &#39;program&#39;</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Data about what should be pipetted where</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceMixing</td>
+												<td>pipetter._MixSpec</td>
+												<td><p>Parameters for mixing the source prior to aspiration</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationMixing</td>
+												<td>pipetter._MixSpec</td>
+												<td><p>Parameters for mixing the destination after dispense</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._punctureSeal">pipetter._punctureSeal</h3>
+								<div class="command">
+									<p>Puncture the seal on a plate using pipetter tips.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>List of parameters for individual punctures</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter._washTips">pipetter._washTips</h3>
+								<div class="command">
+									<p>Clean the pipetter tips by washing.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name,object</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>List of syringe identifiers</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>intensity</td>
+												<td>pipetter.CleaningIntensity</td>
+												<td><p>Intensity of the cleaning</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.cleanTips">pipetter.cleanTips</h3>
+								<div class="command">
+									<p>Clean the pipetter tips.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>List of which syringes to clean at which intensity</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>Optional list of syringes to serve as default for missing syringes in items list</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>intensity</td>
+												<td>pipetter.CleaningIntensity</td>
+												<td><p>Optional intensity to serve as default intensity for missing intensities in items list</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.measureVolume">pipetter.measureVolume</h3>
+								<div class="command">
+									<p>Measure well volume using pipetter tips.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>List of parameters for individual wells to measure</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wellLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wells</td>
+												<td>Wells</td>
+												<td><p>Specifier for well(s) to measure, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>Specifier for syringe(s) to use, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>clean</td>
+												<td>string</td>
+												<td><p>Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBegin</td>
+												<td>string</td>
+												<td><p>intensity of cleaning before the first puncture.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetween</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between wells.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanEnd</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning after the last puncture.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>tipModel</td>
+												<td>string</td>
+												<td><p>Tip model identifier, in order to use a specific tip model</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>output</td>
+												<td></td>
+												<td><p>Output definition for where and how to save the measurements</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;joinKey</td>
+													<td>string</td>
+													<td><p>The key used to left-join the measurement values with the current DATA</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;appendTo</td>
+													<td>string</td>
+													<td><p>Filename to append measured to as newline-delimited JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td></td>
+													<td><p>Map of user-defined key-values to include in the output</p>
+									</td>
+													<td></td>
+												</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.mix">pipetter.mix</h3>
+								<div class="command">
+									<p>Mix well contents by aspirating and re-dispensing.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Data about which wells to mix and how to mix them</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wellLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wells</td>
+												<td>Wells</td>
+												<td><p>Specifier for well(s) to mix, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>counts</td>
+												<td>integer</td>
+												<td><p>Number of times to aspirate, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>amounts</td>
+												<td>Volume,number</td>
+												<td><p>Amount to aspirate, either as a fraction or absolute volume, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>Specifier for syringe(s) to use, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>clean</td>
+												<td>string</td>
+												<td><p>Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBegin</td>
+												<td>string</td>
+												<td><p>intensity of first cleaning at beginning of pipetting, before first aspiration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetween</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between different liquids.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetweenSameSource</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between transfers of the same liquid.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanEnd</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning after the last dispense.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.pipette">pipetter.pipette</h3>
+								<div class="command">
+									<p>Pipette liquids from sources to destinations.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>array,string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceProgram</td>
+												<td>string</td>
+												<td><p>Program identifier for aspirating from source, if it should differ from &#39;program&#39;</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Data about what should be pipetted where</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for source wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for source wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sources</td>
+												<td>Sources</td>
+												<td><p>Specifier for source(s) to aspirate from, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinations</td>
+												<td>Wells</td>
+												<td><p>Specifier for destination(s) to despense to, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volumes</td>
+												<td>Volumes</td>
+												<td><p>Volume(s) to pipette, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>Specifier for syringe(s) to use, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>clean</td>
+												<td>string</td>
+												<td><p>Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBegin</td>
+												<td>string</td>
+												<td><p>intensity of first cleaning at beginning of pipetting, before first aspiration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetween</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between different liquids.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetweenSameSource</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between transfers of the same liquid.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanEnd</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning after the last dispense.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceMixing</td>
+												<td>boolean,pipetter.MixSpec</td>
+												<td><p>Parameters for mixing the source wells with pipetter before aspirating</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationMixing</td>
+												<td>boolean,pipetter.MixSpec</td>
+												<td><p>Parameters for mixing the destination after dispense</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>tipModel</td>
+												<td>string</td>
+												<td><p>Tip model identifier, in order to use a specific tip model</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>calibrators</td>
+												<td>object</td>
+												<td><p>A map from calibrator names to calibrator data (DOCUMENTAITON REQUIRED)</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.pipetteDilutionSeries">pipetter.pipetteDilutionSeries</h3>
+								<div class="command">
+									<p>Pipette a dilution series.</p>
+<p>First the diluent is distributed to the destination wells (if diluent is specified).
+Then the source is transfered to the first destination well of each item (if source is specified -- otherwise the first destination well is assumed to be already prepared).
+Then aliquots are serially transfered from the first destination well to the next, and so on for each item.
+In general, mixing should be performed after each dilution dispense, and perhaps also before the first aspriation -- this can be specified how ???</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>dilutionFactor</td>
+												<td>number</td>
+												<td><p>Dilution factor by which each subsequent well is diluted</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>dilutionMethod</td>
+												<td>string</td>
+												<td><p>How to dilute -- <code>begin</code>: distribute diluent to destination wells first (default); <code>before</code>: add diluent right before transfering aliquot; <code>after</code>: add diluent right after transfering aliquot; <code>source</code>: dilute the well that the aliquot will be extracted from.</p>
+									One of: begin,before,after,source</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>lastWellHandling</td>
+												<td>string</td>
+												<td><p>How to handle the last well in a series</p>
+									One of: none,diluteOnly,diluteAndExtract</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>Array of dilution items</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>diluent</td>
+												<td>Source</td>
+												<td><p>Diluent to be used in dilution</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for source wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for source wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>volume</td>
+												<td>Volume</td>
+												<td><p>Final volume of dilution wells (with the possible exception of the last well, see parameter <code>lastWellHandling</code>)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBegin</td>
+												<td>string</td>
+												<td><p>Intensity of first cleaning at beginning of pipetting, before first aspiration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanEnd</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning after the last dispense.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sourceParams</td>
+												<td></td>
+												<td><p>Extra parameters for pipetting the source</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>diluentParams</td>
+												<td></td>
+												<td><p>Extra parameters for pipetting the diluent</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>dilutionParams</td>
+												<td></td>
+												<td><p>Extra parameters for pipetting the diluted aliquots</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.pipetteMixtures">pipetter.pipetteMixtures</h3>
+								<div class="command">
+									<p>Pipette the given mixtures into the given destinations.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>mixtures</td>
+												<td>array</td>
+												<td><p>Array of arrays, where each sub-array is a list of components to be mixed into a destination well</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>sourceLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for source wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for source wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinations</td>
+												<td>Wells</td>
+												<td><p>Destination specifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>order</td>
+												<td>array</td>
+												<td><p>Order in which to pipette the mixtures.  Defaults to the order given in the mixtures array.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>clean</td>
+												<td>string</td>
+												<td><p>Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanBetweenSameSource, cleanEnd)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBegin</td>
+												<td>string</td>
+												<td><p>intensity of first cleaning at beginning of pipetting, before first aspiration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetween</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between different liquids.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetweenSameSource</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between transfers of the same liquid.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanEnd</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning after the last dispense.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_pipetter.punctureSeal">pipetter.punctureSeal</h3>
+								<div class="command">
+									<p>Puncture the seal on a plate using pipetter tips.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>items</td>
+												<td>array</td>
+												<td><p>List of parameters for individual punctures</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wellLabware</td>
+												<td>Plate</td>
+												<td><p>Labware for wells</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wells</td>
+												<td>Wells</td>
+												<td><p>Specifier for well(s) to puncture, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>syringes</td>
+												<td>array</td>
+												<td><p>Specifier for syringe(s) to use, if missing from items</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>distances</td>
+												<td>Length,array</td>
+												<td><p>Distance for puncturing</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>clean</td>
+												<td>string</td>
+												<td><p>Default value for cleaning intensity (see cleanBegin, cleanBetween, cleanEnd)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBegin</td>
+												<td>string</td>
+												<td><p>intensity of cleaning before the first puncture.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanBetween</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning between wells.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>cleanEnd</td>
+												<td>string</td>
+												<td><p>Intensity of cleaning after the last puncture.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>tipModel</td>
+												<td>string</td>
+												<td><p>Tip model identifier, in order to use a specific tip model</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Agent">Agent</h3>
+								<div class="command">
+									<p>An agent that can execute commands.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Agent</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Data">Data</h3>
+								<div class="command">
+									<p>Specification of an experimental design.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Data</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>design</td>
+												<td>object</td>
+												<td></td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>actions</td>
+												<td>array</td>
+												<td></td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Lid">Lid</h3>
+								<div class="command">
+									<p>Lid labware</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Lid</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>model</td>
+												<td>string</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>location</td>
+												<td>string</td>
+												<td></td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_LidModel">LidModel</h3>
+								<div class="command">
+									<p>Model for lid labware</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: LidModel</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Liquid">Liquid</h3>
+								<div class="command">
+									<p>Liquid substance.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Liquid</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>wells</td>
+												<td>array</td>
+												<td></td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Plate">Plate</h3>
+								<div class="command">
+									<p>Plate labware.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Plate</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>model</td>
+												<td>PlateModel</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>location</td>
+												<td>Site</td>
+												<td></td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>contents</td>
+												<td>object,array</td>
+												<td></td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>sealed</td>
+												<td>boolean</td>
+												<td><p>Indicated whether the plate is sealed</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_PlateModel">PlateModel</h3>
+								<div class="command">
+									<p>Model for plate labware.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: PlateModel</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>rows</td>
+												<td>integer</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>columns</td>
+												<td>integer</td>
+												<td></td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Site">Site</h3>
+								<div class="command">
+									<p>Represents a bench site where labware can placed.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Site</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Template">Template</h3>
+								<div class="command">
+									<p>A template object, used by the <code>system.call</code> command.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Template</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>template</td>
+												<td></td>
+												<td></td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_Variable">Variable</h3>
+								<div class="command">
+									<p>User-defined variable.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Variable</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td></td>
+												<td></td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_sealer">sealer</h2>
+								<p>The <code>sealer</code> commands specify actions using sealing equipment.</p>
+
+								<h3 id="_Sealer">Sealer</h3>
+								<div class="command">
+									<p>Sealing equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Sealer</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_sealer.sealPlate">sealer.sealPlate</h3>
+								<div class="command">
+									<p>Seal a plate.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier for sealing</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier of sealer</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>count</td>
+												<td>number</td>
+												<td><p>Number of times to seal (defaults to 1)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after this command</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_data">data</h2>
+								<p>The <code>data</code> module contains two commands for working with data tables:</p>
+<ul>
+<li><code>data.forEachRow</code> executes sub-steps for each row in the active data table.</li>
+<li><code>data.forEachGroup</code> executes sub-steps for each group of rows in active data table.
+The grouping criterion is specified by <code>groupBy</code> parameter.</li>
+</ul>
+
+								<h3 id="_data.forEachGroup">data.forEachGroup</h3>
+								<div class="command">
+									<p>Perform sub-steps for every grouping of rows in the active data table.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>groupBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to group by</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>distinctBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to distinguish row by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>orderBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to order by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationTotal</td>
+												<td>Duration</td>
+												<td><p>The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationGroup</td>
+												<td>Duration</td>
+												<td><p>The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>interleave</td>
+												<td>Duration</td>
+												<td><p>The time offset for interleaving each group</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>timers</td>
+												<td>array</td>
+												<td><p>Timers that should be used</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>startTimerAfterStep</td>
+												<td>integer</td>
+												<td><p>The duration timer will be started after this step rather than from the beginning, if specified</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object</td>
+												<td><p>The sequence of commands to perform for each set of factor values.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_data.forEachRow">data.forEachRow</h3>
+								<div class="command">
+									<p>Perform sub-steps for every row in the active data table.
+The row&#39;s values are placed in SCOPE for the sub-steps.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>distinctBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to distinguish row by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>orderBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to order by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationTotal</td>
+												<td>Duration</td>
+												<td><p>The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationRow</td>
+												<td>Duration</td>
+												<td><p>The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>interleave</td>
+												<td>Duration</td>
+												<td><p>The time offset for interleaving each group</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>timers</td>
+												<td>array</td>
+												<td><p>Timers that should be used</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object</td>
+												<td><p>The sequence of commands to perform for each set of factor values.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_shaker">shaker</h2>
+								<p>The <code>shaker</code> commands specify actions using shaker equipment.</p>
+
+								<h3 id="_Shaker">Shaker</h3>
+								<div class="command">
+									<p>Shaker equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Shaker</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_shaker.ShakerProgram">shaker.ShakerProgram</h3>
+								<div class="command">
+									<p>Program for shaker.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>amplitude</td>
+												<td>string</td>
+												<td><p>Amplitude</p>
+									One of: min,low,high,max</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>duration</td>
+												<td>Duration</td>
+												<td><p>Duration of shaking</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>rpm</td>
+												<td>number</td>
+												<td><p>Rotations per minute (RPM)</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_shaker.shakePlate">shaker.shakePlate</h3>
+								<div class="command">
+									<p>Shake a plate.
+If necessary, the plate will be transfered to the shaker first.
+By default, the plate will also be automatically moved back to its
+prior location after shaking.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>shaker.ShakerProgram</td>
+												<td><p>Program for shaking</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier on shaker</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after this command</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+										<b>Example:</b>
+
+										<p>This will shake <code>plate1</code> for 1 minute:</p>
+<pre><code>command: shaker.shakePlate
+program:
+  duration: 1 minute
+object: plate1
+</code></pre>
+								</div>
+								<h3 id="_shaker.run">shaker.run</h3>
+								<div class="command">
+									<p>Run the shaker.
+This will simply run the given shaker program, regardless of
+what plate is on the shaker or whether the shaker is empty.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>shaker.ShakerProgram</td>
+												<td><p>Program for shaking</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_system">system</h2>
+								<p>The <code>system</code> commands specify several general, high-level actions that are
+not specific to any particular type of equipment.</p>
+
+								<h3 id="_system._description">system._description</h3>
+								<div class="command">
+									<p>Include the value as a description in the generated script.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>text</td>
+												<td>string</td>
+												<td><p>Description text</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system._echo">system._echo</h3>
+								<div class="command">
+									<p>Include the value in the generated script for trouble-shooting.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>name</td>
+												<td>string</td>
+												<td><p>Name of echoed thing</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>value</td>
+												<td></td>
+												<td><p>Thing to echo</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.call">system.call</h3>
+								<div class="command">
+									<p>Call a template function.</p>
+<p>The template function should be an object of type <code>Template</code> with a property <code>template</code> holding either a Handlebars template string or an object whose properties may be Handlebars template strings. The template will be expanded using the values passed in the <code>params</code> property.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>name</td>
+												<td>Object</td>
+												<td><p>Name of the template function.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>lazyParams</td>
+												<td>object</td>
+												<td><p>Parameters to pass to the template function.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.description">system.description</h3>
+								<div class="command">
+									<p>Include the value as a description in the generated script.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>value</td>
+												<td></td>
+												<td><p>Value to use as description</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.echo">system.echo</h3>
+								<div class="command">
+									<p>Include the value in the generated script for trouble-shooting.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>value</td>
+												<td></td>
+												<td><p>Value to echo</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.if">system.if</h3>
+								<div class="command">
+									<p>Conditionally execute steps depending on a conditional test.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>test</td>
+												<td>boolean</td>
+												<td><p>A boolean value; if true, the <code>then</code> steps are executed.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>then</td>
+												<td>object</td>
+												<td><p>The sequence of steps to perform if the test is true.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>else</td>
+												<td>object</td>
+												<td><p>The sequence of steps to perform if the test is false.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.repeat">system.repeat</h3>
+								<div class="command">
+									<p>Repeat sub-steps a given number of times.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>count</td>
+												<td>integer</td>
+												<td><p>The number of times to repeat.</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object</td>
+												<td><p>The sequence of commands to repeat.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>variableName</td>
+												<td>string</td>
+												<td><p>If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.runtimeExitLoop">system.runtimeExitLoop</h3>
+								<div class="command">
+									<p>Test at run-time whether to exit the current loop.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>testType</td>
+												<td>string</td>
+												<td><p>The type of code to execute to determine whether to break; a JSON truthy value should be returned.</p>
+									One of: nodejs,R</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>test</td>
+												<td>string</td>
+												<td><p>The code to execute at runtime that will test whether to exit.</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.runtimeLoadVariables">system.runtimeLoadVariables</h3>
+								<div class="command">
+									<p>Load the runtime values into variables.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>varset</td>
+												<td>string</td>
+												<td><p>Name of the variable set to load</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>variables</td>
+												<td>array</td>
+												<td><p>Array of variables to load from &#39;varset&#39;</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_system.runtimeSteps">system.runtimeSteps</h3>
+								<div class="command">
+									<p>Handle steps that require runtime variables.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>varset</td>
+												<td>string</td>
+												<td><p>Name of the variable set to load</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>variables</td>
+												<td>array</td>
+												<td><p>Array of variables to load from &#39;varset&#39;</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>array,object</td>
+												<td><p>Steps to compile at runtime</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_timer">timer</h2>
+								<p>The <code>timer</code> commands specify actions using timer equipment.</p>
+
+								<h3 id="_Timer">Timer</h3>
+								<div class="command">
+									<p>Timer equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Timer</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer._sleep">timer._sleep</h3>
+								<div class="command">
+									<p>Sleep for a given duration using a specific timer.</p>
+<p>Handler should return <code>effects</code> that the timer is not running.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>duration</td>
+												<td>Duration</td>
+												<td><p>Duration to sleep</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>stop</td>
+												<td>boolean</td>
+												<td><p>Whether to stop the timer after waiting, or let it continue</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer._start">timer._start</h3>
+								<div class="command">
+									<p>Start the given timer.</p>
+<p>Handler should return <code>effects</code> that the timer is running.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer._stop">timer._stop</h3>
+								<div class="command">
+									<p>Stop the given timer.</p>
+<p>Handler should return <code>effects</code> that the timer is not running.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer._wait">timer._wait</h3>
+								<div class="command">
+									<p>Wait until the given timer has reacher the given elapsed time.</p>
+<p>Handler should:</p>
+<ul>
+<li>expect that the timer (identified by the <code>equipment</code> parameter) is running</li>
+<li>return <code>effects</code> that the timer is not running</li>
+</ul>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>till</td>
+												<td>Duration</td>
+												<td><p>Number of seconds to wait till from the time the timer was started</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>stop</td>
+												<td>boolean</td>
+												<td><p>Whether to stop the timer after waiting, or let it continue</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer.doAndWait">timer.doAndWait</h3>
+								<div class="command">
+									<p>Start a timer, perform sub-steps, then wait till duration has elapsed.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>duration</td>
+												<td>Duration</td>
+												<td><p>Duration that this command should last</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object,array</td>
+												<td><p>Sub-steps to perform</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer.sleep">timer.sleep</h3>
+								<div class="command">
+									<p>Sleep for a given duration.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>duration</td>
+												<td>Duration</td>
+												<td><p>Duration to sleep</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer.start">timer.start</h3>
+								<div class="command">
+									<p>Start a timer.</p>
+<p>If no parameters are supplied, a timer will be automatically chosen.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer.stop">timer.stop</h3>
+								<div class="command">
+									<p>Stop a running a timer.</p>
+<p>If only one timer is running, this command can be called without any parameters.
+Otherwise, the equipment identifier must be supplied.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_timer.wait">timer.wait</h3>
+								<div class="command">
+									<p>Wait until the given timer has reacher the given elapsed time.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>till</td>
+												<td>Duration</td>
+												<td><p>Time that the timer should reach before continuing with the next step</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>stop</td>
+												<td>boolean</td>
+												<td><p>Whether to stop the timer after waiting, or let it continue</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_absorbanceReader">absorbanceReader</h2>
+								<p>The <code>absorbanceReader</code> commands specify actions using equipment for absorbance readouts.</p>
+
+								<h3 id="_Reader">Reader</h3>
+								<div class="command">
+									<p>Reader equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Reader</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_absorbanceReader.measurePlate">absorbanceReader.measurePlate</h3>
+								<div class="command">
+									<p>Measure the absorbance of a plate.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td></td>
+												<td><p>Program parameters</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;shakerProgramBefore</td>
+													<td></td>
+													<td><p>Program for shaker.</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelength</td>
+													<td>Length</td>
+													<td><p>Excitation wavelength</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationBandwidth</td>
+													<td>Length</td>
+													<td><p>Excitation bandwidth</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelengthMin</td>
+													<td>Length</td>
+													<td><p>Minimum excitation wavelength for a scan</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelengthMax</td>
+													<td>Length</td>
+													<td><p>Maximum excitation wavelength for a scan</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelengthStep</td>
+													<td>Length</td>
+													<td><p>Size of steps for a scan</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;wells</td>
+													<td>Wells</td>
+													<td><p>Array of wells to read</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;wellDesignFactor</td>
+													<td>string</td>
+													<td><p>Name of design column that indicates which wells to measure (deprecated, use <code>output.joinKey</code>)</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td>object</td>
+													<td><p>User-specificed values that should be included in the output table (deprecated, use <code>output.userValues</code>)</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>programFileTemplate</td>
+												<td>string</td>
+												<td><p>Program template; well information will be substituted into the template automatically.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programFile</td>
+												<td>string</td>
+												<td><p>Program filename</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programData</td>
+												<td></td>
+												<td><p>Program data</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>outputFile</td>
+												<td>string</td>
+												<td><p>Filename for output (deprecated, use <code>output.writeTo</code>)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>outputDataset</td>
+												<td>string</td>
+												<td><p>Name of dataset to which the measurements values will be appended. (deprecated, use <code>output.appendTo</code>)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>output</td>
+												<td></td>
+												<td><p>Output definition for where and how to save the measurements</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;joinKey</td>
+													<td>string</td>
+													<td><p>The key used to left-join the measurement values with the current DATA</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;writeTo</td>
+													<td>string</td>
+													<td><p>Filename to write measurements to as JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;appendTo</td>
+													<td>string</td>
+													<td><p>Filename to append measurements to as newline-delimited JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td>object</td>
+													<td><p>User-specificed values that should be included in the output table</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;simulated</td>
+													<td>string</td>
+													<td><p>An expression to evaluate with mathjs</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;units</td>
+													<td></td>
+													<td><p>Map of factor names to unit type; converts the factor values to plain numbers in the given units.</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier in reader</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after measurement</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_fluorescenceReader">fluorescenceReader</h2>
+								<p>The <code>fluorescenceReader</code> commands specify actions using equipment for fluorescence readouts.</p>
+
+								<h3 id="_Reader">Reader</h3>
+								<div class="command">
+									<p>Reader equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Reader</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_fluorescenceReader.measurePlate">fluorescenceReader.measurePlate</h3>
+								<div class="command">
+									<p>Measure the fluorescence of wells on a plate.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td></td>
+												<td><p>Program parameters</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;shakerProgram</td>
+													<td></td>
+													<td><p>Program for shaker.</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelength</td>
+													<td>Length</td>
+													<td><p>Excitation wavelength</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;emissionWavelength</td>
+													<td>Length</td>
+													<td><p>Emission wavelength</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;wells</td>
+													<td>Wells</td>
+													<td><p>Array of wells to read</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>programFileTemplate</td>
+												<td>string</td>
+												<td><p>Program template; well information will be substituted into the template automatically.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programFile</td>
+												<td>string</td>
+												<td><p>Program filename</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programData</td>
+												<td></td>
+												<td><p>Program data</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>output</td>
+												<td></td>
+												<td><p>Output definition for where and how to save the measurements</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;joinKey</td>
+													<td>string</td>
+													<td><p>The key used to left-join the measurement values with the current DATA</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;writeTo</td>
+													<td>string</td>
+													<td><p>Filename to write measurements to as JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;appendTo</td>
+													<td>string</td>
+													<td><p>Filename to append measurements to as newline-delimited JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td>object</td>
+													<td><p>User-specificed values that should be included in the output table</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;simulated</td>
+													<td>string</td>
+													<td><p>An expression to evaluate with mathjs</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;units</td>
+													<td></td>
+													<td><p>Map of factor names to unit type; converts the factor values to plain numbers in the given units.</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier in reader</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after measurement</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_transporter">transporter</h2>
+								<p>The <code>transporter</code> commands specify actions using equipment to transport
+labware from one location to another.</p>
+
+								<h3 id="_Transporter">Transporter</h3>
+								<div class="command">
+									<p>Labware transporter equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Transporter</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter._moveLidFromContainerToSite">transporter._moveLidFromContainerToSite</h3>
+								<div class="command">
+									<p>Transport a lid from a container to a destination site.</p>
+<p>Developer notes:
+Handler should return <code>effects</code> with the lid&#39;s new location.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Labware</td>
+												<td><p>Lid identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>container</td>
+												<td>Plate</td>
+												<td><p>Container identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Site</td>
+												<td><p>Site to move the lid to</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter._moveLidFromSiteToContainer">transporter._moveLidFromSiteToContainer</h3>
+								<div class="command">
+									<p>Transport a lid from an origin site to a labware container.</p>
+<p>Developer notes:
+Handler should return <code>effects</code> with the lid&#39;s new location.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Labware</td>
+												<td><p>Lid identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>origin</td>
+												<td>Site</td>
+												<td><p>Site to move the lid from</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>container</td>
+												<td>Plate</td>
+												<td><p>Container to place the lid on</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter._movePlate">transporter._movePlate</h3>
+								<div class="command">
+									<p>Transport a plate to a destination.</p>
+<p>Handler should return <code>effects</code> with the plate&#39;s new location.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Site</td>
+												<td><p>Site to move the plate to</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter.doThenRestoreLocation">transporter.doThenRestoreLocation</h3>
+								<div class="command">
+									<p>Perform steps, then return the given labwares to their prior locations.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>objects</td>
+												<td>array</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object,array</td>
+												<td><p>Sub-steps to perform</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter.moveLidFromContainerToSite">transporter.moveLidFromContainerToSite</h3>
+								<div class="command">
+									<p>Transport a lid from a container to a destination site.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Labware</td>
+												<td><p>Lid identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Site</td>
+												<td><p>Site to move the lid to</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter.moveLidFromSiteToContainer">transporter.moveLidFromSiteToContainer</h3>
+								<div class="command">
+									<p>Transport a lid from an origin site to a labware container.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Labware</td>
+												<td><p>Lid identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>container</td>
+												<td>Labware</td>
+												<td><p>Container to move the lid to</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_transporter.movePlate">transporter.movePlate</h3>
+								<div class="command">
+									<p>Transport a plate to a destination.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>name</td>
+												<td><p>Program identifier for transport</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>destination</td>
+												<td>Site</td>
+												<td><p>Site to move the plate to</p>
+									</td>
+												<td>required</td>
+											</tr>
+									</table>
+
+
+
+								</div>
+				</div>
+			</div>
+
+	</div>
+
+</body>
+</html>
