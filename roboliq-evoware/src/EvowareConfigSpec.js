@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Module for converting an EvowareConfigSpec to a general Roboliq configuration protocol.
  * @module
  */

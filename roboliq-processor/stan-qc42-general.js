@@ -1,3 +1,9 @@
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
 // qc42-general-sim
 const _ = require('lodash');
 const fs = require('fs');

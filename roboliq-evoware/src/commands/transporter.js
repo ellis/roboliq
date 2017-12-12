@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Handles transporter instructions and supplies some additional control functions
  * for moving the ROMAs.
  * @module

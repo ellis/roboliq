@@ -1,3 +1,9 @@
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
 const _ = require('lodash');
 const should = require('should');
 import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, query_groupBy, expandConditions, printRows} from '../src/design.js';

@@ -1,4 +1,16 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * A module of functions for querying and manipulating well contents.
  * @module WellContents
  */

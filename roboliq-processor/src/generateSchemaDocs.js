@@ -1,4 +1,16 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Generate documentation from the schemas in `schemas/*.yaml`.
  * Running this module will create these files:
  *

@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Module for a 1-site Tecan shaker.
  * @module
  */

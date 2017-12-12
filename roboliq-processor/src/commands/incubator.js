@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Incubator commands module (see {@tutorial Commands#incubator} or [command specification](tutorial-Commands.html#incubator)).
  *
  * See {@link roboliq#Protocol}.

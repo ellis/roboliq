@@ -1,3 +1,9 @@
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
 import _ from 'lodash';
 import should from 'should';
 import roboliq from '../src/roboliq.js';

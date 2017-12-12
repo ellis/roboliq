@@ -1,3 +1,15 @@
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
 // REFACTOR: it might make sense to remove this file, but it's currently used in commandHelper.js
 
 const roboliqSchemas = {

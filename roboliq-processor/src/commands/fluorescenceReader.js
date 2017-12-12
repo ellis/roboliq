@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Namespace for the ``fluorescenceReader`` commands.
  * @namespace fluorescenceReader
  * @version v1

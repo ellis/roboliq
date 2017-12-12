@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Centrifuge commands module (see {@tutorial Commands#centrifuge} or [command specification](tutorial-Commands.html#centrifuge)).
  *
  * THIS SECTION IS FOR TESTING ONLY:

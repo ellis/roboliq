@@ -1,4 +1,10 @@
 /**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017 Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+/**
  * Module for Evoware commands.
  * In order to use Evoware commands in Roboliq, you'll need to calls these
  * functions in your robot configuration file.
