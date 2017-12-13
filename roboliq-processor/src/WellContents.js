@@ -1,12 +1,6 @@
 /**
  * Roboliq: Automation for liquid-handling robots
- * @copyright 2017 Ellis Whitehead
- * @license GPL-3.0
- */
-
-/**
- * Roboliq: Automation for liquid-handling robots
- * @copyright 2017 Ellis Whitehead
+ * @copyright 2017, ETH Zurich, Ellis Whitehead
  * @license GPL-3.0
  */
 
@@ -216,7 +210,7 @@ export function flattenContents(contents) {
 	if (_.isUndefined(contents)) {
 		return {};
 	}
-	
+
 	checkContents(contents);
 	//console.log("flattenContents:", contents);
 	assert(_.isArray(contents), "Expected 'contents' to be an array: "+JSON.stringify(contents));
