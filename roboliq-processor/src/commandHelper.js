@@ -9,17 +9,17 @@
  * @module commandHelper
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var expect = require('./expect.js');
-var jmespath = require('jmespath');
-import math from 'mathjs';
-import naturalSort from 'javascript-natural-sort';
-import tv4 from 'tv4';
+const _ = require('lodash');
+const assert = require('assert');
+const expect = require('./expect.js');
+const jmespath = require('jmespath');
+const math = require('mathjs');
+const naturalSort = require('javascript-natural-sort');
+const tv4 = require('tv4');
 const Design = require('./design.js');
-import misc from './misc.js';
-import roboliqSchemas from './roboliqSchemas.js';
-import wellsParser from './parsers/wellsParser.js';
+const misc = require('./misc.js');
+const roboliqSchemas = require('./roboliqSchemas.js');
+const wellsParser = require('./parsers/wellsParser.js');
 
 /**
  * Ensure that the value is an array.
@@ -1100,7 +1100,7 @@ function getParsedValue(parsed, data, paramName, propertyName, defaultValue) {
  * @return {Array}               Array of objects holding valid values
  */
 function queryLogicGeneral(data, predicates, queryExtract) {
-	var llpl = require('./HTN/llpl.js').create();
+	const llpl = require('./HTN/llpl.js').create();
 	llpl.initializeDatabase(data.predicates);
 
 	fixPredicateUndefines(predicates);

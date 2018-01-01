@@ -54,22 +54,22 @@ Error.stackTraceLimit = Infinity;
  * @typedef {array} WellContents
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var fs = require('fs');
-import handlebars from 'handlebars';
-var jiff = require('jiff');
-var jsonfile = require('jsonfile');
-import mkdirp from 'mkdirp';
-import naturalSort from 'javascript-natural-sort';
-var path = require('path');
-var yaml = require('yamljs');
-import commandHelper from './commandHelper.js';
-var expect = require('./expect.js');
-var misc = require('./misc.js');
-import stripUndefined from './stripUndefined.js';
+const _ = require('lodash');
+const assert = require('assert');
+const fs = require('fs');
+const handlebars = require('handlebars');
+const jiff = require('jiff');
+const jsonfile = require('jsonfile');
+const mkdirp = require('mkdirp');
+const naturalSort = require('javascript-natural-sort');
+const path = require('path');
+const yaml = require('yamljs');
+const commandHelper = require('./commandHelper.js');
+const expect = require('./expect.js');
+const misc = require('./misc.js');
+const stripUndefined = require('./stripUndefined.js');
 import * as WellContents from './WellContents.js';
-var wellsParser = require('./parsers/wellsParser.js');
+const wellsParser = require('./parsers/wellsParser.js');
 import * as Design from './design.js';
 
 const version = "v1";

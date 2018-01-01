@@ -4,11 +4,11 @@
  * @license GPL-3.0
  */
 
-var _ = require('lodash');
-var should = require('should');
-var roboliq = require('../src/roboliq.js')
-var directiveHandlers = require('../src/config/roboliqDirectiveHandlers.js');
-var misc = require('../src/misc.js');
+const _ = require('lodash');
+const should = require('should');
+const roboliq = require('../src/roboliq.js')
+const directiveHandlers = require('../src/config/roboliqDirectiveHandlers.js');
+const misc = require('../src/misc.js');
 
 var data = {
 	directiveHandlers: directiveHandlers,

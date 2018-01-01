@@ -4,9 +4,9 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import should from 'should';
-import roboliq from '../src/roboliq.js';
+const _ = require('lodash');
+const should = require('should');
+const roboliq = require('../src/roboliq.js');
 
 describe('pipetter', function() {
 	describe('pipetter.pipetteDilutionSeries', function() {

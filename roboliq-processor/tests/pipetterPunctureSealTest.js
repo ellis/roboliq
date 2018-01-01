@@ -4,9 +4,9 @@
  * @license GPL-3.0
  */
 
-var _ = require('lodash');
-var should = require('should');
-var roboliq = require('../src/roboliq.js')
+const _ = require('lodash');
+const should = require('should');
+const roboliq = require('../src/roboliq.js')
 
 describe('pipetter', function() {
 	describe('pipetter._punctureSeal', function () {

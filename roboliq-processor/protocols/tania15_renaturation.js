@@ -1,6 +1,6 @@
-var _ = require('lodash');
-var fs = require('fs');
-var path = require('path');
+const _ = require('lodash');
+const fs = require('fs');
+const path = require('path');
 
 var mdfxTemplate = _.template(fs.readFileSync(path.join(__dirname, "tania15_renaturation.mdfx.template")).toString());
 

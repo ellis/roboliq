@@ -3,12 +3,12 @@
  * @module commands/pipetter/pipetterUtils
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var math = require('mathjs');
-import expect from '../../expect.js';
-var misc = require('../../misc.js');
-var wellsParser = require('../../parsers/wellsParser.js');
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const expect = require('../../expect.js');
+const misc = require('../../misc.js');
+const wellsParser = require('../../parsers/wellsParser.js');
 import * as WellContents from '../../WellContents.js';
 
 /**
@@ -17,7 +17,7 @@ import * as WellContents from '../../WellContents.js';
  * @param {object} data - The data object passed to command handlers.
  * @return {string} fully qualified syringe object name, if found
  */
-export function getSyringeName(syringeName, equipmentName, data) {
+function getSyringeName(syringeName, equipmentName, data) {
 	const syringeName2 = `${equipmentName}.syringe.${syringeName}`;
 	if (_.isInteger(syringeName)) {
 		return syringeName2;
@@ -38,7 +38,7 @@ export function getSyringeName(syringeName, equipmentName, data) {
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {object} The effects caused by the `_aspirate`, `_dispense` or `_pipette` command.
  */
-export function getEffects_pipette(parsed, data, effects) {
+function getEffects_pipette(parsed, data, effects) {
 	const effects2 = (effects) ? _.cloneDeep(effects) : {};
 	const effectsNew = {};
 
@@ -212,3 +212,8 @@ export function getEffects_pipette(parsed, data, effects) {
 
 	return effectsNew;
 }
+
+module.exports = {
+	getSyringeName,
+	getEffects_pipette,
+};

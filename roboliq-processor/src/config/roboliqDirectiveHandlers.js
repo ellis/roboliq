@@ -9,15 +9,15 @@
  * @module config/roboliqDirectiveHandlers
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var math = require('mathjs');
-var random = require('random-js');
-import commandHelper from '../commandHelper.js';
-var Design = require('../design.js');
-var expect = require('../expect.js');
-var misc = require('../misc.js');
-var wellsParser = require('../parsers/wellsParser.js');
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const random = require('random-js');
+const commandHelper = require('../commandHelper.js');
+const Design = require('../design.js');
+const expect = require('../expect.js');
+const misc = require('../misc.js');
+const wellsParser = require('../parsers/wellsParser.js');
 
 // TODO: analyze wells string (call wellsParser)
 // TODO: zipMerge to merge destinations into mix items (but error somehow if not enough destinations)

@@ -16,8 +16,8 @@
  * Research 20 (2003) 379-404 (also available online).
  *
  * Sample usage:
- * var shop = require('./HTN/Plan/shop.js');
- * var basicExample = require('./HTN/Plan/basicExample.js');
+ * const shop = require('./HTN/Plan/shop.js');
+ * const basicExample = require('./HTN/Plan/basicExample.js');
  * var p = shop.makePlanner(basicExample);
  * p.ppPlan(p.plan());
  *
@@ -63,11 +63,11 @@
  *
  */
 
-var utils = require('./utils.js');
+const utils = require('./utils.js');
 
 function makePlanner(spec) {
 
-  var llpl = require('./llpl.js').create();
+  const llpl = require('./llpl.js').create();
 
   ////
   //// Syntax

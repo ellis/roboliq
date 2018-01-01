@@ -9,8 +9,8 @@
  * @module
  */
 
-import _ from 'lodash'
-import assert from 'assert'
+const _ = require('lodash')
+const assert = require('assert')
 
 /**
  * Place each item into its own group.
@@ -18,7 +18,7 @@ import assert from 'assert'
  * @param {array} items Array of pipetting items.
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
-export function groupingMethod1(items) {
+function groupingMethod1(items) {
 	return _.map(items, function(item) { return [item]; });
 }
 
@@ -34,7 +34,7 @@ export function groupingMethod1(items) {
  * @param {object} tipModelToSyringes An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
-export function groupingMethod2(items, syringes, tipModelToSyringes) {
+function groupingMethod2(items, syringes, tipModelToSyringes) {
 	//console.log({items, syringes, tipModelToSyringes})
 	const groups = [];
 	while (!_.isEmpty(items)) {
@@ -94,7 +94,7 @@ export function groupingMethod2(items, syringes, tipModelToSyringes) {
  * @param {object} tipModelToSyringes An optional map from tipModel to syringes that can be used with the given tipModel.  If the map contains syringes that aren't listed in the 'syringes' array, they won't be used.
  * @return {array} An array of groups of items; each group is a sublist of items from the original array.
  */
-export function groupingMethod3(items, syringes, tipModelToSyringes) {
+function groupingMethod3(items, syringes, tipModelToSyringes) {
 	//console.log({items, syringes, tipModelToSyringes})
 
 	if (_.isEmpty(items))
@@ -227,3 +227,9 @@ export function groupingMethod3(items, syringes, tipModelToSyringes) {
 
 	return groups;
 }
+
+module.exports = {
+	groupingMethod1,
+	groupingMethod2,
+	groupingMethod3,
+};

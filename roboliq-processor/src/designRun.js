@@ -4,13 +4,13 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import jsonfile from 'jsonfile';
-import path from 'path';
-import yaml from 'yamljs';
-import commandHelper from './commandHelper.js';
+const _ = require('lodash');
+const jsonfile = require('jsonfile');
+const path = require('path');
+const yaml = require('yamljs');
+const commandHelper = require('./commandHelper.js');
 import * as Design from './design.js';
-import misc from './misc.js';
+const misc = require('./misc.js');
 
 const commander = require('commander')
 	.version("1.0")

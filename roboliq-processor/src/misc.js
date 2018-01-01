@@ -12,9 +12,9 @@
  * @module
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var Handlebars = require('handlebars');
+const _ = require('lodash');
+const assert = require('assert');
+const Handlebars = require('handlebars');
 
 Handlebars.registerHelper('toJSON', function(obj) {
 	return JSON.stringify(obj);

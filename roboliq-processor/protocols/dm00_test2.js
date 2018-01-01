@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 import Immutable, {Map, fromJS} from 'immutable';
-import yaml from 'yamljs';
+const yaml = require('yamljs');
 
 const tree = {
 	"pipettingLocation": "?",

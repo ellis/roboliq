@@ -17,13 +17,13 @@
  * @version v1
  */
 
-var _ = require('lodash');
-var jmespath = require('jmespath');
-import yaml from 'yamljs';
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-import {mergeR} from '../mergeR.js';
-var misc = require('../misc.js');
+const _ = require('lodash');
+const jmespath = require('jmespath');
+const yaml = require('yamljs');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const {mergeR} = require('../mergeR.js');
+const misc = require('../misc.js');
 
 
 /**

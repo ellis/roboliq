@@ -4,11 +4,11 @@
  * @license GPL-3.0
  */
 
-var _ = require('lodash');
-import assert from 'assert';
-var math = require('mathjs');
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
 import {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} from '../evoware/equipment/evoware.js';
 
 const Equipment = {

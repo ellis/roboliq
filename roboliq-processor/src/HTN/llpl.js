@@ -12,8 +12,8 @@
  * This is a logic programming interpreter.
  *
  * Sample usage:
- * var llpl = require('./HTN/llpl.js').create();
- * var sicpDB = require('./HTN/Logic/sicpDB.js');
+ * const llpl = require('./HTN/llpl.js').create();
+ * const sicpDB = require('./HTN/Logic/sicpDB.js');
  * llpl.initializeDatabase(sicpDB);
  *
  * Here is an example query that can be run from the browser console
@@ -24,8 +24,8 @@
  *
  */
 
-var _ = require('lodash');
-var utils = require('./utils.js');
+const _ = require('lodash');
+const utils = require('./utils.js');
 
 function create() {
 ////

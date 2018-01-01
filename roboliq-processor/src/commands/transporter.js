@@ -18,7 +18,7 @@
  */
 
 const _ = require('lodash');
-import yaml from 'yamljs';
+const yaml = require('yamljs');
 const commandHelper = require('../commandHelper.js');
 const expect = require('../expect.js');
 const misc = require('../misc.js');
@@ -669,7 +669,7 @@ var commandHandlers = {
 		var input = input0;
 		//console.log(JSON.stringify(input, null, '\t'));
 
-		var shop = require('../HTN/shop.js');
+		const shop = require('../HTN/shop.js');
 		var planner = shop.makePlanner(input);
 		var plan = planner.plan();
 		//console.log("plan:\n"+JSON.stringify(plan, null, '  '));

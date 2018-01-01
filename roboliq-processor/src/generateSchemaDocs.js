@@ -14,10 +14,10 @@
  * @module
  */
 
-import _ from 'lodash';
-import fs from 'fs';
-import path from 'path';
-import yaml from 'yamljs';
+const _ = require('lodash');
+const fs = require('fs');
+const path = require('path');
+const yaml = require('yamljs');
 
 /**
  * Convert a name/schema pair to markdown text.

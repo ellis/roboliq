@@ -9,13 +9,13 @@
  * @module commands/simulatedHelpers
  */
 
-var _ = require('lodash');
-import math from 'mathjs';
-var commandHelper = require('../commandHelper.js');
+const _ = require('lodash');
+const math = require('mathjs');
+const commandHelper = require('../commandHelper.js');
 const Design = require('../design.js');
-import wellsParser from '../parsers/wellsParser.js';
+const wellsParser = require('../parsers/wellsParser.js');
 
-export function simulatedByWells(parsed, data, wells0, result) {
+function simulatedByWells(parsed, data, wells0, result) {
 	// console.log(JSON.stringify(parsed, null, '\t'))
 	// console.log({SCOPE: data.objects.SCOPE})
 	let simulatedOutput;
@@ -66,7 +66,7 @@ export function simulatedByWells(parsed, data, wells0, result) {
 	return simulatedOutput;
 }
 
-export function simulatedByLabware(parsed, data, labwares0, result) {
+function simulatedByLabware(parsed, data, labwares0, result) {
 	// console.log(JSON.stringify(parsed, null, '\t'))
 	// console.log({SCOPE: data.objects.SCOPE})
 	let simulatedOutput;
@@ -116,3 +116,8 @@ export function simulatedByLabware(parsed, data, labwares0, result) {
 
 	return simulatedOutput;
 }
+
+module.exports = {
+	simulatedByLabware,
+	simulatedByWells,
+};

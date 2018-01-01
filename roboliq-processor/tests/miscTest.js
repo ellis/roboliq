@@ -4,9 +4,9 @@
  * @license GPL-3.0
  */
 
-var _ = require('lodash');
-var should = require('should');
-var misc = require('../src/misc.js')
+const _ = require('lodash');
+const should = require('should');
+const misc = require('../src/misc.js')
 
 describe('misc', function() {
 	describe('misc.mutateDeep', function () {

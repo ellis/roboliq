@@ -4,10 +4,10 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import fs from 'fs';
-import path from 'path';
-import yaml from 'yamljs';
+const _ = require('lodash');
+const fs = require('fs');
+const path = require('path');
+const yaml = require('yamljs');
 
 const schemas = {};
 const dir = __dirname+"/../src/schemas/";
@@ -303,4 +303,4 @@ const extras = {
 _.merge(schemas, extras);
 // console.log({schemas})
 
-export default schemas;
+module.exports = schemas;

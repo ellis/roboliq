@@ -4,8 +4,8 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 import * as WellContents from '../src/WellContents.js';
 
 describe('WellContents', function() {

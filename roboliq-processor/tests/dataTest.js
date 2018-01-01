@@ -4,10 +4,10 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import should from 'should';
-// import experiment from '../src/commands/data.js';
-import roboliq from '../src/roboliq.js';
+const _ = require('lodash');
+const should = require('should');
+// const experiment = require('../src/commands/data.js');
+const roboliq = require('../src/roboliq.js');
 
 const protocol0 = {
 	roboliq: "v1",

@@ -4,13 +4,13 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import assert from 'assert';
-import yaml from 'yamljs';
-import commandHelper from '../commandHelper.js';
+const _ = require('lodash');
+const assert = require('assert');
+const yaml = require('yamljs');
+const commandHelper = require('../commandHelper.js');
 import * as Design from '../design.js';
-import expect from '../expect.js';
-import misc from '../misc.js';
+const expect = require('../expect.js');
+const misc = require('../misc.js');
 
 function run(parsed, data) {
 	// console.log("data.run");

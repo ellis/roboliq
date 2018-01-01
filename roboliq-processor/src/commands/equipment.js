@@ -17,12 +17,12 @@
  * @version v1
  */
 
-var _ = require('lodash');
-var jmespath = require('jmespath');
-import yaml from 'yamljs';
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-var misc = require('../misc.js');
+const _ = require('lodash');
+const jmespath = require('jmespath');
+const yaml = require('yamljs');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const misc = require('../misc.js');
 
 
 function closeAll(params, data, effects) {

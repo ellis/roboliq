@@ -3,12 +3,12 @@
  * @module
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var random = require('random-js');
-var expect = require('../expectCore.js');
-var misc = require('../misc.js');
-var wellsParser0 = require('./wellsParser0.js');
+const _ = require('lodash');
+const assert = require('assert');
+const random = require('random-js');
+const expect = require('../expectCore.js');
+const misc = require('../misc.js');
+const wellsParser0 = require('./wellsParser0.js');
 
 /**
  * Take a well identifier (e.g. A01) and returns an integer array
@@ -72,7 +72,7 @@ function parse(text, objects, config) {
  * @return {array} array of names for each plate + well (e.g. `plate1(C04)`)
  */
 function processParserResult(result, objects, text, config = {}) {
-	var commandHelper = require('../commandHelper.js');
+	const commandHelper = require('../commandHelper.js');
 	//console.log("text", text)
 	//console.log("result", result)
 	//console.log("result:\n"+JSON.stringify(result, null, '  '));

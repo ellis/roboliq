@@ -4,8 +4,8 @@
  * @license GPL-3.0
  */
 
-// import mergeWith from 'lodash/mergeWith';
-import isPlainObject from 'lodash/isPlainObject';
+// const mergeWith = require('lodash/mergeWith');
+const isPlainObject = require('lodash/isPlainObject');
 
 /*
 * Recursively merge properties of multiple objects (shallow copies)

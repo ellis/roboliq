@@ -13,12 +13,12 @@
  * @version v1
  */
 
-var _ = require('lodash');
-var jmespath = require('jmespath');
-import yaml from 'yamljs';
-var commandHelper = require('../commandHelper.js');
-var expect = require('../expect.js');
-var misc = require('../misc.js');
+const _ = require('lodash');
+const jmespath = require('jmespath');
+const yaml = require('yamljs');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const misc = require('../misc.js');
 
 /**
  * Create predicates for objects of type = "Incubator"
@@ -45,7 +45,7 @@ function closeAll(parsed, data, effects) {
  */
 var commandHandlers = {
 	"incubator.incubatePlates": function(params, parsed, data) {
-		var llpl = require('../HTN/llpl.js').create();
+		const llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
 		//console.log(JSON.stringify(parsed, null, '\t'))
@@ -181,7 +181,7 @@ var commandHandlers = {
 		};
 	},
 	"incubator.insertPlates": function(params, parsed, data) {
-		var llpl = require('../HTN/llpl.js').create();
+		const llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
 		if (!parsed.value.object1 && !parsed.value.object2) {
@@ -271,7 +271,7 @@ var commandHandlers = {
 		};
 	},
 	"incubator.run": function(params, parsed, data) {
-		var llpl = require('../HTN/llpl.js').create();
+		const llpl = require('../HTN/llpl.js').create();
 		llpl.initializeDatabase(data.predicates);
 
 		//console.log(JSON.stringify(parsed, null, '\t'))

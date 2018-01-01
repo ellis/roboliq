@@ -4,11 +4,11 @@
  * @license GPL-3.0
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var expect = require('./expectCore.js');
-var misc = require('./misc.js');
-var wellsParser = require('./parsers/wellsParser.js');
+const _ = require('lodash');
+const assert = require('assert');
+const expect = require('./expectCore.js');
+const misc = require('./misc.js');
+const wellsParser = require('./parsers/wellsParser.js');
 
 function objectsValue(context, key, objects, effects, prefix) {
 	var value = misc.findObjectsValue(key, objects, effects, undefined, prefix);

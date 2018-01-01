@@ -12,21 +12,21 @@
  * into a long table of factor values.
  * @module
  */
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 // import Immutable, {Map, fromJS} from 'immutable';
-import math from 'mathjs';
-import naturalSort from 'javascript-natural-sort';
-import Random from 'random-js';
-import stableSort from 'stable';
-//import yaml from 'yamljs';
+const math = require('mathjs');
+const naturalSort = require('javascript-natural-sort');
+const Random = require('random-js');
+const stableSort = require('stable');
+//const yaml = require('yamljs');
 
-import wellsParser from './parsers/wellsParser.js';
+const wellsParser = require('./parsers/wellsParser.js');
 
 
 const DEBUG = false;
 
-//import {locationRowColToText} from './parsers/wellsParser.js';
+//const {locationRowColToText} = require('./parsers/wellsParser.js');
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
 function locationRowColToText(row, col) {
 	var colText = col.toString();
@@ -39,7 +39,7 @@ function locationRowColToText(row, col) {
  * @param  {array}  rows - array of rows
  * @param  {Boolean} [hideRedundancies] - suppress printing of values that haven't changed from the previous row
  */
-export function printRows(rows, hideRedundancies = false) {
+function printRows(rows, hideRedundancies = false) {
 	const data = _.flattenDeep(rows);
 
 	// Get column names
@@ -96,7 +96,7 @@ export function printRows(rows, hideRedundancies = false) {
  * Print a TAB-formatted representation of the table
  * @param  {array}  rows - array of rows
  */
-export function printTAB(rows) {
+function printTAB(rows) {
 	const hideRedundancies = false;
 	const data = _.flattenDeep(rows);
 
@@ -137,7 +137,7 @@ export function printTAB(rows) {
  * Print a markdown pipe table
  * @param  {array}  rows - array of rows
  */
-export function printMarkdown(rows) {
+function printMarkdown(rows) {
 	const hideRedundancies = false;
 	const data = _.flattenDeep(rows);
 
@@ -180,7 +180,7 @@ export function printMarkdown(rows) {
  * Turn a design specification into a design table.
  * @param {object} design - the design specification.
  */
-export function flattenDesign(design, randomEngine) {
+function flattenDesign(design, randomEngine) {
 	if (_.isEmpty(design)) {
 		return [];
 	}
@@ -226,7 +226,7 @@ export function flattenDesign(design, randomEngine) {
 	return rows;
 }
 
-export function getCommonValues(table) {
+function getCommonValues(table) {
 	if (_.isEmpty(table)) return {};
 	assert(_.isArray(table), `required an array: ${JSON.stringify(table)}`);
 
@@ -243,7 +243,7 @@ export function getCommonValues(table) {
 	return common;
 }
 
-export function getCommonValuesNested(nestedRows, rowIndexes, common) {
+function getCommonValuesNested(nestedRows, rowIndexes, common) {
 	if (_.isEmpty(rowIndexes)) return {};
 
 	for (let i = 0; i < rowIndexes.length; i++) {
@@ -273,7 +273,7 @@ export function getCommonValuesNested(nestedRows, rowIndexes, common) {
  *
  * @param  {array} rows - array to flatten
  */
-export function flattenArrayM(rows) {
+function flattenArrayM(rows) {
 	let i = rows.length;
 	while (i > 0) {
 		i--;
@@ -296,7 +296,7 @@ export function flattenArrayM(rows) {
  * @param {array} [otherRowIndexes] - a second, optional array of row indexes that should have the same modifications made to it as rowIndexes
  * @param {integer} rowIndexesOffset - index in rowIndexes to start at
  */
-export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
+function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
 	if (DEBUG) {
 		console.log(`flattenArrayAndIndexes:`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
@@ -357,7 +357,7 @@ export function flattenArrayAndIndexes(rows, rowIndexes, otherRowIndexes = []) {
  * @param {object|array} conditions - an object of conditions or an array of such objects.
  * @param {array} table0 - the initial rows to start expanding conditions on (default `[{}]`)
  */
-export function expandConditions(conditions, randomEngine, table0 = [{}]) {
+function expandConditions(conditions, randomEngine, table0 = [{}]) {
 	// console.log("expandConditions: "+JSON.stringify(conditions))
 
 	const conditionsList = _.isArray(conditions) ? conditions : [conditions];
@@ -397,7 +397,7 @@ function expandRowsByObject(nestedRows, rowIndexes, otherRowIndexes, conditions,
  *   if has star-suffix, call branchRowsByNamedValue
  *   else call assignRowsByNamedValue
  */
-export function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
+function expandRowsByNamedValue(nestedRows, rowIndexes, otherRowIndexes, name, value, randomEngine) {
 	if (DEBUG) {
 		console.log(`expandRowsByNamedValue: ${name}, ${JSON.stringify(value)}`);
 		console.log(` otherRowIndexes: ${JSON.stringify(otherRowIndexes)}`);
@@ -1253,7 +1253,7 @@ function assign_allocatePlates_initGroup(rows, rowIndexes) {
 /**
  * Calculate `expr` using variables in `row`, with optional `action` object specifying `units` and/or `decimals`
  */
-export function calculate(expr, row, action = {}) {
+function calculate(expr, row, action = {}) {
 	const scope = _.mapValues(row, x => {
 		// console.log({x})
 		try {
@@ -1507,7 +1507,7 @@ const assign_range_next = (expr, action) => function(nestedRows, rowIndex) {
 	return [this.nextIndex, n];
 }*/
 
-export function query_groupBy(rows, rowIndexes, groupBy) {
+function query_groupBy(rows, rowIndexes, groupBy) {
 	const groupKeys = (_.isArray(groupBy)) ? groupBy : [groupBy];
 	// console.log({groupBy, groupKeys, rowIndexes, rows});
 	return _.values(_.groupBy(rowIndexes, rowIndex => _.map(groupKeys, key => rows[rowIndex][key])));
@@ -1520,7 +1520,7 @@ export function query_groupBy(rows, rowIndexes, groupBy) {
  * @param  {string|array} orderBy - the column(s) to order by
  * @return {array} a sorted ordering of rowIndexes
  */
-export function query_orderBy(rows, rowIndexes, orderBy) {
+function query_orderBy(rows, rowIndexes, orderBy) {
 	// console.log({rows, rowLen: rows.length, rowIndexes, orderBy})
 	// console.log(rowIndexes.map(i => _.values(_.pick(rows[i], orderBy))))
 	return stableSort(rowIndexes, makeComparer(rows, orderBy));
@@ -1546,7 +1546,7 @@ function makeComparer(rows, propertyNames) {
 	};
 }
 
-export function query(table, q, SCOPE = undefined) {
+function query(table, q, SCOPE = undefined) {
 	let table2 = _.clone(table);
 
 	if (q.where) {
@@ -1705,3 +1705,20 @@ function assertNoDuplicates(otherRowIndexes) {
 		}
 	}
 }
+
+module.exports = {
+	printRows,
+	printTAB,
+	printMarkdown,
+	flattenDesign,
+	getCommonValues,
+	getCommonValuesNested,
+	flattenArrayM,
+	flattenArrayAndIndexes,
+	expandConditions,
+	expandRowsByNamedValue,
+	calculate,
+	query_groupBy,
+	query_orderBy,
+	query,
+};

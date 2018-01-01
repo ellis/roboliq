@@ -9,8 +9,8 @@
  * @module config/roboliq
  */
 
-var _ = require('lodash');
-import yaml from 'yamljs';
+const _ = require('lodash');
+const yaml = require('yamljs');
 
 var predicates = [
 	//

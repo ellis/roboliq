@@ -4,14 +4,14 @@
  * @license GPL-3.0
  */
 
-import isArray from 'lodash/isArray';
-import isPlainObject from 'lodash/isPlainObject';
+const isArray = require('lodash/isArray');
+const isPlainObject = require('lodash/isPlainObject');
 
 /**
  * Recursively remove any properties that are undefined.
  * @param  {object} obj - objects to remove undefined properties from
  */
-export default function stripUndefined(obj) {
+function stripUndefined(obj) {
 	for (let key in obj) {
 		const x = obj[key]
 		if (x === undefined) {
@@ -23,3 +23,5 @@ export default function stripUndefined(obj) {
 	}
 	return obj;
 }
+
+module.exports = stripUndefined;

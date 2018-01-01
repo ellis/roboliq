@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import math from 'mathjs';
-// import Design from '../src/design.js'
+const _ = require('lodash');
+const math = require('mathjs');
+// const Design = require('../src/design.js')
 const Design = require('../src/design.js');
 
 // Configure mathjs to use bignumbers

@@ -4,11 +4,11 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 import Immutable, {Map, fromJS} from 'immutable';
-import math from 'mathjs';
-import yaml from 'yamljs';
+const math = require('mathjs');
+const yaml = require('yamljs');
 
 /*
  * What's the impact of:

@@ -9,22 +9,22 @@
  * @module WellContents
  */
 
-import _ from 'lodash';
-var assert = require('assert');
-var math = require('mathjs');
-import expect from './expectCore.js';
-var misc = require('./misc.js');
-var wellsParser = require('./parsers/wellsParser.js');
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const expect = require('./expectCore.js');
+const misc = require('./misc.js');
+const wellsParser = require('./parsers/wellsParser.js');
 
-export const emptyVolume = math.unit(0, 'ul');
-export const unknownVolume = math.eval('Infinity l');
+const emptyVolume = math.unit(0, 'ul');
+const unknownVolume = math.eval('Infinity l');
 
 /**
  * Validate well contents.  Throws an error if they aren't valid.
  *
  * @param  {array} contents - The well contents.
  */
-export function checkContents(contents) {
+function checkContents(contents) {
 	if (_.isUndefined(contents)) {
 		// ok
 	}
@@ -64,7 +64,7 @@ export function checkContents(contents) {
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {WellContents} the contents array if found, otherwise null
  *//*
-export function getSyringeContents(syringeName, data, effects) {
+function getSyringeContents(syringeName, data, effects) {
 	//console.log({syringeName})
 	const contentsName = `${syringeName}.contents`;
 	// Check for well or labware contents in effects object
@@ -86,7 +86,7 @@ export function getSyringeContents(syringeName, data, effects) {
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {WellContents} the contents array if found, otherwise null
  */
-export function getWellContents(wellName, data, effects) {
+function getWellContents(wellName, data, effects) {
 	//console.log({wellName})
 	var wellInfo = wellsParser.parseOne(wellName);
 	assert(wellInfo.wellId, "missing `wellId`: "+JSON.stringify(wellInfo));
@@ -117,7 +117,7 @@ export function getWellContents(wellName, data, effects) {
  * @param {array} contents The well contents array
  * @return {object} the mathjs volume if found, otherwise 0ul
  */
-export function getVolume(contents) {
+function getVolume(contents) {
 	checkContents(contents);
 	if (!_.isEmpty(contents)) {
 		const volume = math.eval(contents[0]);
@@ -134,7 +134,7 @@ export function getVolume(contents) {
  * @param {WellContents} contents
  * @return {Boolean} true if the contents are empty
  */
-export function isEmpty(contents) {
+function isEmpty(contents) {
 	const volume = getVolume(contents);
 	return math.equal(volume.toNumber('l'), 0);
 }
@@ -146,7 +146,7 @@ export function isEmpty(contents) {
  * @param {object} effects an optional effects object for effects which have taken place during the command handler and aren't in the data object
  * @return {object} the mathjs volume if found, otherwise 0ul
  */
-export function getWellVolume(wellName, data, effects) {
+function getWellVolume(wellName, data, effects) {
 	var contents = getWellContents(wellName, data, effects);
 	if (!_.isEmpty(contents)) {
 		var volume = math.eval(contents[0]);
@@ -162,7 +162,7 @@ export function getWellVolume(wellName, data, effects) {
  * @param {object} effects The effects object for effects which have taken place during the command handler and aren't in the data object
 * @return {array} [content, contentName], where content will be null if not found
  */
-export function getContentsAndName(wellName, data, effects) {
+function getContentsAndName(wellName, data, effects) {
 	//console.log("getContentsAndName", wellName)
 	if (!effects) effects = {};
 
@@ -206,7 +206,7 @@ export function getContentsAndName(wellName, data, effects) {
  * @param  {array} contents The well contents array
  * @return {object} map of substance name to the volume or amount of that substance in the well
  */
-export function flattenContents(contents) {
+function flattenContents(contents) {
 	if (_.isUndefined(contents)) {
 		return {};
 	}
@@ -263,7 +263,7 @@ export function flattenContents(contents) {
 	}
 }
 
-export function mergeContents(contents) {
+function mergeContents(contents) {
 	const flat = flattenContents(contents);
 	const pairs = _.toPairs(flat);
 	if (pairs.length === 0) {
@@ -289,7 +289,7 @@ export function mergeContents(contents) {
  * @param {string} volume - a string representing the volume to transfer
  * @return {array} an array whose first element is the new source contents and whose second element is the new destination contents.
  */
-export function transferContents(srcContents, dstContents, volume) {
+function transferContents(srcContents, dstContents, volume) {
 	assert(_.isArray(srcContents));
 	checkContents(srcContents);
 
@@ -340,3 +340,17 @@ export function transferContents(srcContents, dstContents, volume) {
 
 	return [srcContents2, dstContents2];
 }
+
+module.exports = {
+	emptyVolume,
+	unknownVolume,
+	checkContents,
+	getWellContents,
+	getVolume,
+	isEmpty,
+	getWellVolume,
+	getContentsAndName,
+	flattenContents,
+	mergeContents,
+	transferContents,
+};

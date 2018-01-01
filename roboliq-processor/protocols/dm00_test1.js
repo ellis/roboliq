@@ -1,6 +1,6 @@
-import _ from 'lodash';
+const _ = require('lodash');
 import Immutable, {Map, fromJS} from 'immutable';
-import yaml from 'yamljs';
+const yaml = require('yamljs');
 
 const conditions = {
   "aspirationLocation": "?",

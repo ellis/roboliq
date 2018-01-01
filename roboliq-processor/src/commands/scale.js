@@ -4,11 +4,11 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import yaml from 'yamljs';
-import commandHelper from '../commandHelper.js';
-import expect from '../expect.js';
-import misc from '../misc.js';
+const _ = require('lodash');
+const yaml = require('yamljs');
+const commandHelper = require('../commandHelper.js');
+const expect = require('../expect.js');
+const misc = require('../misc.js');
 
 const objectToPredicateConverters = {
 	"Scale": function(name, object) {

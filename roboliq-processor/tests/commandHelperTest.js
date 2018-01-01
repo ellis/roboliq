@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 const should = require('should');
-import math from 'mathjs';
+const math = require('mathjs');
 const commandHelper = require('../src/commandHelper.js')
 
 describe('commandHelper', function() {

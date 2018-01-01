@@ -12,4 +12,4 @@ const roboliqSchemas = {
 	//String: {type: 'string'},
 };
 
-export default roboliqSchemas;
+module.exports = roboliqSchemas;

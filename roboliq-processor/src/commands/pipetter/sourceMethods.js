@@ -14,13 +14,13 @@
  * @module
  */
 
-var _ = require('lodash');
-var assert = require('assert');
-var math = require('mathjs');
-import commandHelper from '../../commandHelper.js';
-var expect = require('../../expect.js');
-var pipetterUtils = require('./pipetterUtils.js');
-var WellContents = require('../../WellContents.js');
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const commandHelper = require('../../commandHelper.js');
+const expect = require('../../expect.js');
+const pipetterUtils = require('./pipetterUtils.js');
+const WellContents = require('../../WellContents.js');
 
 /**
  * Pick the first well in a source set and ignore the others.
