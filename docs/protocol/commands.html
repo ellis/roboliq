@@ -101,6 +101,11 @@
 											<a href="#_scale.weigh">&nbsp;&nbsp;scale.weigh</a><br/>
 									</ul>
 									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_absorbanceReader">absorbanceReader</a><br/>
+											<a href="#_Reader">&nbsp;&nbsp;Reader</a><br/>
+											<a href="#_absorbanceReader.measurePlate">&nbsp;&nbsp;absorbanceReader.measurePlate</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
 											<br/><a href="#_centrifuge">centrifuge</a><br/>
 											<a href="#_Centrifuge">&nbsp;&nbsp;Centrifuge</a><br/>
 											<a href="#_centrifuge.centrifuge2">&nbsp;&nbsp;centrifuge.centrifuge2</a><br/>
@@ -156,6 +161,21 @@
 											<a href="#_pipetter.punctureSeal">&nbsp;&nbsp;pipetter.punctureSeal</a><br/>
 									</ul>
 									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_fluorescenceReader">fluorescenceReader</a><br/>
+											<a href="#_Reader">&nbsp;&nbsp;Reader</a><br/>
+											<a href="#_fluorescenceReader.measurePlate">&nbsp;&nbsp;fluorescenceReader.measurePlate</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_data">data</a><br/>
+											<a href="#_data.forEachGroup">&nbsp;&nbsp;data.forEachGroup</a><br/>
+											<a href="#_data.forEachRow">&nbsp;&nbsp;data.forEachRow</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
+											<br/><a href="#_sealer">sealer</a><br/>
+											<a href="#_Sealer">&nbsp;&nbsp;Sealer</a><br/>
+											<a href="#_sealer.sealPlate">&nbsp;&nbsp;sealer.sealPlate</a><br/>
+									</ul>
+									<ul class="nav nav-stacked nav-pills">
 											<a href="#_Agent">&nbsp;&nbsp;Agent</a><br/>
 											<a href="#_Data">&nbsp;&nbsp;Data</a><br/>
 											<a href="#_Lid">&nbsp;&nbsp;Lid</a><br/>
@@ -166,23 +186,6 @@
 											<a href="#_Site">&nbsp;&nbsp;Site</a><br/>
 											<a href="#_Template">&nbsp;&nbsp;Template</a><br/>
 											<a href="#_Variable">&nbsp;&nbsp;Variable</a><br/>
-									</ul>
-									<ul class="nav nav-stacked nav-pills">
-											<br/><a href="#_sealer">sealer</a><br/>
-											<a href="#_Sealer">&nbsp;&nbsp;Sealer</a><br/>
-											<a href="#_sealer.sealPlate">&nbsp;&nbsp;sealer.sealPlate</a><br/>
-									</ul>
-									<ul class="nav nav-stacked nav-pills">
-											<br/><a href="#_data">data</a><br/>
-											<a href="#_data.forEachGroup">&nbsp;&nbsp;data.forEachGroup</a><br/>
-											<a href="#_data.forEachRow">&nbsp;&nbsp;data.forEachRow</a><br/>
-									</ul>
-									<ul class="nav nav-stacked nav-pills">
-											<br/><a href="#_shaker">shaker</a><br/>
-											<a href="#_Shaker">&nbsp;&nbsp;Shaker</a><br/>
-											<a href="#_shaker.ShakerProgram">&nbsp;&nbsp;shaker.ShakerProgram</a><br/>
-											<a href="#_shaker.shakePlate">&nbsp;&nbsp;shaker.shakePlate</a><br/>
-											<a href="#_shaker.run">&nbsp;&nbsp;shaker.run</a><br/>
 									</ul>
 									<ul class="nav nav-stacked nav-pills">
 											<br/><a href="#_system">system</a><br/>
@@ -211,14 +214,11 @@
 											<a href="#_timer.wait">&nbsp;&nbsp;timer.wait</a><br/>
 									</ul>
 									<ul class="nav nav-stacked nav-pills">
-											<br/><a href="#_absorbanceReader">absorbanceReader</a><br/>
-											<a href="#_Reader">&nbsp;&nbsp;Reader</a><br/>
-											<a href="#_absorbanceReader.measurePlate">&nbsp;&nbsp;absorbanceReader.measurePlate</a><br/>
-									</ul>
-									<ul class="nav nav-stacked nav-pills">
-											<br/><a href="#_fluorescenceReader">fluorescenceReader</a><br/>
-											<a href="#_Reader">&nbsp;&nbsp;Reader</a><br/>
-											<a href="#_fluorescenceReader.measurePlate">&nbsp;&nbsp;fluorescenceReader.measurePlate</a><br/>
+											<br/><a href="#_shaker">shaker</a><br/>
+											<a href="#_Shaker">&nbsp;&nbsp;Shaker</a><br/>
+											<a href="#_shaker.ShakerProgram">&nbsp;&nbsp;shaker.ShakerProgram</a><br/>
+											<a href="#_shaker.shakePlate">&nbsp;&nbsp;shaker.shakePlate</a><br/>
+											<a href="#_shaker.run">&nbsp;&nbsp;shaker.run</a><br/>
 									</ul>
 									<ul class="nav nav-stacked nav-pills">
 											<br/><a href="#_transporter">transporter</a><br/>
@@ -372,6 +372,245 @@ the command, or you can specify <code>&quot;stay&quot;</code> to leave the plate
 												<td>destinationAfter</td>
 												<td>SiteOrStay</td>
 												<td><p>Site to move the plate to after this command</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_absorbanceReader">absorbanceReader</h2>
+								<p>The <code>absorbanceReader</code> commands specify actions using equipment for absorbance readouts.</p>
+
+								<h3 id="_Reader">Reader</h3>
+								<div class="command">
+									<p>Reader equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Reader</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_absorbanceReader.measurePlate">absorbanceReader.measurePlate</h3>
+								<div class="command">
+									<p>Measure the absorbance of a plate.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td></td>
+												<td><p>Program parameters</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;shakerProgramBefore</td>
+													<td></td>
+													<td><p>Program for shaker.</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelength</td>
+													<td>Length</td>
+													<td><p>Excitation wavelength</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationBandwidth</td>
+													<td>Length</td>
+													<td><p>Excitation bandwidth</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelengthMin</td>
+													<td>Length</td>
+													<td><p>Minimum excitation wavelength for a scan</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelengthMax</td>
+													<td>Length</td>
+													<td><p>Maximum excitation wavelength for a scan</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelengthStep</td>
+													<td>Length</td>
+													<td><p>Size of steps for a scan</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;wells</td>
+													<td>Wells</td>
+													<td><p>Array of wells to read</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;wellDesignFactor</td>
+													<td>string</td>
+													<td><p>Name of design column that indicates which wells to measure (deprecated, use <code>output.joinKey</code>)</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td>object</td>
+													<td><p>User-specificed values that should be included in the output table (deprecated, use <code>output.userValues</code>)</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>programFileTemplate</td>
+												<td>string</td>
+												<td><p>Program template; well information will be substituted into the template automatically.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programFile</td>
+												<td>string</td>
+												<td><p>Program filename</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programData</td>
+												<td></td>
+												<td><p>Program data</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>outputFile</td>
+												<td>string</td>
+												<td><p>Filename for output (deprecated, use <code>output.writeTo</code>)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>outputDataset</td>
+												<td>string</td>
+												<td><p>Name of dataset to which the measurements values will be appended. (deprecated, use <code>output.appendTo</code>)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>output</td>
+												<td></td>
+												<td><p>Output definition for where and how to save the measurements</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;joinKey</td>
+													<td>string</td>
+													<td><p>The key used to left-join the measurement values with the current DATA</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;writeTo</td>
+													<td>string</td>
+													<td><p>Filename to write measurements to as JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;appendTo</td>
+													<td>string</td>
+													<td><p>Filename to append measurements to as newline-delimited JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td>object</td>
+													<td><p>User-specificed values that should be included in the output table</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;simulated</td>
+													<td>string</td>
+													<td><p>An expression to evaluate with mathjs</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;units</td>
+													<td></td>
+													<td><p>Map of factor names to unit type; converts the factor values to plain numbers in the given units.</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier in reader</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after measurement</p>
 									</td>
 												<td></td>
 											</tr>
@@ -2835,6 +3074,456 @@ In general, mixing should be performed after each dilution dispense, and perhaps
 
 
 								</div>
+								<h2 id="_fluorescenceReader">fluorescenceReader</h2>
+								<p>The <code>fluorescenceReader</code> commands specify actions using equipment for fluorescence readouts.</p>
+
+								<h3 id="_Reader">Reader</h3>
+								<div class="command">
+									<p>Reader equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Reader</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_fluorescenceReader.measurePlate">fluorescenceReader.measurePlate</h3>
+								<div class="command">
+									<p>Measure the fluorescence of wells on a plate.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td></td>
+												<td><p>Program parameters</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;shakerProgram</td>
+													<td></td>
+													<td><p>Program for shaker.</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;excitationWavelength</td>
+													<td>Length</td>
+													<td><p>Excitation wavelength</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;emissionWavelength</td>
+													<td>Length</td>
+													<td><p>Emission wavelength</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;wells</td>
+													<td>Wells</td>
+													<td><p>Array of wells to read</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>programFileTemplate</td>
+												<td>string</td>
+												<td><p>Program template; well information will be substituted into the template automatically.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programFile</td>
+												<td>string</td>
+												<td><p>Program filename</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>programData</td>
+												<td></td>
+												<td><p>Program data</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>output</td>
+												<td></td>
+												<td><p>Output definition for where and how to save the measurements</p>
+									</td>
+												<td></td>
+											</tr>
+												<tr>
+													<td>&nbsp;&nbsp;joinKey</td>
+													<td>string</td>
+													<td><p>The key used to left-join the measurement values with the current DATA</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;writeTo</td>
+													<td>string</td>
+													<td><p>Filename to write measurements to as JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;appendTo</td>
+													<td>string</td>
+													<td><p>Filename to append measurements to as newline-delimited JSON</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;userValues</td>
+													<td>object</td>
+													<td><p>User-specificed values that should be included in the output table</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;simulated</td>
+													<td>string</td>
+													<td><p>An expression to evaluate with mathjs</p>
+									</td>
+													<td></td>
+												</tr>
+												<tr>
+													<td>&nbsp;&nbsp;units</td>
+													<td></td>
+													<td><p>Map of factor names to unit type; converts the factor values to plain numbers in the given units.</p>
+									</td>
+													<td></td>
+												</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier in reader</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after measurement</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_data">data</h2>
+								<p>The <code>data</code> module contains two commands for working with data tables:</p>
+<ul>
+<li><code>data.forEachRow</code> executes sub-steps for each row in the active data table.</li>
+<li><code>data.forEachGroup</code> executes sub-steps for each group of rows in active data table.
+The grouping criterion is specified by <code>groupBy</code> parameter.</li>
+</ul>
+
+								<h3 id="_data.forEachGroup">data.forEachGroup</h3>
+								<div class="command">
+									<p>Perform sub-steps for every grouping of rows in the active data table.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>groupBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to group by</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>distinctBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to distinguish row by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>orderBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to order by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationTotal</td>
+												<td>Duration</td>
+												<td><p>The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationGroup</td>
+												<td>Duration</td>
+												<td><p>The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>interleave</td>
+												<td>Duration</td>
+												<td><p>The time offset for interleaving each group</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>timers</td>
+												<td>array</td>
+												<td><p>Timers that should be used</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>startTimerAfterStep</td>
+												<td>integer</td>
+												<td><p>The duration timer will be started after this step rather than from the beginning, if specified</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object</td>
+												<td><p>The sequence of commands to perform for each set of factor values.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_data.forEachRow">data.forEachRow</h3>
+								<div class="command">
+									<p>Perform sub-steps for every row in the active data table.
+The row&#39;s values are placed in SCOPE for the sub-steps.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>distinctBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to distinguish row by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>orderBy</td>
+												<td>array,string</td>
+												<td><p>The factor(s) to order by</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationTotal</td>
+												<td>Duration</td>
+												<td><p>The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>durationRow</td>
+												<td>Duration</td>
+												<td><p>The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>interleave</td>
+												<td>Duration</td>
+												<td><p>The time offset for interleaving each group</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>timers</td>
+												<td>array</td>
+												<td><p>Timers that should be used</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>steps</td>
+												<td>object</td>
+												<td><p>The sequence of commands to perform for each set of factor values.</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h2 id="_sealer">sealer</h2>
+								<p>The <code>sealer</code> commands specify actions using sealing equipment.</p>
+
+								<h3 id="_Sealer">Sealer</h3>
+								<div class="command">
+									<p>Sealing equipment.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>type</td>
+												<td>string</td>
+												<td><p>Type of this object</p>
+									One of: Sealer</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>description</td>
+												<td>markdown</td>
+												<td><p>Optional user description of this item</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>label</td>
+												<td>markdown</td>
+												<td><p>Optional user label for this item</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_sealer.sealPlate">sealer.sealPlate</h3>
+								<div class="command">
+									<p>Seal a plate.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>agent</td>
+												<td>Agent</td>
+												<td><p>Agent identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>equipment</td>
+												<td>Equipment</td>
+												<td><p>Equipment identifier</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>program</td>
+												<td>string</td>
+												<td><p>Program identifier for sealing</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>object</td>
+												<td>Plate</td>
+												<td><p>Plate identifier</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>site</td>
+												<td>Site</td>
+												<td><p>Site identifier of sealer</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>count</td>
+												<td>number</td>
+												<td><p>Number of times to seal (defaults to 1)</p>
+									</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>destinationAfter</td>
+												<td>SiteOrStay</td>
+												<td><p>Site to move the plate to after this command</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
 								<h3 id="_Agent">Agent</h3>
 								<div class="command">
 									<p>An agent that can execute commands.</p>
@@ -3241,439 +3930,6 @@ In general, mixing should be performed after each dilution dispense, and perhaps
 												<td></td>
 												<td></td>
 												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h2 id="_sealer">sealer</h2>
-								<p>The <code>sealer</code> commands specify actions using sealing equipment.</p>
-
-								<h3 id="_Sealer">Sealer</h3>
-								<div class="command">
-									<p>Sealing equipment.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>type</td>
-												<td>string</td>
-												<td><p>Type of this object</p>
-									One of: Sealer</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>description</td>
-												<td>markdown</td>
-												<td><p>Optional user description of this item</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>label</td>
-												<td>markdown</td>
-												<td><p>Optional user label for this item</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h3 id="_sealer.sealPlate">sealer.sealPlate</h3>
-								<div class="command">
-									<p>Seal a plate.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>agent</td>
-												<td>Agent</td>
-												<td><p>Agent identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>equipment</td>
-												<td>Equipment</td>
-												<td><p>Equipment identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>program</td>
-												<td>string</td>
-												<td><p>Program identifier for sealing</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>object</td>
-												<td>Plate</td>
-												<td><p>Plate identifier</p>
-									</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>site</td>
-												<td>Site</td>
-												<td><p>Site identifier of sealer</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>count</td>
-												<td>number</td>
-												<td><p>Number of times to seal (defaults to 1)</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>destinationAfter</td>
-												<td>SiteOrStay</td>
-												<td><p>Site to move the plate to after this command</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h2 id="_data">data</h2>
-								<p>The <code>data</code> module contains two commands for working with data tables:</p>
-<ul>
-<li><code>data.forEachRow</code> executes sub-steps for each row in the active data table.</li>
-<li><code>data.forEachGroup</code> executes sub-steps for each group of rows in active data table.
-The grouping criterion is specified by <code>groupBy</code> parameter.</li>
-</ul>
-
-								<h3 id="_data.forEachGroup">data.forEachGroup</h3>
-								<div class="command">
-									<p>Perform sub-steps for every grouping of rows in the active data table.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>agent</td>
-												<td>Agent</td>
-												<td><p>Agent identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>groupBy</td>
-												<td>array,string</td>
-												<td><p>The factor(s) to group by</p>
-									</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>distinctBy</td>
-												<td>array,string</td>
-												<td><p>The factor(s) to distinguish row by</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>orderBy</td>
-												<td>array,string</td>
-												<td><p>The factor(s) to order by</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>durationTotal</td>
-												<td>Duration</td>
-												<td><p>The total duration of this step. The execution of all groups should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>durationGroup</td>
-												<td>Duration</td>
-												<td><p>The duration of each row. The execution of each group should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>interleave</td>
-												<td>Duration</td>
-												<td><p>The time offset for interleaving each group</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>timers</td>
-												<td>array</td>
-												<td><p>Timers that should be used</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>startTimerAfterStep</td>
-												<td>integer</td>
-												<td><p>The duration timer will be started after this step rather than from the beginning, if specified</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>steps</td>
-												<td>object</td>
-												<td><p>The sequence of commands to perform for each set of factor values.</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h3 id="_data.forEachRow">data.forEachRow</h3>
-								<div class="command">
-									<p>Perform sub-steps for every row in the active data table.
-The row&#39;s values are placed in SCOPE for the sub-steps.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>agent</td>
-												<td>Agent</td>
-												<td><p>Agent identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>distinctBy</td>
-												<td>array,string</td>
-												<td><p>The factor(s) to distinguish row by</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>orderBy</td>
-												<td>array,string</td>
-												<td><p>The factor(s) to order by</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>durationTotal</td>
-												<td>Duration</td>
-												<td><p>The total duration of this step. The execution of all rows should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>durationRow</td>
-												<td>Duration</td>
-												<td><p>The duration of each row. The execution of each row should complete within the allotted time. If execution completes earlier, the protocol will sleep for the remainder of the duration.</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>interleave</td>
-												<td>Duration</td>
-												<td><p>The time offset for interleaving each group</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>timers</td>
-												<td>array</td>
-												<td><p>Timers that should be used</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>steps</td>
-												<td>object</td>
-												<td><p>The sequence of commands to perform for each set of factor values.</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h2 id="_shaker">shaker</h2>
-								<p>The <code>shaker</code> commands specify actions using shaker equipment.</p>
-
-								<h3 id="_Shaker">Shaker</h3>
-								<div class="command">
-									<p>Shaker equipment.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>type</td>
-												<td>string</td>
-												<td><p>Type of this object</p>
-									One of: Shaker</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>description</td>
-												<td>markdown</td>
-												<td><p>Optional user description of this item</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>label</td>
-												<td>markdown</td>
-												<td><p>Optional user label for this item</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h3 id="_shaker.ShakerProgram">shaker.ShakerProgram</h3>
-								<div class="command">
-									<p>Program for shaker.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>amplitude</td>
-												<td>string</td>
-												<td><p>Amplitude</p>
-									One of: min,low,high,max</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>duration</td>
-												<td>Duration</td>
-												<td><p>Duration of shaking</p>
-									</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>rpm</td>
-												<td>number</td>
-												<td><p>Rotations per minute (RPM)</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h3 id="_shaker.shakePlate">shaker.shakePlate</h3>
-								<div class="command">
-									<p>Shake a plate.
-If necessary, the plate will be transfered to the shaker first.
-By default, the plate will also be automatically moved back to its
-prior location after shaking.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>agent</td>
-												<td>Agent</td>
-												<td><p>Agent identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>equipment</td>
-												<td>Equipment</td>
-												<td><p>Equipment identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>program</td>
-												<td>shaker.ShakerProgram</td>
-												<td><p>Program for shaking</p>
-									</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>object</td>
-												<td>Plate</td>
-												<td><p>Plate identifier</p>
-									</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>site</td>
-												<td>Site</td>
-												<td><p>Site identifier on shaker</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>destinationAfter</td>
-												<td>SiteOrStay</td>
-												<td><p>Site to move the plate to after this command</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-										<b>Example:</b>
-
-										<p>This will shake <code>plate1</code> for 1 minute:</p>
-<pre><code>command: shaker.shakePlate
-program:
-  duration: 1 minute
-object: plate1
-</code></pre>
-								</div>
-								<h3 id="_shaker.run">shaker.run</h3>
-								<div class="command">
-									<p>Run the shaker.
-This will simply run the given shaker program, regardless of
-what plate is on the shaker or whether the shaker is empty.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>agent</td>
-												<td>Agent</td>
-												<td><p>Agent identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>equipment</td>
-												<td>Equipment</td>
-												<td><p>Equipment identifier</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>program</td>
-												<td>shaker.ShakerProgram</td>
-												<td><p>Program for shaking</p>
-									</td>
-												<td>required</td>
 											</tr>
 									</table>
 
@@ -4323,12 +4579,12 @@ Otherwise, the equipment identifier must be supplied.</p>
 
 
 								</div>
-								<h2 id="_absorbanceReader">absorbanceReader</h2>
-								<p>The <code>absorbanceReader</code> commands specify actions using equipment for absorbance readouts.</p>
+								<h2 id="_shaker">shaker</h2>
+								<p>The <code>shaker</code> commands specify actions using shaker equipment.</p>
 
-								<h3 id="_Reader">Reader</h3>
+								<h3 id="_Shaker">Shaker</h3>
 								<div class="command">
-									<p>Reader equipment.</p>
+									<p>Shaker equipment.</p>
 
 
 									<p style="margin-top: 1em"><b>Properties:</b></p>
@@ -4338,7 +4594,7 @@ Otherwise, the equipment identifier must be supplied.</p>
 												<td>type</td>
 												<td>string</td>
 												<td><p>Type of this object</p>
-									One of: Reader</td>
+									One of: Shaker</td>
 												<td>required</td>
 											</tr>
 											<tr>
@@ -4360,9 +4616,46 @@ Otherwise, the equipment identifier must be supplied.</p>
 
 
 								</div>
-								<h3 id="_absorbanceReader.measurePlate">absorbanceReader.measurePlate</h3>
+								<h3 id="_shaker.ShakerProgram">shaker.ShakerProgram</h3>
 								<div class="command">
-									<p>Measure the absorbance of a plate.</p>
+									<p>Program for shaker.</p>
+
+
+									<p style="margin-top: 1em"><b>Properties:</b></p>
+									<table class="table table-striped table-hover table-condensed">
+										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
+											<tr>
+												<td>amplitude</td>
+												<td>string</td>
+												<td><p>Amplitude</p>
+									One of: min,low,high,max</td>
+												<td></td>
+											</tr>
+											<tr>
+												<td>duration</td>
+												<td>Duration</td>
+												<td><p>Duration of shaking</p>
+									</td>
+												<td>required</td>
+											</tr>
+											<tr>
+												<td>rpm</td>
+												<td>number</td>
+												<td><p>Rotations per minute (RPM)</p>
+									</td>
+												<td></td>
+											</tr>
+									</table>
+
+
+
+								</div>
+								<h3 id="_shaker.shakePlate">shaker.shakePlate</h3>
+								<div class="command">
+									<p>Shake a plate.
+If necessary, the plate will be transfered to the shaker first.
+By default, the plate will also be automatically moved back to its
+prior location after shaking.</p>
 
 
 									<p style="margin-top: 1em"><b>Properties:</b></p>
@@ -4384,158 +4677,11 @@ Otherwise, the equipment identifier must be supplied.</p>
 											</tr>
 											<tr>
 												<td>program</td>
-												<td></td>
-												<td><p>Program parameters</p>
+												<td>shaker.ShakerProgram</td>
+												<td><p>Program for shaking</p>
 									</td>
-												<td></td>
+												<td>required</td>
 											</tr>
-												<tr>
-													<td>&nbsp;&nbsp;shakerProgramBefore</td>
-													<td></td>
-													<td><p>Program for shaker.</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;excitationWavelength</td>
-													<td>Length</td>
-													<td><p>Excitation wavelength</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;excitationBandwidth</td>
-													<td>Length</td>
-													<td><p>Excitation bandwidth</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;excitationWavelengthMin</td>
-													<td>Length</td>
-													<td><p>Minimum excitation wavelength for a scan</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;excitationWavelengthMax</td>
-													<td>Length</td>
-													<td><p>Maximum excitation wavelength for a scan</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;excitationWavelengthStep</td>
-													<td>Length</td>
-													<td><p>Size of steps for a scan</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;wells</td>
-													<td>Wells</td>
-													<td><p>Array of wells to read</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;wellDesignFactor</td>
-													<td>string</td>
-													<td><p>Name of design column that indicates which wells to measure (deprecated, use <code>output.joinKey</code>)</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;userValues</td>
-													<td>object</td>
-													<td><p>User-specificed values that should be included in the output table (deprecated, use <code>output.userValues</code>)</p>
-									</td>
-													<td></td>
-												</tr>
-											<tr>
-												<td>programFileTemplate</td>
-												<td>string</td>
-												<td><p>Program template; well information will be substituted into the template automatically.</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>programFile</td>
-												<td>string</td>
-												<td><p>Program filename</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>programData</td>
-												<td></td>
-												<td><p>Program data</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>outputFile</td>
-												<td>string</td>
-												<td><p>Filename for output (deprecated, use <code>output.writeTo</code>)</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>outputDataset</td>
-												<td>string</td>
-												<td><p>Name of dataset to which the measurements values will be appended. (deprecated, use <code>output.appendTo</code>)</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>output</td>
-												<td></td>
-												<td><p>Output definition for where and how to save the measurements</p>
-									</td>
-												<td></td>
-											</tr>
-												<tr>
-													<td>&nbsp;&nbsp;joinKey</td>
-													<td>string</td>
-													<td><p>The key used to left-join the measurement values with the current DATA</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;writeTo</td>
-													<td>string</td>
-													<td><p>Filename to write measurements to as JSON</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;appendTo</td>
-													<td>string</td>
-													<td><p>Filename to append measurements to as newline-delimited JSON</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;userValues</td>
-													<td>object</td>
-													<td><p>User-specificed values that should be included in the output table</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;simulated</td>
-													<td>string</td>
-													<td><p>An expression to evaluate with mathjs</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;units</td>
-													<td></td>
-													<td><p>Map of factor names to unit type; converts the factor values to plain numbers in the given units.</p>
-									</td>
-													<td></td>
-												</tr>
 											<tr>
 												<td>object</td>
 												<td>Plate</td>
@@ -4546,14 +4692,14 @@ Otherwise, the equipment identifier must be supplied.</p>
 											<tr>
 												<td>site</td>
 												<td>Site</td>
-												<td><p>Site identifier in reader</p>
+												<td><p>Site identifier on shaker</p>
 									</td>
 												<td></td>
 											</tr>
 											<tr>
 												<td>destinationAfter</td>
 												<td>SiteOrStay</td>
-												<td><p>Site to move the plate to after measurement</p>
+												<td><p>Site to move the plate to after this command</p>
 									</td>
 												<td></td>
 											</tr>
@@ -4561,47 +4707,20 @@ Otherwise, the equipment identifier must be supplied.</p>
 
 
 
+										<b>Example:</b>
+
+										<p>This will shake <code>plate1</code> for 1 minute:</p>
+<pre><code>command: shaker.shakePlate
+program:
+  duration: 1 minute
+object: plate1
+</code></pre>
 								</div>
-								<h2 id="_fluorescenceReader">fluorescenceReader</h2>
-								<p>The <code>fluorescenceReader</code> commands specify actions using equipment for fluorescence readouts.</p>
-
-								<h3 id="_Reader">Reader</h3>
+								<h3 id="_shaker.run">shaker.run</h3>
 								<div class="command">
-									<p>Reader equipment.</p>
-
-
-									<p style="margin-top: 1em"><b>Properties:</b></p>
-									<table class="table table-striped table-hover table-condensed">
-										<tr><th>Name</th><th>Type</th><th>Description</th><th>Required</th></tr>
-											<tr>
-												<td>type</td>
-												<td>string</td>
-												<td><p>Type of this object</p>
-									One of: Reader</td>
-												<td>required</td>
-											</tr>
-											<tr>
-												<td>description</td>
-												<td>markdown</td>
-												<td><p>Optional user description of this item</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>label</td>
-												<td>markdown</td>
-												<td><p>Optional user label for this item</p>
-									</td>
-												<td></td>
-											</tr>
-									</table>
-
-
-
-								</div>
-								<h3 id="_fluorescenceReader.measurePlate">fluorescenceReader.measurePlate</h3>
-								<div class="command">
-									<p>Measure the fluorescence of wells on a plate.</p>
+									<p>Run the shaker.
+This will simply run the given shaker program, regardless of
+what plate is on the shaker or whether the shaker is empty.</p>
 
 
 									<p style="margin-top: 1em"><b>Properties:</b></p>
@@ -4623,129 +4742,10 @@ Otherwise, the equipment identifier must be supplied.</p>
 											</tr>
 											<tr>
 												<td>program</td>
-												<td></td>
-												<td><p>Program parameters</p>
-									</td>
-												<td></td>
-											</tr>
-												<tr>
-													<td>&nbsp;&nbsp;shakerProgram</td>
-													<td></td>
-													<td><p>Program for shaker.</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;excitationWavelength</td>
-													<td>Length</td>
-													<td><p>Excitation wavelength</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;emissionWavelength</td>
-													<td>Length</td>
-													<td><p>Emission wavelength</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;wells</td>
-													<td>Wells</td>
-													<td><p>Array of wells to read</p>
-									</td>
-													<td></td>
-												</tr>
-											<tr>
-												<td>programFileTemplate</td>
-												<td>string</td>
-												<td><p>Program template; well information will be substituted into the template automatically.</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>programFile</td>
-												<td>string</td>
-												<td><p>Program filename</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>programData</td>
-												<td></td>
-												<td><p>Program data</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>output</td>
-												<td></td>
-												<td><p>Output definition for where and how to save the measurements</p>
-									</td>
-												<td></td>
-											</tr>
-												<tr>
-													<td>&nbsp;&nbsp;joinKey</td>
-													<td>string</td>
-													<td><p>The key used to left-join the measurement values with the current DATA</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;writeTo</td>
-													<td>string</td>
-													<td><p>Filename to write measurements to as JSON</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;appendTo</td>
-													<td>string</td>
-													<td><p>Filename to append measurements to as newline-delimited JSON</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;userValues</td>
-													<td>object</td>
-													<td><p>User-specificed values that should be included in the output table</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;simulated</td>
-													<td>string</td>
-													<td><p>An expression to evaluate with mathjs</p>
-									</td>
-													<td></td>
-												</tr>
-												<tr>
-													<td>&nbsp;&nbsp;units</td>
-													<td></td>
-													<td><p>Map of factor names to unit type; converts the factor values to plain numbers in the given units.</p>
-									</td>
-													<td></td>
-												</tr>
-											<tr>
-												<td>object</td>
-												<td>Plate</td>
-												<td><p>Plate identifier</p>
+												<td>shaker.ShakerProgram</td>
+												<td><p>Program for shaking</p>
 									</td>
 												<td>required</td>
-											</tr>
-											<tr>
-												<td>site</td>
-												<td>Site</td>
-												<td><p>Site identifier in reader</p>
-									</td>
-												<td></td>
-											</tr>
-											<tr>
-												<td>destinationAfter</td>
-												<td>SiteOrStay</td>
-												<td><p>Site to move the plate to after measurement</p>
-									</td>
-												<td></td>
 											</tr>
 									</table>
 

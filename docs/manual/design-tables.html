@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Roboliq</title>
   <meta name="description" content="Roboliq">
-  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.3.16 and GitBook 2.6.7">
 
   <meta property="og:title" content="Roboliq" />
   <meta property="og:type" content="book" />
@@ -208,16 +208,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tbody>
 </table>
 <p>This table could be used to specify a single pipetting operation that dispenses 25 ul of water into well <code>A01</code> of <code>plate1</code>. We will specify this in Roboliq as follows:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">objects:</span>
   <span class="fu">data1:</span>
-    <span class="fu">type:</span> Data
-    <span class="fu">description:</span> First example
+    <span class="fu">type:</span><span class="at"> Data</span>
+    <span class="fu">description:</span><span class="at"> First example</span>
     <span class="fu">design:</span>
-      <span class="fu">plate:</span> plate1
-      <span class="fu">source:</span> water
-      <span class="fu">destination:</span> A01
-      <span class="fu">volume:</span> 25 ul
+      <span class="fu">plate:</span><span class="at"> plate1</span>
+      <span class="fu">source:</span><span class="at"> water</span>
+      <span class="fu">destination:</span><span class="at"> A01</span>
+      <span class="fu">volume:</span><span class="at"> 25 ul</span>
 <span class="ot">---</span></code></pre></div>
 <p>In a Roboliq protocol, designs are placed under the <code>objects</code> property. In this case, its name is <code>data1</code>, its type is <code>Data</code>, and it has a description. The <code>design</code> property is where factors are specified.</p>
 <p>Let’s expand the design table a bit to dispenses 25 ul of water into several destinations.</p>
@@ -252,16 +252,16 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tbody>
 </table>
 <p>To specify this in Roboliq, we change the <code>destination</code> property to a <em>branching</em> factor:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">objects:</span>
   <span class="fu">data1:</span>
-    <span class="fu">type:</span> Data
-    <span class="fu">description:</span> First example
+    <span class="fu">type:</span><span class="at"> Data</span>
+    <span class="fu">description:</span><span class="at"> First example</span>
     <span class="fu">design:</span>
-      <span class="fu">plate:</span> plate1
-      <span class="fu">source:</span> water
-      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
-      <span class="fu">volume:</span> 25 ul</code></pre></div>
+      <span class="fu">plate:</span><span class="at"> plate1</span>
+      <span class="fu">source:</span><span class="at"> water</span>
+      <span class="fu">destination*:</span><span class="at"> </span><span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">volume:</span><span class="at"> 25 ul</span></code></pre></div>
 <p>Notice the asterisk in <code>destination*</code>. An asterisk at the end of a factor name indicates <em>branching</em>. Branching factors require an array of values, and for each value in the array, the existing rows are first replicated and then the value is assigned to the factor in that row.</p>
 <p>Now let’s assign a different volume to each row:</p>
 <table>
@@ -295,19 +295,19 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </tbody>
 </table>
 <p>To specify this in Roboliq, we change the <code>volume</code> property to an array:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">objects:</span>
   <span class="fu">data1:</span>
-    <span class="fu">type:</span> Data
-    <span class="fu">description:</span> First example
+    <span class="fu">type:</span><span class="at"> Data</span>
+    <span class="fu">description:</span><span class="at"> First example</span>
     <span class="fu">design:</span>
-      <span class="fu">plate:</span> plate1
-      <span class="fu">source:</span> water
-      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
-      <span class="fu">volume:</span> <span class="kw">[</span>25 ul<span class="kw">,</span> 50 ul<span class="kw">,</span> 75 ul<span class="kw">]</span></code></pre></div>
+      <span class="fu">plate:</span><span class="at"> plate1</span>
+      <span class="fu">source:</span><span class="at"> water</span>
+      <span class="fu">destination*:</span><span class="at"> </span><span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">volume:</span><span class="at"> </span><span class="kw">[</span>25 ul<span class="kw">,</span> 50 ul<span class="kw">,</span> 75 ul<span class="kw">]</span></code></pre></div>
 <p>When a factor value is an array, a new column is added with those values.</p>
 <p><strong>Try it</strong>. Copy the above code to a new file in Roboliq’s root directory named <code>data1Test.yaml</code>. Open a terminal and change directory to the Roboliq root, and run the following command:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run design -- --path objects.data1 data1Test.yaml</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">npm</span> run design -- --path objects.data1 data1Test.yaml</code></pre></div>
 <p>It should produce this output:</p>
 <pre><code>plate   source  destination  volume
 ======  ======  ===========  ======
@@ -316,13 +316,13 @@ plate1  water   B01          50 ul
 plate1  water   C01          75 ul
 ======  ======  ===========  ======</code></pre>
 <p>Branches can also be specified as integers. If you specify an integer, it creates that many branches which are each given an integer index, as follows:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">objects:</span>
   <span class="fu">designInteger:</span>
-    <span class="fu">type:</span> Data
+    <span class="fu">type:</span><span class="at"> Data</span>
     <span class="fu">design:</span>
-      <span class="fu">a*:</span> 3
-      <span class="fu">b*:</span> 3</code></pre></div>
+      <span class="fu">a*:</span><span class="at"> 3</span>
+      <span class="fu">b*:</span><span class="at"> 3</span></code></pre></div>
 <p>Which creates the following table:</p>
 <table>
 <thead>
@@ -430,22 +430,22 @@ plate1  water   C01          75 ul
 </tbody>
 </table>
 <p>This can be described in Roboliq as follows:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">objects:</span>
   <span class="fu">data2:</span>
-    <span class="fu">type:</span> Data
-    <span class="fu">description:</span> Nested example
+    <span class="fu">type:</span><span class="at"> Data</span>
+    <span class="fu">description:</span><span class="at"> Nested example</span>
     <span class="fu">design:</span>
-      <span class="fu">plate:</span> plate1
-      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">plate:</span><span class="at"> plate1</span>
+      <span class="fu">destination*:</span><span class="at"> </span><span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
       <span class="fu">source*:</span>
         <span class="fu">water:</span>
-          <span class="fu">volume:</span> 50 ul
+          <span class="fu">volume:</span><span class="at"> 50 ul</span>
         <span class="fu">dye:</span>
-          <span class="fu">volume:</span> 25 ul
-      <span class="fu">liquidClass:</span> Roboliq_Water_Air_1000</code></pre></div>
+          <span class="fu">volume:</span><span class="at"> 25 ul</span>
+      <span class="fu">liquidClass:</span><span class="at"> Roboliq_Water_Air_1000</span></code></pre></div>
 <p>Create a file named <code>data2Test.yaml</code> with those contents and run:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run design -- --path objects.data2 data2Test.yaml</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">npm</span> run design -- --path objects.data2 data2Test.yaml</code></pre></div>
 <p>Let’s walk through this example step-by-step to see how the desired table is achieved.</p>
 <p><strong>Step 0</strong>: A design starts as a single empty row.</p>
 <p><strong>Step 1</strong>: <code>plate: plate1</code></p>
@@ -686,20 +686,20 @@ plate1  water   C01          75 ul
 <div id="hidden-factors" class="section level2">
 <h2><span class="header-section-number">7.3</span> Hidden factors</h2>
 <p>There are generally many ways to achieve the same results. As an example, an alternative way of achieving the same result as above is:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">objects:</span>
   <span class="fu">data2:</span>
-    <span class="fu">type:</span> Data
-    <span class="fu">description:</span> Nested example
+    <span class="fu">type:</span><span class="at"> Data</span>
+    <span class="fu">description:</span><span class="at"> Nested example</span>
     <span class="fu">design:</span>
-      <span class="fu">plate:</span> plate1
-      <span class="fu">destination*:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
+      <span class="fu">plate:</span><span class="at"> plate1</span>
+      <span class="fu">destination*:</span><span class="at"> </span><span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> C01<span class="kw">]</span>
       <span class="fu">.sourceId*:</span>
-      <span class="kw">-</span> <span class="fu">source:</span> water
-        <span class="fu">volume:</span> 50 ul
-      <span class="kw">-</span> <span class="fu">source:</span> dye
-        <span class="fu">volume:</span> 25 ul
-      <span class="fu">liquidClass:</span> Roboliq_Water_Air_1000</code></pre></div>
+      <span class="kw">-</span> <span class="fu">source:</span><span class="at"> water</span>
+        <span class="fu">volume:</span><span class="at"> 50 ul</span>
+      <span class="kw">-</span> <span class="fu">source:</span><span class="at"> dye</span>
+        <span class="fu">volume:</span><span class="at"> 25 ul</span>
+      <span class="fu">liquidClass:</span><span class="at"> Roboliq_Water_Air_1000</span></code></pre></div>
 <p>In this case, the branching factor is <code>.sourceId*</code> and it’s an array. The period prefix hides that column, and the final results are the same as above.</p>
 </div>
 <div id="actions" class="section level2">
@@ -714,13 +714,13 @@ plate1  water   C01          75 ul
 <div id="allocatewells" class="section level3">
 <h3><span class="header-section-number">7.4.1</span> <code>allocateWells</code></h3>
 <p>Let’s take a look at an example:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">replicate*:</span> 2
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">replicate*:</span><span class="at"> 2</span>
 <span class="fu">well=allocateWells:</span>
-  <span class="fu">rows:</span> 8
-  <span class="fu">columns:</span> 12</code></pre></div>
+  <span class="fu">rows:</span><span class="at"> 8</span>
+  <span class="fu">columns:</span><span class="at"> 12</span></code></pre></div>
 <p>An action is indicated with the “=”-infix. So in the case of <code>well=allocateWells</code>, the factor name is <code>well</code>, the action is <code>allocateWells</code>, and the properties are the arguments to the action. In this case, <code>rows</code> and <code>columns</code> tells the plate dimension we want to get wells for, and 2 wells will be allocated since the table has two rows:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">{</span><span class="fu">replicate:</span> 1<span class="kw">,</span> <span class="fu">well:</span> A01<span class="kw">}</span>
-<span class="kw">{</span><span class="fu">replicate:</span> 2<span class="kw">,</span> <span class="fu">well:</span> B01<span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">{</span><span class="fu">replicate:</span><span class="at"> 1</span><span class="kw">,</span> <span class="fu">well:</span><span class="at"> A01</span><span class="kw">}</span>
+<span class="kw">{</span><span class="fu">replicate:</span><span class="at"> 2</span><span class="kw">,</span> <span class="fu">well:</span><span class="at"> B01</span><span class="kw">}</span></code></pre></div>
 </div>
 <div id="range" class="section level3">
 <h3><span class="header-section-number">7.4.2</span> <code>range</code></h3>
@@ -731,10 +731,10 @@ plate1  water   C01          75 ul
 <li><code>step</code>: the distance between generated integers (default = 1)</li>
 </ul>
 <p>Here’s an example:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 2
-<span class="fu">b*:</span> 2
-<span class="fu">c=range:</span> <span class="kw">{}</span>
-<span class="fu">d=range:</span> <span class="kw">{</span><span class="fu">from:</span> 10<span class="kw">,</span> <span class="fu">step:</span> 10<span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span><span class="at"> 2</span>
+<span class="fu">b*:</span><span class="at"> 2</span>
+<span class="fu">c=range:</span><span class="at"> </span><span class="kw">{}</span>
+<span class="fu">d=range:</span><span class="at"> </span><span class="kw">{</span><span class="fu">from:</span><span class="at"> 10</span><span class="kw">,</span> <span class="fu">step:</span><span class="at"> 10</span><span class="kw">}</span></code></pre></div>
 <p>Which produces this result:</p>
 <table>
 <thead>
@@ -777,9 +777,9 @@ plate1  water   C01          75 ul
 <div id="calculate" class="section level3">
 <h3><span class="header-section-number">7.4.3</span> <code>calculate</code></h3>
 <p>The <code>calculate</code> action takes a string to be parsed by <a href="http://mathjs.org/">mathjs</a>. The calculation will be made for each row individually. Here’s an example:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 3
-<span class="fu">volume=calculate:</span> <span class="st">&#39;(a * 10) ul&#39;</span>
-<span class="fu">more=calculate:</span> <span class="st">&#39;(50 ul) - volume&#39;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span><span class="at"> 3</span>
+<span class="fu">volume=calculate:</span><span class="at"> </span><span class="st">&#39;(a * 10) ul&#39;</span>
+<span class="fu">more=calculate:</span><span class="at"> </span><span class="st">&#39;(50 ul) - volume&#39;</span></code></pre></div>
 <p>And here is the result:</p>
 <table>
 <thead>
@@ -812,10 +812,10 @@ plate1  water   C01          75 ul
 <li><code>value</code>: the string to parse</li>
 <li><code>units</code>: the units of the final output</li>
 </ul>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 3
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span><span class="at"> 3</span>
 <span class="fu">volume=calculate:</span>
-  <span class="fu">value:</span> <span class="st">&#39;(a * 10)&#39;</span>
-  <span class="fu">units:</span> ul</code></pre></div>
+  <span class="fu">value:</span><span class="at"> </span><span class="st">&#39;(a * 10)&#39;</span>
+  <span class="fu">units:</span><span class="at"> ul</span></code></pre></div>
 <p>With this output:</p>
 <table>
 <thead>
@@ -848,13 +848,13 @@ plate1  water   C01          75 ul
 <li><code>design</code> - a design specification that will be applied to the matching rows</li>
 </ul>
 <p>Here’s an example:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span> 3
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">a*:</span><span class="at"> 3</span>
 <span class="fu">volumeCase=case:</span>
-  <span class="kw">-</span> <span class="fu">where:</span> a &lt; 2
+  <span class="kw">-</span> <span class="fu">where:</span><span class="at"> a &lt; 2</span>
     <span class="fu">design:</span>
-      <span class="fu">volume:</span> 10 ul
+      <span class="fu">volume:</span><span class="at"> 10 ul</span>
   <span class="kw">-</span> <span class="fu">design:</span>
-      <span class="fu">volume:</span> 12354 ul</code></pre></div>
+      <span class="fu">volume:</span><span class="at"> 12354 ul</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -888,21 +888,21 @@ plate1  water   C01          75 ul
 <p>You can only load one design per step, but you can nest steps and load another design in the sub-step. Consider these two excerpts of designs:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">data1:</span>
   <span class="fu">design:</span>
-    <span class="fu">a:</span> Alice
-    <span class="fu">b:</span> <span class="dt">*3</span>
-    <span class="fu">c:</span> Charles
-    <span class="fu">d:</span> Daniel
+    <span class="fu">a:</span><span class="at"> Alice</span>
+    <span class="fu">b:</span><span class="at"> </span><span class="dt">*3</span>
+    <span class="fu">c:</span><span class="at"> Charles</span>
+    <span class="fu">d:</span><span class="at"> Daniel</span>
 
 <span class="fu">data2:</span>
   <span class="fu">design:</span>
-    <span class="fu">d:</span> David</code></pre></div>
+    <span class="fu">d:</span><span class="at"> David</span></code></pre></div>
 <p>Let’s use them in these steps:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">1:</span>
-  <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data1<span class="kw">}</span>
-  <span class="fu">description:</span> <span class="st">&quot;`{{a}} {{c}} {{d}}`&quot;</span>
+  <span class="fu">data:</span><span class="at"> </span><span class="kw">{</span><span class="fu">source:</span><span class="at"> data1</span><span class="kw">}</span>
+  <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;`{{a}} {{c}} {{d}}`&quot;</span>
   <span class="fu">1:</span>
-    <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data2<span class="kw">}</span>
-    <span class="fu">description:</span> <span class="st">&quot;`{{a}} {{c}} {{d}}`&quot;</span></code></pre></div>
+    <span class="fu">data:</span><span class="at"> </span><span class="kw">{</span><span class="fu">source:</span><span class="at"> data2</span><span class="kw">}</span>
+    <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;`{{a}} {{c}} {{d}}`&quot;</span></code></pre></div>
 <p>The descriptions should be expanded as follows:</p>
 <p>1.description: “Alice Charles Daniel” 1.1.description: “Alice Charles David”</p>
 <p>In 1.1, “$$b” does not exist, but “$a” and “$c” still do. That is to say: column data from a previous <code>data</code> directive are not carried into sub-steps with a new <code>data</code> directive, but the values that were the same for all columns remain in scope.</p>
@@ -926,7 +926,7 @@ plate1  water   C01          75 ul
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-gitbook.require(["gitbook"], function(gitbook) {
+require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": true,
@@ -947,7 +947,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["roboliq.pdf"],
+"download": null,
 "toc": {
 "collapse": "subsection"
 }

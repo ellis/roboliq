@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>roboliq-processor Module: commands/centrifuge</title>
+	<title>roboliq-processor Source: expect.js</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -74,257 +74,61 @@
 <div class="row">
 
 	
-	<div class="col-md-8">
+	<div class="col-md-12">
 	
 		<div id="main">
 			
 
-	<h1 class="page-title">Module: commands/centrifuge</h1>
+		<h1 class="page-title">Source: expect.js</h1>
+    
 <section>
-
-<header>
-    
-</header>
-
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description"><p>Centrifuge commands module (see Commands#centrifuge or <a href="tutorial-Commands.html#centrifuge">command specification</a>).</p>
-<p>THIS SECTION IS FOR TESTING ONLY:
-loadEvowareCarrierData
-<a href="module-commandHelper.html">module:commandHelper</a>
-<a href="module-commands_centrifuge.html">module:commands/centrifuge</a>
-END OF SECTION</p>
-<p>See roboliq#Protocol.</p></div>
-        
-
-        
-<dl class="details">
-    
-
-	
-	<dt class="tag-version method-doc-label method-doc-details-label">Version:</dt>
-	<dd class="tag-version">
-		<ul class="dummy">
-			<li>v1</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="commands_centrifuge.js.html">commands/centrifuge.js</a>,
-				 <a href="commands_centrifuge.js.html#sunlight-1-line-7">line 7</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Members</h3>
-
-        <dl>
-            
-<hr>
-<dt class="name" id=".commandHandlers">
-    <h4 id=".commandHandlers"><span class="type-signature">&lt;static> </span>commandHandlers<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Handlers for centrifuge commands.</p>
-    </div>
-    
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="commands_centrifuge.js.html">commands/centrifuge.js</a>,
-				 <a href="commands_centrifuge.js.html#sunlight-1-line-297">line 297</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        
-            
-<hr>
-<dt class="name" id=".objectToPredicateConverters">
-    <h4 id=".objectToPredicateConverters"><span class="type-signature">&lt;static> </span>objectToPredicateConverters<span class="type-signature"></span></h4>
-
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Create predicates for objects of type = &quot;Centrifuge&quot;</p>
-    </div>
-    
-
-    
-
-    
-<dl class="details">
-    
-
-	
-
-	
-
-	
-
-    
-
-    
-
-    
-
-    
-
-	
-
-	
-
-	
-
-	
-
-	
-
-
-
-	
-	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
-	<dd class="tag-source">
-		<ul class="dummy">
-			<li>
-				<a href="commands_centrifuge.js.html">commands/centrifuge.js</a>,
-				 <a href="commands_centrifuge.js.html#sunlight-1-line-33">line 33</a>
-			</li>
-		</ul>
-	</dd>
-	
-
-	
-
-	
-
-	
-</dl>
-
-
-    
-</dd>
-
-        </dl>
-    
-
-    
-
-    
-
-    
-</article>
-
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">/**
+ * Roboliq: Automation for liquid-handling robots
+ * @copyright 2017, ETH Zurich, Ellis Whitehead
+ * @license GPL-3.0
+ */
+
+var _ = require('lodash');
+var assert = require('assert');
+var expect = require('./expectCore.js');
+var misc = require('./misc.js');
+var wellsParser = require('./parsers/wellsParser.js');
+
+function objectsValue(context, key, objects, effects, prefix) {
+	var value = misc.findObjectsValue(key, objects, effects, undefined, prefix);
+	if (_.isUndefined(value)) {
+		var id = (prefix) ? prefix+"."+key : key;
+		//console.trace();
+		expect.throw(_.defaults({objectName: id}, context), "missing value.");
+	}
+	return value;
+}
+
+function wells(context, value, data) {
+	assert(value);
+	assert(data);
+	assert(data.objects);
+	var destinations = expect.try(context, function () {
+		//console.dir(wellsParser.parse);
+		if (_.isString(value))
+			return wellsParser.parse(value, data.objects);
+		else
+			return value;
+	});
+	return destinations;
+}
+
+module.exports = _.merge(expect, {
+	destinationWells: wells,
+	objectsValue: objectsValue,
+	sourceWells: wells,
+});
+</pre>
+    </article>
 </section>
+
 
 
 
@@ -334,10 +138,6 @@ END OF SECTION</p>
 
 	<div class="clearfix"></div>
 
-	
-		<div class="col-md-3">
-			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
-		</div>
 	
 
 </div>
@@ -370,7 +170,7 @@ END OF SECTION</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
 	
-		on 2017-12-13T17:24:14+01:00
+		on 2017-12-13T17:24:13+01:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

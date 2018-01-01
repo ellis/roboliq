@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Roboliq</title>
   <meta name="description" content="Roboliq">
-  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.3.16 and GitBook 2.6.7">
 
   <meta property="og:title" content="Roboliq" />
   <meta property="og:type" content="book" />
@@ -184,15 +184,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h1><span class="header-section-number">5</span> Simple Protocols</h1>
 <p>Roboliq was developed to help automate protocols on liquid handling robots, especially for lab experiments in molecular biology. This chapter will explain the four properties in simple protocols and how to write write them.</p>
 <p>First consider this short example – it uses Roboliq version “v1”; it defines a <code>Plate</code> named <code>sourcePlate</code>; and it instructs us to shake the plate:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
-<span class="fu">description:</span> Shake a plate, just because we can
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
+<span class="fu">description:</span><span class="at"> Shake a plate, just because we can</span>
 <span class="fu">objects:</span>
   <span class="fu">sourcePlate:</span>
-    <span class="fu">type:</span> Plate
+    <span class="fu">type:</span><span class="at"> Plate</span>
 <span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">command:</span> shaker.shakePlate
-    <span class="fu">object:</span> sourcePlate</code></pre></div>
+    <span class="fu">command:</span><span class="at"> shaker.shakePlate</span>
+    <span class="fu">object:</span><span class="at"> sourcePlate</span></code></pre></div>
 <p>The protocol consists of <em>properties</em> and <em>values</em>. A <em>property</em> is a name followed by a semicolon and then a <em>value</em>. In the above example, we see the following properties and values:</p>
 <ol style="list-style-type: decimal">
 <li><p>The first property is <code>roboliq</code>, and it has a string value of <code>v1</code> which indicates we’re using Roboliq version 1.</p></li>
@@ -207,9 +207,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>In order to add more objects, just give them a name and assign them the appropriate properties. Here we extend <code>objects</code> to include another plate for mixing named <code>mixPlate</code>:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
   <span class="fu">sourcePlate:</span>
-    <span class="fu">type:</span> Plate
+    <span class="fu">type:</span><span class="at"> Plate</span>
   <span class="fu">mixPlate:</span>
-    <span class="fu">type:</span> Plate</code></pre></div>
+    <span class="fu">type:</span><span class="at"> Plate</span></code></pre></div>
 <p>Objects are the things that can be used in the protocol’s steps, including labware, liquids, and equipment. Each object requires a <code>type</code> property (e.g. <code>Plate</code> in the example above) – the two most common types used in protocols are:</p>
 <ul>
 <li><a href="../protocol/commands.html#_Plate"><code>Plate</code></a>: for defining labware, including tubes and troughs.</li>
@@ -219,46 +219,46 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>In addition to the <code>type</code> property, object have other properties as well (also available in the <a href="../protocol/commands.html">type documentation</a>), and all objects have an optional <code>description</code> property that you can use to add your own notes about the object. Here are examples of the two main object types to indicate that a liquid named <code>specialMix</code> is in all wells on <code>plate1</code>:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
   <span class="fu">plate1:</span>
-    <span class="fu">type:</span> Plate
-    <span class="fu">description:</span> Plate to be used for initial mixing
-    <span class="fu">model:</span> ourlab.roboto.model.96microwell
-    <span class="fu">location:</span> ourlab.roboto.P1
+    <span class="fu">type:</span><span class="at"> Plate</span>
+    <span class="fu">description:</span><span class="at"> Plate to be used for initial mixing</span>
+    <span class="fu">model:</span><span class="at"> ourlab.roboto.model.96microwell</span>
+    <span class="fu">location:</span><span class="at"> ourlab.roboto.P1</span>
   <span class="fu">specialMix:</span>
-    <span class="fu">type:</span> Liquid
-    <span class="fu">description:</span> Our special mad-scientist mix
-    <span class="fu">wells:</span> plate1(all)</code></pre></div>
+    <span class="fu">type:</span><span class="at"> Liquid</span>
+    <span class="fu">description:</span><span class="at"> Our special mad-scientist mix</span>
+    <span class="fu">wells:</span><span class="at"> plate1(all)</span></code></pre></div>
 </div>
 <div id="steps" class="section level2">
 <h2><span class="header-section-number">5.2</span> Steps</h2>
 <p>A <em>step</em> is either a command or a numbered list of sub-steps, and a protocol’s <code>steps</code> property specifies the steps that should be taken during the protocol. Here is an example with two numbered steps in which a plate is sealed and shaken:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">command:</span> sealer.sealPlate
-    <span class="fu">object:</span> plate1
+    <span class="fu">command:</span><span class="at"> sealer.sealPlate</span>
+    <span class="fu">object:</span><span class="at"> plate1</span>
   <span class="fu">2:</span>
-    <span class="fu">command:</span> shaker.shakePlate
-    <span class="fu">object:</span> plate1</code></pre></div>
+    <span class="fu">command:</span><span class="at"> shaker.shakePlate</span>
+    <span class="fu">object:</span><span class="at"> plate1</span></code></pre></div>
 <p>A <em>command</em> is indicated by a <code>command</code> property, such as the commands <code>sealer.sealPlate</code> and <code>shaker.shakePlate</code> above. Besides the <code>command</code> property, you will need to specify additional properties to tell the command exactly what to do. In the above example, the line <code>object: plate1</code> tells the command to act on <code>plate1</code>.</p>
 <p>Command names have two parts separated by a period. First is the command category, which contains related commands. Second is the actual command name. Roboliq’s standard commands are listed in the <a href="../protocol/commands.html">Command documentation</a>, and Evoware’s special commands are listed in the <a href="../protocol/evowareCommands.html">Evoware Command documentation</a>.</p>
 <p>Steps can also be given a <code>description</code> property that let’s you explanation what’s happening for someone else who reads the protocol (or for yourself later after you’ve forgotten). Step can also be given a <code>comment</code> property, which is intended to be used as programmer comments that aren’t of interest to others.</p>
 <p>Here is an example that contains nested steps, descriptions and commands - it is the same as the previous example, but applied to two plates:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">description:</span> <span class="st">&quot;Handle plate1&quot;</span>
+    <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;Handle plate1&quot;</span>
     <span class="fu">1:</span>
-      <span class="fu">command:</span> sealer.sealPlate
-      <span class="fu">object:</span> plate1
+      <span class="fu">command:</span><span class="at"> sealer.sealPlate</span>
+      <span class="fu">object:</span><span class="at"> plate1</span>
     <span class="fu">2:</span>
-      <span class="fu">command:</span> shaker.shakePlate
-      <span class="fu">object:</span> plate1
+      <span class="fu">command:</span><span class="at"> shaker.shakePlate</span>
+      <span class="fu">object:</span><span class="at"> plate1</span>
   <span class="fu">2:</span>
-    <span class="fu">description:</span> <span class="st">&quot;Handle plate2&quot;</span>
+    <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;Handle plate2&quot;</span>
     <span class="fu">1:</span>
-      <span class="fu">command:</span> sealer.sealPlate
-      <span class="fu">object:</span> plate2
+      <span class="fu">command:</span><span class="at"> sealer.sealPlate</span>
+      <span class="fu">object:</span><span class="at"> plate2</span>
     <span class="fu">2:</span>
-      <span class="fu">command:</span> shaker.shakePlate
-      <span class="fu">object:</span> plate2</code></pre></div>
+      <span class="fu">command:</span><span class="at"> shaker.shakePlate</span>
+      <span class="fu">object:</span><span class="at"> plate2</span></code></pre></div>
 </div>
 <div id="conclusion-1" class="section level2">
 <h2><span class="header-section-number">5.3</span> Conclusion</h2>
@@ -283,7 +283,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-gitbook.require(["gitbook"], function(gitbook) {
+require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": true,
@@ -304,7 +304,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["roboliq.pdf"],
+"download": null,
 "toc": {
 "collapse": "subsection"
 }

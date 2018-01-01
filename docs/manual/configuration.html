@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Roboliq</title>
   <meta name="description" content="Roboliq">
-  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.3.16 and GitBook 2.6.7">
 
   <meta property="og:title" content="Roboliq" />
   <meta property="og:type" content="book" />
@@ -316,13 +316,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p><em>Namespaces.</em> Because a robot “contains” its devices, sites, and permanent labware, we use <code>Namespace</code> types to build nested objects. For example, if our lab is named “bsse”, we have a robot named “bert”, and it has a site named “P1”, this could be encoded as follows:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
   <span class="fu">bsse:</span>
-    <span class="fu">type:</span> Namespace
+    <span class="fu">type:</span><span class="at"> Namespace</span>
     <span class="fu">bert:</span>
-      <span class="fu">type:</span> Namespace
+      <span class="fu">type:</span><span class="at"> Namespace</span>
       <span class="fu">site:</span>
-        <span class="fu">type:</span> Namespace
+        <span class="fu">type:</span><span class="at"> Namespace</span>
         <span class="fu">P1:</span>
-          <span class="fu">type:</span> Site
+          <span class="fu">type:</span><span class="at"> Site</span>
           ...</code></pre></div>
 <p>We can then reference the site in the protocol as <code>bsse.bert.site.P1</code>.</p>
 </div>
@@ -367,8 +367,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p><code>yaml &quot;sealer.canAgentEquipmentProgramModelSite&quot;:     &quot;agent&quot;: &quot;ourlab.mario.evoware&quot;     &quot;equipment&quot;: &quot;ourlab.mario.sealer&quot;     &quot;program&quot;: &quot;C:\\HJBioanalytikGmbH\\...\\PerkinElmer_weiss.bcf&quot;,     &quot;model&quot;: &quot;ourlab.model.plateModel_96_round_transparent_nunc&quot;,     &quot;site&quot;: &quot;ourlab.mario.site.ROBOSEAL&quot;</code>yaml</p>
 <p>The general form for predicates is:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">predicateName:</span>
-  <span class="fu">object1:</span> value1
-  <span class="fu">object2:</span> value2
+  <span class="fu">object1:</span><span class="at"> value1</span>
+  <span class="fu">object2:</span><span class="at"> value2</span>
   ...</code></pre></div>
 <p>The values are usually object names, and predicates often define true relationships among objects. All of the predicates together form a database of true statements about the “world” in which the protocol will run. They are used by certain command handlers to automatically figure out valid operations without the user needing to specify the low-level details. (Currently, the end-user documentation does not contain details about which predicates are used by which commands, but it can be found in the command handler source code.)</p>
 <p>Here is an example excerpt of using the predicate database to find all valid sealers from the <code>sealer.sealPlate</code> command handler:</p>
@@ -435,7 +435,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-gitbook.require(["gitbook"], function(gitbook) {
+require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": true,
@@ -456,7 +456,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["roboliq.pdf"],
+"download": null,
 "toc": {
 "collapse": "subsection"
 }

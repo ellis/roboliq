@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Roboliq</title>
   <meta name="description" content="Roboliq">
-  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.3.16 and GitBook 2.6.7">
 
   <meta property="og:title" content="Roboliq" />
   <meta property="og:type" content="book" />
@@ -188,8 +188,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Parameters are named values that you define at the beginning of a protocol. You can then use the parameter name instead of the value later in the protocol. In this partial example, a <code>VOLUME</code> parameter is defined which is used in the <code>pipetter.pipette</code> step:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">parameters:</span>
   <span class="fu">VOLUME:</span>
-    <span class="fu">description:</span> <span class="st">&quot;amount of water to dispense&quot;</span>
-    <span class="fu">value:</span> 200 ul
+    <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;amount of water to dispense&quot;</span>
+    <span class="fu">value:</span><span class="at"> 200 ul</span>
 <span class="co">...</span>
 <span class="co">steps:</span>
 <span class="co">  1:</span>
@@ -205,42 +205,42 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p><a href="../protocol/commands.html#_Data"><code>Data</code></a>: for defining a data table. The <code>Data</code> type facilitates complex experimental designs, and you can read more about it in the next section and in the chapter on <a href="design-tables.html#design-tables">Design Tables</a>.</p>
 <p><a href="../protocol/commands.html#_Variable"><code>Variable</code></a>: For defining references to other variables. Variables are not particularly useful in Roboliq, but they could potentially be used to easily switch between objects in case you have, for example, two water sources <code>water1</code> and <code>water2</code>. In that case you could have a <code>water</code> variable whose value to set to the source you want to use:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
-  <span class="fu">water1:</span> ...
-  <span class="fu">water2:</span> ...
+  <span class="fu">water1:</span><span class="at"> ...</span>
+  <span class="fu">water2:</span><span class="at"> ...</span>
   <span class="fu">water:</span>
-    <span class="fu">description:</span> <span class="st">&quot;water source&quot;</span>
-    <span class="fu">type:</span> Variable
-    <span class="fu">value:</span> water1
+    <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;water source&quot;</span>
+    <span class="fu">type:</span><span class="at"> Variable</span>
+    <span class="fu">value:</span><span class="at"> water1</span>
 <span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">command:</span> pipetter.pipette
-    <span class="fu">sources:</span> water
-    <span class="fu">destinations:</span> plate1(all)
-    <span class="fu">volumes:</span> 50 ul</code></pre></div>
+    <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+    <span class="fu">sources:</span><span class="at"> water</span>
+    <span class="fu">destinations:</span><span class="at"> plate1(all)</span>
+    <span class="fu">volumes:</span><span class="at"> 50 ul</span></code></pre></div>
 <p><a href="../protocol/commands.html#_Template"><code>Template</code></a>: You can use a template to define re-usable steps. Here is a toy example for a template named <code>dispenseToPlate1</code> which creates a <code>pipetter.pipette</code> command that transfers a volume of water to all wells on <code>plate1</code>:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
   <span class="fu">plate1:</span>
-    <span class="fu">type:</span> Plate
+    <span class="fu">type:</span><span class="at"> Plate</span>
     ...
   <span class="fu">dispenseToPlate1:</span>
-    <span class="fu">description:</span> <span class="st">&quot;template to dispense `volume` ul of water to all wells on plate1&quot;</span>
-    <span class="fu">type:</span> Template
+    <span class="fu">description:</span><span class="at"> </span><span class="st">&quot;template to dispense `volume` ul of water to all wells on plate1&quot;</span>
+    <span class="fu">type:</span><span class="at"> Template</span>
     <span class="fu">template:</span>
-      <span class="fu">command:</span> pipetter.pipette
-      <span class="fu">sources:</span> water
-      <span class="fu">destinations:</span> plate1(all)
-      <span class="fu">volumes:</span> <span class="st">&quot;{{volume}}&quot;</span>
+      <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+      <span class="fu">sources:</span><span class="at"> water</span>
+      <span class="fu">destinations:</span><span class="at"> plate1(all)</span>
+      <span class="fu">volumes:</span><span class="at"> </span><span class="st">&quot;{{volume}}&quot;</span>
 <span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">command:</span> system.call
-    <span class="fu">name:</span> dispenseToPlate1
+    <span class="fu">command:</span><span class="at"> system.call</span>
+    <span class="fu">name:</span><span class="at"> dispenseToPlate1</span>
     <span class="fu">params:</span>
-      <span class="fu">volume:</span> 10 ul
+      <span class="fu">volume:</span><span class="at"> 10 ul</span>
   <span class="fu">2:</span>
-    <span class="fu">command:</span> system.call
-    <span class="fu">name:</span> dispenseToPlate1
+    <span class="fu">command:</span><span class="at"> system.call</span>
+    <span class="fu">name:</span><span class="at"> dispenseToPlate1</span>
     <span class="fu">params:</span>
-      <span class="fu">volume:</span> 50 ul</code></pre></div>
+      <span class="fu">volume:</span><span class="at"> 50 ul</span></code></pre></div>
 <p>This protocol will first dispense 10ul to all wells, then another 50ul to all wells – not actually a useful protocol, but it illustrates the point. In the <code>system.call</code> command, the name of the template is specified along with the parameters template parameters. Templates are expanded using the <a href="http://handlebarsjs.com/">Handlebars</a> template engine, which is the reason for the “{{” and “}}” delimiters in the line <code>volumes: &quot;{{volume}}&quot;</code>.</p>
 </div>
 <div id="data" class="section level2">
@@ -252,12 +252,12 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>You can define a data table using the <code>Data</code> object type. Here’s an example where each row has a well, a liquid source, and a volume:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">objects:</span>
   <span class="fu">data1:</span>
-    <span class="fu">type:</span> Data
+    <span class="fu">type:</span><span class="at"> Data</span>
     <span class="fu">value:</span>
-      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> A01<span class="kw">,</span> <span class="fu">volume:</span> 10 ul<span class="kw">,</span> <span class="fu">source:</span> liquid1<span class="kw">}</span>
-      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> B01<span class="kw">,</span> <span class="fu">volume:</span> 10 ul<span class="kw">,</span> <span class="fu">source:</span> liquid2<span class="kw">}</span>
-      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> A02<span class="kw">,</span> <span class="fu">volume:</span> 20 ul<span class="kw">,</span> <span class="fu">source:</span> liquid1<span class="kw">}</span>
-      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> B02<span class="kw">,</span> <span class="fu">volume:</span> 20 ul<span class="kw">,</span> <span class="fu">source:</span> liquid2<span class="kw">}</span></code></pre></div>
+      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> A01</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 10 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid1</span><span class="kw">}</span>
+      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> B01</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 10 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid2</span><span class="kw">}</span>
+      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> A02</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 20 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid1</span><span class="kw">}</span>
+      <span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> B02</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 20 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid2</span><span class="kw">}</span></code></pre></div>
 <p>You can define as many data tables as you want in a protocol.</p>
 </div>
 <div id="data-property" class="section level3">
@@ -271,20 +271,20 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>Any step can be given a <code>data</code> property to make a table available in that step and its sub-steps. Here’s an example application:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data1<span class="kw">}</span>
-    <span class="fu">command:</span> pipetter.pipette
-    <span class="fu">sources:</span> $$source
-    <span class="fu">destinationPlate:</span> plate1
-    <span class="fu">destinations:</span> $$well
-    <span class="fu">volumes:</span> $$volume</code></pre></div>
+    <span class="fu">data:</span><span class="at"> </span><span class="kw">{</span><span class="fu">source:</span><span class="at"> data1</span><span class="kw">}</span>
+    <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+    <span class="fu">sources:</span><span class="at"> $$source</span>
+    <span class="fu">destinationPlate:</span><span class="at"> plate1</span>
+    <span class="fu">destinations:</span><span class="at"> $$well</span>
+    <span class="fu">volumes:</span><span class="at"> $$volume</span></code></pre></div>
 <p>The <code>data</code> property activates our data table <code>data1</code>. The command <code>pipetter.pipette</code> can now access the data columns by using the <code>$$</code>-prefix along with the column name. So the above example is essentially equivalent to this:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">command:</span> pipetter.pipette
-    <span class="fu">sources:</span> <span class="kw">[</span>liquid1<span class="kw">,</span> liquid2<span class="kw">,</span> liquid1<span class="kw">,</span> liquid2<span class="kw">]</span>
-    <span class="fu">destinationPlate:</span> plate1
-    <span class="fu">destinations:</span> <span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> A02<span class="kw">,</span> B02<span class="kw">]</span>
-    <span class="fu">volumes:</span> <span class="kw">[</span>10 ul<span class="kw">,</span> 10 ul<span class="kw">,</span> 20 ul<span class="kw">,</span> 20 ul<span class="kw">]</span></code></pre></div>
+    <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+    <span class="fu">sources:</span><span class="at"> </span><span class="kw">[</span>liquid1<span class="kw">,</span> liquid2<span class="kw">,</span> liquid1<span class="kw">,</span> liquid2<span class="kw">]</span>
+    <span class="fu">destinationPlate:</span><span class="at"> plate1</span>
+    <span class="fu">destinations:</span><span class="at"> </span><span class="kw">[</span>A01<span class="kw">,</span> B01<span class="kw">,</span> A02<span class="kw">,</span> B02<span class="kw">]</span>
+    <span class="fu">volumes:</span><span class="at"> </span><span class="kw">[</span>10 ul<span class="kw">,</span> 10 ul<span class="kw">,</span> 20 ul<span class="kw">,</span> 20 ul<span class="kw">]</span></code></pre></div>
 </div>
 <div id="data.-commands" class="section level3">
 <h3><span class="header-section-number">6.3.3</span> <code>data.*</code> commands</h3>
@@ -292,46 +292,46 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p><code>data.forEachRow</code> lets you run a series of steps on each row of the data table. For each row, the command activates a new data table containing only that row, and it runs its sub-<code>steps</code> using that new table. Here’s a toy example:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data1<span class="kw">}</span>
-    <span class="fu">command:</span> data.forEachRow
+    <span class="fu">data:</span><span class="at"> </span><span class="kw">{</span><span class="fu">source:</span><span class="at"> data1</span><span class="kw">}</span>
+    <span class="fu">command:</span><span class="at"> data.forEachRow</span>
     <span class="fu">steps:</span>
       <span class="fu">1:</span>
-        <span class="fu">command:</span> pipetter.pipette
-        <span class="fu">sources:</span> $source
-        <span class="fu">destinationPlate:</span> plate1
-        <span class="fu">destinations:</span> $well
-        <span class="fu">volumes:</span> $volume
+        <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+        <span class="fu">sources:</span><span class="at"> $source</span>
+        <span class="fu">destinationPlate:</span><span class="at"> plate1</span>
+        <span class="fu">destinations:</span><span class="at"> $well</span>
+        <span class="fu">volumes:</span><span class="at"> $volume</span>
       <span class="fu">2:</span>
-        <span class="fu">command:</span> fluorescenceReader.measurePlate
-        <span class="fu">object:</span> plate1
+        <span class="fu">command:</span><span class="at"> fluorescenceReader.measurePlate</span>
+        <span class="fu">object:</span><span class="at"> plate1</span>
         <span class="fu">output:</span>
-          <span class="fu">joinKey:</span> well</code></pre></div>
+          <span class="fu">joinKey:</span><span class="at"> well</span></code></pre></div>
 <p>In this case, the sub-steps will be repeated 4 times, once for each row. That mean each well will be dispensed into and measured before moving onto the next well. Notice that here only a single $-prefix was used rather than the double $$-prefix for the column variables. When a data table is activated, Roboliq will check if any of the columns have all the same value; if so, that property and value will be automatically added to the current scope (see the next section about Scope). Scope variables are accessible via the $-prefix. Since the <code>data.forEachRow</code> command activates each row individually, all of its columns will be added to the scope.</p>
 <p><code>data.forEachGroup</code> lets you operate on groups of rows at a time. You provide a <code>groupBy</code> property for it to group by, and then for each group it activates a new data table with those rows and runs its sub-<code>steps</code> using that new table. Here’s another toy example:</p>
 <div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">data:</span> <span class="kw">{</span><span class="fu">source:</span> data1<span class="kw">}</span>
-    <span class="fu">command:</span> data.forEachGroup
-    <span class="fu">groupBy:</span> source
+    <span class="fu">data:</span><span class="at"> </span><span class="kw">{</span><span class="fu">source:</span><span class="at"> data1</span><span class="kw">}</span>
+    <span class="fu">command:</span><span class="at"> data.forEachGroup</span>
+    <span class="fu">groupBy:</span><span class="at"> source</span>
     <span class="fu">steps:</span>
       <span class="fu">1:</span>
-        <span class="fu">command:</span> pipetter.pipette
-        <span class="fu">sources:</span> $source
-        <span class="fu">destinationPlate:</span> plate1
-        <span class="fu">destinations:</span> $$well
-        <span class="fu">volumes:</span> $$volume
+        <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+        <span class="fu">sources:</span><span class="at"> $source</span>
+        <span class="fu">destinationPlate:</span><span class="at"> plate1</span>
+        <span class="fu">destinations:</span><span class="at"> $$well</span>
+        <span class="fu">volumes:</span><span class="at"> $$volume</span>
       <span class="fu">2:</span>
-        <span class="fu">command:</span> fluorescenceReader.measurePlate
-        <span class="fu">object:</span> plate1
+        <span class="fu">command:</span><span class="at"> fluorescenceReader.measurePlate</span>
+        <span class="fu">object:</span><span class="at"> plate1</span>
         <span class="fu">output:</span>
-          <span class="fu">joinKey:</span> well</code></pre></div>
+          <span class="fu">joinKey:</span><span class="at"> well</span></code></pre></div>
 <p>Since there are two unique <code>source</code> values in <code>data1</code>, the <code>data.forEachGroup</code> command will create two new data tables for it sub-steps:</p>
 <p>First table:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> A01<span class="kw">,</span> <span class="fu">volume:</span> 10 ul<span class="kw">,</span> <span class="fu">source:</span> liquid1<span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> A02<span class="kw">,</span> <span class="fu">volume:</span> 20 ul<span class="kw">,</span> <span class="fu">source:</span> liquid1<span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> A01</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 10 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid1</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> A02</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 20 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid1</span><span class="kw">}</span></code></pre></div>
 <p>Second table:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> B01<span class="kw">,</span> <span class="fu">volume:</span> 10 ul<span class="kw">,</span> <span class="fu">source:</span> liquid2<span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> B02<span class="kw">,</span> <span class="fu">volume:</span> 20 ul<span class="kw">,</span> <span class="fu">source:</span> liquid2<span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> B01</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 10 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid2</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> B02</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 20 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid2</span><span class="kw">}</span></code></pre></div>
 <p>So the sub-steps will be repeated twice, once for new data table. Notice that here we used the single $-prefix for <code>source</code>, but the double $$-prefix for <code>well</code> and <code>volume</code>. Because the values of the well and volume columns are not the same in all rows, they are not automatically added to the scape, and we can’t use the single $-prefix.</p>
 </div>
 <div id="data-directive" class="section level3">
@@ -373,47 +373,47 @@ You can use template substitution for this purpose instead.</li>
 </ul>
 <p><strong>Examples</strong></p>
 <p>Let’s look at examples of $-substitutions. Consider this protocol:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
 <span class="fu">parameters:</span>
-  <span class="fu">TEXT:</span> <span class="kw">{</span> <span class="fu">value:</span> <span class="st">&quot;Hello, World&quot;</span> <span class="kw">}</span>
+  <span class="fu">TEXT:</span><span class="at"> </span><span class="kw">{</span> <span class="fu">value:</span><span class="at"> </span><span class="st">&quot;Hello, World&quot;</span> <span class="kw">}</span>
 <span class="fu">objects:</span>
   <span class="fu">data1:</span>
-    <span class="fu">type:</span> Data
+    <span class="fu">type:</span><span class="at"> Data</span>
     <span class="fu">value:</span>
-      <span class="kw">-</span> <span class="kw">{</span><span class="fu">a:</span> 1<span class="kw">,</span> <span class="fu">b:</span> 1<span class="kw">}</span>
-      <span class="kw">-</span> <span class="kw">{</span><span class="fu">a:</span> 1<span class="kw">,</span> <span class="fu">b:</span> 2<span class="kw">}</span>
+      <span class="kw">-</span> <span class="kw">{</span><span class="fu">a:</span><span class="at"> 1</span><span class="kw">,</span> <span class="fu">b:</span><span class="at"> 1</span><span class="kw">}</span>
+      <span class="kw">-</span> <span class="kw">{</span><span class="fu">a:</span><span class="at"> 1</span><span class="kw">,</span> <span class="fu">b:</span><span class="at"> 2</span><span class="kw">}</span>
 <span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">data:</span> data1
-    <span class="fu">command:</span> system.echo
+    <span class="fu">data:</span><span class="at"> data1</span>
+    <span class="fu">command:</span><span class="at"> system.echo</span>
     <span class="fu">value:</span>
-      <span class="fu">javascript:</span> <span class="st">&quot;${`${TEXT} ${a} ${__step.command}`}&quot;</span>
-      <span class="fu">math:</span> <span class="st">&quot;$(a * 10)&quot;</span>
-      <span class="fu">scopeParameter:</span> $TEXT
-      <span class="fu">scopeColumn:</span> $b
-      <span class="fu">scopeOne:</span> $a_ONE
-      <span class="fu">scopeData:</span> $__data[0].b
-      <span class="fu">scopeObjects:</span> $__objects.data1.type
-      <span class="fu">scopeParameters:</span> $__parameters.TEXT.value
-      <span class="fu">scopeStep:</span> $__step.command</code></pre></div>
+      <span class="fu">javascript:</span><span class="at"> </span><span class="st">&quot;${`${TEXT} ${a} ${__step.command}`}&quot;</span>
+      <span class="fu">math:</span><span class="at"> </span><span class="st">&quot;$(a * 10)&quot;</span>
+      <span class="fu">scopeParameter:</span><span class="at"> $TEXT</span>
+      <span class="fu">scopeColumn:</span><span class="at"> $b</span>
+      <span class="fu">scopeOne:</span><span class="at"> $a_ONE</span>
+      <span class="fu">scopeData:</span><span class="at"> $__data[0].b</span>
+      <span class="fu">scopeObjects:</span><span class="at"> $__objects.data1.type</span>
+      <span class="fu">scopeParameters:</span><span class="at"> $__parameters.TEXT.value</span>
+      <span class="fu">scopeStep:</span><span class="at"> $__step.command</span></code></pre></div>
 <p>The <code>system.echo</code> command will output the object described in its <code>value</code> parameter. The resulting value is this:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">javascript:</span> <span class="st">&quot;Hello, World 1 system.echo&quot;</span>
-<span class="fu">math:</span> 10
-<span class="fu">scopeParameter:</span> <span class="st">&quot;Hello, World&quot;</span>
-<span class="fu">scopeColumn:</span> <span class="kw">[</span>1<span class="kw">,</span> 2<span class="kw">]</span>
-<span class="fu">scopeOne:</span> 1
-<span class="fu">scopeData:</span> 1
-<span class="fu">scopeObjects:</span> <span class="st">&quot;Data&quot;</span>
-<span class="fu">scopeParameters:</span> <span class="st">&quot;Hello, World&quot;</span>
-<span class="fu">scopeStep:</span> <span class="st">&quot;system.echo&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">javascript:</span><span class="at"> </span><span class="st">&quot;Hello, World 1 system.echo&quot;</span>
+<span class="fu">math:</span><span class="at"> 10</span>
+<span class="fu">scopeParameter:</span><span class="at"> </span><span class="st">&quot;Hello, World&quot;</span>
+<span class="fu">scopeColumn:</span><span class="at"> </span><span class="kw">[</span>1<span class="kw">,</span> 2<span class="kw">]</span>
+<span class="fu">scopeOne:</span><span class="at"> 1</span>
+<span class="fu">scopeData:</span><span class="at"> 1</span>
+<span class="fu">scopeObjects:</span><span class="at"> </span><span class="st">&quot;Data&quot;</span>
+<span class="fu">scopeParameters:</span><span class="at"> </span><span class="st">&quot;Hello, World&quot;</span>
+<span class="fu">scopeStep:</span><span class="at"> </span><span class="st">&quot;system.echo&quot;</span></code></pre></div>
 </div>
 <div id="template-substitution" class="section level3">
 <h3><span class="header-section-number">6.5.2</span> Template ` substitution</h3>
 <p>Template substitution uses the <a href="http://handlebarsjs.com/">Handlebars</a> template engine to manipulate text. Template substitution occurs on strings that start and end with a tick (`). Here’s a simple example that produces a new string:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">text:</span> <span class="st">&quot;`Hello, {{name}}`&quot;</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">text:</span><span class="at"> </span><span class="st">&quot;`Hello, {{name}}`&quot;</span></code></pre></div>
 <p>If the <code>name</code> in the current scope is “John”, then this will set <code>text: &quot;Hello, John&quot;</code>.</p>
 <p>If the template substitution result is enclosed by braces or brackets, Roboliq will attempt to parse it as a JSON object. Here’s a trivial example that turns a template substitution into a command, assuming that <code>name</code> is currently in scope:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">1:</span> `{command: &quot;system._echo&quot;, text: &quot;Hello, {{name}}&quot;}`</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">1:</span><span class="at"> `{command: &quot;system._echo&quot;, text: &quot;Hello, {{name}}&quot;}`</span></code></pre></div>
 </div>
 <div id="directive-substitution" class="section level3">
 <h3><span class="header-section-number">6.5.3</span> Directive () substitution</h3>
@@ -427,16 +427,16 @@ You can use template substitution for this purpose instead.</li>
 <li><code>head</code>: if set to <code>true</code>,</li>
 </ul>
 <p>Let’s consider some examples using the <code>data1</code> table from above. Here is the table:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> A01<span class="kw">,</span> <span class="fu">volume:</span> 10 ul<span class="kw">,</span> <span class="fu">source:</span> liquid1<span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> B01<span class="kw">,</span> <span class="fu">volume:</span> 10 ul<span class="kw">,</span> <span class="fu">source:</span> liquid2<span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> A02<span class="kw">,</span> <span class="fu">volume:</span> 20 ul<span class="kw">,</span> <span class="fu">source:</span> liquid1<span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> B02<span class="kw">,</span> <span class="fu">volume:</span> 20 ul<span class="kw">,</span> <span class="fu">source:</span> liquid2<span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> A01</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 10 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid1</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> B01</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 10 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid2</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> A02</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 20 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid1</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> B02</span><span class="kw">,</span> <span class="fu">volume:</span><span class="at"> 20 ul</span><span class="kw">,</span> <span class="fu">source:</span><span class="at"> liquid2</span><span class="kw">}</span></code></pre></div>
 <p>and here are the examples:</p>
 <p><strong>Directive</strong>:<br />
 <code>data(): {where: 'source == &quot;liquid1&quot;'}}</code><br />
 <strong>Result</strong>:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> <span class="st">&quot;A01&quot;</span><span class="kw">, </span><span class="fu">volume:</span> <span class="st">&quot;10 ul&quot;</span><span class="kw">, </span><span class="fu">source:</span> <span class="st">&quot;liquid1&quot;</span><span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> <span class="st">&quot;A02&quot;</span><span class="kw">, </span><span class="fu">volume:</span> <span class="st">&quot;20 ul&quot;</span><span class="kw">, </span><span class="fu">source:</span> <span class="st">&quot;liquid1&quot;</span><span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> </span><span class="st">&quot;A01&quot;</span><span class="kw">, </span><span class="fu">volume:</span><span class="at"> </span><span class="st">&quot;10 ul&quot;</span><span class="kw">, </span><span class="fu">source:</span><span class="at"> </span><span class="st">&quot;liquid1&quot;</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> </span><span class="st">&quot;A02&quot;</span><span class="kw">, </span><span class="fu">volume:</span><span class="at"> </span><span class="st">&quot;20 ul&quot;</span><span class="kw">, </span><span class="fu">source:</span><span class="at"> </span><span class="st">&quot;liquid1&quot;</span><span class="kw">}</span></code></pre></div>
 <p><strong>Directive</strong>:<br />
 <code>data(): {map: '$volume'}</code><br />
 <strong>Result</strong>:</p>
@@ -448,10 +448,10 @@ You can use template substitution for this purpose instead.</li>
 <p><strong>Directive</strong>:<br />
 <code>data(): {map: {well: &quot;$well&quot;}}</code><br />
 <strong>Result</strong>:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> <span class="st">&quot;A01&quot;</span><span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> <span class="st">&quot;B01&quot;</span><span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> <span class="st">&quot;A02&quot;</span><span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span> <span class="st">&quot;B02&quot;</span><span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> </span><span class="st">&quot;A01&quot;</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> </span><span class="st">&quot;B01&quot;</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> </span><span class="st">&quot;A02&quot;</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">well:</span><span class="at"> </span><span class="st">&quot;B02&quot;</span><span class="kw">}</span></code></pre></div>
 <p><strong>Directive</strong>:<br />
 <code>data(): {map: &quot;$well&quot;, join: &quot;,&quot;}</code><br />
 <strong>Result</strong>:</p>
@@ -459,12 +459,12 @@ You can use template substitution for this purpose instead.</li>
 <p><strong>Directive</strong>:<br />
 <code>data(): {summarize: {totalVolume: '$(sum(volume))'}}</code><br />
 <strong>Result</strong>:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">totalVolume:</span> <span class="st">&quot;60 ul&quot;</span><span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">totalVolume:</span><span class="at"> </span><span class="st">&quot;60 ul&quot;</span><span class="kw">}</span></code></pre></div>
 <p><strong>Directive</strong>:<br />
 <code>data(): {groupBy: &quot;source&quot;, summarize: {source: '${source[0]}', totalVolume: '$(sum(volume))'}}</code><br />
 <strong>Result</strong>:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">source:</span> <span class="st">&quot;liquid1&quot;</span><span class="kw">, </span><span class="fu">totalVolume:</span> <span class="st">&quot;30 ul&quot;</span><span class="kw">}</span>
-<span class="kw">-</span> <span class="kw">{</span><span class="fu">source:</span> <span class="st">&quot;liquid2&quot;</span><span class="kw">, </span><span class="fu">totalVolume:</span> <span class="st">&quot;30 ul&quot;</span><span class="kw">}</span></code></pre></div>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="kw">-</span> <span class="kw">{</span><span class="fu">source:</span><span class="at"> </span><span class="st">&quot;liquid1&quot;</span><span class="kw">, </span><span class="fu">totalVolume:</span><span class="at"> </span><span class="st">&quot;30 ul&quot;</span><span class="kw">}</span>
+<span class="kw">-</span> <span class="kw">{</span><span class="fu">source:</span><span class="at"> </span><span class="st">&quot;liquid2&quot;</span><span class="kw">, </span><span class="fu">totalVolume:</span><span class="at"> </span><span class="st">&quot;30 ul&quot;</span><span class="kw">}</span></code></pre></div>
 
 </div>
 </div>
@@ -486,7 +486,7 @@ You can use template substitution for this purpose instead.</li>
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-gitbook.require(["gitbook"], function(gitbook) {
+require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": true,
@@ -507,7 +507,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["roboliq.pdf"],
+"download": null,
 "toc": {
 "collapse": "subsection"
 }

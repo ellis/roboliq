@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Roboliq</title>
   <meta name="description" content="Roboliq">
-  <meta name="generator" content="bookdown 0.4.1 and GitBook 2.6.7">
+  <meta name="generator" content="bookdown 0.3.16 and GitBook 2.6.7">
 
   <meta property="og:title" content="Roboliq" />
   <meta property="og:type" content="book" />
@@ -195,15 +195,15 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>We’ll test a simple protocol to show you how to run the software.</p>
 <ol style="list-style-type: decimal">
 <li><p>Navigate to the <code>protocols</code> subdirectory and type this code into a file named <code>walkthrough1.yaml</code> (or copy the file <code>walkthrough1-sample.yaml</code>):</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
-<span class="fu">description:</span> test that doesn&#39;t require configuration
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
+<span class="fu">description:</span><span class="at"> test that doesn&#39;t require configuration</span>
 <span class="fu">steps:</span>
-  <span class="fu">command:</span> system.echo
-  <span class="fu">text:</span> Hello, World!</code></pre></div></li>
+  <span class="fu">command:</span><span class="at"> system.echo</span>
+  <span class="fu">text:</span><span class="at"> Hello, World!</span></code></pre></div></li>
 <li><p>Open the terminal, and navigate to the directory where you copied the Roboliq repository.</p>
 <p><code>cd ~/Desktop/Ellis/roboliq/</code></p></li>
 <li><p>Run Roboliq from the terminal, passing <code>walkthrough1.yaml</code> as input:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- protocols/walkthrough1.yaml</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">npm</span> run processor -- protocols/walkthrough1.yaml</code></pre></div>
 <p>If there were no errors, you can now find a file named <code>protocols/walkthrough1.out.json</code>. The output file contains a lot of information: in addition to your script, it also contains the core configuration data that comes with Roboliq by default. If you open the file, you can find a <code>steps</code> property which looks like this:</p>
 <div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="er">&quot;steps&quot;:</span> <span class="fu">{</span>
   <span class="dt">&quot;1&quot;</span><span class="fu">:</span> <span class="fu">{</span>
@@ -216,7 +216,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>You can see a substep with the command <code>system._echo</code>. Commands that begin with an underscore are “final” instructions that will be passed the the backend without further processing. It may be confusing that the original command (<code>system.echo</code>) and its properties appear <em>after</em> the subcommand, but this is just an artifact of how JavaScript always prints numeric properties first in JSON data.</p>
 <p>An important difference between <code>system.echo</code> and <code>system._echo</code> is that <code>system.echo</code> is a higher level command that can handles variables, whereas <code>system._echo</code> just takes the value verbatim.</p></li>
 <li><p>Run the command above again, but this time add the <code>-P compiled</code> argument to put the output in a separate <code>compiled</code> folder.</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- protocols/walkthrough1.yaml -P compiled/</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">npm</span> run processor -- protocols/walkthrough1.yaml -P compiled/</code></pre></div>
 <p>This will automatically create a subfolder named <code>compiled/walkthrough1</code> and it will save the file <code>compiled/walkthrough1/walkthrough1.out.json</code>. It’s important to have a separate folder for every experiment in order to properly organize measured data for each experimental run.</p></li>
 </ol>
 <p>Now you know how to run the software and write a basic protocol. Let’s continue to the next step, where we’ll see how to create a basic robot configuration file.</p>
@@ -302,61 +302,61 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>site clique: a set of sites that that permit direct movement of labware among all members of the clique. This concept is a bit tricky. A simple robot configuration might just have a single clique that includes all of its sites. But more complex configuration may need to prohibit some movements. For example, we might have sites on the left of the bench and sites on the right, which are partially blocked by equipment in the middle. If each side of the bench has its own transporter arm and there is a single site in the middle that both arms can reach, then we could define two clicks: the left clique would contain all sites on the left plus the middle site, and the right clique would contain all sites on the right plus the middle site. This would ensure that Roboliq never generates instructions to directly move a plate from the left side to the right side, but rather first navigates through the middle site.</li>
 </ul>
 <p>Now write a script to verify that we can move a plate between the two bench sites. Save this file as <code>protocols/walkthrough2a.yaml</code> or use the file <code>protocols/walkthrough2a-sample.yaml</code>.</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1
-<span class="fu">description:</span> Move plate from site P1 to P2
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1</span>
+<span class="fu">description:</span><span class="at"> Move plate from site P1 to P2</span>
 <span class="fu">objects:</span>
   <span class="fu">plate1:</span>
-    <span class="fu">type:</span> Plate
-    <span class="fu">model:</span> ourlab.model.plateModel_96well
-    <span class="fu">location:</span> ourlab.mario.site.P1
+    <span class="fu">type:</span><span class="at"> Plate</span>
+    <span class="fu">model:</span><span class="at"> ourlab.model.plateModel_96well</span>
+    <span class="fu">location:</span><span class="at"> ourlab.mario.site.P1</span>
 <span class="fu">steps:</span>
-  <span class="fu">command:</span> transporter.movePlate
-  <span class="fu">object:</span> plate1
-  <span class="fu">destination:</span> ourlab.mario.site.P2</code></pre></div>
+  <span class="fu">command:</span><span class="at"> transporter.movePlate</span>
+  <span class="fu">object:</span><span class="at"> plate1</span>
+  <span class="fu">destination:</span><span class="at"> ourlab.mario.site.P2</span></code></pre></div>
 <p>Process the script by running this command from the terminal:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- config/walkthrough2a.js protocols/walkthrough2a.yaml -P compiled/</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">npm</span> run processor -- config/walkthrough2a.js protocols/walkthrough2a.yaml -P compiled/</code></pre></div>
 <p>Or if you just want to run the sample files which are already present:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">npm</span> run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml -P compiled/</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">npm</span> run processor -- config/walkthrough2a-sample.js protocols/walkthrough2a-sample.yaml -P compiled/</code></pre></div>
 </div>
 <div id="a-bsse-protocol-for-mario" class="section level2">
 <h2><span class="header-section-number">2.3</span> A BSSE protocol for mario</h2>
 <p>Now we’ll run a protocol on the real robot (named mario). In our lab, mario has already been configured.</p>
 <p>For this example, we’ll simply dispense water into each well of a 96-well plate, seal it, and shake it. Create a new file <code>~/Desktop/Ellis/roboliq/charlotte01.yaml</code> and write a script like this:</p>
-<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span> v1                                <span class="co"># version of Roboliq being used</span>
+<div class="sourceCode"><pre class="sourceCode yaml"><code class="sourceCode yaml"><span class="fu">roboliq:</span><span class="at"> v1                                </span><span class="co"># version of Roboliq being used</span>
 <span class="co"># description of this protocol; the pipe symbol &quot;|&quot;&quot; allows for multi-line text</span>
-<span class="fu">description:</span> |
+<span class="fu">description:</span><span class="at"> |</span>
   Dispense a liquid into each well of a
   96-well plate, seal it, and shake it.
-<span class="fu">objects:</span>                                   <span class="co"># the set of materials used in this protocol</span>
-  <span class="fu">plate1:</span>                                  <span class="co"># an object named &quot;plate1&quot;</span>
-    <span class="fu">type:</span> Plate                            <span class="co"># which is a type of plate</span>
-    <span class="fu">model:</span> ourlab.model.plateModel_96_round_transparent_nunc  <span class="co"># whose model is defined in the configuration file &quot;bsse-mario.js&quot;</span>
-    <span class="fu">location:</span> ourlab.mario.site.P3         <span class="co"># which the user should place at the location &quot;P1&quot;</span>
+<span class="fu">objects:</span><span class="at">                                   </span><span class="co"># the set of materials used in this protocol</span>
+  <span class="fu">plate1:</span><span class="at">                                  </span><span class="co"># an object named &quot;plate1&quot;</span>
+    <span class="fu">type:</span><span class="at"> Plate                            </span><span class="co"># which is a type of plate</span>
+    <span class="fu">model:</span><span class="at"> ourlab.model.plateModel_96_round_transparent_nunc  </span><span class="co"># whose model is defined in the configuration file &quot;bsse-mario.js&quot;</span>
+    <span class="fu">location:</span><span class="at"> ourlab.mario.site.P3         </span><span class="co"># which the user should place at the location &quot;P1&quot;</span>
   <span class="fu">waterLabware:</span>
-    <span class="fu">type:</span> Plate
-    <span class="fu">model:</span> ourlab.model.troughModel_100ml
-    <span class="fu">location:</span> ourlab.mario.site.R6
-    <span class="fu">contents:</span> <span class="kw">[</span>Infinity l<span class="kw">,</span> water<span class="kw">]</span>
+    <span class="fu">type:</span><span class="at"> Plate</span>
+    <span class="fu">model:</span><span class="at"> ourlab.model.troughModel_100ml</span>
+    <span class="fu">location:</span><span class="at"> ourlab.mario.site.R6</span>
+    <span class="fu">contents:</span><span class="at"> </span><span class="kw">[</span>Infinity l<span class="kw">,</span> water<span class="kw">]</span>
   <span class="fu">water:</span>
-    <span class="fu">type:</span> Liquid
-    <span class="fu">wells:</span> waterLabware(A01 down D01)
+    <span class="fu">type:</span><span class="at"> Liquid</span>
+    <span class="fu">wells:</span><span class="at"> waterLabware(A01 down D01)</span>
 <span class="fu">steps:</span>
   <span class="fu">1:</span>
-    <span class="fu">command:</span> pipetter.pipette
-    <span class="fu">sources:</span> water
-    <span class="fu">destinations:</span> plate1(all)
-    <span class="fu">volumes:</span> 40 ul
-    <span class="fu">cleanBetween:</span> none
+    <span class="fu">command:</span><span class="at"> pipetter.pipette</span>
+    <span class="fu">sources:</span><span class="at"> water</span>
+    <span class="fu">destinations:</span><span class="at"> plate1(all)</span>
+    <span class="fu">volumes:</span><span class="at"> 40 ul</span>
+    <span class="fu">cleanBetween:</span><span class="at"> none</span>
   <span class="fu">2:</span>
-    <span class="fu">command:</span> sealer.sealPlate
-    <span class="fu">object:</span> plate1
+    <span class="fu">command:</span><span class="at"> sealer.sealPlate</span>
+    <span class="fu">object:</span><span class="at"> plate1</span>
   <span class="fu">3:</span>
-    <span class="fu">command:</span> shaker.shakePlate
-    <span class="fu">object:</span> plate1
+    <span class="fu">command:</span><span class="at"> shaker.shakePlate</span>
+    <span class="fu">object:</span><span class="at"> plate1</span>
     <span class="fu">program:</span>
-      <span class="fu">duration:</span> 10 seconds</code></pre></div>
+      <span class="fu">duration:</span><span class="at"> 10 seconds</span></code></pre></div>
 <p>Make sure your in the directory <code>~/Desktop/Ellis/roboliq/roboliq-processor</code>, and run the command:</p>
-<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="kw">npm</span> start -- ../protocols/charlotte01.yaml</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode sh"><code class="sourceCode bash"><span class="ex">npm</span> start -- ../protocols/charlotte01.yaml</code></pre></div>
 
 </div>
 </div>
@@ -377,7 +377,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
 <script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
 <script>
-gitbook.require(["gitbook"], function(gitbook) {
+require(["gitbook"], function(gitbook) {
 gitbook.start({
 "sharing": {
 "github": true,
@@ -398,7 +398,7 @@ gitbook.start({
 "link": null,
 "text": null
 },
-"download": ["roboliq.pdf"],
+"download": null,
 "toc": {
 "collapse": "subsection"
 }
