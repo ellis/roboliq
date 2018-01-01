@@ -1160,7 +1160,6 @@ function assignSameBy(rows, rowIndexes, otherRowIndexes, name, action, randomEng
 	}
 
 	const keys = (isObject) ? _.keys(value) : 0;
-	const table2 = _.zip.apply(_, table2);
 	for (let i = 0; i < rowIndexesSame.length; i++) {
 		const rowIndexes3 = rowIndexesSame[i];
 		// if (isSpecial) {

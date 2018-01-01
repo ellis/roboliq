@@ -12,8 +12,8 @@
  */
 
 const _ = require('lodash');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-const expect = require('roboliq-processor/dist/expect.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
+const expect = require('roboliq-processor/src/expect.js');
 const yaml = require('yamljs');
 
 /**

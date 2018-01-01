@@ -25,34 +25,26 @@
     "yamljs": "~0.2.3"
   },
   "devDependencies": {
-    "babel-cli": "^6.4.0",
-    "babel-core": "^6.4.0",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-react": "^6.3.13",
-    "babel-register": "^6.7.2",
     "ink-docstrap": "^1.3.0",
     "jsdoc": "^3.4.1",
-    "metalsmith": "^2.2.0",
     "mocha": "^2.3.4",
     "pegjs": "~0.8.0",
     "should": "^8.1.1",
     "to-fast-properties": "^1.0.2"
   },
-  "main": "dist/roboliq.js",
+  "main": "src/roboliq.js",
   "bin": {
-    "roboliq-processor": "dist/main.sh",
-    "roboliq-design": "dist/designMain.sh"
+    "roboliq-processor": "src/main.sh",
+    "roboliq-design": "src/designMain.sh"
   },
   "scripts": {
-    "prepublish": "npm i --only=dev --ignore-scripts && npm run compile && npm run jsdoc",
-    "compile": "babel-node --harmony compile.js",
-    "clean": "rm -rf dist",
-    "design": "babel-node -- src/designMain.js",
-    "test": "mocha --compilers js:babel-core/register --recursive tests/",
+    "prepublish": "npm i --only=dev --ignore-scripts && npm run jsdoc",
+    "design": "node src/designMain.js",
+    "test": "mocha --recursive tests/",
     "pegjs": "pegjs --allowed-start-rules start,startOne src/parsers/wellsParser0.pegjs",
     "jsdoc": "jsdoc -r -c jsdoc-processor.json",
-    "processor": "babel-node -- src/roboliq.js",
-    "start": "babel-node -- src/roboliq.js"
+    "processor": "node src/roboliq.js",
+    "start": "node src/roboliq.js"
   },
   "author": "Ellis Whitehead",
   "license": "GPL-3.0",

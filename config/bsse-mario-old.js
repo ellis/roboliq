@@ -1,16 +1,16 @@
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-const expect = require('roboliq-processor/dist/expect.js');
-const Evoware = require('roboliq-evoware/dist/equipment/evoware.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
+const expect = require('roboliq-processor/src/expect.js');
+const Evoware = require('roboliq-evoware/src/equipment/evoware.js');
 
 const {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} = Evoware;
 
 const Equipment = {
-	evoware: require('roboliq-evoware/dist/equipment/evoware.js'),
-	reader: require('roboliq-evoware/dist/equipment/reader-InfiniteM200Pro.js'),
-	sealer: require('roboliq-evoware/dist/equipment/sealer-Tecan.js'),
+	evoware: require('roboliq-evoware/src/equipment/evoware.js'),
+	reader: require('roboliq-evoware/src/equipment/reader-InfiniteM200Pro.js'),
+	sealer: require('roboliq-evoware/src/equipment/sealer-Tecan.js'),
 };
 
 module.exports = {

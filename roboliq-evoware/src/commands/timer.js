@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 const math = require('mathjs');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
 
 function _sleep(params, parsed, data) {
 	//console.log("timer._sleep: "+JSON.stringify(parsed, null, '\t'))

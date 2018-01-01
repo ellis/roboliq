@@ -11,7 +11,7 @@
  */
 
 const _ = require('lodash');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
 
 function getMoveRomaHomeLine(romaIndex) {
 	return getRomaMoveLine(romaIndex, 2);

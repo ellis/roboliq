@@ -12,11 +12,11 @@ const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
 const {sprintf} = require('sprintf-js');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
 const evowareHelper = require('./evowareHelper.js');
 const EvowareUtils = require('../EvowareUtils.js');
 const Tokens = require('./tokens.js');
-const wellsParser = require('roboliq-processor/dist/parsers/wellsParser.js');
+const wellsParser = require('roboliq-processor/src/parsers/wellsParser.js');
 
 function _aspirate(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);

@@ -354,7 +354,7 @@ function pipette(params, parsed, data, options={}) {
 	// Pick source well for items, if the source has multiple wells
 	// Rotate through source wells in order of max volume
 	for (const group of groups) {
-		sourceMethods.sourceMethod3(group, data, effects);
+		sourceMethods.sourceMethod3(group, data, undefined);
 	}
 
 	// Add properties `volumeBefore` and `volumeAfter` to the items.

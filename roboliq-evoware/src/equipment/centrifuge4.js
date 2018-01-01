@@ -11,9 +11,9 @@
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-const expect = require('roboliq-processor/dist/expect.js');
-const {makeEvowareFacts} = require('roboliq-evoware/dist/equipment/evoware.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
+const expect = require('roboliq-processor/src/expect.js');
+const {makeEvowareFacts} = require('roboliq-evoware/src/equipment/evoware.js');
 
 /**
  * @typedef CentrifugeParams

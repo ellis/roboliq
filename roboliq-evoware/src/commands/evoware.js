@@ -10,7 +10,7 @@
  */
 
 const _ = require('lodash');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
 const evowareHelper = require('./evowareHelper.js');
 
 function _execute(params, parsed, data) {

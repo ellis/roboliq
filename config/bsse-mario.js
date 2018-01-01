@@ -444,7 +444,7 @@ const evowareSpec = {
 	},
 };
 
-const EvowareConfigSpec = require('roboliq-evoware/dist/EvowareConfigSpec.js');
+const EvowareConfigSpec = require('roboliq-evoware/src/EvowareConfigSpec.js');
 
 //module.exports = evowareSpec;
 module.exports = EvowareConfigSpec.makeProtocol(evowareSpec);

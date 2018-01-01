@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const assert = require('assert');
 const math = require('mathjs');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
 const evowareHelper = require('./evowareHelper.js');
 
 function runtimeExitLoop(params, parsed, data) {

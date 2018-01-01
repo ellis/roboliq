@@ -13,9 +13,9 @@ const assert = require('assert');
 const math = require('mathjs');
 const Handlebars = require('handlebars');
 const path = require('path');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-const expect = require('roboliq-processor/dist/expect.js');
-const wellsParser = require('roboliq-processor/dist/parsers/wellsParser.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
+const expect = require('roboliq-processor/src/expect.js');
+const wellsParser = require('roboliq-processor/src/parsers/wellsParser.js');
 
 const {makeEvowareExecute, makeEvowareFacts} = require('./evoware.js');
 
@@ -291,20 +291,20 @@ function configure(config, equipmentName, params) {
 			}
 		},*/
 	]);
-	predicates.push(...exports.getPredicates(agent, equipment, site));
+	predicates.push(...moduleExports.getPredicates(agent, equipment, site));
 
-	// console.log({planHandlers: exports.getPlanHandlers(agent, equipment, site)})
+	// console.log({planHandlers: moduleExports.getPlanHandlers(agent, equipment, site)})
 	const protocol = {
-		schemas: exports.getSchemas(agent, equipment),
+		schemas: moduleExports.getSchemas(agent, equipment),
 		objects,
 		predicates,
-		planHandlers: exports.getPlanHandlers(agent, equipment, site),
-		commandHandlers: exports.getCommandHandlers(agent, equipment),
+		planHandlers: moduleExports.getPlanHandlers(agent, equipment, site),
+		commandHandlers: moduleExports.getCommandHandlers(agent, equipment),
 	};
 	return protocol;
 }
 
-const exports = {
+const moduleExports = {
 	getSchemas: (agentName, equipmentName) => ({
 		[`equipment.close|${agentName}|${equipmentName}`]: {
 			properties: {
@@ -524,4 +524,4 @@ const exports = {
 	})
 };
 
-module.exports = _.merge({configure}, exports);
+module.exports = _.merge({configure}, moduleExports);

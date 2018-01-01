@@ -1,7 +1,7 @@
 'use babel';
 
 // const Design = require('roboliq-processor/src/design.js');
-// const Temp = require('roboliq-processor/dist/stripUndefined.js');
+// const Temp = require('roboliq-processor/stripUndefined.js');
 // const mathjs = require('mathjs');
 
 export default class DummyViewElement {

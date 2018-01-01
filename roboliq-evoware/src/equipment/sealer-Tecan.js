@@ -5,7 +5,7 @@
  */
 
 const _ = require('lodash');
-const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const commandHelper = require('roboliq-processor/src/commandHelper.js');
 
 function configure(config, equipmentName, params) {
 	const agent = config.getAgentName();
