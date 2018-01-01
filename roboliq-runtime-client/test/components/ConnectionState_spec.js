@@ -1,10 +1,10 @@
-import React from 'react';
+const React = require('react');
 import {
   renderIntoDocument,
   findRenderedDOMComponentWithTag
 } from 'react-addons-test-utils';
-import {expect} from 'chai';
-import {ConnectionState} from '../../src/components/ConnectionState';
+const {expect} = require('chai');
+const {ConnectionState} = require('../../src/components/ConnectionState');
 
 describe('ConnectionState', () => {
 

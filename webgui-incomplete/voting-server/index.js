@@ -1,5 +1,5 @@
-import makeStore from './src/store';
-import startServer from './src/server';
+const makeStore = require('./src/store');
+const startServer = require('./src/server');
 
 export const store = makeStore();
 startServer(store);

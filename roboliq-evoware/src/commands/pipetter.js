@@ -8,15 +8,15 @@
  * Handles pipetter instructions.
  * @module
  */
-import _ from 'lodash';
-import assert from 'assert';
-import math from 'mathjs';
-import {sprintf} from 'sprintf-js';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const {sprintf} = require('sprintf-js');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 import * as evowareHelper from './evowareHelper.js';
 import * as EvowareUtils from '../EvowareUtils.js';
 import * as Tokens from './tokens.js';
-import wellsParser from 'roboliq-processor/dist/parsers/wellsParser.js';
+const wellsParser = require('roboliq-processor/dist/parsers/wellsParser.js');
 
 export function _aspirate(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);

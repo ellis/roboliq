@@ -1,11 +1,11 @@
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 // import Immutable, {Map, fromJS} from 'immutable';
-import math from 'mathjs';
-import Random from 'random-js';
-//import yaml from 'yamljs';
+const math = require('mathjs');
+const Random = require('random-js');
+//const yaml = require('yamljs');
 
-//import {locationRowColToText} from './parsers/wellsParser.js';
+//const {locationRowColToText} = require('./parsers/wellsParser.js');
 // FIXME: HACK: this function is included here temporarily, to make usage in react component easier for the moment
 function locationRowColToText(row, col) {
 	var colText = col.toString();

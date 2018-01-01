@@ -11,10 +11,10 @@
  * @module
  */
 
-import _ from 'lodash';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
-import expect from 'roboliq-processor/dist/expect.js';
-import yaml from 'yamljs';
+const _ = require('lodash');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const expect = require('roboliq-processor/dist/expect.js');
+const yaml = require('yamljs');
 
 /**
  * Create an instruction for Evoware execute an external command.

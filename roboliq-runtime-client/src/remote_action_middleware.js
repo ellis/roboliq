@@ -1,4 +1,4 @@
-import objectAssign from 'object-assign';
+const objectAssign = require('object-assign');
 
 export default socket => store => next => action => {
   if (action.meta && action.meta.remote) {

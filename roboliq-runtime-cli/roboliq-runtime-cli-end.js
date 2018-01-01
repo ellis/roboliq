@@ -1,5 +1,5 @@
-var opts = require('commander');
-var sendPacket = require('./roboliq-runtime-sendPacket.js');
+const opts = require('commander');
+const sendPacket = require('./roboliq-runtime-sendPacket.js');
 
 opts
 	.version("1.0")

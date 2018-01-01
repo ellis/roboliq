@@ -4,12 +4,12 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import fs from 'fs';
-import iconv from 'iconv-lite';
-import jsonfile from 'jsonfile';
-import path from 'path';
-import yaml from 'yamljs';
+const _ = require('lodash');
+const fs = require('fs');
+const iconv = require('iconv-lite');
+const jsonfile = require('jsonfile');
+const path = require('path');
+const yaml = require('yamljs');
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
 import * as EvowareCompiler from './EvowareCompiler.js';
 import * as EvowareTableFile from './EvowareTableFile.js';

@@ -8,8 +8,8 @@
  * Helper functions for evoware command handlers.
  * @module
  */
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 
 /**
  * Create the Evoware token to execute an external command.

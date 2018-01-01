@@ -4,10 +4,10 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import assert from 'assert';
-import math from 'mathjs';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 import * as evowareHelper from './evowareHelper.js';
 
 export function runtimeExitLoop(params, parsed, data) {

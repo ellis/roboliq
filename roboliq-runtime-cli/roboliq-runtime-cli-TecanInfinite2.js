@@ -1,15 +1,15 @@
 // console.log("C")
-import _ from 'lodash';
-var fs = require('fs');
-var opts = require('commander');
-import mkdirp from 'mkdirp';
-var moment = require('moment');
-var path = require('path');
-// var sendPacket = require('./roboliq-runtime-sendPacket.js');
+const _ = require('lodash');
+const fs = require('fs');
+const opts = require('commander');
+const mkdirp = require('mkdirp');
+const moment = require('moment');
+const path = require('path');
+// const sendPacket = require('./roboliq-runtime-sendPacket.js');
 // console.log("D")
-import processXml from './src/formats/TecanInfinite.js';
-import designHelper from './src/designHelper.js';
-var measurementHelpers = require('./src/measurementHelpers.js');
+const processXml = require('./src/formats/TecanInfinite.js');
+const designHelper = require('./src/designHelper.js');
+const measurementHelpers = require('./src/measurementHelpers.js');
 // console.log("E")
 
 opts

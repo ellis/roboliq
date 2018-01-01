@@ -1,6 +1,6 @@
-var fs = require('fs');
-var path = require('path');
-var socket = require('socket.io-client')('http://localhost:12346');
+const fs = require('fs');
+const path = require('path');
+const socket = require('socket.io-client')('http://localhost:12346');
 
 function formatLocalDate() {
 	var now = new Date(),

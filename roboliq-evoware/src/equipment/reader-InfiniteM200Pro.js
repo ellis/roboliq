@@ -8,14 +8,14 @@
  * Module for the Tecan InfiniteM200 reader.
  * @module
  */
-import _ from 'lodash';
-import assert from 'assert';
-import math from 'mathjs';
-import Handlebars from 'handlebars';
-import path from 'path';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
-import expect from 'roboliq-processor/dist/expect.js';
-import wellsParser from 'roboliq-processor/dist/parsers/wellsParser.js';
+const _ = require('lodash');
+const assert = require('assert');
+const math = require('mathjs');
+const Handlebars = require('handlebars');
+const path = require('path');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
+const expect = require('roboliq-processor/dist/expect.js');
+const wellsParser = require('roboliq-processor/dist/parsers/wellsParser.js');
 
 import {makeEvowareExecute, makeEvowareFacts} from './evoware.js';
 

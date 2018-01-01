@@ -1,7 +1,7 @@
-import assert from 'assert';
-import makeStore from './src/store';
-import {startServerRuntime} from './src/serverRuntime.js';
-import {startServerUi} from './src/serverUi.js';
+const assert = require('assert');
+const makeStore = require('./src/store');
+const {startServerRuntime} = require('./src/serverRuntime.js');
+const {startServerUi} = require('./src/serverUi.js');
 
 export const store = makeStore();
 startServerRuntime(store);

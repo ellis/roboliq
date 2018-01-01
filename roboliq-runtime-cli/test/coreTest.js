@@ -1,9 +1,9 @@
 import {List, Map, fromJS} from 'immutable';
-import {expect} from 'chai';
+const {expect} = require('chai');
 
 import {setProtocol, setStepTime} from '../src/core2.js';
 
-import {protocol1} from './protocolExamples.js';
+const {protocol1} = require('./protocolExamples.js');
 
 describe('core logic', () => {
 

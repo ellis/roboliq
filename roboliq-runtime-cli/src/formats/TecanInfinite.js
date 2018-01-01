@@ -1,8 +1,8 @@
-import _ from 'lodash';
-import assert from 'assert';
-import fs from 'fs';
-import moment from 'moment';
-import {XmlDocument} from 'xmldoc';
+const _ = require('lodash');
+const assert = require('assert');
+const fs = require('fs');
+const moment = require('moment');
+const {XmlDocument} = require('xmldoc');
 
 /**
  * Read fluorescence or absorbance data from Infinite M200 XML file

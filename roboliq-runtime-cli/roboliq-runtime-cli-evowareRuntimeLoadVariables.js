@@ -1,12 +1,12 @@
-var child_process = require('child_process');
-var fs = require('fs');
-var opts = require('commander');
-var mkdirp = require('mkdirp');
-var moment = require('moment');
-var path = require('path');
-var get = require('lodash/get');
-var trim = require('lodash/trim');
-// var sendPacket = require('./roboliq-runtime-sendPacket.js');
+const child_process = require('child_process');
+const fs = require('fs');
+const opts = require('commander');
+const mkdirp = require('mkdirp');
+const moment = require('moment');
+const path = require('path');
+const get = require('lodash/get');
+const trim = require('lodash/trim');
+// const sendPacket = require('./roboliq-runtime-sendPacket.js');
 
 opts
 	.version("1.0")
@@ -23,7 +23,7 @@ const runId = trim(fs.readFileSync(runFile));
 const runDir = path.join(scriptDir, runId);
 mkdirp.sync(runDir);
 
-var protocol = require(scriptFile);
+const protocol = require(scriptFile);
 var step = get(protocol.steps, stepId);
 
 console.log(step)

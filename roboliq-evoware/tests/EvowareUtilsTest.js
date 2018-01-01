@@ -4,8 +4,8 @@
  * @license GPL-3.0
  */
 
-var _ = require('lodash');
-var should = require('should');
+const _ = require('lodash');
+const should = require('should');
 import * as EvowareUtils from '../src/EvowareUtils.js';
 
 describe("EvowareUtils", function() {

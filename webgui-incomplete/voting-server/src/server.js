@@ -1,4 +1,4 @@
-import Server from 'socket.io';
+const Server = require('socket.io');
 
 export default function startServer() {
   const io = new Server().attach(8090);

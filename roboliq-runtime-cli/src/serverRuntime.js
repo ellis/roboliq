@@ -1,5 +1,5 @@
-import fs from 'fs';
-import Server from 'socket.io';
+const fs = require('fs');
+const Server = require('socket.io');
 
 export function startServerRuntime(store) {
 	const io = new Server().attach(12346);

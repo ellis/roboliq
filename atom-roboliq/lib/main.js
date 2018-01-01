@@ -1,7 +1,7 @@
 'use babel';
 
 import { CompositeDisposable } from 'atom';
-import DummyViewElement from './dummyViewElement.js';
+const DummyViewElement = require('./dummyViewElement.js');
 const mathjs = require('mathjs');
 
 // This is your main singleton.

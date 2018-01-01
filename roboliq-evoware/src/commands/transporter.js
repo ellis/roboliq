@@ -10,8 +10,8 @@
  * @module
  */
 
-import _ from 'lodash';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+const _ = require('lodash');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 
 function getMoveRomaHomeLine(romaIndex) {
 	return getRomaMoveLine(romaIndex, 2);

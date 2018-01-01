@@ -1,24 +1,24 @@
 'use strict';
 
-var child_process = require('child_process');
-var fs = require('fs');
-var opts = require('commander');
-var mkdirp = require('mkdirp');
-var moment = require('moment');
-var path = require('path');
-var _defaults = require('lodash/defaults');
-var _drop = require('lodash/drop');
-var _forEach = require('lodash/forEach');
-var _get = require('lodash/get');
-var _isEmpty = require('lodash/isEmpty');
-var _isNaN = require('lodash/isNaN');
-var _merge = require('lodash/merge');
-var _omit = require('lodash/omit');
-var _trim = require('lodash/trim');
-// var sendPacket = require('./roboliq-runtime-sendPacket.js');
+const child_process = require('child_process');
+const fs = require('fs');
+const opts = require('commander');
+const mkdirp = require('mkdirp');
+const moment = require('moment');
+const path = require('path');
+const _defaults = require('lodash/defaults');
+const _drop = require('lodash/drop');
+const _forEach = require('lodash/forEach');
+const _get = require('lodash/get');
+const _isEmpty = require('lodash/isEmpty');
+const _isNaN = require('lodash/isNaN');
+const _merge = require('lodash/merge');
+const _omit = require('lodash/omit');
+const _trim = require('lodash/trim');
+// const sendPacket = require('./roboliq-runtime-sendPacket.js');
 
-var designHelper = require('./src/designHelper.js');
-var measurementHelpers = require('./src/measurementHelpers.js');
+const designHelper = require('./src/designHelper.js');
+const measurementHelpers = require('./src/measurementHelpers.js');
 
 opts
 	.version("1.0")

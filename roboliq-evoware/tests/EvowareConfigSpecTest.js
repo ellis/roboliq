@@ -4,8 +4,8 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import should from 'should';
+const _ = require('lodash');
+const should = require('should');
 import * as EvowareConfigSpec from '../src/EvowareConfigSpec.js';
 // const Validator = require('jsonschema').Validator;
 // const YAML = require('yamljs');

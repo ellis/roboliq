@@ -1,5 +1,5 @@
 import {List, Map} from 'immutable';
-import {expect} from 'chai';
+const {expect} = require('chai');
 
 import {next, setEntries, vote} from '../src/core';
 

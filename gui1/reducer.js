@@ -1,11 +1,11 @@
 'use babel'
 
-import _ from 'lodash';
-import assert from 'assert';
+const _ = require('lodash');
+const assert = require('assert');
 import {Map, List, fromJS, toJS} from 'immutable';
 
-// import constants from './views/constants.jsx';
-// import {scoreProduct} from '../amazon/scoreFuncs.js';
+// const constants = require('./views/constants.jsx');
+// const {scoreProduct} = require('../amazon/scoreFuncs.js');
 
 const state0 = fromJS({
 	filenames: {},

@@ -10,12 +10,12 @@
  * @module
  */
 
-import _ from 'lodash';
-import assert from 'assert';
-//import {sprintf} from 'sprintf-js';
+const _ = require('lodash');
+const assert = require('assert');
+//const {sprintf} = require('sprintf-js');
 import * as EvowareUtils from './EvowareUtils.js';
 import * as EvowareCarrierFile from './EvowareCarrierFile.js';
-import M from './Medley.js';
+const M = require('./Medley.js');
 
 /**
  * Represent a hotel object in an Evoware table file

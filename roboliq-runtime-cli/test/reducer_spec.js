@@ -1,9 +1,9 @@
 import {Map, fromJS} from 'immutable';
-import {expect} from 'chai';
+const {expect} = require('chai');
 
-import reducer from '../src/reducer';
+const reducer = require('../src/reducer');
 
-import {protocol1} from './protocolExamples.js';
+const {protocol1} = require('./protocolExamples.js');
 
 describe('reducer', () => {
 

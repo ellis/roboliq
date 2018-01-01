@@ -9,9 +9,9 @@
  * @module
  */
 
-import _ from 'lodash';
-import fs from 'fs';
-import iconv from 'iconv-lite';
+const _ = require('lodash');
+const fs = require('fs');
+const iconv = require('iconv-lite');
 
 /**
  * Encode an integer as an ASCII character.

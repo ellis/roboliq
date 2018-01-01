@@ -1,9 +1,9 @@
-var fs = require('fs');
-var opts = require('commander');
-var mkdirp = require('mkdirp');
-var moment = require('moment');
-var path = require('path');
-// var sendPacket = require('./roboliq-runtime-sendPacket.js');
+const fs = require('fs');
+const opts = require('commander');
+const mkdirp = require('mkdirp');
+const moment = require('moment');
+const path = require('path');
+// const sendPacket = require('./roboliq-runtime-sendPacket.js');
 
 opts
 	.version("1.0")

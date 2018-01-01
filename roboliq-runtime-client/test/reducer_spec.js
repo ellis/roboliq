@@ -1,7 +1,7 @@
 import {List, Map, fromJS} from 'immutable';
-import {expect} from 'chai';
+const {expect} = require('chai');
 
-import reducer from '../src/reducer';
+const reducer = require('../src/reducer');
 
 describe('reducer', () => {
 

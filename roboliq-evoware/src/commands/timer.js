@@ -4,9 +4,9 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import math from 'mathjs';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+const _ = require('lodash');
+const math = require('mathjs');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 
 export function _sleep(params, parsed, data) {
 	//console.log("timer._sleep: "+JSON.stringify(parsed, null, '\t'))

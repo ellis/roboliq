@@ -1,4 +1,4 @@
-import uuid from 'uuid';
+const uuid = require('uuid');
 
 export default function getClientId() {
   let id = localStorage.getItem('clientId');

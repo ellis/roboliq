@@ -1,6 +1,6 @@
-var app = require('express')();
-var http = require('http').Server(app);
-import Server from 'socket.io';
+const app = require('express')();
+const http = require('http').Server(app);
+const Server = require('socket.io');
 
 export function startServerUi(store) {
 	app.get('/', function(req, res){

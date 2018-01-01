@@ -9,11 +9,11 @@
  * @module
  */
 
-import _ from 'lodash';
-import assert from 'assert';
-//import fs from 'fs';
-//import iconv from 'iconv-lite';
-import {sprintf} from 'sprintf-js';
+const _ = require('lodash');
+const assert = require('assert');
+//const fs = require('fs');
+//const iconv = require('iconv-lite');
+const {sprintf} = require('sprintf-js');
 import * as EvowareUtils from './EvowareUtils.js';
 
 

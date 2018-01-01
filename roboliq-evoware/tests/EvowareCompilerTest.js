@@ -4,13 +4,13 @@
  * @license GPL-3.0
  */
 
-import _ from 'lodash';
-import should from 'should';
-import jsonfile from 'jsonfile';
+const _ = require('lodash');
+const should = require('should');
+const jsonfile = require('jsonfile');
 import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
 import * as EvowareCompiler from '../src/EvowareCompiler.js';
 import * as EvowareTableFile from '../src/EvowareTableFile.js';
-import schemas from '../../roboliq-processor/tests/schemas.js';
+const schemas = require('../../roboliq-processor/tests/schemas.js');
 
 const protocol0 = {
 	roboliq: "v1",

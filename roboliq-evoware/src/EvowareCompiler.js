@@ -9,11 +9,11 @@
  * an Evoware script.
  * @module
  */
-import _ from 'lodash';
-import naturalSort from 'javascript-natural-sort';
-import path from 'path';
-import M from './Medley.js';
-import commandHelper from 'roboliq-processor/dist/commandHelper.js';
+const _ = require('lodash');
+const naturalSort = require('javascript-natural-sort');
+const path = require('path');
+const M = require('./Medley.js');
+const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 import * as EvowareTableFile from './EvowareTableFile.js';
 import * as evowareHelper from './commands/evowareHelper.js';
 import * as evoware from './commands/evoware.js';

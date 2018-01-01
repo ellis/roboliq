@@ -1,6 +1,6 @@
 import {List, OrderedMap, Map, fromJS} from 'immutable';
-import {flattenDesign} from './design.js';
-import YAML from 'js-yaml';
+const {flattenDesign} = require('./design.js');
+const YAML = require('js-yaml');
 
 function setState(state, newState) {
 	return state.merge(newState);

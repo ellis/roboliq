@@ -1,5 +1,5 @@
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
+const webpack = require('webpack');
+const autoprefixer = require('autoprefixer');
 
 module.exports = {
   entry: [
