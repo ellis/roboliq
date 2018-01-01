@@ -8,7 +8,7 @@ const _ = require('lodash');
 const math = require('mathjs');
 const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 
-export function _sleep(params, parsed, data) {
+function _sleep(params, parsed, data) {
 	//console.log("timer._sleep: "+JSON.stringify(parsed, null, '\t'))
 	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
 	const seconds = math.round(parsed.value.duration.toNumber('s'));
@@ -18,13 +18,13 @@ export function _sleep(params, parsed, data) {
 	];
 }
 
-export function _start(params, parsed, data) {
+function _start(params, parsed, data) {
 	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
 	const line = `StartTimer("${id}");`;
 	return [{ line }];
 }
 
-export function _wait(params, parsed, data) {
+function _wait(params, parsed, data) {
 	//console.log(JSON.stringify(parsed, null, '\t'))
 	const id = commandHelper.lookupPath(["@equipment", "evowareId"], params, data);
 	const seconds = math.round(parsed.value.till.toNumber('s'));
@@ -34,3 +34,9 @@ export function _wait(params, parsed, data) {
 	//	result.push({line: `StopTimer("${id}");`});
 	return result;
 }
+
+module.exports = {
+  _sleep,
+  _start,
+  _wait,
+};

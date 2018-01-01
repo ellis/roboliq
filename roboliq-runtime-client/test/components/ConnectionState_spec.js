@@ -1,8 +1,8 @@
 const React = require('react');
-import {
+const {
   renderIntoDocument,
   findRenderedDOMComponentWithTag
-} from 'react-addons-test-utils';
+} = require('react-addons-test-utils');
 const {expect} = require('chai');
 const {ConnectionState} = require('../../src/components/ConnectionState');
 

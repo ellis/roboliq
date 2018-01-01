@@ -1,4 +1,4 @@
-export const protocol1 = {
+const protocol1 = {
 	roboliq: "v1",
 	steps: {
 		1: {
@@ -19,3 +19,5 @@ export const protocol1 = {
 		}
 	}
 };
+
+module.exports = protocol1;

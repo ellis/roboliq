@@ -46,7 +46,7 @@ function getRomaMoveLine(romaIndex, action) {
  * @param  {object} data - protocol data
  * @return {array} an array of objects that describe output, effects, and table effects
  */
-export function _moveLidFromContainerToSite(params, parsed, data) {
+function _moveLidFromContainerToSite(params, parsed, data) {
 	// console.log("_moveLidFromContainerToSite: "+JSON.stringify(parsed, null, '\t'));
 	const params2 = {
 		agent: params.agent,
@@ -74,7 +74,7 @@ export function _moveLidFromContainerToSite(params, parsed, data) {
  * @param  {object} data - protocol data
  * @return {array} an array of objects that describe output, effects, and table effects
  */
-export function _moveLidFromSiteToContainer(params, parsed, data) {
+function _moveLidFromSiteToContainer(params, parsed, data) {
 	// console.log("_moveLidFromContainerToSite: "+JSON.stringify(parsed, null, '\t'));
 	const params2 = {
 		agent: params.agent,
@@ -107,7 +107,7 @@ export function _moveLidFromSiteToContainer(params, parsed, data) {
  * @param {string} [lidHandling0.destination] - the site where the lid should be after the transfer
  * @return {array} an array of objects that describe output, effects, and table effects
  */
-export function _movePlate(params, parsed, data, lidHandling0) {
+function _movePlate(params, parsed, data, lidHandling0) {
 	// console.log("_movePlate: "+JSON.stringify(parsed, null, '\t'));
 	// romaIndex: "(@equipment).evowareRoma: integer"
 	const values = commandHelper.lookupPaths({
@@ -214,7 +214,7 @@ export function _movePlate(params, parsed, data, lidHandling0) {
  * @param  {object} data - protocol data
  * @return {array} an array of objects that describe output, effects, and table effects
  */
-export function moveLastRomaHome(data) {
+function moveLastRomaHome(data) {
 	const romaIndexPrev = _.get(data.objects, ["EVOWARE", "romaIndexPrev"]);
 	if (romaIndexPrev) {
 		return [{
@@ -225,3 +225,10 @@ export function moveLastRomaHome(data) {
 		return [];
 	}
 }
+
+module.exports = {
+  _moveLidFromContainerToSite,
+  _moveLidFromSiteToContainer,
+  _movePlate,
+  moveLastRomaHome,
+};

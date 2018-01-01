@@ -1,4 +1,4 @@
-import {List, Map, fromJS} from 'immutable';
+const {List, Map, fromJS} = require('immutable');
 const {expect} = require('chai');
 
 const reducer = require('../src/reducer');

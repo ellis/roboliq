@@ -6,8 +6,8 @@
 
 const _ = require('lodash');
 const should = require('should');
-import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
-import * as EvowareTableFile from '../src/EvowareTableFile.js';
+const EvowareCarrierFile = require('../src/EvowareCarrierFile.js');
+const EvowareTableFile = require('../src/EvowareTableFile.js');
 
 const table1 = {
 	"System": {

@@ -10,9 +10,9 @@ const iconv = require('iconv-lite');
 const jsonfile = require('jsonfile');
 const path = require('path');
 const yaml = require('yamljs');
-import * as EvowareCarrierFile from './EvowareCarrierFile.js';
-import * as EvowareCompiler from './EvowareCompiler.js';
-import * as EvowareTableFile from './EvowareTableFile.js';
+const EvowareCarrierFile = require('./EvowareCarrierFile.js');
+const EvowareCompiler = require('./EvowareCompiler.js');
+const EvowareTableFile = require('./EvowareTableFile.js');
 
 const version = "v1";
 

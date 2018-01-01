@@ -1,6 +1,6 @@
 'use babel';
 
-import { CompositeDisposable } from 'atom';
+const { CompositeDisposable } = require('atom');
 const DummyViewElement = require('./dummyViewElement.js');
 const mathjs = require('mathjs');
 

@@ -3,7 +3,7 @@ const makeStore = require('./src/store');
 const {startServerRuntime} = require('./src/serverRuntime.js');
 const {startServerUi} = require('./src/serverUi.js');
 
-export const store = makeStore();
+const store = makeStore();
 startServerRuntime(store);
 startServerUi(store);
 
@@ -15,3 +15,7 @@ store.dispatch({
   type: "setProtocol",
   protocol: protocol || {}
 });
+
+module.exports = {
+  store,
+};

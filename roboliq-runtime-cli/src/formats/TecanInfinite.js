@@ -9,7 +9,7 @@ const {XmlDocument} = require('xmldoc');
  * @param  {string} filename - Filename of XML file to loa
  * @return {array} array of objects representing a data table of the measurements.
  */
-export default function processXml(filename) {
+default function processXml(filename) {
 	const content = fs.readFileSync(filename);
 	// console.log("content:"); console.log(content)
 	const doc = new XmlDocument(content);
@@ -125,3 +125,7 @@ loadInfiniteM200Xml = function(filename, plateName = "", ...) {
   dfMeasurement
 }
 */
+
+module.exports = {
+  function,
+};

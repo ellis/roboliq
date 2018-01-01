@@ -1,6 +1,5 @@
 'use babel';
 
-// import Design from '';
 // const Design = require('roboliq-processor/src/design.js');
 // const Temp = require('roboliq-processor/dist/stripUndefined.js');
 // const mathjs = require('mathjs');

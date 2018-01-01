@@ -1,7 +1,7 @@
-import {setEntries, INITIAL_STATE} from './core';
-import {setProtocol, setStepTime} from './core2.js';
+const {setEntries, INITIAL_STATE} = require('./core');
+const {setProtocol, setStepTime} = require('./core2.js');
 
-export default function reducer(state = INITIAL_STATE, action) {
+default function reducer(state = INITIAL_STATE, action) {
 	switch (action.type) {
 	// case "load":
 	// 	return load()
@@ -14,3 +14,7 @@ export default function reducer(state = INITIAL_STATE, action) {
 	}
 	return state;
 }
+
+module.exports = {
+  function,
+};

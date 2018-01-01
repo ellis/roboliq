@@ -1,4 +1,4 @@
-import {List, Map} from 'immutable';
+const {List, Map} = require('immutable');
 
 function setConnectionState(state, connectionState, connected) {
   return state.set('connection', Map({

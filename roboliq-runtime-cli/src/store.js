@@ -1,6 +1,10 @@
 const {createStore} = require('redux');
 const reducer = require('./reducer');
 
-export default function makeStore() {
+default function makeStore() {
   return createStore(reducer);
 }
+
+module.exports = {
+  function,
+};

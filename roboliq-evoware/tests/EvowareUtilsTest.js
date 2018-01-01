@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 const should = require('should');
-import * as EvowareUtils from '../src/EvowareUtils.js';
+const EvowareUtils = require('../src/EvowareUtils.js');
 
 describe("EvowareUtils", function() {
 	describe("parseEncodedIndexes", function() {

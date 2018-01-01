@@ -1,4 +1,4 @@
-import {Map, fromJS} from 'immutable';
+const {Map, fromJS} = require('immutable');
 const {expect} = require('chai');
 
 const makeStore = require('../src/store');

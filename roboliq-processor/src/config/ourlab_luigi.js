@@ -9,7 +9,7 @@ const assert = require('assert');
 const math = require('mathjs');
 const commandHelper = require('../commandHelper.js');
 const expect = require('../expect.js');
-import {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} from '../evoware/equipment/evoware.js';
+const {makeEvowareFacts, makeSiteModelPredicates, makeTransporterPredicates} = require('../evoware/equipment/evoware.js');
 
 const Equipment = {
 	evoware: require('../evoware/equipment/evoware.js'),

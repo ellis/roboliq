@@ -8,7 +8,7 @@ const _ = require('lodash');
 const assert = require('assert');
 const yaml = require('yamljs');
 const commandHelper = require('../commandHelper.js');
-import * as Design from '../design.js';
+const Design = require('../design.js');
 const expect = require('../expect.js');
 const misc = require('../misc.js');
 

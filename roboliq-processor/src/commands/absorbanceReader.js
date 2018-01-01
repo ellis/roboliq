@@ -20,7 +20,7 @@ const Design = require('../design.js');
 const expect = require('../expect.js');
 const {mergeR} = require('../mergeR.js');
 const misc = require('../misc.js');
-import * as simulatedHelpers from './simulatedHelpers.js';
+const simulatedHelpers = require('./simulatedHelpers.js');
 const wellsParser = require('../parsers/wellsParser.js');
 
 

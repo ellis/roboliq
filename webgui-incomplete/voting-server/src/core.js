@@ -1,4 +1,4 @@
-import {List, Map} from 'immutable';
+const {List, Map} = require('immutable');
 
 export const INITIAL_STATE = Map();
 

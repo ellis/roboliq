@@ -19,7 +19,7 @@ const assert = require('assert');
  * @param  {string} exitCodeVariableName - optional name of
  * @return {string} a string representing an Evoware 'Execute' token.
  */
-export function createExecuteLine(path, args, wait, exitCodeVariableName = "") {
+function createExecuteLine(path, args, wait, exitCodeVariableName = "") {
 	const flag1 = ((wait) ? 2 : 0) + (_.isEmpty(exitCodeVariableName) ? 0 : 4);
 	return `Execute("${path} ${args.join(" ")}",${flag1},"${exitCodeVariableName}",2);`;
 }
@@ -31,7 +31,7 @@ export function createExecuteLine(path, args, wait, exitCodeVariableName = "") {
  * @param  {string} value - optional value of the variable
  * @return {string} a string representing an Evoware 'FACTS' token.
  */
-export function createFactsLine(equipment, variableName, value = "") {
+function createFactsLine(equipment, variableName, value = "") {
 	const l = [
 		`"${equipment}"`,
 		`"${variableName}"`,
@@ -50,7 +50,7 @@ export function createFactsLine(equipment, variableName, value = "") {
  * @param  {string} target - target to jump to: an Evoware "Comment" token
  * @return {string} - line for an "If" token
  */
-export function createIfLine(variable, test, value, target) {
+function createIfLine(variable, test, value, target) {
 	const cmps = ["==", "!-", ">", "<"];
 	const cmp = cmps.indexOf(test);
 	assert(cmp >= 0, `Unknown test: ${test}`);
@@ -62,7 +62,7 @@ export function createIfLine(variable, test, value, target) {
  * @param  {string} path - path to the script to start
  * @return {string} - line for a "StartScript" token
  */
-export function createStartScriptLine(path) {
+function createStartScriptLine(path) {
 	return `StartScript("${path}");`;
 }
 
@@ -72,7 +72,7 @@ export function createStartScriptLine(path) {
  * @param  {numeric} beep - 0: none, 1: beep once, 2: beep three times, 3: beep every 3 seconds
  * @param  {numeric} autoclose - number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)
  */
-export function createUserPromptLine(text, beep = 0, autoclose = -1) {
+function createUserPromptLine(text, beep = 0, autoclose = -1) {
 	return `UserPrompt("${text}",${beep},${autoclose});`;
 }
 
@@ -82,7 +82,7 @@ export function createUserPromptLine(text, beep = 0, autoclose = -1) {
  * @param  {numeric} beep - 0: none, 1: beep once, 2: beep three times, 3: beep every 3 seconds
  * @param  {numeric} autoclose - number of second to leave the prompt open before autoclosing it and continuing operation (-1 means no autoclose)
  */
-export function createVariableLine(name, value) {
+function createVariableLine(name, value) {
 	const min = "1.000000";
 	const max = "10.000000";
 	return `Variable(${name},"${value}",0,"",0,${min},${max},${(_.isNumber(value) ? 0 : 1)},2,0,0);`;
@@ -93,7 +93,7 @@ export function createVariableLine(name, value) {
  * @param  {string} s - any input string
  * @return {string} string with outer double-quotes.
  */
-export function quote(s) {
+function quote(s) {
 	return `"${stripQuotes(s)}"`;
 }
 
@@ -102,7 +102,18 @@ export function quote(s) {
  * @param  {string} s - a string, possible with outer double-quotes.
  * @return {string} string with outer double-quotes removed.
  */
-export function stripQuotes(s) {
+function stripQuotes(s) {
 	return (_.startsWith(s, '"') && _.endsWith(s, '"'))
 		? s.substring(1, s.length - 1) : s;
 }
+
+module.exports = {
+  createExecuteLine,
+  createFactsLine,
+  createIfLine,
+  createStartScriptLine,
+  createUserPromptLine,
+  createVariableLine,
+  quote,
+  stripQuotes,
+};

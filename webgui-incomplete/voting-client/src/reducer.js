@@ -1,4 +1,4 @@
-import {List, OrderedMap, Map, fromJS} from 'immutable';
+const {List, OrderedMap, Map, fromJS} = require('immutable');
 const {flattenDesign} = require('./design.js');
 const YAML = require('js-yaml');
 

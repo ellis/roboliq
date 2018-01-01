@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 const assert = require('assert');
-import * as WellContents from '../src/WellContents.js';
+const WellContents = require('../src/WellContents.js');
 
 describe('WellContents', function() {
 	describe('getContentsAndName', function () {

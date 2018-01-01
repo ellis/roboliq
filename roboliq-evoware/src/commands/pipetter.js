@@ -13,33 +13,33 @@ const assert = require('assert');
 const math = require('mathjs');
 const {sprintf} = require('sprintf-js');
 const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-import * as evowareHelper from './evowareHelper.js';
-import * as EvowareUtils from '../EvowareUtils.js';
-import * as Tokens from './tokens.js';
+const evowareHelper = require('./evowareHelper.js');
+const EvowareUtils = require('../EvowareUtils.js');
+const Tokens = require('./tokens.js');
 const wellsParser = require('roboliq-processor/dist/parsers/wellsParser.js');
 
-export function _aspirate(params, parsed, data) {
+function _aspirate(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
 
-export function _dispense(params, parsed, data) {
+function _dispense(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
 
-export function _measureVolume(params, parsed, data) {
+function _measureVolume(params, parsed, data) {
 	// console.log("measureVolume: "+JSON.stringify(parsed, null, '\t'))
 	return handlePipetterSpirate(parsed, data, {well: "Detect_Liquid"});
 }
 
-export function _mix(params, parsed, data) {
+function _mix(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data, {well: "Mix"});
 }
 
-export function _pipette(params, parsed, data) {
+function _pipette(params, parsed, data) {
 	return handlePipetterSpirate(parsed, data);
 }
 
-export function _washTips(params, parsed, data) {
+function _washTips(params, parsed, data) {
 	//console.log("handleWashProgram: "+JSON.stringify(parsed, null, '\t'))
 
 	function handleScript(filename) {
@@ -549,3 +549,12 @@ function encodeWells(tuples, propertyName) {
 	const sPlateMask = sprintf("%02X%02X", labwareModel.columns, labwareModel.rows) + sWellMask;
 	return sPlateMask;
 }
+
+module.exports = {
+  _aspirate,
+  _dispense,
+  _measureVolume,
+  _mix,
+  _pipette,
+  _washTips,
+};

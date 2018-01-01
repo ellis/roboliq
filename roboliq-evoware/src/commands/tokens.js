@@ -18,9 +18,9 @@
  * @class
  */
 
-import * as evowareHelper from './evowareHelper.js'
+const evowareHelper = require('./evowareHelper.js')
 
-export class Mix {
+class Mix {
 	constructor(params) {
 		// console.log(params)
 		this.params = params;
@@ -42,3 +42,7 @@ export class Mix {
 		return `Mix(${l.join(",")});`;
 	}
 }
+
+module.exports = {
+  Mix,
+};

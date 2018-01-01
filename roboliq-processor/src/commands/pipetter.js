@@ -26,10 +26,10 @@ const expect = require('../expect.js');
 const misc = require('../misc.js');
 const groupingMethods = require('./pipetter/groupingMethods.js');
 const pipetterUtils = require('./pipetter/pipetterUtils.js');
-import * as simulatedHelpers from './simulatedHelpers.js';
+const simulatedHelpers = require('./simulatedHelpers.js');
 const sourceMethods = require('./pipetter/sourceMethods.js');
 const wellsParser = require('../parsers/wellsParser.js');
-import * as WellContents from '../WellContents.js';
+const WellContents = require('../WellContents.js');
 
 const intensityToValue = {
 	"none": 0,

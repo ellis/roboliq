@@ -1,8 +1,8 @@
-import {List, Map} from 'immutable';
+const {List, Map} = require('immutable');
 
-export const INITIAL_STATE = Map();
+const INITIAL_STATE = Map();
 
-export function setEntries(state, entries) {
+function setEntries(state, entries) {
   const list = List(entries);
   return state.set('entries', list)
               .set('initialEntries', list);
@@ -18,7 +18,7 @@ function getWinners(vote) {
   else                           return [one, two];
 }
 
-export function next(state, round = state.getIn(['vote', 'round'], 0)) {
+function next(state, round = state.getIn(['vote', 'round'], 0)) {
   const entries = state.get('entries')
                        .concat(getWinners(state.get('vote')));
   if (entries.size === 1) {
@@ -36,7 +36,7 @@ export function next(state, round = state.getIn(['vote', 'round'], 0)) {
   }
 }
 
-export function restart(state) {
+function restart(state) {
   const round = state.getIn(['vote', 'round'], 0);
   return next(
     state.set('entries', state.get('initialEntries'))
@@ -65,10 +65,18 @@ function addVote(voteState, entry, voter) {
   }
 }
 
-export function vote(voteState, entry, voter) {
+function vote(voteState, entry, voter) {
   return addVote(
     removePreviousVote(voteState, voter),
     entry,
     voter
   );
 }
+
+module.exports = {
+  INITIAL_STATE,
+  setEntries,
+  next,
+  restart,
+  vote,
+};

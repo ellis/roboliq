@@ -1,11 +1,11 @@
 const React = require('react');
 const ReactDOM = require('react-dom');
-import {
+const {
   renderIntoDocument,
   scryRenderedDOMComponentsWithClass,
   Simulate
-} from 'react-addons-test-utils';
-import {List, Map} from 'immutable';
+} = require('react-addons-test-utils');
+const {List, Map} = require('immutable');
 const {Results} = require('../../src/components/Results');
 const {expect} = require('chai');
 

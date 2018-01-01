@@ -19,14 +19,14 @@ const iconv = require('iconv-lite');
  * @param  {number} n - integer to encode as a character
  * @return {string} a single-character string that represents the number
  */
-export function encode(n) {
+function encode(n) {
 	return String.fromCharCode("0".charCodeAt(0) + n);
 }
 
 /**
  * Decode a character to an integer.
  */
-export function decode(c) {
+function decode(c) {
 	return c.charCodeAt(0) - "0".charCodeAt(0);
 }
 
@@ -35,7 +35,7 @@ export function decode(c) {
  * @param  {integer} n - number between 0 and 15
  * @return {char}
  */
-export function hex(n) {
+function hex(n) {
 	return n.toString(16).toUpperCase()[0];
 }
 
@@ -45,7 +45,7 @@ export function hex(n) {
  * @param  {string} encoded - an encoded list of indexes
  * @return {array} tuple of [rows on surface, columns on surface, selected indexes on surface]
  */
-export function parseEncodedIndexes(encoded) {
+function parseEncodedIndexes(encoded) {
 	// HACK: for some reason, there is this strange sequence "ï¿½" that shows
 	// up in some places.  It appears to simply indicate 7 bits, e.g. "0"+127, e.g. '¯'
 	encoded = encoded.replace(/ï¿½/g, String.fromCharCode(48+127));
@@ -74,7 +74,7 @@ export function parseEncodedIndexes(encoded) {
  *   identifying the type of line, and items is a string array of the remaining
  *   components of the line.
  */
-export function splitSemicolons(line) {
+function splitSemicolons(line) {
 	const l = line.split(";");
 	const kind = parseInt(l[0]);
 	return [kind, _.tail(l)];
@@ -86,7 +86,7 @@ export function splitSemicolons(line) {
  * @param  {string} filename - path to semicolon file
  * @param  {number} skip - number of lines to initially skip at the top of the file
  */
-export class EvowareSemicolonFile {
+class EvowareSemicolonFile {
 	constructor(filename, skip) {
 		const raw = fs.readFileSync(filename);
 		const filedata = iconv.decode(raw, "ISO-8859-1");
@@ -160,3 +160,12 @@ export class EvowareSemicolonFile {
 		return l;
 	}
 }
+
+module.exports = {
+  encode,
+  decode,
+  hex,
+  parseEncodedIndexes,
+  splitSemicolons,
+  EvowareSemicolonFile,
+};

@@ -2,7 +2,7 @@ const app = require('express')();
 const http = require('http').Server(app);
 const Server = require('socket.io');
 
-export function startServerUi(store) {
+function startServerUi(store) {
 	app.get('/', function(req, res){
 	  res.sendFile(__dirname + '/index.html');
 	});
@@ -33,3 +33,7 @@ export function startServerUi(store) {
 		socket.on('action', store.dispatch.bind(store));
 	});
 }
+
+module.exports = {
+  startServerUi,
+};

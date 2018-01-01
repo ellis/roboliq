@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const assert = require('assert');
-import {Map, List, fromJS, toJS} from 'immutable';
+const {Map, List, fromJS, toJS} = require('immutable');
 
 // const constants = require('./views/constants.jsx');
 // const {scoreProduct} = require('../amazon/scoreFuncs.js');

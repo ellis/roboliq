@@ -14,13 +14,13 @@ const naturalSort = require('javascript-natural-sort');
 const path = require('path');
 const M = require('./Medley.js');
 const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-import * as EvowareTableFile from './EvowareTableFile.js';
-import * as evowareHelper from './commands/evowareHelper.js';
-import * as evoware from './commands/evoware.js';
-import * as pipetter from './commands/pipetter.js';
-import * as system from './commands/system.js';
-import * as timer from './commands/timer.js';
-import * as transporter from './commands/transporter.js';
+const EvowareTableFile = require('./EvowareTableFile.js');
+const evowareHelper = require('./commands/evowareHelper.js');
+const evoware = require('./commands/evoware.js');
+const pipetter = require('./commands/pipetter.js');
+const system = require('./commands/system.js');
+const timer = require('./commands/timer.js');
+const transporter = require('./commands/transporter.js');
 
 const commandHandlers = {
 	"evoware._execute": evoware._execute,
@@ -56,7 +56,7 @@ const commandHandlers = {
  * @param  {object} options - an optional map of options; e.g. set timing=false to avoid outputting time-logging instructions
  * @return {array} an array of {table, lines} items; one item is generated per required table layout.  lines is an array of strings.
  */
-export function compile(table, protocol, agents, options = {}) {
+function compile(table, protocol, agents, options = {}) {
 	// console.log(`compile:`)
 	// console.log({options})
 	options = _.defaults(options, _.get(protocol.config, "evowareCompiler", {}));
@@ -99,7 +99,7 @@ export function compile(table, protocol, agents, options = {}) {
 	return [{table, lines, tokenTree: results}];
 }
 
-export function compileStep(table, protocol, agents, path, objects, evowareVariables, loopEndStack = [], options = {}) {
+function compileStep(table, protocol, agents, path, objects, evowareVariables, loopEndStack = [], options = {}) {
 	// console.log(`compileStep: ${path.join(".")}`)
 	// console.log({options})
 	try {
@@ -305,3 +305,8 @@ function substitutePathVariables(results, options) {
 		}
 	}
 }
+
+module.exports = {
+  compile,
+  compileStep,
+};

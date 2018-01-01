@@ -68,9 +68,9 @@ const commandHelper = require('./commandHelper.js');
 const expect = require('./expect.js');
 const misc = require('./misc.js');
 const stripUndefined = require('./stripUndefined.js');
-import * as WellContents from './WellContents.js';
+const WellContents = require('./WellContents.js');
 const wellsParser = require('./parsers/wellsParser.js');
-import * as Design from './design.js';
+const Design = require('./design.js');
 
 const version = "v1";
 

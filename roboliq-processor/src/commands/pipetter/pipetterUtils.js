@@ -9,7 +9,7 @@ const math = require('mathjs');
 const expect = require('../../expect.js');
 const misc = require('../../misc.js');
 const wellsParser = require('../../parsers/wellsParser.js');
-import * as WellContents from '../../WellContents.js';
+const WellContents = require('../../WellContents.js');
 
 /**
  * Get fully qualified syringe object name

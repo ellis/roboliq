@@ -1,7 +1,7 @@
 const fs = require('fs');
 const Server = require('socket.io');
 
-export function startServerRuntime(store) {
+function startServerRuntime(store) {
 	const io = new Server().attach(12346);
 
 	io.on('connection', (socket) => {
@@ -18,3 +18,7 @@ export function startServerRuntime(store) {
 		// });
 	});
 }
+
+module.exports = {
+  startServerRuntime,
+};

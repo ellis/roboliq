@@ -8,7 +8,7 @@
  */
 
 const _ = require('lodash');
-import {List, Map, fromJS} from 'immutable';
+const {List, Map, fromJS} = require('immutable');
 
 const INITIAL_STATE = Map();
 

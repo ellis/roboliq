@@ -7,9 +7,9 @@
 const _ = require('lodash');
 const should = require('should');
 const jsonfile = require('jsonfile');
-import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
-import * as EvowareCompiler from '../src/EvowareCompiler.js';
-import * as EvowareTableFile from '../src/EvowareTableFile.js';
+const EvowareCarrierFile = require('../src/EvowareCarrierFile.js');
+const EvowareCompiler = require('../src/EvowareCompiler.js');
+const EvowareTableFile = require('../src/EvowareTableFile.js');
 const schemas = require('../../roboliq-processor/tests/schemas.js');
 
 const protocol0 = {

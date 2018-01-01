@@ -9,7 +9,7 @@ const jsonfile = require('jsonfile');
 const path = require('path');
 const yaml = require('yamljs');
 const commandHelper = require('./commandHelper.js');
-import * as Design from './design.js';
+const Design = require('./design.js');
 const misc = require('./misc.js');
 
 const commander = require('commander')

@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 const should = require('should');
-import {flattenDesign, flattenArrayM, flattenArrayAndIndexes, query_groupBy, expandConditions, printRows} from '../src/design.js';
+const {flattenDesign, flattenArrayM, flattenArrayAndIndexes, query_groupBy, expandConditions, printRows} = require('../src/design.js');
 
 describe('design', () => {
 	// Configure mathjs to use bignumbers

@@ -13,8 +13,8 @@
 const _ = require('lodash');
 const assert = require('assert');
 //const {sprintf} = require('sprintf-js');
-import * as EvowareUtils from './EvowareUtils.js';
-import * as EvowareCarrierFile from './EvowareCarrierFile.js';
+const EvowareUtils = require('./EvowareUtils.js');
+const EvowareCarrierFile = require('./EvowareCarrierFile.js');
 const M = require('./Medley.js');
 
 /**
@@ -23,7 +23,7 @@ const M = require('./Medley.js');
  * @param {integer} parentCarrierId - carrier ID for the carrier holding this hotel
  * @param {integer} gridIndex - grid index of the hotel
  */
-export class HotelObject {
+class HotelObject {
 	constructor(parentCarrierId, gridIndex) {
 		this.parentCarrierId = parentCarrierId;
 		this.gridIndex = gridIndex;
@@ -37,7 +37,7 @@ export class HotelObject {
  * @param {integer} n2 - I think this is the on-screen display index
  * @param {string} carrierName - carrier name for the carrier holding this hotel/object
  */
-export class ExternalObject {
+class ExternalObject {
 	constructor(n1, n2, carrierName) {
 		this.n1 = n1;
 		this.n2 = n2;
@@ -51,7 +51,7 @@ export class ExternalObject {
  * @param {string} filename
  * @return {object} a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  */
-export function load(carrierData, filename) {
+function load(carrierData, filename) {
 	const lines = new EvowareUtils.EvowareSemicolonFile(filename, 7);
 	lines.next() // TODO: should we check whether this is equal to "--{ RPG }--"?
 	//println(lsLine.takeWhile(_ != "--{ RPG }--").length)
@@ -71,7 +71,6 @@ export function load(carrierData, filename) {
  * @return {object} a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  */
 function parse14(carrierData, l, lines) {
-	//import configFile._
 	const carrierIdsInternal = parse14_getCarrierIds(_.initial(l));
 	//console.log("carrierIdsInternal: "+JSON.stringify(carrierIdsInternal));
 	const internalObjects = parse14_getLabwareObjects(carrierData, carrierIdsInternal, lines);
@@ -268,7 +267,7 @@ function parse14_getExternalCarrierGrids(externalObjects, lines) {
  * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  * @return {string} string representation of table layout
  */
-export function toStrings(carrierData, table) {
+function toStrings(carrierData, table) {
 	const l1 = [
 		"00000000",
 		"20000101_000000 No log in       ",
@@ -298,7 +297,7 @@ export function toStrings(carrierData, table) {
  * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  * @return {string} string representation of internal carriers
  */
-export function toString_internalCarriers(carrierData, table) {
+function toString_internalCarriers(carrierData, table) {
 	// Get list [[gridIndex, carrier.id]] for internal sites
 	// [[a, b]]
 	const gridToCarrierName_l = _(table).map((c, carrierName) => {
@@ -332,7 +331,7 @@ export function toString_internalCarriers(carrierData, table) {
  * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  * @return {string} string representation of internal labware
  */
-export function toStrings_internalLabware(carrierData, table) {
+function toStrings_internalLabware(carrierData, table) {
 	const items0 = [];
 	_.forEach(table, (c, carrierName) => {
 		_.forEach(c, (g, gridIndexText) => {
@@ -378,7 +377,7 @@ export function toStrings_internalLabware(carrierData, table) {
  * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  * @return {string} string representation of hotels
  */
-export function toStrings_hotels(carrierData, table) {
+function toStrings_hotels(carrierData, table) {
 	const hotelItems0 = [];
 	_.forEach(table, (c, carrierName) => {
 		_.forEach(c, (g, gridIndexText) => {
@@ -402,7 +401,7 @@ export function toStrings_hotels(carrierData, table) {
  * @param  {object} table - a table layout, keys are carrier names, sub-keys are gridIndexes or properties, sub-sub-keys are siteIndexes or property, and sub-sub-sub-keys {label, labwareModelName}
  * @return {string} string representation of external carriers
  */
-export function toStrings_externals(carrierData, table) {
+function toStrings_externals(carrierData, table) {
 	const items0 = [];
 	_.forEach(table, (c, carrierName) => {
 		_.forEach(c, (g, gridIndexText) => {
@@ -430,3 +429,14 @@ export function toStrings_externals(carrierData, table) {
 
 	return _.concat(l1, l2, l3);
 }
+
+module.exports = {
+  HotelObject,
+  ExternalObject,
+  load,
+  toStrings,
+  toString_internalCarriers,
+  toStrings_internalLabware,
+  toStrings_hotels,
+  toStrings_externals,
+};

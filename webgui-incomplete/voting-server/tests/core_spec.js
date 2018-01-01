@@ -1,7 +1,7 @@
-import {List, Map} from 'immutable';
+const {List, Map} = require('immutable');
 const {expect} = require('chai');
 
-import {next, setEntries, vote} from '../src/core';
+const {next, setEntries, vote} = require('../src/core');
 
 describe('application logic', () => {
 

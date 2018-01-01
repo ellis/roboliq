@@ -17,7 +17,7 @@ const commandHelper = require('roboliq-processor/dist/commandHelper.js');
 const expect = require('roboliq-processor/dist/expect.js');
 const wellsParser = require('roboliq-processor/dist/parsers/wellsParser.js');
 
-import {makeEvowareExecute, makeEvowareFacts} from './evoware.js';
+const {makeEvowareExecute, makeEvowareFacts} = require('./evoware.js');
 
 const templateAbsorbance = `<TecanFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="tecan.at.schema.documents Main.xsd" fileformat="Tecan.At.Measurement" fileversion="2.0" xmlns="tecan.at.schema.documents">
 		<FileInfo type="" instrument="infinite 200Pro" version="" createdFrom="localadmin" createdAt="{{createdAt}}" createdWith="Tecan.At.XFluor.ReaderEditor.XFluorReaderEditor" description="" />

@@ -1,4 +1,4 @@
-import {setEntries, next, vote, INITIAL_STATE} from './core';
+const {setEntries, next, vote, INITIAL_STATE} = require('./core');
 
 export default function reducer(state = INITIAL_STATE, action) {
   switch (action.type) {

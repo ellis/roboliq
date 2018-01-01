@@ -1,7 +1,7 @@
-import {List, Map, fromJS} from 'immutable';
+const {List, Map, fromJS} = require('immutable');
 const {expect} = require('chai');
 
-import {setProtocol, setStepTime} from '../src/core2.js';
+const {setProtocol, setStepTime} = require('../src/core2.js');
 
 const {protocol1} = require('./protocolExamples.js');
 

@@ -1,5 +1,6 @@
 const _ = require('lodash');
-import Immutable, {Map, fromJS} from 'immutable';
+const Immutable = require('immutable');
+const {Map, fromJS} = Immutable;
 const yaml = require('yamljs');
 
 const conditions = {

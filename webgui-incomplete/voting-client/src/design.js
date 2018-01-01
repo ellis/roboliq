@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const assert = require('assert');
-// import Immutable, {Map, fromJS} from 'immutable';
+// const Immutable = require('immutable');
+// const {Map, fromJS} = Immutable;
 const math = require('mathjs');
 const Random = require('random-js');
 //const yaml = require('yamljs');

@@ -14,7 +14,7 @@ const assert = require('assert');
 //const fs = require('fs');
 //const iconv = require('iconv-lite');
 const {sprintf} = require('sprintf-js');
-import * as EvowareUtils from './EvowareUtils.js';
+const EvowareUtils = require('./EvowareUtils.js');
 
 
 /**
@@ -25,7 +25,7 @@ import * as EvowareUtils from './EvowareUtils.js';
  * @property {integer} siteIndex -  0-based index of site
  */
 
-export class CarrierGridSiteIndex {
+class CarrierGridSiteIndex {
 	constructor(carrierId, gridIndex, siteIndex) {
 		this.carrierId = carrierId;
 		this.gridIndex = gridIndex;
@@ -40,7 +40,7 @@ export class CarrierGridSiteIndex {
  * @property {integer} siteIndex -  0-based index of site
  */
 
-export class CarrierSiteIndex {
+class CarrierSiteIndex {
 	constructor(carrierId, siteIndex) {
 		this.carrierId = carrierId;
 		this.siteIndex = siteIndex;
@@ -64,7 +64,7 @@ export class CarrierSiteIndex {
  * @property {string} [partNo]
  * @property {array} [vectors] - array of vector names for this carrier
  */
-export class Carrier {
+class Carrier {
 	constructor(name, id, siteCount, deviceName, partNo) {
 		this.type = "Carrier";
 		this.name = name;
@@ -87,7 +87,7 @@ export class Carrier {
  * @property {array} sites - list of CarrierSiteIndexes where this labware can be placed.
  */
 
-export class LabwareModel {
+class LabwareModel {
 	constructor(name, rows, cols, ul, sites) {
 		this.type = "LabwareModel";
 		this.name = name;
@@ -107,7 +107,7 @@ export class LabwareModel {
  * @property {integer} romaId - which RoMa this vector is for
  */
 
-export class Vector {
+class Vector {
 	constructor(carrierId, clazz, romaId) {
 		this.type = "Vector";
 		this.carrierId = carrierId;
@@ -125,7 +125,7 @@ export class Vector {
  * @property {object} carrierIdToVectors - map of carrier ID to list of Vectors
  */
 
-export class EvowareCarrierData {
+class EvowareCarrierData {
 	constructor(carrierModels, labwareModels) {
 		this.carrierModels = carrierModels;
 		this.labwareModels = labwareModels;
@@ -167,7 +167,7 @@ case class CarrierSite(
  * @param  {string} filename - path to the carrier file
  * @return {EvowareCarrierData}
  */
-export function load(filename) {
+function load(filename) {
 	const modelList = loadEvowareModels(filename);
 	const data = makeEvowareCarrierData(modelList);
 	//console.log({data});
@@ -350,3 +350,13 @@ function parse998(s) {
 	assert(lineType === 998);
 	return _.initial(l);
 }
+
+module.exports = {
+  CarrierGridSiteIndex,
+  CarrierSiteIndex,
+  Carrier,
+  LabwareModel,
+  Vector,
+  EvowareCarrierData,
+  load,
+};

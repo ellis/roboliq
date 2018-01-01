@@ -6,7 +6,7 @@
 
 const _ = require('lodash');
 const should = require('should');
-import * as EvowareCarrierFile from '../src/EvowareCarrierFile.js';
+const EvowareCarrierFile = require('../src/EvowareCarrierFile.js');
 
 describe('EvowareCarrierFile', function() {
 	describe('load', function () {

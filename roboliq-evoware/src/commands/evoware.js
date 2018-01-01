@@ -11,14 +11,14 @@
 
 const _ = require('lodash');
 const commandHelper = require('roboliq-processor/dist/commandHelper.js');
-import * as evowareHelper from './evowareHelper.js';
+const evowareHelper = require('./evowareHelper.js');
 
-export function _execute(params, parsed, data) {
+function _execute(params, parsed, data) {
 	const line = evowareHelper.createExecuteLine(parsed.orig.path, parsed.orig.args, parsed.orig.wait);
 	return [{line}];
 }
 
-export function _facts(params, parsed, data) {
+function _facts(params, parsed, data) {
 	const line = evowareHelper.createFactsLine(parsed.orig.factsEquipment, parsed.orig.factsVariable, parsed.orig.factsValue);
 
 	if (params.labware) {
@@ -41,21 +41,30 @@ export function _facts(params, parsed, data) {
 	}
 }
 
-export function _raw(params, parsed, data) {
+function _raw(params, parsed, data) {
 	return _(parsed.value.commands).split(";").map(_.trim).compact().map(s => ({line: s+";"})).value();
 }
 
-export function _subroutine(params, parsed, data) {
+function _subroutine(params, parsed, data) {
 	const line = `Subroutine("${params.filename}",0);`;
 	return [{line}];
 }
 
-export function _userPrompt(params, parsed, data) {
+function _userPrompt(params, parsed, data) {
 	const line = evowareHelper.createUserPromptLine(parsed.orig.text, parsed.orig.beep, parsed.orig.autoclose);
 	return [{line}];
 }
 
-export function _variable(params, parsed, data) {
+function _variable(params, parsed, data) {
 	const line = evowareHelper.createVariableLine(parsed.orig.name, parsed.orig.value);
 	return [{line}];
 }
+
+module.exports = {
+  _execute,
+  _facts,
+  _raw,
+  _subroutine,
+  _userPrompt,
+  _variable,
+};

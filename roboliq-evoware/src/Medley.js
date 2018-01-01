@@ -7,7 +7,7 @@
 const _ = require('lodash');
 const assert = require('assert');
 
-export function delMut(data, path) {
+function delMut(data, path) {
 	assert(_.isPlainObject(data));
 	assert(_.isArray(path) || _.isString(path) || _.isNumber(path), `expected an array or string: ${JSON.stringify(path)}`);
 
@@ -23,7 +23,7 @@ export function delMut(data, path) {
 	}
 	return data;
 }
-export function setMut(data, path, value) {
+function setMut(data, path, value) {
 	assert(_.isPlainObject(data));
 	assert(_.isArray(path) || _.isString(path) || _.isNumber(path), `expected an array or string: ${JSON.stringify(path)}`);
 
@@ -59,7 +59,7 @@ export function setMut(data, path, value) {
 	return data;
 }
 
-export function get(data, path, dflt) {
+function get(data, path, dflt) {
 	return _.get(data, path, dflt);
 }
 
@@ -67,3 +67,9 @@ module.exports = {
 	setMut,
 	get
 }
+
+module.exports = {
+  delMut,
+  setMut,
+  get,
+};
