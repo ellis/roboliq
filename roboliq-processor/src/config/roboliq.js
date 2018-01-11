@@ -141,6 +141,7 @@ module.exports = {
 	imports: [
 		'../commands/data.js',
 		'../commands/system.js',
+		'../commands/abstract.js',
 		// Equipment
 		'../commands/equipment.js',
 		'../commands/absorbanceReader.js',

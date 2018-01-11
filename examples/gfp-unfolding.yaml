@@ -95,16 +95,16 @@ steps:
   1:
     description: Fill balance plate with 75ul in 375 wells, place it in centrifuge bay 4
 
-    # 1:
-    #   command: pipetter.pipette
-    #   program!: Roboliq_Water_Air_1000
-    #   sources: balanceWater
-    #   destinations:
-    #     "#replaceLabware":
-    #       list: mixtureWells
-    #       new: "balancePlate"
-    #   volumes: 75ul
-    #   cleanBetween: none
+    1:
+      command: pipetter.pipette
+      program!: Roboliq_Water_Air_1000
+      sources: balanceWater
+      destinations:
+        "#replaceLabware":
+          list: mixtureWells
+          new: "balancePlate"
+      volumes: 75ul
+      cleanBetween: none
 
     2:
       command: sealer.sealPlate

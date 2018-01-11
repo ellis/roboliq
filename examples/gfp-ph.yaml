@@ -141,7 +141,7 @@ steps:
       mixtures:
         data():
           map:
-            - {source: saltwater, volume: $#SALTWATER_VOLUME, layer: 1}
+            - {source: saltwater, volume: $SALTWATER_VOLUME, layer: 1}
             - {source: $acid, volume: $acidVolume, layer: 2}
             - {source: $base, volume: $baseVolume, layer: 3}
           orderBy: [layer, source]
@@ -157,7 +157,7 @@ steps:
       mixtures:
         data():
           map:
-            - {source: $gfp, volume: $#GFP_VOLUME, clean: thorough, cleanBetweenSameSource: flush, program!: Roboliq_Water_Wet_1000_mix3x50ul}
+            - {source: $gfp, volume: $GFP_VOLUME, cleanBefore: thorough, cleanBeforeSameSource: flush, program!: Roboliq_Water_Wet_1000_mix3x50ul}
       destinationLabware: mixPlate
       destinations: $well
       clean: flush
@@ -175,8 +175,8 @@ steps:
   4:
     description: Measurement loop; Each cycle of the loop lasts 4 hours
     command: system.repeat
-    count: $#NUMBER_OF_MEASUREMENTS
-    iterationDuration: $#DURATION_BETWEEN_MEASUREMENTS
+    count: $NUMBER_OF_MEASUREMENTS
+    iterationDuration: $DURATION_BETWEEN_MEASUREMENTS
     skipLastWait: true
     variableName: i
     steps:
@@ -195,40 +195,16 @@ steps:
       2:
         command: fluorescenceReader.measurePlate
         object: mixPlate
-        program:
-          excitationWavelength: 488nm
-          emissionWavelength: 510nm
-          wells: $$well
+        # program:
+        #   excitationWavelength: 488nm
+        #   emissionWavelength: 510nm
+        #   wells: $$well
         output:
           joinKey: well
           appendTo: pH_measurements
           userValues:
             iteration: $i
-        # TODO: add output factors for measurement number and time
-        # dataOutput:
-        #
-        #   measuredFactor: fluorescence
-        #   plots:
-        #   - mark: point
-        #     encoding:
-        #       x:
-        #         field: pH
-        #         type: quantitative
-        #       y:
-        #         field: fluorescence
-        #         type: quantitative
-        #       shape:
-        #         field: protein
-        #         type: nominal
-        #       color:
-        #         field: measurement
-        #         type: quantitative
-        #   CONTINUE try: "<http://vega.github.io/vega-lite/tutorials/getting_started.html>"
-        #   models:
-        #   - "fluorescence ~ pH + Error(replicate)"
-        programFile!: ./tania13_ph-temp.mdfx
-      # 3:
-      #   command: vegaLite.refresh
+        programFile!: ./gfp-ph.mdfx
 
       3:
         description: Incubate at 25C until the next measurement

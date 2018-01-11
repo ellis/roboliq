@@ -71,6 +71,14 @@ const commandHandlers = {
 					}
 					iteration["@SCOPE"] = {[parsed.value.variableName]: i};
 				}
+				// Wrap the steps in a `timer.doAndWait` command, if the `iterationDuration` is specified
+				if (parsed.value.iterationDuration && (i < count || parsed.value.skipLastWait !== true)) {
+					iteration = {
+						command: "timer.doAndWait",
+						duration: parsed.value.iterationDuration,
+						steps: iteration
+					};
+				}
 				expansion[i] = iteration;
 			}
 		}

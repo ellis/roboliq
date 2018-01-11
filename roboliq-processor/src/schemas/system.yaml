@@ -43,8 +43,10 @@ system.repeat:
   description: "Repeat sub-steps a given number of times."
   properties:
     count: {description: "The number of times to repeat.", type: "integer"}
-    steps: {description: "The sequence of commands to repeat.", type: "object"}
+    iterationDuration: {description: "Duration for each iteration (loop will sleep after each iteration until the duration is reached).", type: Duration}
+    skipLastWait: {description: "Flag whether to wait during the last iteration for `iterationDuration` to pass.", type: boolean}
     variableName: {description: "If provided, a variable will this name will be added to the scope containing the loop index (starting from 1).", type: string}
+    steps: {description: "The sequence of commands to repeat.", type: "object"}
   required: ["count"]
 
 system.runtimeExitLoop:

@@ -1,0 +1,32 @@
+abstract:
+  module: |
+    The `abstract` commands describe tasks without specifying the equipment will be used to
+    execute the task.  For example, `abstract.incubate` can be used to incubate a plate,
+    but leaves open whether to use a dedicated incubator or other equipment,
+    such as a temperature-controlled centrifuge.
+
+          program:
+            rpm: 3000
+            duration: 1s # must set a duration of at least 1s
+            temperature: 25 degC
+
+abstract.incubate:
+  description: Incubate one or more labware objects
+  properties:
+    agent: {description: "Agent identifier", type: Agent}
+    equipment: {description: "Equipment identifier", type: Equipment}
+    objects: {description: "The object or objects to incubate.", type: Plates}
+    duration: {description: "Duration to incubate", type: Duration}
+    temperature: {description: "Temperature to incubate at", type: Temperature}
+    rpm: {description: "Rotations per minute (RPM)", type: number}
+    methodCommand: {description: "Concrete command to use for this abstract command.", type: object}
+  required: [objects]
+
+abstract.removeCondensationFromSeal:
+  description: Remove condensation from seal of plate
+  properties:
+    agent: {description: "Agent identifier", type: Agent}
+    equipment: {description: "Equipment identifier", type: Equipment}
+    objects: {description: "The object or objects to remove condensation from.", type: Plates}
+    methodCommand: {description: "Concrete command to use for this abstract command.", type: object}
+  required: [objects]
