@@ -24,11 +24,11 @@ fluorescenceReader.measurePlate:
             rpm: {description: Rotations per minute (RPM), type: number}
             duration: {description: "Duration of shaking", type: Duration}
         excitationWavelength: {description: "Excitation wavelength", type: Length}
-        #excitationBandwidth: {description: "Excitation bandwidth", type: Length}
-        #excitationWavelengthMin: {description: "Minimum excitation wavelength for a scan", type: Length}
-        #excitationWavelengthMax: {description: "Maximum excitation wavelength for a scan", type: Length}
-        #excitationWavelengthStep: {description: "Size of steps for a scan", type: Length}
-        emissionWavelength: {description: "Emission wavelength", type: Length}
+        excitationBandwidth: {description: "Excitation bandwidth", type: Length}
+        emissionWavelength: {description: "Emmission wavelength", type: Length}
+        emissionWavelength: {description: "Emmission wavelength", type: Length}
+        topOrBottom: {description: "Whether to read from the top or bottom", enum: [top, bottom], default: top}
+        gain: {description: "Gain factor"}
         wells: {description: "Array of wells to read", type: "Wells"}
     programFileTemplate: {description: "Program template; well information will be substituted into the template automatically.", type: "string"}
     programFile: {description: "Program filename", type: "string"}

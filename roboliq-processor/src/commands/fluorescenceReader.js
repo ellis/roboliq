@@ -5,12 +5,6 @@
  */
 
 /**
- * Namespace for the ``fluorescenceReader`` commands.
- * @namespace fluorescenceReader
- * @version v1
- */
-
-/**
  * Fluorescence Reader commands module.
  * @module commands/fluorescenceReader
  * @return {Protocol}
@@ -19,11 +13,15 @@
 
 const _ = require('lodash');
 const jmespath = require('jmespath');
+const math = require('mathjs');
 const yaml = require('yamljs');
 const commandHelper = require('../commandHelper.js');
+const Design = require('../design.js');
 const expect = require('../expect.js');
 const {mergeR} = require('../mergeR.js');
 const misc = require('../misc.js');
+const simulatedHelpers = require('./simulatedHelpers.js');
+const wellsParser = require('../parsers/wellsParser.js');
 
 
 /**
@@ -31,22 +29,8 @@ const misc = require('../misc.js');
  * @static
  */
 var commandHandlers = {
-	/**
-	 * Measure the fluorescence of a plate.
-	 *
-	 * @typedef measurePlate
-	 * @memberof fluorescenceReader
-	 * @property {string} command - "fluorescenceReader.measurePlate"
-	 * @property {string} [agent] - Agent identifier
-	 * @property {string} [equipment] - Equipment identifier
-	 * @property {Object} program - Program object for measurement
-	 * @property {string} outputFile - Filename for output
-	 * @property {string} object - Plate identifier
-	 * @property {string} [site] - Site identifier in reader
-	 * @property {string} [destinationAfter] - Site to move the plate to after measurement
-	 */
 	"fluorescenceReader.measurePlate": function(params, parsed, data) {
-		//console.log(JSON.stringify(parsed));
+		// console.log(JSON.stringify(parsed));
 		var model = commandHelper.getParsedValue(parsed, data, 'object', 'model');
 		var location0 = commandHelper.getParsedValue(parsed, data, 'object', 'location');
 
@@ -59,8 +43,8 @@ var commandHandlers = {
 			}}
 		];
 		var [params2, alternatives] = commandHelper.queryLogic(data, predicates, "fluorescenceReader.canAgentEquipmentModelSite");
-		//console.log("params2:\n"+JSON.stringify(params2, null, '  '))
-		//console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
+		// console.log("params2:\n"+JSON.stringify(params2, null, '  '))
+		// console.log("parsed.value.outputFile: "+JSON.stringify(parsed.value.outputFile));
 
 		const destinationAfter
 			= (parsed.value.destinationAfter === "stay") ? null
@@ -71,7 +55,6 @@ var commandHandlers = {
 		const program = mergeR({}, parsed.orig.program, {
 			wells: (parsed.value.program || {}).wells
 		});
-		// console.log({program})
 		// Handle deprecated parameter names
 		const output = mergeR({}, parsed.orig.output, {
 			joinKey: _.get(parsed.orig, "program.wellDesignFactor"),
@@ -105,6 +88,7 @@ var commandHandlers = {
 				destination: destinationAfter
 			}
 		];
+		// console.log({expansion1: expansion[0]})
 		// console.log({expansion1output: expansion[1].output})
 
 		const result = {expansion};

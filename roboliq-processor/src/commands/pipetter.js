@@ -418,7 +418,7 @@ function pipette(params, parsed, data, options={}) {
 			// FIXME: also take the source's and destination's "cleanBefore" into account
 			const intensity = (!isSameSource)
 				? item.cleanBefore || parsed.value.cleanBetween || parsed.value.clean || "thorough"
-				: item.cleanBefore || parsed.value.cleanBetweenSameSource || parsed.value.cleanBetween || parsed.value.clean || "thorough";
+				: item.cleanBeforeSameSource || item.cleanBefore || parsed.value.cleanBetweenSameSource || parsed.value.cleanBetween || parsed.value.clean || "thorough";
 			expect.truthy({}, intensityToValue.hasOwnProperty(intensity), `unrecognized intensity value: ${intensity}`);
 			let intensityValue = intensityToValue[intensity];
 			if (syringeToCleanAfterValue.hasOwnProperty(syringe))

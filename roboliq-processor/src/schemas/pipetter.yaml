@@ -102,6 +102,8 @@ pipetter.PipetteItem:
     volumeTotal: {description: "Volume that the well should be brought up to.", type: Volume}
     program: {description: "Program identifier", type: "string"}
     layer: {description: "A layer identifier for hinting that to items in the same layer should be grouped together, even if they aren't in adjacent in the items list."}
+    cleanBefore: {description: "intensity of cleaning required before this item.", type: pipetter.CleaningIntensity}
+    cleanBeforeSameSource: {description: "Intensity of cleaning before transfers of the same liquid (takes priority over `cleanBefore` when same source is used).", type: pipetter.CleaningIntensity}
     cleanAfter: {description: "intensity of cleaning required after this item.", type: pipetter.CleaningIntensity}
     sourceMixing: {description: "Parameters for mixing the source prior to aspiration", type: [boolean, pipetter.MixSpec]}
     destinationMixing: {description: "Parameters for mixing the destination after dispense", type: [boolean, pipetter.MixSpec]}
