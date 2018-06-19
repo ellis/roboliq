@@ -31,3 +31,4 @@ compiled
 roboliq-processor.yaml
 .Rproj.user
 C:\\ProgramData\\Tecan\\EVOware\\database\\scripts\\OV
+*.bak
